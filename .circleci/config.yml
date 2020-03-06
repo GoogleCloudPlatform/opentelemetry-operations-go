@@ -26,7 +26,7 @@ jobs:
             find . -name 'coverage.html' | xargs -I{} rsync -R  "{}" $TEST_RESULTS/
 
       - save_cache:
-          key: go-pkg-mod-{{ checksum ".tools/combined-go.sum" }}
+          key: go-pkg-mod-{{ checksum "combined-go.sum" }}
           paths:
             - "/go/pkg/mod"
 
