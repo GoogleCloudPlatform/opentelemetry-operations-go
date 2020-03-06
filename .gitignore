@@ -1,6 +1,7 @@
 .DS_Store
 Thumbs.db
 
+.combined-go.sum
 .tools/
 .idea/
 .vscode/
