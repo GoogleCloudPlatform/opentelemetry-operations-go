@@ -23,7 +23,7 @@ jobs:
           name: "Precommit and Coverage Report"
           command: |
             make ci
-            find . -name 'coverage.html' | xargs -I{} rsync -R  "{}" $TEST_RESULTS/
+            find . -name 'coverage.html' | xargs -I{} cp --parents  "{}" $TEST_RESULTS
 
       - save_cache:
           key: go-pkg-mod-{{ checksum ".combined-go.sum" }}
