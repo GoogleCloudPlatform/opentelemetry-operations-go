@@ -13,11 +13,11 @@ jobs:
       - run:
           name: "checksum for cache"
           command: |
-            find . -name 'go.sum' | xargs cat > .tools/combined-go.sum
+            find . -name 'go.sum' | xargs cat > .combined-go.sum
 
       - restore_cache: # restores saved cache if no changes are detected since last run
           keys:
-            - go-pkg-mod-{{ checksum ".tools/combined-go.sum" }}
+            - go-pkg-mod-{{ checksum ".combined-go.sum" }}
 
       - run:
           name: "Precommit and Coverage Report"
