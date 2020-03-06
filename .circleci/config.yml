@@ -19,7 +19,6 @@ jobs:
           name: "Precommit and Coverage Report"
           command: |
             make ci
-            mv coverage.html $TEST_RESULTS/
             find . -name 'coverage.html' | xargs -I{} rsync -R  "{}" $TEST_RESULTS/
 
       - save_cache:
