@@ -24,6 +24,7 @@ import (
 	"testing"
 	"time"
 
+	stackdriver "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/option"
@@ -31,7 +32,6 @@ import (
 	"google.golang.org/grpc"
 
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/exporters/trace/stackdriver"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
