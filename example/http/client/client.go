@@ -94,5 +94,5 @@ func main() {
 	fmt.Printf("Response Received: %s\n\n\n", body)
 	fmt.Printf("Waiting for few seconds to export spans ...\n\n")
 	time.Sleep(10 * time.Second)
-	fmt.Println("Check traces on Stackdriver Trace")
+	fmt.Println("Check traces on Google Cloud Trace")
 }
