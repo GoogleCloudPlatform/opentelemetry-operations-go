@@ -26,7 +26,7 @@ import (
 
 	"google.golang.org/grpc/codes"
 
-	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel/api/correlation"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/key"
@@ -40,8 +40,8 @@ func initTracer() {
 
 	// Create Google Cloud Trace exporter to be able to retrieve
 	// the collected spans.
-	exporter, err := cloudtrace.NewExporter(
-		cloudtrace.WithProjectID(projectID),
+	exporter, err := texporter.NewExporter(
+		texporter.WithProjectID(projectID),
 	)
 	if err != nil {
 		log.Fatal(err)

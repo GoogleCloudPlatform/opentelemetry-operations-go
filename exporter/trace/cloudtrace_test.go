@@ -24,7 +24,7 @@ import (
 	"testing"
 	"time"
 
-	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/option"
@@ -98,9 +98,9 @@ func TestExporter_ExportSpans(t *testing.T) {
 	mockTrace.delay = 0
 
 	// Create Google Cloud Trace Exporter
-	exp, err := cloudtrace.NewExporter(
-		cloudtrace.WithProjectID("PROJECT_ID_NOT_REAL"),
-		cloudtrace.WithTraceClientOptions(clientOpt),
+	exp, err := texporter.NewExporter(
+		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+		texporter.WithTraceClientOptions(clientOpt),
 	)
 	assert.NoError(t, err)
 
@@ -129,11 +129,11 @@ func TestExporter_Timeout(t *testing.T) {
 	var exportErrors []error
 
 	// Create Google Cloud Trace Exporter
-	exp, err := cloudtrace.NewExporter(
-		cloudtrace.WithProjectID("PROJECT_ID_NOT_REAL"),
-		cloudtrace.WithTraceClientOptions(clientOpt),
-		cloudtrace.WithTimeout(1*time.Millisecond),
-		cloudtrace.WithOnError(func(err error) {
+	exp, err := texporter.NewExporter(
+		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+		texporter.WithTraceClientOptions(clientOpt),
+		texporter.WithTimeout(1*time.Millisecond),
+		texporter.WithOnError(func(err error) {
 			exportErrors = append(exportErrors, err)
 		}),
 	)

@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/opentelemetry-operations-go/
+module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/http
 
 go 1.13
 
