@@ -57,7 +57,7 @@ const (
 	version = "0.2.3"
 )
 
-var userAgent = fmt.Sprintf("opentelemetry-go %s; stackdriver-exporter %s", opentelemetry.Version(), version)
+var userAgent = fmt.Sprintf("opentelemetry-go %s; cloudtrace-exporter %s", opentelemetry.Version(), version)
 
 func protoFromSpanData(s *export.SpanData, projectID string) *tracepb.Span {
 	if s == nil {
@@ -204,7 +204,7 @@ func attributeValue(kv core.KeyValue) *tracepb.AttributeValue {
 			Value: &tracepb.AttributeValue_IntValue{IntValue: value.AsInt64()},
 		}
 	case core.FLOAT64:
-		// TODO: set double value if Stackdriver Trace support it in the future.
+		// TODO: set double value if Google Cloud Trace support it in the future.
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_StringValue{
 				StringValue: trunc(strconv.FormatFloat(value.AsFloat64(), 'f', -1, 64),
