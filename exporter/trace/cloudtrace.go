@@ -59,11 +59,6 @@ type options struct {
 	// Optional.
 	OnError func(err error)
 
-	// MonitoringClientOptions are additional options to be passed
-	// to the underlying Stackdriver Monitoring API client.
-	// Optional.
-	MonitoringClientOptions []option.ClientOption
-
 	// TraceClientOptions are additional options to be passed
 	// to the underlying Stackdriver Trace API client.
 	// Optional.
@@ -89,12 +84,6 @@ type options struct {
 	//
 	// If unset, context.Background() will be used.
 	Context context.Context
-
-	// SkipCMD enforces to skip all the CreateMetricDescriptor calls.
-	// These calls are important in order to configure the unit of the metrics,
-	// but in some cases all the exported metrics are builtin (unit is configured)
-	// or the unit is not important.
-	SkipCMD bool
 
 	// Timeout for all API calls. If not set, defaults to 5 seconds.
 	Timeout time.Duration
@@ -162,18 +151,12 @@ func (o *options) handleError(err error) {
 // defaultTimeout is used as default when timeout is not set in newContextWithTimout.
 const defaultTimeout = 5 * time.Second
 
-// Exporter is a trace exporter that uploads data to Stackdriver.
-//
-// TODO(yoshifumi): add a metrics exporter once the spec definition
-// process and the sampler implementation are done.
+// Exporter is a trace exporter that uploads data to Google Cloud Trace.
 type Exporter struct {
 	traceExporter *traceExporter
 }
 
 // NewExporter creates a new Exporter thats implements trace.Exporter.
-//
-// TODO(yoshifumi): add a metrics exporter one the spec definition
-// process and the sampler implementation are done.
 func NewExporter(opts ...Option) (*Exporter, error) {
 	o := options{Context: context.Background()}
 	for _, opt := range opts {

@@ -25,7 +25,7 @@ import (
 )
 
 // traceExporter is an imeplementation of trace.Exporter and trace.BatchExporter
-// that uploads spans to Stackdriver Trace in batch.
+// that uploads spans to Google Cloud Trace in batch.
 type traceExporter struct {
 	o         *options
 	projectID string
@@ -48,13 +48,13 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	return e, nil
 }
 
-// ExportSpan exports a SpanData to Stackdriver Trace.
+// ExportSpan exports a SpanData to Google Cloud Trace.
 func (e *traceExporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 	protoSpan := protoFromSpanData(sd, e.projectID)
 	e.uploadFn(ctx, []*tracepb.Span{protoSpan})
 }
 
-// ExportSpans exports a slice of SpanData to Stackdriver Trace in batch
+// ExportSpans exports a slice of SpanData to Google Cloud Trace in batch
 func (e *traceExporter) ExportSpans(ctx context.Context, sds []*export.SpanData) {
 	pbSpans := make([]*tracepb.Span, len(sds))
 	for i, sd := range sds {
@@ -63,7 +63,7 @@ func (e *traceExporter) ExportSpans(ctx context.Context, sds []*export.SpanData)
 	e.uploadFn(ctx, pbSpans)
 }
 
-// uploadSpans sends a set of spans to Stackdriver.
+// uploadSpans sends a set of spans to Google Cloud Trace.
 func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) {
 	req := tracepb.BatchWriteSpansRequest{
 		Name:  "projects/" + e.projectID,
