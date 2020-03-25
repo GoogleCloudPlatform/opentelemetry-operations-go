@@ -6,6 +6,6 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trac
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.0.0-00010101000000-000000000000
-	go.opentelemetry.io/otel v0.2.3
+	go.opentelemetry.io/otel v0.3.0
 	google.golang.org/grpc v1.27.1
 )
