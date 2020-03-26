@@ -26,6 +26,7 @@ import (
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	monitoringapi "cloud.google.com/go/monitoring/apiv3"
+	"go.opencensus.io/metric/metricdata"
 	_ "go.opencensus.io/metric/metricexport"
 	otel "go.opentelemetry.io/otel/sdk"
 	"google.golang.org/api/option"
@@ -120,6 +121,33 @@ func newMetricsExporter(o *options) (*metricsExporter, error) {
 	// 	e.metricsBundler.BundleCountThreshold = countThreshold
 	// }
 	return e, nil
+}
+
+// ExportMetrics exports OpenTelemetry Metrics to Google Cloud Monitoring.
+func (me *metricsExporter) ExportMetrics(ctx context.Context, metrics []*metricdata.Metric) error {
+	if len(metrics) == 0 {
+		return nil
+	}
+
+	for _, metric := range metrics {
+		_ = metric
+		//se.metricsBundler.Add(metric, 1)
+		// TODO: [rghetia] handle errors.
+	}
+
+	return nil
+}
+
+func (me *metricsExporter) handleMetricsUpload(metrics []*metricdata.Metric) {
+	err := me.uploadMetrics(metrics)
+	if err != nil {
+		me.o.handleError(err)
+	}
+}
+
+// TODO(ymotongpoo): replace with actual implementation
+func (me *metricsExporter) uploadMetrics(m []*metricdata.Metric) error {
+	return nil
 }
 
 // getTaskValue returns a task label value in the format of
