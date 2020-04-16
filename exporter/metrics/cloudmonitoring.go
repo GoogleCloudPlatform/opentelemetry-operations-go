@@ -253,3 +253,11 @@ func convertMonitoredResourceToPB(mr monitoredresource.Interface) *monitoredresp
 	}
 	return mrpb
 }
+
+func (o *options) handleError(err error) {
+	if o.OnError != nil {
+		o.OnError(err)
+		return
+	}
+	log.Printf("Failed to export to Google Cloud Monitoring: %v", err)
+}
