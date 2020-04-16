@@ -54,7 +54,7 @@ const (
 	labelHTTPPath       = `/http/path`
 	labelHTTPUserAgent  = `/http/user_agent`
 
-	version = "0.2.3"
+	version = "0.1.0"
 )
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; cloudtrace-exporter %s", opentelemetry.Version(), version)
@@ -85,8 +85,8 @@ func protoFromSpanData(s *export.SpanData, projectID string) *tracepb.Span {
 	if s.ParentSpanID != s.SpanContext.SpanID && s.ParentSpanID.IsValid() {
 		sp.ParentSpanId = fmt.Sprintf("%.16x", s.ParentSpanID)
 	}
-	if s.Status != codes.OK {
-		sp.Status = &statuspb.Status{Code: int32(s.Status)}
+	if s.StatusCode != codes.OK {
+		sp.Status = &statuspb.Status{Code: int32(s.StatusCode)}
 	}
 
 	copyAttributes(&sp.Attributes, s.Attributes)
