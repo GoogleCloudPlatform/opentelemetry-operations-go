@@ -125,15 +125,14 @@ func WithTraceClientOptions(opts []option.ClientOption) func(o *options) {
 	}
 }
 
-// WithContext sets the context that trace exporter and metric exporter
-// relies on.
+// WithContext sets the context that trace exporter relies on.
 func WithContext(ctx context.Context) func(o *options) {
 	return func(o *options) {
 		o.Context = ctx
 	}
 }
 
-// WithTimeout sets the timeout for trace exporter and metric exporter
+// WithTimeout sets the timeout for trace exporter.
 func WithTimeout(t time.Duration) func(o *options) {
 	return func(o *options) {
 		o.Timeout = t

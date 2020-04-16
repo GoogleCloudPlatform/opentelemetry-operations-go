@@ -28,7 +28,12 @@ import (
 	monitoringapi "cloud.google.com/go/monitoring/apiv3"
 	"go.opencensus.io/metric/metricdata"
 	_ "go.opencensus.io/metric/metricexport"
+	"go.opentelemetry.io/otel/api/global"
 	otel "go.opentelemetry.io/otel/sdk"
+	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/metric/batcher/defaultkeys"
+	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"google.golang.org/api/option"
 )
 
@@ -62,6 +67,30 @@ type metricsExporter struct {
 var (
 	errBlankProjectID = errors.New("expecting a non-blank ProjectID")
 )
+
+// InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
+func InstallNewPipeline(opts ...Option) (*push.Controller, error) {
+	pusher, err := NewExportPipeline(opts...)
+	if err != nil {
+		return nil, err
+	}
+	global.SetMeterProvider(pusher)
+	return pusher, err
+}
+
+// NewExportPipeline sets up a complete export pipeline with the recommended setup,
+// chaining a NewRawExporter into the recommended selectors and batchers.
+func NewExportPipeline(opts ...Option) (*push.Controller, error) {
+	selector := simple.NewWithExactMeasure()
+	exporter, err := NewRawExporter()
+	if err != nil {
+		return nil, err
+	}
+	batcher := defaultkeys.New(selector, export.NewDefaultLabelEncoder(), true)
+	period := exporter.metricsExporter.o.ReportingInterval
+	pusher := push.New(batcher, exporter, period)
+	return pusher, nil
+}
 
 // newMetricsExporter returns an exporter that uploads stats data to Google Cloud Monitoring.
 // Only one Cloud Monitoring exporter should be created per ProjectID per process, any subsequent

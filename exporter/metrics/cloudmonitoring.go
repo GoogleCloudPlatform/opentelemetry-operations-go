@@ -27,15 +27,11 @@ import (
 	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
 	"go.opencensus.io/resource"
 	"go.opencensus.io/stats/view"
+	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
-
-// Exporter is a metrics exporter that uploads data to Google Cloud Monitoring.
-type Exporter struct {
-	metricsExporter *metricsExporter
-}
 
 // Option is function type that is passed to the exporter initialization function.
 type Option func(*options)
@@ -195,8 +191,46 @@ type options struct {
 	NumberOfWorkers int
 }
 
-// NewExporter creates a new Exporter thats implements trace.Exporter.
-func NewExporter(opts ...Option) (*Exporter, error) {
+// WithTimeout sets the timeout for metric exporter to call backend API.
+func WithTimeout(t time.Duration) func(o *options) {
+	return func(o *options) {
+		o.Timeout = t
+	}
+}
+
+// WithInterval sets the interval for metric exporter to send data to Cloud Monitoring.
+// t should not be less than 10 seconds.
+// c.f. https://cloud.google.com/monitoring/docs/release-notes#March_30_2020
+func WithInterval(t time.Duration) func(o *options) {
+	return func(o *options) {
+		o.ReportingInterval = t
+	}
+}
+
+func (o *options) handleError(err error) {
+	if o.OnError != nil {
+		o.OnError(err)
+		return
+	}
+	log.Printf("Failed to export to Google Cloud Monitoring: %v", err)
+}
+
+const (
+	// defaultTimeout is used as default when timeout is not set in newContextWithTimout.
+	defaultTimeout = 5 * time.Second
+
+	// defaultReportingInterval defaults to 60 seconds.
+	// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#monitoring_write_timeseries-go
+	defaultReportingInterval = 60 * time.Second
+)
+
+// Exporter is a metrics exporter that uploads data to Google Cloud Monitoring.
+type Exporter struct {
+	metricsExporter *metricsExporter
+}
+
+// NewRawExporter creates a new Exporter thats implements trace.Exporter.
+func NewRawExporter(opts ...Option) (*Exporter, error) {
 	o := options{Context: context.Background()}
 	for _, opt := range opts {
 		opt(&o)
@@ -232,6 +266,12 @@ func NewExporter(opts ...Option) (*Exporter, error) {
 	if o.MapResource == nil {
 		o.MapResource = defaultMapResource
 	}
+	if o.Timeout == 0 {
+		o.Timeout = defaultTimeout
+	}
+	if o.ReportingInterval == 0 {
+		o.ReportingInterval = defaultReportingInterval
+	}
 	me, err := newMetricsExporter(&o)
 	if err != nil {
 		return nil, err
@@ -254,10 +294,8 @@ func convertMonitoredResourceToPB(mr monitoredresource.Interface) *monitoredresp
 	return mrpb
 }
 
-func (o *options) handleError(err error) {
-	if o.OnError != nil {
-		o.OnError(err)
-		return
-	}
-	log.Printf("Failed to export to Google Cloud Monitoring: %v", err)
+// Export exports the provide metric record to Google Cloud Monitoring.
+func (e *Exporter) Export(_ context.Context, checkpointSet export.CheckpointSet) error {
+	// TODO(ymotongpoo): implement here
+	return nil
 }
