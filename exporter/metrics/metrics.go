@@ -28,9 +28,12 @@ import (
 	monitoringapi "cloud.google.com/go/monitoring/apiv3"
 	"go.opencensus.io/metric/metricdata"
 	_ "go.opencensus.io/metric/metricexport"
+	"go.opentelemetry.io/otel/api/core"
 	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel/api/metric"
 	otel "go.opentelemetry.io/otel/sdk"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/export/metric/aggregator"
 	"go.opentelemetry.io/otel/sdk/metric/batcher/defaultkeys"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
@@ -57,7 +60,7 @@ type metricsExporter struct {
 	// metricMu          sync.Mutex
 	metricDescriptors map[string]bool // Metric descriptors that were already created remotely
 
-	c             *monitoringapi.MetricClient
+	client        *monitoringapi.MetricClient
 	defaultLabels map[string]labelValue
 	// ir            *metricexport.IntervalReader
 
@@ -110,7 +113,7 @@ func newMetricsExporter(o *options) (*metricsExporter, error) {
 		return nil, err
 	}
 	e := &metricsExporter{
-		c:                      client,
+		client:                 client,
 		o:                      o,
 		protoMetricDescriptors: make(map[string]bool),
 		metricDescriptors:      make(map[string]bool),
@@ -131,39 +134,45 @@ func newMetricsExporter(o *options) (*metricsExporter, error) {
 		e.defaultLabels[sanitize(key)] = label
 	}
 
-	// TODO(ymotongpoo): Confirm how to change bundler part by referring trace implementation.
-	//
-	// e.viewDataBundler = bundler.NewBundler((*view.Data)(nil), func(bundle interface{}) {
-	// 	vds := bundle.([]*view.Data)
-	// 	e.handleUpload(vds...)
-	// })
-	// e.metricsBundler = bundler.NewBundler((*metricdata.Metric)(nil), func(bundle interface{}) {
-	// 	metrics := bundle.([]*metricdata.Metric)
-	// 	e.handleMetricsUpload(metrics)
-	// })
-	// if delayThreshold := e.o.BundleDelayThreshold; delayThreshold > 0 {
-	// 	e.viewDataBundler.DelayThreshold = delayThreshold
-	// 	e.metricsBundler.DelayThreshold = delayThreshold
-	// }
-	// if countThreshold := e.o.BundleCountThreshold; countThreshold > 0 {
-	// 	e.viewDataBundler.BundleCountThreshold = countThreshold
-	// 	e.metricsBundler.BundleCountThreshold = countThreshold
-	// }
 	return e, nil
 }
 
 // ExportMetrics exports OpenTelemetry Metrics to Google Cloud Monitoring.
-func (me *metricsExporter) ExportMetrics(ctx context.Context, metrics []*metricdata.Metric) error {
-	if len(metrics) == 0 {
+func (me *metricsExporter) ExportMetrics(ctx context.Context, checkpointSet export.CheckpointSet) error {
+	var aggError error
+	aggError = checkpointSet.ForEach(func(record export.Record) error {
+		desc := record.Descriptor()
+		agg := record.Aggregator()
+		kind := desc.NumberKind()
+
+		if sum, ok := agg.(aggregator.Sum); ok {
+			if err := me.exportSum(sum, kind, desc, []string{}); err != nil {
+				return fmt.Errorf("exporting sum: %w", err)
+			}
+		} else if count, ok := agg.(aggregator.Count); ok {
+			if err := me.exportCounter(count, kind, desc, []string{}); err != nil {
+				return fmt.Errorf("exporting counter: %w", err)
+			}
+		} else if lv, ok := agg.(aggregator.LastValue); ok {
+			if err := me.exportLastValue(lv, kind, desc, []string{}); err != nil {
+				return fmt.Errorf("exporting last value: %w", err)
+			}
+		}
 		return nil
-	}
+	})
 
-	for _, metric := range metrics {
-		_ = metric
-		//se.metricsBundler.Add(metric, 1)
-		// TODO: [rghetia] handle errors.
-	}
+	return aggError
+}
 
+func (me *metricsExporter) exportSum(sum aggregator.Sum, kind core.NumberKind, desc *metric.Descriptor, labels []string) error {
+	return nil
+}
+
+func (me *metricsExporter) exportCounter(count aggregator.Count, kind core.NumberKind, desc *metric.Descriptor, labels []string) error {
+	return nil
+}
+
+func (me *metricsExporter) exportLastValue(lv aggregator.LastValue, kind core.NumberKind, desc *metric.Descriptor, labels []string) error {
 	return nil
 }
 

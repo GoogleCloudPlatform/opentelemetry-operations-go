@@ -1,4 +1,4 @@
-// Copyright 2018, OpenCensus Authors
+// Copyright 2016, OpenCensus Authors
 //           2020, Google Cloud Operations Exporter Authors
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,17 +20,38 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"path"
+	"strings"
 	"time"
 
 	metadataapi "cloud.google.com/go/compute/metadata"
 	monitoringapi "cloud.google.com/go/monitoring/apiv3"
 	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
 	"go.opencensus.io/resource"
+	"go.opencensus.io/resource/resourcekeys"
 	"go.opencensus.io/stats/view"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+)
+
+var (
+	errReportingIntervalTooLow = fmt.Errorf("reporting interval less than %d", minimumReportingDuration)
+)
+
+const (
+	// defaultTimeout is used as default when timeout is not set in newContextWithTimout.
+	defaultTimeout = 5 * time.Second
+
+	// defaultReportingDuration defaults to 60 seconds.
+	// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#monitoring_write_timeseries-go
+	defaultReportingDuration = 60 * time.Second
+
+	// minimumReportingDuration is the minimum duration supported by Google Cloud Monitoring.
+	// As of Apr 2020, the minimum duration is 1 second for custom metrics.
+	minimumReportingDuration = 1 * time.Second
 )
 
 // Option is function type that is passed to the exporter initialization function.
@@ -111,6 +132,15 @@ type options struct {
 	// Resource field.
 	// Optional, but encouraged.
 	MonitoredResource monitoredresource.Interface
+
+	// ResourceDetector provides a hook to discover arbitrary resource information.
+	//
+	// The translation function provided in MapResource must be able to conver the
+	// the resource information to a Stackdriver monitored resource.
+	//
+	// If this field is unset, resource type and tags will automatically be discovered through
+	// the OC_RESOURCE_TYPE and OC_RESOURCE_LABELS environment variables.
+	ResourceDetector resource.Detector
 
 	// MapResource converts a OpenTelemetry resource to a Google Cloud Monitored resource.
 	//
@@ -215,15 +245,6 @@ func (o *options) handleError(err error) {
 	log.Printf("Failed to export to Google Cloud Monitoring: %v", err)
 }
 
-const (
-	// defaultTimeout is used as default when timeout is not set in newContextWithTimout.
-	defaultTimeout = 5 * time.Second
-
-	// defaultReportingInterval defaults to 60 seconds.
-	// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#monitoring_write_timeseries-go
-	defaultReportingInterval = 60 * time.Second
-)
-
 // Exporter is a metrics exporter that uploads data to Google Cloud Monitoring.
 type Exporter struct {
 	metricsExporter *metricsExporter
@@ -266,11 +287,35 @@ func NewRawExporter(opts ...Option) (*Exporter, error) {
 	if o.MapResource == nil {
 		o.MapResource = defaultMapResource
 	}
+	if o.ResourceDetector != nil {
+		// For backwards-compatibility we still respect the deprecated resource field.
+		if o.Resource != nil {
+			return nil, errors.New("Cloud Operations: ResourceDetector must not be used in combination with deprecated resource fields")
+		}
+		res, err := o.ResourceDetector(o.Context)
+		if err != nil {
+			return nil, fmt.Errorf("Cloud Operations: detect resource: %s", err)
+		}
+		res.Labels[operationsProjectID] = o.ProjectID
+		res.Labels[resourcekeys.CloudKeyZone] = o.Location
+		res.Labels[operationsGenericTaskNamespace] = "default"
+		res.Labels[operationsGenericTaskJob] = path.Base(os.Args[0])
+		log.Printf("OpenTelemetry detected resource: %v", res)
+
+		o.Resource = o.MapResource(res)
+		log.Printf("OpenTelemetry using monitored resource: %v", o.Resource)
+	}
+	if o.MetricPrefix != "" && !strings.HasSuffix(o.MetricPrefix, "/") {
+		o.MetricPrefix = o.MetricPrefix + "/"
+	}
 	if o.Timeout == 0 {
 		o.Timeout = defaultTimeout
 	}
 	if o.ReportingInterval == 0 {
-		o.ReportingInterval = defaultReportingInterval
+		o.ReportingInterval = defaultReportingDuration
+	}
+	if o.ReportingInterval < minimumReportingDuration {
+		return nil, errReportingIntervalTooLow
 	}
 	me, err := newMetricsExporter(&o)
 	if err != nil {
@@ -295,7 +340,6 @@ func convertMonitoredResourceToPB(mr monitoredresource.Interface) *monitoredresp
 }
 
 // Export exports the provide metric record to Google Cloud Monitoring.
-func (e *Exporter) Export(_ context.Context, checkpointSet export.CheckpointSet) error {
-	// TODO(ymotongpoo): implement here
-	return nil
+func (e *Exporter) Export(ctx context.Context, checkpointSet export.CheckpointSet) error {
+	return e.metricsExporter.ExportMetrics(ctx, checkpointSet)
 }
