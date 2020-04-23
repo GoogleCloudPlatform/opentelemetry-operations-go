@@ -20,9 +20,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 	"strconv"
 	"strings"
-	_ "sync"
+	"sync"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	monitoringapi "cloud.google.com/go/monitoring/apiv3"
@@ -38,14 +39,17 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"google.golang.org/api/option"
+	labelpb "google.golang.org/genproto/googleapis/api/label"
+	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
+	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 const (
 	// maxTimeSeriesPerUpload    = 200
 	operationsTaskKey         = "operations_task"
 	operationsTaskDescription = "Operations task identifier"
-	// defaultDisplayNamePrefix  = "CloudMonitoring"
-	version = "0.2.3" // TODO(ymotongpoo): Sort out how to keep up with the release version automatically.
+	defaultDisplayNamePrefix  = "CloudMonitoring"
+	version                   = "0.2.3" // TODO(ymotongpoo): Sort out how to keep up with the release version automatically.
 )
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; metrics-exporter %s", otel.Version(), version)
@@ -57,7 +61,7 @@ type metricsExporter struct {
 	// protoMu                sync.Mutex
 	protoMetricDescriptors map[string]bool // Metric descriptors that were already created remotely
 
-	// metricMu          sync.Mutex
+	metricMu          sync.Mutex
 	metricDescriptors map[string]bool // Metric descriptors that were already created remotely
 
 	client        *monitoringapi.MetricClient
@@ -138,9 +142,22 @@ func newMetricsExporter(o *options) (*metricsExporter, error) {
 }
 
 // ExportMetrics exports OpenTelemetry Metrics to Google Cloud Monitoring.
-func (me *metricsExporter) ExportMetrics(ctx context.Context, checkpointSet export.CheckpointSet) error {
+func (me *metricsExporter) ExportMetrics(ctx context.Context, cps export.CheckpointSet) error {
 	var aggError error
-	aggError = checkpointSet.ForEach(func(record export.Record) error {
+	var allTimeSeries *monitoringpb.TimeSeries
+	_ = allTimeSeries
+
+	ctx, cancel := newContextWithTimeout(me.o.Context, me.o.Timeout)
+	defer cancel()
+
+	aggError = cps.ForEach(func(record export.Record) error {
+		if err := me.createMetricDescriptorFromRecord(ctx, &record); err != nil {
+			return err
+		}
+		return nil
+	})
+
+	aggError = cps.ForEach(func(record export.Record) error {
 		desc := record.Descriptor()
 		agg := record.Aggregator()
 		kind := desc.NumberKind()
@@ -188,6 +205,140 @@ func (me *metricsExporter) uploadMetrics(m []*metricdata.Metric) error {
 	return nil
 }
 
+// createMetricDescriptorFromRecord creates a metric descriptor from the OpenTelemetry Record
+// and then creates it remotely using Cloud Monitoring's API.
+func (me *metricsExporter) createMetricDescriptorFromRecord(ctx context.Context, record *export.Record) error {
+	// Skip create metric descriptor if configured
+	if me.o.SkipCMD {
+		return nil
+	}
+
+	me.metricMu.Lock()
+	defer me.metricMu.Unlock()
+
+	name := record.Descriptor().Name()
+	if _, created := me.metricDescriptors[name]; created {
+		return nil
+	}
+
+	if builtinMetric(me.metricTypeFromProto(name)) {
+		me.metricDescriptors[name] = true
+		return nil
+	}
+
+	// Otherwise, we encountered a cache-miss and
+	// should create the metric descriptor remotely.
+	inMD, err := me.recordToMpbMetricDescriptor(record)
+	if err != nil {
+		return err
+	}
+
+	if err = me.createMetricDescriptor(ctx, inMD); err != nil {
+		return err
+	}
+
+	// Now record the metric as having been created.
+	me.metricDescriptors[name] = true
+	return nil
+}
+
+func (me *metricsExporter) recordToMpbMetricDescriptor(record *export.Record) (*googlemetricpb.MetricDescriptor, error) {
+	if record == nil {
+		return nil, errNilMetricOrMetricDescriptor
+	}
+
+	name := record.Descriptor().Name()
+	metricType := me.metricTypeFromProto(name)
+	displayName := me.displayName(name)
+	metricKind, valueType := recordDescriptorTypeToMetricKind(record)
+
+	sdm := &googlemetricpb.MetricDescriptor{
+		Name:        fmt.Sprintf("projects/%s/metricDescriptors/%s", me.o.ProjectID, metricType),
+		DisplayName: displayName,
+		Description: record.Descriptor().Description(),
+		Unit:        string(record.Descriptor().Unit()),
+		Type:        metricType,
+		MetricKind:  metricKind,
+		ValueType:   valueType,
+		Labels:      recordKeysToLabels(me.defaultLabels, record.Descriptor().Keys()),
+	}
+
+	return sdm, nil
+}
+
+func recordKeysToLabels(defaults map[string]labelValue, keys []core.Key) []*labelpb.LabelDescriptor {
+	labelDescriptors := make([]*labelpb.LabelDescriptor, 0, len(defaults)+len(keys))
+
+	// Fill in the defaults first.
+	for key, lbl := range defaults {
+		labelDescriptors = append(labelDescriptors, &labelpb.LabelDescriptor{
+			Key:         sanitize(key),
+			Description: lbl.desc,
+			ValueType:   labelpb.LabelDescriptor_STRING,
+		})
+	}
+
+	// Now fill in those from the key.
+	for _, key := range keys {
+		labelDescriptors = append(labelDescriptors, &labelpb.LabelDescriptor{
+			Key:         sanitize(string(key)),
+			Description: "",                             // core.Key doesn't have descriptions so leave this as empty string
+			ValueType:   labelpb.LabelDescriptor_STRING, // We only use string tags
+		})
+	}
+	return labelDescriptors
+}
+
+func recordDescriptorTypeToMetricKind(record *export.Record) (googlemetricpb.MetricDescriptor_MetricKind, googlemetricpb.MetricDescriptor_ValueType) {
+	if record == nil {
+		return googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED, googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	}
+
+	switch record.Descriptor().MetricKind() {
+	case metric.MeasureKind:
+		switch record.Descriptor().NumberKind() {
+		case core.Int64NumberKind:
+			return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_INT64
+		case core.Float64NumberKind:
+			return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_DOUBLE
+		}
+	case metric.CounterKind:
+		switch record.Descriptor().NumberKind() {
+		case core.Int64NumberKind:
+			return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_INT64
+		case core.Float64NumberKind:
+			return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DOUBLE
+		}
+	case metric.ObserverKind:
+		// TODO: [ymotongpoo] find the best way to match distribution.
+		fallthrough
+	default:
+		// TODO: [rghetia] after upgrading to proto version3, retrun UNRECOGNIZED instead of UNSPECIFIED
+		return googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED, googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	}
+	// TODO: [ymotongpoo] gopls returns error with no return statement
+	return googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED, googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+}
+
+func (me *metricsExporter) createMetricDescriptor(ctx context.Context, md *googlemetricpb.MetricDescriptor) error {
+	ctx, cancel := newContextWithTimeout(ctx, me.o.Timeout)
+	defer cancel()
+	cmrdesc := &monitoringpb.CreateMetricDescriptorRequest{
+		Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
+		MetricDescriptor: md,
+	}
+	_, err := createMetricDescriptor(ctx, me.client, cmrdesc)
+	return err
+}
+
+func createMetricDescriptor(ctx context.Context, c *monitoring.MetricClient, mdr *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
+	return c.CreateMetricDescriptor(ctx, mdr)
+}
+
+func (me *metricsExporter) displayName(suffix string) string {
+	return path.Join(defaultDisplayNamePrefix, suffix)
+}
+
 // getTaskValue returns a task label value in the format of
 // "go-<pid>@<hostname>".
 func getTaskValue() string {
@@ -196,4 +347,20 @@ func getTaskValue() string {
 		hostname = "localhost"
 	}
 	return "go-" + strconv.Itoa(os.Getpid()) + "@" + hostname
+}
+
+var knownExternalMetricPrefixes = []string{
+	"custom.googleapis.com/",
+	"external.googleapis.com/",
+}
+
+// builtinMetric returns true if a MetricType is a heuristically known
+// built-in Stackdriver metric
+func builtinMetric(metricType string) bool {
+	for _, knownExternalMetric := range knownExternalMetricPrefixes {
+		if strings.HasPrefix(metricType, knownExternalMetric) {
+			return false
+		}
+	}
+	return true
 }

@@ -41,6 +41,8 @@ var (
 	errReportingIntervalTooLow = fmt.Errorf("reporting interval less than %d", minimumReportingDuration)
 )
 
+var defaultDomain = path.Join("custom.googleapis.com", "opentelemetry")
+
 const (
 	// defaultTimeout is used as default when timeout is not set in newContextWithTimout.
 	defaultTimeout = 5 * time.Second
@@ -326,6 +328,16 @@ func NewRawExporter(opts ...Option) (*Exporter, error) {
 	}, nil
 }
 
+func newContextWithTimeout(ctx context.Context, timeout time.Duration) (context.Context, func()) {
+	if ctx == nil {
+		ctx = context.Background()
+	}
+	if timeout <= 0 {
+		timeout = defaultTimeout
+	}
+	return context.WithTimeout(ctx, timeout)
+}
+
 // convertMonitoredResourceToPB converts MonitoredResource data in to
 // protocol buffer.
 func convertMonitoredResourceToPB(mr monitoredresource.Interface) *monitoredrespb.MonitoredResource {
@@ -340,6 +352,6 @@ func convertMonitoredResourceToPB(mr monitoredresource.Interface) *monitoredresp
 }
 
 // Export exports the provide metric record to Google Cloud Monitoring.
-func (e *Exporter) Export(ctx context.Context, checkpointSet export.CheckpointSet) error {
-	return e.metricsExporter.ExportMetrics(ctx, checkpointSet)
+func (e *Exporter) Export(ctx context.Context, cps export.CheckpointSet) error {
+	return e.metricsExporter.ExportMetrics(ctx, cps)
 }
