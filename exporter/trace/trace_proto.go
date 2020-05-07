@@ -64,8 +64,8 @@ func protoFromSpanData(s *export.SpanData, projectID string) *tracepb.Span {
 		return nil
 	}
 
-	traceIDString := s.SpanContext.TraceIDString()
-	spanIDString := s.SpanContext.SpanIDString()
+	traceIDString := s.SpanContext.TraceID.String()
+	spanIDString := s.SpanContext.SpanID.String()
 
 	name := s.Name
 	switch s.SpanKind {
