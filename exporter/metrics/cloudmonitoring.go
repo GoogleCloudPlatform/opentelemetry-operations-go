@@ -1,5 +1,4 @@
-// Copyright 2016, OpenCensus Authors
-//           2020, Google Cloud Operations Exporter Authors
+// Copyright 2020, Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"path"
 	"strings"
 	"time"
@@ -28,10 +26,9 @@ import (
 	metadataapi "cloud.google.com/go/compute/metadata"
 	monitoringapi "cloud.google.com/go/monitoring/apiv3"
 	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
-	"go.opencensus.io/resource"
-	"go.opencensus.io/resource/resourcekeys"
 	"go.opencensus.io/stats/view"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -39,6 +36,7 @@ import (
 
 var (
 	errReportingIntervalTooLow = fmt.Errorf("reporting interval less than %d", minimumReportingDuration)
+	errContextCanceled         = fmt.Errorf("context is canceled during the process")
 )
 
 var defaultDomain = path.Join("custom.googleapis.com", "opentelemetry")
@@ -134,15 +132,6 @@ type options struct {
 	// Resource field.
 	// Optional, but encouraged.
 	MonitoredResource monitoredresource.Interface
-
-	// ResourceDetector provides a hook to discover arbitrary resource information.
-	//
-	// The translation function provided in MapResource must be able to conver the
-	// the resource information to a Stackdriver monitored resource.
-	//
-	// If this field is unset, resource type and tags will automatically be discovered through
-	// the OC_RESOURCE_TYPE and OC_RESOURCE_LABELS environment variables.
-	ResourceDetector resource.Detector
 
 	// MapResource converts a OpenTelemetry resource to a Google Cloud Monitored resource.
 	//
@@ -289,24 +278,6 @@ func NewRawExporter(opts ...Option) (*Exporter, error) {
 	if o.MapResource == nil {
 		o.MapResource = defaultMapResource
 	}
-	if o.ResourceDetector != nil {
-		// For backwards-compatibility we still respect the deprecated resource field.
-		if o.Resource != nil {
-			return nil, errors.New("Cloud Operations: ResourceDetector must not be used in combination with deprecated resource fields")
-		}
-		res, err := o.ResourceDetector(o.Context)
-		if err != nil {
-			return nil, fmt.Errorf("Cloud Operations: detect resource: %s", err)
-		}
-		res.Labels[operationsProjectID] = o.ProjectID
-		res.Labels[resourcekeys.CloudKeyZone] = o.Location
-		res.Labels[operationsGenericTaskNamespace] = "default"
-		res.Labels[operationsGenericTaskJob] = path.Base(os.Args[0])
-		log.Printf("OpenTelemetry detected resource: %v", res)
-
-		o.Resource = o.MapResource(res)
-		log.Printf("OpenTelemetry using monitored resource: %v", o.Resource)
-	}
 	if o.MetricPrefix != "" && !strings.HasSuffix(o.MetricPrefix, "/") {
 		o.MetricPrefix = o.MetricPrefix + "/"
 	}
@@ -352,6 +323,6 @@ func convertMonitoredResourceToPB(mr monitoredresource.Interface) *monitoredresp
 }
 
 // Export exports the provide metric record to Google Cloud Monitoring.
-func (e *Exporter) Export(ctx context.Context, cps export.CheckpointSet) error {
-	return e.metricsExporter.ExportMetrics(ctx, cps)
+func (e *Exporter) Export(ctx context.Context, res *resource.Resource, cps export.CheckpointSet) error {
+	return e.metricsExporter.ExportMetrics(ctx, res, cps)
 }

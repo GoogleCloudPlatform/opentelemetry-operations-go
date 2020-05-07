@@ -1,5 +1,4 @@
-// Copyright 2018, OpenCensus Authors
-//           2020, Google Cloud Operations Exporter Authors
+// Copyright 2020, Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,23 +23,24 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
-	monitoringapi "cloud.google.com/go/monitoring/apiv3"
-	"go.opencensus.io/metric/metricdata"
-	_ "go.opencensus.io/metric/metricexport"
+	"github.com/golang/protobuf/ptypes/timestamp"
 	"go.opentelemetry.io/otel/api/core"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/metric"
 	otel "go.opentelemetry.io/otel/sdk"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregator"
-	"go.opentelemetry.io/otel/sdk/metric/batcher/defaultkeys"
+	"go.opentelemetry.io/otel/sdk/metric/batcher/ungrouped"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
+	"go.opentelemetry.io/otel/sdk/resource"
 	"google.golang.org/api/option"
 	labelpb "google.golang.org/genproto/googleapis/api/label"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
@@ -64,7 +64,7 @@ type metricsExporter struct {
 	metricMu          sync.Mutex
 	metricDescriptors map[string]bool // Metric descriptors that were already created remotely
 
-	client        *monitoringapi.MetricClient
+	client        *monitoring.MetricClient
 	defaultLabels map[string]labelValue
 	// ir            *metricexport.IntervalReader
 
@@ -93,7 +93,7 @@ func NewExportPipeline(opts ...Option) (*push.Controller, error) {
 	if err != nil {
 		return nil, err
 	}
-	batcher := defaultkeys.New(selector, export.NewDefaultLabelEncoder(), true)
+	batcher := ungrouped.New(selector, true)
 	period := exporter.metricsExporter.o.ReportingInterval
 	pusher := push.New(batcher, exporter, period)
 	return pusher, nil
@@ -142,10 +142,9 @@ func newMetricsExporter(o *options) (*metricsExporter, error) {
 }
 
 // ExportMetrics exports OpenTelemetry Metrics to Google Cloud Monitoring.
-func (me *metricsExporter) ExportMetrics(ctx context.Context, cps export.CheckpointSet) error {
+// TODO: [ymotongpoo] Ignores global *resource.Resource on initial implementation.
+func (me *metricsExporter) ExportMetrics(ctx context.Context, _ *resource.Resource, cps export.CheckpointSet) error {
 	var aggError error
-	var allTimeSeries *monitoringpb.TimeSeries
-	_ = allTimeSeries
 
 	ctx, cancel := newContextWithTimeout(me.o.Context, me.o.Timeout)
 	defer cancel()
@@ -156,53 +155,108 @@ func (me *metricsExporter) ExportMetrics(ctx context.Context, cps export.Checkpo
 		}
 		return nil
 	})
+	if aggError != nil {
+		return aggError
+	}
 
+	timeSeries := []*monitoringpb.TimeSeries{}
 	aggError = cps.ForEach(func(record export.Record) error {
 		desc := record.Descriptor()
 		agg := record.Aggregator()
 		kind := desc.NumberKind()
+		labels := record.Labels().ToSlice()
 
+		metricKind, _ := recordDescriptorTypeToMetricKind(&record)
+		if metricKind == googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
+			// ignore this record. TODO [ymotongpoo] log errors.
+			return nil
+		}
+
+		var ts *monitoringpb.TimeSeries
+		var err error
 		if sum, ok := agg.(aggregator.Sum); ok {
-			if err := me.exportSum(sum, kind, desc, []string{}); err != nil {
+			ts, err = me.aggToSumTs(sum, kind, desc, labels)
+			if err != nil {
 				return fmt.Errorf("exporting sum: %w", err)
 			}
 		} else if count, ok := agg.(aggregator.Count); ok {
-			if err := me.exportCounter(count, kind, desc, []string{}); err != nil {
+			ts, err = me.aggToCounterTs(count, kind, desc, labels)
+			if err != nil {
 				return fmt.Errorf("exporting counter: %w", err)
 			}
 		} else if lv, ok := agg.(aggregator.LastValue); ok {
-			if err := me.exportLastValue(lv, kind, desc, []string{}); err != nil {
+			ts, err = me.aggToLastValueTs(lv, kind, desc, labels)
+			if err != nil {
 				return fmt.Errorf("exporting last value: %w", err)
 			}
+		} else {
+			// TODO [ymotongpoo] add process to handle observer values.
 		}
+
+		if ts != nil {
+			timeSeries = append(timeSeries, ts)
+		}
+
 		return nil
 	})
 
 	return aggError
 }
 
-func (me *metricsExporter) exportSum(sum aggregator.Sum, kind core.NumberKind, desc *metric.Descriptor, labels []string) error {
-	return nil
-}
+func (me *metricsExporter) aggToSumTs(sum aggregator.Sum, kind core.NumberKind, desc *metric.Descriptor, labels []core.KeyValue) (*monitoringpb.TimeSeries, error) {
+	recordName := desc.Name()
+	metricType := me.metricTypeFromProto(recordName)
 
-func (me *metricsExporter) exportCounter(count aggregator.Count, kind core.NumberKind, desc *metric.Descriptor, labels []string) error {
-	return nil
-}
-
-func (me *metricsExporter) exportLastValue(lv aggregator.LastValue, kind core.NumberKind, desc *metric.Descriptor, labels []string) error {
-	return nil
-}
-
-func (me *metricsExporter) handleMetricsUpload(metrics []*metricdata.Metric) {
-	err := me.uploadMetrics(metrics)
-	if err != nil {
-		me.o.handleError(err)
+	mlabels := make(map[string]string)
+	for _, kv := range labels {
+		mlabels[kv.Key] = kv.Value.AsString()
 	}
+
+	// TODO: [ymotongpoo] find *monitoredrespb.MonitoredResource.Type from metric.Descriptor
+	rsc := &monitoredrespb.MonitoredResource{
+		Type:   "global",
+		Labels: nil,
+	}
+
+	now := time.Now()
+	startTime := &timestamp.Timestamp{
+		Seconds: now.Unix(),
+		Nanos:   int32(now.Nanosecond()),
+	}
+
+	num, err := sum.Sum()
+	if err != nil {
+		return nil, err
+	}
+	tv, err := aggValueToMpbTypeValue(num, kind)
+	if err != nil {
+		return nil, err
+	}
+
+	p := &monitoringpb.Point{
+		Interval: &monitoringpb.TimeInterval{
+			StartTime: startTime,
+		},
+		Value: tv,
+	}
+
+	ts := &monitoringpb.TimeSeries{
+		Metric: &googlemetricpb.Metric{
+			Type:   metricType,
+			Labels: mlabels,
+		},
+		Resource: rsc,
+		Points:   []*monitoringpb.Point{p},
+	}
+	return ts, nil
 }
 
-// TODO(ymotongpoo): replace with actual implementation
-func (me *metricsExporter) uploadMetrics(m []*metricdata.Metric) error {
-	return nil
+func (me *metricsExporter) aggToCounterTs(count aggregator.Count, kind core.NumberKind, desc *metric.Descriptor, labels []core.KeyValue) (*monitoringpb.TimeSeries, error) {
+	return nil, nil
+}
+
+func (me *metricsExporter) aggToLastValueTs(lv aggregator.LastValue, kind core.NumberKind, desc *metric.Descriptor, labels []core.KeyValue) (*monitoringpb.TimeSeries, error) {
+	return nil, nil
 }
 
 // createMetricDescriptorFromRecord creates a metric descriptor from the OpenTelemetry Record
@@ -318,6 +372,37 @@ func recordDescriptorTypeToMetricKind(record *export.Record) (googlemetricpb.Met
 	}
 	// TODO: [ymotongpoo] gopls returns error with no return statement
 	return googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED, googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+}
+
+func (me *metricsExporter) metricRscToMpbRsc(rs *resource.Resource) *monitoredrespb.MonitoredResource {
+	if rs == nil {
+		rscField := me.o.Resource
+		if rscField == nil {
+			rscField = &monitoredrespb.MonitoredResource{
+				Type: "global",
+			}
+		}
+		return rscField
+	}
+
+	// TODO: [ymotongpoo] OTel's resource doesn't have type, so currently leave "global"
+	// as default value
+	var typ string
+	if typ == "" {
+		typ = "global"
+	}
+	mrsp := &monitoredrespb.MonitoredResource{
+		Type: typ,
+	}
+	attributes := rs.Attributes()
+	if len(attributes) > 0 {
+		mrsp.Labels = make(map[string]string, len(attributes))
+		for _, kv := range attributes {
+			// TODO: [rghetia] add mapping between OC Labels and SD Labels.
+			mrsp.Labels[string(kv.Key)] = kv.Value.AsString()
+		}
+	}
+	return mrsp
 }
 
 func (me *metricsExporter) createMetricDescriptor(ctx context.Context, md *googlemetricpb.MetricDescriptor) error {

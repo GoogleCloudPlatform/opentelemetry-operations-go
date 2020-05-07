@@ -1,4 +1,4 @@
-// Copyright 2020, OpenCensus Authors
+// Copyright 2020, Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,13 +15,11 @@
 package metrics
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metrics/monitoredresource/gcp"
 
-	"go.opencensus.io/resource"
-	"go.opencensus.io/resource/resourcekeys"
+	"go.opentelemetry.io/otel/sdk/resource"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -35,18 +33,6 @@ const (
 	operationsGenericTaskNamespace = "go.opentelemetry.io/exporter/operations/generic_task/namespace"
 	operationsGenericTaskJob       = "go.opentelemetry.io/exporter/operations/generic_task/job"
 	operationsGenericTaskID        = "go.opentelemetry.io/exporter/operations/generic_task/task_id"
-
-	knativeResType           = "knative_revision"
-	knativeServiceName       = "service_name"
-	knativeRevisionName      = "revision_name"
-	knativeConfigurationName = "configuration_name"
-	knativeNamespaceName     = "namespace_name"
-
-	appEngineInstanceType = "gae_instance"
-
-	appEngineService  = "appengine.service.id"
-	appEngineVersion  = "appengine.version.id"
-	appEngineInstance = "appengine.instance.id"
 )
 
 var (
@@ -66,72 +52,6 @@ func init() {
 	// monitoredresource.Autodetect only makes calls to the metadata APIs once
 	// and caches the results
 	autodetectOnce = new(sync.Once)
-}
-
-// Mappings for the well-known OpenCensus resource label keys
-// to applicable Stackdriver Monitored Resource label keys.
-var k8sContainerMap = map[string]string{
-	"project_id":     operationsProjectID,
-	"location":       resourcekeys.CloudKeyZone,
-	"cluster_name":   resourcekeys.K8SKeyClusterName,
-	"namespace_name": resourcekeys.K8SKeyNamespaceName,
-	"pod_name":       resourcekeys.K8SKeyPodName,
-	"container_name": resourcekeys.ContainerKeyName,
-}
-
-var k8sPodMap = map[string]string{
-	"project_id":     operationsProjectID,
-	"location":       resourcekeys.CloudKeyZone,
-	"cluster_name":   resourcekeys.K8SKeyClusterName,
-	"namespace_name": resourcekeys.K8SKeyNamespaceName,
-	"pod_name":       resourcekeys.K8SKeyPodName,
-}
-
-var k8sNodeMap = map[string]string{
-	"project_id":   operationsProjectID,
-	"location":     resourcekeys.CloudKeyZone,
-	"cluster_name": resourcekeys.K8SKeyClusterName,
-	"node_name":    resourcekeys.HostKeyName,
-}
-
-var gcpResourceMap = map[string]string{
-	"project_id":  operationsProjectID,
-	"instance_id": resourcekeys.HostKeyID,
-	"zone":        resourcekeys.CloudKeyZone,
-}
-
-var awsResourceMap = map[string]string{
-	"project_id":  operationsProjectID,
-	"instance_id": resourcekeys.HostKeyID,
-	"region":      resourcekeys.CloudKeyRegion,
-	"aws_account": resourcekeys.CloudKeyAccountID,
-}
-
-var appEngineInstanceMap = map[string]string{
-	"project_id":  operationsProjectID,
-	"location":    resourcekeys.CloudKeyRegion,
-	"module_id":   appEngineService,
-	"version_id":  appEngineVersion,
-	"instance_id": appEngineInstance,
-}
-
-// Generic task resource.
-var genericResourceMap = map[string]string{
-	"project_id": operationsProjectID,
-	"location":   resourcekeys.CloudKeyZone,
-	"namespace":  operationsGenericTaskNamespace,
-	"job":        operationsGenericTaskJob,
-	"task_id":    operationsGenericTaskID,
-}
-
-var knativeRevisionResourceMap = map[string]string{
-	"project_id":             operationsProjectID,
-	"location":               resourcekeys.CloudKeyZone,
-	"cluster_name":           resourcekeys.K8SKeyClusterName,
-	knativeServiceName:       knativeServiceName,
-	knativeRevisionName:      knativeRevisionName,
-	knativeConfigurationName: knativeConfigurationName,
-	knativeNamespaceName:     knativeNamespaceName,
 }
 
 // getAutodetectedLabels returns all the labels from the Monitored Resource detected
@@ -157,79 +77,20 @@ func getAutodetectedLabels() map[string]string {
 	return autodetectedLabels
 }
 
-// returns transformed label map and true if all labels in match are found
-// in input except optional project_id. It returns false if at least one label
-// other than project_id is missing.
-func transformResource(match, input map[string]string) (map[string]string, bool) {
-	output := make(map[string]string, len(input))
-	for dst, src := range match {
-		if v, ok := input[src]; ok {
-			output[dst] = v
-			continue
-		}
-
-		// attempt to autodetect missing labels, autodetected label keys should
-		// match destination label keys
-		if v, ok := getAutodetectedLabels()[dst]; ok {
-			output[dst] = v
-			continue
-		}
-
-		if dst != "project_id" {
-			return nil, true
-		}
-	}
-	return output, false
-}
-
 func defaultMapResource(res *resource.Resource) *monitoredrespb.MonitoredResource {
-	match := genericResourceMap
 	result := &monitoredrespb.MonitoredResource{
 		Type: "global",
 	}
-	if res == nil || res.Labels == nil {
+
+	if res == nil || res.Len() == 0 {
 		return result
 	}
 
-	switch {
-	case res.Type == resourcekeys.ContainerType:
-		result.Type = "k8s_container"
-		match = k8sContainerMap
-	case res.Type == resourcekeys.K8SType:
-		result.Type = "k8s_pod"
-		match = k8sPodMap
-	case res.Type == resourcekeys.HostType && res.Labels[resourcekeys.K8SKeyClusterName] != "":
-		result.Type = "k8s_node"
-		match = k8sNodeMap
-	case res.Type == appEngineInstanceType:
-		result.Type = appEngineInstanceType
-		match = appEngineInstanceMap
-	case res.Labels[resourcekeys.CloudKeyProvider] == resourcekeys.CloudProviderGCP:
-		result.Type = "gce_instance"
-		match = gcpResourceMap
-	case res.Labels[resourcekeys.CloudKeyProvider] == resourcekeys.CloudProviderAWS:
-		result.Type = "aws_ec2_instance"
-		match = awsResourceMap
-	case res.Type == knativeResType:
-		result.Type = res.Type
-		match = knativeRevisionResourceMap
+	// TODO: [ymotongpoo] add default labeles based on some attributes or labels.
+	// c.f. https://github.com/census-ecosystem/opencensus-go-exporter-stackdriver/blob/v0.13.1/resource.go#L70-L134
+	for _, kv := range res.Attributes() {
+		result.Labels[string(kv.Key)] = kv.Value.AsString()
 	}
 
-	var missing bool
-	result.Labels, missing = transformResource(match, res.Labels)
-	if missing {
-		result.Type = "global"
-		// if project id specified then transform it.
-		if v, ok := res.Labels[operationsProjectID]; ok {
-			result.Labels = make(map[string]string, 1)
-			result.Labels["project_id"] = v
-		}
-		return result
-	}
-	if result.Type == "aws_ec2_instance" {
-		if v, ok := result.Labels["region"]; ok {
-			result.Labels["region"] = fmt.Sprintf("aws:%s", v)
-		}
-	}
 	return result
 }
