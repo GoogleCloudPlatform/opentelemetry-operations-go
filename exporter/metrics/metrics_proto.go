@@ -15,16 +15,12 @@
 package metrics
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"path"
 	"strings"
-	"sync"
 
 	"go.opentelemetry.io/otel/api/core"
-	"go.opentelemetry.io/otel/api/label"
-	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
@@ -64,100 +60,6 @@ type result struct {
 	Library    string
 	TimeSeries *monitoringpb.TimeSeries
 	Err        error
-}
-
-// checkpointSet transforms all records contained in a checkpoint into
-// monitoringpb.TimeSeries in batch.
-func (me *metricsExporter) checkPointSet(ctx context.Context, cps export.CheckpointSet, numWorkers uint) ([]*monitoringpb.TimeSeries, error) {
-	records, errch := source(ctx, cps)
-
-	// Start workers to transform records.
-	transformed := make(chan result)
-	var wg sync.WaitGroup
-	wg.Add(int(numWorkers))
-	for i := uint(0); i < numWorkers; i++ {
-		go func() {
-			defer wg.Done()
-			transformer(ctx, records, transformed)
-		}()
-	}
-	go func() {
-		wg.Wait()
-		close(transformed)
-	}()
-
-	tss, err := sink(ctx, transformed)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := <-errch; err != nil {
-		return nil, err
-	}
-	return tss, nil
-}
-
-// source starts a goroutine that sends each one of the Records yielded by
-// the CheckpointSet on the returned chan. Any error encoutered will be sent
-// on the returned error chan after seeding is complete.
-func source(ctx context.Context, cps export.CheckpointSet) (<-chan export.Record, <-chan error) {
-	errch := make(chan error, 1)
-	out := make(chan export.Record)
-	go func() {
-		defer close(out)
-		errch <- cps.ForEach(func(r export.Record) error {
-			select {
-			case <-ctx.Done():
-				return errContextCanceled
-			case out <- r:
-			}
-			return nil
-		})
-	}()
-	return out, errch
-}
-
-// transformer transforms records read from the passed in chan into
-// monitoringpb.TimeSeries which are sent on the out chan.
-func transformer(ctx context.Context, in <-chan export.Record, out chan<- result) {
-	for r := range in {
-		ts, err := recordToTs(r)
-		if err == nil && ts == nil {
-			continue
-		}
-		res := result{
-			Resource:   r.Descriptor().Resource(),
-			Library:    r.Descriptor().LibraryName(),
-			TimeSeries: ts,
-			Err:        err,
-		}
-		select {
-		case <-ctx.Done():
-			return
-		case out <- res:
-		}
-	}
-}
-
-func sink(ctx context.Context, in <-chan result) ([]*monitoringpb.TimeSeries, error) {
-	var errStrings []string
-
-	grouped := make(map[label.Distinct][]*monitoringpb.TimeSeries)
-	for res := range in {
-		if res.Err != nil {
-			errStrings = append(errStrings, res.Err.Error())
-			continue
-		}
-
-		rID := res.Resource.Equivalent()
-
-	}
-	return nil, nil
-}
-
-func recordToTs(r export.Record) (*monitoringpb.TimeSeries, error) {
-	// TODO: [ymotongpoo] implement here
-	return nil, nil
 }
 
 func aggValueToMpbTypeValue(v core.Number, kind core.NumberKind) (*monitoringpb.TypedValue, error) {

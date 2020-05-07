@@ -159,6 +159,9 @@ func (me *metricsExporter) ExportMetrics(ctx context.Context, _ *resource.Resour
 		return aggError
 	}
 
+	// TODO: [ymotongpoo] add process to add auto detected labels to pb data.
+	_ = getAutodetectedLabels()
+
 	timeSeries := []*monitoringpb.TimeSeries{}
 	aggError = cps.ForEach(func(record export.Record) error {
 		desc := record.Descriptor()
@@ -189,13 +192,13 @@ func (me *metricsExporter) ExportMetrics(ctx context.Context, _ *resource.Resour
 			if err != nil {
 				return fmt.Errorf("exporting last value: %w", err)
 			}
-		} else {
-			// TODO [ymotongpoo] add process to handle observer values.
+		}
+		// TODO: [ymotongpoo] Add logs in the case for other aggregators.
+		if ts == nil {
+			return nil
 		}
 
-		if ts != nil {
-			timeSeries = append(timeSeries, ts)
-		}
+		timeSeries = append(timeSeries, ts)
 
 		return nil
 	})
@@ -209,7 +212,7 @@ func (me *metricsExporter) aggToSumTs(sum aggregator.Sum, kind core.NumberKind, 
 
 	mlabels := make(map[string]string)
 	for _, kv := range labels {
-		mlabels[kv.Key] = kv.Value.AsString()
+		mlabels[string(kv.Key)] = kv.Value.AsString()
 	}
 
 	// TODO: [ymotongpoo] find *monitoredrespb.MonitoredResource.Type from metric.Descriptor
@@ -314,14 +317,15 @@ func (me *metricsExporter) recordToMpbMetricDescriptor(record *export.Record) (*
 		Type:        metricType,
 		MetricKind:  metricKind,
 		ValueType:   valueType,
-		Labels:      recordKeysToLabels(me.defaultLabels, record.Descriptor().Keys()),
+		Labels:      recordKeysToLabels(me.defaultLabels, record),
 	}
 
 	return sdm, nil
 }
 
-func recordKeysToLabels(defaults map[string]labelValue, keys []core.Key) []*labelpb.LabelDescriptor {
-	labelDescriptors := make([]*labelpb.LabelDescriptor, 0, len(defaults)+len(keys))
+func recordKeysToLabels(defaults map[string]labelValue, record *export.Record) []*labelpb.LabelDescriptor {
+	labels := record.Labels()
+	labelDescriptors := make([]*labelpb.LabelDescriptor, 0, len(defaults)+labels.Len())
 
 	// Fill in the defaults first.
 	for key, lbl := range defaults {
@@ -333,9 +337,11 @@ func recordKeysToLabels(defaults map[string]labelValue, keys []core.Key) []*labe
 	}
 
 	// Now fill in those from the key.
-	for _, key := range keys {
+	iter := labels.Iter()
+	for iter.Next() {
+		k := iter.Label().Key
 		labelDescriptors = append(labelDescriptors, &labelpb.LabelDescriptor{
-			Key:         sanitize(string(key)),
+			Key:         sanitize(string(k)),
 			Description: "",                             // core.Key doesn't have descriptions so leave this as empty string
 			ValueType:   labelpb.LabelDescriptor_STRING, // We only use string tags
 		})
