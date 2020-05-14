@@ -23,7 +23,6 @@ import (
 	otel "go.opentelemetry.io/otel/sdk"
 
 	apioption "google.golang.org/api/option"
-	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 var (
@@ -69,32 +68,9 @@ type options struct {
 	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
 	MetricDescriptorTypeFormatter func(*apimetric.Descriptor) string
 
-	// MonitoredResource sets the MonitoredResource against which all views will be
-	// recorded by this exporter.
-	//
-	// All Stackdriver metrics created by this exporter are custom metrics,
-	// so only a limited number of MonitoredResource types are supported, see:
-	// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#which-resource
-	//
-	// An important consideration when setting the MonitoredResource here is that
-	// Stackdriver Monitoring only allows a single writer per
-	// TimeSeries, see: https://cloud.google.com/monitoring/api/v3/metrics-details#intro-time-series
-	// A TimeSeries is uniquely defined by the metric type name
-	// (constructed from the view name and the MetricPrefix), the MonitoredResource field,
-	// and the set of label key/value pairs (in OpenCensus terminology: tag).
-	//
-	// If no custom MonitoredResource is set AND if Resource is also not set then
-	// a default MonitoredResource with type global and no resource labels will be used.
-	// If you explicitly set this field, you may also want to set custom DefaultMonitoringLabels.
-	//
-	// This field replaces Resource field. If this is set then it will override the
-	// Resource field.
-	// Optional, but encouraged.
-	//
-	// NOTE: [ymotongpoo] Leave this field with primitive type, but this should have
-	// a similar abstract interface as OpenCensus does.
-	// c.f. https://github.com/census-ecosystem/opencensus-go-exporter-stackdriver/blob/e191b7c50f/monitoredresource
-	MonitoredResource *monitoredrespb.MonitoredResource
+	// OnError is the hook to be called when there is an error uploading the metric data.
+	// If no custom hook is set, errors are logged. Optional.
+	onError func(error)
 }
 
 // WithMonitoringClientOptions add the options for Cloud Monitoring client instance.
@@ -124,12 +100,9 @@ func WithMetricDescriptorTypeFormatter(f func(*apimetric.Descriptor) string) fun
 	}
 }
 
-// WithMonitoredResource sets the custom MonitoredResoruce.
-// Note that the resource name should follow the convention defined in the official document.
-// The default is "projects/[PROJECT_ID]/metridDescriptors/[METRIC_TYPE]".
-// ref. https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom_metric_names
-func WithMonitoredResource(mr *monitoredrespb.MonitoredResource) func(o *options) {
+// WithOnError sets the custom error handler to be called on errors.
+func WithOnError(f func(error)) func(o *options) {
 	return func(o *options) {
-		o.MonitoredResource = mr
+		o.onError = f
 	}
 }

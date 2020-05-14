@@ -94,7 +94,7 @@ func InstallNewPipeline(popts ...push.Option) (*push.Controller, error) {
 }
 
 // NewExportPipeline sets up a complete export pipeline with the recommended setup,
-// chaining a NewRawExporter into the recommended selectors and batchers.
+// chaining a NewRawExporter into the recommended selectors and integrators.
 func NewExportPipeline(popts ...push.Option) (*push.Controller, error) {
 	selector := simple.NewWithExactMeasure()
 	exporter, err := NewRawExporter()
@@ -174,7 +174,11 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 	})
 
 	if aggError != nil {
-		log.Printf("Error during exporting TimeSeries: %v", aggError)
+		if me.o.onError != nil {
+			me.o.onError(aggError)
+		} else {
+			log.Printf("Error during exporting TimeSeries: %v", aggError)
+		}
 	}
 
 	var flat []*monitoringpb.TimeSeries
@@ -191,10 +195,10 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 }
 
 // recordToTspb converts record to TimeSeries proto type with common resource.
+// ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
 func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource) (*monitoringpb.TimeSeries, error) {
 	m := me.recordToMpb(r)
 	mr := me.resourceToMonitoredResourcepb(res)
-	mkind, typ := recordToMdpbKindType(r)
 
 	tv, err := recordToTypedValue(r)
 	if err != nil {
@@ -206,11 +210,9 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	}
 
 	return &monitoringpb.TimeSeries{
-		Metric:     m,
-		Resource:   mr,
-		MetricKind: mkind,
-		ValueType:  typ,
-		Points:     []*monitoringpb.Point{p},
+		Metric:   m,
+		Resource: mr,
+		Points:   []*monitoringpb.Point{p},
 	}, nil
 }
 
@@ -245,25 +247,19 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 
 // resourceToMonitoredResourcepb converts resource in OTel to MonitoredResource
 // proto type for Cloud Monitoring.
-// https://github.com/googleapis/googleapis/blob/50af053073/google/api/monitored_resource.proto#L86
-func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
-	labels := make(map[string]string)
-	iter := res.Iter()
-	for iter.Next() {
-		kv := iter.Label()
-		labels[string(kv.Key)] = kv.Value.AsString()
-	}
+// NOTE:
+// https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
+func (me *metricExporter) resourceToMonitoredResourcepb(_ *resource.Resource) *monitoredrespb.MonitoredResource {
+	// TODO: Implement the process to convert Resource to MonitoringResoruce.
+	// ref. https://cloud.google.com/monitoring/api/resources
 
-	// TODO: Replace this part with more flexible. Idea is to accept fixed key in res
-	// such as "monitored_resource_type" and use its value.
-	typ := "global"
-	if me.o.MonitoredResource != nil {
-		typ = me.o.MonitoredResource.Type
-	}
-
+	// "global" only accepts "project_id" for label.
+	// https://cloud.google.com/monitoring/api/resources#tag_global
 	return &monitoredrespb.MonitoredResource{
-		Type:   typ,
-		Labels: labels,
+		Type: "global",
+		Labels: map[string]string{
+			"project_id": me.o.ProjectID,
+		},
 	}
 }
 
@@ -276,12 +272,11 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 
 	var kind googlemetricpb.MetricDescriptor_MetricKind
 	switch mkind {
-	case apimetric.MeasureKind:
-		kind = googlemetricpb.MetricDescriptor_GAUGE
 	case apimetric.CounterKind:
 		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
 	case apimetric.ObserverKind:
-		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
+		kind = googlemetricpb.MetricDescriptor_GAUGE
+	// TODO: Add support for MeasureKind.
 	default:
 		kind = googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
 	}
@@ -299,10 +294,7 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 		typ = googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 	}
 
-	// TODO: [ymotongpoo] Temporarily fix ObserverKind for DISTRIBUTION.
-	if mkind == apimetric.ObserverKind {
-		typ = googlemetricpb.MetricDescriptor_DISTRIBUTION
-	}
+	// TODO: Add handling for MeasureKind if necessary.
 
 	return kind, typ
 }
