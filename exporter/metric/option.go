@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"time"
 
+	apimetric "go.opentelemetry.io/otel/api/metric"
 	otel "go.opentelemetry.io/otel/sdk"
 	"google.golang.org/api/option"
 )
@@ -61,6 +62,10 @@ type options struct {
 	// ReportingInterval sets the interval between reporting metrics.
 	// If it is set to zero then default value is used.
 	ReportingInterval time.Duration
+
+	// MetricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
+	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
+	MetricDescriptorTypeFormatter func(*apimetric.Descriptor) string
 }
 
 // WithInterval sets the interval for metric exporter to send data to Cloud Monitoring.
