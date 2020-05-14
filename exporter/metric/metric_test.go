@@ -15,17 +15,28 @@
 package metric
 
 import (
+	"context"
 	"fmt"
+	"reflect"
 	"testing"
 
+	"go.opentelemetry.io/otel/api/kv"
+	"go.opentelemetry.io/otel/api/metric"
 	apimetric "go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/exporters/metric/test"
+	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
+	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/test"
+	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
+)
+
+var (
+	formatter = func(d *apimetric.Descriptor) string {
+		return fmt.Sprintf("test.googleapis.com/%s", d.Name())
+	}
 )
 
 func TestDescToMetricType(t *testing.T) {
-	formatter := func(d *apimetric.Descriptor) string {
-		return fmt.Sprintf("test.googleapis.com/%s", d.Name())
-	}
-
 	inMe := []*metricExporter{
 		{
 			o: &options{},
@@ -52,5 +63,51 @@ func TestDescToMetricType(t *testing.T) {
 		if out != w {
 			t.Errorf("expected: %v, actual: %v", w, out)
 		}
+	}
+}
+
+func TestRecordToMpb(t *testing.T) {
+	cps := test.NewCheckpointSet()
+	ctx := context.Background()
+
+	desc := apimetric.NewDescriptor("testing", apimetric.MeasureKind, apimetric.Float64NumberKind)
+
+	lvagg := lastvalue.New()
+	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)
+	lvagg.Checkpoint(ctx, &desc)
+	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
+
+	md := &googlemetricpb.MetricDescriptor{
+		Name:        desc.Name(),
+		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
+		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
+		Description: "test",
+	}
+
+	me := &metricExporter{
+		o: &options{},
+		mdCache: map[string]*googlemetricpb.MetricDescriptor{
+			md.Name: md,
+		},
+	}
+
+	want := &googlemetricpb.Metric{
+		Type: md.Type,
+		Labels: map[string]string{
+			"a": "A",
+			"b": "B",
+		},
+	}
+
+	aggError := cps.ForEach(func(r export.Record) error {
+		out := me.recordToMpb(&r)
+		if !reflect.DeepEqual(want, out) {
+			return fmt.Errorf("expected: %v, actual: %v", want, out)
+		}
+		return nil
+	})
+	if aggError != nil {
+		t.Errorf("%v", aggError)
 	}
 }

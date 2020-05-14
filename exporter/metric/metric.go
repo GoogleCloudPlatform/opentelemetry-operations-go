@@ -34,8 +34,8 @@ import (
 )
 
 const (
-	version                                  = "0.1.0"
-	cloudMonitoringMetricDescriptorNameFormt = "custom.googleapis.com/opentelemetry/%s"
+	version                                   = "0.1.0"
+	cloudMonitoringMetricDescriptorNameFormat = "custom.googleapis.com/opentelemetry/%s"
 )
 
 var (
@@ -112,7 +112,7 @@ func (me *metricExporter) descToMetricType(desc *apimetric.Descriptor) string {
 	if formatter := me.o.MetricDescriptorTypeFormatter; formatter != nil {
 		return formatter(desc)
 	}
-	return fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormt, desc.Name())
+	return fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name())
 }
 
 // recordToMdpb extracts data and converts them to googlemetricpb.MetricDescriptor.
@@ -135,7 +135,65 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 	}
 }
 
+// recordToMdpbKindType return the mapping from OTel's record descriptor to
+// Cloud Monitoring's MetricKind and ValueType.
 func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_MetricKind, googlemetricpb.MetricDescriptor_ValueType) {
 	// TODO: [ymotongpoo] Remove tentative implementation
-	return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_INT64
+	mkind := r.Descriptor().MetricKind()
+	nkind := r.Descriptor().NumberKind()
+
+	var kind googlemetricpb.MetricDescriptor_MetricKind
+	switch mkind {
+	case apimetric.MeasureKind:
+		kind = googlemetricpb.MetricDescriptor_GAUGE
+	case apimetric.CounterKind:
+		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
+	case apimetric.ObserverKind:
+		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
+	default:
+		kind = googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
+	}
+
+	var typ googlemetricpb.MetricDescriptor_ValueType
+	switch nkind {
+	case apimetric.Int64NumberKind:
+		typ = googlemetricpb.MetricDescriptor_INT64
+	case apimetric.Float64NumberKind:
+		typ = googlemetricpb.MetricDescriptor_DOUBLE
+	case apimetric.Uint64NumberKind:
+		// TODO: [ymotongpoo] Confirm if INT64 is ok here.
+		typ = googlemetricpb.MetricDescriptor_INT64
+	default:
+		typ = googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	}
+
+	// TODO: [ymotongpoo] Temporarily fix ObserverKind for DISTRIBUTION.
+	if mkind == apimetric.ObserverKind {
+		typ = googlemetricpb.MetricDescriptor_DISTRIBUTION
+	}
+
+	return kind, typ
+}
+
+// recordToMpb converts data from records to Metric proto type for Cloud Monitoring.
+func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
+	desc := r.Descriptor()
+	name := desc.Name()
+	md, ok := me.mdCache[name]
+	if !ok {
+		md = me.recordToMdpb(r)
+		me.mdCache[name] = md
+	}
+
+	labels := make(map[string]string)
+	iter := r.Labels().Iter()
+	for iter.Next() {
+		kv := iter.Label()
+		labels[string(kv.Key)] = kv.Value.AsString()
+	}
+
+	return &googlemetricpb.Metric{
+		Type:   md.Type,
+		Labels: labels,
+	}
 }
