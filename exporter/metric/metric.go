@@ -18,11 +18,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/export/metric/aggregator"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	integrator "go.opentelemetry.io/otel/sdk/metric/integrator/simple"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
@@ -41,7 +43,8 @@ const (
 )
 
 var (
-	errBlankProjectID = errors.New("expecting a non-blank ProjectID")
+	errBlankProjectID         = errors.New("expecting a non-blank ProjectID")
+	errUnsupportedAggregation = errors.New("Currently the metric type is not supported")
 )
 
 // metricExporter is the implementation of OpenTelemetry metric exporter for
@@ -106,24 +109,21 @@ func NewExportPipeline(popts ...push.Option) (*push.Controller, error) {
 
 // ExportMetrics exports OpenTelemetry Metrics to Google Cloud Monitoring.
 func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resource, cps export.CheckpointSet) error {
-	// TODO: [ymotongpoo] implement this function to create TimeSeries from records.
-	// 1. check all records if they have new MetricDescriptor that are not cached.
-	// 2. convert record to TimeSeries
 	if err := me.exportMetricDescriptor(ctx, cps); err != nil {
 		return err
 	}
 
-	aggError := cps.ForEach(func(r export.Record) error {
-		return nil
-	})
-	return aggError
+	if err := me.exportTimeSeries(ctx, res, cps); err != nil {
+		return err
+	}
+	return nil
 }
 
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registerd in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export.CheckpointSet) error {
 	mds := make(map[string]*googlemetricpb.MetricDescriptor)
-	cps.ForEach(func(r export.Record) error {
+	aggError := cps.ForEach(func(r export.Record) error {
 		desc := r.Descriptor()
 		name := desc.Name()
 
@@ -135,12 +135,15 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 		}
 		return nil
 	})
+	if aggError != nil {
+		return aggError
+	}
 	if len(mds) == 0 {
 		return nil
 	}
 
 	for _, md := range mds {
-		req := monitoringpb.CreateMetricDescriptorRequest{
+		req := &monitoringpb.CreateMetricDescriptorRequest{
 			Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
 			MetricDescriptor: md,
 		}
@@ -153,6 +156,66 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 	return nil
 }
 
+// exportTimeSeriees create TimeSeries from the records in cps.
+// res should be the common resource among all TimeSeries, such as instance id, application name and so on.
+func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Resource, cps export.CheckpointSet) error {
+	tsCache := make(map[string][]*monitoringpb.TimeSeries)
+
+	aggError := cps.ForEach(func(r export.Record) error {
+		desc := r.Descriptor()
+		name := desc.Name()
+
+		ts, err := me.recordToTspb(&r, res)
+		if err != nil {
+			return err
+		}
+		tsCache[name] = append(tsCache[name], ts)
+		return nil
+	})
+
+	if aggError != nil {
+		log.Printf("Error during exporting TimeSeries: %v", aggError)
+	}
+
+	var flat []*monitoringpb.TimeSeries
+	for _, v := range tsCache {
+		flat = append(flat, v...)
+	}
+
+	req := &monitoringpb.CreateTimeSeriesRequest{
+		Name:       fmt.Sprintf("projects/%s", me.o.ProjectID),
+		TimeSeries: flat,
+	}
+
+	return me.client.CreateTimeSeries(ctx, req)
+}
+
+// recordToTspb converts record to TimeSeries proto type with common resource.
+func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource) (*monitoringpb.TimeSeries, error) {
+	m := me.recordToMpb(r)
+	mr := me.resourceToMonitoredResourcepb(res)
+	mkind, typ := recordToMdpbKindType(r)
+
+	tv, err := recordToTypedValue(r)
+	if err != nil {
+		return nil, err
+	}
+
+	p := &monitoringpb.Point{
+		Value: tv,
+	}
+
+	return &monitoringpb.TimeSeries{
+		Metric:     m,
+		Resource:   mr,
+		MetricKind: mkind,
+		ValueType:  typ,
+		Points:     []*monitoringpb.Point{p},
+	}, nil
+}
+
+// descToMetricType converts descriptor to MetricType proto type.
+// Basically this returns default value ("custom.googleapis.com/opentelemetry/[metric type]")
 func (me *metricExporter) descToMetricType(desc *apimetric.Descriptor) string {
 	if formatter := me.o.MetricDescriptorTypeFormatter; formatter != nil {
 		return formatter(desc)
@@ -264,4 +327,66 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 		Type:   md.Type,
 		Labels: labels,
 	}
+}
+
+func recordToTypedValue(r *export.Record) (*monitoringpb.TypedValue, error) {
+	desc := r.Descriptor()
+	agg := r.Aggregator()
+	kind := desc.NumberKind()
+
+	// TODO: Ignoring the case for Min, Max, Count and Distribution to simply
+	// the first implementation.
+	if lv, ok := agg.(aggregator.LastValue); ok {
+		value, _, err := lv.LastValue()
+		if err != nil {
+			return nil, err
+		}
+		switch kind {
+		case apimetric.Int64NumberKind:
+			return &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_Int64Value{
+					Int64Value: value.AsInt64(),
+				},
+			}, nil
+		case apimetric.Float64NumberKind:
+			return &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_DoubleValue{
+					DoubleValue: value.AsFloat64(),
+				},
+			}, nil
+		case apimetric.Uint64NumberKind:
+			return &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_Int64Value{
+					Int64Value: value.AsInt64(),
+				},
+			}, nil
+		}
+	} else if sum, ok := agg.(aggregator.Sum); ok {
+		value, err := sum.Sum()
+		if err != nil {
+			return nil, err
+		}
+		switch kind {
+		case apimetric.Int64NumberKind:
+			return &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_Int64Value{
+					Int64Value: value.AsInt64(),
+				},
+			}, nil
+		case apimetric.Float64NumberKind:
+			return &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_DoubleValue{
+					DoubleValue: value.AsFloat64(),
+				},
+			}, nil
+		case apimetric.Uint64NumberKind:
+			return &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_Int64Value{
+					Int64Value: value.AsInt64(),
+				},
+			}, nil
+		}
+	}
+
+	return nil, errUnsupportedAggregation
 }

@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"path"
 	"time"
 
 	export "go.opentelemetry.io/otel/sdk/export/metric"
@@ -38,11 +37,8 @@ const (
 	minimumReportingDuration = 1 * time.Second
 )
 
-var defaultDomain = path.Join("custom.googleapis.com", "opentelemetry")
-
 var (
 	errReportingIntervalTooLow = fmt.Errorf("reporting interval less than %d", minimumReportingDuration)
-	errContextCanceled         = fmt.Errorf("context is canceled during the process")
 )
 
 // Exporter is the public interface of OpenTelemetry metric exporter for
