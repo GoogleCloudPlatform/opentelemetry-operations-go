@@ -31,6 +31,7 @@ import (
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 const (
@@ -47,6 +48,8 @@ var (
 type metricExporter struct {
 	o *options
 
+	// mdCache is the cache to hold MetricDescriptor to avoid creating duplicate MD.
+	// TODO: [ymotongpoo] this map should be goroutine safe with mutex.
 	mdCache map[string]*googlemetricpb.MetricDescriptor
 
 	client *monitoring.MetricClient
@@ -132,6 +135,30 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 		ValueType:   typ,
 		Unit:        string(unit),
 		Description: desc.Description(),
+	}
+}
+
+// resourceToMonitoredResourcepb converts resource in OTel to MonitoredResource
+// proto type for Cloud Monitoring.
+// https://github.com/googleapis/googleapis/blob/50af053073/google/api/monitored_resource.proto#L86
+func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
+	labels := make(map[string]string)
+	iter := res.Iter()
+	for iter.Next() {
+		kv := iter.Label()
+		labels[string(kv.Key)] = kv.Value.AsString()
+	}
+
+	// TODO: Replace this part with more flexible. Idea is to accept fixed key in res
+	// such as "monitored_resource_type" and use its value.
+	typ := "global"
+	if me.o.MonitoredResource != nil {
+		typ = me.o.MonitoredResource.Type
+	}
+
+	return &monitoredrespb.MonitoredResource{
+		Type:   typ,
+		Labels: labels,
 	}
 }
 

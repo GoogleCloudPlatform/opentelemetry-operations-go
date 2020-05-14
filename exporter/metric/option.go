@@ -21,7 +21,9 @@ import (
 
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	otel "go.opentelemetry.io/otel/sdk"
-	"google.golang.org/api/option"
+
+	apioption "google.golang.org/api/option"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 var (
@@ -46,7 +48,7 @@ type options struct {
 	// MonitoringClientOptions are additional options to be passed
 	// to the underlying Stackdriver Monitoring API client.
 	// Optional.
-	MonitoringClientOptions []option.ClientOption
+	MonitoringClientOptions []apioption.ClientOption
 
 	// Context allows you to provide a custom context for API calls.
 	//
@@ -66,6 +68,41 @@ type options struct {
 	// MetricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
 	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
 	MetricDescriptorTypeFormatter func(*apimetric.Descriptor) string
+
+	// MonitoredResource sets the MonitoredResource against which all views will be
+	// recorded by this exporter.
+	//
+	// All Stackdriver metrics created by this exporter are custom metrics,
+	// so only a limited number of MonitoredResource types are supported, see:
+	// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#which-resource
+	//
+	// An important consideration when setting the MonitoredResource here is that
+	// Stackdriver Monitoring only allows a single writer per
+	// TimeSeries, see: https://cloud.google.com/monitoring/api/v3/metrics-details#intro-time-series
+	// A TimeSeries is uniquely defined by the metric type name
+	// (constructed from the view name and the MetricPrefix), the MonitoredResource field,
+	// and the set of label key/value pairs (in OpenCensus terminology: tag).
+	//
+	// If no custom MonitoredResource is set AND if Resource is also not set then
+	// a default MonitoredResource with type global and no resource labels will be used.
+	// If you explicitly set this field, you may also want to set custom DefaultMonitoringLabels.
+	//
+	// This field replaces Resource field. If this is set then it will override the
+	// Resource field.
+	// Optional, but encouraged.
+	//
+	// NOTE: [ymotongpoo] Leave this field with primitive type, but this should have
+	// a similar abstract interface as OpenCensus does.
+	// c.f. https://github.com/census-ecosystem/opencensus-go-exporter-stackdriver/blob/e191b7c50f/monitoredresource
+	MonitoredResource *monitoredrespb.MonitoredResource
+}
+
+// WithMoniroingClientOptions add the options for Cloud Monitoring client instance.
+// Available options are defined in
+func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options) {
+	return func(o *options) {
+		o.MonitoringClientOptions = append(o.MonitoringClientOptions, opts...)
+	}
 }
 
 // WithInterval sets the interval for metric exporter to send data to Cloud Monitoring.
@@ -74,5 +111,25 @@ type options struct {
 func WithInterval(t time.Duration) func(o *options) {
 	return func(o *options) {
 		o.ReportingInterval = t
+	}
+}
+
+// WithMetricDescriptorTypeFormatter sets the custom formatter for MetricDescriptor.
+// Note that the format has to follow the convention defined in the official document.
+// The default is "custom.googleapi.com/[metric name]".
+// ref. https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom_metric_names
+func WithMetricDescriptorTypeFormatter(f func(*apimetric.Descriptor) string) func(o *options) {
+	return func(o *options) {
+		o.MetricDescriptorTypeFormatter = f
+	}
+}
+
+// WithMoniWithMonitoredResource sets the custom MonitoredResoruce.
+// Note that the resource name should follow the convention defined in the official document.
+// The default is "projects/[PROJECT_ID]/metridDescriptors/[METRIC_TYPE]".
+// ref. https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom_metric_names
+func WithMonitoredResource(mr *monitoredrespb.MonitoredResource) func(o *options) {
+	return func(o *options) {
+		o.MonitoredResource = mr
 	}
 }
