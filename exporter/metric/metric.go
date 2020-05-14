@@ -32,6 +32,7 @@ import (
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
 const (
@@ -108,6 +109,47 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resou
 	// TODO: [ymotongpoo] implement this function to create TimeSeries from records.
 	// 1. check all records if they have new MetricDescriptor that are not cached.
 	// 2. convert record to TimeSeries
+	if err := me.exportMetricDescriptor(ctx, cps); err != nil {
+		return err
+	}
+
+	aggError := cps.ForEach(func(r export.Record) error {
+		return nil
+	})
+	return aggError
+}
+
+// exportMetricDescriptor create MetricDescriptor from the record
+// if the descriptor is not registerd in Cloud Monitoring yet.
+func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export.CheckpointSet) error {
+	mds := make(map[string]*googlemetricpb.MetricDescriptor)
+	cps.ForEach(func(r export.Record) error {
+		desc := r.Descriptor()
+		name := desc.Name()
+
+		if _, ok := me.mdCache[name]; !ok {
+			if _, localok := mds[name]; !localok {
+				md := me.recordToMdpb(&r)
+				mds[name] = md
+			}
+		}
+		return nil
+	})
+	if len(mds) == 0 {
+		return nil
+	}
+
+	for _, md := range mds {
+		req := monitoringpb.CreateMetricDescriptorRequest{
+			Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
+			MetricDescriptor: md,
+		}
+		_, err := me.client.CreateMetricDescriptor(ctx, req)
+		if err != nil {
+			return err
+		}
+		me.mdCache[md.Name] = md
+	}
 	return nil
 }
 
@@ -209,7 +251,6 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 	md, ok := me.mdCache[name]
 	if !ok {
 		md = me.recordToMdpb(r)
-		me.mdCache[name] = md
 	}
 
 	labels := make(map[string]string)
