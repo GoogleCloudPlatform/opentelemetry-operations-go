@@ -97,7 +97,7 @@ type options struct {
 	MonitoredResource *monitoredrespb.MonitoredResource
 }
 
-// WithMoniroingClientOptions add the options for Cloud Monitoring client instance.
+// WithMonitoringClientOptions add the options for Cloud Monitoring client instance.
 // Available options are defined in
 func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options) {
 	return func(o *options) {
@@ -124,7 +124,7 @@ func WithMetricDescriptorTypeFormatter(f func(*apimetric.Descriptor) string) fun
 	}
 }
 
-// WithMoniWithMonitoredResource sets the custom MonitoredResoruce.
+// WithMonitoredResource sets the custom MonitoredResoruce.
 // Note that the resource name should follow the convention defined in the official document.
 // The default is "projects/[PROJECT_ID]/metridDescriptors/[METRIC_TYPE]".
 // ref. https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom_metric_names
