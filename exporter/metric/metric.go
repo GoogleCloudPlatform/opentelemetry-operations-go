@@ -43,9 +43,16 @@ const (
 )
 
 var (
-	errBlankProjectID         = errors.New("expecting a non-blank ProjectID")
-	errUnsupportedAggregation = errors.New("Currently the metric type is not supported")
+	errBlankProjectID = errors.New("expecting a non-blank ProjectID")
 )
+
+type errUnsupportedAggregation struct {
+	agg export.Aggregator
+}
+
+func (e errUnsupportedAggregation) Error() string {
+	return fmt.Sprintf("currently the aggregator is not supported: %v", e.agg)
+}
 
 // key is used to judge the uniqueness of the record descriptor.
 type key struct {
@@ -133,18 +140,19 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resou
 }
 
 // exportMetricDescriptor create MetricDescriptor from the record
-// if the descriptor is not registerd in Cloud Monitoring yet.
+// if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export.CheckpointSet) error {
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
 	aggError := cps.ForEach(func(r export.Record) error {
-		desc := r.Descriptor()
-		key := keyOf(desc)
+		key := keyOf(r.Descriptor())
 
-		if _, ok := me.mdCache[key]; !ok {
-			if _, localok := mds[key]; !localok {
-				md := me.recordToMdpb(&r)
-				mds[key] = md
-			}
+		if _, ok := me.mdCache[key]; ok {
+			return nil
+		}
+
+		if _, localok := mds[key]; !localok {
+			md := me.recordToMdpb(&r)
+			mds[key] = md
 		}
 		return nil
 	})
@@ -155,6 +163,10 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 		return nil
 	}
 
+	// TODO: This process is synchronous and blocks longer time if records in cps
+	// have many diffrent descriptors. In the cps.ForEach above, it should spawn
+	// goroutines to send CreateMetricDescriptorRequest asynchronously in the case
+	// the descriptor does not exist in global cache (me.mdCache).
 	for key, md := range mds {
 		req := &monitoringpb.CreateMetricDescriptorRequest{
 			Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
@@ -175,8 +187,7 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 	tsCache := make(map[key][]*monitoringpb.TimeSeries)
 
 	aggError := cps.ForEach(func(r export.Record) error {
-		desc := r.Descriptor()
-		key := keyOf(desc)
+		key := keyOf(r.Descriptor())
 
 		ts, err := me.recordToTspb(&r, res)
 		if err != nil {
@@ -393,5 +404,5 @@ func recordToTypedValue(r *export.Record) (*monitoringpb.TypedValue, error) {
 		}
 	}
 
-	return nil, errUnsupportedAggregation
+	return nil, errUnsupportedAggregation{agg: agg}
 }
