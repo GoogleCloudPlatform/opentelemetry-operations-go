@@ -17,7 +17,9 @@ package main
 import (
 	"context"
 	"log"
+	"math/rand"
 	"sync"
+	"time"
 
 	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
@@ -36,11 +38,11 @@ func main() {
 	}
 	defer pusher.Stop()
 
-	block := make(chan bool)
-
 	// Start meter
 	ctx := context.Background()
 	meter := pusher.Meter("cloudmonitoring/example")
+
+	timer := time.NewTicker(1 * time.Second)
 
 	// Register counter value
 	counter := metric.Must(meter).NewInt64Counter("counter-a")
@@ -69,5 +71,18 @@ func main() {
 	*observerL = lables
 	(*observerMu).Unlock()
 
-	<-block
+	select {
+	case <-timer.C:
+		r := rand.Int63n(100)
+		cv := 100 + r
+		counter.Add(ctx, cv, labels...)
+
+		r2 := rand.Int63n(10)
+		(*observerMu).Lock()
+		ov := 12.34 + float64(r2)/20.0
+		*observerV = ov
+		(*observerMu).Unlock()
+
+		log.Printf("Submitted data: counter %v, observer %v", cv, ov)
+	}
 }

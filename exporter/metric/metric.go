@@ -402,7 +402,7 @@ func recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue,
 				Seconds: now,
 			},
 			EndTime: &googlepb.Timestamp{
-				Seconds: now,
+				Seconds: now + 1,
 			},
 		}
 
