@@ -71,8 +71,7 @@ func main() {
 	*observerL = lables
 	(*observerMu).Unlock()
 
-	select {
-	case <-timer.C:
+	for range timer.C {
 		rand.Seed(time.Now().UnixNano())
 
 		r := rand.Int63n(100)
