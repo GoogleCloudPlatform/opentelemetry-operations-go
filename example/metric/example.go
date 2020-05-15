@@ -73,6 +73,8 @@ func main() {
 
 	select {
 	case <-timer.C:
+		rand.Seed(time.Now().UnixNano())
+
 		r := rand.Int63n(100)
 		cv := 100 + r
 		counter.Add(ctx, cv, labels...)
