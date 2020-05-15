@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
@@ -31,6 +32,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
+	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -94,9 +96,12 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	cache := map[key]*googlemetricpb.MetricDescriptor{}
 	e := &metricExporter{
-		client: client,
-		o:      o,
+		o:       o,
+		mdCache: cache,
+		client:  client,
 	}
 	return e, nil
 }
@@ -216,13 +221,14 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	m := me.recordToMpb(r)
 	mr := me.resourceToMonitoredResourcepb(res)
 
-	tv, err := recordToTypedValue(r)
+	tv, t, err := recordToTypedValueAndTimestamp(r)
 	if err != nil {
 		return nil, err
 	}
 
 	p := &monitoringpb.Point{
-		Value: tv,
+		Value:    tv,
+		Interval: t,
 	}
 
 	return &monitoringpb.TimeSeries{
@@ -337,7 +343,14 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 	}
 }
 
-func recordToTypedValue(r *export.Record) (*monitoringpb.TypedValue, error) {
+// recordToTypedValueAndTimestamp converts measurement value stored in r to
+// correspoinding counterpart in monitoringpb, and extracts timestamp of the record
+// and convert it to appropriate TimeInterval.
+//
+// TODO: Apply appropriate TimeInterval based upon MetricKind. See details in the doc.
+// https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries#Point
+// See detils in #25.
+func recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	desc := r.Descriptor()
 	agg := r.Aggregator()
 	kind := desc.NumberKind()
@@ -345,56 +358,75 @@ func recordToTypedValue(r *export.Record) (*monitoringpb.TypedValue, error) {
 	// TODO: Ignoring the case for Min, Max, Count and Distribution to simply
 	// the first implementation.
 	if lv, ok := agg.(aggregator.LastValue); ok {
-		value, _, err := lv.LastValue()
+		value, timestamp, err := lv.LastValue()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
+
+		t := &monitoringpb.TimeInterval{
+			StartTime: &googlepb.Timestamp{
+				Seconds: timestamp.Unix(),
+			},
+		}
+
 		switch kind {
 		case apimetric.Int64NumberKind:
 			return &monitoringpb.TypedValue{
 				Value: &monitoringpb.TypedValue_Int64Value{
 					Int64Value: value.AsInt64(),
 				},
-			}, nil
+			}, t, nil
 		case apimetric.Float64NumberKind:
 			return &monitoringpb.TypedValue{
 				Value: &monitoringpb.TypedValue_DoubleValue{
 					DoubleValue: value.AsFloat64(),
 				},
-			}, nil
+			}, t, nil
 		case apimetric.Uint64NumberKind:
 			return &monitoringpb.TypedValue{
 				Value: &monitoringpb.TypedValue_Int64Value{
 					Int64Value: value.AsInt64(),
 				},
-			}, nil
+			}, t, nil
 		}
 	} else if sum, ok := agg.(aggregator.Sum); ok {
 		value, err := sum.Sum()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
+
+		// TODO: Handle TimeInterval appropriately (#25)
+		now := time.Now().Unix()
+		t := &monitoringpb.TimeInterval{
+			StartTime: &googlepb.Timestamp{
+				Seconds: now,
+			},
+			EndTime: &googlepb.Timestamp{
+				Seconds: now,
+			},
+		}
+
 		switch kind {
 		case apimetric.Int64NumberKind:
 			return &monitoringpb.TypedValue{
 				Value: &monitoringpb.TypedValue_Int64Value{
 					Int64Value: value.AsInt64(),
 				},
-			}, nil
+			}, t, nil
 		case apimetric.Float64NumberKind:
 			return &monitoringpb.TypedValue{
 				Value: &monitoringpb.TypedValue_DoubleValue{
 					DoubleValue: value.AsFloat64(),
 				},
-			}, nil
+			}, t, nil
 		case apimetric.Uint64NumberKind:
 			return &monitoringpb.TypedValue{
 				Value: &monitoringpb.TypedValue_Int64Value{
 					Int64Value: value.AsInt64(),
 				},
-			}, nil
+			}, t, nil
 		}
 	}
 
-	return nil, errUnsupportedAggregation{agg: agg}
+	return nil, nil, errUnsupportedAggregation{agg: agg}
 }
