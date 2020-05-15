@@ -80,8 +80,6 @@ type metricExporter struct {
 }
 
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
-// Only one Cloud Monitoring exporter should be created per ProjectID per process, any subsequent
-// invocations of NewExporter with the same ProjectID will return an error.
 func newMetricExporter(o *options) (*metricExporter, error) {
 	if strings.TrimSpace(o.ProjectID) == "" {
 		return nil, errBlankProjectID
