@@ -47,6 +47,19 @@ var (
 	errUnsupportedAggregation = errors.New("Currently the metric type is not supported")
 )
 
+// key is used to judge the uniqueness of the record descriptor.
+type key struct {
+	name        string
+	libraryname string
+}
+
+func keyOf(descriptor *apimetric.Descriptor) key {
+	return key{
+		name:        descriptor.Name(),
+		libraryname: descriptor.LibraryName(),
+	}
+}
+
 // metricExporter is the implementation of OpenTelemetry metric exporter for
 // Google Cloud Monitoring.
 type metricExporter struct {
@@ -54,7 +67,7 @@ type metricExporter struct {
 
 	// mdCache is the cache to hold MetricDescriptor to avoid creating duplicate MD.
 	// TODO: [ymotongpoo] this map should be goroutine safe with mutex.
-	mdCache map[string]*googlemetricpb.MetricDescriptor
+	mdCache map[key]*googlemetricpb.MetricDescriptor
 
 	client *monitoring.MetricClient
 }
@@ -122,15 +135,15 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resou
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registerd in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export.CheckpointSet) error {
-	mds := make(map[string]*googlemetricpb.MetricDescriptor)
+	mds := make(map[key]*googlemetricpb.MetricDescriptor)
 	aggError := cps.ForEach(func(r export.Record) error {
 		desc := r.Descriptor()
-		name := desc.Name()
+		key := keyOf(desc)
 
-		if _, ok := me.mdCache[name]; !ok {
-			if _, localok := mds[name]; !localok {
+		if _, ok := me.mdCache[key]; !ok {
+			if _, localok := mds[key]; !localok {
 				md := me.recordToMdpb(&r)
-				mds[name] = md
+				mds[key] = md
 			}
 		}
 		return nil
@@ -142,7 +155,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 		return nil
 	}
 
-	for _, md := range mds {
+	for key, md := range mds {
 		req := &monitoringpb.CreateMetricDescriptorRequest{
 			Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
 			MetricDescriptor: md,
@@ -151,7 +164,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 		if err != nil {
 			return err
 		}
-		me.mdCache[md.Name] = md
+		me.mdCache[key] = md
 	}
 	return nil
 }
@@ -159,17 +172,17 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 // exportTimeSeriees create TimeSeries from the records in cps.
 // res should be the common resource among all TimeSeries, such as instance id, application name and so on.
 func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Resource, cps export.CheckpointSet) error {
-	tsCache := make(map[string][]*monitoringpb.TimeSeries)
+	tsCache := make(map[key][]*monitoringpb.TimeSeries)
 
 	aggError := cps.ForEach(func(r export.Record) error {
 		desc := r.Descriptor()
-		name := desc.Name()
+		key := keyOf(desc)
 
 		ts, err := me.recordToTspb(&r, res)
 		if err != nil {
 			return err
 		}
-		tsCache[name] = append(tsCache[name], ts)
+		tsCache[key] = append(tsCache[key], ts)
 		return nil
 	})
 
@@ -302,8 +315,8 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 // recordToMpb converts data from records to Metric proto type for Cloud Monitoring.
 func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 	desc := r.Descriptor()
-	name := desc.Name()
-	md, ok := me.mdCache[name]
+	key := keyOf(desc)
+	md, ok := me.mdCache[key]
 	if !ok {
 		md = me.recordToMdpb(r)
 	}

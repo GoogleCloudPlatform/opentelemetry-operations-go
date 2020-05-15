@@ -27,10 +27,8 @@ import (
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/test"
-	"go.opentelemetry.io/otel/sdk/resource"
 
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
-	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 var (
@@ -88,10 +86,14 @@ func TestRecordToMpb(t *testing.T) {
 		Description: "test",
 	}
 
+	mdkey := key{
+		name:        md.Name,
+		libraryname: "",
+	}
 	me := &metricExporter{
 		o: &options{},
-		mdCache: map[string]*googlemetricpb.MetricDescriptor{
-			md.Name: md,
+		mdCache: map[key]*googlemetricpb.MetricDescriptor{
+			mdkey: md,
 		},
 	}
 
@@ -112,23 +114,5 @@ func TestRecordToMpb(t *testing.T) {
 	})
 	if aggError != nil {
 		t.Errorf("%v", aggError)
-	}
-}
-
-func TestResourceToMonitoredResourcepb(t *testing.T) {
-	in := resource.New(kv.String("a", "A"), kv.String("b", "B"))
-	me := &metricExporter{
-		o: &options{},
-	}
-	out := me.resourceToMonitoredResourcepb(in)
-	want := &monitoredrespb.MonitoredResource{
-		Type: "global",
-		Labels: map[string]string{
-			"a": "A",
-			"b": "B",
-		},
-	}
-	if !reflect.DeepEqual(out, want) {
-		t.Errorf("expected: %v, actual: %v", want, out)
 	}
 }
