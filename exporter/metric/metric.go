@@ -122,6 +122,7 @@ func NewExportPipeline(opts []Option, popts ...push.Option) (*push.Controller, e
 	integrator := integrator.New(selector, true)
 	period := exporter.metricExporter.o.ReportingInterval
 	pusher := push.New(integrator, exporter, period, popts...)
+	pusher.Start()
 	return pusher, nil
 }
 
