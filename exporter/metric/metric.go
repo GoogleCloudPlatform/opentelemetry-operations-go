@@ -102,8 +102,8 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 }
 
 // InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
-func InstallNewPipeline(popts ...push.Option) (*push.Controller, error) {
-	pusher, err := NewExportPipeline(popts...)
+func InstallNewPipeline(opts []Option, popts ...push.Option) (*push.Controller, error) {
+	pusher, err := NewExportPipeline(opts, popts...)
 	if err != nil {
 		return nil, err
 	}
@@ -113,9 +113,9 @@ func InstallNewPipeline(popts ...push.Option) (*push.Controller, error) {
 
 // NewExportPipeline sets up a complete export pipeline with the recommended setup,
 // chaining a NewRawExporter into the recommended selectors and integrators.
-func NewExportPipeline(popts ...push.Option) (*push.Controller, error) {
+func NewExportPipeline(opts []Option, popts ...push.Option) (*push.Controller, error) {
 	selector := simple.NewWithExactMeasure()
-	exporter, err := NewRawExporter()
+	exporter, err := NewRawExporter(opts...)
 	if err != nil {
 		return nil, err
 	}
