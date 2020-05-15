@@ -182,16 +182,14 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 // exportTimeSeriees create TimeSeries from the records in cps.
 // res should be the common resource among all TimeSeries, such as instance id, application name and so on.
 func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Resource, cps export.CheckpointSet) error {
-	tsCache := make(map[key][]*monitoringpb.TimeSeries)
+	tss := []*monitoringpb.TimeSeries{}
 
 	aggError := cps.ForEach(func(r export.Record) error {
-		key := keyOf(r.Descriptor())
-
 		ts, err := me.recordToTspb(&r, res)
 		if err != nil {
 			return err
 		}
-		tsCache[key] = append(tsCache[key], ts)
+		tss = append(tss, ts)
 		return nil
 	})
 
@@ -203,14 +201,9 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 		}
 	}
 
-	var flat []*monitoringpb.TimeSeries
-	for _, v := range tsCache {
-		flat = append(flat, v...)
-	}
-
 	req := &monitoringpb.CreateTimeSeriesRequest{
 		Name:       fmt.Sprintf("projects/%s", me.o.ProjectID),
-		TimeSeries: flat,
+		TimeSeries: tss,
 	}
 
 	return me.client.CreateTimeSeries(ctx, req)
