@@ -227,8 +227,13 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	}
 
 	p := &monitoringpb.Point{
-		Value:    tv,
-		Interval: t,
+		Value: tv,
+	}
+	// MetricKind in CUMULATIVE or DELTA requires Interval field
+	key := keyOf(r.Descriptor())
+	md := me.mdCache[key]
+	if md.MetricKind == googlemetricpb.MetricDescriptor_CUMULATIVE {
+		p.Interval = t
 	}
 
 	return &monitoringpb.TimeSeries{
@@ -269,11 +274,12 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 
 // resourceToMonitoredResourcepb converts resource in OTel to MonitoredResource
 // proto type for Cloud Monitoring.
-// NOTE:
+//
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
 func (me *metricExporter) resourceToMonitoredResourcepb(_ *resource.Resource) *monitoredrespb.MonitoredResource {
 	// TODO: Implement the process to convert Resource to MonitoringResoruce.
 	// ref. https://cloud.google.com/monitoring/api/resources
+	// This method only returns global resource for now.
 
 	// "global" only accepts "project_id" for label.
 	// https://cloud.google.com/monitoring/api/resources#tag_global
@@ -354,10 +360,27 @@ func recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue,
 	desc := r.Descriptor()
 	agg := r.Aggregator()
 	kind := desc.NumberKind()
+	now := time.Now().Unix()
 
-	// TODO: Ignoring the case for Min, Max, Count and Distribution to simply
+	// TODO: Ignoring the case for Min, Max and Distribution to simply
 	// the first implementation.
-	if lv, ok := agg.(aggregator.LastValue); ok {
+	if count, ok := agg.(aggregator.Count); ok {
+		value, err := count.Count()
+		if err != nil {
+			return nil, nil, err
+		}
+
+		t := &monitoringpb.TimeInterval{
+			StartTime: &googlepb.Timestamp{
+				Seconds: now,
+			},
+		}
+		return &monitoringpb.TypedValue{
+			Value: &monitoringpb.TypedValue_Int64Value{
+				Int64Value: value,
+			},
+		}, t, nil
+	} else if lv, ok := agg.(aggregator.LastValue); ok {
 		value, timestamp, err := lv.LastValue()
 		if err != nil {
 			return nil, nil, err
@@ -396,7 +419,6 @@ func recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue,
 		}
 
 		// TODO: Handle TimeInterval appropriately (#25)
-		now := time.Now().Unix()
 		t := &monitoringpb.TimeInterval{
 			StartTime: &googlepb.Timestamp{
 				Seconds: now,
