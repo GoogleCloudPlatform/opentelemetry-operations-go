@@ -51,11 +51,8 @@ type options struct {
 
 	// Context allows you to provide a custom context for API calls.
 	//
-	// This context will be used several times: first, to create Stackdriver
-	// trace and metric clients, and then every time a new batch of traces or
-	// stats needs to be uploaded.
-	//
-	// Do not set a timeout on this context. Instead, set the Timeout option.
+	// This context will be used several times: first, to create Cloud Monitoring
+	// clients, and then every time a new batch of metrics needs to be uploaded.
 	//
 	// If unset, context.Background() will be used.
 	Context context.Context
@@ -68,8 +65,11 @@ type options struct {
 	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
 	MetricDescriptorTypeFormatter func(*apimetric.Descriptor) string
 
-	// OnError is the hook to be called when there is an error uploading the metric data.
+	// onError is the hook to be called when there is an error uploading the metric data.
 	// If no custom hook is set, errors are logged. Optional.
+	//
+	// TODO: This option should be replaced with OTel defining error handler.
+	// c.f. https://pkg.go.dev/go.opentelemetry.io/otel@v0.5.0/sdk/metric/controller/push?tab=doc#Config
 	onError func(error)
 }
 
