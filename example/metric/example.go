@@ -25,14 +25,45 @@ import (
 
 	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	"go.opentelemetry.io/otel/sdk/resource"
 )
+
+type observedFloat struct {
+	mu sync.RWMutex
+	f  float64
+}
+
+func (of *observedFloat) set(v float64) {
+	of.mu.Lock()
+	defer of.mu.Unlock()
+	of.f = v
+}
+
+func (of *observedFloat) get() float64 {
+	of.mu.RLock()
+	defer of.mu.RUnlock()
+	return of.f
+}
+
+func newObservedFloat(v float64) *observedFloat {
+	return &observedFloat{
+		f: v,
+	}
+}
 
 func main() {
 	// Initialization. In order to pass the credentials to the exporter,
 	// prepare credential file following the instruction described in this doc.
 	// https://pkg.go.dev/golang.org/x/oauth2/google?tab=doc#FindDefaultCredentials
 	opts := []mexporter.Option{}
-	pusher, err := mexporter.InstallNewPipeline(opts)
+	resOpt := push.WithResource(
+		resource.New(
+			kv.String("instance_id", "abc123"),
+			kv.String("application", "example-app"),
+		),
+	)
+	pusher, err := mexporter.InstallNewPipeline(opts, resOpt)
 	if err != nil {
 		log.Fatalf("Failed to establish pipeline: %v", err)
 	}
@@ -42,48 +73,39 @@ func main() {
 	ctx := context.Background()
 	meter := pusher.Meter("cloudmonitoring/example")
 
-	timer := time.NewTicker(1 * time.Second)
-
 	// Register counter value
 	counter := metric.Must(meter).NewInt64Counter("counter-a")
-	labels := []kv.KeyValue{kv.Key("key").String("value")}
-	counter.Add(ctx, 100, labels...)
+	clabels := []kv.KeyValue{kv.Key("key").String("value")}
+	counter.Add(ctx, 100, clabels...)
 
 	// Register observer value
-	observerMu := new(sync.RWMutex)
-	observerV := new(float64)
-	observerL := &[]kv.KeyValue{}
-	callback := func(result metric.Float64ObserverResult) {
-		(*observerMu).RLock()
-		v := observerV
-		l := observerL
-		(*observerMu).RUnlock()
-		result.Observe(*v, *l...)
-	}
-
-	lables := []kv.KeyValue{
+	olabels := []kv.KeyValue{
 		kv.String("foo", "Tokyo"),
 		kv.String("bar", "Sushi"),
 	}
-	metric.Must(meter).RegisterFloat64Observer("observer-a", callback)
-	(*observerMu).Lock()
-	*observerV = 12.34
-	*observerL = lables
-	(*observerMu).Unlock()
+	of := newObservedFloat(12.34)
 
+	observerV := new(float64)
+	callback := func(result metric.Float64ObserverResult) {
+		v := of.get()
+		result.Observe(v, olabels...)
+	}
+
+	metric.Must(meter).RegisterFloat64Observer("observer-a", callback)
+	*observerV = of.get()
+
+	// Add measurement once an every 10 second.
+	timer := time.NewTicker(10 * time.Second)
 	for range timer.C {
 		rand.Seed(time.Now().UnixNano())
 
 		r := rand.Int63n(100)
 		cv := 100 + r
-		counter.Add(ctx, cv, labels...)
+		counter.Add(ctx, cv, clabels...)
 
 		r2 := rand.Int63n(10)
-		(*observerMu).Lock()
 		ov := 12.34 + float64(r2)/20.0
-		*observerV = ov
-		(*observerMu).Unlock()
-
+		of.set(ov)
 		log.Printf("Submitted data: counter %v, observer %v", cv, ov)
 	}
 }
