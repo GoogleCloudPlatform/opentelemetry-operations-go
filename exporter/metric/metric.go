@@ -171,6 +171,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 	// have many diffrent descriptors. In the cps.ForEach above, it should spawn
 	// goroutines to send CreateMetricDescriptorRequest asynchronously in the case
 	// the descriptor does not exist in global cache (me.mdCache).
+	// See details in #26.
 	for key, md := range mds {
 		req := &monitoringpb.CreateMetricDescriptorRequest{
 			Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
@@ -227,13 +228,8 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	}
 
 	p := &monitoringpb.Point{
-		Value: tv,
-	}
-	// MetricKind in CUMULATIVE or DELTA requires Interval field
-	key := keyOf(r.Descriptor())
-	md := me.mdCache[key]
-	if md.MetricKind == googlemetricpb.MetricDescriptor_CUMULATIVE {
-		p.Interval = t
+		Value:    tv,
+		Interval: t,
 	}
 
 	return &monitoringpb.TimeSeries{
@@ -374,12 +370,30 @@ func recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue,
 			StartTime: &googlepb.Timestamp{
 				Seconds: now,
 			},
-		}
-		return &monitoringpb.TypedValue{
-			Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: value,
+			EndTime: &googlepb.Timestamp{
+				Seconds: now,
 			},
-		}, t, nil
+		}
+		switch kind {
+		case apimetric.Int64NumberKind:
+			return &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_Int64Value{
+					Int64Value: value,
+				},
+			}, t, nil
+		case apimetric.Float64NumberKind:
+			return &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_DoubleValue{
+					DoubleValue: float64(value),
+				},
+			}, t, nil
+		case apimetric.Uint64NumberKind:
+			return &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_Int64Value{
+					Int64Value: value,
+				},
+			}, t, nil
+		}
 	} else if lv, ok := agg.(aggregator.LastValue); ok {
 		value, timestamp, err := lv.LastValue()
 		if err != nil {

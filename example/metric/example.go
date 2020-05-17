@@ -85,14 +85,12 @@ func main() {
 	}
 	of := newObservedFloat(12.34)
 
-	observerV := new(float64)
 	callback := func(result metric.Float64ObserverResult) {
 		v := of.get()
 		result.Observe(v, olabels...)
 	}
 
 	metric.Must(meter).RegisterFloat64Observer("observer-a", callback)
-	*observerV = of.get()
 
 	// Add measurement once an every 10 second.
 	timer := time.NewTicker(10 * time.Second)
