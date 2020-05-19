@@ -56,6 +56,14 @@ func (e errUnsupportedAggregation) Error() string {
 	return fmt.Sprintf("currently the aggregator is not supported: %v", e.agg)
 }
 
+type errUnexpectedNumberKind struct {
+	kind apimetric.NumberKind
+}
+
+func (e errUnexpectedNumberKind) Error() string {
+	return fmt.Sprintf("the metric kind is unexpected: %v", e.kind)
+}
+
 // key is used to judge the uniqueness of the record descriptor.
 type key struct {
 	name        string
@@ -171,6 +179,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 	// have many diffrent descriptors. In the cps.ForEach above, it should spawn
 	// goroutines to send CreateMetricDescriptorRequest asynchronously in the case
 	// the descriptor does not exist in global cache (me.mdCache).
+	// See details in #26.
 	for key, md := range mds {
 		req := &monitoringpb.CreateMetricDescriptorRequest{
 			Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
@@ -227,13 +236,8 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	}
 
 	p := &monitoringpb.Point{
-		Value: tv,
-	}
-	// MetricKind in CUMULATIVE or DELTA requires Interval field
-	key := keyOf(r.Descriptor())
-	md := me.mdCache[key]
-	if md.MetricKind == googlemetricpb.MetricDescriptor_CUMULATIVE {
-		p.Interval = t
+		Value:    tv,
+		Interval: t,
 	}
 
 	return &monitoringpb.TimeSeries{
@@ -357,98 +361,124 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries#Point
 // See detils in #25.
 func recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
-	desc := r.Descriptor()
 	agg := r.Aggregator()
-	kind := desc.NumberKind()
+	kind := r.Descriptor().NumberKind()
 	now := time.Now().Unix()
 
 	// TODO: Ignoring the case for Min, Max and Distribution to simply
 	// the first implementation.
 	if count, ok := agg.(aggregator.Count); ok {
-		value, err := count.Count()
-		if err != nil {
-			return nil, nil, err
-		}
+		return countToTypeValueAndTimestamp(count, kind, now)
+	} else if lv, ok := agg.(aggregator.LastValue); ok {
+		return lastValueToTypedValueAndTimestamp(lv, kind, now)
+	} else if sum, ok := agg.(aggregator.Sum); ok {
+		// TODO: Handle TimeInterval appropriately (#25)
+		return sumToTypedValueAndTimestamp(sum, kind, now, now+1)
+	}
+	return nil, nil, errUnsupportedAggregation{agg: agg}
+}
 
-		t := &monitoringpb.TimeInterval{
-			StartTime: &googlepb.Timestamp{
-				Seconds: now,
-			},
-		}
+func countToTypeValueAndTimestamp(count aggregator.Count, kind apimetric.NumberKind, seconds int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+	value, err := count.Count()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	// TODO: Consider the expression of TimeInterval (#25)
+	t := &monitoringpb.TimeInterval{
+		StartTime: &googlepb.Timestamp{
+			Seconds: seconds,
+		},
+		EndTime: &googlepb.Timestamp{
+			Seconds: seconds,
+		},
+	}
+	switch kind {
+	case apimetric.Int64NumberKind:
 		return &monitoringpb.TypedValue{
 			Value: &monitoringpb.TypedValue_Int64Value{
 				Int64Value: value,
 			},
 		}, t, nil
-	} else if lv, ok := agg.(aggregator.LastValue); ok {
-		value, timestamp, err := lv.LastValue()
-		if err != nil {
-			return nil, nil, err
-		}
-
-		t := &monitoringpb.TimeInterval{
-			StartTime: &googlepb.Timestamp{
-				Seconds: timestamp.Unix(),
+	case apimetric.Float64NumberKind:
+		return &monitoringpb.TypedValue{
+			Value: &monitoringpb.TypedValue_DoubleValue{
+				DoubleValue: float64(value),
 			},
-		}
-
-		switch kind {
-		case apimetric.Int64NumberKind:
-			return &monitoringpb.TypedValue{
-				Value: &monitoringpb.TypedValue_Int64Value{
-					Int64Value: value.AsInt64(),
-				},
-			}, t, nil
-		case apimetric.Float64NumberKind:
-			return &monitoringpb.TypedValue{
-				Value: &monitoringpb.TypedValue_DoubleValue{
-					DoubleValue: value.AsFloat64(),
-				},
-			}, t, nil
-		case apimetric.Uint64NumberKind:
-			return &monitoringpb.TypedValue{
-				Value: &monitoringpb.TypedValue_Int64Value{
-					Int64Value: value.AsInt64(),
-				},
-			}, t, nil
-		}
-	} else if sum, ok := agg.(aggregator.Sum); ok {
-		value, err := sum.Sum()
-		if err != nil {
-			return nil, nil, err
-		}
-
-		// TODO: Handle TimeInterval appropriately (#25)
-		t := &monitoringpb.TimeInterval{
-			StartTime: &googlepb.Timestamp{
-				Seconds: now,
+		}, t, nil
+	case apimetric.Uint64NumberKind:
+		return &monitoringpb.TypedValue{
+			Value: &monitoringpb.TypedValue_Int64Value{
+				Int64Value: value,
 			},
-			EndTime: &googlepb.Timestamp{
-				Seconds: now + 1,
-			},
-		}
+		}, t, nil
+	}
+	return nil, nil, errUnexpectedNumberKind{kind: kind}
+}
 
-		switch kind {
-		case apimetric.Int64NumberKind:
-			return &monitoringpb.TypedValue{
-				Value: &monitoringpb.TypedValue_Int64Value{
-					Int64Value: value.AsInt64(),
-				},
-			}, t, nil
-		case apimetric.Float64NumberKind:
-			return &monitoringpb.TypedValue{
-				Value: &monitoringpb.TypedValue_DoubleValue{
-					DoubleValue: value.AsFloat64(),
-				},
-			}, t, nil
-		case apimetric.Uint64NumberKind:
-			return &monitoringpb.TypedValue{
-				Value: &monitoringpb.TypedValue_Int64Value{
-					Int64Value: value.AsInt64(),
-				},
-			}, t, nil
-		}
+func lastValueToTypedValueAndTimestamp(lv aggregator.LastValue, kind apimetric.NumberKind, start int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+	value, timestamp, err := lv.LastValue()
+	if err != nil {
+		return nil, nil, err
 	}
 
-	return nil, nil, errUnsupportedAggregation{agg: agg}
+	// TODO: Consider the expression of TimeInterval (#25)
+	t := &monitoringpb.TimeInterval{
+		StartTime: &googlepb.Timestamp{
+			Seconds: timestamp.Unix(),
+		},
+	}
+
+	tv, err := aggToTypedValue(kind, value)
+	if err != nil {
+		return nil, nil, err
+	}
+	return tv, t, nil
+}
+
+func sumToTypedValueAndTimestamp(sum aggregator.Sum, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+	value, err := sum.Sum()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	t := &monitoringpb.TimeInterval{
+		StartTime: &googlepb.Timestamp{
+			Seconds: start,
+		},
+		EndTime: &googlepb.Timestamp{
+			Seconds: end,
+		},
+	}
+
+	tv, err := aggToTypedValue(kind, value)
+	if err != nil {
+		return nil, nil, err
+	}
+	return tv, t, err
+}
+
+func aggToTypedValue(kind apimetric.NumberKind, value apimetric.Number) (*monitoringpb.TypedValue, error) {
+	switch kind {
+	case apimetric.Int64NumberKind:
+		return &monitoringpb.TypedValue{
+			Value: &monitoringpb.TypedValue_Int64Value{
+				Int64Value: value.AsInt64(),
+			},
+		}, nil
+	case apimetric.Float64NumberKind:
+		return &monitoringpb.TypedValue{
+			Value: &monitoringpb.TypedValue_DoubleValue{
+				DoubleValue: value.AsFloat64(),
+			},
+		}, nil
+	// TODO: Confirm if using Int64Value is OK
+	case apimetric.Uint64NumberKind:
+		return &monitoringpb.TypedValue{
+			Value: &monitoringpb.TypedValue_Int64Value{
+				Int64Value: value.AsInt64(),
+			},
+		}, nil
+	}
+	return nil, errUnexpectedNumberKind{kind: kind}
 }
