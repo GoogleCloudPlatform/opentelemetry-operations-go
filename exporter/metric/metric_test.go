@@ -27,6 +27,7 @@ import (
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/test"
+	"go.opentelemetry.io/otel/sdk/resource"
 
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 )
@@ -50,8 +51,8 @@ func TestDescToMetricType(t *testing.T) {
 	}
 
 	inDesc := []apimetric.Descriptor{
-		apimetric.NewDescriptor("testing", apimetric.MeasureKind, apimetric.Float64NumberKind),
-		apimetric.NewDescriptor("test/of/path", apimetric.MeasureKind, apimetric.Float64NumberKind),
+		apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind),
+		apimetric.NewDescriptor("test/of/path", apimetric.ValueRecorderKind, apimetric.Float64NumberKind),
 	}
 
 	wants := []string{
@@ -68,10 +69,11 @@ func TestDescToMetricType(t *testing.T) {
 }
 
 func TestRecordToMpb(t *testing.T) {
-	cps := test.NewCheckpointSet()
+	res := &resource.Resource{}
+	cps := test.NewCheckpointSet(res)
 	ctx := context.Background()
 
-	desc := apimetric.NewDescriptor("testing", apimetric.MeasureKind, apimetric.Float64NumberKind)
+	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
 
 	lvagg := lastvalue.New()
 	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)

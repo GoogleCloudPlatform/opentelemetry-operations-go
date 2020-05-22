@@ -21,7 +21,6 @@ import (
 	"time"
 
 	export "go.opentelemetry.io/otel/sdk/export/metric"
-	"go.opentelemetry.io/otel/sdk/resource"
 	"golang.org/x/oauth2/google"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
@@ -81,6 +80,6 @@ func NewRawExporter(opts ...Option) (*Exporter, error) {
 }
 
 // Export exports the provide metric record to Google Cloud Monitoring.
-func (e *Exporter) Export(ctx context.Context, res *resource.Resource, cps export.CheckpointSet) error {
-	return e.metricExporter.ExportMetrics(ctx, res, cps)
+func (e *Exporter) Export(ctx context.Context, cps export.CheckpointSet) error {
+	return e.metricExporter.ExportMetrics(ctx, cps)
 }
