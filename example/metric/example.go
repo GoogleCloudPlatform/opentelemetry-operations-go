@@ -57,6 +57,11 @@ func main() {
 	// prepare credential file following the instruction described in this doc.
 	// https://pkg.go.dev/golang.org/x/oauth2/google?tab=doc#FindDefaultCredentials
 	opts := []mexporter.Option{}
+
+	// NOTE: In current implementation of exporter, this resource is ignored because
+	// the function to handle the common resource just ignore the passed resource and
+	// it returned hard coded "global" resource.
+	// This should be fixed in #29.
 	resOpt := push.WithResource(
 		resource.New(
 			kv.String("instance_id", "abc123"),

@@ -367,6 +367,23 @@ func recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue,
 
 	// TODO: Ignoring the case for Min, Max and Distribution to simply
 	// the first implementation.
+	//
+	// Currently the selector used in the integrator is `simple.NewWithExactDistribution`
+	// which should return array.New(), where it is ambiguous how the aggregator is treated inside.
+	// https://pkg.go.dev/go.opentelemetry.io/otel/sdk/metric/aggregator/array?tab=doc#New
+	//
+	// Now this function only returns count for Counter and Observer as it is set as 1st condition,
+	// and float64 type obersever is trimmed to int64, unfortunately.
+	// If we'd like to handle all possible aggregations, we need to have intermediate result type,
+	// and return the specified aggrataion value, which is done in stdout exporter.
+	// https://github.com/open-telemetry/opentelemetry-go/blob/21d094af43/exporters/metric/stdout/stdout.go#L72-L84
+	// https://github.com/open-telemetry/opentelemetry-go/blob/21d094af43/exporters/metric/stdout/stdout.go#L167-L221
+	//
+	// Views API should provide better interface that does not require the complicated codition handling
+	// done in this function.
+	// https://github.com/open-telemetry/opentelemetry-specification/issues/466
+	// In OpenCensus, view interface provided the bundle of name, measure, labels and aggregation in one place,
+	// and it should return the appropriate value based on the aggregation type specified there.
 	if count, ok := agg.(aggregator.Count); ok {
 		return countToTypeValueAndTimestamp(count, kind, now)
 	} else if lv, ok := agg.(aggregator.LastValue); ok {
