@@ -368,7 +368,7 @@ func recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue,
 	// TODO: Ignoring the case for Min, Max and Distribution to simply
 	// the first implementation.
 	//
-	// Currently the selector used in the integrator is `simple.NewWithExactMeasure`
+	// Currently the selector used in the integrator is `simple.NewWithExactDistribution`
 	// which should return array.New(), where it is ambiguous how the aggregator is treated inside.
 	// https://pkg.go.dev/go.opentelemetry.io/otel/sdk/metric/aggregator/array?tab=doc#New
 	//
