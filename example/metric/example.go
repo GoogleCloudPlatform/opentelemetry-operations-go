@@ -76,7 +76,7 @@ func main() {
 
 	// Start meter
 	ctx := context.Background()
-	meter := pusher.Meter("cloudmonitoring/example")
+	meter := pusher.Provider().Meter("cloudmonitoring/example")
 
 	// Register counter value
 	counter := metric.Must(meter).NewInt64Counter("counter-a")
@@ -90,12 +90,12 @@ func main() {
 	}
 	of := newObservedFloat(12.34)
 
-	callback := func(result metric.Float64ObserverResult) {
+	callback := func(_ context.Context, result metric.Float64ObserverResult) {
 		v := of.get()
 		result.Observe(v, olabels...)
 	}
 
-	metric.Must(meter).RegisterFloat64Observer("observer-a", callback)
+	metric.Must(meter).NewFloat64ValueObserver("observer-a", callback)
 
 	// Add measurement once an every 10 second.
 	timer := time.NewTicker(10 * time.Second)

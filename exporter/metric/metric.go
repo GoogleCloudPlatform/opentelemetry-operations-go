@@ -27,7 +27,6 @@ import (
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregator"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
-	integrator "go.opentelemetry.io/otel/sdk/metric/integrator/simple"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
 
@@ -120,32 +119,38 @@ func InstallNewPipeline(opts []Option, popts ...push.Option) (*push.Controller, 
 	if err != nil {
 		return nil, err
 	}
-	global.SetMeterProvider(pusher)
+	global.SetMeterProvider(pusher.Provider())
 	return pusher, err
 }
 
 // NewExportPipeline sets up a complete export pipeline with the recommended setup,
 // chaining a NewRawExporter into the recommended selectors and integrators.
 func NewExportPipeline(opts []Option, popts ...push.Option) (*push.Controller, error) {
-	selector := simple.NewWithExactMeasure()
+	selector := simple.NewWithExactDistribution()
 	exporter, err := NewRawExporter(opts...)
 	if err != nil {
 		return nil, err
 	}
-	integrator := integrator.New(selector, true)
 	period := exporter.metricExporter.o.ReportingInterval
-	pusher := push.New(integrator, exporter, period, popts...)
+	pusher := push.New(
+		selector,
+		exporter,
+		append([]push.Option{
+			push.WithStateful(true),
+			push.WithPeriod(period),
+		}, popts...)...,
+	)
 	pusher.Start()
 	return pusher, nil
 }
 
 // ExportMetrics exports OpenTelemetry Metrics to Google Cloud Monitoring.
-func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resource, cps export.CheckpointSet) error {
+func (me *metricExporter) ExportMetrics(ctx context.Context, cps export.CheckpointSet) error {
 	if err := me.exportMetricDescriptor(ctx, cps); err != nil {
 		return err
 	}
 
-	if err := me.exportTimeSeries(ctx, res, cps); err != nil {
+	if err := me.exportTimeSeries(ctx, cps); err != nil {
 		return err
 	}
 	return nil
@@ -196,8 +201,12 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 
 // exportTimeSeriees create TimeSeries from the records in cps.
 // res should be the common resource among all TimeSeries, such as instance id, application name and so on.
-func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Resource, cps export.CheckpointSet) error {
+func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.CheckpointSet) error {
 	tss := []*monitoringpb.TimeSeries{}
+
+	// TODO: [ymotongpoo] Check how resource registered via push.WithResource can be
+	// extracted from pusher.
+	res := &resource.Resource{}
 
 	aggError := cps.ForEach(func(r export.Record) error {
 		ts, err := me.recordToTspb(&r, res)
@@ -304,11 +313,12 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 
 	var kind googlemetricpb.MetricDescriptor_MetricKind
 	switch mkind {
-	case apimetric.CounterKind:
+	case apimetric.CounterKind, apimetric.UpDownCounterKind:
 		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
-	case apimetric.ObserverKind:
+	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
 		kind = googlemetricpb.MetricDescriptor_GAUGE
-	// TODO: Add support for MeasureKind.
+	// TODO: Add support for SumObserverKind and UpDownSumObserverKind.
+	// https://pkg.go.dev/go.opentelemetry.io/otel@v0.6.0/api/metric?tab=doc#Kind
 	default:
 		kind = googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
 	}
