@@ -17,9 +17,14 @@ package trace
 import (
 	"context"
 	"fmt"
+	"log"
+	"sync"
+	"time"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
+	"google.golang.org/api/support/bundler"
+	"github.com/golang/protobuf/proto"
 
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 )
@@ -29,10 +34,14 @@ import (
 type traceExporter struct {
 	o         *options
 	projectID string
+	bundler   *bundler.Bundler
 	// uploadFn defaults in uploadSpans; it can be replaced for tests.
 	uploadFn func(ctx context.Context, spans []*tracepb.Span)
+	overflowLogger
 	client   *traceclient.Client
 }
+
+const defaultBufferedByteLimit = 8 * 1024 * 1024
 
 func newTraceExporter(o *options) (*traceExporter, error) {
 	client, err := traceclient.NewClient(o.Context, o.TraceClientOptions...)
@@ -44,6 +53,35 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 		client:    client,
 		o:         o,
 	}
+	b := bundler.NewBundler((*contextAndSpans)(nil), func(bundle interface{}) {
+		ctxSpans := bundle.([]*contextAndSpans)
+		for _, cs := range ctxSpans {
+			e.uploadFn(cs.ctx, cs.spans)
+		}
+	})
+	if o.BundleDelayThreshold > 0 {
+		b.DelayThreshold = o.BundleDelayThreshold
+	} else {
+		b.DelayThreshold = 2 * time.Second
+	}
+	if o.BundleCountThreshold > 0 {
+		b.BundleCountThreshold = o.BundleCountThreshold
+	} else {
+		b.BundleCountThreshold = 50
+	}
+	if o.NumberOfWorkers > 0 {
+		b.HandlerLimit = o.NumberOfWorkers
+	}
+	// The measured "bytes" are not really bytes, see exportReceiver.
+	b.BundleByteThreshold = b.BundleCountThreshold * 200
+	b.BundleByteLimit = b.BundleCountThreshold * 1000
+	if o.TraceSpansBufferMaxBytes > 0 {
+		b.BufferedByteLimit = o.TraceSpansBufferMaxBytes
+	} else {
+		b.BufferedByteLimit = defaultBufferedByteLimit
+	}
+
+	e.bundler = b
 	e.uploadFn = e.uploadSpans
 	return e, nil
 }
@@ -51,16 +89,31 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 // ExportSpan exports a SpanData to Stackdriver Trace.
 func (e *traceExporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 	protoSpan := protoFromSpanData(sd, e.projectID)
-	e.uploadFn(ctx, []*tracepb.Span{protoSpan})
+	protoSize := proto.Size(protoSpan)
+	err := e.bundler.Add(&contextAndSpans{
+		ctx: ctx, 
+		spans: []*tracepb.Span{protoSpan},
+	}, protoSize)
+	switch err {
+	case nil:
+		return
+	case bundler.ErrOversizedItem:
+	case bundler.ErrOverflow:
+		e.overflowLogger.log()
+	default:
+		e.o.handleError(err)
+	}
 }
 
 // ExportSpans exports a slice of SpanData to Stackdriver Trace in batch
 func (e *traceExporter) ExportSpans(ctx context.Context, sds []*export.SpanData) {
 	pbSpans := make([]*tracepb.Span, len(sds))
+	var protoSize int = 0
 	for i, sd := range sds {
 		pbSpans[i] = protoFromSpanData(sd, e.projectID)
+		protoSize += proto.Size(pbSpans[i])
 	}
-	e.uploadFn(ctx, pbSpans)
+	e.bundler.Add(&contextAndSpans{ctx, pbSpans}, protoSize)
 }
 
 // uploadSpans sends a set of spans to Stackdriver.
@@ -90,5 +143,50 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 		// TODO(ymotongpoo): handle detailed error categories
 		// span.SetStatus(codes.Unknown)
 		e.o.handleError(err)
+	}
+}
+
+// contextAndSpan stores both a context and spans for use with a bundler.
+type contextAndSpans struct {
+	ctx context.Context
+	spans []*tracepb.Span
+}
+
+// overflowLogger ensures that at most one overflow error log message is
+// written every 5 seconds.
+type overflowLogger struct {
+	mu    sync.Mutex
+	pause bool
+	accum int
+}
+
+func (o *overflowLogger) delay() {
+	o.pause = true
+	time.AfterFunc(5*time.Second, func() {
+		o.mu.Lock()
+		defer o.mu.Unlock()
+		switch {
+		case o.accum == 0:
+			o.pause = false
+		case o.accum == 1:
+			log.Println("OpenCensus Stackdriver exporter: failed to upload span: buffer full")
+			o.accum = 0
+			o.delay()
+		default:
+			log.Printf("OpenCensus Stackdriver exporter: failed to upload %d spans: buffer full", o.accum)
+			o.accum = 0
+			o.delay()
+		}
+	})
+}
+
+func (o *overflowLogger) log() {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if !o.pause {
+		log.Println("OpenCensus Stackdriver exporter: failed to upload span: buffer full")
+		o.delay()
+	} else {
+		o.accum++
 	}
 }

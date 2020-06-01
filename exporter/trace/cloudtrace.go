@@ -69,11 +69,22 @@ type options struct {
 	// Optional.
 	TraceClientOptions []option.ClientOption
 
+	// BundleDelayThreshold determines the max amount of time
+	// the exporter can wait before uploading view data or trace spans to
+	// the backend.
+	// Optional.
+	BundleDelayThreshold time.Duration
+
+	// BundleCountThreshold determines how many view data events or trace spans
+	// can be buffered before batch uploading them to the backend.
+	// Optional.
+	BundleCountThreshold int
+
 	// TraceSpansBufferMaxBytes is the maximum size (in bytes) of spans that
 	// will be buffered in memory before being dropped.
 	//
 	// If unset, a default of 8MB will be used.
-	// TraceSpansBufferMaxBytes int
+	TraceSpansBufferMaxBytes int
 
 	// DefaultTraceAttributes will be appended to every span that is exported to
 	// Stackdriver Trace.
@@ -126,6 +137,30 @@ func WithProjectID(projectID string) func(o *options) {
 func WithOnError(onError func(err error)) func(o *options) {
 	return func(o *options) {
 		o.OnError = onError
+	}
+}
+
+// WithBundleDelayThreshold sets the max amount of time the exporter can wait before 
+// uploading trace spans to the backend.
+func WithBundleDelayThreshold(bundleDelayThreshold time.Duration) func(o *options) {
+	return func(o *options) {
+		o.BundleDelayThreshold = bundleDelayThreshold
+	}
+}
+
+// WithBundleCountThreshold sets how many trace spans can be buffered before batch
+// uploading them to the backend.
+func WithBundleCountThreshold(bundleCountThreshold int) func(o *options) {
+	return func(o *options) {
+		o.BundleCountThreshold = bundleCountThreshold
+	}
+}
+
+// WithTraceSpansBufferMaxBytes sets the maximum size (in bytes) of spans that will
+// be buffered in memory before being dropped
+func WithTraceSpansBufferMaxBytes(traceSpansBufferMaxBytes int) func(o *options) {
+	return func(o *options) {
+		o.TraceSpansBufferMaxBytes = traceSpansBufferMaxBytes
 	}
 }
 
