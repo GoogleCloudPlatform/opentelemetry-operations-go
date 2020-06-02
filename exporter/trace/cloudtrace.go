@@ -179,6 +179,14 @@ func WithContext(ctx context.Context) func(o *options) {
 	}
 }
 
+// WithNumberOfWorkers sets the number of go routines that send requests
+// to the Cloud Trace backend.
+func WithNumberOfWorkers(n int) func(o *options) {
+	return func(o *options) {
+		o.NumberOfWorkers = n
+	}
+}
+
 // WithTimeout sets the timeout for trace exporter and metric exporter
 func WithTimeout(t time.Duration) func(o *options) {
 	return func(o *options) {
