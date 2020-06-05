@@ -55,8 +55,13 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	}
 	b := bundler.NewBundler((*contextAndSpans)(nil), func(bundle interface{}) {
 		ctxSpans := bundle.([]*contextAndSpans)
+		ctxToSpansMap := make(map[context.Context][]*tracepb.Span)
+		// upload spans with same context in batch
 		for _, cs := range ctxSpans {
-			e.uploadFn(cs.ctx, cs.spans)
+			ctxToSpansMap[cs.ctx] = append(ctxToSpansMap[cs.ctx], cs.spans...)
+		}
+		for ctx, spans := range ctxToSpansMap {
+			e.uploadFn(ctx, spans)
 		}
 	})
 	if o.BundleDelayThreshold > 0 {
