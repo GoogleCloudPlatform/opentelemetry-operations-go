@@ -24,7 +24,7 @@ import (
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 )
 
-// traceExporter is an imeplementation of trace.Exporter and trace.BatchExporter
+// traceExporter is an implementation of trace.Exporter and trace.BatchExporter
 // that uploads spans to Stackdriver Trace in batch.
 type traceExporter struct {
 	o         *options
@@ -83,7 +83,7 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 	// 	"go.opentelemetry.io/otel/exporters/stackdriver.uploadSpans",
 	// )
 	// defer span.End()
-	// span.SetAttributes(key.New("num_spans").Int64(int64(len(spans))))
+	// span.SetAttributes(kv.Int64("num_spans", int64(len(spans))))
 
 	err := e.client.BatchWriteSpans(ctx, &req)
 	if err != nil {
