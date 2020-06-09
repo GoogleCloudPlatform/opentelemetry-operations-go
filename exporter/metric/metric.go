@@ -16,7 +16,6 @@ package metric
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 	"strings"
@@ -27,7 +26,6 @@ import (
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregator"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
-	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
@@ -39,29 +37,9 @@ import (
 )
 
 const (
-	version                                   = "0.1.0"
+	version                                   = "0.2.1"
 	cloudMonitoringMetricDescriptorNameFormat = "custom.googleapis.com/opentelemetry/%s"
 )
-
-var (
-	errBlankProjectID = errors.New("expecting a non-blank ProjectID")
-)
-
-type errUnsupportedAggregation struct {
-	agg export.Aggregator
-}
-
-func (e errUnsupportedAggregation) Error() string {
-	return fmt.Sprintf("currently the aggregator is not supported: %v", e.agg)
-}
-
-type errUnexpectedNumberKind struct {
-	kind apimetric.NumberKind
-}
-
-func (e errUnexpectedNumberKind) Error() string {
-	return fmt.Sprintf("the metric kind is unexpected: %v", e.kind)
-}
 
 // key is used to judge the uniqueness of the record descriptor.
 type key struct {
@@ -86,6 +64,10 @@ type metricExporter struct {
 	mdCache map[key]*googlemetricpb.MetricDescriptor
 
 	client *monitoring.MetricClient
+
+	// startTime is the cache of start time shared among all CUMULATIVE values.
+	// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
+	startTime time.Time
 }
 
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
@@ -106,9 +88,10 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 
 	cache := map[key]*googlemetricpb.MetricDescriptor{}
 	e := &metricExporter{
-		o:       o,
-		mdCache: cache,
-		client:  client,
+		o:         o,
+		mdCache:   cache,
+		client:    client,
+		startTime: time.Now(),
 	}
 	return e, nil
 }
@@ -126,7 +109,7 @@ func InstallNewPipeline(opts []Option, popts ...push.Option) (*push.Controller, 
 // NewExportPipeline sets up a complete export pipeline with the recommended setup,
 // chaining a NewRawExporter into the recommended selectors and integrators.
 func NewExportPipeline(opts []Option, popts ...push.Option) (*push.Controller, error) {
-	selector := simple.NewWithExactDistribution()
+	selector := NewWithCloudMonitoringDistribution()
 	exporter, err := NewRawExporter(opts...)
 	if err != nil {
 		return nil, err
@@ -239,7 +222,7 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	m := me.recordToMpb(r)
 	mr := me.resourceToMonitoredResourcepb(res)
 
-	tv, t, err := recordToTypedValueAndTimestamp(r)
+	tv, t, err := me.recordToTypedValueAndTimestamp(r)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +290,6 @@ func (me *metricExporter) resourceToMonitoredResourcepb(_ *resource.Resource) *m
 // recordToMdpbKindType return the mapping from OTel's record descriptor to
 // Cloud Monitoring's MetricKind and ValueType.
 func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_MetricKind, googlemetricpb.MetricDescriptor_ValueType) {
-	// TODO: [ymotongpoo] Remove tentative implementation
 	mkind := r.Descriptor().MetricKind()
 	nkind := r.Descriptor().NumberKind()
 
@@ -370,54 +352,54 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 // TODO: Apply appropriate TimeInterval based upon MetricKind. See details in the doc.
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries#Point
 // See detils in #25.
-func recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	agg := r.Aggregator()
-	kind := r.Descriptor().NumberKind()
+	nkind := r.Descriptor().NumberKind()
+	mkind := r.Descriptor().MetricKind()
 	now := time.Now().Unix()
 
 	// TODO: Ignoring the case for Min, Max and Distribution to simply
 	// the first implementation.
 	//
-	// Currently the selector used in the integrator is `simple.NewWithExactDistribution`
-	// which should return array.New(), where it is ambiguous how the aggregator is treated inside.
-	// https://pkg.go.dev/go.opentelemetry.io/otel/sdk/metric/aggregator/array?tab=doc#New
-	//
-	// Now this function only returns count for Counter and Observer as it is set as 1st condition,
-	// and float64 type obersever is trimmed to int64, unfortunately.
-	// If we'd like to handle all possible aggregations, we need to have intermediate result type,
-	// and return the specified aggrataion value, which is done in stdout exporter.
-	// https://github.com/open-telemetry/opentelemetry-go/blob/21d094af43/exporters/metric/stdout/stdout.go#L72-L84
-	// https://github.com/open-telemetry/opentelemetry-go/blob/21d094af43/exporters/metric/stdout/stdout.go#L167-L221
+	// NOTE: Currently the selector used in the integrator is our own implementation,
+	// because none of those in go.opentelemetry.io/otel/sdk/metric/selector/simple
+	// gives interfaces to fetch LastValue.
 	//
 	// Views API should provide better interface that does not require the complicated codition handling
 	// done in this function.
 	// https://github.com/open-telemetry/opentelemetry-specification/issues/466
 	// In OpenCensus, view interface provided the bundle of name, measure, labels and aggregation in one place,
 	// and it should return the appropriate value based on the aggregation type specified there.
-	if count, ok := agg.(aggregator.Count); ok {
-		return countToTypeValueAndTimestamp(count, kind, now)
-	} else if lv, ok := agg.(aggregator.LastValue); ok {
-		return lastValueToTypedValueAndTimestamp(lv, kind, now)
-	} else if sum, ok := agg.(aggregator.Sum); ok {
-		// TODO: Handle TimeInterval appropriately (#25)
-		return sumToTypedValueAndTimestamp(sum, kind, now, now+1)
+	switch mkind {
+	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
+		if lv, ok := agg.(aggregator.LastValue); ok {
+			return lastValueToTypedValueAndTimestamp(lv, nkind)
+		}
+		return nil, nil, errUnsupportedAggregation{agg: agg}
+	case apimetric.CounterKind, apimetric.UpDownCounterKind:
+		// CUMULATIVE measurement should have the same start time and increasing end time.
+		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
+		if sum, ok := agg.(aggregator.Sum); ok {
+			return sumToTypedValueAndTimestamp(sum, nkind, me.startTime.Unix(), now)
+		}
+		return nil, nil, errUnsupportedAggregation{agg: agg}
 	}
-	return nil, nil, errUnsupportedAggregation{agg: agg}
+
+	return nil, nil, errUnexpectedMetricKind{kind: mkind}
 }
 
-func countToTypeValueAndTimestamp(count aggregator.Count, kind apimetric.NumberKind, seconds int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func countToTypeValueAndTimestamp(count aggregator.Count, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, err := count.Count()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	// TODO: Consider the expression of TimeInterval (#25)
 	t := &monitoringpb.TimeInterval{
 		StartTime: &googlepb.Timestamp{
-			Seconds: seconds,
+			Seconds: start,
 		},
 		EndTime: &googlepb.Timestamp{
-			Seconds: seconds,
+			Seconds: end,
 		},
 	}
 	switch kind {
@@ -443,7 +425,7 @@ func countToTypeValueAndTimestamp(count aggregator.Count, kind apimetric.NumberK
 	return nil, nil, errUnexpectedNumberKind{kind: kind}
 }
 
-func lastValueToTypedValueAndTimestamp(lv aggregator.LastValue, kind apimetric.NumberKind, start int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func lastValueToTypedValueAndTimestamp(lv aggregator.LastValue, kind apimetric.NumberKind) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, timestamp, err := lv.LastValue()
 	if err != nil {
 		return nil, nil, err
@@ -452,6 +434,9 @@ func lastValueToTypedValueAndTimestamp(lv aggregator.LastValue, kind apimetric.N
 	// TODO: Consider the expression of TimeInterval (#25)
 	t := &monitoringpb.TimeInterval{
 		StartTime: &googlepb.Timestamp{
+			Seconds: timestamp.Unix(),
+		},
+		EndTime: &googlepb.Timestamp{
 			Seconds: timestamp.Unix(),
 		},
 	}
