@@ -41,6 +41,9 @@ const (
 	cloudMonitoringMetricDescriptorNameFormat = "custom.googleapis.com/opentelemetry/%s"
 )
 
+// TODO: Remove when Count aggregation is used in the implementation
+var _ = countToTypeValueAndTimestamp
+
 // key is used to judge the uniqueness of the record descriptor.
 type key struct {
 	name        string
