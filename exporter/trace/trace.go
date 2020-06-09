@@ -42,6 +42,10 @@ type traceExporter struct {
 }
 
 const defaultBufferedByteLimit = 8 * 1024 * 1024
+const defaultBundleDelayThreshold = 2 * time.Second
+const defaultBundleCountThreshold = 50
+const bundleByteThresholdMultiplier = 200
+const bundleByteLimitMultiplier = 1000
 
 func newTraceExporter(o *options) (*traceExporter, error) {
 	client, err := traceclient.NewClient(o.Context, o.TraceClientOptions...)
@@ -67,28 +71,41 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	if o.BundleDelayThreshold > 0 {
 		b.DelayThreshold = o.BundleDelayThreshold
 	} else {
-		b.DelayThreshold = 2 * time.Second
+		b.DelayThreshold = defaultBundleDelayThreshold
 	}
 	if o.BundleCountThreshold > 0 {
 		b.BundleCountThreshold = o.BundleCountThreshold
 	} else {
-		b.BundleCountThreshold = 50
+		b.BundleCountThreshold = defaultBundleCountThreshold
 	}
-	if o.NumberOfWorkers > 0 {
-		b.HandlerLimit = o.NumberOfWorkers
-	}
-	// The measured "bytes" are not really bytes, see exportReceiver.
-	b.BundleByteThreshold = b.BundleCountThreshold * 200
-	b.BundleByteLimit = b.BundleCountThreshold * 1000
+	b.BundleByteThreshold = b.BundleCountThreshold * bundleByteThresholdMultiplier
+	b.BundleByteLimit = b.BundleCountThreshold * bundleByteLimitMultiplier
 	if o.TraceSpansBufferMaxBytes > 0 {
 		b.BufferedByteLimit = o.TraceSpansBufferMaxBytes
 	} else {
 		b.BufferedByteLimit = defaultBufferedByteLimit
 	}
+	if o.MaxNumberOfWorkers > 0 {
+		b.HandlerLimit = o.MaxNumberOfWorkers
+	}
 
 	e.bundler = b
 	e.uploadFn = e.uploadSpans
 	return e, nil
+}
+
+
+func (e *traceExporter) checkBundlerError(err error) {
+	switch err {
+	case nil:
+		return
+	case bundler.ErrOversizedItem:
+		fallthrough
+	case bundler.ErrOverflow:
+		e.overflowLogger.log()
+	default:
+		e.o.handleError(err)
+	}
 }
 
 // ExportSpan exports a SpanData to Stackdriver Trace.
@@ -99,15 +116,7 @@ func (e *traceExporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 		ctx: ctx, 
 		spans: []*tracepb.Span{protoSpan},
 	}, protoSize)
-	switch err {
-	case nil:
-		return
-	case bundler.ErrOversizedItem:
-	case bundler.ErrOverflow:
-		e.overflowLogger.log()
-	default:
-		e.o.handleError(err)
-	}
+	e.checkBundlerError(err)
 }
 
 // ExportSpans exports a slice of SpanData to Stackdriver Trace in batch
@@ -118,7 +127,8 @@ func (e *traceExporter) ExportSpans(ctx context.Context, sds []*export.SpanData)
 		pbSpans[i] = protoFromSpanData(sd, e.projectID)
 		protoSize += proto.Size(pbSpans[i])
 	}
-	e.bundler.Add(&contextAndSpans{ctx, pbSpans}, protoSize)
+	err := e.bundler.Add(&contextAndSpans{ctx, pbSpans}, protoSize)
+	e.checkBundlerError(err)
 }
 
 // uploadSpans sends a set of spans to Stackdriver.

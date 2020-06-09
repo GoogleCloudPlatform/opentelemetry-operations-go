@@ -114,10 +114,9 @@ type options struct {
 	// If it is set to zero then default value is used.
 	ReportingInterval time.Duration
 
-	// NumberOfWorkers sets the number of go rountines that send requests
-	// to Stackdriver Monitoring. This is only used for Proto metrics export
-	// for now. The minimum number of workers is 1.
-	NumberOfWorkers int
+	// MaxNumberOfWorkers sets the maximum number of go rountines that send requests
+	// to Stackdriver Trace. The minimum number of workers is 1.
+	MaxNumberOfWorkers int
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -179,11 +178,11 @@ func WithContext(ctx context.Context) func(o *options) {
 	}
 }
 
-// WithNumberOfWorkers sets the number of go routines that send requests
+// WithMaxNumberOfWorkers sets the number of go routines that send requests
 // to the Cloud Trace backend.
-func WithNumberOfWorkers(n int) func(o *options) {
+func WithMaxNumberOfWorkers(n int) func(o *options) {
 	return func(o *options) {
-		o.NumberOfWorkers = n
+		o.MaxNumberOfWorkers = n
 	}
 }
 
