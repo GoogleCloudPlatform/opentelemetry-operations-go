@@ -379,7 +379,7 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 			return lastValueToTypedValueAndTimestamp(lv, nkind)
 		}
 		return nil, nil, errUnsupportedAggregation{agg: agg}
-	case apimetric.CounterKind, apimetric.UpDownCounterKind:
+	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
 		// CUMULATIVE measurement should have the same start time and increasing end time.
 		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
 		if sum, ok := agg.(aggregator.Sum); ok {

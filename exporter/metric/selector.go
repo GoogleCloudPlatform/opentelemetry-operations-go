@@ -15,7 +15,6 @@
 package metric
 
 import (
-	"go.opentelemetry.io/otel/api/metric"
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/array"
@@ -36,9 +35,11 @@ func NewWithCloudMonitoringDistribution() export.AggregationSelector {
 
 func (selectorCloudMonitoring) AggregatorFor(descriptor *apimetric.Descriptor) export.Aggregator {
 	switch descriptor.MetricKind() {
-	case metric.ValueObserverKind, metric.ValueRecorderKind:
+	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
 		return lastvalue.New()
-	case metric.CounterKind, metric.UpDownCounterKind:
+	// NOTE: `array` gives the option to use Sum, Count, Max, Min, Quantile and Points (most flexible),
+	// so chosen for future implementations rather than `sum`.
+	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
 		return array.New()
 	default:
 		return sum.New()
