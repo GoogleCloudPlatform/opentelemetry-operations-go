@@ -26,9 +26,16 @@ type selectorCloudMonitoring struct{}
 
 var _ export.AggregationSelector = selectorCloudMonitoring{}
 
-// NewWithCloudNewWithCloudMonitoringDistribution return a simple aggregation selector
+// NewWithCloudMonitoringDistribution return a simple aggregation selector
 // that uses lastvalue, counter, array, and aggregator for three kinds of metric.
-// NOTE: this selector is used to
+//
+// NOTE: this selector is just to ensure that LastValue is used for
+// ValueObserverKind and ValueRecorderKind.
+//
+// TODO: Remove this once SDK implements such a
+// selector, otherwise Views API gives flexibility to set aggregation type on
+// configuring measurement.
+// c.f. https://github.com/open-telemetry/oteps/pull/89
 func NewWithCloudMonitoringDistribution() export.AggregationSelector {
 	return selectorCloudMonitoring{}
 }

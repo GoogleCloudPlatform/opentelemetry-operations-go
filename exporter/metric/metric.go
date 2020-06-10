@@ -70,6 +70,7 @@ type metricExporter struct {
 
 	// startTime is the cache of start time shared among all CUMULATIVE values.
 	// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
+	//  TODO: Remove this when OTel SDK provides start time for each record specifically for stateful batcher.
 	startTime time.Time
 }
 
