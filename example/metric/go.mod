@@ -5,7 +5,7 @@ go 1.14
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric => ../../exporter/metric
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.2.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.2.1
 	github.com/google/go-cmp v0.4.1 // indirect
 	go.opentelemetry.io/otel v0.6.0
 	golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2 // indirect
