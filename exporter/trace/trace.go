@@ -44,7 +44,7 @@ type traceExporter struct {
 const defaultBufferedByteLimit = 8 * 1024 * 1024
 const defaultBundleDelayThreshold = 2 * time.Second
 const defaultBundleCountThreshold = 50
-const bundleByteThresholdMultiplier = 200
+const bundleByteThresholdMultiplier = 300
 const bundleByteLimitMultiplier = 1000
 
 func newTraceExporter(o *options) (*traceExporter, error) {
