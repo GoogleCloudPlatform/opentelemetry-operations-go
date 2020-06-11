@@ -8,6 +8,10 @@ OpenTelemetry Google Cloud Trace Exporter allow the user to send collected trace
 
 [Google Cloud Trace](https://cloud.google.com/trace) is a distributed tracing backend system. It helps developers to gather timing data needed to troubleshoot latency problemts in microservice architecture as well as monolithic architecture. It manages both the collection and lookup of gathered trace data.
 
-This exporter package assumes your application is [already instrumented](https://github.com/open-telemetry/opentelemetry-go/blob/master/example/http/client/client.go) with the OpenTelemetry SDK. Once you are ready to export OpenTelemetry data, you can add this exporter to your application. See [README.md](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/master/exporter/trace/README.go)
+This exporter package assumes your application is [already instrumented](https://github.com/open-telemetry/opentelemetry-go/blob/master/example/http/client/client.go) with the OpenTelemetry SDK. Once you are ready to export OpenTelemetry data, you can add this exporter to your application. See [README.md](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/master/exporter/trace/README.go) for setup and usage information.
 
 ## OpenTelemetry Google Cloud Monitoring Exporter
+
+OpenTelemetry Google Cloud Monitoring Exporter allows the user to send collected metrics to Google Cloud Monitoring.
+
+See [README.md](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/master/exporter/metrics/README.go) for setup and usage information.

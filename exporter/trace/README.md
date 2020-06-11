@@ -63,3 +63,6 @@ The Google Cloud Trace exporter depends upon [`google.FindDefaultCredentials`](h
 * For more information on OpenTelemetry, visit: https://opentelemetry.io/
 * For more about OpenTelemetry Go, visit: https://github.com/open-telemetry/opentelemetry-go
 * Learn more about Google Cloud Trace at https://cloud.google.com/trace
+
+[license-url]: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/master/LICENSE
+[license-image]: https://img.shields.io/badge/license-Apache_2.0-green.svg?style=flat
