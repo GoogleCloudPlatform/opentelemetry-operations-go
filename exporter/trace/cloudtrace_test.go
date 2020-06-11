@@ -166,3 +166,49 @@ func TestExporter_Timeout(t *testing.T) {
 		t.Fatalf("err.Error() = %q; want %q", got, want)
 	}
 }
+
+func TestBundling(t *testing.T) {
+	ch := make(chan []*tracepb.Span)
+	uploadFn := func(ctx context.Context, spans []*tracepb.Span) {
+		ch <- spans
+	}
+	exporter, err := texporter.NewExporter(
+		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+		texporter.WithBundleDelayThreshold(time.Second / 10),
+		texporter.WithBundleCountThreshold(10),
+		texporter.WithUploadFunction(uploadFn),
+	)
+	assert.NoError(t, err) 
+
+	tp, err := sdktrace.NewProvider(
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSyncer(exporter))
+	assert.NoError(t, err)
+
+	global.SetTraceProvider(tp)
+
+	for i := 0; i < 35; i++ {
+		_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+		span.End()
+	}
+
+	// Read the first three bundles.
+	<-ch
+	<-ch
+	<-ch
+
+	// Test that the fourth bundle isn't sent early.
+	select {
+	case <-ch:
+		t.Errorf("bundle sent too early")
+	case <-time.After(time.Second / 20):
+		<-ch
+	}
+
+	// Test that there aren't extra bundles.
+	select {
+	case <-ch:
+		t.Errorf("too many bundles sent")
+	case <-time.After(time.Second / 5):
+	}
+}
