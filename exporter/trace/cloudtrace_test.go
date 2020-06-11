@@ -174,6 +174,7 @@ func TestBundling(t *testing.T) {
 	}
 	exporter, err := texporter.NewExporter(
 		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+		texporter.WithTraceClientOptions(clientOpt),
 		texporter.WithBundleDelayThreshold(time.Second / 10),
 		texporter.WithBundleCountThreshold(10),
 		texporter.WithUploadFunction(uploadFn),
