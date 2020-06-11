@@ -1,7 +1,7 @@
 # OpenTelemetry Google Cloud Trace Exporter
 
 [![Docs](https://godoc.org/github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace?status.svg)](https://pkg.go.dev/github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace)
-[![Apache License][license-image]][license-image]
+[![Apache License][license-image]][license-url]
 
 OpenTelemetry Google Cloud Trace Exporter allow the user to send collected traces and spans to Google Cloud.
 

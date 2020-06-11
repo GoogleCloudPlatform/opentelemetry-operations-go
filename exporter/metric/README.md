@@ -1,7 +1,7 @@
 # OpenTelemetry Google Cloud Monitoring Exporter
 
 [![Docs](https://godoc.org/github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric?status.svg)](https://pkg.go.dev/github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric)
-[![Apache License][license-image]][license-image]
+[![Apache License][license-image]][license-url]
 
 OpenTelemetry Google Cloud Monitoring Exporter allow the user to send collected metrics to Google Cloud.
 
