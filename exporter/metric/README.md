@@ -19,7 +19,7 @@ Add `github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric`
 import mexpoter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 ```
 
-Once you import the metric exporter package, then register the exporter to the application, and start sending metrics. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instruction in [Authentication](#Authentication).
+After you import the metric exporter package, then register the exporter to the application, and start sending metrics. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instructions in [Authentication](#Authentication).
 
 ```go
 
