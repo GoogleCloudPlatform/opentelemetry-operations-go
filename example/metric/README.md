@@ -38,7 +38,7 @@ Once you think you have sent sufficient data, then create a dashboard. If you ar
 
 When filling in the **Find resource type and metric box**, use the metric names "custom.googleapis.com/opentelemetry/counter-a" and "custom.googleapis.com/opentelemetry/observer-a".
 
-If you already know how to use Cloud Monitoring and would just like to confirm the data is properly received, you can run the dashboard creation script bundled in this directly.
+If you already know how to use Cloud Monitoring and would just like to confirm the data is properly received, you can run the dashboard creation script bundled in this directory.
 
 ```
 $ ./create_dashboard.sh
