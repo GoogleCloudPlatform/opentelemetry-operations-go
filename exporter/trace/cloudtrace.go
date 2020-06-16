@@ -73,19 +73,19 @@ type options struct {
 	// BundleDelayThreshold determines the max amount of time
 	// the exporter can wait before uploading view data or trace spans to
 	// the backend.
-	// Optional.
+	// Optional. Default value is 2 seconds.
 	BundleDelayThreshold time.Duration
 
 	// BundleCountThreshold determines how many view data events or trace spans
 	// can be buffered before batch uploading them to the backend.
-	// Optional.
+	// Optional. Default value is 50.
 	BundleCountThreshold int
 
-	// TraceSpansBufferMaxBytes is the maximum size (in bytes) of spans that
+	// BufferMaxBytes is the maximum size (in bytes) of spans that
 	// will be buffered in memory before being dropped.
 	//
 	// If unset, a default of 8MB will be used.
-	TraceSpansBufferMaxBytes int
+	BufferMaxBytes int
 
 	// DefaultTraceAttributes will be appended to every span that is exported to
 	// Stackdriver Trace.
@@ -116,7 +116,7 @@ type options struct {
 	ReportingInterval time.Duration
 
 	// MaxNumberOfWorkers sets the maximum number of go rountines that send requests
-	// to Stackdriver Trace. The minimum number of workers is 1.
+	// to Cloud Trace. The minimum number of workers is 1.
 	MaxNumberOfWorkers int
 
 	// UploadFunction is the function used to upload spans to Cloud Trace. Used for
@@ -161,11 +161,11 @@ func WithBundleCountThreshold(bundleCountThreshold int) func(o *options) {
 	}
 }
 
-// WithTraceSpansBufferMaxBytes sets the maximum size (in bytes) of spans that will
+// WithBufferMaxBytes sets the maximum size (in bytes) of spans that will
 // be buffered in memory before being dropped
-func WithTraceSpansBufferMaxBytes(traceSpansBufferMaxBytes int) func(o *options) {
+func WithBufferMaxBytes(bufferMaxBytes int) func(o *options) {
 	return func(o *options) {
-		o.TraceSpansBufferMaxBytes = traceSpansBufferMaxBytes
+		o.BufferMaxBytes = bufferMaxBytes
 	}
 }
 

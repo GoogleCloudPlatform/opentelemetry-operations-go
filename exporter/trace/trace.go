@@ -80,8 +80,8 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	}
 	b.BundleByteThreshold = b.BundleCountThreshold * bundleByteThresholdMultiplier
 	b.BundleByteLimit = b.BundleCountThreshold * bundleByteLimitMultiplier
-	if o.TraceSpansBufferMaxBytes > 0 {
-		b.BufferedByteLimit = o.TraceSpansBufferMaxBytes
+	if o.BufferMaxBytes > 0 {
+		b.BufferedByteLimit = o.BufferMaxBytes
 	} else {
 		b.BufferedByteLimit = defaultBufferedByteLimit
 	}
@@ -188,11 +188,11 @@ func (o *overflowLogger) delay() {
 		case o.accum == 0:
 			o.pause = false
 		case o.accum == 1:
-			log.Println("OpenCensus Stackdriver exporter: failed to upload span: buffer full")
+			log.Println("OpenTelemetry Cloud Trace exporter: failed to upload span: buffer full")
 			o.accum = 0
 			o.delay()
 		default:
-			log.Printf("OpenCensus Stackdriver exporter: failed to upload %d spans: buffer full", o.accum)
+			log.Printf("OpenTelemetry Cloud Trace exporter: failed to upload %d spans: buffer full", o.accum)
 			o.accum = 0
 			o.delay()
 		}
@@ -203,7 +203,7 @@ func (o *overflowLogger) log() {
 	o.mu.Lock()
 	defer o.mu.Unlock()
 	if !o.pause {
-		log.Println("OpenCensus Stackdriver exporter: failed to upload span: buffer full")
+		log.Println("OpenTelemetry Cloud Trace exporter: failed to upload span: buffer full")
 		o.delay()
 	} else {
 		o.accum++
