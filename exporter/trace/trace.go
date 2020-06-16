@@ -90,11 +90,7 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	}
 
 	e.bundler = b
-	if o.UploadFunction == nil {
-		e.uploadFn = e.uploadSpans
-	} else {
-		e.uploadFn = o.UploadFunction
-	}
+	e.uploadFn = e.uploadSpans
 	return e, nil
 }
 

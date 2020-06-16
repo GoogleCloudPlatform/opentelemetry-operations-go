@@ -24,7 +24,6 @@ import (
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
-	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 
 	"go.opentelemetry.io/otel/api/kv"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
@@ -118,11 +117,6 @@ type options struct {
 	// MaxNumberOfWorkers sets the maximum number of go rountines that send requests
 	// to Cloud Trace. The minimum number of workers is 1.
 	MaxNumberOfWorkers int
-
-	// UploadFunction is the function used to upload spans to Cloud Trace. Used for
-	// testing. Defaults to uploadSpans in trace.go.
-	// Optional.
-	UploadFunction func(ctx context.Context, spans []*tracepb.Span)
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -196,14 +190,6 @@ func WithMaxNumberOfWorkers(n int) func(o *options) {
 func WithTimeout(t time.Duration) func(o *options) {
 	return func(o *options) {
 		o.Timeout = t
-	}
-}
-
-// WithUploadFunction sets the function used to upload spans
-func WithUploadFunction(f func(ctx context.Context, 
-	spans []*tracepb.Span)) func(o *options) {
-	return func(o * options) {
-		o.UploadFunction = f
 	}
 }
 
