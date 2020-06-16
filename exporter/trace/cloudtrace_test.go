@@ -40,10 +40,15 @@ type mockTraceServer struct {
 	mu            sync.Mutex
 	spansUploaded []*tracepb.Span
 	delay         time.Duration
+	// onUpload is called every time BatchWriteSpans is called
+	onUpload      func(ctx context.Context, spans []*tracepb.Span)
 }
 
 func (s *mockTraceServer) BatchWriteSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
 	var err error
+	if s.onUpload != nil {
+		s.onUpload(ctx, req.Spans)
+	}
 	s.mu.Lock()
 	select {
 	case <-ctx.Done():
@@ -169,7 +174,7 @@ func TestExporter_Timeout(t *testing.T) {
 
 func TestBundling(t *testing.T) {
 	ch := make(chan []*tracepb.Span)
-	uploadFn := func(ctx context.Context, spans []*tracepb.Span) {
+	mockTrace.onUpload = func(ctx context.Context, spans []*tracepb.Span) {
 		ch <- spans
 	}
 	exporter, err := texporter.NewExporter(
@@ -177,7 +182,6 @@ func TestBundling(t *testing.T) {
 		texporter.WithTraceClientOptions(clientOpt),
 		texporter.WithBundleDelayThreshold(time.Second / 10),
 		texporter.WithBundleCountThreshold(10),
-		texporter.WithUploadFunction(uploadFn),
 	)
 	assert.NoError(t, err) 
 
@@ -218,7 +222,7 @@ func TestBundling(t *testing.T) {
 func TestBundling_ConcurrentExports(t *testing.T) {
 	var exportMap sync.Map // maintain a collection of the spans exported
 	wg := sync.WaitGroup{}
-	uploadFn := func(ctx context.Context, spans []*tracepb.Span) {
+	mockTrace.onUpload = func(ctx context.Context, spans []*tracepb.Span) {
 		for _, s := range spans {
 			exportMap.Store(s.SpanId, true)
 		}
@@ -239,7 +243,6 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 		texporter.WithBundleDelayThreshold(delay),
 		texporter.WithBundleCountThreshold(spansPerWorker),
 		texporter.WithMaxNumberOfWorkers(workers),
-		texporter.WithUploadFunction(uploadFn),
 	)
 	assert.NoError(t, err) 
 
