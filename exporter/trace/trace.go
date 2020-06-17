@@ -50,7 +50,7 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 
 // ExportSpan exports a SpanData to Stackdriver Trace.
 func (e *traceExporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
-	protoSpan := protoFromSpanData(sd, e.projectID)
+	protoSpan := protoFromSpanData(sd, e.projectID, e.o.DisplayNameFormatter)
 	e.uploadFn(ctx, []*tracepb.Span{protoSpan})
 }
 
@@ -58,7 +58,7 @@ func (e *traceExporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 func (e *traceExporter) ExportSpans(ctx context.Context, sds []*export.SpanData) {
 	pbSpans := make([]*tracepb.Span, len(sds))
 	for i, sd := range sds {
-		pbSpans[i] = protoFromSpanData(sd, e.projectID)
+		pbSpans[i] = protoFromSpanData(sd, e.projectID, e.o.DisplayNameFormatter)
 	}
 	e.uploadFn(ctx, pbSpans)
 }

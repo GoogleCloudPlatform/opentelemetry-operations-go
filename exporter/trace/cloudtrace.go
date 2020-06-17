@@ -32,6 +32,10 @@ import (
 // Option is function type that is passed to the exporter initialization function.
 type Option func(*options)
 
+// DisplayNameFormatter is is a function that produces the display name of a span
+// given its SpanData
+type DisplayNameFormatter func(*export.SpanData) string
+
 // options contains options for configuring the exporter.
 type options struct {
 	// ProjectID is the identifier of the Stackdriver
@@ -107,6 +111,11 @@ type options struct {
 	// to Stackdriver Monitoring. This is only used for Proto metrics export
 	// for now. The minimum number of workers is 1.
 	NumberOfWorkers int
+
+	// DisplayNameFormatter is a function that produces the display name of a span
+	// given its SpanData.
+	// Optional. Default format for SpanData s is "Span.{s.SpanKind}-{s.Name}"
+	DisplayNameFormatter
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -148,6 +157,14 @@ func WithContext(ctx context.Context) func(o *options) {
 func WithTimeout(t time.Duration) func(o *options) {
 	return func(o *options) {
 		o.Timeout = t
+	}
+}
+
+// WithDisplayNameFormatter sets the way span's display names will be 
+// generated from SpanData
+func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
+	return func(o *options) {
+		o.DisplayNameFormatter = f
 	}
 }
 

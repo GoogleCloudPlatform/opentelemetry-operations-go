@@ -60,7 +60,7 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; cloudtrace-exporter %s", opentelemetry.Version(), version)
 
-func protoFromSpanData(s *export.SpanData, projectID string) *tracepb.Span {
+func protoFromSpanData(s *export.SpanData, projectID string, format DisplayNameFormatter) *tracepb.Span {
 	if s == nil {
 		return nil
 	}
@@ -69,10 +69,14 @@ func protoFromSpanData(s *export.SpanData, projectID string) *tracepb.Span {
 	spanIDString := s.SpanContext.SpanID.String()
 
 	name := s.Name
-	switch s.SpanKind {
-	// TODO(ymotongpoo): add cases for "Send" and "Recv".
-	default:
-		name = fmt.Sprintf("Span.%s-%s", s.SpanKind, name)
+	if format == nil {
+		switch s.SpanKind {
+		// TODO(ymotongpoo): add cases for "Send" and "Recv".
+		default:
+			name = fmt.Sprintf("Span.%s-%s", s.SpanKind, name)
+		}
+	} else {
+		name = format(s)
 	}
 
 	sp := &tracepb.Span{
