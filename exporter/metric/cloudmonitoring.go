@@ -50,16 +50,18 @@ type Exporter struct {
 func NewRawExporter(opts ...Option) (*Exporter, error) {
 	o := options{Context: context.Background()}
 	for _, opt := range opts {
+		fmt.Errorf("opt %v", opt)
 		opt(&o)
 	}
+
 
 	if o.ProjectID == "" {
 		creds, err := google.FindDefaultCredentials(o.Context, monitoring.DefaultAuthScopes()...)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to find Google Cloud credentials: %v", err)
+			return nil, fmt.Errorf("123Failed to find Google Cloud credentials: %v", err)
 		}
 		if creds.ProjectID == "" {
-			return nil, errors.New("Google Cloud Monitoring: no project found with application default credentials")
+			return nil, errors.New("123Google Cloud Monitoring: no project found with application default credentials")
 		}
 		o.ProjectID = creds.ProjectID
 	}
