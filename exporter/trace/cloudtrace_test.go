@@ -33,6 +33,7 @@ import (
 
 	"go.opentelemetry.io/otel/api/global"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	export "go.opentelemetry.io/otel/sdk/export/trace"
 )
 
 type mockTraceServer struct {
@@ -120,6 +121,45 @@ func TestExporter_ExportSpans(t *testing.T) {
 	// wait exporter to flush
 	time.Sleep(20 * time.Millisecond)
 	assert.EqualValues(t, 1, mockTrace.len())
+}
+
+func TestExporter_DisplayNameFormatter(t *testing.T) {
+	// Initial test precondition
+	mockTrace.spansUploaded = nil
+	mockTrace.delay = 0
+	
+	spanName := "span1234"
+	format := func(s *export.SpanData) string {
+		return "TEST_FORMAT" + s.Name
+	}
+
+	// Create Google Cloud Trace Exporter
+	exp, err := texporter.NewExporter(
+		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+		texporter.WithTraceClientOptions(clientOpt),
+		// uncomment when exporter is using bundler
+		// texporter.WithBundleCountThreshold(1),
+		texporter.WithDisplayNameFormatter(format),
+	)
+	assert.NoError(t, err)
+
+	tp, err := sdktrace.NewProvider(
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithBatcher(exp, // add following two options to ensure flush
+			sdktrace.WithScheduleDelayMillis(1),
+			sdktrace.WithMaxExportBatchSize(1),
+		))
+	assert.NoError(t, err)
+
+	global.SetTraceProvider(tp)
+	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), spanName)
+	span.End()
+	assert.True(t, span.SpanContext().IsValid())
+
+	// wait exporter to flush
+	time.Sleep(20 * time.Millisecond)
+	assert.EqualValues(t, 1, mockTrace.len())
+	assert.EqualValues(t, "TEST_FORMAT" + spanName, mockTrace.spansUploaded[0].DisplayName.Value)
 }
 
 func TestExporter_Timeout(t *testing.T) {
