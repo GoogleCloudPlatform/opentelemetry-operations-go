@@ -173,10 +173,15 @@ func TestExporter_Timeout(t *testing.T) {
 }
 
 func TestBundling(t *testing.T) {
+	mockTrace.mu.Lock()
+	mockTrace.spansUploaded = nil
+	mockTrace.delay = 0
 	ch := make(chan []*tracepb.Span)
 	mockTrace.onUpload = func(ctx context.Context, spans []*tracepb.Span) {
 		ch <- spans
 	}
+	mockTrace.mu.Unlock()
+
 	exporter, err := texporter.NewExporter(
 		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
 		texporter.WithTraceClientOptions(clientOpt),
@@ -220,6 +225,9 @@ func TestBundling(t *testing.T) {
 
 
 func TestBundling_ConcurrentExports(t *testing.T) {
+	mockTrace.mu.Lock()
+	mockTrace.spansUploaded = nil
+	mockTrace.delay = 0
 	var exportMap sync.Map // maintain a collection of the spans exported
 	wg := sync.WaitGroup{}
 	mockTrace.onUpload = func(ctx context.Context, spans []*tracepb.Span) {
@@ -233,6 +241,7 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 		// released by one goroutine completing before the other.
 		wg.Wait()
 	}
+	mockTrace.mu.Unlock()
 
 	workers := 3
 	spansPerWorker := 50
