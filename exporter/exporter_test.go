@@ -1,4 +1,4 @@
-package  exporter//_test 
+package  exporter
 
 
 import (
@@ -21,7 +21,6 @@ import (
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	exporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter"
 )
 
 
@@ -88,8 +87,8 @@ func TestExporter_ExportSpan(t *testing.T) {
 	mockTrace.delay = 0
 
 	// Create Google Cloud Trace Exporter
-	exp, err := exporter.NewExporter(
-		exporter.Options{
+	exp, err := NewExporter(
+		Options{
 			ProjectID: "PROJECT_ID_NOT_REAL",		
 			TraceClientOptions: clientOpt,
 		},
