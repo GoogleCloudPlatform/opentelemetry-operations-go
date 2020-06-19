@@ -1,12 +1,10 @@
-package main//exporter
+package exporter
 import (
 	"context"
 	"time"
-	"fmt"
 
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	texport "go.opentelemetry.io/otel/sdk/export/trace"	
-	mexport "go.opentelemetry.io/otel/sdk/export/metric"
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	cloudmonitoring "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
@@ -108,39 +106,23 @@ type Exporter struct {
 // NewExporter creates a new Exporter that implements both trace.Exporter
 // and metric.Exporter
 func NewExporter(o Options) (*Exporter, error) {
+
 	te, err := cloudtrace.NewExporter(cloudtrace.WithProjectID(o.ProjectID), cloudtrace.WithContext(o.Context),
-            cloudtrace.WithTraceClientOptions(o.TraceClientOptions), cloudtrace.WithTimeout(o.Timeout), 
-	        cloudtrace.WithOnError(o.OnError),
-	) //TODO: How to set other fields since the current package is outside trace package?
-
-	// te, err := cloudtrace.NewExporter(cloudtrace.WithProjectID(o.ProjectID),
-	//     cloudtrace.WithTraceClientOptions(o.TraceClientOptions),
-	// )
+		cloudtrace.WithTraceClientOptions(o.TraceClientOptions), cloudtrace.WithTimeout(o.Timeout), 
+		cloudtrace.WithOnError(o.OnError),
+	)
 	if err != nil {
 		return nil, err
 	}
-
-	// me, err := cloudmonitoring.NewRawExporter(cloudmonitoring.WithProjectID(o.ProjectID), cloudmonitoring.WithOnError(o.OnError),
-    //     cloudmonitoring.WithMonitoringClientOptions(o.MonitoringClientOptions), cloudmonitoring.WithInterval(o.Timeout),
-	// 	cloudmonitoring.WithMetricDescriptorTypeFormatter(o.MetricDescriptorTypeFormatter),
-	// )
 	
-	me, err := cloudmonitoring.NewRawExporter(cloudmonitoring.WithProjectID(o.ProjectID),)
-	fmt.Println(me, err)
-	
-
-	if err != nil {
-		return nil, err
-	}
-
 	return &Exporter{
 		traceExporter: te,
-		metricExporter: me,
 	}, nil
 }
 
 // readMonitoredResourcesFromMetricsExporter obtains Monitored Resources labels from metrics exporter
 func readMonitoredResourcesFromMetricsExporter() (resType string, labels map[string]string) {
+	//TODO: read the resources from metric. Now the autodetect is for mockup
 	return monitoredresource.Autodetect().MonitoredResource()
 }
 
@@ -174,19 +156,7 @@ func (e *Exporter) ExportSpans(ctx context.Context, sds []*texport.SpanData) {
 	e.traceExporter.ExportSpans(ctx, sds)
 }
 
-// ExportMetrics exports the provide metric record to Google Cloud Monitoring.
-func (e *Exporter) ExportMetrics(ctx context.Context, cps mexport.CheckpointSet) error {
-	return e.metricExporter.Export(ctx, cps)
-}
-
 // GetTraceExporter returns the traceExporter
 func (e *Exporter) GetTraceExporter() *cloudtrace.Exporter {
 	return e.traceExporter;
-}
-
-
-func main() {
-	exporter, err := NewExporter(Options{ProjectID: "123"})
-	fmt.Println(exporter, err)
-
 }

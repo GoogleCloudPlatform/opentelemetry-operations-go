@@ -1,4 +1,4 @@
-package  exporter_test 
+package  exporter//_test 
 
 
 import (
@@ -11,17 +11,16 @@ import (
 	"os"
 	"time"
 
-
-
 	"google.golang.org/grpc"
 	"google.golang.org/api/option"
+	"go.opentelemetry.io/otel/api/kv"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/api/global"
 	
+	texport "go.opentelemetry.io/otel/sdk/export/trace"	
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	//texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	exporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter"
 )
 
@@ -116,5 +115,17 @@ func TestExporter_ExportSpan(t *testing.T) {
 }
 
 func TestExporter_injectLabelsIntoSpan(t *testing.T) {
-	
+	sd := &texport.SpanData{Attributes: []kv.KeyValue{
+		kv.Key("key1").String("val1"),
+		kv.Key("key2").String("val2"),
+	}}
+	assert.EqualValues(t, 2, len(sd.Attributes))
+
+	sd = injectLabelsIntoSpan(sd, map[string]string{}) // empty
+	assert.EqualValues(t, 2, len(sd.Attributes))
+
+	sd = injectLabelsIntoSpan(sd, map[string]string{
+		"key3": "val3",                                // new key
+	})	
+	assert.EqualValues(t, 3, len(sd.Attributes))
 }
