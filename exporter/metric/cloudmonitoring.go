@@ -50,10 +50,8 @@ type Exporter struct {
 func NewRawExporter(opts ...Option) (*Exporter, error) {
 	o := options{Context: context.Background()}
 	for _, opt := range opts {
-		fmt.Errorf("opt %v", opt)
 		opt(&o)
 	}
-
 
 	if o.ProjectID == "" {
 		creds, err := google.FindDefaultCredentials(o.Context, monitoring.DefaultAuthScopes()...)
