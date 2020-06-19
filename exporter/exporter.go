@@ -111,7 +111,7 @@ func NewExporter(o Options) (*Exporter, error) {
 	)
 	if err != nil {
 		return nil, err
-	}
+	} 
 	
 	return &Exporter{
 		traceExporter: te,
