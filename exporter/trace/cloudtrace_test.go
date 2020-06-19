@@ -107,7 +107,7 @@ func TestExporter_ExportSpans(t *testing.T) {
 	tp, err := sdktrace.NewProvider(
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 		sdktrace.WithBatcher(exp, // add following two options to ensure flush
-			sdktrace.WithScheduleDelayMillis(1),
+			sdktrace.WithBatchTimeout(1),
 			sdktrace.WithMaxExportBatchSize(1),
 		))
 	assert.NoError(t, err)
