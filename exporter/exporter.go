@@ -6,7 +6,6 @@ import (
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	texport "go.opentelemetry.io/otel/sdk/export/trace"	
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-	cloudmonitoring "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
 	"google.golang.org/api/option"
 	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
@@ -99,7 +98,6 @@ type Options struct {
 // Exporter is a trace and metric exporter
 type Exporter struct {
 	traceExporter *cloudtrace.Exporter
-	metricExporter *cloudmonitoring.Exporter
 }
 
 
