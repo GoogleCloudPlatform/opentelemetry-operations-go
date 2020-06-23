@@ -20,7 +20,7 @@ import (
 	"log"
 	"strings"
 	"time"
-	"reflect"
+	"go.opentelemetry.io/otel/api/kv"
 
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
