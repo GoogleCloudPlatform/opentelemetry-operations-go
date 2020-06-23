@@ -331,7 +331,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 
 	fmt.Println("*****res list", resLabelList)
 	// resLabelMap := make(map[string]string)
-	for label := range resLabelList {
+	for _, label := range resLabelList {
 		fmt.Println(label, reflect.TypeOf(label))
 		// resLabelMap[label.Key] = string(label.Value) 
 	}
