@@ -259,6 +259,10 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 	unit := record.Descriptor().Unit()
 	kind, typ := recordToMdpbKindType(record)
 
+	fmt.Println("recordToMdpb:")
+	fmt.Println("labels", record.Labels())
+	fmt.Println("resources", record.Resource())
+
 	// Detailed explanations on MetricDescriptor proto is not documented on
 	// generated Go packages. Refer to the original proto file.
 	// https://github.com/googleapis/googleapis/blob/50af053/google/api/metric.proto#L33
@@ -344,7 +348,7 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 	}
 
 	fmt.Println("recordToMpb:")
-	fmt.Println("labels", labels)
+	fmt.Println("metrics labels", labels)
 
 	return &googlemetricpb.Metric{
 		Type:   md.Type,
