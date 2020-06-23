@@ -224,6 +224,13 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.Check
 // ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
 func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource) (*monitoringpb.TimeSeries, error) {
 	m := me.recordToMpb(r)
+
+
+	fmt.Println("recordToTspb:")
+	fmt.Println("param res", res)
+	fmt.Println("record res", r.Resource())
+
+
 	mr := me.resourceToMonitoredResourcepb(res)
 
 	tv, t, err := me.recordToTypedValueAndTimestamp(r)
