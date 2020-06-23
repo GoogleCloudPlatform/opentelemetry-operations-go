@@ -267,12 +267,6 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.Check
 func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource) (*monitoringpb.TimeSeries, error) {
 	m := me.recordToMpb(r)
 
-
-	fmt.Println("recordToTspb:")
-	fmt.Println("param res", res)
-	fmt.Println("record res", r.Resource())
-
-
 	mr := me.resourceToMonitoredResourcepb(r.Resource())
 
 	tv, t, err := me.recordToTypedValueAndTimestamp(r)
@@ -307,10 +301,6 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 	name := desc.Name()
 	unit := record.Descriptor().Unit()
 	kind, typ := recordToMdpbKindType(record)
-
-	fmt.Println("recordToMdpb:")
-	fmt.Println("labels", record.Labels())
-	fmt.Println("resources", record.Resource())
 
 	// Detailed explanations on MetricDescriptor proto is not documented on
 	// generated Go packages. Refer to the original proto file.
@@ -454,9 +444,6 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 		kv := iter.Label()
 		labels[string(kv.Key)] = kv.Value.AsString()
 	}
-
-	fmt.Println("recordToMpb:")
-	fmt.Println("metrics labels", labels)
 
 	return &googlemetricpb.Metric{
 		Type:   md.Type,
