@@ -21,8 +21,6 @@ import (
 	"strings"
 	"time"
 
-//	"reflect"
-
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
@@ -110,7 +108,6 @@ var k8sContainerMap = map[string]string{
 
 // Generic task resource.
 var genericResourceMap = map[string]string{
-//	"project_id": stackdriverProjectID,
 	"location":   CloudKeyZone,
 	"namespace":  stackdriverGenericTaskNamespace,
 	"job":        stackdriverGenericTaskJob,
@@ -350,15 +347,9 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	// convert them into a map of kv.String
 	resLabelList := res.Attributes()
 
-//	fmt.Println("*****res list", resLabelList)
 	resLabelMap := make(map[string]string)
 	for _, label := range resLabelList {
-//		fmt.Println("kv type", reflect.TypeOf(label.Key), reflect.TypeOf(label.Value.AsString()))
 		resLabelMap[string(label.Key)] = label.Value.AsString()
-	}
-	fmt.Println("before mapping:---")
-	for a, b := range resLabelMap {
-		fmt.Println(a, b)
 	}
 
 	resTypeStr := "global"
@@ -370,25 +361,21 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 		case "k8s":
 			resTypeStr = "k8s_container"
 			match = k8sContainerMap
-
 		case "gce":
 			//TODO:
 		default:
 		}	
 
 		outputMap, isMissing := transformResource(match, resLabelMap)
-		if !isMissing {
+		if isMissing { // restoring type to "global"
+			resTypeStr = "global"
+		} else {
 			monitoredReslabelsMap = outputMap
 		}
 	}
 
 	monitoredReslabelsMap["project_id"] = me.o.ProjectID
 	
-	fmt.Println("after mapping:---")
-	for a, b := range monitoredReslabelsMap {
-		fmt.Println(a, b)
-	}
-
 	return &monitoredrespb.MonitoredResource{
 		Type: resTypeStr,
 		Labels: monitoredReslabelsMap,

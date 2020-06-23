@@ -118,3 +118,87 @@ func TestRecordToMpb(t *testing.T) {
 		t.Errorf("%v", aggError)
 	}
 }
+
+
+func TestResourceToMonitoredResourcepb(t *testing.T) {
+	resList := []*resource.Resource{
+	// correct k8s resources
+	resource.New(
+		kv.String("type", "k8s"),
+		kv.String("cloud.zone", "us-central1-a"),
+		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+		kv.String("k8s.namespace.name", "default"),
+		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+		kv.String("k8s.deployment.name", "opentelemetry"),		
+	), 
+	// nonexisting resource types
+	resource.New(
+		kv.String("type", "none"),
+		kv.String("cloud.zone", "us-central1-a"),
+		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+		kv.String("k8s.namespace.name", "default"),
+		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+		kv.String("k8s.deployment.name", "opentelemetry"),		
+	),
+	// missing resource fields
+	resource.New(
+		kv.String("type", "k8s"),
+		kv.String("cloud.zone", "us-central1-a"),
+		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+		kv.String("k8s.namespace.name", "default"),
+		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+	)}
+
+	expectedTypes := []string{"k8s_container","global", "global"}
+
+	expectedLabels := []map[string]string {
+		map[string]string{
+			"project_id":     "",
+			"location": "us-central1-a",
+			"cluster_name": "opentelemetry-cluster",
+			"namespace_name": "default",
+			"pod_name": "opentelemetry-pod-autoconf",
+			"container_name": "opentelemetry",
+		},
+		map[string]string{
+			"project_id":     "",
+		},
+		map[string]string{
+			"project_id":     "",
+		},
+	}
+
+	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
+
+
+	
+	md := &googlemetricpb.MetricDescriptor{
+		Name:        desc.Name(),
+		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
+		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
+		Description: "test",
+	}	
+
+	mdkey := key{
+		name:        md.Name,
+		libraryname: "",
+	}	
+
+	me := &metricExporter{
+		o: &options{},
+		mdCache: map[key]*googlemetricpb.MetricDescriptor{
+			mdkey: md,
+		},
+	}
+
+	for index := range resList {
+		outputMonitoredRes := me.resourceToMonitoredResourcepb(resList[index])
+		if !reflect.DeepEqual(outputMonitoredRes.GetLabels(), expectedLabels[index]) {
+			t.Errorf("expected: %v, actual: %v", expectedLabels[index], outputMonitoredRes.GetLabels())
+		}
+		if outputMonitoredRes.GetType() != expectedTypes[index] {
+			t.Errorf("expected: %v, actual: %v", expectedTypes[index], outputMonitoredRes.GetType())
+		}		
+	}
+}
