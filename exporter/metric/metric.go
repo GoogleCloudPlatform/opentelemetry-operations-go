@@ -329,17 +329,17 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	// convert them into a map of kv.String
 	resLabelList := res.Attributes()
 
-	fmt.Println("*****res list", resLabelList)
-	// resLabelMap := make(map[string]string)
+	//fmt.Println("*****res list", resLabelList)
+	resLabelMap := make(map[string]string)
 	for _, label := range resLabelList {
-		fmt.Println(label, reflect.TypeOf(label))
-		// resLabelMap[label.Key] = string(label.Value) 
+		// fmt.Println(label, reflect.TypeOf(label))
+		resLabelMap[label.Key] = string(label.Value) 
 	}
-	// fmt.Println("mapping:---")
+	fmt.Println("mapping:---")
 
-	// for a, b := range resLabelMap {
-	// 	fmt.Println(a, b)
-	// }
+	for a, b := range resLabelMap {
+		fmt.Println(a, b)
+	}
 
 
 
