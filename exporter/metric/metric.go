@@ -20,6 +20,7 @@ import (
 	"log"
 	"strings"
 	"time"
+	"reflect"
 
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
@@ -328,11 +329,12 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	// convert them into a map of kv.String
 	resLabelList := res.Attributes()
 
-	fmt.Println("res list", resLabelList)
+	fmt.Println("*****res list", resLabelList)
 	// resLabelMap := make(map[string]string)
-	// for label := range resLabelList {
-	// 	resLabelMap[label.Key] = string(label.Value) 
-	// }
+	for label := range resLabelList {
+		fmt.Println(reflect.TypeOf(label))
+		// resLabelMap[label.Key] = string(label.Value) 
+	}
 	// fmt.Println("mapping:---")
 
 	// for a, b := range resLabelMap {
