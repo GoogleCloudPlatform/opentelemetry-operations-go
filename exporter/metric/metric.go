@@ -20,9 +20,8 @@ import (
 	"log"
 	"strings"
 	"time"
-//	"go.opentelemetry.io/otel/api/kv"
 
-	"reflect"
+//	"reflect"
 
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
@@ -77,28 +76,48 @@ type metricExporter struct {
 	startTime time.Time
 }
 
+
+// TODO: put all constants into a separate file in the same package
+
 // Mappings for the well-known OpenCensus resource label keys
 // to applicable Stackdriver Monitored Resource label keys.
-var k8sContainerMap = map[string]string{
-	"project_id":     "",//stackdriverProjectID,
-	"location":       "cloud.zone",//resourcekeys.CloudKeyZone,
-	"cluster_name":   "k8s.cluster.name",//resourcekeys.K8SKeyClusterName,
-	"namespace_name": "k8s.namespace.name",//resourcekeys.K8SKeyNamespaceName,
-	"pod_name":       "k8s.pod.name",//resourcekeys.K8SKeyPodName,
-	"container_name": "k8s.deployment.name",//resourcekeys.ContainerKeyName,
-}
-
+// A uniquely identifying name for the Kubernetes cluster. Kubernetes
+// does not have cluster names as an internal concept so this may be
+// set to any meaningful value within the environment. For example,
+// GKE clusters have a name which can be used for this label.
 const (
-	K8SType = "k8s"
-	// A uniquely identifying name for the Kubernetes cluster. Kubernetes
-	// does not have cluster names as an internal concept so this may be
-	// set to any meaningful value within the environment. For example,
-	// GKE clusters have a name which can be used for this label.
+	CloudKeyZone         = "cloud.zone"
+
+	K8SType              = "k8s"
 	K8SKeyClusterName    = "k8s.cluster.name"
 	K8SKeyNamespaceName  = "k8s.namespace.name"
 	K8SKeyPodName        = "k8s.pod.name"
 	K8SKeyDeploymentName = "k8s.deployment.name"
+
+	stackdriverGenericTaskNamespace = "contrib.opencensus.io/exporter/stackdriver/generic_task/namespace"
+	stackdriverGenericTaskJob       = "contrib.opencensus.io/exporter/stackdriver/generic_task/job"
+	stackdriverGenericTaskID        = "contrib.opencensus.io/exporter/stackdriver/generic_task/task_id"
 )
+
+var k8sContainerMap = map[string]string{
+//	"project_id":     "",
+	"location":       CloudKeyZone,
+	"cluster_name":   K8SKeyClusterName,
+	"namespace_name": K8SKeyNamespaceName,
+	"pod_name":       K8SKeyPodName,
+	"container_name": K8SKeyDeploymentName,
+}
+
+// Generic task resource.
+var genericResourceMap = map[string]string{
+//	"project_id": stackdriverProjectID,
+	"location":   CloudKeyZone,
+	"namespace":  stackdriverGenericTaskNamespace,
+	"job":        stackdriverGenericTaskJob,
+	"task_id":    stackdriverGenericTaskID,
+}
+
+
 
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
 func newMetricExporter(o *options) (*metricExporter, error) {
@@ -331,40 +350,71 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	// convert them into a map of kv.String
 	resLabelList := res.Attributes()
 
-	fmt.Println("*****res list", resLabelList)
+//	fmt.Println("*****res list", resLabelList)
 	resLabelMap := make(map[string]string)
 	for _, label := range resLabelList {
-		fmt.Println("kv type", reflect.TypeOf(label.Key), reflect.TypeOf(label.Value.AsString()))
+//		fmt.Println("kv type", reflect.TypeOf(label.Key), reflect.TypeOf(label.Value.AsString()))
 		resLabelMap[string(label.Key)] = label.Value.AsString()
 	}
-	fmt.Println("mapping:---")
-
+	fmt.Println("before mapping:---")
 	for a, b := range resLabelMap {
 		fmt.Println(a, b)
 	}
 
-
-
-
-
-
-
 	resTypeStr := "global"
 	monitoredReslabelsMap := make(map[string]string)
+	match := genericResourceMap
+	
+	if resType, found := resLabelMap["type"]; found {
+		switch resType {
+		case "k8s":
+			resTypeStr = "k8s_container"
+			match = k8sContainerMap
+
+		case "gce":
+			//TODO:
+		default:
+		}	
+
+		outputMap, isMissing := transformResource(match, resLabelMap)
+		if !isMissing {
+			monitoredReslabelsMap = outputMap
+		}
+	}
+
 	monitoredReslabelsMap["project_id"] = me.o.ProjectID
 	
+	fmt.Println("after mapping:---")
+	for a, b := range monitoredReslabelsMap {
+		fmt.Println(a, b)
+	}
 
-
-
-
-
-	
-	// Return "global" Monitored resources for unknown types of resources
 	return &monitoredrespb.MonitoredResource{
 		Type: resTypeStr,
 		Labels: monitoredReslabelsMap,
 	}
 }
+
+
+// returns transformed label map and true if all labels in match are found
+// in input except optional project_id. It returns whether at least one label
+// other than project_id is missing or not.
+func transformResource(match, input map[string]string) (map[string]string, bool) {
+	output := make(map[string]string, len(input))
+	for dst, src := range match {
+		if v, ok := input[src]; ok {
+			output[dst] = v
+			continue
+		}
+
+		if dst != "project_id" {
+			return nil, true
+		}
+	}
+	return output, false
+}
+
+
 
 // recordToMdpbKindType return the mapping from OTel's record descriptor to
 // Cloud Monitoring's MetricKind and ValueType.

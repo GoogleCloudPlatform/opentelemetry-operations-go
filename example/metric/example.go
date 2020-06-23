@@ -66,6 +66,8 @@ func main() {
 		resource.New(
 			// kv.String("instance_id", "abc123"),
 			// kv.String("application", "example-app"),
+			kv.String("type", "k8s"),
+			kv.String("cloud.zone", "us-central-1a")
 			kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 			kv.String("k8s.namespace.name", "default"),
 			kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
