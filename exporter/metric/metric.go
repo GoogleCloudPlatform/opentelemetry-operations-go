@@ -77,12 +77,12 @@ type metricExporter struct {
 // Mappings for the well-known OpenCensus resource label keys
 // to applicable Stackdriver Monitored Resource label keys.
 var k8sContainerMap = map[string]string{
-	"project_id":     stackdriverProjectID,
-	"location":       resourcekeys.CloudKeyZone,
-	"cluster_name":   resourcekeys.K8SKeyClusterName,
-	"namespace_name": resourcekeys.K8SKeyNamespaceName,
-	"pod_name":       resourcekeys.K8SKeyPodName,
-	"container_name": resourcekeys.ContainerKeyName,
+	"project_id":     "",//stackdriverProjectID,
+	"location":       "cloud.zone",//resourcekeys.CloudKeyZone,
+	"cluster_name":   "k8s.cluster.name",//resourcekeys.K8SKeyClusterName,
+	"namespace_name": "k8s.namespace.name",//resourcekeys.K8SKeyNamespaceName,
+	"pod_name":       "k8s.pod.name",//resourcekeys.K8SKeyPodName,
+	"container_name": "k8s.deployment.name",//resourcekeys.ContainerKeyName,
 }
 
 const (
@@ -327,15 +327,17 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	// labels in Resource are in the form of []kv.KeyValue
 	// convert them into a map of kv.String
 	resLabelList := res.Attributes()
-	resLabelMap := make(map[string]string)
-	for label := range resLabelList {
-		resLabelMap[label.Key] = string(label.Value) 
-	}
-	fmt.Println("mapping:---")
 
-	for a, b := range resLabelMap {
-		fmt.Println(a, b)
-	}
+	fmt.Println("res list", resLabelList)
+	// resLabelMap := make(map[string]string)
+	// for label := range resLabelList {
+	// 	resLabelMap[label.Key] = string(label.Value) 
+	// }
+	// fmt.Println("mapping:---")
+
+	// for a, b := range resLabelMap {
+	// 	fmt.Println(a, b)
+	// }
 
 
 
@@ -347,7 +349,6 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	monitoredReslabelsMap := make(map[string]string)
 	monitoredReslabelsMap["project_id"] = me.o.ProjectID
 	
-	
 
 
 
@@ -357,7 +358,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	// Return "global" Monitored resources for unknown types of resources
 	return &monitoredrespb.MonitoredResource{
 		Type: resTypeStr,
-		Labels: labelsMap,
+		Labels: monitoredReslabelsMap,
 	}
 }
 
