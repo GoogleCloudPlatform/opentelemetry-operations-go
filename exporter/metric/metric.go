@@ -74,6 +74,29 @@ type metricExporter struct {
 	startTime time.Time
 }
 
+// Mappings for the well-known OpenCensus resource label keys
+// to applicable Stackdriver Monitored Resource label keys.
+var k8sContainerMap = map[string]string{
+	"project_id":     stackdriverProjectID,
+	"location":       resourcekeys.CloudKeyZone,
+	"cluster_name":   resourcekeys.K8SKeyClusterName,
+	"namespace_name": resourcekeys.K8SKeyNamespaceName,
+	"pod_name":       resourcekeys.K8SKeyPodName,
+	"container_name": resourcekeys.ContainerKeyName,
+}
+
+const (
+	K8SType = "k8s"
+	// A uniquely identifying name for the Kubernetes cluster. Kubernetes
+	// does not have cluster names as an internal concept so this may be
+	// set to any meaningful value within the environment. For example,
+	// GKE clusters have a name which can be used for this label.
+	K8SKeyClusterName    = "k8s.cluster.name"
+	K8SKeyNamespaceName  = "k8s.namespace.name"
+	K8SKeyPodName        = "k8s.pod.name"
+	K8SKeyDeploymentName = "k8s.deployment.name"
+)
+
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
 func newMetricExporter(o *options) (*metricExporter, error) {
 	if strings.TrimSpace(o.ProjectID) == "" {
@@ -287,18 +310,54 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 // proto type for Cloud Monitoring.
 //
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
-func (me *metricExporter) resourceToMonitoredResourcepb(_ *resource.Resource) *monitoredrespb.MonitoredResource {
-	// TODO: Implement the process to convert Resource to MonitoringResoruce.
-	// ref. https://cloud.google.com/monitoring/api/resources
-	// This method only returns global resource for now.
+func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
 
-	// "global" only accepts "project_id" for label.
-	// https://cloud.google.com/monitoring/api/resources#tag_global
+	if res == nil || res.Len() == 0 {
+    	// Return "global" Monitored resources if the input resource is null or empty
+	    // "global" only accepts "project_id" for label.
+	    // https://cloud.google.com/monitoring/api/resources#tag_global
+		return &monitoredrespb.MonitoredResource{
+			Type: "global",
+			Labels: map[string]string{
+				"project_id": me.o.ProjectID,
+			},
+		}	
+	}
+
+	// labels in Resource are in the form of []kv.KeyValue
+	// convert them into a map of kv.String
+	resLabelList := res.Attributes()
+	resLabelMap := make(map[string]string)
+	for label := range resLabelList {
+		resLabelMap[label.Key] = string(label.Value) 
+	}
+	fmt.Println("mapping:---")
+
+	for a, b := range resLabelMap {
+		fmt.Println(a, b)
+	}
+
+
+
+
+
+
+
+	resTypeStr := "global"
+	monitoredReslabelsMap := make(map[string]string)
+	monitoredReslabelsMap["project_id"] = me.o.ProjectID
+	
+	
+
+
+
+
+
+	
+	// Return "global" Monitored resources for unknown types of resources
 	return &monitoredrespb.MonitoredResource{
-		Type: "global",
-		Labels: map[string]string{
-			"project_id": me.o.ProjectID,
-		},
+		Type: resTypeStr,
+		Labels: labelsMap,
 	}
 }
 
