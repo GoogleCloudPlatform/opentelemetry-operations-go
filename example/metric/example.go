@@ -64,8 +64,12 @@ func main() {
 	// This should be fixed in #29.
 	resOpt := push.WithResource(
 		resource.New(
-			kv.String("instance_id", "abc123"),
-			kv.String("application", "example-app"),
+			// kv.String("instance_id", "abc123"),
+			// kv.String("application", "example-app"),
+			kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+			kv.String("k8s.namespace.name", "default"),
+			kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+			kv.String("k8s.deployment.name", "opentelemetry"),		
 		),
 	)
 	pusher, err := mexporter.InstallNewPipeline(opts, resOpt)

@@ -343,6 +343,9 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 		labels[string(kv.Key)] = kv.Value.AsString()
 	}
 
+	fmt.Println("recordToMpb:")
+	fmt.Println("labels", labels)
+
 	return &googlemetricpb.Metric{
 		Type:   md.Type,
 		Labels: labels,
