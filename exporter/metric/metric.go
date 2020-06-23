@@ -254,7 +254,7 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	fmt.Println("record res", r.Resource())
 
 
-	mr := me.resourceToMonitoredResourcepb(res)
+	mr := me.resourceToMonitoredResourcepb(r.Resource())
 
 	tv, t, err := me.recordToTypedValueAndTimestamp(r)
 	if err != nil {
