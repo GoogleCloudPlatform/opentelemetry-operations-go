@@ -124,7 +124,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	resList := []*resource.Resource{
 	// correct k8s resources
 	resource.New(
-		kv.String("type", "k8s"),
+		kv.String("cloud.provider", "k8s"),
 		kv.String("cloud.zone", "us-central1-a"),
 		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 		kv.String("k8s.namespace.name", "default"),
@@ -133,7 +133,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	), 
 	// nonexisting resource types
 	resource.New(
-		kv.String("type", "none"),
+		kv.String("cloud.provider", "none"),
 		kv.String("cloud.zone", "us-central1-a"),
 		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 		kv.String("k8s.namespace.name", "default"),
@@ -142,7 +142,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	),
 	// missing resource fields
 	resource.New(
-		kv.String("type", "k8s"),
+		kv.String("cloud.provider", "k8s"),
 		kv.String("cloud.zone", "us-central1-a"),
 		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 		kv.String("k8s.namespace.name", "default"),

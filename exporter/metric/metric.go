@@ -84,36 +84,30 @@ type metricExporter struct {
 // set to any meaningful value within the environment. For example,
 // GKE clusters have a name which can be used for this label.
 const (
-	CloudKeyZone         = "cloud.zone"
+	CloudType = "cloud"
+	CloudKeyProvider  = "cloud.provider"
+	CloudKeyAccountID = "cloud.account.id"
+	CloudKeyRegion    = "cloud.region"
+	CloudKeyZone      = "cloud.zone"
+	// Cloud Providers
+	CloudProviderAWS   = "aws"
+	CloudProviderGCP   = "gcp"
+	CloudProviderAZURE = "azure"
+	CloudProviderK8S = "k8s"
 
-	K8SType              = "k8s"
 	K8SKeyClusterName    = "k8s.cluster.name"
 	K8SKeyNamespaceName  = "k8s.namespace.name"
 	K8SKeyPodName        = "k8s.pod.name"
 	K8SKeyDeploymentName = "k8s.deployment.name"
-
-	stackdriverGenericTaskNamespace = "contrib.opencensus.io/exporter/stackdriver/generic_task/namespace"
-	stackdriverGenericTaskJob       = "contrib.opencensus.io/exporter/stackdriver/generic_task/job"
-	stackdriverGenericTaskID        = "contrib.opencensus.io/exporter/stackdriver/generic_task/task_id"
 )
 
 var k8sContainerMap = map[string]string{
-//	"project_id":     "",
 	"location":       CloudKeyZone,
 	"cluster_name":   K8SKeyClusterName,
 	"namespace_name": K8SKeyNamespaceName,
 	"pod_name":       K8SKeyPodName,
 	"container_name": K8SKeyDeploymentName,
 }
-
-// Generic task resource.
-var genericResourceMap = map[string]string{
-	"location":   CloudKeyZone,
-	"namespace":  stackdriverGenericTaskNamespace,
-	"job":        stackdriverGenericTaskJob,
-	"task_id":    stackdriverGenericTaskID,
-}
-
 
 
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
@@ -344,14 +338,14 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 
 	resTypeStr := "global"
 	monitoredReslabelsMap := make(map[string]string)
-	match := genericResourceMap
+	match := map[string]string{}
 	
-	if resType, found := resLabelMap["type"]; found {
+	if resType, found := resLabelMap[CloudKeyProvider]; found {
 		switch resType {
-		case "k8s":
+		case CloudProviderK8S:
 			resTypeStr = "k8s_container"
 			match = k8sContainerMap
-		case "gce":
+		case CloudProviderGCP:
 			//TODO:
 		default:
 		}	
