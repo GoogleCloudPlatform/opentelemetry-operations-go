@@ -21,6 +21,7 @@ import (
 	"log"
 	"strings"
 	"time"
+	"sync"
 
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
@@ -45,6 +46,8 @@ const (
 
 var (
 	errBlankProjectID = errors.New("expecting a non-blank ProjectID")
+	monitoredResLabelMap = make(map[string]string)
+	once sync.Once
 )
 
 type errUnsupportedAggregation struct {
@@ -239,6 +242,8 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	m := me.recordToMpb(r)
 	mr := me.resourceToMonitoredResourcepb(res)
 
+	generateMonitoredResLabelMap(mr.Labels)
+
 	tv, t, err := recordToTypedValueAndTimestamp(r)
 	if err != nil {
 		return nil, err
@@ -254,6 +259,24 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 		Resource: mr,
 		Points:   []*monitoringpb.Point{p},
 	}, nil
+}
+
+// generateMonitoredResLabelMap renders the monitoredResLabelMap for once
+// since the monitored resource labels are static
+func generateMonitoredResLabelMap(input map[string]string) {
+	once.Do(func() {
+		fmt.Println("****** copying res labels *****")
+		for k,v := range input {
+			fmt.Println(k, v)
+			monitoredResLabelMap[k] = v
+		}
+	})	
+}
+
+
+// ExportMonitoredResLabels exports the map of monitored resources labels
+func (me *metricExporter) ExportMonitoredResLabels() map[string]string {
+	return monitoredResLabelMap
 }
 
 // descToMetricType converts descriptor to MetricType proto type.
