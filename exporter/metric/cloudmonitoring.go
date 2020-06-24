@@ -83,3 +83,8 @@ func NewRawExporter(opts ...Option) (*Exporter, error) {
 func (e *Exporter) Export(ctx context.Context, cps export.CheckpointSet) error {
 	return e.metricExporter.ExportMetrics(ctx, cps)
 }
+
+// ExportMonitoredResLabels exports the labels of monitored resources.
+func (e *Exporter) ExportMonitoredResLabels() map[string]string {
+	return e.metricExporter.ExportMonitoredResLabels()
+}

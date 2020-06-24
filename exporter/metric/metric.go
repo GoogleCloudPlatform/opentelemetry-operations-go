@@ -265,9 +265,7 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 // since the monitored resource labels are static
 func generateMonitoredResLabelMap(input map[string]string) {
 	once.Do(func() {
-		fmt.Println("****** copying res labels *****")
 		for k,v := range input {
-			fmt.Println(k, v)
 			monitoredResLabelMap[k] = v
 		}
 	})	
@@ -276,7 +274,12 @@ func generateMonitoredResLabelMap(input map[string]string) {
 
 // ExportMonitoredResLabels exports the map of monitored resources labels
 func (me *metricExporter) ExportMonitoredResLabels() map[string]string {
-	return monitoredResLabelMap
+	outputMap :=  make(map[string]string)
+	// Do deep copy to protect the label map
+	for k,v := range monitoredResLabelMap {
+		outputMap[k] = v
+	}
+	return outputMap
 }
 
 // descToMetricType converts descriptor to MetricType proto type.
