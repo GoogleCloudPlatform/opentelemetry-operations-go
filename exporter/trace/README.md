@@ -3,7 +3,7 @@
 [![Docs](https://godoc.org/github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace?status.svg)](https://pkg.go.dev/github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace)
 [![Apache License][license-image]][license-url]
 
-OpenTelemetry Google Cloud Trace Exporter allow the user to send collected traces and spans to Google Cloud.
+OpenTelemetry Google Cloud Trace Exporter allows the user to send collected traces and spans to Google Cloud.
 
 [Google Cloud Trace](https://cloud.google.com/trace) is a distributed tracing backend system. It helps developers to gather timing data needed to troubleshoot latency problems in microservice & monolithic architectures. It manages both the collection and lookup of gathered trace data.
 
@@ -11,14 +11,14 @@ This exporter package assumes your application is [already instrumented](https:/
 
 ## Setup
 
-Google Cloud Trace is a managed service provided by Google Cloud Platform. The end-to-end set up guide with OpenTelemetry is available on [the office document](https://cloud.google.com/trace/docs/setup/go-ot), so this document go through the exporter set up.
+Google Cloud Trace is a managed service provided by Google Cloud Platform. The end-to-end set up guide with OpenTelemetry is available on [the official GCP docs](https://cloud.google.com/trace/docs/setup/go-ot), so this document goes through the exporter set up.
 
 ## Usage
 
 Add `github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace` to the import list and set up `go.mod` file accordingly.
 
 ```go
-import texpoter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+import texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 ```
 
 Once you import the trace exporter package, then register the exporter to the application, and start tracing. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instruction in [Authentication](#Authentication).
