@@ -140,7 +140,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
 		kv.String("k8s.deployment.name", "opentelemetry"),		
 	),
-	// missing resource fields
+	// ok for missing resource fields
 	resource.New(
 		kv.String("cloud.provider", "k8s"),
 		kv.String("cloud.zone", "us-central1-a"),
@@ -149,7 +149,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
 	)}
 
-	expectedTypes := []string{"k8s_container","global", "global"}
+	expectedTypes := []string{"k8s_container","global", "k8s_container"}
 
 	expectedLabels := []map[string]string {
 		map[string]string{
@@ -165,6 +165,10 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		map[string]string{
 			"project_id":     "",
+			"location": "us-central1-a",
+			"cluster_name": "opentelemetry-cluster",
+			"namespace_name": "default",
+			"pod_name": "opentelemetry-pod-autoconf",
 		},
 	}
 

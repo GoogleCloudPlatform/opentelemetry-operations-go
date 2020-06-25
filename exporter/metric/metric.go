@@ -375,11 +375,6 @@ func transformResource(match, input map[string]string) (map[string]string, bool)
 	for dst, src := range match {
 		if v, ok := input[src]; ok {
 			output[dst] = v
-			continue
-		}
-
-		if dst != "project_id" {
-			return nil, true
 		}
 	}
 	return output, false
