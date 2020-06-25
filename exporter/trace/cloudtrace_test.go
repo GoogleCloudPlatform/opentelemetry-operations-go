@@ -134,8 +134,7 @@ func TestExporter_Timeout(t *testing.T) {
 	mockTrace.spansUploaded = nil
 	mockTrace.delay = 20 * time.Millisecond
 	var exportErrors []error
-	var wg sync.WaitGroup
-	wg.Add(1)
+	ch := make(chan error)
 
 	// Create Google Cloud Trace Exporter
 	exp, err := texporter.NewExporter(
@@ -146,7 +145,7 @@ func TestExporter_Timeout(t *testing.T) {
 		texporter.WithBundleCountThreshold(1),
 		texporter.WithOnError(func(err error) {
 			exportErrors = append(exportErrors, err)
-			wg.Done()
+			ch <- err
 		}),
 	)
 	assert.NoError(t, err)
@@ -162,7 +161,7 @@ func TestExporter_Timeout(t *testing.T) {
 	assert.True(t, span.SpanContext().IsValid())
 
 	// wait for error to be handled
-	wg.Wait()
+	<-ch
 	assert.EqualValues(t, 0, mockTrace.len())
 	if got, want := len(exportErrors), 1; got != want {
 		t.Fatalf("len(exportErrors) = %q; want %q", got, want)
