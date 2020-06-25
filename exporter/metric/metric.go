@@ -350,12 +350,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 		default:
 		}	
 
-		outputMap, isMissing := transformResource(match, resLabelMap)
-		if isMissing { // restoring type to "global"
-			resTypeStr = "global"
-		} else {
-			monitoredReslabelsMap = outputMap
-		}
+		monitoredReslabelsMap = transformResource(match, resLabelMap)
 	}
 
 	monitoredReslabelsMap["project_id"] = me.o.ProjectID
@@ -367,17 +362,15 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 }
 
 
-// returns transformed label map and true if all labels in match are found
-// in input except optional project_id. It returns whether at least one label
-// other than project_id is missing or not.
-func transformResource(match, input map[string]string) (map[string]string, bool) {
+// returns transformed label map for all labels in match are found
+func transformResource(match, input map[string]string) map[string]string {
 	output := make(map[string]string, len(input))
 	for dst, src := range match {
 		if v, ok := input[src]; ok {
 			output[dst] = v
 		}
 	}
-	return output, false
+	return output
 }
 
 
