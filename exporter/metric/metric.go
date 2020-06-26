@@ -21,7 +21,6 @@ import (
 	"log"
 	"strings"
 	"time"
-	"sync"
 
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
@@ -47,7 +46,6 @@ const (
 var (
 	errBlankProjectID = errors.New("expecting a non-blank ProjectID")
 	monitoredResLabelMap = make(map[string]string)
-	once sync.Once
 )
 
 type errUnsupportedAggregation struct {
@@ -130,6 +128,7 @@ func InstallNewPipeline(opts []Option, popts ...push.Option) (*push.Controller, 
 // chaining a NewRawExporter into the recommended selectors and integrators.
 func NewExportPipeline(opts []Option, popts ...push.Option) (*push.Controller, error) {
 	selector := simple.NewWithExactDistribution()
+	extractResourceLabels(popts...)
 	exporter, err := NewRawExporter(opts...)
 	if err != nil {
 		return nil, err
@@ -242,8 +241,6 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	m := me.recordToMpb(r)
 	mr := me.resourceToMonitoredResourcepb(res)
 
-	generateMonitoredResLabelMap(mr.Labels)
-
 	tv, t, err := recordToTypedValueAndTimestamp(r)
 	if err != nil {
 		return nil, err
@@ -261,14 +258,17 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource)
 	}, nil
 }
 
-// generateMonitoredResLabelMap renders the monitoredResLabelMap for once
-// since the monitored resource labels are static
-func generateMonitoredResLabelMap(input map[string]string) {
-	once.Do(func() {
-		for k,v := range input {
-			monitoredResLabelMap[k] = v
+// extractResourceLabels extracts resources from the construction option
+func extractResourceLabels(popts ...push.Option) {
+	for _, popt := range popts {
+		var config push.Config
+		popt.Apply(&config)
+		if config.Resource.Len() > 0 {
+			for _, ele := range config.Resource.Attributes() {
+				monitoredResLabelMap[string(ele.Key)] = ele.Value.AsString()
+			}
 		}
-	})	
+	}
 }
 
 
