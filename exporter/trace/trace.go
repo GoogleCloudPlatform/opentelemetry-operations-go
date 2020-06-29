@@ -161,6 +161,10 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 	}
 }
 
+func (e *traceExporter) Flush() {
+	e.bundler.Flush()
+}
+
 // contextAndSpan stores both a context and spans for use with a bundler.
 type contextAndSpans struct {
 	ctx context.Context
