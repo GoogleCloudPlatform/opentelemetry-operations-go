@@ -127,7 +127,6 @@ func TestExporter_Timeout(t *testing.T) {
 	mockTrace.spansUploaded = nil
 	mockTrace.delay = 20 * time.Millisecond
 	var exportErrors []error
-	//ch := make(chan error)
 
 	// Create Google Cloud Trace Exporter
 	_, flush, err := texporter.NewExportPipeline(
@@ -138,7 +137,6 @@ func TestExporter_Timeout(t *testing.T) {
 		texporter.WithBundleCountThreshold(1),
 		texporter.WithOnError(func(err error) {
 			exportErrors = append(exportErrors, err)
-			//ch <- err
 		}),
 		texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 		texporter.RegisterAsGlobal(),
