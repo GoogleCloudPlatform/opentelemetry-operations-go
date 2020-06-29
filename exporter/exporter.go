@@ -10,8 +10,12 @@ import (
 
 	"google.golang.org/api/option"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	"go.opentelemetry.io/otel/sdk/resource"
 )
 
+var (
+	monitoredResLabelMap = make(map[string]string)
+)
 
 // Options contains options for configuring the exporter.
 type Options struct {
@@ -101,6 +105,18 @@ type Exporter struct {
 	metricPusher *push.Controller
 }
 
+// extractResourceLabels extracts resources from the construction option
+func extractResourceLabels(popts ...push.Option) {
+	for _, popt := range popts {
+		var config push.Config
+		popt.Apply(&config)
+		if config.Resource.Len() > 0 {
+			for _, ele := range config.Resource.Attributes() {
+				monitoredResLabelMap[string(ele.Key)] = ele.Value.AsString()
+			}
+		}
+	}
+}
 
 // NewExporter creates a new Exporter that implements both trace.Exporter
 // and metric.Exporter
@@ -113,6 +129,8 @@ func NewExporter(o Options, popts... push.Option) (*Exporter, error) {
 	if err != nil {
 		return nil, err
 	} 
+
+	extractResourceLabels(popts...)
 
 	pusher, err := cloudmetric.InstallNewPipeline(
 		[]cloudmetric.Option{		
