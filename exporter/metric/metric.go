@@ -84,7 +84,6 @@ type metricExporter struct {
 // set to any meaningful value within the environment. For example,
 // GKE clusters have a name which can be used for this label.
 const (
-	CloudType = "cloud"
 	CloudKeyProvider  = "cloud.provider"
 	CloudKeyAccountID = "cloud.account.id"
 	CloudKeyRegion    = "cloud.region"
