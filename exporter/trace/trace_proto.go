@@ -60,17 +60,15 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; cloudtrace-exporter %s", opentelemetry.Version(), version)
 
-func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) (displayName string) {
-	if format == nil {
-		switch s.SpanKind {
-		// TODO(ymotongpoo): add cases for "Send" and "Recv".
-		default:
-			displayName = fmt.Sprintf("Span.%s-%s", s.SpanKind, s.Name)
-		}
-	} else {
-		displayName = format(s)
+func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) string {
+	if format != nil {
+		return format(s)
 	}
-	return
+	switch s.SpanKind {
+	// TODO(ymotongpoo): add cases for "Send" and "Recv".
+	default:
+		return fmt.Sprintf("Span.%s-%s", s.SpanKind, s.Name)
+	}
 }
 
 func protoFromSpanData(s *export.SpanData, projectID string, format DisplayNameFormatter) *tracepb.Span {
