@@ -10,7 +10,6 @@ import (
 
 	"google.golang.org/api/option"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
-	"go.opentelemetry.io/otel/sdk/resource"
 )
 
 var (
