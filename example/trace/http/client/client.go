@@ -22,7 +22,6 @@ import (
 	"os"
 
 	"net/http"
-	"time"
 
 	"google.golang.org/grpc/codes"
 
@@ -35,30 +34,26 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
-func initTracer() {
+func initTracer() func() {
 	projectID := os.Getenv("PROJECT_ID")
 
 	// Create Google Cloud Trace exporter to be able to retrieve
 	// the collected spans.
-	exporter, err := texporter.NewExporter(
+	_, flush, err := texporter.NewExportPipeline(
 		texporter.WithProjectID(projectID),
+		// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
+		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
+		texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		texporter.RegisterAsGlobal(),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
-	// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
-	tp, err := sdktrace.NewProvider(sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithSyncer(exporter))
-	if err != nil {
-		log.Fatal(err)
-	}
-	global.SetTraceProvider(tp)
+	return flush
 }
 
 func main() {
-	initTracer()
+	flush := initTracer()
 	tr := global.TraceProvider().Tracer("cloudtrace/example/client")
 
 	client := http.DefaultClient
@@ -92,7 +87,7 @@ func main() {
 	}
 
 	fmt.Printf("Response Received: %s\n\n\n", body)
-	fmt.Printf("Waiting for few seconds to export spans ...\n\n")
-	time.Sleep(10 * time.Second)
+	fmt.Printf("Waiting to export spans ...\n\n")
+	flush()
 	fmt.Println("Check traces on Google Cloud Trace")
 }
