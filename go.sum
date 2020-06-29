@@ -29,6 +29,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/DataDog/sketches-go v0.0.0-20190923095040-43f19ad77ff7 h1:qELHH0AWCvf98Yf+CNIJx9vOZOfHFDDzgDRYsnNk/vs=
 github.com/DataDog/sketches-go v0.0.0-20190923095040-43f19ad77ff7/go.mod h1:Q5DbzQ+3AkgGwymQO7aZFNP7ns2lZKGtvRBzRXfdi60=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.2.0 h1:pJCK0Jc6GrjKTV4zj81Cw7iKXgLur5kQa1v2FIM6XI4=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.2.0/go.mod h1:J1/LZ7h0ZuUG3qjcKrorJhcSie4kcUBNZNPFkXaxPdU=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.2.0 h1:d/0HrwVskjLkJIz70Gn9ADURRNaNdTGOkQ1TiuCOefU=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.2.0/go.mod h1:Ps0PAOihxzMbs4J2PWLffeKwJo3Bka6LHMLP6r/K0l8=
 github.com/aws/aws-sdk-go v1.23.20 h1:2CBuL21P0yKdZN5urf2NxKa1ha8fhnY+A3pBCHFeZoA=

@@ -6,10 +6,10 @@ import (
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	texport "go.opentelemetry.io/otel/sdk/export/trace"	
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	cloudmetric "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
 	"google.golang.org/api/option"
-	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
-	"go.opentelemetry.io/otel/api/kv"
+	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 )
 
 
@@ -98,12 +98,13 @@ type Options struct {
 // Exporter is a trace and metric exporter
 type Exporter struct {
 	traceExporter *cloudtrace.Exporter
+	metricPusher *push.Controller
 }
 
 
 // NewExporter creates a new Exporter that implements both trace.Exporter
 // and metric.Exporter
-func NewExporter(o Options) (*Exporter, error) {
+func NewExporter(o Options, popts... push.Option) (*Exporter, error) {
 
 	te, err := cloudtrace.NewExporter(cloudtrace.WithProjectID(o.ProjectID), cloudtrace.WithContext(o.Context),
 		cloudtrace.WithTraceClientOptions(o.TraceClientOptions), cloudtrace.WithTimeout(o.Timeout), 
@@ -112,45 +113,34 @@ func NewExporter(o Options) (*Exporter, error) {
 	if err != nil {
 		return nil, err
 	} 
-	
+
+	pusher, err := cloudmetric.InstallNewPipeline(
+		[]cloudmetric.Option{		
+			cloudmetric.WithProjectID(o.ProjectID), 
+			cloudmetric.WithInterval(o.Timeout), cloudmetric.WithOnError(o.OnError),		
+			cloudmetric.WithMetricDescriptorTypeFormatter(o.MetricDescriptorTypeFormatter),
+			// cloudmetric.WithMonitoringClientOptions(o.MonitoringClientOptions), 
+		}, popts...,
+	)
+	if err != nil {
+		return nil, err
+	} 
+
+
 	return &Exporter{
 		traceExporter: te,
+		metricPusher: pusher,
 	}, nil
 }
 
-// readMonitoredResourcesFromMetricsExporter obtains Monitored Resources labels from metrics exporter
-func readMonitoredResourcesFromMetricsExporter() (resType string, labels map[string]string) {
-	//TODO: read the resources from metric. Now the autodetect is for mockup
-	return monitoredresource.Autodetect().MonitoredResource()
-}
-
-// injectLabelsIntoSpan injects Monitored Resources labels into a span 
-func injectLabelsIntoSpan(sd *texport.SpanData, labels map[string]string) *texport.SpanData {
-	for k, v := range labels {
-		sd.Attributes = append(sd.Attributes, kv.Key(k).String(v))
-	}
-	return sd
-}
-
-// injectLabelsIntoSpan injects Monitored Resources labels into spans
-func injectLabelsIntoSpans(sds []*texport.SpanData, labels map[string]string) []*texport.SpanData {
-	for i, v := range sds {
-		sds[i] = injectLabelsIntoSpan(v, labels)
-	}
-	return sds
-}
 
 // ExportSpan exports a SpanData to Stackdriver Trace.
 func (e *Exporter) ExportSpan(ctx context.Context, sd *texport.SpanData) {
-	_, monitoredResMap := readMonitoredResourcesFromMetricsExporter()
-	sd = injectLabelsIntoSpan(sd, monitoredResMap)
 	e.traceExporter.ExportSpan(ctx, sd)
 }
 
 // ExportSpans exports a slice of SpanData to Stackdriver Trace in batch
 func (e *Exporter) ExportSpans(ctx context.Context, sds []*texport.SpanData) {
-	_, monitoredResMap := readMonitoredResourcesFromMetricsExporter()
-	sds = injectLabelsIntoSpans(sds, monitoredResMap)
 	e.traceExporter.ExportSpans(ctx, sds)
 }
 
