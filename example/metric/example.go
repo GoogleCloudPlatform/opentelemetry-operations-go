@@ -106,9 +106,9 @@ func main() {
 		cv := 100 + r
 		counter.Add(ctx, cv, clabels...)
 
-		r2 := rand.Int63n(10)
+		r2 := rand.Int63n(100)
 		ov := 12.34 + float64(r2)/20.0
 		of.set(ov)
-		log.Printf("Submitted data: counter %v, observer %v", cv, ov)
+		log.Printf("Most recent data: counter %v, observer %v", cv, ov)
 	}
 }

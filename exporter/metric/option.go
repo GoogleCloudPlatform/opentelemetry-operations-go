@@ -69,7 +69,7 @@ type options struct {
 	// If no custom hook is set, errors are logged. Optional.
 	//
 	// TODO: This option should be replaced with OTel defining error handler.
-	// c.f. https://pkg.go.dev/go.opentelemetry.io/otel@v0.5.0/sdk/metric/controller/push?tab=doc#Config
+	// c.f. https://pkg.go.dev/go.opentelemetry.io/otel@v0.6.0/sdk/metric/controller/push?tab=doc#Config
 	onError func(error)
 }
 
@@ -103,7 +103,7 @@ func WithInterval(t time.Duration) func(o *options) {
 
 // WithMetricDescriptorTypeFormatter sets the custom formatter for MetricDescriptor.
 // Note that the format has to follow the convention defined in the official document.
-// The default is "custom.googleapi.com/[metric name]".
+// The default is "custom.googleapis.com/[metric name]".
 // ref. https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom_metric_names
 func WithMetricDescriptorTypeFormatter(f func(*apimetric.Descriptor) string) func(o *options) {
 	return func(o *options) {
