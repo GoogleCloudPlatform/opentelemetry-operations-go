@@ -144,18 +144,14 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	exp, err := texporter.NewExporter(
 		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
 		texporter.WithTraceClientOptions(clientOpt),
-		// uncomment when exporter is using bundler
-		// texporter.WithBundleCountThreshold(1),
+		texporter.WithBundleCountThreshold(1),
 		texporter.WithDisplayNameFormatter(format),
 	)
 	assert.NoError(t, err)
 
 	tp, err := sdktrace.NewProvider(
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithBatcher(exp, // add following two options to ensure flush
-			sdktrace.WithScheduleDelayMillis(1),
-			sdktrace.WithMaxExportBatchSize(1),
-		))
+		sdktrace.WithSyncer(exp))
 	assert.NoError(t, err)
 
 	global.SetTraceProvider(tp)
