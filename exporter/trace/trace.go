@@ -119,18 +119,6 @@ func (e *traceExporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 	e.checkBundlerError(err)
 }
 
-// ExportSpans exports a slice of SpanData to Stackdriver Trace in batch
-func (e *traceExporter) ExportSpans(ctx context.Context, sds []*export.SpanData) {
-	pbSpans := make([]*tracepb.Span, len(sds))
-	var protoSize int = 0
-	for i, sd := range sds {
-		pbSpans[i] = protoFromSpanData(sd, e.projectID)
-		protoSize += proto.Size(pbSpans[i])
-	}
-	err := e.bundler.Add(&contextAndSpans{ctx, pbSpans}, protoSize)
-	e.checkBundlerError(err)
-}
-
 // uploadSpans sends a set of spans to Stackdriver.
 func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) {
 	req := tracepb.BatchWriteSpansRequest{

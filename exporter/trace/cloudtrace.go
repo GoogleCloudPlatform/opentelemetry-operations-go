@@ -318,11 +318,6 @@ func (e *Exporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 	e.traceExporter.ExportSpan(ctx, sd)
 }
 
-// ExportSpans exports a slice of SpanData to Stackdriver Trace in batch
-func (e *Exporter) ExportSpans(ctx context.Context, sds []*export.SpanData) {
-	e.traceExporter.ExportSpans(ctx, sds)
-}
-
 func (e *Exporter) sdWithDefaultTraceAttributes(sd *export.SpanData) *export.SpanData {
 	newSD := *sd
 	for k, v := range e.traceExporter.o.DefaultTraceAttributes {
