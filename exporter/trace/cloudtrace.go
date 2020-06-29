@@ -25,8 +25,11 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
+	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/kv"
+	apitrace "go.opentelemetry.io/otel/api/trace"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 // Option is function type that is passed to the exporter initialization function.
@@ -117,6 +120,13 @@ type options struct {
 	// MaxNumberOfWorkers sets the maximum number of go rountines that send requests
 	// to Cloud Trace. The minimum number of workers is 1.
 	MaxNumberOfWorkers int
+
+	// SDKConfig is the Config for sdktrace when creating provider
+	SDKConfig *sdktrace.Config
+
+	// RegisterGlobal is set to true if the trace provider of the new pipeline should be
+	// registered as Global Trace Provider
+	RegisterGlobal bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -193,6 +203,20 @@ func WithTimeout(t time.Duration) func(o *options) {
 	}
 }
 
+// WithSDKConfig sets the SDK Config when creating the provider in the pipeline
+func WithSDKConfig(c *sdktrace.Config) func(o *options) {
+	return func(o *options) {
+		o.SDKConfig = c
+	}
+}
+
+// RegisterAsGlobal() marks the provider to be set as global in the pipeline
+func RegisterAsGlobal() func (o *options) {
+	return func(o *options) {
+		o.RegisterGlobal = true
+	}
+}
+
 func (o *options) handleError(err error) {
 	if o.OnError != nil {
 		o.OnError(err)
@@ -210,6 +234,44 @@ const defaultTimeout = 5 * time.Second
 // process and the sampler implementation are done.
 type Exporter struct {
 	traceExporter *traceExporter
+}
+
+// NewExportPipeline sets up a complete export pipeline with the recommended setup 
+// for trace provider. Returns provider, flush function, and errors.
+func NewExportPipeline(opts ...Option) (apitrace.Provider, func(), error) {
+	o := options{Context: context.Background()}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	if o.ProjectID == "" {
+		creds, err := google.FindDefaultCredentials(o.Context, traceapi.DefaultAuthScopes()...)
+		if err != nil {
+			return nil, nil, fmt.Errorf("stackdriver: %v", err)
+		}
+		if creds.ProjectID == "" {
+			return nil, nil, errors.New("stackdriver: no project found with application default credentials")
+		}
+		o.ProjectID = creds.ProjectID
+	}
+	te, err := newTraceExporter(&o)
+	if err != nil {
+		return nil, nil, err
+	}
+	syncer := sdktrace.WithSyncer(&Exporter{
+		traceExporter: te,
+	})
+	tp, err := sdktrace.NewProvider(syncer)
+	if err != nil {
+		return nil, nil, err
+	}
+	if te.o.SDKConfig != nil {
+		tp.ApplyConfig(*te.o.SDKConfig)
+	}
+	if te.o.RegisterGlobal {
+		global.SetTraceProvider(tp)
+	}
+
+	return tp, te.Flush, nil
 }
 
 // NewExporter creates a new Exporter thats implements trace.Exporter.
