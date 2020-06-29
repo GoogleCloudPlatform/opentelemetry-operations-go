@@ -69,11 +69,22 @@ type options struct {
 	// Optional.
 	TraceClientOptions []option.ClientOption
 
-	// TraceSpansBufferMaxBytes is the maximum size (in bytes) of spans that
+	// BundleDelayThreshold determines the max amount of time
+	// the exporter can wait before uploading view data or trace spans to
+	// the backend.
+	// Optional. Default value is 2 seconds.
+	BundleDelayThreshold time.Duration
+
+	// BundleCountThreshold determines how many view data events or trace spans
+	// can be buffered before batch uploading them to the backend.
+	// Optional. Default value is 50.
+	BundleCountThreshold int
+
+	// BufferMaxBytes is the maximum size (in bytes) of spans that
 	// will be buffered in memory before being dropped.
 	//
 	// If unset, a default of 8MB will be used.
-	// TraceSpansBufferMaxBytes int
+	BufferMaxBytes int
 
 	// DefaultTraceAttributes will be appended to every span that is exported to
 	// Stackdriver Trace.
@@ -103,10 +114,9 @@ type options struct {
 	// If it is set to zero then default value is used.
 	ReportingInterval time.Duration
 
-	// NumberOfWorkers sets the number of go rountines that send requests
-	// to Stackdriver Monitoring. This is only used for Proto metrics export
-	// for now. The minimum number of workers is 1.
-	NumberOfWorkers int
+	// MaxNumberOfWorkers sets the maximum number of go rountines that send requests
+	// to Cloud Trace. The minimum number of workers is 1.
+	MaxNumberOfWorkers int
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -129,6 +139,30 @@ func WithOnError(onError func(err error)) func(o *options) {
 	}
 }
 
+// WithBundleDelayThreshold sets the max amount of time the exporter can wait before 
+// uploading trace spans to the backend.
+func WithBundleDelayThreshold(bundleDelayThreshold time.Duration) func(o *options) {
+	return func(o *options) {
+		o.BundleDelayThreshold = bundleDelayThreshold
+	}
+}
+
+// WithBundleCountThreshold sets how many trace spans can be buffered before batch
+// uploading them to the backend.
+func WithBundleCountThreshold(bundleCountThreshold int) func(o *options) {
+	return func(o *options) {
+		o.BundleCountThreshold = bundleCountThreshold
+	}
+}
+
+// WithBufferMaxBytes sets the maximum size (in bytes) of spans that will
+// be buffered in memory before being dropped
+func WithBufferMaxBytes(bufferMaxBytes int) func(o *options) {
+	return func(o *options) {
+		o.BufferMaxBytes = bufferMaxBytes
+	}
+}
+
 // WithTraceClientOptions sets additionial client options for tracing.
 func WithTraceClientOptions(opts []option.ClientOption) func(o *options) {
 	return func(o *options) {
@@ -141,6 +175,14 @@ func WithTraceClientOptions(opts []option.ClientOption) func(o *options) {
 func WithContext(ctx context.Context) func(o *options) {
 	return func(o *options) {
 		o.Context = ctx
+	}
+}
+
+// WithMaxNumberOfWorkers sets the number of go routines that send requests
+// to the Cloud Trace backend.
+func WithMaxNumberOfWorkers(n int) func(o *options) {
+	return func(o *options) {
+		o.MaxNumberOfWorkers = n
 	}
 }
 
