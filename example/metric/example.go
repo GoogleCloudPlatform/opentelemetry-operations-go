@@ -65,7 +65,7 @@ func main() {
 	resOpt := push.WithResource(
 		resource.New(
 			kv.String("instance_id", "abc123"),
-			kv.String("application", "example-app"),	
+			kv.String("application", "example-app"),
 		),
 	)
 	pusher, err := mexporter.InstallNewPipeline(opts, resOpt)

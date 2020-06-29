@@ -74,39 +74,25 @@ type metricExporter struct {
 	startTime time.Time
 }
 
-
-// TODO: put all constants into a separate file in the same package
-
-// Mappings for the well-known OpenCensus resource label keys
-// to applicable Stackdriver Monitored Resource label keys.
-// A uniquely identifying name for the Kubernetes cluster. Kubernetes
-// does not have cluster names as an internal concept so this may be
-// set to any meaningful value within the environment. For example,
-// GKE clusters have a name which can be used for this label.
-const (
-	CloudType = "cloud"
-	CloudKeyProvider  = "cloud.provider"
-	CloudKeyAccountID = "cloud.account.id"
-	CloudKeyRegion    = "cloud.region"
-	CloudKeyZone      = "cloud.zone"
-	// Cloud Providers
-	CloudProviderAWS   = "aws"
-	CloudProviderGCP   = "gcp"
-	CloudProviderAZURE = "azure"
-	CloudProviderK8S = "k8s"
-
-	K8SKeyClusterName    = "k8s.cluster.name"
-	K8SKeyNamespaceName  = "k8s.namespace.name"
-	K8SKeyPodName        = "k8s.pod.name"
-	K8SKeyDeploymentName = "k8s.deployment.name"
-)
-
+// Below are maps with monitored resources fields as keys
+// and OpenTelemetry resources fields as values
 var k8sContainerMap = map[string]string{
 	"location":       CloudKeyZone,
 	"cluster_name":   K8SKeyClusterName,
 	"namespace_name": K8SKeyNamespaceName,
 	"pod_name":       K8SKeyPodName,
 	"container_name": K8SKeyDeploymentName,
+}
+
+var gceResourceMap = map[string]string{
+	"instance_id": HostKeyID,
+	"zone":        CloudKeyZone,
+}
+
+var awsResourceMap = map[string]string{
+	"instance_id": HostKeyID,
+	"region":      CloudKeyRegion,
+	"aws_account": CloudKeyAccountID,
 }
 
 
@@ -227,12 +213,8 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.CheckpointSet) error {
 	tss := []*monitoringpb.TimeSeries{}
 
-	// TODO: [ymotongpoo] Check how resource registered via push.WithResource can be
-	// extracted from pusher.
-	res := &resource.Resource{}
-
 	aggError := cps.ForEach(func(r export.Record) error {
-		ts, err := me.recordToTspb(&r, res)
+		ts, err := me.recordToTspb(&r)
 		if err != nil {
 			return err
 		}
@@ -258,7 +240,7 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.Check
 
 // recordToTspb converts record to TimeSeries proto type with common resource.
 // ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
-func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource) (*monitoringpb.TimeSeries, error) {
+func (me *metricExporter) recordToTspb(r *export.Record) (*monitoringpb.TimeSeries, error) {
 	m := me.recordToMpb(r)
 
 	mr := me.resourceToMonitoredResourcepb(r.Resource())
@@ -309,6 +291,20 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 	}
 }
 
+// checkPrefixInMapKeys checks whether the non-empty prefix string
+//  is in the values of the map
+func checkPrefixInMapKeys(labelMap map[string]string, prefix string) bool {
+	if len(prefix) == 0 {
+		return false
+	}
+	for key := range labelMap {
+		if strings.HasPrefix(key, prefix) {
+			return true
+		}
+	}
+	return false
+}
+
 // resourceToMonitoredResourcepb converts resource in OTel to MonitoredResource
 // proto type for Cloud Monitoring.
 //
@@ -342,11 +338,17 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	
 	if resType, found := resLabelMap[CloudKeyProvider]; found {
 		switch resType {
-		case CloudProviderK8S:
-			resTypeStr = "k8s_container"
-			match = k8sContainerMap
 		case CloudProviderGCP:
-			//TODO:
+			if checkPrefixInMapKeys(resLabelMap, "k8s") {
+				resTypeStr = "k8s_container"
+				match = k8sContainerMap	
+			} else {
+				resTypeStr = "gce_instance"
+				match = gceResourceMap
+			}		
+		case CloudProviderAWS:
+			resTypeStr = "aws_ec2_instance"
+			match = awsResourceMap
 		default:
 		}	
 

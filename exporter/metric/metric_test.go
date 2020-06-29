@@ -122,9 +122,9 @@ func TestRecordToMpb(t *testing.T) {
 
 func TestResourceToMonitoredResourcepb(t *testing.T) {
 	resList := []*resource.Resource{
-	// correct k8s resources
+	// K8S resources
 	resource.New(
-		kv.String("cloud.provider", "k8s"),
+		kv.String("cloud.provider", "gcp"),
 		kv.String("cloud.zone", "us-central1-a"),
 		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 		kv.String("k8s.namespace.name", "default"),
@@ -140,16 +140,21 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
 		kv.String("k8s.deployment.name", "opentelemetry"),		
 	),
-	// ok for missing resource fields
+	// GCE resource fields
 	resource.New(
-		kv.String("cloud.provider", "k8s"),
+		kv.String("cloud.provider", "gcp"),
+		kv.String("host.id", "123"),
 		kv.String("cloud.zone", "us-central1-a"),
-		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-		kv.String("k8s.namespace.name", "default"),
-		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-	)}
+	),
+	// AWS resources
+	resource.New(
+		kv.String("cloud.provider", "aws"),
+		kv.String("cloud.region", "us-central1-a"),
+		kv.String("host.id", "123"),
+		kv.String("cloud.account.id", "fake_account"),
+	),}
 
-	expectedTypes := []string{"k8s_container","global", "k8s_container"}
+	expectedTypes := []string{"k8s_container","global", "gce_instance", "aws_ec2_instance"}
 
 	expectedLabels := []map[string]string {
 		map[string]string{
@@ -165,16 +170,18 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		map[string]string{
 			"project_id":     "",
-			"location": "us-central1-a",
-			"cluster_name": "opentelemetry-cluster",
-			"namespace_name": "default",
-			"pod_name": "opentelemetry-pod-autoconf",
+			"instance_id": "123",
+			"zone": "us-central1-a",
+		},
+		map[string]string{
+			"project_id":     "",
+			"instance_id": "123",
+			"region": "us-central1-a",
+			"aws_account": "fake_account",
 		},
 	}
 
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
-
-
 	
 	md := &googlemetricpb.MetricDescriptor{
 		Name:        desc.Name(),
