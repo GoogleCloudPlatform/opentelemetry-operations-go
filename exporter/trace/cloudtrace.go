@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	traceapi "cloud.google.com/go/trace/apiv2"
@@ -27,6 +28,11 @@ import (
 
 	"go.opentelemetry.io/otel/api/kv"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
+)
+
+var (
+	once sync.Once
+	resLabelMap = make(map[string]string)
 )
 
 // Option is function type that is passed to the exporter initialization function.
@@ -206,11 +212,30 @@ func newContextWithTimeout(ctx context.Context, timeout time.Duration) (context.
 	return context.WithTimeout(ctx, timeout)
 }
 
+// SetResLabelMapForOnce intializes ResLabelMap for once since 
+// monitored resources are static
+func (e * Exporter) SetResLabelMapForOnce(input map[string]string) {
+	once.Do(func() {
+		for k,v := range input {
+			resLabelMap[k] = v
+		}
+	})
+}
+
+// injectLabelsIntoSpan injects Monitored Resources labels into a span 
+func injectLabelsIntoSpan(sd *export.SpanData) *export.SpanData {
+	for k, v := range resLabelMap {
+		sd.Attributes = append(sd.Attributes, kv.Key(k).String(v))
+	}
+	return sd
+}
+
 // ExportSpan exports a SpanData to Stackdriver Trace.
 func (e *Exporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 	if len(e.traceExporter.o.DefaultTraceAttributes) > 0 {
 		sd = e.sdWithDefaultTraceAttributes(sd)
 	}
+	injectLabelsIntoSpan(sd)
 	e.traceExporter.ExportSpan(ctx, sd)
 }
 
