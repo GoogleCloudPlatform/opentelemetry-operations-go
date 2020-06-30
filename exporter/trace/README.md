@@ -29,7 +29,7 @@ projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 _, flush, err := texporter.NewExportPipeline(
         texporter.WithProjectID(projectID),
         // For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
-        // In a production environment or high QPS setup please use ProbabilitySampler 
+        // In a production environment or high QPS setup please use ProbabilitySampler
         // set at the desired probability.
         // Example:
         // texporter.WithSDKConfig(&sdktrace.Config{
