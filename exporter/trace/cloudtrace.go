@@ -32,6 +32,10 @@ import (
 // Option is function type that is passed to the exporter initialization function.
 type Option func(*options)
 
+// DisplayNameFormatter is is a function that produces the display name of a span
+// given its SpanData
+type DisplayNameFormatter func(*export.SpanData) string
+
 // options contains options for configuring the exporter.
 type options struct {
 	// ProjectID is the identifier of the Stackdriver
@@ -114,6 +118,11 @@ type options struct {
 	// If it is set to zero then default value is used.
 	ReportingInterval time.Duration
 
+	// DisplayNameFormatter is a function that produces the display name of a span
+	// given its SpanData.
+	// Optional. Default format for SpanData s is "Span.{s.SpanKind}-{s.Name}"
+	DisplayNameFormatter
+
 	// MaxNumberOfWorkers sets the maximum number of go rountines that send requests
 	// to Cloud Trace. The minimum number of workers is 1.
 	MaxNumberOfWorkers int
@@ -190,6 +199,14 @@ func WithMaxNumberOfWorkers(n int) func(o *options) {
 func WithTimeout(t time.Duration) func(o *options) {
 	return func(o *options) {
 		o.Timeout = t
+	}
+}
+
+// WithDisplayNameFormatter sets the way span's display names will be 
+// generated from SpanData
+func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
+	return func(o *options) {
+		o.DisplayNameFormatter = f
 	}
 }
 

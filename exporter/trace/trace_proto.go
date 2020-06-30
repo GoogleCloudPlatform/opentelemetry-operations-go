@@ -60,7 +60,18 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; cloudtrace-exporter %s", opentelemetry.Version(), version)
 
-func protoFromSpanData(s *export.SpanData, projectID string) *tracepb.Span {
+func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) string {
+	if format != nil {
+		return format(s)
+	}
+	switch s.SpanKind {
+	// TODO(ymotongpoo): add cases for "Send" and "Recv".
+	default:
+		return fmt.Sprintf("Span.%s-%s", s.SpanKind, s.Name)
+	}
+}
+
+func protoFromSpanData(s *export.SpanData, projectID string, format DisplayNameFormatter) *tracepb.Span {
 	if s == nil {
 		return nil
 	}
@@ -68,17 +79,12 @@ func protoFromSpanData(s *export.SpanData, projectID string) *tracepb.Span {
 	traceIDString := s.SpanContext.TraceID.String()
 	spanIDString := s.SpanContext.SpanID.String()
 
-	name := s.Name
-	switch s.SpanKind {
-	// TODO(ymotongpoo): add cases for "Send" and "Recv".
-	default:
-		name = fmt.Sprintf("Span.%s-%s", s.SpanKind, name)
-	}
+	displayName := generateDisplayName(s, format)
 
 	sp := &tracepb.Span{
 		Name:                    "projects/" + projectID + "/traces/" + traceIDString + "/spans/" + spanIDString,
 		SpanId:                  spanIDString,
-		DisplayName:             trunc(name, 128),
+		DisplayName:             trunc(displayName, 128),
 		StartTime:               timestampProto(s.StartTime),
 		EndTime:                 timestampProto(s.EndTime),
 		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.HasRemoteParent},
