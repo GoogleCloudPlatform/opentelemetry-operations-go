@@ -129,7 +129,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 		kv.String("k8s.namespace.name", "default"),
 		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-		kv.String("k8s.deployment.name", "opentelemetry"),		
+		kv.String("container.name", "opentelemetry"),		
 	), 
 	// nonexisting resource types
 	resource.New(
@@ -138,7 +138,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 		kv.String("k8s.namespace.name", "default"),
 		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-		kv.String("k8s.deployment.name", "opentelemetry"),		
+		kv.String("container.name", "opentelemetry"),		
 	),
 	// GCE resource fields
 	resource.New(
@@ -213,3 +213,46 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		}		
 	}
 }
+
+
+func TestCheckPrefixInMapKeys(t *testing.T) {
+	inputMap := []map[string]string {
+		// empty map and empty string -> false
+		map[string]string{
+		},
+		// non-empty map and empty string -> true
+		map[string]string{
+			"abc": "1",
+		},
+		// empty map and non-empty string -> false
+		map[string]string{
+		},
+		// no prefix exists -> false
+		map[string]string{
+			"a" : "1",
+			"abd": "2",
+		},
+		// a key is equal to prefix -> true
+		map[string]string{
+			"abc" : "1",
+			"ab": "2",
+		},
+		// the substring of a key is prefix -> true
+		map[string]string{
+			"abcd" : "1",
+			"ab": "2",
+		},	
+	}
+
+	inputString := []string {"", "", "abc", "abc", "abc", "abc"}
+
+	expected := []bool { false, true, false, false, true, true}
+
+	for i := range inputMap {
+		output := checkPrefixInMapKeys(inputMap[i], inputString[i])
+		if expected[i] != output {
+			t.Errorf("expected: %v, actual: %v", expected[i], output)
+		}
+	}
+}
+

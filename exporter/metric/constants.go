@@ -36,6 +36,11 @@ const (
 	HostKeyID       = "host.id"
 	HostKeyType     = "host.type"
 
+	// A uniquely identifying name for the Container.
+	ContainerKeyName      = "container.name"
+	ContainerKeyImageName = "container.image.name"
+	ContainerKeyImageTag  = "container.image.tag"
+
 	// Cloud Providers
 	CloudProviderAWS   = "aws"
 	CloudProviderGCP   = "gcp"

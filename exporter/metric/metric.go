@@ -81,7 +81,7 @@ var k8sContainerMap = map[string]string{
 	"cluster_name":   K8SKeyClusterName,
 	"namespace_name": K8SKeyNamespaceName,
 	"pod_name":       K8SKeyPodName,
-	"container_name": K8SKeyDeploymentName,
+	"container_name": ContainerKeyName,
 }
 
 var gceResourceMap = map[string]string{
@@ -291,12 +291,9 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 	}
 }
 
-// checkPrefixInMapKeys checks whether the non-empty prefix string
+// checkPrefixInMapKeys checks whether the prefix string
 //  is in the values of the map
 func checkPrefixInMapKeys(labelMap map[string]string, prefix string) bool {
-	if len(prefix) == 0 {
-		return false
-	}
 	for key := range labelMap {
 		if strings.HasPrefix(key, prefix) {
 			return true
@@ -311,29 +308,23 @@ func checkPrefixInMapKeys(labelMap map[string]string, prefix string) bool {
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
 func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
 
+	monitoredRes := &monitoredrespb.MonitoredResource{
+		Type: "global",
+		Labels: map[string]string{
+			"project_id": me.o.ProjectID,
+		},	
+	}
+		
+	// Return "global" Monitored resources if the input resource is null or empty
+	// "global" only accepts "project_id" for label.
+	// https://cloud.google.com/monitoring/api/resources#tag_global
 	if res == nil || res.Len() == 0 {
-    	// Return "global" Monitored resources if the input resource is null or empty
-	    // "global" only accepts "project_id" for label.
-	    // https://cloud.google.com/monitoring/api/resources#tag_global
-		return &monitoredrespb.MonitoredResource{
-			Type: "global",
-			Labels: map[string]string{
-				"project_id": me.o.ProjectID,
-			},
-		}	
+		return monitoredRes
 	}
 
-	// labels in Resource are in the form of []kv.KeyValue
-	// convert them into a map of kv.String
-	resLabelList := res.Attributes()
-
-	resLabelMap := make(map[string]string)
-	for _, label := range resLabelList {
-		resLabelMap[string(label.Key)] = label.Value.AsString()
-	}
+	resLabelMap := generateResLabelMap(res)
 
 	resTypeStr := "global"
-	monitoredReslabelsMap := make(map[string]string)
 	match := map[string]string{}
 	
 	if resType, found := resLabelMap[CloudKeyProvider]; found {
@@ -349,18 +340,24 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 		case CloudProviderAWS:
 			resTypeStr = "aws_ec2_instance"
 			match = awsResourceMap
-		default:
 		}	
-
-		monitoredReslabelsMap = transformResource(match, resLabelMap)
+		
+		monitoredRes.Labels = transformResource(match, resLabelMap)
 	}
 
-	monitoredReslabelsMap["project_id"] = me.o.ProjectID
+	monitoredRes.Type = resTypeStr	
+	monitoredRes.Labels["project_id"] = me.o.ProjectID
 	
-	return &monitoredrespb.MonitoredResource{
-		Type: resTypeStr,
-		Labels: monitoredReslabelsMap,
+	return monitoredRes
+}
+
+
+func generateResLabelMap(res *resource.Resource) map[string]string {
+	resLabelMap := make(map[string]string)
+	for _, label := range res.Attributes() {
+		resLabelMap[string(label.Key)] = label.Value.AsString()
 	}
+	return resLabelMap
 }
 
 
