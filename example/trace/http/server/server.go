@@ -47,7 +47,8 @@ func initTracer() func () {
 }
 
 func main() {
-	_ = initTracer()
+	flush := initTracer()
+	defer flush()
 
 	tr := global.TraceProvider().Tracer("cloudtrace/example/server")
 

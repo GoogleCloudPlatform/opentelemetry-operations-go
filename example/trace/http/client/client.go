@@ -54,6 +54,7 @@ func initTracer() func() {
 
 func main() {
 	flush := initTracer()
+	defer flush()
 	tr := global.TraceProvider().Tracer("cloudtrace/example/client")
 
 	client := http.DefaultClient
@@ -88,6 +89,4 @@ func main() {
 
 	fmt.Printf("Response Received: %s\n\n\n", body)
 	fmt.Printf("Waiting to export spans ...\n\n")
-	flush()
-	fmt.Println("Check traces on Google Cloud Trace")
 }
