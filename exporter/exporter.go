@@ -3,10 +3,12 @@ import (
 	"context"
 	"time"
 
+	sdk "go.opentelemetry.io/otel/sdk/metric"
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	texport "go.opentelemetry.io/otel/sdk/export/trace"	
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	cloudmetric "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
+	controllerTime "go.opentelemetry.io/otel/sdk/metric/controller/time"
 
 	"google.golang.org/api/option"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
@@ -164,4 +166,38 @@ func (e *Exporter) ExportSpans(ctx context.Context, sds []*texport.SpanData) {
 // GetTraceExporter returns the traceExporter
 func (e *Exporter) GetTraceExporter() *cloudtrace.Exporter {
 	return e.traceExporter;
+}
+
+// GetMetricPusher returns the metricPusher
+func (e *Exporter) GetMetricPusher() *push.Controller {
+	return e.metricPusher;
+}
+
+// SetClock supports setting a mock clock for testing.  This must be
+// called before Start().
+func (e *Exporter) SetClock(clock controllerTime.Clock) {
+	e.metricPusher.SetClock(clock)
+}
+
+// SetErrorHandler sets the handler for errors.  If none has been set, the
+// SDK default error handler is used.
+func (e *Exporter) SetErrorHandler(errorHandler sdk.ErrorHandler) {
+	e.metricPusher.SetErrorHandler(errorHandler)
+}
+
+// Provider returns a metric.Provider instance for this controller.
+func (e *Exporter) Provider() apimetric.Provider {
+	return e.metricPusher.Provider()
+}
+
+// Start begins a ticker that periodically collects and exports
+// metrics with the configured interval.
+func (e *Exporter) Start() {
+	e.metricPusher.Start()
+}
+
+// Stop waits for the background goroutine to return and then collects
+// and exports metrics one last time before returning.
+func (e *Exporter) Stop() {
+	e.metricPusher.Stop()
 }

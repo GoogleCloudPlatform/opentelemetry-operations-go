@@ -3,8 +3,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go
 go 1.14
 
 require (
-	cloud.google.com/go v0.57.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.2.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.2.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.2.0
 	github.com/golang/protobuf v1.4.2
 	github.com/stretchr/testify v1.4.0
