@@ -134,26 +134,22 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	}
 
 	// Create Google Cloud Trace Exporter
-	exp, err := texporter.NewExporter(
+	_, flush, err := texporter.NewExportPipeline(
 		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
 		texporter.WithTraceClientOptions(clientOpt),
 		texporter.WithBundleCountThreshold(1),
 		texporter.WithDisplayNameFormatter(format),
+		texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		texporter.RegisterAsGlobal(),
 	)
 	assert.NoError(t, err)
 
-	tp, err := sdktrace.NewProvider(
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithSyncer(exp))
-	assert.NoError(t, err)
-
-	global.SetTraceProvider(tp)
 	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), spanName)
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
 	// wait exporter to flush
-	time.Sleep(20 * time.Millisecond)
+	flush()
 	assert.EqualValues(t, 1, mockTrace.len())
 	assert.EqualValues(t, "TEST_FORMAT" + spanName, mockTrace.spansUploaded[0].DisplayName.Value)
 }
