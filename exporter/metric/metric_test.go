@@ -143,9 +143,12 @@ func TestRecordToMpb(t *testing.T) {
 
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
 
-	lvagg := lastvalue.New()
+	lvagg := &lastvalue.New(1)[0]
 	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)
-	lvagg.Checkpoint(ctx, &desc)
+	err := lvagg.Update(ctx, 1, &desc)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
 	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
 
 	md := &googlemetricpb.MetricDescriptor{
@@ -175,7 +178,7 @@ func TestRecordToMpb(t *testing.T) {
 		},
 	}
 
-	aggError := cps.ForEach(func(r export.Record) error {
+	aggError := cps.ForEach(export.PassThroughExporter, func(r export.Record) error {
 		out := me.recordToMpb(&r)
 		if !reflect.DeepEqual(want, out) {
 			return fmt.Errorf("expected: %v, actual: %v", want, out)

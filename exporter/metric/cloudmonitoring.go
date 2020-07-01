@@ -18,6 +18,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 	"time"
 
 	export "go.opentelemetry.io/otel/sdk/export/metric"
@@ -82,4 +84,9 @@ func NewRawExporter(opts ...Option) (*Exporter, error) {
 // Export exports the provide metric record to Google Cloud Monitoring.
 func (e *Exporter) Export(ctx context.Context, cps export.CheckpointSet) error {
 	return e.metricExporter.ExportMetrics(ctx, cps)
+}
+
+// ExportKindFor
+func (e *Exporter) ExportKindFor(*metric.Descriptor, aggregation.Kind) export.ExportKind {
+	return export.PassThroughExporter
 }

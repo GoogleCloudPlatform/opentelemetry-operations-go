@@ -24,7 +24,9 @@ import (
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
-	"go.opentelemetry.io/otel/sdk/export/metric/aggregator"
+	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
+	"go.opentelemetry.io/otel/sdk/metric/aggregator/minmaxsumcount"
+	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/resource"
 
@@ -53,7 +55,7 @@ type key struct {
 func keyOf(descriptor *apimetric.Descriptor) key {
 	return key{
 		name:        descriptor.Name(),
-		libraryname: descriptor.LibraryName(),
+		libraryname: descriptor.InstrumentationName(),
 	}
 }
 
@@ -162,7 +164,6 @@ func NewExportPipeline(opts []Option, popts ...push.Option) (*push.Controller, e
 		selector,
 		exporter,
 		append([]push.Option{
-			push.WithStateful(true),
 			push.WithPeriod(period),
 		}, popts...)...,
 	)
@@ -186,16 +187,17 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, cps export.Checkpoi
 // if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export.CheckpointSet) error {
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
-	aggError := cps.ForEach(func(r export.Record) error {
-		k := keyOf(r.Descriptor())
+	//TODO: check if it is export.PassThroughExporter
+	aggError := cps.ForEach(export.PassThroughExporter, func(r export.Record) error {
+		key := keyOf(r.Descriptor())
 
-		if _, ok := me.mdCache[k]; ok {
+		if _, ok := me.mdCache[key]; ok {
 			return nil
 		}
 
-		if _, localok := mds[k]; !localok {
+		if _, localok := mds[key]; !localok {
 			md := me.recordToMdpb(&r)
-			mds[k] = md
+			mds[key] = md
 		}
 		return nil
 	})
@@ -230,7 +232,8 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.CheckpointSet) error {
 	tss := []*monitoringpb.TimeSeries{}
 
-	aggError := cps.ForEach(func(r export.Record) error {
+	//TODO: check if it is export.PassThroughExporter
+	aggError := cps.ForEach(export.PassThroughExporter, func(r export.Record) error {
 		ts, err := me.recordToTspb(&r)
 		if err != nil {
 			return err
@@ -433,9 +436,6 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 		typ = googlemetricpb.MetricDescriptor_INT64
 	case apimetric.Float64NumberKind:
 		typ = googlemetricpb.MetricDescriptor_DOUBLE
-	case apimetric.Uint64NumberKind:
-		// TODO: [ymotongpoo] Confirm if INT64 is ok here.
-		typ = googlemetricpb.MetricDescriptor_INT64
 	default:
 		typ = googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 	}
@@ -475,7 +475,7 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries#Point
 // See detils in #25.
 func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
-	agg := r.Aggregator()
+	agg := r.Aggregation()
 	nkind := r.Descriptor().NumberKind()
 	mkind := r.Descriptor().MetricKind()
 	now := time.Now().Unix()
@@ -494,14 +494,14 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	// and it should return the appropriate value based on the aggregation type specified there.
 	switch mkind {
 	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
-		if lv, ok := agg.(aggregator.LastValue); ok {
+		if lv, ok := agg.(*lastvalue.Aggregator); ok {
 			return lastValueToTypedValueAndTimestamp(lv, nkind)
 		}
 		return nil, nil, errUnsupportedAggregation{agg: agg}
 	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
 		// CUMULATIVE measurement should have the same start time and increasing end time.
 		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
-		if sum, ok := agg.(aggregator.Sum); ok {
+		if sum, ok := agg.(*sum.Aggregator); ok {
 			return sumToTypedValueAndTimestamp(sum, nkind, me.startTime.Unix(), now)
 		}
 		return nil, nil, errUnsupportedAggregation{agg: agg}
@@ -510,7 +510,7 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	return nil, nil, errUnexpectedMetricKind{kind: mkind}
 }
 
-func countToTypeValueAndTimestamp(count aggregator.Count, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, err := count.Count()
 	if err != nil {
 		return nil, nil, err
@@ -537,17 +537,11 @@ func countToTypeValueAndTimestamp(count aggregator.Count, kind apimetric.NumberK
 				DoubleValue: float64(value),
 			},
 		}, t, nil
-	case apimetric.Uint64NumberKind:
-		return &monitoringpb.TypedValue{
-			Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: value,
-			},
-		}, t, nil
 	}
 	return nil, nil, errUnexpectedNumberKind{kind: kind}
 }
 
-func lastValueToTypedValueAndTimestamp(lv aggregator.LastValue, kind apimetric.NumberKind) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind apimetric.NumberKind) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, timestamp, err := lv.LastValue()
 	if err != nil {
 		return nil, nil, err
@@ -570,7 +564,7 @@ func lastValueToTypedValueAndTimestamp(lv aggregator.LastValue, kind apimetric.N
 	return tv, t, nil
 }
 
-func sumToTypedValueAndTimestamp(sum aggregator.Sum, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, err := sum.Sum()
 	if err != nil {
 		return nil, nil, err
@@ -604,13 +598,6 @@ func aggToTypedValue(kind apimetric.NumberKind, value apimetric.Number) (*monito
 		return &monitoringpb.TypedValue{
 			Value: &monitoringpb.TypedValue_DoubleValue{
 				DoubleValue: value.AsFloat64(),
-			},
-		}, nil
-	// TODO: Confirm if using Int64Value is OK
-	case apimetric.Uint64NumberKind:
-		return &monitoringpb.TypedValue{
-			Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: value.AsInt64(),
 			},
 		}, nil
 	}
