@@ -27,7 +27,7 @@ Once you import the trace exporter package, create and install a new export pipe
 // Create exporter and trace provider pipeline, and register provider.
 projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 _, flush, err := texporter.InstallNewPipeline(
-        []texporter.Option {
+        []texporter.Option{
                 texporter.WithProjectID(projectID),
                 // other optional exporter options
         },
