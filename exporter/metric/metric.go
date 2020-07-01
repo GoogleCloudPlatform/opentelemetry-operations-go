@@ -84,6 +84,19 @@ var k8sContainerMap = map[string]string{
 	"container_name": ContainerKeyName,
 }
 
+var k8sNodeMap = map[string]string{
+	"location":       CloudKeyZone,
+	"cluster_name":   K8SKeyClusterName,
+	"node_name": HostKeyName,
+}
+
+var k8sPodMap = map[string]string{
+	"location":       CloudKeyZone,
+	"cluster_name":   K8SKeyClusterName,
+	"namespace_name": K8SKeyNamespaceName,
+	"pod_name":       K8SKeyPodName,
+}
+
 var gceResourceMap = map[string]string{
 	"instance_id": HostKeyID,
 	"zone":        CloudKeyZone,
@@ -291,16 +304,32 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 	}
 }
 
-// checkPrefixInMapKeys checks whether the prefix string
-//  is in the values of the map
-func checkPrefixInMapKeys(labelMap map[string]string, prefix string) bool {
-	for key := range labelMap {
-		if strings.HasPrefix(key, prefix) {
-			return true
-		}
+// refer to the monitored resources fields 
+// https://cloud.google.com/monitoring/api/resources
+func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
+	_, hasLocation := labelMap[CloudKeyZone]
+	_, hasClusterName := labelMap[K8SKeyClusterName]
+	_, hasNamespaceName := labelMap[K8SKeyNamespaceName]
+	_, hasPodName := labelMap[K8SKeyPodName]
+	_, hasContainerName := labelMap[ContainerKeyName]
+
+	if hasLocation && hasClusterName && hasNamespaceName && hasPodName && hasContainerName {
+		return K8SContainer, k8sContainerMap
 	}
-	return false
+
+	_, hasNodeName := labelMap[HostKeyName]
+
+	if hasLocation && hasClusterName && hasNodeName {
+		return K8SNode, k8sNodeMap
+	}
+
+	if hasLocation && hasClusterName && hasNamespaceName && hasPodName {
+		return K8SPod, k8sPodMap
+	}
+
+	return GCEInstance, gceResourceMap
 }
+
 
 // resourceToMonitoredResourcepb converts resource in OTel to MonitoredResource
 // proto type for Cloud Monitoring.
@@ -330,19 +359,18 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	if resType, found := resLabelMap[CloudKeyProvider]; found {
 		switch resType {
 		case CloudProviderGCP:
-			if checkPrefixInMapKeys(resLabelMap, "k8s") {
-				resTypeStr = "k8s_container"
-				match = k8sContainerMap	
-			} else {
-				resTypeStr = "gce_instance"
-				match = gceResourceMap
-			}		
+			resTypeStr, match = subdivideGCPTypes(resLabelMap)
 		case CloudProviderAWS:
-			resTypeStr = "aws_ec2_instance"
+			resTypeStr = AWSEC2Instance
 			match = awsResourceMap
 		}	
-		
-		monitoredRes.Labels = transformResource(match, resLabelMap)
+
+		outputMap, isMissing := transformResource(match, resLabelMap)
+		if isMissing {
+			resTypeStr = "global"			
+		} else {
+			monitoredRes.Labels = outputMap
+		}
 	}
 
 	monitoredRes.Type = resTypeStr	
@@ -361,15 +389,19 @@ func generateResLabelMap(res *resource.Resource) map[string]string {
 }
 
 
-// returns transformed label map for all labels in match are found
-func transformResource(match, input map[string]string) map[string]string {
+// returns transformed label map and false if all labels in match are found
+// in input except optional project_id. It returns true if at least one label
+// other than project_id is missing.
+func transformResource(match, input map[string]string) (map[string]string, bool) {
 	output := make(map[string]string, len(input))
 	for dst, src := range match {
 		if v, ok := input[src]; ok {
 			output[dst] = v
+		} else {
+			return map[string]string{}, true
 		}
 	}
-	return output
+	return output, false
 }
 
 

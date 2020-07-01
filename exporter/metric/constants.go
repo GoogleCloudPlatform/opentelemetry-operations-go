@@ -46,8 +46,16 @@ const (
 	CloudProviderGCP   = "gcp"
 	CloudProviderAZURE = "azure"
 
+	K8S = "k8s"
 	K8SKeyClusterName    = "k8s.cluster.name"
 	K8SKeyNamespaceName  = "k8s.namespace.name"
 	K8SKeyPodName        = "k8s.pod.name"
 	K8SKeyDeploymentName = "k8s.deployment.name"
+
+	// Monitored Resources types
+	K8SContainer = "k8s_container"
+	K8SNode = "k8s_node"
+	K8SPod = "k8s_pod"
+	GCEInstance = "gce_instance"
+	AWSEC2Instance = "aws_ec2_instance"
 )

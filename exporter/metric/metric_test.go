@@ -122,7 +122,7 @@ func TestRecordToMpb(t *testing.T) {
 
 func TestResourceToMonitoredResourcepb(t *testing.T) {
 	resList := []*resource.Resource{
-	// K8S resources
+	// k8s_container
 	resource.New(
 		kv.String("cloud.provider", "gcp"),
 		kv.String("cloud.zone", "us-central1-a"),
@@ -131,6 +131,27 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
 		kv.String("container.name", "opentelemetry"),		
 	), 
+	// k8s_node
+	resource.New(
+		kv.String("cloud.provider", "gcp"),
+		kv.String("cloud.zone", "us-central1-a"),
+		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+		kv.String("host.name", "opentelemetry-node"),
+	), 	
+	// k8s_pod
+	resource.New(
+		kv.String("cloud.provider", "gcp"),
+		kv.String("cloud.zone", "us-central1-a"),
+		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+		kv.String("k8s.namespace.name", "default"),
+		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+	), 
+	// k8s_node missing a field
+	resource.New(
+		kv.String("cloud.provider", "gcp"),
+		kv.String("cloud.zone", "us-central1-a"),
+		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+	), 	
 	// nonexisting resource types
 	resource.New(
 		kv.String("cloud.provider", "none"),
@@ -154,7 +175,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		kv.String("cloud.account.id", "fake_account"),
 	),}
 
-	expectedTypes := []string{"k8s_container","global", "gce_instance", "aws_ec2_instance"}
+	expectedTypes := []string{"k8s_container","k8s_node", "k8s_pod", "global", "global", "gce_instance", "aws_ec2_instance"}
 
 	expectedLabels := []map[string]string {
 		map[string]string{
@@ -165,6 +186,23 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			"pod_name": "opentelemetry-pod-autoconf",
 			"container_name": "opentelemetry",
 		},
+
+		map[string]string{
+			"project_id":     "",
+			"location": "us-central1-a",
+			"cluster_name": "opentelemetry-cluster",
+			"node_name": "opentelemetry-node",
+		},		
+		map[string]string{
+			"project_id":     "",
+			"location": "us-central1-a",
+			"cluster_name": "opentelemetry-cluster",
+			"namespace_name": "default",
+			"pod_name": "opentelemetry-pod-autoconf",
+		},		
+		map[string]string{
+			"project_id":     "",
+		},	
 		map[string]string{
 			"project_id":     "",
 		},
@@ -213,46 +251,3 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		}		
 	}
 }
-
-
-func TestCheckPrefixInMapKeys(t *testing.T) {
-	inputMap := []map[string]string {
-		// empty map and empty string -> false
-		map[string]string{
-		},
-		// non-empty map and empty string -> true
-		map[string]string{
-			"abc": "1",
-		},
-		// empty map and non-empty string -> false
-		map[string]string{
-		},
-		// no prefix exists -> false
-		map[string]string{
-			"a" : "1",
-			"abd": "2",
-		},
-		// a key is equal to prefix -> true
-		map[string]string{
-			"abc" : "1",
-			"ab": "2",
-		},
-		// the substring of a key is prefix -> true
-		map[string]string{
-			"abcd" : "1",
-			"ab": "2",
-		},	
-	}
-
-	inputString := []string {"", "", "abc", "abc", "abc", "abc"}
-
-	expected := []bool { false, true, false, false, true, true}
-
-	for i := range inputMap {
-		output := checkPrefixInMapKeys(inputMap[i], inputString[i])
-		if expected[i] != output {
-			t.Errorf("expected: %v, actual: %v", expected[i], output)
-		}
-	}
-}
-
