@@ -104,13 +104,14 @@ func TestExporter_ExportSpan(t *testing.T) {
 	mockTrace.delay = 0
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := texporter.NewExportPipeline(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		// handle bundle as soon as span is received
-		texporter.WithBundleCountThreshold(1),
-		texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		texporter.RegisterAsGlobal(),
+	_, flush, err := texporter.InstallNewPipeline(
+		[]texporter.Option {
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			// handle bundle as soon as span is received
+			texporter.WithBundleCountThreshold(1),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	assert.NoError(t, err)
 
@@ -134,13 +135,14 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	}
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := texporter.NewExportPipeline(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		texporter.WithBundleCountThreshold(1),
-		texporter.WithDisplayNameFormatter(format),
-		texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		texporter.RegisterAsGlobal(),
+	_, flush, err := texporter.InstallNewPipeline(
+		[]texporter.Option {
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			texporter.WithBundleCountThreshold(1),
+			texporter.WithDisplayNameFormatter(format),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	assert.NoError(t, err)
 
@@ -161,17 +163,18 @@ func TestExporter_Timeout(t *testing.T) {
 	var exportErrors []error
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := texporter.NewExportPipeline(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		texporter.WithTimeout(1*time.Millisecond),
-		// handle bundle as soon as span is received
-		texporter.WithBundleCountThreshold(1),
-		texporter.WithOnError(func(err error) {
-			exportErrors = append(exportErrors, err)
-		}),
-		texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		texporter.RegisterAsGlobal(),
+	_, flush, err := texporter.InstallNewPipeline(
+		[]texporter.Option {
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			texporter.WithTimeout(1*time.Millisecond),
+			// handle bundle as soon as span is received
+			texporter.WithBundleCountThreshold(1),
+			texporter.WithOnError(func(err error) {
+				exportErrors = append(exportErrors, err)
+			}),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	assert.NoError(t, err)
 
@@ -200,13 +203,14 @@ func TestBundling(t *testing.T) {
 	}
 	mockTrace.mu.Unlock()
 
-	_, _, err := texporter.NewExportPipeline(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		texporter.WithBundleDelayThreshold(time.Second / 10),
-		texporter.WithBundleCountThreshold(10),
-		texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		texporter.RegisterAsGlobal(),
+	_, _, err := texporter.InstallNewPipeline(
+		[]texporter.Option {
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			texporter.WithBundleDelayThreshold(time.Second / 10),
+			texporter.WithBundleCountThreshold(10),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	assert.NoError(t, err)
 
@@ -259,14 +263,15 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 	workers := 3
 	spansPerWorker := 50
 	delay := 2 * time.Second
-	_, _, err := texporter.NewExportPipeline(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		texporter.WithBundleDelayThreshold(delay),
-		texporter.WithBundleCountThreshold(spansPerWorker),
-		texporter.WithMaxNumberOfWorkers(workers),
-		texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		texporter.RegisterAsGlobal(),
+	_, _, err := texporter.InstallNewPipeline(
+		[]texporter.Option {
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			texporter.WithBundleDelayThreshold(delay),
+			texporter.WithBundleCountThreshold(spansPerWorker),
+			texporter.WithMaxNumberOfWorkers(workers),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	assert.NoError(t, err)
 

@@ -28,17 +28,16 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
-func initTracer() func () {
+func initTracer() func() {
 	projectID := os.Getenv("PROJECT_ID")
 
 	// Create Google Cloud Trace exporter to be able to retrieve
 	// the collected spans.
-	_, flush, err := cloudtrace.NewExportPipeline(
-		cloudtrace.WithProjectID(projectID),
+	_, flush, err := cloudtrace.InstallNewPipeline(
+		[]cloudtrace.Option {cloudtrace.WithProjectID(projectID)},
 		// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
-		cloudtrace.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		cloudtrace.RegisterAsGlobal(),
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	if err != nil {
 		log.Fatal(err)

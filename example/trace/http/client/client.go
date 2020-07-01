@@ -39,12 +39,11 @@ func initTracer() func() {
 
 	// Create Google Cloud Trace exporter to be able to retrieve
 	// the collected spans.
-	_, flush, err := texporter.NewExportPipeline(
-		texporter.WithProjectID(projectID),
+	_, flush, err := texporter.InstallNewPipeline(
+		[]texporter.Option {texporter.WithProjectID(projectID)},
 		// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
-		texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		texporter.RegisterAsGlobal(),
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	if err != nil {
 		log.Fatal(err)
