@@ -129,13 +129,6 @@ type options struct {
 	// MaxNumberOfWorkers sets the maximum number of go rountines that send requests
 	// to Cloud Trace. The minimum number of workers is 1.
 	MaxNumberOfWorkers int
-
-	// SDKConfig is the Config for sdktrace when creating provider
-	SDKConfig *sdktrace.Config
-
-	// RegisterGlobal is set to true if the trace provider of the new pipeline should be
-	// registered as Global Trace Provider
-	RegisterGlobal bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -220,20 +213,6 @@ func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
   }
 }
 
-// WithSDKConfig sets the SDK Config when creating the provider in the pipeline
-func WithSDKConfig(c *sdktrace.Config) func(o *options) {
-	return func(o *options) {
-		o.SDKConfig = c
-	}
-}
-
-// RegisterAsGlobal() marks the provider to be set as global in the pipeline
-func RegisterAsGlobal() func (o *options) {
-	return func(o *options) {
-		o.RegisterGlobal = true
-	}
-}
-
 func (o *options) handleError(err error) {
 	if o.OnError != nil {
 		o.OnError(err)
@@ -253,42 +232,28 @@ type Exporter struct {
 	traceExporter *traceExporter
 }
 
+// InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
+func InstallNewPipeline(opts []Option, topts ...sdktrace.ProviderOption) (apitrace.Provider, func(), error) {
+	tp, flush, err := NewExportPipeline(opts, topts...)
+	if err != nil {
+		return nil, nil, err
+	}
+	global.SetTraceProvider(tp)
+	return tp, flush, err
+}
+
 // NewExportPipeline sets up a complete export pipeline with the recommended setup 
 // for trace provider. Returns provider, flush function, and errors.
-func NewExportPipeline(opts ...Option) (apitrace.Provider, func(), error) {
-	o := options{Context: context.Background()}
-	for _, opt := range opts {
-		opt(&o)
-	}
-	if o.ProjectID == "" {
-		creds, err := google.FindDefaultCredentials(o.Context, traceapi.DefaultAuthScopes()...)
-		if err != nil {
-			return nil, nil, fmt.Errorf("stackdriver: %v", err)
-		}
-		if creds.ProjectID == "" {
-			return nil, nil, errors.New("stackdriver: no project found with application default credentials")
-		}
-		o.ProjectID = creds.ProjectID
-	}
-	te, err := newTraceExporter(&o)
+func NewExportPipeline(opts []Option, topts ...sdktrace.ProviderOption) (apitrace.Provider, func(), error) {
+	exporter, err := NewExporter(opts...)
 	if err != nil {
 		return nil, nil, err
 	}
-	syncer := sdktrace.WithSyncer(&Exporter{
-		traceExporter: te,
-	})
-	tp, err := sdktrace.NewProvider(syncer)
+	tp, err := sdktrace.NewProvider(append(topts, sdktrace.WithSyncer(exporter))...)
 	if err != nil {
 		return nil, nil, err
 	}
-	if te.o.SDKConfig != nil {
-		tp.ApplyConfig(*te.o.SDKConfig)
-	}
-	if te.o.RegisterGlobal {
-		global.SetTraceProvider(tp)
-	}
-
-	return tp, te.Flush, nil
+	return tp, exporter.traceExporter.Flush, nil
 }
 
 // NewExporter creates a new Exporter thats implements trace.Exporter.
