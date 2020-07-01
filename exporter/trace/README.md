@@ -21,7 +21,7 @@ Add `github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace` 
 import texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 ```
 
-Once you import the trace exporter package, then register the exporter to the application, and start tracing. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instruction in [Authentication](#Authentication).
+Once you import the trace exporter package, create and install a new export pipeline, and then you can start tracing. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instruction in [Authentication](#Authentication).
 
 ```go
 // Create exporter and trace provider pipeline, and register provider.
