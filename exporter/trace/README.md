@@ -24,22 +24,25 @@ import texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exp
 Once you import the trace exporter package, then register the exporter to the application, and start tracing. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instruction in [Authentication](#Authentication).
 
 ```go
-// Create exporter and trace provider using pipeline.
+// Create exporter and trace provider pipeline, and register provider.
 projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-_, flush, err := texporter.NewExportPipeline(
-        texporter.WithProjectID(projectID),
+_, flush, err := texporter.InstallNewPipeline(
+        []texporter.Option {
+                texporter.WithProjectID(projectID),
+                // other optional exporter options
+        },
         // For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
         // In a production environment or high QPS setup please use ProbabilitySampler
         // set at the desired probability.
         // Example:
-        // texporter.WithSDKConfig(&sdktrace.Config{
+        // sdktrace.WithConfig(sdktrace.Config {
         //        DefaultSampler: sdktrace.ProbabilitySampler(0.0001),
         // })
-        texporter.WithSDKConfig(&sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-        texporter.RegisterAsGlobal(),
+        sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+        // other optional provider options
 )
 if err != nil {
-    log.Fatalf("texporter.NewExportPipeline: %v", err)
+    log.Fatalf("texporter.InstallNewPipeline: %v", err)
 }
 // before ending program, wait for all enqueued spans to be exported
 defer flush()
