@@ -210,7 +210,7 @@ func WithTimeout(t time.Duration) func(o *options) {
 func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
 	return func(o *options) {
 		o.DisplayNameFormatter = f
-  }
+	}
 }
 
 func (o *options) handleError(err error) {
