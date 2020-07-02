@@ -121,103 +121,124 @@ func TestRecordToMpb(t *testing.T) {
 
 
 func TestResourceToMonitoredResourcepb(t *testing.T) {
-	resList := []*resource.Resource{
-	// k8s_container
-	resource.New(
-		kv.String("cloud.provider", "gcp"),
-		kv.String("cloud.zone", "us-central1-a"),
-		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-		kv.String("k8s.namespace.name", "default"),
-		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-		kv.String("container.name", "opentelemetry"),		
-	), 
-	// k8s_node
-	resource.New(
-		kv.String("cloud.provider", "gcp"),
-		kv.String("cloud.zone", "us-central1-a"),
-		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-		kv.String("host.name", "opentelemetry-node"),
-	), 	
-	// k8s_pod
-	resource.New(
-		kv.String("cloud.provider", "gcp"),
-		kv.String("cloud.zone", "us-central1-a"),
-		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-		kv.String("k8s.namespace.name", "default"),
-		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-	), 
-	// k8s_node missing a field
-	resource.New(
-		kv.String("cloud.provider", "gcp"),
-		kv.String("cloud.zone", "us-central1-a"),
-		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-	), 	
-	// nonexisting resource types
-	resource.New(
-		kv.String("cloud.provider", "none"),
-		kv.String("cloud.zone", "us-central1-a"),
-		kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-		kv.String("k8s.namespace.name", "default"),
-		kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-		kv.String("container.name", "opentelemetry"),		
-	),
-	// GCE resource fields
-	resource.New(
-		kv.String("cloud.provider", "gcp"),
-		kv.String("host.id", "123"),
-		kv.String("cloud.zone", "us-central1-a"),
-	),
-	// AWS resources
-	resource.New(
-		kv.String("cloud.provider", "aws"),
-		kv.String("cloud.region", "us-central1-a"),
-		kv.String("host.id", "123"),
-		kv.String("cloud.account.id", "fake_account"),
-	),}
-
-	expectedTypes := []string{"k8s_container","k8s_node", "k8s_pod", "global", "global", "gce_instance", "aws_ec2_instance"}
-
-	expectedLabels := []map[string]string {
-		map[string]string{
-			"project_id":     "",
-			"location": "us-central1-a",
-			"cluster_name": "opentelemetry-cluster",
-			"namespace_name": "default",
-			"pod_name": "opentelemetry-pod-autoconf",
-			"container_name": "opentelemetry",
+	testCases := []struct {
+		resource *resource.Resource
+		expectedType string
+		expectedLabels map[string]string
+	}{
+		// k8s_container
+		{
+			resource.New(
+				kv.String("cloud.provider", "gcp"),
+				kv.String("cloud.zone", "us-central1-a"),
+				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+				kv.String("k8s.namespace.name", "default"),
+				kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+				kv.String("container.name", "opentelemetry"),		
+			), 
+			"k8s_container", 
+			map[string]string{
+				"project_id":     "",
+				"location": "us-central1-a",
+				"cluster_name": "opentelemetry-cluster",
+				"namespace_name": "default",
+				"pod_name": "opentelemetry-pod-autoconf",
+				"container_name": "opentelemetry",
+			},
+	    },
+		// k8s_node
+		{
+			resource.New(
+				kv.String("cloud.provider", "gcp"),
+				kv.String("cloud.zone", "us-central1-a"),
+				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+				kv.String("host.name", "opentelemetry-node"),
+			), 	
+			"k8s_node", 
+			map[string]string{
+				"project_id":     "",
+				"location": "us-central1-a",
+				"cluster_name": "opentelemetry-cluster",
+				"node_name": "opentelemetry-node",
+			},
 		},
-
-		map[string]string{
-			"project_id":     "",
-			"location": "us-central1-a",
-			"cluster_name": "opentelemetry-cluster",
-			"node_name": "opentelemetry-node",
-		},		
-		map[string]string{
-			"project_id":     "",
-			"location": "us-central1-a",
-			"cluster_name": "opentelemetry-cluster",
-			"namespace_name": "default",
-			"pod_name": "opentelemetry-pod-autoconf",
-		},		
-		map[string]string{
-			"project_id":     "",
-		},	
-		map[string]string{
-			"project_id":     "",
+        // k8s_pod
+		{
+			resource.New(
+				kv.String("cloud.provider", "gcp"),
+				kv.String("cloud.zone", "us-central1-a"),
+				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+				kv.String("k8s.namespace.name", "default"),
+				kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+			), 
+			"k8s_pod",
+			map[string]string{
+				"project_id":     "",
+				"location": "us-central1-a",
+				"cluster_name": "opentelemetry-cluster",
+				"namespace_name": "default",
+				"pod_name": "opentelemetry-pod-autoconf",
+			},
+		},			 
+		// k8s_node missing a field
+		{
+			resource.New(
+				kv.String("cloud.provider", "gcp"),
+				kv.String("cloud.zone", "us-central1-a"),
+				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+			),
+			"global",
+			map[string]string{
+				"project_id":     "",
+			},
 		},
-		map[string]string{
-			"project_id":     "",
-			"instance_id": "123",
-			"zone": "us-central1-a",
+		// nonexisting resource types
+		{
+			resource.New(
+				kv.String("cloud.provider", "none"),
+				kv.String("cloud.zone", "us-central1-a"),
+				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+				kv.String("k8s.namespace.name", "default"),
+				kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+				kv.String("container.name", "opentelemetry"),		
+			),
+			"global", 
+			map[string]string{
+				"project_id":     "",
+			},
 		},
-		map[string]string{
-			"project_id":     "",
-			"instance_id": "123",
-			"region": "us-central1-a",
-			"aws_account": "fake_account",
+		// GCE resource fields
+		{
+			resource.New(
+				kv.String("cloud.provider", "gcp"),
+				kv.String("host.id", "123"),
+				kv.String("cloud.zone", "us-central1-a"),
+			),
+			"gce_instance",
+			map[string]string{
+				"project_id":     "",
+				"instance_id": "123",
+				"zone": "us-central1-a",
+			},
+		},
+		// AWS resources
+		{
+			resource.New(
+				kv.String("cloud.provider", "aws"),
+				kv.String("cloud.region", "us-central1-a"),
+				kv.String("host.id", "123"),
+				kv.String("cloud.account.id", "fake_account"),
+			),
+			"aws_ec2_instance",
+			map[string]string{
+				"project_id":     "",
+				"instance_id": "123",
+				"region": "us-central1-a",
+				"aws_account": "fake_account",
+			},
 		},
 	}
+
 
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
 	
@@ -241,13 +262,13 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 	}
 
-	for index := range resList {
-		outputMonitoredRes := me.resourceToMonitoredResourcepb(resList[index])
-		if !reflect.DeepEqual(outputMonitoredRes.GetLabels(), expectedLabels[index]) {
-			t.Errorf("expected: %v, actual: %v", expectedLabels[index], outputMonitoredRes.GetLabels())
+	for _, test := range testCases {
+		outputMonitoredRes := me.resourceToMonitoredResourcepb(test.resource)
+		if !reflect.DeepEqual(outputMonitoredRes.GetLabels(), test.expectedLabels) {
+			t.Errorf("expected: %v, actual: %v", test.expectedLabels, outputMonitoredRes.GetLabels())
 		}
-		if outputMonitoredRes.GetType() != expectedTypes[index] {
-			t.Errorf("expected: %v, actual: %v", expectedTypes[index], outputMonitoredRes.GetType())
-		}		
+		if outputMonitoredRes.GetType() != test.expectedType {
+			t.Errorf("expected: %v, actual: %v", test.expectedType, outputMonitoredRes.GetType())
+		}	
 	}
 }
