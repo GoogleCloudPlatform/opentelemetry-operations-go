@@ -263,12 +263,14 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	}
 
 	for _, test := range testCases {
-		outputMonitoredRes := me.resourceToMonitoredResourcepb(test.resource)
-		if !reflect.DeepEqual(outputMonitoredRes.GetLabels(), test.expectedLabels) {
-			t.Errorf("expected: %v, actual: %v", test.expectedLabels, outputMonitoredRes.GetLabels())
-		}
-		if outputMonitoredRes.GetType() != test.expectedType {
-			t.Errorf("expected: %v, actual: %v", test.expectedType, outputMonitoredRes.GetType())
-		}	
+		t.Run(fmt.Sprintf("%s", test.resource), func(t *testing.T) {
+            got := me.resourceToMonitoredResourcepb(test.resource)
+		    if !reflect.DeepEqual(got.GetLabels(), test.expectedLabels) {
+			    t.Errorf("expected: %v, actual: %v", test.expectedLabels, got.GetLabels())
+		    }
+		    if got.GetType() != test.expectedType {
+			    t.Errorf("expected: %v, actual: %v", test.expectedType, got.GetType())
+		    }	
+        })
 	}
 }
