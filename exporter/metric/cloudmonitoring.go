@@ -28,11 +28,11 @@ import (
 
 const (
 	// defaultReportingDuration defaults to 60 seconds.
-	// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#monitoring_write_timeseries-go
 	defaultReportingDuration = 60 * time.Second
 
 	// minimumReportingDuration is the minimum duration supported by Google Cloud Monitoring.
 	// As of Apr 2020, the minimum duration is 10 second for custom metrics.
+	// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#writing-ts
 	minimumReportingDuration = 10 * time.Second
 )
 
