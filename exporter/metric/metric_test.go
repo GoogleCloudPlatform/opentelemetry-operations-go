@@ -263,7 +263,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	}
 
 	for _, test := range testCases {
-		t.Run(fmt.Sprintf("%s", test.resource), func(t *testing.T) {
+		t.Run(test.resource.String(), func(t *testing.T) {
             got := me.resourceToMonitoredResourcepb(test.resource)
 		    if !reflect.DeepEqual(got.GetLabels(), test.expectedLabels) {
 			    t.Errorf("expected: %v, actual: %v", test.expectedLabels, got.GetLabels())
