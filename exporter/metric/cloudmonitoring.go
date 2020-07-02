@@ -32,8 +32,8 @@ const (
 	defaultReportingDuration = 60 * time.Second
 
 	// minimumReportingDuration is the minimum duration supported by Google Cloud Monitoring.
-	// As of Apr 2020, the minimum duration is 1 second for custom metrics.
-	minimumReportingDuration = 1 * time.Second
+	// As of Apr 2020, the minimum duration is 10 second for custom metrics.
+	minimumReportingDuration = 10 * time.Second
 )
 
 var (
