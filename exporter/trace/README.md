@@ -31,7 +31,7 @@ _, flush, err := texporter.InstallNewPipeline(
                 texporter.WithProjectID(projectID),
                 // other optional exporter options
         },
-        // For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
+        // This example code uses sdktrace.AlwaysSample sampler to sample all traces.
         // In a production environment or high QPS setup please use ProbabilitySampler
         // set at the desired probability.
         // Example:

@@ -41,7 +41,7 @@ func initTracer() func() {
 	// the collected spans.
 	_, flush, err := texporter.InstallNewPipeline(
 		[]texporter.Option {texporter.WithProjectID(projectID)},
-		// For the demonstration, use sdktrace.AlwaysSample sampler to sample all traces.
+		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
