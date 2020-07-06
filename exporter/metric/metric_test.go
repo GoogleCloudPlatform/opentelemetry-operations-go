@@ -81,15 +81,15 @@ func TestRecordToMpb(t *testing.T) {
 	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
 
 	md := &googlemetricpb.MetricDescriptor{
-		Name:        desc.Name(),
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
-		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
+		Name: desc.Name(),
+		Type: fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		MetricKind: googlemetricpb.MetricDescriptor_GAUGE,
+		ValueType: googlemetricpb.MetricDescriptor_DOUBLE,
 		Description: "test",
 	}
 
 	mdkey := key{
-		name:        md.Name,
+		name: md.Name,
 		libraryname: "",
 	}
 	me := &metricExporter{
@@ -138,7 +138,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			), 
 			"k8s_container", 
 			map[string]string{
-				"project_id":     "",
+				"project_id": "",
 				"location": "us-central1-a",
 				"cluster_name": "opentelemetry-cluster",
 				"namespace_name": "default",
@@ -156,7 +156,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			), 	
 			"k8s_node", 
 			map[string]string{
-				"project_id":     "",
+				"project_id": "",
 				"location": "us-central1-a",
 				"cluster_name": "opentelemetry-cluster",
 				"node_name": "opentelemetry-node",
@@ -173,23 +173,37 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			), 
 			"k8s_pod",
 			map[string]string{
-				"project_id":     "",
+				"project_id": "",
 				"location": "us-central1-a",
 				"cluster_name": "opentelemetry-cluster",
 				"namespace_name": "default",
 				"pod_name": "opentelemetry-pod-autoconf",
 			},
-		},			 
-		// k8s_node missing a field
+		},
+        // k8s_cluster
 		{
 			resource.New(
 				kv.String("cloud.provider", "gcp"),
 				kv.String("cloud.zone", "us-central1-a"),
 				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+			), 	
+			"k8s_cluster", 
+			map[string]string{
+				"project_id": "",
+				"location": "us-central1-a",
+				"cluster_name": "opentelemetry-cluster",
+			},
+		},	
+		// k8s_node missing a field
+		{
+			resource.New(
+				kv.String("cloud.provider", "gcp"),
+				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+				kv.String("host.name", "opentelemetry-node"),
 			),
 			"global",
 			map[string]string{
-				"project_id":     "",
+				"project_id": "",
 			},
 		},
 		// nonexisting resource types
@@ -204,7 +218,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			),
 			"global", 
 			map[string]string{
-				"project_id":     "",
+				"project_id": "",
 			},
 		},
 		// GCE resource fields
@@ -216,7 +230,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			),
 			"gce_instance",
 			map[string]string{
-				"project_id":     "",
+				"project_id": "",
 				"instance_id": "123",
 				"zone": "us-central1-a",
 			},
@@ -231,7 +245,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			),
 			"aws_ec2_instance",
 			map[string]string{
-				"project_id":     "",
+				"project_id": "",
 				"instance_id": "123",
 				"region": "us-central1-a",
 				"aws_account": "fake_account",
@@ -243,15 +257,15 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
 	
 	md := &googlemetricpb.MetricDescriptor{
-		Name:        desc.Name(),
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
-		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
+		Name: desc.Name(),
+		Type: fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		MetricKind: googlemetricpb.MetricDescriptor_GAUGE,
+		ValueType: googlemetricpb.MetricDescriptor_DOUBLE,
 		Description: "test",
 	}	
 
 	mdkey := key{
-		name:        md.Name,
+		name: md.Name,
 		libraryname: "",
 	}	
 

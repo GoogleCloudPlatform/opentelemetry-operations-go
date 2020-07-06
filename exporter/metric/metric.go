@@ -87,7 +87,12 @@ var k8sContainerMap = map[string]string{
 var k8sNodeMap = map[string]string{
 	"location":       CloudKeyZone,
 	"cluster_name":   K8SKeyClusterName,
-	"node_name": HostKeyName,
+	"node_name":      HostKeyName,
+}
+
+var k8sClusterMap = map[string]string{
+	"location":       CloudKeyZone,
+	"cluster_name":   K8SKeyClusterName,
 }
 
 var k8sPodMap = map[string]string{
@@ -325,6 +330,10 @@ func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
 
 	if hasLocation && hasClusterName && hasNamespaceName && hasPodName {
 		return K8SPod, k8sPodMap
+	}
+
+	if hasLocation && hasClusterName {
+		return K8SCluster, k8sClusterMap
 	}
 
 	return GCEInstance, gceResourceMap

@@ -56,6 +56,7 @@ const (
 	K8SContainer = "k8s_container"
 	K8SNode = "k8s_node"
 	K8SPod = "k8s_pod"
+	K8SCluster = "k8s_cluster"
 	GCEInstance = "gce_instance"
 	AWSEC2Instance = "aws_ec2_instance"
 )
