@@ -72,13 +72,16 @@ func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) string
 }
 
 func injectLabelsFromResources(sd *export.SpanData) {
-	existingAttrs := make(map[kv.KeyValue]bool)
+	if sd.Resource.Len() == 0 {
+		return
+	}
+	uniqueAttrs := make(map[kv.KeyValue]bool)
 	for _, attr := range sd.Attributes {
-		existingAttrs[attr] = true	
+		uniqueAttrs[attr] = true	
 	}
 	for _, attr := range sd.Resource.Attributes() {
-		if !existingAttrs[attr] {
-			existingAttrs[attr] = true	
+		if !uniqueAttrs[attr] {
+			uniqueAttrs[attr] = true	
 			sd.Attributes = append(sd.Attributes, attr)
 		}
 	}
