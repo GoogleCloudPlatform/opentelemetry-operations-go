@@ -151,7 +151,7 @@ func WithOnError(onError func(err error)) func(o *options) {
 	}
 }
 
-// WithBundleDelayThreshold sets the max amount of time the exporter can wait before 
+// WithBundleDelayThreshold sets the max amount of time the exporter can wait before
 // uploading trace spans to the backend.
 func WithBundleDelayThreshold(bundleDelayThreshold time.Duration) func(o *options) {
 	return func(o *options) {
@@ -205,7 +205,7 @@ func WithTimeout(t time.Duration) func(o *options) {
 	}
 }
 
-// WithDisplayNameFormatter sets the way span's display names will be 
+// WithDisplayNameFormatter sets the way span's display names will be
 // generated from SpanData
 func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
 	return func(o *options) {
@@ -242,7 +242,7 @@ func InstallNewPipeline(opts []Option, topts ...sdktrace.ProviderOption) (apitra
 	return tp, flush, err
 }
 
-// NewExportPipeline sets up a complete export pipeline with the recommended setup 
+// NewExportPipeline sets up a complete export pipeline with the recommended setup
 // for trace provider. Returns provider, flush function, and errors.
 func NewExportPipeline(opts []Option, topts ...sdktrace.ProviderOption) (apitrace.Provider, func(), error) {
 	exporter, err := NewExporter(opts...)
