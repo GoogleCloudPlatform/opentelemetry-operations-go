@@ -75,15 +75,16 @@ func injectLabelsFromResources(sd *export.SpanData) {
 	if sd.Resource.Len() == 0 {
 		return
 	}
-	uniqueAttrs := make(map[kv.KeyValue]bool)
+	uniqueAttrs := make(map[kv.Key]bool, len(sd.Attributes))
 	for _, attr := range sd.Attributes {
-		uniqueAttrs[attr] = true	
+		uniqueAttrs[attr.Key] = true	
 	}
 	for _, attr := range sd.Resource.Attributes() {
-		if !uniqueAttrs[attr] {
-			uniqueAttrs[attr] = true	
-			sd.Attributes = append(sd.Attributes, attr)
+		if uniqueAttrs[attr.Key] {
+			continue // skip resource attributes which conflict with span attributes
 		}
+		uniqueAttrs[attr.Key] = true	
+		sd.Attributes = append(sd.Attributes, attr)
 	}
 }
 
