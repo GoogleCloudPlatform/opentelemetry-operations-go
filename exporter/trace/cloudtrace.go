@@ -25,8 +25,11 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
+	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/kv"
+	apitrace "go.opentelemetry.io/otel/api/trace"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 // Option is function type that is passed to the exporter initialization function.
@@ -229,6 +232,30 @@ type Exporter struct {
 	traceExporter *traceExporter
 }
 
+// InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
+func InstallNewPipeline(opts []Option, topts ...sdktrace.ProviderOption) (apitrace.Provider, func(), error) {
+	tp, flush, err := NewExportPipeline(opts, topts...)
+	if err != nil {
+		return nil, nil, err
+	}
+	global.SetTraceProvider(tp)
+	return tp, flush, err
+}
+
+// NewExportPipeline sets up a complete export pipeline with the recommended setup 
+// for trace provider. Returns provider, flush function, and errors.
+func NewExportPipeline(opts []Option, topts ...sdktrace.ProviderOption) (apitrace.Provider, func(), error) {
+	exporter, err := NewExporter(opts...)
+	if err != nil {
+		return nil, nil, err
+	}
+	tp, err := sdktrace.NewProvider(append(topts, sdktrace.WithSyncer(exporter))...)
+	if err != nil {
+		return nil, nil, err
+	}
+	return tp, exporter.traceExporter.Flush, nil
+}
+
 // NewExporter creates a new Exporter thats implements trace.Exporter.
 //
 // TODO(yoshifumi): add a metrics exporter one the spec definition
@@ -271,11 +298,6 @@ func (e *Exporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 		sd = e.sdWithDefaultTraceAttributes(sd)
 	}
 	e.traceExporter.ExportSpan(ctx, sd)
-}
-
-// ExportSpans exports a slice of SpanData to Stackdriver Trace in batch
-func (e *Exporter) ExportSpans(ctx context.Context, sds []*export.SpanData) {
-	e.traceExporter.ExportSpans(ctx, sds)
 }
 
 func (e *Exporter) sdWithDefaultTraceAttributes(sd *export.SpanData) *export.SpanData {
