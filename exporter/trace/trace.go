@@ -22,9 +22,9 @@ import (
 	"time"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
-	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
-	"google.golang.org/api/support/bundler"
 	"github.com/golang/protobuf/proto"
+	"google.golang.org/api/support/bundler"
+	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 )
@@ -38,7 +38,7 @@ type traceExporter struct {
 	// uploadFn defaults in uploadSpans; it can be replaced for tests.
 	uploadFn func(ctx context.Context, spans []*tracepb.Span)
 	overflowLogger
-	client   *traceclient.Client
+	client *traceclient.Client
 }
 
 const defaultBufferedByteLimit = 8 * 1024 * 1024
@@ -94,7 +94,6 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	return e, nil
 }
 
-
 func (e *traceExporter) checkBundlerError(err error) {
 	switch err {
 	case nil:
@@ -113,21 +112,9 @@ func (e *traceExporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 	protoSpan := protoFromSpanData(sd, e.projectID, e.o.DisplayNameFormatter)
 	protoSize := proto.Size(protoSpan)
 	err := e.bundler.Add(&contextAndSpans{
-		ctx: ctx, 
+		ctx:   ctx,
 		spans: []*tracepb.Span{protoSpan},
 	}, protoSize)
-	e.checkBundlerError(err)
-}
-
-// ExportSpans exports a slice of SpanData to Stackdriver Trace in batch
-func (e *traceExporter) ExportSpans(ctx context.Context, sds []*export.SpanData) {
-	pbSpans := make([]*tracepb.Span, len(sds))
-	var protoSize int = 0
-	for i, sd := range sds {
-		pbSpans[i] = protoFromSpanData(sd, e.projectID, e.o.DisplayNameFormatter)
-		protoSize += proto.Size(pbSpans[i])
-	}
-	err := e.bundler.Add(&contextAndSpans{ctx, pbSpans}, protoSize)
 	e.checkBundlerError(err)
 }
 
@@ -161,9 +148,13 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 	}
 }
 
+func (e *traceExporter) Flush() {
+	e.bundler.Flush()
+}
+
 // contextAndSpan stores both a context and spans for use with a bundler.
 type contextAndSpans struct {
-	ctx context.Context
+	ctx   context.Context
 	spans []*tracepb.Span
 }
 

@@ -20,20 +20,22 @@ import (
 	"log"
 	"net"
 	"os"
+	"regexp"
 	"sync"
 	"testing"
 	"time"
 
-	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	emptypb "github.com/golang/protobuf/ptypes/empty"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/option"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	"google.golang.org/grpc"
 
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+
 	"go.opentelemetry.io/otel/api/global"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 type mockTraceServer struct {
@@ -42,7 +44,7 @@ type mockTraceServer struct {
 	spansUploaded []*tracepb.Span
 	delay         time.Duration
 	// onUpload is called every time BatchWriteSpans is called
-	onUpload      func(ctx context.Context, spans []*tracepb.Span)
+	onUpload func(ctx context.Context, spans []*tracepb.Span)
 }
 
 func (s *mockTraceServer) BatchWriteSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
@@ -98,35 +100,29 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func TestExporter_ExportSpans(t *testing.T) {
+func TestExporter_ExportSpan(t *testing.T) {
 	// Initial test precondition
 	mockTrace.spansUploaded = nil
 	mockTrace.delay = 0
 
 	// Create Google Cloud Trace Exporter
-	exp, err := texporter.NewExporter(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		// handle bundle as soon as span is received
-		texporter.WithBundleCountThreshold(1),
+	_, flush, err := texporter.InstallNewPipeline(
+		[]texporter.Option{
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			// handle bundle as soon as span is received
+			texporter.WithBundleCountThreshold(1),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	assert.NoError(t, err)
 
-	tp, err := sdktrace.NewProvider(
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithBatcher(exp, // add following two options to ensure flush
-			sdktrace.WithBatchTimeout(1),
-			sdktrace.WithMaxExportBatchSize(1),
-		))
-	assert.NoError(t, err)
-
-	global.SetTraceProvider(tp)
 	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
 	// wait exporter to flush
-	time.Sleep(20 * time.Millisecond)
+	flush()
 	assert.EqualValues(t, 1, mockTrace.len())
 }
 
@@ -134,35 +130,32 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	// Initial test precondition
 	mockTrace.spansUploaded = nil
 	mockTrace.delay = 0
-	
+
 	spanName := "span1234"
 	format := func(s *export.SpanData) string {
 		return "TEST_FORMAT" + s.Name
 	}
 
 	// Create Google Cloud Trace Exporter
-	exp, err := texporter.NewExporter(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		texporter.WithBundleCountThreshold(1),
-		texporter.WithDisplayNameFormatter(format),
+	_, flush, err := texporter.InstallNewPipeline(
+		[]texporter.Option{
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			texporter.WithBundleCountThreshold(1),
+			texporter.WithDisplayNameFormatter(format),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	assert.NoError(t, err)
 
-	tp, err := sdktrace.NewProvider(
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithSyncer(exp))
-	assert.NoError(t, err)
-
-	global.SetTraceProvider(tp)
 	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), spanName)
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
 	// wait exporter to flush
-	time.Sleep(20 * time.Millisecond)
+	flush()
 	assert.EqualValues(t, 1, mockTrace.len())
-	assert.EqualValues(t, "TEST_FORMAT" + spanName, mockTrace.spansUploaded[0].DisplayName.Value)
+	assert.EqualValues(t, "TEST_FORMAT"+spanName, mockTrace.spansUploaded[0].DisplayName.Value)
 }
 
 func TestExporter_Timeout(t *testing.T) {
@@ -170,39 +163,35 @@ func TestExporter_Timeout(t *testing.T) {
 	mockTrace.spansUploaded = nil
 	mockTrace.delay = 20 * time.Millisecond
 	var exportErrors []error
-	ch := make(chan error)
 
 	// Create Google Cloud Trace Exporter
-	exp, err := texporter.NewExporter(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		texporter.WithTimeout(1*time.Millisecond),
-		// handle bundle as soon as span is received
-		texporter.WithBundleCountThreshold(1),
-		texporter.WithOnError(func(err error) {
-			exportErrors = append(exportErrors, err)
-			ch <- err
-		}),
+	_, flush, err := texporter.InstallNewPipeline(
+		[]texporter.Option{
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			texporter.WithTimeout(1 * time.Millisecond),
+			// handle bundle as soon as span is received
+			texporter.WithBundleCountThreshold(1),
+			texporter.WithOnError(func(err error) {
+				exportErrors = append(exportErrors, err)
+			}),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
 	assert.NoError(t, err)
 
-	tp, err := sdktrace.NewProvider(
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithSyncer(exp))
-	assert.NoError(t, err)
-
-	global.SetTraceProvider(tp)
 	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
 	// wait for error to be handled
-	<-ch
+	flush()
 	assert.EqualValues(t, 0, mockTrace.len())
 	if got, want := len(exportErrors), 1; got != want {
 		t.Fatalf("len(exportErrors) = %q; want %q", got, want)
 	}
-	if got, want := exportErrors[0].Error(), "rpc error: code = DeadlineExceeded desc = context deadline exceeded"; got != want {
+	got, want := exportErrors[0].Error(), "rpc error: code = (DeadlineExceeded|Unknown) desc = context deadline exceeded"
+	if match, _ := regexp.MatchString(want, got); !match {
 		t.Fatalf("err.Error() = %q; want %q", got, want)
 	}
 }
@@ -217,20 +206,16 @@ func TestBundling(t *testing.T) {
 	}
 	mockTrace.mu.Unlock()
 
-	exporter, err := texporter.NewExporter(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		texporter.WithBundleDelayThreshold(time.Second / 10),
-		texporter.WithBundleCountThreshold(10),
-	)
-	assert.NoError(t, err) 
-
-	tp, err := sdktrace.NewProvider(
+	_, _, err := texporter.InstallNewPipeline(
+		[]texporter.Option{
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			texporter.WithBundleDelayThreshold(time.Second / 10),
+			texporter.WithBundleCountThreshold(10),
+		},
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithSyncer(exporter))
+	)
 	assert.NoError(t, err)
-
-	global.SetTraceProvider(tp)
 
 	for i := 0; i < 35; i++ {
 		_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
@@ -258,7 +243,6 @@ func TestBundling(t *testing.T) {
 	}
 }
 
-
 func TestBundling_ConcurrentExports(t *testing.T) {
 	mockTrace.mu.Lock()
 	mockTrace.spansUploaded = nil
@@ -281,21 +265,17 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 	workers := 3
 	spansPerWorker := 50
 	delay := 2 * time.Second
-	exporter, err := texporter.NewExporter(
-		texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-		texporter.WithTraceClientOptions(clientOpt),
-		texporter.WithBundleDelayThreshold(delay),
-		texporter.WithBundleCountThreshold(spansPerWorker),
-		texporter.WithMaxNumberOfWorkers(workers),
-	)
-	assert.NoError(t, err) 
-
-	tp, err := sdktrace.NewProvider(
+	_, _, err := texporter.InstallNewPipeline(
+		[]texporter.Option{
+			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
+			texporter.WithTraceClientOptions(clientOpt),
+			texporter.WithBundleDelayThreshold(delay),
+			texporter.WithBundleCountThreshold(spansPerWorker),
+			texporter.WithMaxNumberOfWorkers(workers),
+		},
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
-		sdktrace.WithSyncer(exporter))
+	)
 	assert.NoError(t, err)
-
-	global.SetTraceProvider(tp)
 
 	waitCh := make(chan struct{})
 	wg.Add(workers)

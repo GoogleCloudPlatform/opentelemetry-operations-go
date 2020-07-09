@@ -188,15 +188,15 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, cps export.Checkpoi
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export.CheckpointSet) error {
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
 	aggError := cps.ForEach(func(r export.Record) error {
-		key := keyOf(r.Descriptor())
+		k := keyOf(r.Descriptor())
 
-		if _, ok := me.mdCache[key]; ok {
+		if _, ok := me.mdCache[k]; ok {
 			return nil
 		}
 
-		if _, localok := mds[key]; !localok {
+		if _, localok := mds[k]; !localok {
 			md := me.recordToMdpb(&r)
-			mds[key] = md
+			mds[k] = md
 		}
 		return nil
 	})
@@ -208,7 +208,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 	}
 
 	// TODO: This process is synchronous and blocks longer time if records in cps
-	// have many diffrent descriptors. In the cps.ForEach above, it should spawn
+	// have many different descriptors. In the cps.ForEach above, it should spawn
 	// goroutines to send CreateMetricDescriptorRequest asynchronously in the case
 	// the descriptor does not exist in global cache (me.mdCache).
 	// See details in #26.
@@ -454,8 +454,8 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 // recordToMpb converts data from records to Metric proto type for Cloud Monitoring.
 func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 	desc := r.Descriptor()
-	key := keyOf(desc)
-	md, ok := me.mdCache[key]
+	k := keyOf(desc)
+	md, ok := me.mdCache[k]
 	if !ok {
 		md = me.recordToMdpb(r)
 	}

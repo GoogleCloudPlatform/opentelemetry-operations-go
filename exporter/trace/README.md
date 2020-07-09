@@ -21,28 +21,31 @@ Add `github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace` 
 import texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 ```
 
-Once you import the trace exporter package, then register the exporter to the application, and start tracing. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instruction in [Authentication](#Authentication).
+Once you import the trace exporter package, create and install a new export pipeline, and then you can start tracing. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instruction in [Authentication](#Authentication).
 
 ```go
-// Create exporter.
+// Create exporter and trace provider pipeline, and register provider.
 projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+_, flush, err := texporter.InstallNewPipeline(
+        []texporter.Option {
+                texporter.WithProjectID(projectID),
+                // other optional exporter options
+        },
+        // This example code uses sdktrace.AlwaysSample sampler to sample all traces.
+        // In a production environment or high QPS setup please use ProbabilitySampler
+        // set at the desired probability.
+        // Example:
+        // sdktrace.WithConfig(sdktrace.Config {
+        //        DefaultSampler: sdktrace.ProbabilitySampler(0.0001),
+        // })
+        sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+        // other optional provider options
+)
 if err != nil {
-    log.Fatalf("texporter.NewExporter: %v", err)
+    log.Fatalf("texporter.InstallNewPipeline: %v", err)
 }
-// Create trace provider with the exporter.
-//
-// By default it uses AlwaysSample() which samples all traces.
-// In a production environment or high QPS setup please use
-// ProbabilitySampler set at the desired probability.
-// Example:
-//   config := sdktrace.Config{DefaultSampler:sdktrace.ProbabilitySampler(0.0001)}
-//   tp, err := sdktrace.NewProvider(sdktrace.WithConfig(config), ...)
-tp, err := sdktrace.NewProvider(sdktrace.WithSyncer(exporter))
-if err != nil {
-        log.Fatal(err)
-}
-global.SetTraceProvider(tp)
+// before ending program, wait for all enqueued spans to be exported
+defer flush()
 
 // Create custom span.
 tracer := global.TraceProvider().Tracer("example.com/trace")
