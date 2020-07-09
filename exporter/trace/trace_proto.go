@@ -71,8 +71,7 @@ func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) string
 	}
 }
 
-
-// If there are duplicate keys present in the list of attributes, 
+// If there are duplicate keys present in the list of attributes,
 // then the first value found for the key is preserved.
 func injectLabelsFromResources(sd *export.SpanData) {
 	if sd.Resource.Len() == 0 {
@@ -80,13 +79,13 @@ func injectLabelsFromResources(sd *export.SpanData) {
 	}
 	uniqueAttrs := make(map[kv.Key]bool, len(sd.Attributes))
 	for _, attr := range sd.Attributes {
-		uniqueAttrs[attr.Key] = true	
+		uniqueAttrs[attr.Key] = true
 	}
 	for _, attr := range sd.Resource.Attributes() {
 		if uniqueAttrs[attr.Key] {
 			continue // skip resource attributes which conflict with span attributes
 		}
-		uniqueAttrs[attr.Key] = true	
+		uniqueAttrs[attr.Key] = true
 		sd.Attributes = append(sd.Attributes, attr)
 	}
 }
