@@ -81,15 +81,15 @@ func TestRecordToMpb(t *testing.T) {
 	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
 
 	md := &googlemetricpb.MetricDescriptor{
-		Name: desc.Name(),
-		Type: fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
-		MetricKind: googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType: googlemetricpb.MetricDescriptor_DOUBLE,
+		Name:        desc.Name(),
+		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
+		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
 		Description: "test",
 	}
 
 	mdkey := key{
-		name: md.Name,
+		name:        md.Name,
 		libraryname: "",
 	}
 	me := &metricExporter{
@@ -119,11 +119,10 @@ func TestRecordToMpb(t *testing.T) {
 	}
 }
 
-
 func TestResourceToMonitoredResourcepb(t *testing.T) {
 	testCases := []struct {
-		resource *resource.Resource
-		expectedType string
+		resource       *resource.Resource
+		expectedType   string
 		expectedLabels map[string]string
 	}{
 		// k8s_container
@@ -134,18 +133,18 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 				kv.String("k8s.namespace.name", "default"),
 				kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-				kv.String("container.name", "opentelemetry"),		
-			), 
-			"k8s_container", 
+				kv.String("container.name", "opentelemetry"),
+			),
+			"k8s_container",
 			map[string]string{
-				"project_id": "",
-				"location": "us-central1-a",
-				"cluster_name": "opentelemetry-cluster",
+				"project_id":     "",
+				"location":       "us-central1-a",
+				"cluster_name":   "opentelemetry-cluster",
 				"namespace_name": "default",
-				"pod_name": "opentelemetry-pod-autoconf",
+				"pod_name":       "opentelemetry-pod-autoconf",
 				"container_name": "opentelemetry",
 			},
-	    },
+		},
 		// k8s_node
 		{
 			resource.New(
@@ -153,16 +152,16 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				kv.String("cloud.zone", "us-central1-a"),
 				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 				kv.String("host.name", "opentelemetry-node"),
-			), 	
-			"k8s_node", 
+			),
+			"k8s_node",
 			map[string]string{
-				"project_id": "",
-				"location": "us-central1-a",
+				"project_id":   "",
+				"location":     "us-central1-a",
 				"cluster_name": "opentelemetry-cluster",
-				"node_name": "opentelemetry-node",
+				"node_name":    "opentelemetry-node",
 			},
 		},
-        // k8s_pod
+		// k8s_pod
 		{
 			resource.New(
 				kv.String("cloud.provider", "gcp"),
@@ -170,30 +169,30 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 				kv.String("k8s.namespace.name", "default"),
 				kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-			), 
+			),
 			"k8s_pod",
 			map[string]string{
-				"project_id": "",
-				"location": "us-central1-a",
-				"cluster_name": "opentelemetry-cluster",
+				"project_id":     "",
+				"location":       "us-central1-a",
+				"cluster_name":   "opentelemetry-cluster",
 				"namespace_name": "default",
-				"pod_name": "opentelemetry-pod-autoconf",
+				"pod_name":       "opentelemetry-pod-autoconf",
 			},
 		},
-        // k8s_cluster
+		// k8s_cluster
 		{
 			resource.New(
 				kv.String("cloud.provider", "gcp"),
 				kv.String("cloud.zone", "us-central1-a"),
 				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-			), 	
-			"k8s_cluster", 
+			),
+			"k8s_cluster",
 			map[string]string{
-				"project_id": "",
-				"location": "us-central1-a",
+				"project_id":   "",
+				"location":     "us-central1-a",
 				"cluster_name": "opentelemetry-cluster",
 			},
-		},	
+		},
 		// k8s_node missing a field
 		{
 			resource.New(
@@ -214,9 +213,9 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
 				kv.String("k8s.namespace.name", "default"),
 				kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-				kv.String("container.name", "opentelemetry"),		
+				kv.String("container.name", "opentelemetry"),
 			),
-			"global", 
+			"global",
 			map[string]string{
 				"project_id": "",
 			},
@@ -230,9 +229,9 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			),
 			"gce_instance",
 			map[string]string{
-				"project_id": "",
+				"project_id":  "",
 				"instance_id": "123",
-				"zone": "us-central1-a",
+				"zone":        "us-central1-a",
 			},
 		},
 		// AWS resources
@@ -245,29 +244,28 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			),
 			"aws_ec2_instance",
 			map[string]string{
-				"project_id": "",
+				"project_id":  "",
 				"instance_id": "123",
-				"region": "us-central1-a",
+				"region":      "us-central1-a",
 				"aws_account": "fake_account",
 			},
 		},
 	}
 
-
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
-	
+
 	md := &googlemetricpb.MetricDescriptor{
-		Name: desc.Name(),
-		Type: fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
-		MetricKind: googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType: googlemetricpb.MetricDescriptor_DOUBLE,
+		Name:        desc.Name(),
+		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
+		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
 		Description: "test",
-	}	
+	}
 
 	mdkey := key{
-		name: md.Name,
+		name:        md.Name,
 		libraryname: "",
-	}	
+	}
 
 	me := &metricExporter{
 		o: &options{},
@@ -278,13 +276,13 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.resource.String(), func(t *testing.T) {
-            got := me.resourceToMonitoredResourcepb(test.resource)
-		    if !reflect.DeepEqual(got.GetLabels(), test.expectedLabels) {
-			    t.Errorf("expected: %v, actual: %v", test.expectedLabels, got.GetLabels())
-		    }
-		    if got.GetType() != test.expectedType {
-			    t.Errorf("expected: %v, actual: %v", test.expectedType, got.GetType())
-		    }	
-        })
+			got := me.resourceToMonitoredResourcepb(test.resource)
+			if !reflect.DeepEqual(got.GetLabels(), test.expectedLabels) {
+				t.Errorf("expected: %v, actual: %v", test.expectedLabels, got.GetLabels())
+			}
+			if got.GetType() != test.expectedType {
+				t.Errorf("expected: %v, actual: %v", test.expectedType, got.GetType())
+			}
+		})
 	}
 }

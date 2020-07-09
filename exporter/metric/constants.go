@@ -27,7 +27,7 @@ const (
 	CloudKeyAccountID = "cloud.account.id"
 	CloudKeyRegion    = "cloud.region"
 	CloudKeyZone      = "cloud.zone"
-	
+
 	HostType = "host"
 	// A uniquely identifying name for the host.
 	HostKeyName = "host.name"
@@ -46,17 +46,17 @@ const (
 	CloudProviderGCP   = "gcp"
 	CloudProviderAZURE = "azure"
 
-	K8S = "k8s"
+	K8S                  = "k8s"
 	K8SKeyClusterName    = "k8s.cluster.name"
 	K8SKeyNamespaceName  = "k8s.namespace.name"
 	K8SKeyPodName        = "k8s.pod.name"
 	K8SKeyDeploymentName = "k8s.deployment.name"
 
 	// Monitored Resources types
-	K8SContainer = "k8s_container"
-	K8SNode = "k8s_node"
-	K8SPod = "k8s_pod"
-	K8SCluster = "k8s_cluster"
-	GCEInstance = "gce_instance"
+	K8SContainer   = "k8s_container"
+	K8SNode        = "k8s_node"
+	K8SPod         = "k8s_pod"
+	K8SCluster     = "k8s_cluster"
+	GCEInstance    = "gce_instance"
 	AWSEC2Instance = "aws_ec2_instance"
 )

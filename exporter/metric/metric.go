@@ -85,14 +85,14 @@ var k8sContainerMap = map[string]string{
 }
 
 var k8sNodeMap = map[string]string{
-	"location":       CloudKeyZone,
-	"cluster_name":   K8SKeyClusterName,
-	"node_name":      HostKeyName,
+	"location":     CloudKeyZone,
+	"cluster_name": K8SKeyClusterName,
+	"node_name":    HostKeyName,
 }
 
 var k8sClusterMap = map[string]string{
-	"location":       CloudKeyZone,
-	"cluster_name":   K8SKeyClusterName,
+	"location":     CloudKeyZone,
+	"cluster_name": K8SKeyClusterName,
 }
 
 var k8sPodMap = map[string]string{
@@ -112,7 +112,6 @@ var awsResourceMap = map[string]string{
 	"region":      CloudKeyRegion,
 	"aws_account": CloudKeyAccountID,
 }
-
 
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
 func newMetricExporter(o *options) (*metricExporter, error) {
@@ -309,7 +308,7 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 	}
 }
 
-// refer to the monitored resources fields 
+// refer to the monitored resources fields
 // https://cloud.google.com/monitoring/api/resources
 func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
 	_, hasLocation := labelMap[CloudKeyZone]
@@ -339,7 +338,6 @@ func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
 	return GCEInstance, gceResourceMap
 }
 
-
 // resourceToMonitoredResourcepb converts resource in OTel to MonitoredResource
 // proto type for Cloud Monitoring.
 //
@@ -350,9 +348,9 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 		Type: "global",
 		Labels: map[string]string{
 			"project_id": me.o.ProjectID,
-		},	
+		},
 	}
-		
+
 	// Return "global" Monitored resources if the input resource is null or empty
 	// "global" only accepts "project_id" for label.
 	// https://cloud.google.com/monitoring/api/resources#tag_global
@@ -364,7 +362,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 
 	resTypeStr := "global"
 	match := map[string]string{}
-	
+
 	if resType, found := resLabelMap[CloudKeyProvider]; found {
 		switch resType {
 		case CloudProviderGCP:
@@ -372,22 +370,21 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 		case CloudProviderAWS:
 			resTypeStr = AWSEC2Instance
 			match = awsResourceMap
-		}	
+		}
 
 		outputMap, isMissing := transformResource(match, resLabelMap)
 		if isMissing {
-			resTypeStr = "global"			
+			resTypeStr = "global"
 		} else {
 			monitoredRes.Labels = outputMap
 		}
 	}
 
-	monitoredRes.Type = resTypeStr	
+	monitoredRes.Type = resTypeStr
 	monitoredRes.Labels["project_id"] = me.o.ProjectID
-	
+
 	return monitoredRes
 }
-
 
 func generateResLabelMap(res *resource.Resource) map[string]string {
 	resLabelMap := make(map[string]string)
@@ -396,7 +393,6 @@ func generateResLabelMap(res *resource.Resource) map[string]string {
 	}
 	return resLabelMap
 }
-
 
 // returns transformed label map and false if all labels in match are found
 // in input except optional project_id. It returns true if at least one label
@@ -412,8 +408,6 @@ func transformResource(match, input map[string]string) (map[string]string, bool)
 	}
 	return output, false
 }
-
-
 
 // recordToMdpbKindType return the mapping from OTel's record descriptor to
 // Cloud Monitoring's MetricKind and ValueType.
