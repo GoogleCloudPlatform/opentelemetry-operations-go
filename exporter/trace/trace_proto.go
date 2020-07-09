@@ -71,10 +71,32 @@ func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) string
 	}
 }
 
+
+// If there are duplicate keys present in the list of attributes, 
+// then the first value found for the key is preserved.
+func injectLabelsFromResources(sd *export.SpanData) {
+	if sd.Resource.Len() == 0 {
+		return
+	}
+	uniqueAttrs := make(map[kv.Key]bool, len(sd.Attributes))
+	for _, attr := range sd.Attributes {
+		uniqueAttrs[attr.Key] = true	
+	}
+	for _, attr := range sd.Resource.Attributes() {
+		if uniqueAttrs[attr.Key] {
+			continue // skip resource attributes which conflict with span attributes
+		}
+		uniqueAttrs[attr.Key] = true	
+		sd.Attributes = append(sd.Attributes, attr)
+	}
+}
+
 func protoFromSpanData(s *export.SpanData, projectID string, format DisplayNameFormatter) *tracepb.Span {
 	if s == nil {
 		return nil
 	}
+
+	injectLabelsFromResources(s)
 
 	traceIDString := s.SpanContext.TraceID.String()
 	spanIDString := s.SpanContext.SpanID.String()
