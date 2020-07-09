@@ -25,13 +25,14 @@ import (
 
 	"google.golang.org/grpc/codes"
 
-	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel/api/correlation"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/plugin/httptrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
 
 func initTracer() func() {
@@ -40,7 +41,7 @@ func initTracer() func() {
 	// Create Google Cloud Trace exporter to be able to retrieve
 	// the collected spans.
 	_, flush, err := texporter.InstallNewPipeline(
-		[]texporter.Option {texporter.WithProjectID(projectID)},
+		[]texporter.Option{texporter.WithProjectID(projectID)},
 		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
