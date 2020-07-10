@@ -74,6 +74,45 @@ type metricExporter struct {
 	startTime time.Time
 }
 
+// Below are maps with monitored resources fields as keys
+// and OpenTelemetry resources fields as values
+var k8sContainerMap = map[string]string{
+	"location":       CloudKeyZone,
+	"cluster_name":   K8SKeyClusterName,
+	"namespace_name": K8SKeyNamespaceName,
+	"pod_name":       K8SKeyPodName,
+	"container_name": ContainerKeyName,
+}
+
+var k8sNodeMap = map[string]string{
+	"location":     CloudKeyZone,
+	"cluster_name": K8SKeyClusterName,
+	"node_name":    HostKeyName,
+}
+
+var k8sClusterMap = map[string]string{
+	"location":     CloudKeyZone,
+	"cluster_name": K8SKeyClusterName,
+}
+
+var k8sPodMap = map[string]string{
+	"location":       CloudKeyZone,
+	"cluster_name":   K8SKeyClusterName,
+	"namespace_name": K8SKeyNamespaceName,
+	"pod_name":       K8SKeyPodName,
+}
+
+var gceResourceMap = map[string]string{
+	"instance_id": HostKeyID,
+	"zone":        CloudKeyZone,
+}
+
+var awsResourceMap = map[string]string{
+	"instance_id": HostKeyID,
+	"region":      CloudKeyRegion,
+	"aws_account": CloudKeyAccountID,
+}
+
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
 func newMetricExporter(o *options) (*metricExporter, error) {
 	if strings.TrimSpace(o.ProjectID) == "" {
@@ -191,12 +230,8 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.CheckpointSet) error {
 	tss := []*monitoringpb.TimeSeries{}
 
-	// TODO: [ymotongpoo] Check how resource registered via push.WithResource can be
-	// extracted from pusher.
-	res := &resource.Resource{}
-
 	aggError := cps.ForEach(func(r export.Record) error {
-		ts, err := me.recordToTspb(&r, res)
+		ts, err := me.recordToTspb(&r)
 		if err != nil {
 			return err
 		}
@@ -222,9 +257,10 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.Check
 
 // recordToTspb converts record to TimeSeries proto type with common resource.
 // ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
-func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource) (*monitoringpb.TimeSeries, error) {
+func (me *metricExporter) recordToTspb(r *export.Record) (*monitoringpb.TimeSeries, error) {
 	m := me.recordToMpb(r)
-	mr := me.resourceToMonitoredResourcepb(res)
+
+	mr := me.resourceToMonitoredResourcepb(r.Resource())
 
 	tv, t, err := me.recordToTypedValueAndTimestamp(r)
 	if err != nil {
@@ -272,23 +308,105 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 	}
 }
 
+// refer to the monitored resources fields
+// https://cloud.google.com/monitoring/api/resources
+func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
+	_, hasLocation := labelMap[CloudKeyZone]
+	_, hasClusterName := labelMap[K8SKeyClusterName]
+	_, hasNamespaceName := labelMap[K8SKeyNamespaceName]
+	_, hasPodName := labelMap[K8SKeyPodName]
+	_, hasContainerName := labelMap[ContainerKeyName]
+
+	if hasLocation && hasClusterName && hasNamespaceName && hasPodName && hasContainerName {
+		return K8SContainer, k8sContainerMap
+	}
+
+	_, hasNodeName := labelMap[HostKeyName]
+
+	if hasLocation && hasClusterName && hasNodeName {
+		return K8SNode, k8sNodeMap
+	}
+
+	if hasLocation && hasClusterName && hasNamespaceName && hasPodName {
+		return K8SPod, k8sPodMap
+	}
+
+	if hasLocation && hasClusterName {
+		return K8SCluster, k8sClusterMap
+	}
+
+	return GCEInstance, gceResourceMap
+}
+
 // resourceToMonitoredResourcepb converts resource in OTel to MonitoredResource
 // proto type for Cloud Monitoring.
 //
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
-func (me *metricExporter) resourceToMonitoredResourcepb(_ *resource.Resource) *monitoredrespb.MonitoredResource {
-	// TODO: Implement the process to convert Resource to MonitoringResoruce.
-	// ref. https://cloud.google.com/monitoring/api/resources
-	// This method only returns global resource for now.
+func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
 
-	// "global" only accepts "project_id" for label.
-	// https://cloud.google.com/monitoring/api/resources#tag_global
-	return &monitoredrespb.MonitoredResource{
+	monitoredRes := &monitoredrespb.MonitoredResource{
 		Type: "global",
 		Labels: map[string]string{
 			"project_id": me.o.ProjectID,
 		},
 	}
+
+	// Return "global" Monitored resources if the input resource is null or empty
+	// "global" only accepts "project_id" for label.
+	// https://cloud.google.com/monitoring/api/resources#tag_global
+	if res == nil || res.Len() == 0 {
+		return monitoredRes
+	}
+
+	resLabelMap := generateResLabelMap(res)
+
+	resTypeStr := "global"
+	match := map[string]string{}
+
+	if resType, found := resLabelMap[CloudKeyProvider]; found {
+		switch resType {
+		case CloudProviderGCP:
+			resTypeStr, match = subdivideGCPTypes(resLabelMap)
+		case CloudProviderAWS:
+			resTypeStr = AWSEC2Instance
+			match = awsResourceMap
+		}
+
+		outputMap, isMissing := transformResource(match, resLabelMap)
+		if isMissing {
+			resTypeStr = "global"
+		} else {
+			monitoredRes.Labels = outputMap
+		}
+	}
+
+	monitoredRes.Type = resTypeStr
+	monitoredRes.Labels["project_id"] = me.o.ProjectID
+
+	return monitoredRes
+}
+
+func generateResLabelMap(res *resource.Resource) map[string]string {
+	resLabelMap := make(map[string]string)
+	for _, label := range res.Attributes() {
+		resLabelMap[string(label.Key)] = label.Value.AsString()
+	}
+	return resLabelMap
+}
+
+// returns transformed label map and false if all labels in match are found
+// in input except optional project_id. It returns true if at least one label
+// other than project_id is missing.
+func transformResource(match, input map[string]string) (map[string]string, bool) {
+	output := make(map[string]string, len(input))
+	for dst, src := range match {
+		if v, ok := input[src]; ok {
+			output[dst] = v
+		} else {
+			return map[string]string{}, true
+		}
+	}
+	return output, false
 }
 
 // recordToMdpbKindType return the mapping from OTel's record descriptor to
