@@ -28,40 +28,43 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		input    export.SpanData
 		expected export.SpanData
 	}{
+		// empty resource
 		{
-			export.SpanData{
+			input: export.SpanData{
 				Resource: resource.New(),
 				Attributes: []kv.KeyValue{
 					kv.String("a", "1"),
 				},
 			},
-			export.SpanData{
+			expected: export.SpanData{
 				Resource: resource.New(),
 				Attributes: []kv.KeyValue{
 					kv.String("a", "1"),
 				},
 			},
 		},
+		// empty attributes
 		{
-			export.SpanData{
+			input: export.SpanData{
 				Resource:   resource.New(kv.String("b", "2")),
 				Attributes: []kv.KeyValue{},
 			},
-			export.SpanData{
+			expected: export.SpanData{
 				Resource: resource.New(kv.String("b", "2")),
 				Attributes: []kv.KeyValue{
 					kv.String("b", "2"),
 				},
 			},
 		},
+		// normal insert
 		{
-			export.SpanData{
+			input: export.SpanData{
 				Resource: resource.New(kv.String("b", "2")),
 				Attributes: []kv.KeyValue{
 					kv.String("a", "1"),
 				},
 			},
-			export.SpanData{
+			expected: export.SpanData{
 				Resource: resource.New(kv.String("b", "2")),
 				Attributes: []kv.KeyValue{
 					kv.String("a", "1"),
@@ -69,22 +72,40 @@ func TestInjectLabelsFromResources(t *testing.T) {
 				},
 			},
 		},
+		// conflicts with the existing keys
 		{
-			export.SpanData{
+			input: export.SpanData{
+				Resource: resource.New(kv.String("a", "2")),
+				Attributes: []kv.KeyValue{
+					kv.String("a", "1"),
+				},
+			},
+			expected: export.SpanData{
+				Resource: resource.New(kv.String("a", "2")),
+				Attributes: []kv.KeyValue{
+					kv.String("a", "1"),
+				},
+			},
+		},
+		// duplicate keys in attributes (allowed)
+		{
+			input: export.SpanData{
 				Resource: resource.New(
 					kv.String("c", "1"),
-					kv.String("b", "1"),
-					kv.String("b", "2"),
-					kv.String("b", "3"),
 				),
 				Attributes: []kv.KeyValue{
 					kv.String("a", "1"),
+					kv.String("b", "1"),
+					kv.String("b", "2"),
+					kv.String("b", "3"),
 				},
 			},
-			export.SpanData{
-				Resource: resource.New(kv.String("b", "2")),
+			expected: export.SpanData{
+				Resource: resource.New(kv.String("c", "1")),
 				Attributes: []kv.KeyValue{
 					kv.String("a", "1"),
+					kv.String("b", "1"),
+					kv.String("b", "2"),
 					kv.String("b", "3"),
 					kv.String("c", "1"),
 				},
