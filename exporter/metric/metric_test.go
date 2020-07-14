@@ -20,6 +20,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/metric"
 	apimetric "go.opentelemetry.io/otel/api/metric"
@@ -28,6 +29,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/test"
 	"go.opentelemetry.io/otel/sdk/resource"
+	"google.golang.org/api/option"
 
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 )
@@ -39,10 +41,23 @@ var (
 )
 
 func TestDescToMetricType(t *testing.T) {
+	cloudMock := cloudmock.NewCloudMock()
+	defer cloudMock.Shutdown()
+
+	clientOpt := []option.ClientOption{option.WithGRPCConn(cloudMock.ClientConn())}
+	o := options{
+		Context:                 context.Background(),
+		MonitoringClientOptions: clientOpt,
+		ProjectID:               "PROJECT_ID_NOT_REAL",
+	}
+
+	me, err := newMetricExporter(&o)
+	if err != nil {
+		t.Errorf("Error occurred when creating metric exporter: %v", err)
+	}
+
 	inMe := []*metricExporter{
-		{
-			o: &options{},
-		},
+		me,
 		{
 			o: &options{
 				MetricDescriptorTypeFormatter: formatter,
@@ -73,6 +88,16 @@ func TestRecordToMpb(t *testing.T) {
 	cps := test.NewCheckpointSet(res)
 	ctx := context.Background()
 
+	cloudMock := cloudmock.NewCloudMock()
+	defer cloudMock.Shutdown()
+
+	clientOpt := []option.ClientOption{option.WithGRPCConn(cloudMock.ClientConn())}
+	o := options{
+		Context:                 ctx,
+		MonitoringClientOptions: clientOpt,
+		ProjectID:               "PROJECT_ID_NOT_REAL",
+	}
+
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
 
 	lvagg := lastvalue.New()
@@ -92,12 +117,13 @@ func TestRecordToMpb(t *testing.T) {
 		name:        md.Name,
 		libraryname: "",
 	}
-	me := &metricExporter{
-		o: &options{},
-		mdCache: map[key]*googlemetricpb.MetricDescriptor{
-			mdkey: md,
-		},
+
+	me, err := newMetricExporter(&o)
+	if err != nil {
+		t.Errorf("Error occurred when creating metric exporter: %v", err)
 	}
+
+	me.mdCache = map[key]*googlemetricpb.MetricDescriptor{mdkey: md}
 
 	want := &googlemetricpb.Metric{
 		Type: md.Type,
