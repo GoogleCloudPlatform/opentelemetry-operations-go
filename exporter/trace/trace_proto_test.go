@@ -25,11 +25,12 @@ import (
 
 func TestInjectLabelsFromResources(t *testing.T) {
 	testcases := []struct {
+		name     string
 		input    export.SpanData
 		expected export.SpanData
 	}{
-		// empty resource
 		{
+			name: "empty resource",
 			input: export.SpanData{
 				Resource: resource.New(),
 				Attributes: []kv.KeyValue{
@@ -43,8 +44,8 @@ func TestInjectLabelsFromResources(t *testing.T) {
 				},
 			},
 		},
-		// empty attributes
 		{
+			name: "empty attributes",
 			input: export.SpanData{
 				Resource:   resource.New(kv.String("b", "2")),
 				Attributes: []kv.KeyValue{},
@@ -56,8 +57,8 @@ func TestInjectLabelsFromResources(t *testing.T) {
 				},
 			},
 		},
-		// normal insert
 		{
+			name: "normal insert",
 			input: export.SpanData{
 				Resource: resource.New(kv.String("b", "2")),
 				Attributes: []kv.KeyValue{
@@ -72,8 +73,8 @@ func TestInjectLabelsFromResources(t *testing.T) {
 				},
 			},
 		},
-		// conflicts with the existing keys
 		{
+			name: "conflicts with the existing keys",
 			input: export.SpanData{
 				Resource: resource.New(kv.String("a", "2")),
 				Attributes: []kv.KeyValue{
@@ -87,8 +88,8 @@ func TestInjectLabelsFromResources(t *testing.T) {
 				},
 			},
 		},
-		// duplicate keys in attributes (allowed)
 		{
+			name: "allowed duplicate keys in attributes",
 			input: export.SpanData{
 				Resource: resource.New(
 					kv.String("c", "1"),
@@ -114,7 +115,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		t.Run(tc.input.Resource.String(), func(t *testing.T) {
+		t.Run(tc.name, func(t *testing.T) {
 			injectLabelsFromResources(&tc.input)
 			if len(tc.input.Attributes) != len(tc.expected.Attributes) {
 				t.Errorf("expected: %v, actual: %v", tc.expected.Attributes, tc.input.Attributes)
