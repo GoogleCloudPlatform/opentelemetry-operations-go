@@ -16,94 +16,29 @@ package trace_test
 
 import (
 	"context"
-	"flag"
-	"log"
-	"net"
-	"os"
 	"regexp"
 	"sync"
 	"testing"
 	"time"
 
-	emptypb "github.com/golang/protobuf/ptypes/empty"
+	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
-	"google.golang.org/api/option"
-	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
-	"google.golang.org/grpc"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 
 	"go.opentelemetry.io/otel/api/global"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
+	"google.golang.org/api/option"
+	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 )
-
-type mockTraceServer struct {
-	tracepb.TraceServiceServer
-	mu            sync.Mutex
-	spansUploaded []*tracepb.Span
-	delay         time.Duration
-	// onUpload is called every time BatchWriteSpans is called
-	onUpload func(ctx context.Context, spans []*tracepb.Span)
-}
-
-func (s *mockTraceServer) BatchWriteSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
-	var err error
-	if s.onUpload != nil {
-		s.onUpload(ctx, req.Spans)
-	}
-	s.mu.Lock()
-	select {
-	case <-ctx.Done():
-		err = ctx.Err()
-	case <-time.After(s.delay):
-		s.spansUploaded = append(s.spansUploaded, req.Spans...)
-	}
-	s.mu.Unlock()
-	return &emptypb.Empty{}, err
-}
-
-func (s *mockTraceServer) len() int {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	return len(s.spansUploaded)
-}
-
-// clientOpt is the option tests should use to connect to the test server.
-// It is initialized by TestMain.
-var clientOpt []option.ClientOption
-
-var (
-	mockTrace mockTraceServer
-)
-
-func TestMain(m *testing.M) {
-	flag.Parse()
-
-	serv := grpc.NewServer()
-	tracepb.RegisterTraceServiceServer(serv, &mockTrace)
-
-	lis, err := net.Listen("tcp", "localhost:0")
-	if err != nil {
-		log.Fatal(err)
-	}
-	go func() {
-		_ = serv.Serve(lis)
-	}()
-
-	conn, err := grpc.Dial(lis.Addr().String(), grpc.WithInsecure())
-	if err != nil {
-		log.Fatal(err)
-	}
-	clientOpt = []option.ClientOption{option.WithGRPCConn(conn)}
-
-	os.Exit(m.Run())
-}
 
 func TestExporter_ExportSpan(t *testing.T) {
 	// Initial test precondition
-	mockTrace.spansUploaded = nil
-	mockTrace.delay = 0
+	mock := cloudmock.NewCloudMock()
+	defer mock.Shutdown()
+	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	// Create Google Cloud Trace Exporter
 	_, flush, err := texporter.InstallNewPipeline(
@@ -123,13 +58,14 @@ func TestExporter_ExportSpan(t *testing.T) {
 
 	// wait exporter to flush
 	flush()
-	assert.EqualValues(t, 1, mockTrace.len())
+	assert.EqualValues(t, 1, mock.GetNumSpans())
 }
 
 func TestExporter_DisplayNameFormatter(t *testing.T) {
 	// Initial test precondition
-	mockTrace.spansUploaded = nil
-	mockTrace.delay = 0
+	mock := cloudmock.NewCloudMock()
+	defer mock.Shutdown()
+	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	spanName := "span1234"
 	format := func(s *export.SpanData) string {
@@ -154,14 +90,16 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 
 	// wait exporter to flush
 	flush()
-	assert.EqualValues(t, 1, mockTrace.len())
-	assert.EqualValues(t, "TEST_FORMAT"+spanName, mockTrace.spansUploaded[0].DisplayName.Value)
+	assert.EqualValues(t, 1, mock.GetNumSpans())
+	assert.EqualValues(t, "TEST_FORMAT"+spanName, mock.GetSpan(0).DisplayName.Value)
 }
 
 func TestExporter_Timeout(t *testing.T) {
 	// Initial test precondition
-	mockTrace.spansUploaded = nil
-	mockTrace.delay = 20 * time.Millisecond
+	mock := cloudmock.NewCloudMock()
+	defer mock.Shutdown()
+	mock.SetDelay(20 * time.Millisecond)
+	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 	var exportErrors []error
 
 	// Create Google Cloud Trace Exporter
@@ -186,7 +124,7 @@ func TestExporter_Timeout(t *testing.T) {
 
 	// wait for error to be handled
 	flush()
-	assert.EqualValues(t, 0, mockTrace.len())
+	assert.EqualValues(t, 0, mock.GetNumSpans())
 	if got, want := len(exportErrors), 1; got != want {
 		t.Fatalf("len(exportErrors) = %q; want %q", got, want)
 	}
@@ -197,14 +135,14 @@ func TestExporter_Timeout(t *testing.T) {
 }
 
 func TestBundling(t *testing.T) {
-	mockTrace.mu.Lock()
-	mockTrace.spansUploaded = nil
-	mockTrace.delay = 0
+	mock := cloudmock.NewCloudMock()
+	defer mock.Shutdown()
+	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
+
 	ch := make(chan []*tracepb.Span)
-	mockTrace.onUpload = func(ctx context.Context, spans []*tracepb.Span) {
+	mock.SetOnUpload(func(ctx context.Context, spans []*tracepb.Span) {
 		ch <- spans
-	}
-	mockTrace.mu.Unlock()
+	})
 
 	_, _, err := texporter.InstallNewPipeline(
 		[]texporter.Option{
@@ -244,12 +182,13 @@ func TestBundling(t *testing.T) {
 }
 
 func TestBundling_ConcurrentExports(t *testing.T) {
-	mockTrace.mu.Lock()
-	mockTrace.spansUploaded = nil
-	mockTrace.delay = 0
+	mock := cloudmock.NewCloudMock()
+	defer mock.Shutdown()
+	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
+
 	var exportMap sync.Map // maintain a collection of the spans exported
 	wg := sync.WaitGroup{}
-	mockTrace.onUpload = func(ctx context.Context, spans []*tracepb.Span) {
+	mock.SetOnUpload(func(ctx context.Context, spans []*tracepb.Span) {
 		for _, s := range spans {
 			exportMap.Store(s.SpanId, true)
 		}
@@ -259,13 +198,12 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 		// This ensures the semaphore limiting the concurrent uploads is not
 		// released by one goroutine completing before the other.
 		wg.Wait()
-	}
-	mockTrace.mu.Unlock()
+	})
 
 	workers := 3
 	spansPerWorker := 50
 	delay := 2 * time.Second
-	_, _, err := texporter.InstallNewPipeline(
+	_, flush, err := texporter.InstallNewPipeline(
 		[]texporter.Option{
 			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
 			texporter.WithTraceClientOptions(clientOpt),
@@ -315,4 +253,6 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 			t.Errorf("want %s; missing from exported spans", id)
 		}
 	}
+
+	flush()
 }

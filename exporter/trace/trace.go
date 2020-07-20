@@ -22,9 +22,9 @@ import (
 	"time"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
-	"github.com/golang/protobuf/proto"
 	"google.golang.org/api/support/bundler"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
+	"google.golang.org/protobuf/proto"
 
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 )
