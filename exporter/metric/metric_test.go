@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
+	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/metric"
 	apimetric "go.opentelemetry.io/otel/api/metric"
@@ -28,9 +29,10 @@ import (
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/test"
+	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/resource"
-	"google.golang.org/api/option"
 
+	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 )
 
@@ -40,24 +42,75 @@ var (
 	}
 )
 
-func TestDescToMetricType(t *testing.T) {
+func TestExportMetrics(t *testing.T) {
 	cloudMock := cloudmock.NewCloudMock()
 	defer cloudMock.Shutdown()
 
-	clientOpt := []option.ClientOption{option.WithGRPCConn(cloudMock.ClientConn())}
-	o := options{
-		Context:                 context.Background(),
-		MonitoringClientOptions: clientOpt,
-		ProjectID:               "PROJECT_ID_NOT_REAL",
+	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+	res := &resource.Resource{}
+	cps := test.NewCheckpointSet(res)
+	ctx := context.Background()
+	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
+
+	lvagg := lastvalue.New()
+	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)
+	lvagg.Checkpoint(ctx, &desc)
+	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
+
+	opts := []Option{
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithMonitoringClientOptions(clientOpt),
+		WithMetricDescriptorTypeFormatter(formatter),
 	}
 
-	me, err := newMetricExporter(&o)
+	exporter, err := NewRawExporter(opts...)
 	if err != nil {
-		t.Errorf("Error occurred when creating metric exporter: %v", err)
+		t.Errorf("Error occurred when creating exporter: %v", err)
 	}
 
+	err = exporter.Export(ctx, cps)
+	assert.NoError(t, err)
+}
+
+func TestExportCounter(t *testing.T) {
+	cloudMock := cloudmock.NewCloudMock()
+	defer cloudMock.Shutdown()
+
+	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+
+	resOpt := push.WithResource(
+		resource.New(
+			kv.String("test_id", "abc123"),
+		),
+	)
+
+	pusher, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithMonitoringClientOptions(clientOpt),
+			WithMetricDescriptorTypeFormatter(formatter),
+		},
+		resOpt,
+	)
+	assert.NoError(t, err)
+
+	defer pusher.Stop()
+
+	// Start meter
+	ctx := context.Background()
+	meter := pusher.Provider().Meter("cloudmonitoring/test")
+
+	// Register counter value
+	counter := metric.Must(meter).NewInt64Counter("counter-a")
+	clabels := []kv.KeyValue{kv.Key("key").String("value")}
+	counter.Add(ctx, 100, clabels...)
+}
+
+func TestDescToMetricType(t *testing.T) {
 	inMe := []*metricExporter{
-		me,
+		{
+			o: &options{},
+		},
 		{
 			o: &options{
 				MetricDescriptorTypeFormatter: formatter,
@@ -88,16 +141,6 @@ func TestRecordToMpb(t *testing.T) {
 	cps := test.NewCheckpointSet(res)
 	ctx := context.Background()
 
-	cloudMock := cloudmock.NewCloudMock()
-	defer cloudMock.Shutdown()
-
-	clientOpt := []option.ClientOption{option.WithGRPCConn(cloudMock.ClientConn())}
-	o := options{
-		Context:                 ctx,
-		MonitoringClientOptions: clientOpt,
-		ProjectID:               "PROJECT_ID_NOT_REAL",
-	}
-
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
 
 	lvagg := lastvalue.New()
@@ -117,13 +160,12 @@ func TestRecordToMpb(t *testing.T) {
 		name:        md.Name,
 		libraryname: "",
 	}
-
-	me, err := newMetricExporter(&o)
-	if err != nil {
-		t.Errorf("Error occurred when creating metric exporter: %v", err)
+	me := &metricExporter{
+		o: &options{},
+		mdCache: map[key]*googlemetricpb.MetricDescriptor{
+			mdkey: md,
+		},
 	}
-
-	me.mdCache = map[key]*googlemetricpb.MetricDescriptor{mdkey: md}
 
 	want := &googlemetricpb.Metric{
 		Type: md.Type,
