@@ -88,5 +88,5 @@ func (e *Exporter) Export(ctx context.Context, cps export.CheckpointSet) error {
 
 // ExportKindFor
 func (e *Exporter) ExportKindFor(*metric.Descriptor, aggregation.Kind) export.ExportKind {
-	return export.PassThroughExporter
+	return export.CumulativeExporter
 }

@@ -187,17 +187,16 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, cps export.Checkpoi
 // if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export.CheckpointSet) error {
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
-	//TODO: check if it is export.PassThroughExporter
-	aggError := cps.ForEach(export.PassThroughExporter, func(r export.Record) error {
-		key := keyOf(r.Descriptor())
+	aggError := cps.ForEach(export.CumulativeExporter, func(r export.Record) error {
+		k := keyOf(r.Descriptor())
 
-		if _, ok := me.mdCache[key]; ok {
+		if _, ok := me.mdCache[k]; ok {
 			return nil
 		}
 
-		if _, localok := mds[key]; !localok {
+		if _, localok := mds[k]; !localok {
 			md := me.recordToMdpb(&r)
-			mds[key] = md
+			mds[k] = md
 		}
 		return nil
 	})
@@ -213,7 +212,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 	// goroutines to send CreateMetricDescriptorRequest asynchronously in the case
 	// the descriptor does not exist in global cache (me.mdCache).
 	// See details in #26.
-	for key, md := range mds {
+	for kmd, md := range mds {
 		req := &monitoringpb.CreateMetricDescriptorRequest{
 			Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
 			MetricDescriptor: md,
@@ -222,7 +221,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 		if err != nil {
 			return err
 		}
-		me.mdCache[key] = md
+		me.mdCache[kmd] = md
 	}
 	return nil
 }
@@ -232,8 +231,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.CheckpointSet) error {
 	tss := []*monitoringpb.TimeSeries{}
 
-	//TODO: check if it is export.PassThroughExporter
-	aggError := cps.ForEach(export.PassThroughExporter, func(r export.Record) error {
+	aggError := cps.ForEach(export.CumulativeExporter, func(r export.Record) error {
 		ts, err := me.recordToTspb(&r)
 		if err != nil {
 			return err
