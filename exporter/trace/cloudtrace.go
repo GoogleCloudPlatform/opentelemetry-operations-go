@@ -300,6 +300,14 @@ func (e *Exporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
 	e.traceExporter.ExportSpan(ctx, sd)
 }
 
+// Flush waits for exported data to be uploaded.
+//
+// This is useful if your program is ending and you do not
+// want to lose recent spans.
+func (e *Exporter) Flush() {
+	e.traceExporter.Flush()
+}
+
 func (e *Exporter) sdWithDefaultTraceAttributes(sd *export.SpanData) *export.SpanData {
 	newSD := *sd
 	for k, v := range e.traceExporter.o.DefaultTraceAttributes {
