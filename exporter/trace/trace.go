@@ -57,16 +57,8 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 		client:    client,
 		o:         o,
 	}
-	b := bundler.NewBundler((*contextAndSpans)(nil), func(bundle interface{}) {
-		ctxSpans := bundle.([]*contextAndSpans)
-		ctxToSpansMap := make(map[context.Context][]*tracepb.Span)
-		// upload spans with same context in batch
-		for _, cs := range ctxSpans {
-			ctxToSpansMap[cs.ctx] = append(ctxToSpansMap[cs.ctx], cs.spans...)
-		}
-		for ctx, spans := range ctxToSpansMap {
-			e.uploadFn(ctx, spans)
-		}
+	b := bundler.NewBundler((*tracepb.Span)(nil), func(bundle interface{}) {
+		e.uploadFn(context.Background(), bundle.([]*tracepb.Span))
 	})
 	if o.BundleDelayThreshold > 0 {
 		b.DelayThreshold = o.BundleDelayThreshold
@@ -108,13 +100,10 @@ func (e *traceExporter) checkBundlerError(err error) {
 }
 
 // ExportSpan exports a SpanData to Stackdriver Trace.
-func (e *traceExporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
+func (e *traceExporter) ExportSpan(_ context.Context, sd *export.SpanData) {
 	protoSpan := protoFromSpanData(sd, e.projectID, e.o.DisplayNameFormatter)
 	protoSize := proto.Size(protoSpan)
-	err := e.bundler.Add(&contextAndSpans{
-		ctx:   ctx,
-		spans: []*tracepb.Span{protoSpan},
-	}, protoSize)
+	err := e.bundler.Add(protoSpan, protoSize)
 	e.checkBundlerError(err)
 }
 
@@ -150,12 +139,6 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 
 func (e *traceExporter) Flush() {
 	e.bundler.Flush()
-}
-
-// contextAndSpan stores both a context and spans for use with a bundler.
-type contextAndSpans struct {
-	ctx   context.Context
-	spans []*tracepb.Span
 }
 
 // overflowLogger ensures that at most one overflow error log message is
