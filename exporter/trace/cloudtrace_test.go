@@ -26,7 +26,6 @@ import (
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 
-	"go.opentelemetry.io/otel/api/global"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
@@ -41,7 +40,7 @@ func TestExporter_ExportSpan(t *testing.T) {
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := texporter.InstallNewPipeline(
+	tp, flush, err := texporter.InstallNewPipeline(
 		[]texporter.Option{
 			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
 			texporter.WithTraceClientOptions(clientOpt),
@@ -52,7 +51,7 @@ func TestExporter_ExportSpan(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+	_, span := tp.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
@@ -73,7 +72,7 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	}
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := texporter.InstallNewPipeline(
+	tp, flush, err := texporter.InstallNewPipeline(
 		[]texporter.Option{
 			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
 			texporter.WithTraceClientOptions(clientOpt),
@@ -84,7 +83,7 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), spanName)
+	_, span := tp.Tracer("test-tracer").Start(context.Background(), spanName)
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
@@ -103,7 +102,7 @@ func TestExporter_Timeout(t *testing.T) {
 	var exportErrors []error
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := texporter.InstallNewPipeline(
+	tp, flush, err := texporter.InstallNewPipeline(
 		[]texporter.Option{
 			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
 			texporter.WithTraceClientOptions(clientOpt),
@@ -118,7 +117,7 @@ func TestExporter_Timeout(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+	_, span := tp.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
@@ -144,7 +143,7 @@ func TestBundling(t *testing.T) {
 		ch <- spans
 	})
 
-	_, _, err := texporter.InstallNewPipeline(
+	tp, _, err := texporter.InstallNewPipeline(
 		[]texporter.Option{
 			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
 			texporter.WithTraceClientOptions(clientOpt),
@@ -156,7 +155,7 @@ func TestBundling(t *testing.T) {
 	assert.NoError(t, err)
 
 	for i := 0; i < 35; i++ {
-		_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+		_, span := tp.Tracer("test-tracer").Start(context.Background(), "test-span")
 		span.End()
 	}
 
@@ -203,7 +202,7 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 	workers := 3
 	spansPerWorker := 50
 	delay := 2 * time.Second
-	_, flush, err := texporter.InstallNewPipeline(
+	tp, flush, err := texporter.InstallNewPipeline(
 		[]texporter.Option{
 			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
 			texporter.WithTraceClientOptions(clientOpt),
@@ -223,7 +222,7 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 	go func() {
 		// Release enough spans to form two bundles
 		for i := 0; i < totalSpans; i++ {
-			_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+			_, span := tp.Tracer("test-tracer").Start(context.Background(), "test-span")
 			expectedSpanIDs = append(expectedSpanIDs, span.SpanContext().SpanID.String())
 			span.End()
 		}

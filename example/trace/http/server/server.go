@@ -21,7 +21,6 @@ import (
 	"os"
 
 	"go.opentelemetry.io/otel/api/correlation"
-	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/instrumentation/httptrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -29,12 +28,12 @@ import (
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
 
-func initTracer() func() {
+func initTracer() (trace.Provider, func()) {
 	projectID := os.Getenv("PROJECT_ID")
 
 	// Create Google Cloud Trace exporter to be able to retrieve
 	// the collected spans.
-	_, flush, err := cloudtrace.InstallNewPipeline(
+	tp, flush, err := cloudtrace.InstallNewPipeline(
 		[]cloudtrace.Option{cloudtrace.WithProjectID(projectID)},
 		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
@@ -43,14 +42,14 @@ func initTracer() func() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return flush
+	return tp, flush
 }
 
 func main() {
-	flush := initTracer()
+	tp, flush := initTracer()
 	defer flush()
 
-	tr := global.TraceProvider().Tracer("cloudtrace/example/server")
+	tr := tp.Tracer("cloudtrace/example/server")
 
 	helloHandler := func(w http.ResponseWriter, req *http.Request) {
 		attrs, entries, spanCtx := httptrace.Extract(req.Context(), req)
