@@ -52,9 +52,9 @@ func TestExportMetrics(t *testing.T) {
 	ctx := context.Background()
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
 
-	lvagg := lastvalue.New()
+	lvagg := &lastvalue.New(1)[0]
 	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)
-	lvagg.Checkpoint(ctx, &desc)
+	lvagg.Update(ctx, metric.NewFloat64Number(12.34), &desc)
 	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
 
 	opts := []Option{

@@ -18,9 +18,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+
 	"go.opentelemetry.io/otel/api/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
-	"time"
 
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"golang.org/x/oauth2/google"
