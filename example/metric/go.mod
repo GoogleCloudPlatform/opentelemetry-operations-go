@@ -6,8 +6,6 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metr
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.2.1
-	github.com/google/go-cmp v0.4.1 // indirect
-	go.opentelemetry.io/otel v0.6.0
-	golang.org/x/sys v0.0.0-20200519105757-fe76b779f299 // indirect
+	go.opentelemetry.io/otel v0.9.0
 	google.golang.org/api v0.25.0 // indirect
 )
