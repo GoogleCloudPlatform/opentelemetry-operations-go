@@ -178,7 +178,7 @@ func TestRecordToMpb(t *testing.T) {
 		},
 	}
 
-	aggError := cps.ForEach(export.PassThroughExporter, func(r export.Record) error {
+	aggError := cps.ForEach(export.CumulativeExporter, func(r export.Record) error {
 		out := me.recordToMpb(&r)
 		if !reflect.DeepEqual(want, out) {
 			return fmt.Errorf("expected: %v, actual: %v", want, out)
