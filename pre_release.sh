@@ -68,6 +68,10 @@ if ! git diff --quiet; then \
 	exit 1
 fi
 
+# Update go.mod
+git checkout -b pre_release_${TAG} master
+PACKAGE_DIRS=$(find . -mindepth 2 -type f -name 'go.mod' -exec dirname {} \; | egrep -v 'tools' | sed 's/^\.\///' | sort)
+
 # Update exporter/trace/version.go
 cp ./exporter/trace/version.go ./exporter/trace/version.go.bak
 sed "s/\(return \"\)[0-9]*\.[0-9]*\.[0-9]*\"/\1${OTELOPS_VERSION}\"/" ./exporter/trace/version.go.bak >./exporter/trace/version.go
@@ -77,10 +81,6 @@ rm -f ./exporter/trace/version.go.bak
 cp ./exporter/metric/version.go ./exporter/metric/version.go.bak
 sed "s/\(return \"\)[0-9]*\.[0-9]*\.[0-9]*\"/\1${OTELOPS_VERSION}\"/" ./exporter/metric/version.go.bak >./exporter/metric/version.go
 rm -f ./exporter/metric/version.go.bak
-
-# Update go.mod
-git checkout -b pre_release_${TAG} master
-PACKAGE_DIRS=$(find . -mindepth 2 -type f -name 'go.mod' -exec dirname {} \; | egrep -v 'tools' | sed 's/^\.\///' | sort)
 
 for dir in $PACKAGE_DIRS; do
 	cp "${dir}/go.mod" "${dir}/go.mod.bak"
