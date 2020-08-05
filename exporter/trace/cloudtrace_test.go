@@ -16,11 +16,12 @@ package trace_test
 
 import (
 	"context"
-	"google.golang.org/grpc/codes"
 	"regexp"
 	"sync"
 	"testing"
 	"time"
+
+	"google.golang.org/grpc/codes"
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
