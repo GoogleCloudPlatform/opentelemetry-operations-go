@@ -109,3 +109,28 @@ lint: $(TOOLS_DIR)/golangci-lint $(TOOLS_DIR)/misspell
 
 generate: $(TOOLS_DIR)/stringer
 	PATH="$(TOOLS_DIR):$${PATH}" go generate ./...
+
+.PHONY: for-all
+for-all:
+	@$${CMD}
+	@set -e; for dir in $(ALL_GO_MOD_DIRS); do \
+	  (cd "$${dir}" && \
+	  	echo "running $${CMD} in $${dir}" && \
+	 	$${CMD} ); \
+	done
+
+.PHONY: gotidy
+gotidy:
+	$(MAKE) for-all CMD="go mod tidy"
+
+.PHONY: update-dep
+update-dep:
+	$(MAKE) for-all CMD="$(PWD)/internal/buildscripts/update-dep"
+	$(MAKE) build
+	$(MAKE) gotidy
+
+OTEL_VERSION=v0.10.0
+
+.PHONY: update-otel
+update-otel:
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel VERSION=$(OTEL_VERSION)
