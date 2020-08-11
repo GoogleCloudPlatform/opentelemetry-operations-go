@@ -15,7 +15,7 @@
 # limitations under the License.
 
 readonly PROGNAME=$(basename "$0")
-readonly PROGDIR=$(readlink -m "$(dirname "$0")")
+readonly PROGDIR=$(pwd)
 
 readonly EXCLUDE_PACKAGES="tools"
 readonly SEMVER_REGEX="v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?"
@@ -126,7 +126,7 @@ git_tag() {
     local tag="$1"
     local commit="$2"
 
-    git tag -a "$tag" -s -m "Version $tag" "$commit"
+    git tag -a "$tag" -m "Version $tag" "$commit"
 }
 
 previous_version() {
