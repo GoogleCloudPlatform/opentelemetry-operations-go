@@ -21,6 +21,8 @@ import (
 	"testing"
 	"time"
 
+	"google.golang.org/grpc/codes"
+
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
 
@@ -53,12 +55,19 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+	span.SetStatus(codes.OK, "Status Message")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
+	_, span = global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span-with-error-status")
+	span.SetStatus(codes.NotFound, "Error Message")
+	span.End()
+
 	// wait exporter to flush
 	flush()
-	assert.EqualValues(t, 1, mock.GetNumSpans())
+	assert.EqualValues(t, 2, mock.GetNumSpans())
+	assert.EqualValues(t, "Status Message", mock.GetSpan(0).GetStatus().Message)
+	assert.EqualValues(t, "Error Message", mock.GetSpan(1).GetStatus().Message)
 }
 
 func TestExporter_DisplayNameFormatter(t *testing.T) {

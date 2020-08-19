@@ -113,7 +113,10 @@ func protoFromSpanData(s *export.SpanData, projectID string, format DisplayNameF
 		sp.ParentSpanId = s.ParentSpanID.String()
 	}
 	if s.StatusCode != codes.OK {
-		sp.Status = &statuspb.Status{Code: int32(s.StatusCode)}
+		sp.Status = &statuspb.Status{Code: int32(s.StatusCode), Message: s.StatusMessage}
+	}
+	if s.StatusCode == codes.OK && s.StatusMessage != "" {
+		sp.Status = &statuspb.Status{Code: int32(s.StatusCode), Message: s.StatusMessage}
 	}
 
 	copyAttributes(&sp.Attributes, s.Attributes)
