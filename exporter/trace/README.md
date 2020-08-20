@@ -26,7 +26,7 @@ Once you import the trace exporter package, create and install a new export pipe
 ```go
 // Create exporter and trace provider pipeline, and register provider.
 projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-tp, flush, err := texporter.InstallNewPipeline(
+_, flush, err := texporter.InstallNewPipeline(
         []texporter.Option {
                 texporter.WithProjectID(projectID),
                 // other optional exporter options
@@ -48,7 +48,7 @@ if err != nil {
 defer flush()
 
 // Create custom span.
-tracer := tp.Tracer("example.com/trace")
+tracer := global.TraceProvider().Tracer("example.com/trace")
 tracer.WithSpan(context.Background(), "foo",
         func(_ context.Context) error {
                 // Do some work.
