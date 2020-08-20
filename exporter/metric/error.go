@@ -18,8 +18,9 @@ import (
 	"errors"
 	"fmt"
 
+	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
+
 	apimetric "go.opentelemetry.io/otel/api/metric"
-	export "go.opentelemetry.io/otel/sdk/export/metric"
 )
 
 var (
@@ -27,7 +28,7 @@ var (
 )
 
 type errUnsupportedAggregation struct {
-	agg export.Aggregator
+	agg aggregation.Aggregation
 }
 
 func (e errUnsupportedAggregation) Error() string {

@@ -28,7 +28,6 @@ import (
 	"google.golang.org/grpc/codes"
 
 	"go.opentelemetry.io/otel/api/kv"
-	"go.opentelemetry.io/otel/api/kv/value"
 	opentelemetry "go.opentelemetry.io/otel/sdk"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 )
@@ -114,7 +113,10 @@ func protoFromSpanData(s *export.SpanData, projectID string, format DisplayNameF
 		sp.ParentSpanId = s.ParentSpanID.String()
 	}
 	if s.StatusCode != codes.OK {
-		sp.Status = &statuspb.Status{Code: int32(s.StatusCode)}
+		sp.Status = &statuspb.Status{Code: int32(s.StatusCode), Message: s.StatusMessage}
+	}
+	if s.StatusCode == codes.OK && s.StatusMessage != "" {
+		sp.Status = &statuspb.Status{Code: int32(s.StatusCode), Message: s.StatusMessage}
 	}
 
 	copyAttributes(&sp.Attributes, s.Attributes)
@@ -220,25 +222,25 @@ func copyAttributes(out **tracepb.Span_Attributes, in []kv.KeyValue) {
 	(*out).DroppedAttributesCount = dropped
 }
 
-func attributeValue(kv kv.KeyValue) *tracepb.AttributeValue {
-	v := kv.Value
+func attributeValue(keyValue kv.KeyValue) *tracepb.AttributeValue {
+	v := keyValue.Value
 	switch v.Type() {
-	case value.BOOL:
+	case kv.BOOL:
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_BoolValue{BoolValue: v.AsBool()},
 		}
-	case value.INT64:
+	case kv.INT64:
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_IntValue{IntValue: v.AsInt64()},
 		}
-	case value.FLOAT64:
+	case kv.FLOAT64:
 		// TODO: set double value if Google Cloud Trace support it in the future.
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_StringValue{
 				StringValue: trunc(strconv.FormatFloat(v.AsFloat64(), 'f', -1, 64),
 					maxAttributeStringValue)},
 		}
-	case value.STRING:
+	case kv.STRING:
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_StringValue{StringValue: trunc(v.AsString(), maxAttributeStringValue)},
 		}

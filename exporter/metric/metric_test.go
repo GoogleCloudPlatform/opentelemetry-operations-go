@@ -25,10 +25,10 @@ import (
 	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/metric"
 	apimetric "go.opentelemetry.io/otel/api/metric"
-	"go.opentelemetry.io/otel/exporters/metric/test"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/export/metric/metrictest"
+	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/aggregatortest"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
-	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/test"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/resource"
 
@@ -48,13 +48,13 @@ func TestExportMetrics(t *testing.T) {
 
 	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 	res := &resource.Resource{}
-	cps := test.NewCheckpointSet(res)
+	cps := metrictest.NewCheckpointSet(res)
 	ctx := context.Background()
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
 
-	lvagg := lastvalue.New()
+	lvagg := &lastvalue.New(1)[0]
 	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)
-	lvagg.Checkpoint(ctx, &desc)
+	lvagg.Update(ctx, metric.NewFloat64Number(12.34), &desc)
 	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
 
 	opts := []Option{
@@ -138,14 +138,17 @@ func TestDescToMetricType(t *testing.T) {
 
 func TestRecordToMpb(t *testing.T) {
 	res := &resource.Resource{}
-	cps := test.NewCheckpointSet(res)
+	cps := metrictest.NewCheckpointSet(res)
 	ctx := context.Background()
 
 	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
 
-	lvagg := lastvalue.New()
+	lvagg := &lastvalue.New(1)[0]
 	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)
-	lvagg.Checkpoint(ctx, &desc)
+	err := lvagg.Update(ctx, 1, &desc)
+	if err != nil {
+		t.Errorf("%v", err)
+	}
 	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
 
 	md := &googlemetricpb.MetricDescriptor{
@@ -175,7 +178,7 @@ func TestRecordToMpb(t *testing.T) {
 		},
 	}
 
-	aggError := cps.ForEach(func(r export.Record) error {
+	aggError := cps.ForEach(export.CumulativeExporter, func(r export.Record) error {
 		out := me.recordToMpb(&r)
 		if !reflect.DeepEqual(want, out) {
 			return fmt.Errorf("expected: %v, actual: %v", want, out)

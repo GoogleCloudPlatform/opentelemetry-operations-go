@@ -24,7 +24,7 @@ import (
 
 type selectorCloudMonitoring struct{}
 
-var _ export.AggregationSelector = selectorCloudMonitoring{}
+var _ export.AggregatorSelector = selectorCloudMonitoring{}
 
 // NewWithCloudMonitoringDistribution return a simple aggregation selector
 // that uses lastvalue, counter, array, and aggregator for three kinds of metric.
@@ -36,19 +36,28 @@ var _ export.AggregationSelector = selectorCloudMonitoring{}
 // selector, otherwise Views API gives flexibility to set aggregation type on
 // configuring measurement.
 // c.f. https://github.com/open-telemetry/oteps/pull/89
-func NewWithCloudMonitoringDistribution() export.AggregationSelector {
+func NewWithCloudMonitoringDistribution() export.AggregatorSelector {
 	return selectorCloudMonitoring{}
 }
 
-func (selectorCloudMonitoring) AggregatorFor(descriptor *apimetric.Descriptor) export.Aggregator {
+func (selectorCloudMonitoring) AggregatorFor(descriptor *apimetric.Descriptor, aggPtrs ...*export.Aggregator) {
 	switch descriptor.MetricKind() {
 	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
-		return lastvalue.New()
+		aggs := lastvalue.New(len(aggPtrs))
+		for i := range aggPtrs {
+			*aggPtrs[i] = &aggs[i]
+		}
 	// NOTE: `array` gives the option to use Sum, Count, Max, Min, Quantile and Points (most flexible),
 	// so chosen for future implementations rather than `sum`.
 	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
-		return array.New()
+		aggs := array.New(len(aggPtrs))
+		for i := range aggPtrs {
+			*aggPtrs[i] = &aggs[i]
+		}
 	default:
-		return sum.New()
+		aggs := sum.New(len(aggPtrs))
+		for i := range aggPtrs {
+			*aggPtrs[i] = &aggs[i]
+		}
 	}
 }

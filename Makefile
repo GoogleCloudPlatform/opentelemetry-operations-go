@@ -38,6 +38,10 @@ $(TOOLS_DIR)/stringer: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_M
 	cd $(TOOLS_MOD_DIR) && \
 	go build -o $(TOOLS_DIR)/stringer golang.org/x/tools/cmd/stringer
 
+$(TOOLS_DIR)/gojq: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
+	cd $(TOOLS_MOD_DIR) && \
+	go build -o $(TOOLS_DIR)/gojq github.com/itchyny/gojq/cmd/gojq
+
 precommit: generate build lint test
 
 .PHONY: test-with-coverage
@@ -109,3 +113,28 @@ lint: $(TOOLS_DIR)/golangci-lint $(TOOLS_DIR)/misspell
 
 generate: $(TOOLS_DIR)/stringer
 	PATH="$(TOOLS_DIR):$${PATH}" go generate ./...
+
+.PHONY: for-all
+for-all:
+	@$${CMD}
+	@set -e; for dir in $(ALL_GO_MOD_DIRS); do \
+	  (cd "$${dir}" && \
+	  	echo "running $${CMD} in $${dir}" && \
+	 	$${CMD} ); \
+	done
+
+.PHONY: gotidy
+gotidy:
+	$(MAKE) for-all CMD="go mod tidy"
+
+.PHONY: update-dep
+update-dep:
+	$(MAKE) for-all CMD="$(PWD)/internal/buildscripts/update-dep"
+	$(MAKE) build
+	$(MAKE) gotidy
+
+OTEL_VERSION=v0.10.0
+
+.PHONY: update-otel
+update-otel:
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel VERSION=$(OTEL_VERSION)
