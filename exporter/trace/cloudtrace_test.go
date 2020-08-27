@@ -21,7 +21,7 @@ import (
 	"testing"
 	"time"
 
-	"google.golang.org/grpc/codes"
+	"go.opentelemetry.io/otel/codes"
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"

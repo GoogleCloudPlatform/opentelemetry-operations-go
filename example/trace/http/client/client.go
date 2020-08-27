@@ -21,15 +21,17 @@ import (
 	"log"
 	"os"
 
+	"go.opentelemetry.io/otel/semconv"
+
 	"net/http"
 
-	"google.golang.org/grpc/codes"
+	"go.opentelemetry.io/otel/codes"
 
+	otelhttp "go.opentelemetry.io/contrib/instrumentation/net/http"
 	"go.opentelemetry.io/otel/api/correlation"
 	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/trace"
-	"go.opentelemetry.io/otel/instrumentation/httptrace"
+	"go.opentelemetry.io/otel/label"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
@@ -57,31 +59,29 @@ func main() {
 	defer flush()
 	tr := global.TraceProvider().Tracer("cloudtrace/example/client")
 
-	client := http.DefaultClient
+	client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 	ctx := correlation.NewContext(context.Background(),
-		kv.String("username", "donuts"),
+		label.String("username", "donuts"),
 	)
 
 	var body []byte
 
-	err := tr.WithSpan(ctx, "say hello",
-		func(ctx context.Context) error {
-			req, _ := http.NewRequest("GET", "http://localhost:7777/hello", nil)
+	err := func(ctx context.Context) error {
+		ctx, span := tr.Start(ctx, "say hello", trace.WithAttributes(semconv.PeerServiceKey.String("ExampleService")))
+		defer span.End()
+		req, _ := http.NewRequestWithContext(ctx, "GET", "http://localhost:7777/hello", nil)
 
-			ctx, req = httptrace.W3C(ctx, req)
-			httptrace.Inject(ctx, req)
+		fmt.Printf("Sending request...\n")
+		res, err := client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+		body, err = ioutil.ReadAll(res.Body)
+		_ = res.Body.Close()
+		span.SetStatus(codes.OK, "")
 
-			fmt.Printf("Sending request...\n")
-			res, err := client.Do(req)
-			if err != nil {
-				panic(err)
-			}
-			body, err = ioutil.ReadAll(res.Body)
-			_ = res.Body.Close()
-			trace.SpanFromContext(ctx).SetStatus(codes.OK, "")
-
-			return err
-		})
+		return err
+	}(ctx)
 
 	if err != nil {
 		panic(err)
