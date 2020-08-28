@@ -27,7 +27,7 @@ import (
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 	"google.golang.org/grpc/codes"
 
-	"go.opentelemetry.io/otel/api/kv"
+	"go.opentelemetry.io/otel/label"
 	opentelemetry "go.opentelemetry.io/otel/sdk"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 )
@@ -76,7 +76,7 @@ func injectLabelsFromResources(sd *export.SpanData) {
 	if sd.Resource.Len() == 0 {
 		return
 	}
-	uniqueAttrs := make(map[kv.Key]bool, len(sd.Attributes))
+	uniqueAttrs := make(map[label.Key]bool, len(sd.Attributes))
 	for _, attr := range sd.Attributes {
 		uniqueAttrs[attr.Key] = true
 	}
@@ -184,7 +184,7 @@ func timestampProto(t time.Time) *timestamppb.Timestamp {
 
 // copyAttributes copies a map of attributes to a proto map field.
 // It creates the map if it is nil.
-func copyAttributes(out **tracepb.Span_Attributes, in []kv.KeyValue) {
+func copyAttributes(out **tracepb.Span_Attributes, in []label.KeyValue) {
 	if len(in) == 0 {
 		return
 	}
@@ -222,25 +222,25 @@ func copyAttributes(out **tracepb.Span_Attributes, in []kv.KeyValue) {
 	(*out).DroppedAttributesCount = dropped
 }
 
-func attributeValue(keyValue kv.KeyValue) *tracepb.AttributeValue {
+func attributeValue(keyValue label.KeyValue) *tracepb.AttributeValue {
 	v := keyValue.Value
 	switch v.Type() {
-	case kv.BOOL:
+	case label.BOOL:
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_BoolValue{BoolValue: v.AsBool()},
 		}
-	case kv.INT64:
+	case label.INT64:
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_IntValue{IntValue: v.AsInt64()},
 		}
-	case kv.FLOAT64:
+	case label.FLOAT64:
 		// TODO: set double value if Google Cloud Trace support it in the future.
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_StringValue{
 				StringValue: trunc(strconv.FormatFloat(v.AsFloat64(), 'f', -1, 64),
 					maxAttributeStringValue)},
 		}
-	case kv.STRING:
+	case label.STRING:
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_StringValue{StringValue: trunc(v.AsString(), maxAttributeStringValue)},
 		}

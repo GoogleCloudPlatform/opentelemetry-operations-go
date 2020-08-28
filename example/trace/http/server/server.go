@@ -20,10 +20,8 @@ import (
 	"net/http"
 	"os"
 
-	"go.opentelemetry.io/otel/api/correlation"
-	"go.opentelemetry.io/otel/api/global"
+	otelhttp "go.opentelemetry.io/contrib/instrumentation/net/http"
 	"go.opentelemetry.io/otel/api/trace"
-	"go.opentelemetry.io/otel/instrumentation/httptrace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
@@ -50,28 +48,15 @@ func main() {
 	flush := initTracer()
 	defer flush()
 
-	tr := global.TraceProvider().Tracer("cloudtrace/example/server")
-
 	helloHandler := func(w http.ResponseWriter, req *http.Request) {
-		attrs, entries, spanCtx := httptrace.Extract(req.Context(), req)
-
-		req = req.WithContext(correlation.ContextWithMap(req.Context(), correlation.NewMap(correlation.MapUpdate{
-			MultiKV: entries,
-		})))
-
-		ctx, span := tr.Start(
-			trace.ContextWithRemoteSpanContext(req.Context(), spanCtx),
-			"hello",
-			trace.WithAttributes(attrs...),
-		)
-		defer span.End()
-
+		ctx := req.Context()
+		span := trace.SpanFromContext(ctx)
 		span.AddEvent(ctx, "handling this...")
 
 		_, _ = io.WriteString(w, "Hello, world!\n")
 	}
-
-	http.HandleFunc("/hello", helloHandler)
+	otelHandler := otelhttp.NewHandler(http.HandlerFunc(helloHandler), "Hello")
+	http.Handle("/hello", otelHandler)
 	err := http.ListenAndServe(":7777", nil)
 	if err != nil {
 		panic(err)

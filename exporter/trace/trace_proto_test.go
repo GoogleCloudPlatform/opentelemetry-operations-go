@@ -20,7 +20,7 @@ import (
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
 
-	"go.opentelemetry.io/otel/api/kv"
+	"go.opentelemetry.io/otel/label"
 )
 
 func TestInjectLabelsFromResources(t *testing.T) {
@@ -33,58 +33,58 @@ func TestInjectLabelsFromResources(t *testing.T) {
 			name: "empty resource",
 			input: export.SpanData{
 				Resource: resource.New(),
-				Attributes: []kv.KeyValue{
-					kv.String("a", "1"),
+				Attributes: []label.KeyValue{
+					label.String("a", "1"),
 				},
 			},
 			expected: export.SpanData{
 				Resource: resource.New(),
-				Attributes: []kv.KeyValue{
-					kv.String("a", "1"),
+				Attributes: []label.KeyValue{
+					label.String("a", "1"),
 				},
 			},
 		},
 		{
 			name: "empty attributes",
 			input: export.SpanData{
-				Resource:   resource.New(kv.String("b", "2")),
-				Attributes: []kv.KeyValue{},
+				Resource:   resource.New(label.String("b", "2")),
+				Attributes: []label.KeyValue{},
 			},
 			expected: export.SpanData{
-				Resource: resource.New(kv.String("b", "2")),
-				Attributes: []kv.KeyValue{
-					kv.String("b", "2"),
+				Resource: resource.New(label.String("b", "2")),
+				Attributes: []label.KeyValue{
+					label.String("b", "2"),
 				},
 			},
 		},
 		{
 			name: "normal insert",
 			input: export.SpanData{
-				Resource: resource.New(kv.String("b", "2")),
-				Attributes: []kv.KeyValue{
-					kv.String("a", "1"),
+				Resource: resource.New(label.String("b", "2")),
+				Attributes: []label.KeyValue{
+					label.String("a", "1"),
 				},
 			},
 			expected: export.SpanData{
-				Resource: resource.New(kv.String("b", "2")),
-				Attributes: []kv.KeyValue{
-					kv.String("a", "1"),
-					kv.String("b", "2"),
+				Resource: resource.New(label.String("b", "2")),
+				Attributes: []label.KeyValue{
+					label.String("a", "1"),
+					label.String("b", "2"),
 				},
 			},
 		},
 		{
 			name: "conflicts with the existing keys",
 			input: export.SpanData{
-				Resource: resource.New(kv.String("a", "2")),
-				Attributes: []kv.KeyValue{
-					kv.String("a", "1"),
+				Resource: resource.New(label.String("a", "2")),
+				Attributes: []label.KeyValue{
+					label.String("a", "1"),
 				},
 			},
 			expected: export.SpanData{
-				Resource: resource.New(kv.String("a", "2")),
-				Attributes: []kv.KeyValue{
-					kv.String("a", "1"),
+				Resource: resource.New(label.String("a", "2")),
+				Attributes: []label.KeyValue{
+					label.String("a", "1"),
 				},
 			},
 		},
@@ -92,23 +92,23 @@ func TestInjectLabelsFromResources(t *testing.T) {
 			name: "allowed duplicate keys in attributes",
 			input: export.SpanData{
 				Resource: resource.New(
-					kv.String("c", "1"),
+					label.String("c", "1"),
 				),
-				Attributes: []kv.KeyValue{
-					kv.String("a", "1"),
-					kv.String("b", "1"),
-					kv.String("b", "2"),
-					kv.String("b", "3"),
+				Attributes: []label.KeyValue{
+					label.String("a", "1"),
+					label.String("b", "1"),
+					label.String("b", "2"),
+					label.String("b", "3"),
 				},
 			},
 			expected: export.SpanData{
-				Resource: resource.New(kv.String("c", "1")),
-				Attributes: []kv.KeyValue{
-					kv.String("a", "1"),
-					kv.String("b", "1"),
-					kv.String("b", "2"),
-					kv.String("b", "3"),
-					kv.String("c", "1"),
+				Resource: resource.New(label.String("c", "1")),
+				Attributes: []label.KeyValue{
+					label.String("a", "1"),
+					label.String("b", "1"),
+					label.String("b", "2"),
+					label.String("b", "3"),
+					label.String("c", "1"),
 				},
 			},
 		},
@@ -121,7 +121,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 				t.Errorf("expected: %v, actual: %v", tc.expected.Attributes, tc.input.Attributes)
 				return
 			}
-			attrs := make(map[kv.KeyValue]bool, len(tc.input.Attributes))
+			attrs := make(map[label.KeyValue]bool, len(tc.input.Attributes))
 
 			for _, ele := range tc.input.Attributes {
 				attrs[ele] = true

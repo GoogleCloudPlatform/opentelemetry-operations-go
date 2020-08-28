@@ -6,7 +6,8 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trac
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.10.0
-	go.opentelemetry.io/otel v0.10.0
-	go.opentelemetry.io/otel/sdk v0.10.0
-	google.golang.org/grpc v1.30.0
+	go.opentelemetry.io/contrib/instrumentation/net/http v0.11.0
+	go.opentelemetry.io/otel v0.11.0
+	go.opentelemetry.io/otel/sdk v0.11.0
+	golang.org/x/sys v0.0.0-20200615200032-f1bc736245b1 // indirect
 )
