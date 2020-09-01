@@ -26,7 +26,7 @@ import (
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"golang.org/x/oauth2/google"
 
-	monitoring "cloud.google.com/go/monitoring/apiv3"
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 )
 
 const (

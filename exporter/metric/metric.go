@@ -31,7 +31,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
 
-	monitoring "cloud.google.com/go/monitoring/apiv3"
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
