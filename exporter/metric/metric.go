@@ -28,6 +28,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/minmaxsumcount"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
@@ -160,8 +161,10 @@ func NewExportPipeline(opts []Option, popts ...push.Option) (*push.Controller, e
 		return nil, err
 	}
 	period := exporter.metricExporter.o.ReportingInterval
+	checkpointer := basic.New(selector, exporter)
+
 	pusher := push.New(
-		selector,
+		checkpointer,
 		exporter,
 		append([]push.Option{
 			push.WithPeriod(period),
