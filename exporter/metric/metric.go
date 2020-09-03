@@ -418,6 +418,8 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 
 	var kind googlemetricpb.MetricDescriptor_MetricKind
 	switch mkind {
+	// TODO: Decide how UpDownCounterKind and UpDownSumObserverKind should be handled.
+	// CUMULATIVE might not be correct as it assumes the metric always goes up.
 	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
 		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
 	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
