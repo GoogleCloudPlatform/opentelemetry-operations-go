@@ -22,9 +22,9 @@ import (
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/metric"
 	apimetric "go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/label"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/metrictest"
 	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/aggregatortest"
@@ -55,7 +55,7 @@ func TestExportMetrics(t *testing.T) {
 	lvagg := &lastvalue.New(1)[0]
 	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)
 	lvagg.Update(ctx, metric.NewFloat64Number(12.34), &desc)
-	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
+	cps.Add(&desc, lvagg, label.String("a", "A"), label.String("b", "B"))
 
 	opts := []Option{
 		WithProjectID("PROJECT_ID_NOT_REAL"),
@@ -80,7 +80,7 @@ func TestExportCounter(t *testing.T) {
 
 	resOpt := push.WithResource(
 		resource.New(
-			kv.String("test_id", "abc123"),
+			label.String("test_id", "abc123"),
 		),
 	)
 
@@ -102,7 +102,7 @@ func TestExportCounter(t *testing.T) {
 
 	// Register counter value
 	counter := metric.Must(meter).NewInt64Counter("counter-a")
-	clabels := []kv.KeyValue{kv.Key("key").String("value")}
+	clabels := []label.KeyValue{label.Key("key").String("value")}
 	counter.Add(ctx, 100, clabels...)
 }
 
@@ -149,7 +149,7 @@ func TestRecordToMpb(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	cps.Add(&desc, lvagg, kv.String("a", "A"), kv.String("b", "B"))
+	cps.Add(&desc, lvagg, label.String("a", "A"), label.String("b", "B"))
 
 	md := &googlemetricpb.MetricDescriptor{
 		Name:        desc.Name(),
@@ -199,12 +199,12 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_container
 		{
 			resource.New(
-				kv.String("cloud.provider", "gcp"),
-				kv.String("cloud.zone", "us-central1-a"),
-				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-				kv.String("k8s.namespace.name", "default"),
-				kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-				kv.String("container.name", "opentelemetry"),
+				label.String("cloud.provider", "gcp"),
+				label.String("cloud.zone", "us-central1-a"),
+				label.String("k8s.cluster.name", "opentelemetry-cluster"),
+				label.String("k8s.namespace.name", "default"),
+				label.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+				label.String("container.name", "opentelemetry"),
 			),
 			"k8s_container",
 			map[string]string{
@@ -219,10 +219,10 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_node
 		{
 			resource.New(
-				kv.String("cloud.provider", "gcp"),
-				kv.String("cloud.zone", "us-central1-a"),
-				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-				kv.String("host.name", "opentelemetry-node"),
+				label.String("cloud.provider", "gcp"),
+				label.String("cloud.zone", "us-central1-a"),
+				label.String("k8s.cluster.name", "opentelemetry-cluster"),
+				label.String("host.name", "opentelemetry-node"),
 			),
 			"k8s_node",
 			map[string]string{
@@ -235,11 +235,11 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_pod
 		{
 			resource.New(
-				kv.String("cloud.provider", "gcp"),
-				kv.String("cloud.zone", "us-central1-a"),
-				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-				kv.String("k8s.namespace.name", "default"),
-				kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+				label.String("cloud.provider", "gcp"),
+				label.String("cloud.zone", "us-central1-a"),
+				label.String("k8s.cluster.name", "opentelemetry-cluster"),
+				label.String("k8s.namespace.name", "default"),
+				label.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
 			),
 			"k8s_pod",
 			map[string]string{
@@ -253,9 +253,9 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_cluster
 		{
 			resource.New(
-				kv.String("cloud.provider", "gcp"),
-				kv.String("cloud.zone", "us-central1-a"),
-				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
+				label.String("cloud.provider", "gcp"),
+				label.String("cloud.zone", "us-central1-a"),
+				label.String("k8s.cluster.name", "opentelemetry-cluster"),
 			),
 			"k8s_cluster",
 			map[string]string{
@@ -267,9 +267,9 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_node missing a field
 		{
 			resource.New(
-				kv.String("cloud.provider", "gcp"),
-				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-				kv.String("host.name", "opentelemetry-node"),
+				label.String("cloud.provider", "gcp"),
+				label.String("k8s.cluster.name", "opentelemetry-cluster"),
+				label.String("host.name", "opentelemetry-node"),
 			),
 			"global",
 			map[string]string{
@@ -279,12 +279,12 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// nonexisting resource types
 		{
 			resource.New(
-				kv.String("cloud.provider", "none"),
-				kv.String("cloud.zone", "us-central1-a"),
-				kv.String("k8s.cluster.name", "opentelemetry-cluster"),
-				kv.String("k8s.namespace.name", "default"),
-				kv.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-				kv.String("container.name", "opentelemetry"),
+				label.String("cloud.provider", "none"),
+				label.String("cloud.zone", "us-central1-a"),
+				label.String("k8s.cluster.name", "opentelemetry-cluster"),
+				label.String("k8s.namespace.name", "default"),
+				label.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+				label.String("container.name", "opentelemetry"),
 			),
 			"global",
 			map[string]string{
@@ -294,9 +294,9 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// GCE resource fields
 		{
 			resource.New(
-				kv.String("cloud.provider", "gcp"),
-				kv.String("host.id", "123"),
-				kv.String("cloud.zone", "us-central1-a"),
+				label.String("cloud.provider", "gcp"),
+				label.String("host.id", "123"),
+				label.String("cloud.zone", "us-central1-a"),
 			),
 			"gce_instance",
 			map[string]string{
@@ -308,10 +308,10 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// AWS resources
 		{
 			resource.New(
-				kv.String("cloud.provider", "aws"),
-				kv.String("cloud.region", "us-central1-a"),
-				kv.String("host.id", "123"),
-				kv.String("cloud.account.id", "fake_account"),
+				label.String("cloud.provider", "aws"),
+				label.String("cloud.region", "us-central1-a"),
+				label.String("host.id", "123"),
+				label.String("cloud.account.id", "fake_account"),
 			),
 			"aws_ec2_instance",
 			map[string]string{
