@@ -23,8 +23,8 @@ import (
 
 	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
-	"go.opentelemetry.io/otel/api/kv"
 	"go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/resource"
 )
@@ -64,8 +64,8 @@ func main() {
 	// This should be fixed in #29.
 	resOpt := push.WithResource(
 		resource.New(
-			kv.String("instance_id", "abc123"),
-			kv.String("application", "example-app"),
+			label.String("instance_id", "abc123"),
+			label.String("application", "example-app"),
 		),
 	)
 	pusher, err := mexporter.InstallNewPipeline(opts, resOpt)
@@ -80,13 +80,13 @@ func main() {
 
 	// Register counter value
 	counter := metric.Must(meter).NewInt64Counter("counter-a")
-	clabels := []kv.KeyValue{kv.Key("key").String("value")}
+	clabels := []label.KeyValue{label.Key("key").String("value")}
 	counter.Add(ctx, 100, clabels...)
 
 	// Register observer value
-	olabels := []kv.KeyValue{
-		kv.String("foo", "Tokyo"),
-		kv.String("bar", "Sushi"),
+	olabels := []label.KeyValue{
+		label.String("foo", "Tokyo"),
+		label.String("bar", "Sushi"),
 	}
 	of := newObservedFloat(12.34)
 
