@@ -421,12 +421,12 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 
 	var kind googlemetricpb.MetricDescriptor_MetricKind
 	switch mkind {
-	case apimetric.CounterKind, apimetric.UpDownCounterKind:
+	// TODO: Decide how UpDownCounterKind and UpDownSumObserverKind should be handled.
+	// CUMULATIVE might not be correct as it assumes the metric always goes up.
+	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
 		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
 	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
 		kind = googlemetricpb.MetricDescriptor_GAUGE
-	// TODO: Add support for SumObserverKind and UpDownSumObserverKind.
-	// https://pkg.go.dev/go.opentelemetry.io/otel@v0.6.0/api/metric?tab=doc#Kind
 	default:
 		kind = googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
 	}
