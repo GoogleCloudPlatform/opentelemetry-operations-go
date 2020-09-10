@@ -17,7 +17,6 @@ package metric
 import (
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
-	"go.opentelemetry.io/otel/sdk/metric/aggregator/array"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
 )
@@ -31,6 +30,8 @@ var _ export.AggregatorSelector = selectorCloudMonitoring{}
 //
 // NOTE: this selector is just to ensure that LastValue is used for
 // ValueObserverKind and ValueRecorderKind.
+// All other metric kinds have Sum default aggregation
+// c.f. https://github.com/open-telemetry/opentelemetry-go/blob/master/sdk/metric/selector/simple/simple.go
 //
 // TODO: Remove this once SDK implements such a
 // selector, otherwise Views API gives flexibility to set aggregation type on
@@ -44,13 +45,6 @@ func (selectorCloudMonitoring) AggregatorFor(descriptor *apimetric.Descriptor, a
 	switch descriptor.MetricKind() {
 	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
 		aggs := lastvalue.New(len(aggPtrs))
-		for i := range aggPtrs {
-			*aggPtrs[i] = &aggs[i]
-		}
-	// NOTE: `array` gives the option to use Sum, Count, Max, Min, Quantile and Points (most flexible),
-	// so chosen for future implementations rather than `sum`.
-	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
-		aggs := array.New(len(aggPtrs))
 		for i := range aggPtrs {
 			*aggPtrs[i] = &aggs[i]
 		}

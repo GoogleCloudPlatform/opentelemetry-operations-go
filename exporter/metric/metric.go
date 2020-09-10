@@ -24,9 +24,9 @@ import (
 	"go.opentelemetry.io/otel/api/global"
 	apimetric "go.opentelemetry.io/otel/api/metric"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
-	"go.opentelemetry.io/otel/sdk/metric/aggregator/array"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/minmaxsumcount"
+	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -502,7 +502,7 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
 		// CUMULATIVE measurement should have the same start time and increasing end time.
 		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
-		if sum, ok := agg.(*array.Aggregator); ok {
+		if sum, ok := agg.(*sum.Aggregator); ok {
 			return sumToTypedValueAndTimestamp(sum, nkind, me.startTime.Unix(), now)
 		}
 		return nil, nil, errUnsupportedAggregation{agg: agg}
@@ -565,7 +565,7 @@ func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind apimetric.
 	return tv, t, nil
 }
 
-func sumToTypedValueAndTimestamp(sum *array.Aggregator, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, err := sum.Sum()
 	if err != nil {
 		return nil, nil, err
