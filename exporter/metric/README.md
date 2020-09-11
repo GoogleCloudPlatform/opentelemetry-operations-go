@@ -31,14 +31,7 @@ projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 opts := []mexporter.Option{
     mexporter.WithProjectID(projectID),
 }
-popts:= []push.Option{
-    push.WithResource(
-        resource.New(
-            label.String("author", "google"),
-            label.String("application", "example"),
-        ),
-    ),
-}
+popts:= []push.Option{}
 
 // Create exporter (collector embedded with the exporter).
 pusher, err := mexporter.InstallNewPipeline(opts, popts)
