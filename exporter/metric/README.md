@@ -27,10 +27,7 @@ import (
 )
 
 // Initialize exporter option.
-projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-opts := []mexporter.Option{
-    mexporter.WithProjectID(projectID),
-}
+opts := []mexporter.Option{}
 popts:= []push.Option{}
 
 // Create exporter (collector embedded with the exporter).
@@ -59,6 +56,15 @@ The Google Cloud Monitoring exporter depends upon [`google.FindDefaultCredential
 
 * A JSON file whose path is specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 * A JSON file in a location known to the gcloud command-line tool. On Windows, this is `%APPDATA%/gcloud/application_default_credentials.json`. On other systems, `$HOME/.config/gcloud/application_default_credentials.json`.
+
+When running code locally, you may need to specify a Google Project ID in addition to `GOOGLE_APPLICATION_CREDENTIALS`. This is best done using an environment variable (e.g. `GOOGLE_CLOUD_PROJECT`) and the `metric.WithProjectID` method, e.g.:
+
+```golang
+projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+opts := []mexporter.Option{
+    mexporter.WithProjectID(projectID),
+}
+```
 
 ## Useful links
 
