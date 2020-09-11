@@ -51,7 +51,7 @@ defer pusher.Stop()
 ctx := context.Background()
 meter := pusher.Provider().Meter("cloudmonitoring/example")
 
-counter := metric.Must(meter).NewInt64Counter("counter.foo")
+counter := metric.Must(meter).NewInt64Counter("counter-foo")
 labels := []label.KeyValue{
     label.Key("key").String("value"),
 }
