@@ -16,6 +16,7 @@ Google Cloud Monitoring is a managed service provided by Google Cloud Platform. 
 After you import the metric exporter package, then register the exporter to the application, and start sending metrics. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instructions in [Authentication](#Authentication).
 
 ```go
+package main
 
 import (
     "go.opentelemetry.io/otel/api/metric"
@@ -26,26 +27,28 @@ import (
     mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 )
 
-// Initialize exporter option.
-opts := []mexporter.Option{}
-popts:= []push.Option{}
+func main() {
+    // Initialize exporter option.
+    opts := []mexporter.Option{}
+    popts:= []push.Option{}
 
-// Create exporter (collector embedded with the exporter).
-pusher, err := mexporter.InstallNewPipeline(opts, popts)
-if err != nil {
-    log.Fatalf("mexporter.InstallNewPipeline: %v", err)
+    // Create exporter (collector embedded with the exporter).
+    pusher, err := mexporter.InstallNewPipeline(opts, popts...)
+    if err != nil {
+        log.Fatalf("mexporter.InstallNewPipeline: %v", err)
+    }
+    defer pusher.Stop()
+
+    // Start meter
+    ctx := context.Background()
+    meter := pusher.Provider().Meter("cloudmonitoring/example")
+
+    counter := metric.Must(meter).NewInt64Counter("counter-foo")
+    labels := []label.KeyValue{
+        label.Key("key").String("value"),
+    }
+    counter.Add(ctx, 123, labels...)
 }
-defer pusher.Stop()
-
-// Start meter
-ctx := context.Background()
-meter := pusher.Provider().Meter("cloudmonitoring/example")
-
-counter := metric.Must(meter).NewInt64Counter("counter-foo")
-labels := []label.KeyValue{
-    label.Key("key").String("value"),
-}
-counter.Add(ctx, 123, labels...)
 ```
 
 Note that, as of version 0.2.1, `ValueObserver` and `ValueRecorder` are aggregated to `LastValue`, and other metric kinds are to `Sum`. This behaviour should be change once [Views API](https://github.com/open-telemetry/oteps/pull/89) is introduced to the specification.
