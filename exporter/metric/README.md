@@ -13,48 +13,61 @@ Google Cloud Monitoring is a managed service provided by Google Cloud Platform. 
 
 ## Usage
 
-Add `github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric` to the import list and set up `go.mod` file accordingly.
-
-```go
-import mexpoter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
-```
-
 After you import the metric exporter package, then register the exporter to the application, and start sending metrics. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instructions in [Authentication](#Authentication).
 
 ```go
+package main
 
 import (
-    ... (omitted)
     "go.opentelemetry.io/otel/api/metric"
+    "go.opentelemetry.io/otel/label"
+    "go.opentelemetry.io/otel/sdk/metric/controller/push"
+    "go.opentelemetry.io/otel/sdk/resource"
+
+    mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 )
 
-// Initialize exporter option.
-opts := []mexporter.Option{}
+func main() {
+    // Initialize exporter option.
+    opts := []mexporter.Option{}
+    popts:= []push.Option{}
 
-// Create exporter (collector embedded with the exporter).
-pusher, err := mexporter.InstallNewPipeline(opts, nil)
-if err != nil {
-    log.Fatalf("mexporter.InstallNewPipeline: %v", err)
+    // Create exporter (collector embedded with the exporter).
+    pusher, err := mexporter.InstallNewPipeline(opts, popts...)
+    if err != nil {
+        log.Fatalf("mexporter.InstallNewPipeline: %v", err)
+    }
+    defer pusher.Stop()
+
+    // Start meter
+    ctx := context.Background()
+    meter := pusher.Provider().Meter("cloudmonitoring/example")
+
+    counter := metric.Must(meter).NewInt64Counter("counter-foo")
+    labels := []label.KeyValue{
+        label.Key("key").String("value"),
+    }
+    counter.Add(ctx, 123, labels...)
 }
-defer pusher.Stop()
-
-// Start meter
-ctx := context.Background()
-meter := pusher.Provider().Meter("cloudmonitoring/example")
-
-counter := metric.Must(meter).NewInt64Counter("counter-foo")
-labels := []kv.KeyValue{kv.Key("key").String("value")}
-counter.Add(ctx, 123, labels...)
 ```
 
 Note that, as of version 0.2.1, `ValueObserver` and `ValueRecorder` are aggregated to `LastValue`, and other metric kinds are to `Sum`. This behaviour should be change once [Views API](https://github.com/open-telemetry/oteps/pull/89) is introduced to the specification.
 
 ## Authentication
 
-The Google Cloud Trace exporter depends upon [`google.FindDefaultCredentials`](https://pkg.go.dev/golang.org/x/oauth2/google?tab=doc#FindDefaultCredentials), so the service account is automatically detected by default, but also the custom credential file (so called `service_account_key.json`) can be detected with specific conditions. Quoting from the document of `google.FindDefaultCredentials`:
+The Google Cloud Monitoring exporter depends upon [`google.FindDefaultCredentials`](https://pkg.go.dev/golang.org/x/oauth2/google?tab=doc#FindDefaultCredentials), so the service account is automatically detected by default, but also the custom credential file (so called `service_account_key.json`) can be detected with specific conditions. Quoting from the document of `google.FindDefaultCredentials`:
 
 * A JSON file whose path is specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 * A JSON file in a location known to the gcloud command-line tool. On Windows, this is `%APPDATA%/gcloud/application_default_credentials.json`. On other systems, `$HOME/.config/gcloud/application_default_credentials.json`.
+
+When running code locally, you may need to specify a Google Project ID in addition to `GOOGLE_APPLICATION_CREDENTIALS`. This is best done using an environment variable (e.g. `GOOGLE_CLOUD_PROJECT`) and the `metric.WithProjectID` method, e.g.:
+
+```golang
+projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+opts := []mexporter.Option{
+    mexporter.WithProjectID(projectID),
+}
+```
 
 ## Useful links
 
