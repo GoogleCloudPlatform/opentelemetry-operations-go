@@ -15,45 +15,57 @@ Google Cloud Trace is a managed service provided by Google Cloud Platform. The e
 
 ## Usage
 
-Add `github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace` to the import list and set up `go.mod` file accordingly.
+Once you import the trace exporter package, create and install a new export pipeline, then you can start tracing. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instruction in [Authentication](#Authentication).
 
 ```go
-import texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-```
+package main
 
-Once you import the trace exporter package, create and install a new export pipeline, and then you can start tracing. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instruction in [Authentication](#Authentication).
+import (
+    "context"
+    "log"
+    "os"
 
-```go
-// Create exporter and trace provider pipeline, and register provider.
-projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-_, flush, err := texporter.InstallNewPipeline(
+    texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+
+    "go.opentelemetry.io/otel/api/global"
+    sdktrace "go.opentelemetry.io/otel/sdk/trace"
+)
+
+func main() {
+    // Create exporter and trace provider pipeline, and register provider.
+    _, flush, err := texporter.InstallNewPipeline(
         []texporter.Option {
-                texporter.WithProjectID(projectID),
-                // other optional exporter options
+            // optional exporter options
         },
         // This example code uses sdktrace.AlwaysSample sampler to sample all traces.
         // In a production environment or high QPS setup please use ProbabilitySampler
         // set at the desired probability.
         // Example:
         // sdktrace.WithConfig(sdktrace.Config {
-        //        DefaultSampler: sdktrace.ProbabilitySampler(0.0001),
+        //     DefaultSampler: sdktrace.ProbabilitySampler(0.0001),
         // })
-        sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+        sdktrace.WithConfig(sdktrace.Config{
+            DefaultSampler: sdktrace.AlwaysSample(),
+        }),
         // other optional provider options
-)
-if err != nil {
-    log.Fatalf("texporter.InstallNewPipeline: %v", err)
-}
-// before ending program, wait for all enqueued spans to be exported
-defer flush()
+    )
+    if err != nil {
+        log.Fatalf("texporter.InstallNewPipeline: %v", err)
+    }
+    // before ending program, wait for all enqueued spans to be exported
+    defer flush()
 
-// Create custom span.
-tracer := global.TraceProvider().Tracer("example.com/trace")
-tracer.WithSpan(context.Background(), "foo",
-        func(_ context.Context) error {
-                // Do some work.
-                return nil
-        })
+    // Create custom span.
+    tracer := global.TraceProvider().Tracer("example.com/trace")
+    err = func(ctx context.Context) error {
+        ctx, span := tracer.Start(ctx, "foo")
+        defer span.End()
+
+        // Do some work.
+
+        return nil
+    }(ctx)
+}
 ```
 
 ## Authentication
@@ -62,6 +74,19 @@ The Google Cloud Trace exporter depends upon [`google.FindDefaultCredentials`](h
 
 * A JSON file whose path is specified by the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
 * A JSON file in a location known to the gcloud command-line tool. On Windows, this is `%APPDATA%/gcloud/application_default_credentials.json`. On other systems, `$HOME/.config/gcloud/application_default_credentials.json`.
+
+When running code locally, you may need to specify a Google Project ID in addition to `GOOGLE_APPLICATION_CREDENTIALS`. This is best done using an environment variable (e.g. `GOOGLE_CLOUD_PROJECT`) and the `WithProjectID` method, e.g.:
+
+```go
+projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
+_, flush, err := texporter.InstallNewPipeline(
+    []texporter.Option {
+        texporter.WithProjectID(projectID),
+        // other optional exporter options
+    },
+    ...
+)
+```
 
 ## Useful links
 
