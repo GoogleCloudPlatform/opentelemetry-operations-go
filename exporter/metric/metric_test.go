@@ -149,7 +149,7 @@ func TestRecordToMpb(t *testing.T) {
 	if err != nil {
 		t.Errorf("%v", err)
 	}
-	cps.Add(&desc, lvagg, label.String("a", "A"), label.String("b", "B"))
+	cps.Add(&desc, lvagg, label.String("a", "A"), label.String("b.b", "B"))
 
 	md := &googlemetricpb.MetricDescriptor{
 		Name:        desc.Name(),
@@ -173,8 +173,8 @@ func TestRecordToMpb(t *testing.T) {
 	want := &googlemetricpb.Metric{
 		Type: md.Type,
 		Labels: map[string]string{
-			"a": "A",
-			"b": "B",
+			"a":   "A",
+			"b_b": "B",
 		},
 	}
 
