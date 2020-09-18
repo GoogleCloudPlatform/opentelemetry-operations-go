@@ -459,7 +459,7 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 	iter := r.Labels().Iter()
 	for iter.Next() {
 		kv := iter.Label()
-		labels[string(kv.Key)] = kv.Value.AsString()
+		labels[normalizeLabelKey(string(kv.Key))] = kv.Value.AsString()
 	}
 
 	return &googlemetricpb.Metric{
@@ -603,4 +603,16 @@ func aggToTypedValue(kind apimetric.NumberKind, value apimetric.Number) (*monito
 		}, nil
 	}
 	return nil, errUnexpectedNumberKind{kind: kind}
+}
+
+// https://github.com/googleapis/googleapis/blob/c4c562f89acce603fb189679836712d08c7f8584/google/api/metric.proto#L149
+//
+// > The label key name must follow:
+// >
+// > * Only upper and lower-case letters, digits and underscores (_) are
+// >   allowed.
+// > * Label name must start with a letter or digit.
+// > * The maximum length of a label name is 100 characters.
+func normalizeLabelKey(s string) string {
+	return strings.ReplaceAll(s, ".", "_")
 }
