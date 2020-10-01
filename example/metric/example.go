@@ -76,7 +76,7 @@ func main() {
 
 	// Start meter
 	ctx := context.Background()
-	meter := pusher.Provider().Meter("cloudmonitoring/example")
+	meter := pusher.MeterProvider().Meter("cloudmonitoring/example")
 
 	// Register counter value
 	counter := metric.Must(meter).NewInt64Counter("counter-a")

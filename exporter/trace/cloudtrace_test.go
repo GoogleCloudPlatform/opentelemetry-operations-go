@@ -54,12 +54,12 @@ func TestExporter_ExportSpan(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+	_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.SetStatus(codes.OK, "Status Message")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
-	_, span = global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span-with-error-status")
+	_, span = global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span-with-error-status")
 	span.SetStatus(codes.NotFound, "Error Message")
 	span.End()
 
@@ -93,7 +93,7 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), spanName)
+	_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), spanName)
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
@@ -127,7 +127,7 @@ func TestExporter_Timeout(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+	_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
@@ -165,7 +165,7 @@ func TestBundling(t *testing.T) {
 	assert.NoError(t, err)
 
 	for i := 0; i < 35; i++ {
-		_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+		_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
 		span.End()
 	}
 
@@ -232,7 +232,7 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 	go func() {
 		// Release enough spans to form two bundles
 		for i := 0; i < totalSpans; i++ {
-			_, span := global.TraceProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+			_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
 			expectedSpanIDs = append(expectedSpanIDs, span.SpanContext().SpanID.String())
 			span.End()
 		}

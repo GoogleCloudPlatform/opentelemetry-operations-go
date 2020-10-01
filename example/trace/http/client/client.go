@@ -27,8 +27,8 @@ import (
 
 	"go.opentelemetry.io/otel/codes"
 
-	otelhttp "go.opentelemetry.io/contrib/instrumentation/net/http"
-	"go.opentelemetry.io/otel/api/correlation"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+	"go.opentelemetry.io/otel/api/baggage"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/label"
@@ -57,10 +57,10 @@ func initTracer() func() {
 func main() {
 	flush := initTracer()
 	defer flush()
-	tr := global.TraceProvider().Tracer("cloudtrace/example/client")
+	tr := global.TracerProvider().Tracer("cloudtrace/example/client")
 
 	client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
-	ctx := correlation.NewContext(context.Background(),
+	ctx := baggage.NewContext(context.Background(),
 		label.String("username", "donuts"),
 	)
 

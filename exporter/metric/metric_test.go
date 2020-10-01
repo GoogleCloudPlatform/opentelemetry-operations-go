@@ -98,7 +98,7 @@ func TestExportCounter(t *testing.T) {
 
 	// Start meter
 	ctx := context.Background()
-	meter := pusher.Provider().Meter("cloudmonitoring/test")
+	meter := pusher.MeterProvider().Meter("cloudmonitoring/test")
 
 	// Register counter value
 	counter := metric.Must(meter).NewInt64Counter("counter-a")

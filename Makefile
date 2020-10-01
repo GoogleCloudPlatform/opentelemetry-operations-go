@@ -133,7 +133,7 @@ update-dep:
 	$(MAKE) build
 	$(MAKE) gotidy
 
-OTEL_VERSION=v0.11.0
+OTEL_VERSION=v0.12.0
 
 .PHONY: update-otel
 update-otel:
