@@ -233,26 +233,23 @@ type Exporter struct {
 }
 
 // InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
-func InstallNewPipeline(opts []Option, topts ...sdktrace.ProviderOption) (apitrace.Provider, func(), error) {
+func InstallNewPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (apitrace.TracerProvider, func(), error) {
 	tp, flush, err := NewExportPipeline(opts, topts...)
 	if err != nil {
 		return nil, nil, err
 	}
-	global.SetTraceProvider(tp)
+	global.SetTracerProvider(tp)
 	return tp, flush, err
 }
 
 // NewExportPipeline sets up a complete export pipeline with the recommended setup
 // for trace provider. Returns provider, flush function, and errors.
-func NewExportPipeline(opts []Option, topts ...sdktrace.ProviderOption) (apitrace.Provider, func(), error) {
+func NewExportPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (apitrace.TracerProvider, func(), error) {
 	exporter, err := NewExporter(opts...)
 	if err != nil {
 		return nil, nil, err
 	}
-	tp, err := sdktrace.NewProvider(append(topts, sdktrace.WithSyncer(exporter))...)
-	if err != nil {
-		return nil, nil, err
-	}
+	tp := sdktrace.NewTracerProvider(append(topts, sdktrace.WithSyncer(exporter))...)
 	return tp, exporter.traceExporter.Flush, nil
 }
 
@@ -292,20 +289,25 @@ func newContextWithTimeout(ctx context.Context, timeout time.Duration) (context.
 	return context.WithTimeout(ctx, timeout)
 }
 
-// ExportSpan exports a SpanData to Stackdriver Trace.
-func (e *Exporter) ExportSpan(ctx context.Context, sd *export.SpanData) {
-	if len(e.traceExporter.o.DefaultTraceAttributes) > 0 {
-		sd = e.sdWithDefaultTraceAttributes(sd)
+// ExportSpans exports a SpanData to Stackdriver Trace.
+func (e *Exporter) ExportSpans(ctx context.Context, spanData []*export.SpanData) error {
+	for _, sd := range spanData {
+		if len(e.traceExporter.o.DefaultTraceAttributes) > 0 {
+			sd = e.sdWithDefaultTraceAttributes(sd)
+		}
+		e.traceExporter.ExportSpan(ctx, sd)
 	}
-	e.traceExporter.ExportSpan(ctx, sd)
+
+	return nil
 }
 
-// Flush waits for exported data to be uploaded.
+// Shutdown waits for exported data to be uploaded.
 //
 // This is useful if your program is ending and you do not
 // want to lose recent spans.
-func (e *Exporter) Flush() {
+func (e *Exporter) Shutdown(ctx context.Context) error {
 	e.traceExporter.Flush()
+	return nil
 }
 
 func (e *Exporter) sdWithDefaultTraceAttributes(sd *export.SpanData) *export.SpanData {
