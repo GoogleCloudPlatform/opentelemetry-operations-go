@@ -40,7 +40,6 @@ import (
 )
 
 const (
-	version                                   = "0.2.1"
 	cloudMonitoringMetricDescriptorNameFormat = "custom.googleapis.com/opentelemetry/%s"
 )
 

@@ -53,11 +53,9 @@ const (
 	labelHTTPStatusCode = `/http/status_code`
 	labelHTTPPath       = `/http/path`
 	labelHTTPUserAgent  = `/http/user_agent`
-
-	version = "0.1.0"
 )
 
-var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", opentelemetry.Version(), version)
+var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", opentelemetry.Version(), Version())
 
 func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) string {
 	if format != nil {
