@@ -40,7 +40,7 @@ const (
 )
 
 var (
-	errReportingIntervalTooLow = fmt.Errorf("reporting interval less than %d", minimumReportingDuration)
+	errReportingIntervalTooLow = fmt.Errorf("reporting interval less than %s", minimumReportingDuration)
 )
 
 // Exporter is the public interface of OpenTelemetry metric exporter for
