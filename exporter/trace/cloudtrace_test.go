@@ -55,12 +55,12 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
-	span.SetStatus(codes.OK, "Status Message")
+	span.SetStatus(codes.Ok, "Status Message")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
 	_, span = global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span-with-error-status")
-	span.SetStatus(codes.NotFound, "Error Message")
+	span.SetStatus(codes.Error, "Error Message")
 	span.End()
 
 	// wait exporter to flush

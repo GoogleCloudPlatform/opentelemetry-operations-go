@@ -21,6 +21,7 @@ import (
 	"log"
 	"os"
 
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/semconv"
 
 	"net/http"
@@ -28,7 +29,6 @@ import (
 	"go.opentelemetry.io/otel/codes"
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/api/baggage"
 	"go.opentelemetry.io/otel/api/global"
 	"go.opentelemetry.io/otel/api/trace"
 	"go.opentelemetry.io/otel/label"
@@ -60,7 +60,7 @@ func main() {
 	tr := global.TracerProvider().Tracer("cloudtrace/example/client")
 
 	client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
-	ctx := baggage.NewContext(context.Background(),
+	ctx := otel.ContextWithBaggageValues(context.Background(),
 		label.String("username", "donuts"),
 	)
 
@@ -78,7 +78,7 @@ func main() {
 		}
 		body, err = ioutil.ReadAll(res.Body)
 		_ = res.Body.Close()
-		span.SetStatus(codes.OK, "")
+		span.SetStatus(codes.Ok, "")
 
 		return err
 	}(ctx)
