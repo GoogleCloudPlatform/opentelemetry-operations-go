@@ -23,9 +23,9 @@ import (
 
 	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 	wrapperspb "github.com/golang/protobuf/ptypes/wrappers"
+	"go.opentelemetry.io/otel/codes"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
-	"google.golang.org/grpc/codes"
 
 	"go.opentelemetry.io/otel/label"
 	opentelemetry "go.opentelemetry.io/otel/sdk"
@@ -112,10 +112,10 @@ func protoFromSpanData(s *export.SpanData, projectID string, format DisplayNameF
 	if s.ParentSpanID != s.SpanContext.SpanID && s.ParentSpanID.IsValid() {
 		sp.ParentSpanId = s.ParentSpanID.String()
 	}
-	if s.StatusCode != codes.OK {
+	if s.StatusCode != codes.Ok {
 		sp.Status = &statuspb.Status{Code: int32(s.StatusCode), Message: s.StatusMessage}
 	}
-	if s.StatusCode == codes.OK && s.StatusMessage != "" {
+	if s.StatusCode == codes.Ok && s.StatusMessage != "" {
 		sp.Status = &statuspb.Status{Code: int32(s.StatusCode), Message: s.StatusMessage}
 	}
 
