@@ -216,17 +216,33 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export
 	// the descriptor does not exist in global cache (me.mdCache).
 	// See details in #26.
 	for kmd, md := range mds {
-		req := &monitoringpb.CreateMetricDescriptorRequest{
-			Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
-			MetricDescriptor: md,
-		}
-		_, err := me.client.CreateMetricDescriptor(ctx, req)
+		err := me.createMetricDescriptorIfNeeded(ctx, md)
 		if err != nil {
 			return err
 		}
 		me.mdCache[kmd] = md
 	}
 	return nil
+}
+
+func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md *googlemetricpb.MetricDescriptor) error {
+	mdReq := &monitoringpb.GetMetricDescriptorRequest{
+		Name: fmt.Sprintf("projects/%s/metricDescriptors/%s", me.o.ProjectID, md.Type),
+	}
+	_, err := me.client.GetMetricDescriptor(ctx, mdReq)
+	if err == nil {
+		// If the metric descriptor already exists, skip the CreateMetricDescriptor call.
+		// Metric descriptors cannot be updated without deleting them first, so there
+		// isn't anything we can do here:
+		// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#md-modify
+		return nil
+	}
+	req := &monitoringpb.CreateMetricDescriptorRequest{
+		Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
+		MetricDescriptor: md,
+	}
+	_, err = me.client.CreateMetricDescriptor(ctx, req)
+	return err
 }
 
 // exportTimeSeriees create TimeSeries from the records in cps.
