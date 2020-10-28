@@ -87,6 +87,15 @@ type options struct {
 	// Optional. Default value is 50.
 	BundleCountThreshold int
 
+	// BundleByteThreshold is the number of bytes that can be buffered before
+	// batch uploading them to the backend.
+	// Optional. Default value is 15KB.
+	BundleByteThreshold int
+
+	// BundleByteLimit is the maximum size of a bundle, in bytes. Zero means unlimited.
+	// Optional. Default value is unlimited.
+	BundleByteLimit int
+
 	// BufferMaxBytes is the maximum size (in bytes) of spans that
 	// will be buffered in memory before being dropped.
 	//
@@ -164,6 +173,22 @@ func WithBundleDelayThreshold(bundleDelayThreshold time.Duration) func(o *option
 func WithBundleCountThreshold(bundleCountThreshold int) func(o *options) {
 	return func(o *options) {
 		o.BundleCountThreshold = bundleCountThreshold
+	}
+}
+
+// WithBundleByteThreshold sets the number of bytes that can be buffered before
+// batch uploading them to the backend.
+func WithBundleByteThreshold(bundleByteThreshold int) func(o *options) {
+	return func(o *options) {
+		o.BundleByteThreshold = bundleByteThreshold
+	}
+}
+
+// WithBundleByteLimit sets the maximum size of a bundle, in bytes. Zero means
+// unlimited.
+func WithBundleByteLimit(bundleByteLimit int) func(o *options) {
+	return func(o *options) {
+		o.BundleByteLimit = bundleByteLimit
 	}
 }
 

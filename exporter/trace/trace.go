@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 	"sync"
 	"time"
 
@@ -41,11 +42,11 @@ type traceExporter struct {
 	client *traceclient.Client
 }
 
-const defaultBufferedByteLimit = 8 * 1024 * 1024
 const defaultBundleDelayThreshold = 2 * time.Second
 const defaultBundleCountThreshold = 50
-const bundleByteThresholdMultiplier = 300
-const bundleByteLimitMultiplier = 1000
+const defaultBundleByteThreshold = 15000
+const defaultBundleByteLimit = 0
+const defaultBufferedByteLimit = 8 * 1024 * 1024
 
 func newTraceExporter(o *options) (*traceExporter, error) {
 	client, err := traceclient.NewClient(o.Context, o.TraceClientOptions...)
@@ -53,30 +54,45 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
 	}
 	e := &traceExporter{
-		projectID: o.ProjectID,
-		client:    client,
-		o:         o,
+		projectID:      o.ProjectID,
+		client:         client,
+		o:              o,
+		overflowLogger: overflowLogger{delayDur: 5 * time.Second},
 	}
 	b := bundler.NewBundler((*tracepb.Span)(nil), func(bundle interface{}) {
 		e.uploadFn(context.Background(), bundle.([]*tracepb.Span))
 	})
+
 	if o.BundleDelayThreshold > 0 {
 		b.DelayThreshold = o.BundleDelayThreshold
 	} else {
 		b.DelayThreshold = defaultBundleDelayThreshold
 	}
+
 	if o.BundleCountThreshold > 0 {
 		b.BundleCountThreshold = o.BundleCountThreshold
 	} else {
 		b.BundleCountThreshold = defaultBundleCountThreshold
 	}
-	b.BundleByteThreshold = b.BundleCountThreshold * bundleByteThresholdMultiplier
-	b.BundleByteLimit = b.BundleCountThreshold * bundleByteLimitMultiplier
+
+	if o.BundleByteThreshold > 0 {
+		b.BundleByteThreshold = o.BundleByteThreshold
+	} else {
+		b.BundleByteThreshold = defaultBundleByteThreshold
+	}
+
+	if o.BundleByteLimit > 0 {
+		b.BundleByteLimit = o.BundleByteLimit
+	} else {
+		b.BundleByteLimit = defaultBundleByteLimit
+	}
+
 	if o.BufferMaxBytes > 0 {
 		b.BufferedByteLimit = o.BufferMaxBytes
 	} else {
 		b.BufferedByteLimit = defaultBufferedByteLimit
 	}
+
 	if o.MaxNumberOfWorkers > 0 {
 		b.HandlerLimit = o.MaxNumberOfWorkers
 	}
@@ -91,9 +107,9 @@ func (e *traceExporter) checkBundlerError(err error) {
 	case nil:
 		return
 	case bundler.ErrOversizedItem:
-		fallthrough
+		e.overflowLogger.log(true)
 	case bundler.ErrOverflow:
-		e.overflowLogger.log()
+		e.overflowLogger.log(false)
 	default:
 		e.o.handleError(err)
 	}
@@ -144,38 +160,51 @@ func (e *traceExporter) Flush() {
 // overflowLogger ensures that at most one overflow error log message is
 // written every 5 seconds.
 type overflowLogger struct {
-	mu    sync.Mutex
-	pause bool
-	accum int
+	mu         sync.Mutex
+	pause      bool
+	delayDur   time.Duration
+	bufferErrs int
+	oversized  int
+}
+
+func (o *overflowLogger) log(oversized bool) {
+	o.mu.Lock()
+	defer o.mu.Unlock()
+	if !o.pause {
+		o.delay()
+	}
+
+	if oversized {
+		o.oversized++
+	} else {
+		o.bufferErrs++
+	}
 }
 
 func (o *overflowLogger) delay() {
 	o.pause = true
-	time.AfterFunc(5*time.Second, func() {
+	time.AfterFunc(o.delayDur, func() {
 		o.mu.Lock()
 		defer o.mu.Unlock()
-		switch {
-		case o.accum == 0:
-			o.pause = false
-		case o.accum == 1:
-			log.Println("OpenTelemetry Cloud Trace exporter: failed to upload span: buffer full")
-			o.accum = 0
-			o.delay()
-		default:
-			log.Printf("OpenTelemetry Cloud Trace exporter: failed to upload %d spans: buffer full", o.accum)
-			o.accum = 0
-			o.delay()
-		}
+		o.pause = false
+		logBufferErrors(o.bufferErrs, o.oversized)
+		o.bufferErrs = 0
+		o.oversized = 0
 	})
 }
 
-func (o *overflowLogger) log() {
-	o.mu.Lock()
-	defer o.mu.Unlock()
-	if !o.pause {
-		log.Println("OpenTelemetry Cloud Trace exporter: failed to upload span: buffer full")
-		o.delay()
-	} else {
-		o.accum++
+func logBufferErrors(bufferFull, oversized int) {
+	if bufferFull == 0 && oversized == 0 {
+		return
 	}
+
+	msgs := make([]string, 0, 2)
+	if bufferFull > 0 {
+		msgs = append(msgs, fmt.Sprintf("buffer full: %v", bufferFull))
+	}
+	if oversized > 0 {
+		msgs = append(msgs, fmt.Sprintf("oversized item: %v", oversized))
+	}
+
+	log.Printf("OpenTelemetry Cloud Trace exporter: failed to upload spans: %s\n", strings.Join(msgs, ", "))
 }

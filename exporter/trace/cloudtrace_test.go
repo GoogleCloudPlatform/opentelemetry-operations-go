@@ -12,10 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package trace_test
+package trace
 
 import (
 	"context"
+	"log"
+	"os"
 	"regexp"
 	"sync"
 	"testing"
@@ -25,8 +27,6 @@ import (
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
-
-	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 
 	"go.opentelemetry.io/otel/api/global"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
@@ -43,12 +43,12 @@ func TestExporter_ExportSpan(t *testing.T) {
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := texporter.InstallNewPipeline(
-		[]texporter.Option{
-			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-			texporter.WithTraceClientOptions(clientOpt),
+	_, flush, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithTraceClientOptions(clientOpt),
 			// handle bundle as soon as span is received
-			texporter.WithBundleCountThreshold(1),
+			WithBundleCountThreshold(1),
 		},
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
@@ -82,12 +82,12 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	}
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := texporter.InstallNewPipeline(
-		[]texporter.Option{
-			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-			texporter.WithTraceClientOptions(clientOpt),
-			texporter.WithBundleCountThreshold(1),
-			texporter.WithDisplayNameFormatter(format),
+	_, flush, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithTraceClientOptions(clientOpt),
+			WithBundleCountThreshold(1),
+			WithDisplayNameFormatter(format),
 		},
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
@@ -112,14 +112,14 @@ func TestExporter_Timeout(t *testing.T) {
 	var exportErrors []error
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := texporter.InstallNewPipeline(
-		[]texporter.Option{
-			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-			texporter.WithTraceClientOptions(clientOpt),
-			texporter.WithTimeout(1 * time.Millisecond),
+	_, flush, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithTraceClientOptions(clientOpt),
+			WithTimeout(1 * time.Millisecond),
 			// handle bundle as soon as span is received
-			texporter.WithBundleCountThreshold(1),
-			texporter.WithOnError(func(err error) {
+			WithBundleCountThreshold(1),
+			WithOnError(func(err error) {
 				exportErrors = append(exportErrors, err)
 			}),
 		},
@@ -153,12 +153,12 @@ func TestBundling(t *testing.T) {
 		ch <- spans
 	})
 
-	_, _, err := texporter.InstallNewPipeline(
-		[]texporter.Option{
-			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-			texporter.WithTraceClientOptions(clientOpt),
-			texporter.WithBundleDelayThreshold(time.Second / 10),
-			texporter.WithBundleCountThreshold(10),
+	_, _, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithTraceClientOptions(clientOpt),
+			WithBundleDelayThreshold(time.Second / 10),
+			WithBundleCountThreshold(10),
 		},
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
@@ -212,13 +212,13 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 	workers := 3
 	spansPerWorker := 50
 	delay := 2 * time.Second
-	_, flush, err := texporter.InstallNewPipeline(
-		[]texporter.Option{
-			texporter.WithProjectID("PROJECT_ID_NOT_REAL"),
-			texporter.WithTraceClientOptions(clientOpt),
-			texporter.WithBundleDelayThreshold(delay),
-			texporter.WithBundleCountThreshold(spansPerWorker),
-			texporter.WithMaxNumberOfWorkers(workers),
+	_, flush, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithTraceClientOptions(clientOpt),
+			WithBundleDelayThreshold(delay),
+			WithBundleCountThreshold(spansPerWorker),
+			WithMaxNumberOfWorkers(workers),
 		},
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 	)
@@ -264,4 +264,57 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 	}
 
 	flush()
+}
+
+func TestBundling_Oversized(t *testing.T) {
+	mock := cloudmock.NewCloudMock()
+	defer mock.Shutdown()
+	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
+
+	var uploaded bool
+	mock.SetOnUpload(func(ctx context.Context, spans []*tracepb.Span) { uploaded = true })
+
+	exp, err := NewExporter(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithTraceClientOptions(clientOpt),
+		WithBundleByteLimit(1),
+	)
+	assert.NoError(t, err)
+	exp.traceExporter.overflowLogger.delayDur = 100 * time.Millisecond
+
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSyncer(exp),
+	)
+	global.SetTracerProvider(tp)
+
+	buf := &logBuffer{logInputChan: make(chan []byte, 100)}
+	log.SetOutput(buf)
+	defer func() {
+		log.SetOutput(os.Stderr)
+	}()
+
+	go func() {
+		for i := 0; i < 10; i++ {
+			_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+			span.SetName("a")
+			span.End()
+		}
+	}()
+
+	if got, want := <-buf.logInputChan, regexp.MustCompile(`OpenTelemetry Cloud Trace exporter: failed to upload spans: oversized item: 10`); !want.Match([]byte(got)) {
+		t.Errorf("log: got %s, want %s", got, want)
+	}
+	if got, want := uploaded, false; got != want {
+		t.Errorf("uploaded: got %v, want %v", got, want)
+	}
+}
+
+type logBuffer struct {
+	logInputChan chan []byte
+}
+
+func (lb *logBuffer) Write(b []byte) (n int, err error) {
+	lb.logInputChan <- b
+	return len(b), nil
 }
