@@ -115,6 +115,15 @@ var awsResourceMap = map[string]string{
 	"aws_account": CloudKeyAccountID,
 }
 
+// For generic_task, assume there's no further transformation required. Still
+// provide a map here to check the existence of the required labels.
+var genericTaskMap = map[string]string{
+	"task_id":   "task_id",
+	"location":  "location",
+	"namespace": "namespace",
+	"job":       "job",
+}
+
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
 func newMetricExporter(o *options) (*metricExporter, error) {
 	if strings.TrimSpace(o.ProjectID) == "" {
@@ -335,6 +344,7 @@ func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
 	_, hasNamespaceName := labelMap[K8SKeyNamespaceName]
 	_, hasPodName := labelMap[K8SKeyPodName]
 	_, hasContainerName := labelMap[ContainerKeyName]
+	_, hasTaskID := labelMap[TaskID]
 
 	if hasLocation && hasClusterName && hasNamespaceName && hasPodName && hasContainerName {
 		return K8SContainer, k8sContainerMap
@@ -352,6 +362,10 @@ func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
 
 	if hasLocation && hasClusterName {
 		return K8SCluster, k8sClusterMap
+	}
+
+	if hasTaskID {
+		return GenericTask, genericTaskMap
 	}
 
 	return GCEInstance, gceResourceMap

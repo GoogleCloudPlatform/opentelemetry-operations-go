@@ -52,6 +52,8 @@ const (
 	K8SKeyPodName        = "k8s.pod.name"
 	K8SKeyDeploymentName = "k8s.deployment.name"
 
+	TaskID = "task_id"
+
 	// Monitored Resources types
 	K8SContainer   = "k8s_container"
 	K8SNode        = "k8s_node"
@@ -59,4 +61,5 @@ const (
 	K8SCluster     = "k8s_cluster"
 	GCEInstance    = "gce_instance"
 	AWSEC2Instance = "aws_ec2_instance"
+	GenericTask    = "generic_task"
 )
