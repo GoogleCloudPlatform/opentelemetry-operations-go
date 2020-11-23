@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"time"
 
-	otel "go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 
 	apioption "google.golang.org/api/option"
