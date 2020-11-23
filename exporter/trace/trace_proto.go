@@ -27,8 +27,8 @@ import (
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 
+	opentelemetry "go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/label"
-	opentelemetry "go.opentelemetry.io/otel/sdk"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 )
 

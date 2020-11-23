@@ -32,13 +32,13 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		{
 			name: "empty resource",
 			input: export.SpanData{
-				Resource: resource.New(),
+				Resource: resource.NewWithAttributes(),
 				Attributes: []label.KeyValue{
 					label.String("a", "1"),
 				},
 			},
 			expected: export.SpanData{
-				Resource: resource.New(),
+				Resource: resource.NewWithAttributes(),
 				Attributes: []label.KeyValue{
 					label.String("a", "1"),
 				},
@@ -47,11 +47,15 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		{
 			name: "empty attributes",
 			input: export.SpanData{
-				Resource:   resource.New(label.String("b", "2")),
+				Resource: resource.NewWithAttributes(
+					label.String("b", "2"),
+				),
 				Attributes: []label.KeyValue{},
 			},
 			expected: export.SpanData{
-				Resource: resource.New(label.String("b", "2")),
+				Resource: resource.NewWithAttributes(
+					label.String("b", "2"),
+				),
 				Attributes: []label.KeyValue{
 					label.String("b", "2"),
 				},
@@ -60,13 +64,17 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		{
 			name: "normal insert",
 			input: export.SpanData{
-				Resource: resource.New(label.String("b", "2")),
+				Resource: resource.NewWithAttributes(
+					label.String("b", "2"),
+				),
 				Attributes: []label.KeyValue{
 					label.String("a", "1"),
 				},
 			},
 			expected: export.SpanData{
-				Resource: resource.New(label.String("b", "2")),
+				Resource: resource.NewWithAttributes(
+					label.String("b", "2"),
+				),
 				Attributes: []label.KeyValue{
 					label.String("a", "1"),
 					label.String("b", "2"),
@@ -76,13 +84,17 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		{
 			name: "conflicts with the existing keys",
 			input: export.SpanData{
-				Resource: resource.New(label.String("a", "2")),
+				Resource: resource.NewWithAttributes(
+					label.String("a", "2"),
+				),
 				Attributes: []label.KeyValue{
 					label.String("a", "1"),
 				},
 			},
 			expected: export.SpanData{
-				Resource: resource.New(label.String("a", "2")),
+				Resource: resource.NewWithAttributes(
+					label.String("a", "2"),
+				),
 				Attributes: []label.KeyValue{
 					label.String("a", "1"),
 				},
@@ -91,7 +103,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		{
 			name: "allowed duplicate keys in attributes",
 			input: export.SpanData{
-				Resource: resource.New(
+				Resource: resource.NewWithAttributes(
 					label.String("c", "1"),
 				),
 				Attributes: []label.KeyValue{
@@ -102,7 +114,9 @@ func TestInjectLabelsFromResources(t *testing.T) {
 				},
 			},
 			expected: export.SpanData{
-				Resource: resource.New(label.String("c", "1")),
+				Resource: resource.NewWithAttributes(
+					label.String("c", "1"),
+				),
 				Attributes: []label.KeyValue{
 					label.String("a", "1"),
 					label.String("b", "1"),

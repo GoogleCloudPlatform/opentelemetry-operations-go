@@ -19,7 +19,7 @@ After you import the metric exporter package, then register the exporter to the 
 package main
 
 import (
-    "go.opentelemetry.io/otel/api/metric"
+    "go.opentelemetry.io/otel/metric"
     "go.opentelemetry.io/otel/label"
     "go.opentelemetry.io/otel/sdk/metric/controller/push"
     "go.opentelemetry.io/otel/sdk/resource"

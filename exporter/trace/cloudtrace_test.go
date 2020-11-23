@@ -28,7 +28,7 @@ import (
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
 
-	"go.opentelemetry.io/otel/api/global"
+	"go.opentelemetry.io/otel"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
@@ -54,12 +54,12 @@ func TestExporter_ExportSpan(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.SetStatus(codes.Ok, "Status Message")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
-	_, span = global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span-with-error-status")
+	_, span = otel.Tracer("test-tracer").Start(context.Background(), "test-span-with-error-status")
 	span.SetStatus(codes.Error, "Error Message")
 	span.End()
 
@@ -93,7 +93,7 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), spanName)
+	_, span := otel.Tracer("test-tracer").Start(context.Background(), spanName)
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
@@ -127,7 +127,7 @@ func TestExporter_Timeout(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
@@ -165,7 +165,7 @@ func TestBundling(t *testing.T) {
 	assert.NoError(t, err)
 
 	for i := 0; i < 35; i++ {
-		_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+		_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 		span.End()
 	}
 
@@ -232,7 +232,7 @@ func TestBundling_ConcurrentExports(t *testing.T) {
 	go func() {
 		// Release enough spans to form two bundles
 		for i := 0; i < totalSpans; i++ {
-			_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+			_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 			expectedSpanIDs = append(expectedSpanIDs, span.SpanContext().SpanID.String())
 			span.End()
 		}
@@ -286,7 +286,7 @@ func TestBundling_Oversized(t *testing.T) {
 		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
 		sdktrace.WithSyncer(exp),
 	)
-	global.SetTracerProvider(tp)
+	otel.SetTracerProvider(tp)
 
 	buf := &logBuffer{logInputChan: make(chan []byte, 100)}
 	log.SetOutput(buf)
@@ -296,7 +296,7 @@ func TestBundling_Oversized(t *testing.T) {
 
 	go func() {
 		for i := 0; i < 10; i++ {
-			_, span := global.TracerProvider().Tracer("test-tracer").Start(context.Background(), "test-span")
+			_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 			span.SetName("a")
 			span.End()
 		}

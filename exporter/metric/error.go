@@ -20,7 +20,8 @@ import (
 
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 
-	apimetric "go.opentelemetry.io/otel/api/metric"
+	apimetric "go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/number"
 )
 
 var (
@@ -36,17 +37,17 @@ func (e errUnsupportedAggregation) Error() string {
 }
 
 type errUnexpectedNumberKind struct {
-	kind apimetric.NumberKind
+	kind number.Kind
 }
 
 func (e errUnexpectedNumberKind) Error() string {
 	return fmt.Sprintf("the number kind is unexpected: %v", e.kind)
 }
 
-type errUnexpectedMetricKind struct {
-	kind apimetric.Kind
+type errUnexpectedInstrumentKind struct {
+	kind apimetric.InstrumentKind
 }
 
-func (e errUnexpectedMetricKind) Error() string {
+func (e errUnexpectedInstrumentKind) Error() string {
 	return fmt.Sprintf("the metric kind is unexpected: %v", e.kind)
 }

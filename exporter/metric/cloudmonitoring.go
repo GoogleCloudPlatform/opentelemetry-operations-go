@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"time"
 
-	"go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 
 	export "go.opentelemetry.io/otel/sdk/export/metric"
@@ -87,7 +87,7 @@ func (e *Exporter) Export(ctx context.Context, cps export.CheckpointSet) error {
 	return e.metricExporter.ExportMetrics(ctx, cps)
 }
 
-// ExportKindFor
+// ExportKindFor returns cumulative extport kind
 func (e *Exporter) ExportKindFor(*metric.Descriptor, aggregation.Kind) export.ExportKind {
-	return export.CumulativeExporter
+	return export.CumulativeExportKind
 }

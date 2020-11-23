@@ -27,7 +27,7 @@ import (
 
     texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 
-    "go.opentelemetry.io/otel/api/global"
+    "go.opentelemetry.io/otel"
     sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
@@ -56,7 +56,7 @@ func main() {
     defer flush()
 
     // Create custom span.
-    tracer := global.TraceProvider().Tracer("example.com/trace")
+    tracer := otel.TraceProvider().Tracer("example.com/trace")
     err = func(ctx context.Context) error {
         ctx, span := tracer.Start(ctx, "foo")
         defer span.End()

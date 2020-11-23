@@ -22,9 +22,9 @@ import (
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/otel/api/metric"
-	apimetric "go.opentelemetry.io/otel/api/metric"
 	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/number"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/metrictest"
 	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/aggregatortest"
@@ -37,7 +37,7 @@ import (
 )
 
 var (
-	formatter = func(d *apimetric.Descriptor) string {
+	formatter = func(d *metric.Descriptor) string {
 		return fmt.Sprintf("test.googleapis.com/%s", d.Name())
 	}
 )
@@ -50,11 +50,11 @@ func TestExportMetrics(t *testing.T) {
 	res := &resource.Resource{}
 	cps := metrictest.NewCheckpointSet(res)
 	ctx := context.Background()
-	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
+	desc := metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind)
 
 	lvagg := &lastvalue.New(1)[0]
-	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)
-	lvagg.Update(ctx, metric.NewFloat64Number(12.34), &desc)
+	aggtest.CheckedUpdate(t, lvagg, number.NewFloat64Number(12.34), &desc)
+	lvagg.Update(ctx, number.NewFloat64Number(12.34), &desc)
 	cps.Add(&desc, lvagg, label.String("a", "A"), label.String("b", "B"))
 
 	opts := []Option{
@@ -79,7 +79,7 @@ func TestExportCounter(t *testing.T) {
 	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 
 	resOpt := push.WithResource(
-		resource.New(
+		resource.NewWithAttributes(
 			label.String("test_id", "abc123"),
 		),
 	)
@@ -118,9 +118,9 @@ func TestDescToMetricType(t *testing.T) {
 		},
 	}
 
-	inDesc := []apimetric.Descriptor{
-		apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind),
-		apimetric.NewDescriptor("test/of/path", apimetric.ValueRecorderKind, apimetric.Float64NumberKind),
+	inDesc := []metric.Descriptor{
+		metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind),
+		metric.NewDescriptor("test/of/path", metric.ValueRecorderInstrumentKind, number.Float64Kind),
 	}
 
 	wants := []string{
@@ -141,10 +141,10 @@ func TestRecordToMpb(t *testing.T) {
 	cps := metrictest.NewCheckpointSet(res)
 	ctx := context.Background()
 
-	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
+	desc := metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind)
 
 	lvagg := &lastvalue.New(1)[0]
-	aggtest.CheckedUpdate(t, lvagg, metric.NewFloat64Number(12.34), &desc)
+	aggtest.CheckedUpdate(t, lvagg, number.NewFloat64Number(12.34), &desc)
 	err := lvagg.Update(ctx, 1, &desc)
 	if err != nil {
 		t.Errorf("%v", err)
@@ -178,7 +178,7 @@ func TestRecordToMpb(t *testing.T) {
 		},
 	}
 
-	aggError := cps.ForEach(export.CumulativeExporter, func(r export.Record) error {
+	aggError := cps.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
 		out := me.recordToMpb(&r)
 		if !reflect.DeepEqual(want, out) {
 			return fmt.Errorf("expected: %v, actual: %v", want, out)
@@ -198,7 +198,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	}{
 		// k8s_container
 		{
-			resource.New(
+			resource.NewWithAttributes(
 				label.String("cloud.provider", "gcp"),
 				label.String("cloud.zone", "us-central1-a"),
 				label.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -218,7 +218,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// k8s_node
 		{
-			resource.New(
+			resource.NewWithAttributes(
 				label.String("cloud.provider", "gcp"),
 				label.String("cloud.zone", "us-central1-a"),
 				label.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -234,7 +234,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// k8s_pod
 		{
-			resource.New(
+			resource.NewWithAttributes(
 				label.String("cloud.provider", "gcp"),
 				label.String("cloud.zone", "us-central1-a"),
 				label.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -252,7 +252,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// k8s_cluster
 		{
-			resource.New(
+			resource.NewWithAttributes(
 				label.String("cloud.provider", "gcp"),
 				label.String("cloud.zone", "us-central1-a"),
 				label.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -266,7 +266,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// k8s_node missing a field
 		{
-			resource.New(
+			resource.NewWithAttributes(
 				label.String("cloud.provider", "gcp"),
 				label.String("k8s.cluster.name", "opentelemetry-cluster"),
 				label.String("host.name", "opentelemetry-node"),
@@ -278,7 +278,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// nonexisting resource types
 		{
-			resource.New(
+			resource.NewWithAttributes(
 				label.String("cloud.provider", "none"),
 				label.String("cloud.zone", "us-central1-a"),
 				label.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -293,7 +293,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// GCE resource fields
 		{
-			resource.New(
+			resource.NewWithAttributes(
 				label.String("cloud.provider", "gcp"),
 				label.String("host.id", "123"),
 				label.String("cloud.zone", "us-central1-a"),
@@ -307,7 +307,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// AWS resources
 		{
-			resource.New(
+			resource.NewWithAttributes(
 				label.String("cloud.provider", "aws"),
 				label.String("cloud.region", "us-central1-a"),
 				label.String("host.id", "123"),
@@ -323,7 +323,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 	}
 
-	desc := apimetric.NewDescriptor("testing", apimetric.ValueRecorderKind, apimetric.Float64NumberKind)
+	desc := metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind)
 
 	md := &googlemetricpb.MetricDescriptor{
 		Name:        desc.Name(),

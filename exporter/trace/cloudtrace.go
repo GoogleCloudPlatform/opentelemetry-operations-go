@@ -25,11 +25,11 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
-	"go.opentelemetry.io/otel/api/global"
-	apitrace "go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/label"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 )
 
 // Option is function type that is passed to the exporter initialization function.
@@ -258,18 +258,18 @@ type Exporter struct {
 }
 
 // InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
-func InstallNewPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (apitrace.TracerProvider, func(), error) {
+func InstallNewPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (trace.TracerProvider, func(), error) {
 	tp, flush, err := NewExportPipeline(opts, topts...)
 	if err != nil {
 		return nil, nil, err
 	}
-	global.SetTracerProvider(tp)
+	otel.SetTracerProvider(tp)
 	return tp, flush, err
 }
 
 // NewExportPipeline sets up a complete export pipeline with the recommended setup
 // for trace provider. Returns provider, flush function, and errors.
-func NewExportPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (apitrace.TracerProvider, func(), error) {
+func NewExportPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (trace.TracerProvider, func(), error) {
 	exporter, err := NewExporter(opts...)
 	if err != nil {
 		return nil, nil, err
