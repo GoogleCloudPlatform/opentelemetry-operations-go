@@ -432,11 +432,11 @@ func transformResource(match, input map[string]string) (map[string]string, bool)
 // recordToMdpbKindType return the mapping from OTel's record descriptor to
 // Cloud Monitoring's MetricKind and ValueType.
 func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_MetricKind, googlemetricpb.MetricDescriptor_ValueType) {
-	mkind := r.Descriptor().InstrumentKind()
+	ikind := r.Descriptor().InstrumentKind()
 	nkind := r.Descriptor().NumberKind()
 
 	var kind googlemetricpb.MetricDescriptor_MetricKind
-	switch mkind {
+	switch ikind {
 	// TODO: Decide how UpDownCounterKind and UpDownSumObserverKind should be handled.
 	// CUMULATIVE might not be correct as it assumes the metric always goes up.
 	case apimetric.CounterInstrumentKind, apimetric.UpDownCounterInstrumentKind, apimetric.SumObserverInstrumentKind, apimetric.UpDownSumObserverInstrumentKind:
@@ -494,7 +494,7 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	agg := r.Aggregation()
 	nkind := r.Descriptor().NumberKind()
-	mkind := r.Descriptor().InstrumentKind()
+	ikind := r.Descriptor().InstrumentKind()
 	now := time.Now().Unix()
 
 	// TODO: Ignoring the case for Min, Max and Distribution to simply
@@ -509,7 +509,7 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	// https://github.com/open-telemetry/opentelemetry-specification/issues/466
 	// In OpenCensus, view interface provided the bundle of name, measure, labels and aggregation in one place,
 	// and it should return the appropriate value based on the aggregation type specified there.
-	switch mkind {
+	switch ikind {
 	case apimetric.ValueObserverInstrumentKind, apimetric.ValueRecorderInstrumentKind:
 		if lv, ok := agg.(*lastvalue.Aggregator); ok {
 			return lastValueToTypedValueAndTimestamp(lv, nkind)
@@ -524,7 +524,7 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 		return nil, nil, errUnsupportedAggregation{agg: agg}
 	}
 
-	return nil, nil, errUnexpectedInstrumentKind{kind: mkind}
+	return nil, nil, errUnexpectedInstrumentKind{kind: ikind}
 }
 
 func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind number.Kind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
