@@ -21,12 +21,11 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/metric"
+	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 
-	export "go.opentelemetry.io/otel/sdk/export/metric"
-	"golang.org/x/oauth2/google"
-
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	"golang.org/x/oauth2/google"
 )
 
 const (

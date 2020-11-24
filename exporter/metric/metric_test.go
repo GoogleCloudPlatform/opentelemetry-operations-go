@@ -20,8 +20,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
-	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/number"
@@ -32,6 +30,8 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/resource"
 
+	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
+	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 )

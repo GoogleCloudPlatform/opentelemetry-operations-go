@@ -21,8 +21,6 @@ import (
 	"strings"
 	"time"
 
-	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
-	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/number"
@@ -33,6 +31,9 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
+
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"

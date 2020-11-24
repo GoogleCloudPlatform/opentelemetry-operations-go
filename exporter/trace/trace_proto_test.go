@@ -17,10 +17,9 @@ package trace
 import (
 	"testing"
 
+	"go.opentelemetry.io/otel/label"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
-
-	"go.opentelemetry.io/otel/label"
 )
 
 func TestInjectLabelsFromResources(t *testing.T) {

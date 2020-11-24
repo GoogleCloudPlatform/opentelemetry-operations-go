@@ -21,15 +21,15 @@ import (
 	"log"
 	"time"
 
-	traceapi "cloud.google.com/go/trace/apiv2"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/option"
-
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/label"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
+
+	traceapi "cloud.google.com/go/trace/apiv2"
+	"golang.org/x/oauth2/google"
+	"google.golang.org/api/option"
 )
 
 // Option is function type that is passed to the exporter initialization function.

@@ -21,15 +21,15 @@ import (
 	"time"
 	"unicode/utf8"
 
-	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
-	wrapperspb "github.com/golang/protobuf/ptypes/wrappers"
-	"go.opentelemetry.io/otel/codes"
-	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
-	statuspb "google.golang.org/genproto/googleapis/rpc/status"
-
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/label"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
+
+	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
+	wrapperspb "github.com/golang/protobuf/ptypes/wrappers"
+	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
+	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 )
 
 const (

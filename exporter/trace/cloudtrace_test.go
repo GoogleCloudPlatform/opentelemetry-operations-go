@@ -23,15 +23,13 @@ import (
 	"testing"
 	"time"
 
-	"go.opentelemetry.io/otel/codes"
-
-	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
-	"github.com/stretchr/testify/assert"
-
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/codes"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
+	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
+	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/option"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 )
