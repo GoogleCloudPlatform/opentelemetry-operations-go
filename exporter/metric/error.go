@@ -18,10 +18,9 @@ import (
 	"errors"
 	"fmt"
 
-	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
-
-	apimetric "go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/number"
+	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 )
 
 var (
@@ -45,7 +44,7 @@ func (e errUnexpectedNumberKind) Error() string {
 }
 
 type errUnexpectedInstrumentKind struct {
-	kind apimetric.InstrumentKind
+	kind metric.InstrumentKind
 }
 
 func (e errUnexpectedInstrumentKind) Error() string {

@@ -21,8 +21,10 @@ import (
 	"strings"
 	"time"
 
-	global "go.opentelemetry.io/otel"
-	apimetric "go.opentelemetry.io/otel/metric"
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	googlepb "github.com/golang/protobuf/ptypes/timestamp"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/number"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
@@ -31,9 +33,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/controller/push"
 	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
-
-	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
-	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -53,7 +52,7 @@ type key struct {
 	libraryname string
 }
 
-func keyOf(descriptor *apimetric.Descriptor) key {
+func keyOf(descriptor *metric.Descriptor) key {
 	return key{
 		name:        descriptor.Name(),
 		libraryname: descriptor.InstrumentationName(),
@@ -148,7 +147,7 @@ func InstallNewPipeline(opts []Option, popts ...push.Option) (*push.Controller, 
 	if err != nil {
 		return nil, err
 	}
-	global.SetMeterProvider(pusher.MeterProvider())
+	otel.SetMeterProvider(pusher.MeterProvider())
 	return pusher, err
 }
 
@@ -301,7 +300,7 @@ func (me *metricExporter) recordToTspb(r *export.Record) (*monitoringpb.TimeSeri
 
 // descToMetricType converts descriptor to MetricType proto type.
 // Basically this returns default value ("custom.googleapis.com/opentelemetry/[metric type]")
-func (me *metricExporter) descToMetricType(desc *apimetric.Descriptor) string {
+func (me *metricExporter) descToMetricType(desc *metric.Descriptor) string {
 	if formatter := me.o.MetricDescriptorTypeFormatter; formatter != nil {
 		return formatter(desc)
 	}
@@ -439,9 +438,9 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 	switch ikind {
 	// TODO: Decide how UpDownCounterKind and UpDownSumObserverKind should be handled.
 	// CUMULATIVE might not be correct as it assumes the metric always goes up.
-	case apimetric.CounterInstrumentKind, apimetric.UpDownCounterInstrumentKind, apimetric.SumObserverInstrumentKind, apimetric.UpDownSumObserverInstrumentKind:
+	case metric.CounterInstrumentKind, metric.UpDownCounterInstrumentKind, metric.SumObserverInstrumentKind, metric.UpDownSumObserverInstrumentKind:
 		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
-	case apimetric.ValueObserverInstrumentKind, apimetric.ValueRecorderInstrumentKind:
+	case metric.ValueObserverInstrumentKind, metric.ValueRecorderInstrumentKind:
 		kind = googlemetricpb.MetricDescriptor_GAUGE
 	default:
 		kind = googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
@@ -510,12 +509,12 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	// In OpenCensus, view interface provided the bundle of name, measure, labels and aggregation in one place,
 	// and it should return the appropriate value based on the aggregation type specified there.
 	switch ikind {
-	case apimetric.ValueObserverInstrumentKind, apimetric.ValueRecorderInstrumentKind:
+	case metric.ValueObserverInstrumentKind, metric.ValueRecorderInstrumentKind:
 		if lv, ok := agg.(*lastvalue.Aggregator); ok {
 			return lastValueToTypedValueAndTimestamp(lv, nkind)
 		}
 		return nil, nil, errUnsupportedAggregation{agg: agg}
-	case apimetric.CounterInstrumentKind, apimetric.UpDownCounterInstrumentKind, apimetric.SumObserverInstrumentKind, apimetric.UpDownSumObserverInstrumentKind:
+	case metric.CounterInstrumentKind, metric.UpDownCounterInstrumentKind, metric.SumObserverInstrumentKind, metric.UpDownSumObserverInstrumentKind:
 		// CUMULATIVE measurement should have the same start time and increasing end time.
 		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
 		if sum, ok := agg.(*sum.Aggregator); ok {

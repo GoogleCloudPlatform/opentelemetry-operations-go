@@ -27,7 +27,7 @@ import (
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 
-	opentelemetry "go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/label"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 )
@@ -55,7 +55,7 @@ const (
 	labelHTTPUserAgent  = `/http/user_agent`
 )
 
-var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", opentelemetry.Version(), Version())
+var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
 
 func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) string {
 	if format != nil {
