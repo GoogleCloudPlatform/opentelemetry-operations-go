@@ -21,8 +21,9 @@ import (
 	"strings"
 	"time"
 
-	"go.opentelemetry.io/otel/api/global"
-	apimetric "go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/number"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/minmaxsumcount"
@@ -52,7 +53,7 @@ type key struct {
 	libraryname string
 }
 
-func keyOf(descriptor *apimetric.Descriptor) key {
+func keyOf(descriptor *metric.Descriptor) key {
 	return key{
 		name:        descriptor.Name(),
 		libraryname: descriptor.InstrumentationName(),
@@ -147,7 +148,7 @@ func InstallNewPipeline(opts []Option, popts ...push.Option) (*push.Controller, 
 	if err != nil {
 		return nil, err
 	}
-	global.SetMeterProvider(pusher.MeterProvider())
+	otel.SetMeterProvider(pusher.MeterProvider())
 	return pusher, err
 }
 
@@ -189,7 +190,7 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, cps export.Checkpoi
 // if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export.CheckpointSet) error {
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
-	aggError := cps.ForEach(export.CumulativeExporter, func(r export.Record) error {
+	aggError := cps.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
 		k := keyOf(r.Descriptor())
 
 		if _, ok := me.mdCache[k]; ok {
@@ -249,7 +250,7 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.CheckpointSet) error {
 	tss := []*monitoringpb.TimeSeries{}
 
-	aggError := cps.ForEach(export.CumulativeExporter, func(r export.Record) error {
+	aggError := cps.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
 		ts, err := me.recordToTspb(&r)
 		if err != nil {
 			return err
@@ -300,7 +301,7 @@ func (me *metricExporter) recordToTspb(r *export.Record) (*monitoringpb.TimeSeri
 
 // descToMetricType converts descriptor to MetricType proto type.
 // Basically this returns default value ("custom.googleapis.com/opentelemetry/[metric type]")
-func (me *metricExporter) descToMetricType(desc *apimetric.Descriptor) string {
+func (me *metricExporter) descToMetricType(desc *metric.Descriptor) string {
 	if formatter := me.o.MetricDescriptorTypeFormatter; formatter != nil {
 		return formatter(desc)
 	}
@@ -431,16 +432,16 @@ func transformResource(match, input map[string]string) (map[string]string, bool)
 // recordToMdpbKindType return the mapping from OTel's record descriptor to
 // Cloud Monitoring's MetricKind and ValueType.
 func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_MetricKind, googlemetricpb.MetricDescriptor_ValueType) {
-	mkind := r.Descriptor().MetricKind()
+	ikind := r.Descriptor().InstrumentKind()
 	nkind := r.Descriptor().NumberKind()
 
 	var kind googlemetricpb.MetricDescriptor_MetricKind
-	switch mkind {
+	switch ikind {
 	// TODO: Decide how UpDownCounterKind and UpDownSumObserverKind should be handled.
 	// CUMULATIVE might not be correct as it assumes the metric always goes up.
-	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
+	case metric.CounterInstrumentKind, metric.UpDownCounterInstrumentKind, metric.SumObserverInstrumentKind, metric.UpDownSumObserverInstrumentKind:
 		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
-	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
+	case metric.ValueObserverInstrumentKind, metric.ValueRecorderInstrumentKind:
 		kind = googlemetricpb.MetricDescriptor_GAUGE
 	default:
 		kind = googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
@@ -448,9 +449,9 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 
 	var typ googlemetricpb.MetricDescriptor_ValueType
 	switch nkind {
-	case apimetric.Int64NumberKind:
+	case number.Int64Kind:
 		typ = googlemetricpb.MetricDescriptor_INT64
-	case apimetric.Float64NumberKind:
+	case number.Float64Kind:
 		typ = googlemetricpb.MetricDescriptor_DOUBLE
 	default:
 		typ = googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
@@ -493,7 +494,7 @@ func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
 func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	agg := r.Aggregation()
 	nkind := r.Descriptor().NumberKind()
-	mkind := r.Descriptor().MetricKind()
+	ikind := r.Descriptor().InstrumentKind()
 	now := time.Now().Unix()
 
 	// TODO: Ignoring the case for Min, Max and Distribution to simply
@@ -508,13 +509,13 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	// https://github.com/open-telemetry/opentelemetry-specification/issues/466
 	// In OpenCensus, view interface provided the bundle of name, measure, labels and aggregation in one place,
 	// and it should return the appropriate value based on the aggregation type specified there.
-	switch mkind {
-	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
+	switch ikind {
+	case metric.ValueObserverInstrumentKind, metric.ValueRecorderInstrumentKind:
 		if lv, ok := agg.(*lastvalue.Aggregator); ok {
 			return lastValueToTypedValueAndTimestamp(lv, nkind)
 		}
 		return nil, nil, errUnsupportedAggregation{agg: agg}
-	case apimetric.CounterKind, apimetric.UpDownCounterKind, apimetric.SumObserverKind, apimetric.UpDownSumObserverKind:
+	case metric.CounterInstrumentKind, metric.UpDownCounterInstrumentKind, metric.SumObserverInstrumentKind, metric.UpDownSumObserverInstrumentKind:
 		// CUMULATIVE measurement should have the same start time and increasing end time.
 		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
 		if sum, ok := agg.(*sum.Aggregator); ok {
@@ -523,10 +524,10 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 		return nil, nil, errUnsupportedAggregation{agg: agg}
 	}
 
-	return nil, nil, errUnexpectedMetricKind{kind: mkind}
+	return nil, nil, errUnexpectedInstrumentKind{kind: ikind}
 }
 
-func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind number.Kind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, err := count.Count()
 	if err != nil {
 		return nil, nil, err
@@ -541,13 +542,13 @@ func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind apimetr
 		},
 	}
 	switch kind {
-	case apimetric.Int64NumberKind:
+	case number.Int64Kind:
 		return &monitoringpb.TypedValue{
 			Value: &monitoringpb.TypedValue_Int64Value{
 				Int64Value: value,
 			},
 		}, t, nil
-	case apimetric.Float64NumberKind:
+	case number.Float64Kind:
 		return &monitoringpb.TypedValue{
 			Value: &monitoringpb.TypedValue_DoubleValue{
 				DoubleValue: float64(value),
@@ -557,7 +558,7 @@ func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind apimetr
 	return nil, nil, errUnexpectedNumberKind{kind: kind}
 }
 
-func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind apimetric.NumberKind) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind number.Kind) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, timestamp, err := lv.LastValue()
 	if err != nil {
 		return nil, nil, err
@@ -580,7 +581,7 @@ func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind apimetric.
 	return tv, t, nil
 }
 
-func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind apimetric.NumberKind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind number.Kind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, err := sum.Sum()
 	if err != nil {
 		return nil, nil, err
@@ -602,15 +603,15 @@ func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind apimetric.NumberKind,
 	return tv, t, err
 }
 
-func aggToTypedValue(kind apimetric.NumberKind, value apimetric.Number) (*monitoringpb.TypedValue, error) {
+func aggToTypedValue(kind number.Kind, value number.Number) (*monitoringpb.TypedValue, error) {
 	switch kind {
-	case apimetric.Int64NumberKind:
+	case number.Int64Kind:
 		return &monitoringpb.TypedValue{
 			Value: &monitoringpb.TypedValue_Int64Value{
 				Int64Value: value.AsInt64(),
 			},
 		}, nil
-	case apimetric.Float64NumberKind:
+	case number.Float64Kind:
 		return &monitoringpb.TypedValue{
 			Value: &monitoringpb.TypedValue_DoubleValue{
 				DoubleValue: value.AsFloat64(),

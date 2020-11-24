@@ -19,20 +19,17 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 
-	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/semconv"
-
-	"net/http"
-
-	"go.opentelemetry.io/otel/codes"
-
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/api/global"
-	"go.opentelemetry.io/otel/api/trace"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/baggage"
+	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/label"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/semconv"
+	"go.opentelemetry.io/otel/trace"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -57,10 +54,10 @@ func initTracer() func() {
 func main() {
 	flush := initTracer()
 	defer flush()
-	tr := global.TracerProvider().Tracer("cloudtrace/example/client")
+	tr := otel.Tracer("cloudtrace/example/client")
 
 	client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
-	ctx := otel.ContextWithBaggageValues(context.Background(),
+	ctx := baggage.ContextWithValues(context.Background(),
 		label.String("username", "donuts"),
 	)
 

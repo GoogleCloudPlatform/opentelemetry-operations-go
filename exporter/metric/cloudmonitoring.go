@@ -20,13 +20,12 @@ import (
 	"fmt"
 	"time"
 
-	"go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/metric"
+	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 
-	export "go.opentelemetry.io/otel/sdk/export/metric"
-	"golang.org/x/oauth2/google"
-
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	"golang.org/x/oauth2/google"
 )
 
 const (
@@ -87,7 +86,7 @@ func (e *Exporter) Export(ctx context.Context, cps export.CheckpointSet) error {
 	return e.metricExporter.ExportMetrics(ctx, cps)
 }
 
-// ExportKindFor
+// ExportKindFor returns cumulative export kind
 func (e *Exporter) ExportKindFor(*metric.Descriptor, aggregation.Kind) export.ExportKind {
-	return export.CumulativeExporter
+	return export.CumulativeExportKind
 }

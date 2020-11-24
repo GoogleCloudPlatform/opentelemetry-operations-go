@@ -131,7 +131,7 @@ gotidy:
 update-dep:
 	$(MAKE) for-all CMD="$(PWD)/internal/buildscripts/update-dep"
 
-OTEL_VERSION=v0.13.0
+OTEL_VERSION=v0.14.0
 
 .PHONY: update-otel
 update-otel:
