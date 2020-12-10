@@ -28,6 +28,10 @@ const (
 	CloudKeyRegion    = "cloud.region"
 	CloudKeyZone      = "cloud.zone"
 
+	ServiceKeyNamespace  = "service.namespace"
+	ServiceKeyInstanceID = "service.instance.id"
+	ServiceKeyName       = "service.name"
+
 	HostType = "host"
 	// A uniquely identifying name for the host.
 	HostKeyName = "host.name"
@@ -51,11 +55,6 @@ const (
 	K8SKeyNamespaceName  = "k8s.namespace.name"
 	K8SKeyPodName        = "k8s.pod.name"
 	K8SKeyDeploymentName = "k8s.deployment.name"
-
-	// Cloud Run
-	ServiceNamespace  = "service.namespace"
-	ServiceInstanceID = "service.instance.id"
-	ServiceName       = "service.name"
 
 	// Monitored Resources types
 	K8SContainer   = "k8s_container"
