@@ -116,13 +116,11 @@ var awsResourceMap = map[string]string{
 	"aws_account": CloudKeyAccountID,
 }
 
-// For generic_task, assume there's no further transformation required. Still
-// provide a map here to check the existence of the required labels.
-var genericTaskMap = map[string]string{
-	"task_id":   "task_id",
-	"location":  "location",
-	"namespace": "namespace",
-	"job":       "job",
+var cloudRunResourceMap = map[string]string{
+	"task_id":   ServiceInstanceID,
+	"location":  CloudKeyRegion,
+	"namespace": ServiceNamespace,
+	"job":       ServiceName,
 }
 
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
@@ -345,7 +343,6 @@ func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
 	_, hasNamespaceName := labelMap[K8SKeyNamespaceName]
 	_, hasPodName := labelMap[K8SKeyPodName]
 	_, hasContainerName := labelMap[ContainerKeyName]
-	_, hasTaskID := labelMap[TaskID]
 
 	if hasLocation && hasClusterName && hasNamespaceName && hasPodName && hasContainerName {
 		return K8SContainer, k8sContainerMap
@@ -365,8 +362,8 @@ func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
 		return K8SCluster, k8sClusterMap
 	}
 
-	if hasTaskID {
-		return GenericTask, genericTaskMap
+	if labelMap[ServiceNamespace] == "cloud-run-managed" {
+		return GenericTask, cloudRunResourceMap
 	}
 
 	return GCEInstance, gceResourceMap

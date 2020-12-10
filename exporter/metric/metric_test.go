@@ -321,6 +321,24 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				"aws_account": "fake_account",
 			},
 		},
+		// Cloud Run
+		{
+			resource.NewWithAttributes(
+				label.String("cloud.provider", "gcp"),
+				label.String("cloud.region", "utopia"),
+				label.String("service.instance.id", "bar"),
+				label.String("service.name", "x-service"),
+				label.String("service.namespace", "cloud-run-managed"),
+			),
+			"generic_task",
+			map[string]string{
+				"project_id": "",
+				"location":   "utopia",
+				"namespace":  "cloud-run-managed",
+				"job":        "x-service",
+				"task_id":    "bar",
+			},
+		},
 	}
 
 	desc := metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind)

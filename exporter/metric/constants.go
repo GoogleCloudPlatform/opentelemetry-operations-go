@@ -52,7 +52,10 @@ const (
 	K8SKeyPodName        = "k8s.pod.name"
 	K8SKeyDeploymentName = "k8s.deployment.name"
 
-	TaskID = "task_id"
+	// Cloud Run
+	ServiceNamespace  = "service.namespace"
+	ServiceInstanceID = "service.instance.id"
+	ServiceName       = "service.name"
 
 	// Monitored Resources types
 	K8SContainer   = "k8s_container"
