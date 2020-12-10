@@ -15,7 +15,7 @@
 package metric
 
 import (
-	apimetric "go.opentelemetry.io/otel/api/metric"
+	"go.opentelemetry.io/otel/metric"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
@@ -41,9 +41,9 @@ func NewWithCloudMonitoringDistribution() export.AggregatorSelector {
 	return selectorCloudMonitoring{}
 }
 
-func (selectorCloudMonitoring) AggregatorFor(descriptor *apimetric.Descriptor, aggPtrs ...*export.Aggregator) {
-	switch descriptor.MetricKind() {
-	case apimetric.ValueObserverKind, apimetric.ValueRecorderKind:
+func (selectorCloudMonitoring) AggregatorFor(descriptor *metric.Descriptor, aggPtrs ...*export.Aggregator) {
+	switch descriptor.InstrumentKind() {
+	case metric.ValueObserverInstrumentKind, metric.ValueRecorderInstrumentKind:
 		aggs := lastvalue.New(len(aggPtrs))
 		for i := range aggPtrs {
 			*aggPtrs[i] = &aggs[i]
