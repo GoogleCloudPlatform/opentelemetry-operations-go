@@ -116,6 +116,13 @@ var awsResourceMap = map[string]string{
 	"aws_account": CloudKeyAccountID,
 }
 
+var cloudRunResourceMap = map[string]string{
+	"task_id":   ServiceKeyInstanceID,
+	"location":  CloudKeyRegion,
+	"namespace": ServiceKeyNamespace,
+	"job":       ServiceKeyName,
+}
+
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
 func newMetricExporter(o *options) (*metricExporter, error) {
 	if strings.TrimSpace(o.ProjectID) == "" {
@@ -353,6 +360,10 @@ func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
 
 	if hasLocation && hasClusterName {
 		return K8SCluster, k8sClusterMap
+	}
+
+	if labelMap[ServiceKeyNamespace] == "cloud-run-managed" {
+		return GenericTask, cloudRunResourceMap
 	}
 
 	return GCEInstance, gceResourceMap

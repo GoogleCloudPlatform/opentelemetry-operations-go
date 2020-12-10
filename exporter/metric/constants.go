@@ -28,6 +28,10 @@ const (
 	CloudKeyRegion    = "cloud.region"
 	CloudKeyZone      = "cloud.zone"
 
+	ServiceKeyNamespace  = "service.namespace"
+	ServiceKeyInstanceID = "service.instance.id"
+	ServiceKeyName       = "service.name"
+
 	HostType = "host"
 	// A uniquely identifying name for the host.
 	HostKeyName = "host.name"
@@ -59,4 +63,5 @@ const (
 	K8SCluster     = "k8s_cluster"
 	GCEInstance    = "gce_instance"
 	AWSEC2Instance = "aws_ec2_instance"
+	GenericTask    = "generic_task"
 )
