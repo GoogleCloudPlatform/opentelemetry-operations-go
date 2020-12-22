@@ -207,6 +207,13 @@ func WithTraceClientOptions(opts []option.ClientOption) func(o *options) {
 	}
 }
 
+// WithMonitoringClientOptions sets additionial client options for monitoring.
+func WithMonitoringClientOptions(opts []option.ClientOption) func(o *options) {
+	return func(o *options) {
+		o.MonitoringClientOptions = opts
+	}
+}
+
 // WithContext sets the context that trace exporter and metric exporter
 // relies on.
 func WithContext(ctx context.Context) func(o *options) {
