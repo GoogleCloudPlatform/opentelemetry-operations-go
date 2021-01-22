@@ -36,8 +36,8 @@ import (
 type Option func(*options)
 
 // DisplayNameFormatter is is a function that produces the display name of a span
-// given its SpanData
-type DisplayNameFormatter func(*export.SpanData) string
+// given its SpanSnapshot
+type DisplayNameFormatter func(*export.SpanSnapshot) string
 
 // options contains options for configuring the exporter.
 type options struct {
@@ -131,8 +131,8 @@ type options struct {
 	ReportingInterval time.Duration
 
 	// DisplayNameFormatter is a function that produces the display name of a span
-	// given its SpanData.
-	// Optional. Default format for SpanData s is "Span.{s.SpanKind}-{s.Name}"
+	// given its SpanSnapshot.
+	// Optional. Default format for SpanSnapshot s is "Span.{s.SpanKind}-{s.Name}"
 	DisplayNameFormatter
 
 	// MaxNumberOfWorkers sets the maximum number of go rountines that send requests
@@ -238,7 +238,7 @@ func WithTimeout(t time.Duration) func(o *options) {
 }
 
 // WithDisplayNameFormatter sets the way span's display names will be
-// generated from SpanData
+// generated from SpanSnapshot
 func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
 	return func(o *options) {
 		o.DisplayNameFormatter = f
@@ -321,8 +321,8 @@ func newContextWithTimeout(ctx context.Context, timeout time.Duration) (context.
 	return context.WithTimeout(ctx, timeout)
 }
 
-// ExportSpans exports a SpanData to Stackdriver Trace.
-func (e *Exporter) ExportSpans(ctx context.Context, spanData []*export.SpanData) error {
+// ExportSpans exports a SpanSnapshot to Stackdriver Trace.
+func (e *Exporter) ExportSpans(ctx context.Context, spanData []*export.SpanSnapshot) error {
 	for _, sd := range spanData {
 		if len(e.traceExporter.o.DefaultTraceAttributes) > 0 {
 			sd = e.sdWithDefaultTraceAttributes(sd)
@@ -342,7 +342,7 @@ func (e *Exporter) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-func (e *Exporter) sdWithDefaultTraceAttributes(sd *export.SpanData) *export.SpanData {
+func (e *Exporter) sdWithDefaultTraceAttributes(sd *export.SpanSnapshot) *export.SpanSnapshot {
 	newSD := *sd
 	for k, v := range e.traceExporter.o.DefaultTraceAttributes {
 		switch val := v.(type) {

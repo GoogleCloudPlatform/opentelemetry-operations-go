@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"strings"
 	"time"
 
@@ -28,7 +29,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/minmaxsumcount"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
-	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
 
@@ -150,7 +151,7 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 }
 
 // InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
-func InstallNewPipeline(opts []Option, popts ...push.Option) (*push.Controller, error) {
+func InstallNewPipeline(opts []Option, popts ...controller.Option) (*controller.Controller, error) {
 	pusher, err := NewExportPipeline(opts, popts...)
 	if err != nil {
 		return nil, err
@@ -161,7 +162,7 @@ func InstallNewPipeline(opts []Option, popts ...push.Option) (*push.Controller, 
 
 // NewExportPipeline sets up a complete export pipeline with the recommended setup,
 // chaining a NewRawExporter into the recommended selectors and integrators.
-func NewExportPipeline(opts []Option, popts ...push.Option) (*push.Controller, error) {
+func NewExportPipeline(opts []Option, popts ...controller.Option) (*controller.Controller, error) {
 	selector := NewWithCloudMonitoringDistribution()
 	exporter, err := NewRawExporter(opts...)
 	if err != nil {
@@ -170,14 +171,14 @@ func NewExportPipeline(opts []Option, popts ...push.Option) (*push.Controller, e
 	period := exporter.metricExporter.o.ReportingInterval
 	checkpointer := basic.New(selector, exporter)
 
-	pusher := push.New(
+	pusher := controller.New(
 		checkpointer,
-		exporter,
-		append([]push.Option{
-			push.WithPeriod(period),
+		append([]controller.Option{
+			controller.WithPusher(exporter),
+			controller.WithCollectPeriod(period),
 		}, popts...)...,
 	)
-	pusher.Start()
+	pusher.Start(context.Background())
 	return pusher, nil
 }
 
@@ -554,9 +555,12 @@ func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind number.
 	}
 	switch kind {
 	case number.Int64Kind:
+		if value > math.MaxInt64 {
+			return nil, nil, fmt.Errorf("unable to convert uint64 to int64: uint64 %v exceeds the max for int64: %v", value, string(math.MaxInt64))
+		}
 		return &monitoringpb.TypedValue{
 			Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: value,
+				Int64Value: int64(value),
 			},
 		}, t, nil
 	case number.Float64Kind:

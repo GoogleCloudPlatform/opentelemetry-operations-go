@@ -27,7 +27,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/export/metric/metrictest"
 	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/aggregatortest"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
-	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
@@ -78,7 +78,7 @@ func TestExportCounter(t *testing.T) {
 
 	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 
-	resOpt := push.WithResource(
+	resOpt := basic.WithResource(
 		resource.NewWithAttributes(
 			label.String("test_id", "abc123"),
 		),
@@ -94,10 +94,10 @@ func TestExportCounter(t *testing.T) {
 	)
 	assert.NoError(t, err)
 
-	defer pusher.Stop()
+	ctx := context.Background()
+	defer pusher.Stop(ctx)
 
 	// Start meter
-	ctx := context.Background()
 	meter := pusher.MeterProvider().Meter("cloudmonitoring/test")
 
 	// Register counter value
