@@ -57,7 +57,7 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
 
-func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) string {
+func generateDisplayName(s *export.SpanSnapshot, format DisplayNameFormatter) string {
 	if format != nil {
 		return format(s)
 	}
@@ -70,7 +70,7 @@ func generateDisplayName(s *export.SpanData, format DisplayNameFormatter) string
 
 // If there are duplicate keys present in the list of attributes,
 // then the first value found for the key is preserved.
-func injectLabelsFromResources(sd *export.SpanData) {
+func injectLabelsFromResources(sd *export.SpanSnapshot) {
 	if sd.Resource.Len() == 0 {
 		return
 	}
@@ -87,7 +87,7 @@ func injectLabelsFromResources(sd *export.SpanData) {
 	}
 }
 
-func protoFromSpanData(s *export.SpanData, projectID string, format DisplayNameFormatter) *tracepb.Span {
+func protoFromSpanSnapshot(s *export.SpanSnapshot, projectID string, format DisplayNameFormatter) *tracepb.Span {
 	if s == nil {
 		return nil
 	}

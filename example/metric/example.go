@@ -25,7 +25,7 @@ import (
 
 	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/sdk/metric/controller/push"
+	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
 )
 
@@ -62,7 +62,7 @@ func main() {
 	// the function to handle the common resource just ignore the passed resource and
 	// it returned hard coded "global" resource.
 	// This should be fixed in #29.
-	resOpt := push.WithResource(resource.NewWithAttributes(
+	resOpt := basic.WithResource(resource.NewWithAttributes(
 		label.String("instance_id", "abc123"),
 		label.String("application", "example-app"),
 	))
@@ -70,10 +70,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to establish pipeline: %v", err)
 	}
-	defer pusher.Stop()
+	ctx := context.Background()
+	defer pusher.Stop(ctx)
 
 	// Start meter
-	ctx := context.Background()
 	meter := pusher.MeterProvider().Meter("cloudmonitoring/example")
 
 	// Register counter value

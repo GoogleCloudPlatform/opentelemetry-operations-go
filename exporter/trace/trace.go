@@ -115,9 +115,9 @@ func (e *traceExporter) checkBundlerError(err error) {
 	}
 }
 
-// ExportSpan exports a SpanData to Stackdriver Trace.
-func (e *traceExporter) ExportSpan(_ context.Context, sd *export.SpanData) {
-	protoSpan := protoFromSpanData(sd, e.projectID, e.o.DisplayNameFormatter)
+// ExportSpan exports a SpanSnapshot to Stackdriver Trace.
+func (e *traceExporter) ExportSpan(_ context.Context, sd *export.SpanSnapshot) {
+	protoSpan := protoFromSpanSnapshot(sd, e.projectID, e.o.DisplayNameFormatter)
 	protoSize := proto.Size(protoSpan)
 	err := e.bundler.Add(protoSpan, protoSize)
 	e.checkBundlerError(err)

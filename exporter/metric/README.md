@@ -21,7 +21,7 @@ package main
 import (
     "go.opentelemetry.io/otel/metric"
     "go.opentelemetry.io/otel/label"
-    "go.opentelemetry.io/otel/sdk/metric/controller/push"
+    "go.opentelemetry.io/otel/sdk/metric/controller/basic"
     "go.opentelemetry.io/otel/sdk/resource"
 
     mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
@@ -30,17 +30,17 @@ import (
 func main() {
     // Initialize exporter option.
     opts := []mexporter.Option{}
-    popts:= []push.Option{}
+    popts:= []basic.Option{}
 
     // Create exporter (collector embedded with the exporter).
     pusher, err := mexporter.InstallNewPipeline(opts, popts...)
     if err != nil {
         log.Fatalf("mexporter.InstallNewPipeline: %v", err)
     }
-    defer pusher.Stop()
+    ctx := context.Background()
+    defer pusher.Stop(ctx)
 
     // Start meter
-    ctx := context.Background()
     meter := pusher.Provider().Meter("cloudmonitoring/example")
 
     counter := metric.Must(meter).NewInt64Counter("counter-foo")
