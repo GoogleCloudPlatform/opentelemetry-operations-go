@@ -47,12 +47,16 @@ const (
 	URLAttribute        = "http.url"
 	UserAgentAttribute  = "http.user_agent"
 	StatusCodeAttribute = "http.status_code"
+	ServiceAttribute    = "service.name"
 
 	labelHTTPHost       = `/http/host`
 	labelHTTPMethod     = `/http/method`
 	labelHTTPStatusCode = `/http/status_code`
 	labelHTTPPath       = `/http/path`
 	labelHTTPUserAgent  = `/http/user_agent`
+	// This is prefixed for google app engine, but translates to the service
+	// in the trace UI
+	labelService = `g.co/gae/app/module`
 )
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
@@ -209,6 +213,8 @@ func copyAttributes(out **tracepb.Span_Attributes, in []label.KeyValue) {
 			(*out).AttributeMap[labelHTTPUserAgent] = av
 		case StatusCodeAttribute:
 			(*out).AttributeMap[labelHTTPStatusCode] = av
+		case ServiceAttribute:
+			(*out).AttributeMap[labelService] = av
 		default:
 			if len(kv.Key) > 128 {
 				dropped++
