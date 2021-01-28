@@ -556,7 +556,7 @@ func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind number.
 	switch kind {
 	case number.Int64Kind:
 		if value > math.MaxInt64 {
-			return nil, nil, fmt.Errorf("unable to convert uint64 to int64: uint64 %v exceeds the max for int64: %v", value, string(math.MaxInt64))
+			return nil, nil, fmt.Errorf("unable to convert uint64 to int64: uint64 %v exceeds the max for int64: %v", value, int64(math.MaxInt64))
 		}
 		return &monitoringpb.TypedValue{
 			Value: &monitoringpb.TypedValue_Int64Value{
