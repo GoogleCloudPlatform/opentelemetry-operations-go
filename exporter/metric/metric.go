@@ -34,6 +34,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	"github.com/golang/protobuf/ptypes"
 	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
@@ -507,7 +508,6 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	agg := r.Aggregation()
 	nkind := r.Descriptor().NumberKind()
 	ikind := r.Descriptor().InstrumentKind()
-	now := time.Now().Unix()
 
 	// TODO: Ignoring the case for Min, Max and Distribution to simply
 	// the first implementation.
@@ -531,7 +531,7 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 		// CUMULATIVE measurement should have the same start time and increasing end time.
 		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
 		if sum, ok := agg.(*sum.Aggregator); ok {
-			return sumToTypedValueAndTimestamp(sum, nkind, me.startTime.Unix(), now)
+			return sumToTypedValueAndTimestamp(sum, nkind, me.startTime, time.Now())
 		}
 		return nil, nil, errUnsupportedAggregation{agg: agg}
 	}
@@ -596,19 +596,32 @@ func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind number.Kin
 	return tv, t, nil
 }
 
-func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind number.Kind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind number.Kind, start, end time.Time) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, err := sum.Sum()
 	if err != nil {
 		return nil, nil, err
 	}
 
+	// The end time of a new interval must be at least a millisecond after the end time of the
+	// previous interval, for all non-gauge types.
+	// https://cloud.google.com/monitoring/api/ref_v3/rpc/google.monitoring.v3#timeinterval
+	if end.Sub(start).Milliseconds() <= 1 {
+		end = start.Add(time.Millisecond)
+	}
+
+	startpb, err := ptypes.TimestampProto(start)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	endpb, err := ptypes.TimestampProto(end)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	t := &monitoringpb.TimeInterval{
-		StartTime: &googlepb.Timestamp{
-			Seconds: start,
-		},
-		EndTime: &googlepb.Timestamp{
-			Seconds: end,
-		},
+		StartTime: startpb,
+		EndTime:   endpb,
 	}
 
 	tv, err := aggToTypedValue(kind, value)
