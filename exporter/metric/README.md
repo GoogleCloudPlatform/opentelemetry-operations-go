@@ -75,5 +75,5 @@ opts := []mexporter.Option{
 * For more about OpenTelemetry Go, visit: https://github.com/open-telemetry/opentelemetry-go
 * Learn more about Google Cloud Monitoring at https://cloud.google.com/monitoring
 
-[license-url]: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/master/LICENSE
+[license-url]: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/main/LICENSE
 [license-image]: https://img.shields.io/badge/license-Apache_2.0-green.svg?style=flat
