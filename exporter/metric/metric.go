@@ -35,7 +35,6 @@ import (
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"github.com/golang/protobuf/ptypes"
-	googlepb "github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -539,20 +538,17 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	return nil, nil, errUnexpectedInstrumentKind{kind: ikind}
 }
 
-func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind number.Kind, start, end int64) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind number.Kind, start, end time.Time) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
 	value, err := count.Count()
 	if err != nil {
 		return nil, nil, err
 	}
 
-	t := &monitoringpb.TimeInterval{
-		StartTime: &googlepb.Timestamp{
-			Seconds: start,
-		},
-		EndTime: &googlepb.Timestamp{
-			Seconds: end,
-		},
+	t, err := toNonemptyTimeIntervalpb(start, end)
+	if err != nil {
+		return nil, nil, err
 	}
+
 	switch kind {
 	case number.Int64Kind:
 		if value > math.MaxInt64 {
@@ -579,14 +575,15 @@ func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind number.Kin
 		return nil, nil, err
 	}
 
+	timestamppb, err := ptypes.TimestampProto(timestamp)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	// TODO: Consider the expression of TimeInterval (#25)
 	t := &monitoringpb.TimeInterval{
-		StartTime: &googlepb.Timestamp{
-			Seconds: timestamp.Unix(),
-		},
-		EndTime: &googlepb.Timestamp{
-			Seconds: timestamp.Unix(),
-		},
+		StartTime: timestamppb,
+		EndTime:   timestamppb,
 	}
 
 	tv, err := aggToTypedValue(kind, value)
@@ -602,6 +599,19 @@ func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind number.Kind, start, e
 		return nil, nil, err
 	}
 
+	t, err := toNonemptyTimeIntervalpb(start, end)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	tv, err := aggToTypedValue(kind, value)
+	if err != nil {
+		return nil, nil, err
+	}
+	return tv, t, err
+}
+
+func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval, error) {
 	// The end time of a new interval must be at least a millisecond after the end time of the
 	// previous interval, for all non-gauge types.
 	// https://cloud.google.com/monitoring/api/ref_v3/rpc/google.monitoring.v3#timeinterval
@@ -611,24 +621,18 @@ func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind number.Kind, start, e
 
 	startpb, err := ptypes.TimestampProto(start)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	endpb, err := ptypes.TimestampProto(end)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	t := &monitoringpb.TimeInterval{
+	return &monitoringpb.TimeInterval{
 		StartTime: startpb,
 		EndTime:   endpb,
-	}
-
-	tv, err := aggToTypedValue(kind, value)
-	if err != nil {
-		return nil, nil, err
-	}
-	return tv, t, err
+	}, nil
 }
 
 func aggToTypedValue(kind number.Kind, value number.Number) (*monitoringpb.TypedValue, error) {

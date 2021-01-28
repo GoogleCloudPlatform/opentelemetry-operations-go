@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"reflect"
 	"testing"
+	"time"
 
 	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/metric"
@@ -30,6 +31,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
 
+	"github.com/golang/protobuf/ptypes"
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/option"
@@ -374,4 +376,49 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestTimeIntervalStaggering(t *testing.T) {
+	var tm time.Time
+
+	interval, err := toNonemptyTimeIntervalpb(tm, tm)
+	if err != nil {
+		t.Fatalf("conversion to PB failed: %v", err)
+	}
+
+	start, err := ptypes.Timestamp(interval.StartTime)
+	if err != nil {
+		t.Fatalf("unable to convert start time from PB: %v", err)
+	}
+
+	end, err := ptypes.Timestamp(interval.EndTime)
+	if err != nil {
+		t.Fatalf("unable to convert end time to PB: %v", err)
+	}
+
+	if end.Before(start.Add(time.Millisecond)) {
+		t.Fatalf("expected end=%v to be at least %v after start=%v, but it wasn't", end, time.Millisecond, start)
+	}
+}
+
+func TestTimeIntervalPassthru(t *testing.T) {
+	var tm time.Time
+
+	interval, err := toNonemptyTimeIntervalpb(tm, tm.Add(time.Second))
+	if err != nil {
+		t.Fatalf("conversion to PB failed: %v", err)
+	}
+
+	start, err := ptypes.Timestamp(interval.StartTime)
+	if err != nil {
+		t.Fatalf("unable to convert start time from PB: %v", err)
+	}
+
+	end, err := ptypes.Timestamp(interval.EndTime)
+	if err != nil {
+		t.Fatalf("unable to convert end time to PB: %v", err)
+	}
+
+	assert.Equal(t, start, tm)
+	assert.Equal(t, end, tm.Add(time.Second))
 }
