@@ -69,7 +69,7 @@ if ! git diff --quiet; then \
 fi
 
 # Update go.mod
-git checkout -b pre_release_${TAG} master
+git checkout -b pre_release_${TAG} main
 PACKAGE_DIRS=$(find . -mindepth 2 -type f -name 'go.mod' -exec dirname {} \; | egrep -v 'tools' | sed 's/^\.\///' | sort)
 
 # Update exporter/trace/version.go
@@ -96,5 +96,5 @@ git add .
 make ci
 git commit -m "Prepare for releasing $TAG"
 
-printf "Now run following to verify the changes.\ngit diff master\n"
+printf "Now run following to verify the changes.\ngit diff main\n"
 printf "\nThen push the changes to upstream\n"

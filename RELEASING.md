@@ -13,7 +13,7 @@ Update go.mod for submodules to depend on the new release which will happen in t
 2. Verify the changes.
 
     ```
-    git diff master
+    git diff main
     ```
 
     This should have changed the version for all modules to be `<new tag>`.
@@ -35,7 +35,7 @@ Failure to do so will leave things in a broken state.
 It is critical you make sure the version you push upstream is correct.
 [Failure to do so will lead to minor emergencies and tough to work around](https://github.com/open-telemetry/opentelemetry-go/issues/331).
 
-1. Run the tag.sh script using the `<commit-hash>` of the commit on the master branch for the merged Pull Request.
+1. Run the tag.sh script using the `<commit-hash>` of the commit on the main branch for the merged Pull Request.
 
     ```
     ./tag.sh <new tag> <commit-hash>

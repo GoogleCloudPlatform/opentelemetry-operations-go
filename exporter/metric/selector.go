@@ -31,7 +31,7 @@ var _ export.AggregatorSelector = selectorCloudMonitoring{}
 // NOTE: this selector is just to ensure that LastValue is used for
 // ValueObserverKind and ValueRecorderKind.
 // All other metric kinds have Sum default aggregation
-// c.f. https://github.com/open-telemetry/opentelemetry-go/blob/master/sdk/metric/selector/simple/simple.go
+// c.f. https://github.com/open-telemetry/opentelemetry-go/blob/main/sdk/metric/selector/simple/simple.go
 //
 // TODO: Remove this once SDK implements such a
 // selector, otherwise Views API gives flexibility to set aggregation type on
