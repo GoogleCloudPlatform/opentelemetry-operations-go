@@ -5,7 +5,7 @@ go 1.14
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../../../exporter/trace
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.13.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.16.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.16.0
 	go.opentelemetry.io/otel v0.16.0
