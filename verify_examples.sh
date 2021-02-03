@@ -19,16 +19,6 @@ set -euo pipefail
 cd $(dirname $0)
 TOOLS_DIR=$(pwd)/.tools
 
-if [ -z "${GOPATH}" ] ; then
-	printf "GOPATH is not defined.\n"
-	exit -1
-fi
-
-if [ ! -d "${GOPATH}" ] ; then
-	printf "GOPATH ${GOPATH} is invalid \n"
-	exit -1
-fi
-
 # Pre-requisites
 if ! git diff --quiet; then \
 	git status
@@ -43,9 +33,7 @@ fi
 
 make ${TOOLS_DIR}/gojq
 
-DIR_TMP="${GOPATH}/src/otelopstmp/"
-rm -rf $DIR_TMP
-mkdir -p $DIR_TMP
+DIR_TMP="$(mktemp -d -t otelops-XXXX)"
 
 printf "Copy examples to ${DIR_TMP}\n"
 cp -a ./example ${DIR_TMP}

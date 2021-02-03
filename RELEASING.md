@@ -67,3 +67,5 @@ After releasing verify that examples build outside of the repository.
 
 The script copies examples into a different directory removes any `replace` declarations in `go.mod` and builds them.
 This ensures they build with the published release, not the local copy.
+
+Also update the examples maintained outside this repo at https://github.com/GoogleCloudPlatform/golang-samples/tree/master/opentelemetry.
