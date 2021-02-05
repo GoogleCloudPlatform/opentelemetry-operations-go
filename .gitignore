@@ -9,4 +9,5 @@ Thumbs.db
 *.so
 coverage.*
 
+/example/container_metric/container_metric
 /example/metric/metric
