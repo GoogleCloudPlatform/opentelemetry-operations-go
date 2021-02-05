@@ -3,3 +3,5 @@ allowedLicenses:
 sourceFileExtensions:
   - go
   - sh
+allowedCopyrightHolders:
+- "Google Inc"
