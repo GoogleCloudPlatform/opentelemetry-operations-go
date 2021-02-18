@@ -22,8 +22,8 @@ import (
 	"strings"
 	"time"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/metric/number"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
@@ -156,7 +156,7 @@ func InstallNewPipeline(opts []Option, popts ...controller.Option) (*controller.
 	if err != nil {
 		return nil, err
 	}
-	otel.SetMeterProvider(pusher.MeterProvider())
+	global.SetMeterProvider(pusher.MeterProvider())
 	return pusher, err
 }
 

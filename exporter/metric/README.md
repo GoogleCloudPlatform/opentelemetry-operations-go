@@ -19,35 +19,35 @@ After you import the metric exporter package, then register the exporter to the 
 package main
 
 import (
-    "go.opentelemetry.io/otel/metric"
-    "go.opentelemetry.io/otel/label"
-    "go.opentelemetry.io/otel/sdk/metric/controller/basic"
-    "go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
+	"go.opentelemetry.io/otel/sdk/resource"
 
-    mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
+	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 )
 
 func main() {
-    // Initialize exporter option.
-    opts := []mexporter.Option{}
-    popts:= []basic.Option{}
+	// Initialize exporter option.
+	opts := []mexporter.Option{}
+	popts := []basic.Option{}
 
-    // Create exporter (collector embedded with the exporter).
-    pusher, err := mexporter.InstallNewPipeline(opts, popts...)
-    if err != nil {
-        log.Fatalf("mexporter.InstallNewPipeline: %v", err)
-    }
-    ctx := context.Background()
-    defer pusher.Stop(ctx)
+	// Create exporter (collector embedded with the exporter).
+	pusher, err := mexporter.InstallNewPipeline(opts, popts...)
+	if err != nil {
+		log.Fatalf("mexporter.InstallNewPipeline: %v", err)
+	}
+	ctx := context.Background()
+	defer pusher.Stop(ctx)
 
-    // Start meter
-    meter := pusher.Provider().Meter("cloudmonitoring/example")
+	// Start meter
+	meter := pusher.MeterProvider().Meter("cloudmonitoring/example")
 
-    counter := metric.Must(meter).NewInt64Counter("counter-foo")
-    labels := []label.KeyValue{
-        label.Key("key").String("value"),
-    }
-    counter.Add(ctx, 123, labels...)
+	counter := metric.Must(meter).NewInt64Counter("counter-foo")
+	labels := []label.KeyValue{
+		label.Key("key").String("value"),
+	}
+	counter.Add(ctx, 123, labels...)
 }
 ```
 
