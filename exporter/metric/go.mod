@@ -7,9 +7,12 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.4.2
 	github.com/googleinterns/cloud-operations-api-mock v0.0.0-20200709193332-a1e58c29bdd3
-	github.com/stretchr/testify v1.6.1
-	go.opentelemetry.io/otel v0.16.0
-	go.opentelemetry.io/otel/sdk v0.16.0
+	github.com/stretchr/testify v1.7.0
+	go.opentelemetry.io/otel v0.17.0
+	go.opentelemetry.io/otel/metric v0.17.0
+	go.opentelemetry.io/otel/sdk v0.17.0
+	go.opentelemetry.io/otel/sdk/export/metric v0.17.0
+	go.opentelemetry.io/otel/sdk/metric v0.17.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/sys v0.0.0-20200828194041-157a740278f4 // indirect
 	google.golang.org/api v0.30.0

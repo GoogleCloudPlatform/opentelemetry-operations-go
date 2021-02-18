@@ -41,7 +41,7 @@ func main() {
     defer pusher.Stop(ctx)
 
     // Start meter
-    meter := pusher.Provider().Meter("cloudmonitoring/example")
+    meter := pusher.MeterProvider().Meter("cloudmonitoring/example")
 
     counter := metric.Must(meter).NewInt64Counter("counter-foo")
     labels := []label.KeyValue{
