@@ -153,6 +153,9 @@ func protoFromSpanSnapshot(s *export.SpanSnapshot, projectID string, format Disp
 	// Only set the agent label if it is not already set. That enables the
 	// OpenTelemery service/collector to set the agent label based on the library that
 	// sent the span to the service.
+	// TODO(jsuereth): This scenario is highly unlikely.  This would require vanilla OTLP
+	// sources of tracess to be setting "g.co/agent" labels on spans.  We should confirm
+	// and remove/update this code.
 	if _, hasAgent := sp.Attributes.AttributeMap[agentLabel]; !hasAgent {
 		sp.Attributes.AttributeMap[agentLabel] = &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_StringValue{

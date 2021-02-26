@@ -15,8 +15,11 @@
 package trace
 
 import (
+	"bufio"
 	"context"
+	"fmt"
 	"log"
+	"net"
 	"os"
 	"regexp"
 	"sync"
@@ -32,6 +35,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"google.golang.org/api/option"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/test/bufconn"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func TestExporter_ExportSpan(t *testing.T) {
@@ -315,4 +322,88 @@ type logBuffer struct {
 func (lb *logBuffer) Write(b []byte) (n int, err error) {
 	lb.logInputChan <- b
 	return len(b), nil
+}
+
+const bufSize = 1024 * 1024
+
+var lis *bufconn.Listener
+
+type TestServer struct{}
+
+func (s *TestServer) BatchWriteSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
+	headers, _ := metadata.FromIncomingContext(ctx)
+	fmt.Printf(" - User-Agent: %s\n", headers["user-agent"])
+	return &emptypb.Empty{}, nil
+}
+func (s *TestServer) CreateSpan(context.Context, *tracepb.Span) (*tracepb.Span, error) {
+	// TODO - error
+	return &tracepb.Span{}, nil
+}
+
+func init() {
+	lis = bufconn.Listen(bufSize)
+	s := grpc.NewServer()
+	// register cloud trace mock
+	tracepb.RegisterTraceServiceServer(s, &TestServer{})
+	go func() {
+		if err := s.Serve(lis); err != nil {
+			log.Fatalf("Server exited with error: %v", err)
+		}
+	}()
+}
+
+func bufDialer(context.Context, string) (net.Conn, error) {
+	return lis.Dial()
+}
+
+func TestExporter_ExportWithUserAgent(t *testing.T) {
+	// Initialize our buffer-dumper grpc
+	ctx := context.Background()
+	conn, err := grpc.DialContext(ctx, "bufnet",
+		grpc.WithContextDialer(bufDialer),
+		grpc.WithInsecure(),
+		// TODO - Figure out how to get this from the `newTraceExporter`
+		// method.  Right now we're just testin gif we send this config in ourselves
+		// it works locally, not whether the option is appended to users at runtime.
+		grpc.WithUserAgent(userAgent))
+	if err != nil {
+		t.Fatalf("Failed to connecto buffer: %v", err)
+	}
+	defer conn.Close()
+	// Handle the incoming connection
+	go func() {
+		fmt.Println("Waiting for connection")
+		conn2, _ := lis.Accept()
+		result, _ := bufio.NewReader(conn2).ReadString('\n')
+		fmt.Print("Connection input: ")
+		fmt.Println(result)
+	}()
+
+	// Wire into buffer output.
+	clientOpt := []option.ClientOption{option.WithGRPCConn(conn)}
+	// Create Google Cloud Trace Exporter
+	_, flush, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithTraceClientOptions(clientOpt),
+			// handle bundle as soon as span is received
+			WithBundleCountThreshold(1),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+	)
+	assert.NoError(t, err)
+
+	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
+	span.SetStatus(codes.Ok, "Status Message")
+	span.End()
+	assert.True(t, span.SpanContext().IsValid())
+
+	_, span = otel.Tracer("test-tracer").Start(context.Background(), "test-span-with-error-status")
+	span.SetStatus(codes.Error, "Error Message")
+	span.End()
+
+	// wait exporter to flush
+	flush()
+	// Now check for user agent string in the buffer.
+
 }
