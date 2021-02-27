@@ -15,9 +15,7 @@
 package trace
 
 import (
-	"bufio"
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"os"
@@ -33,11 +31,11 @@ import (
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/grpc/test/bufconn"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -324,63 +322,44 @@ func (lb *logBuffer) Write(b []byte) (n int, err error) {
 	return len(b), nil
 }
 
-const bufSize = 1024 * 1024
-
-var lis *bufconn.Listener
-
-type TestServer struct{}
-
-func (s *TestServer) BatchWriteSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
-	headers, _ := metadata.FromIncomingContext(ctx)
-	fmt.Printf(" - User-Agent: %s\n", headers["user-agent"])
-	return &emptypb.Empty{}, nil
-}
-func (s *TestServer) CreateSpan(context.Context, *tracepb.Span) (*tracepb.Span, error) {
-	// TODO - error
-	return &tracepb.Span{}, nil
+// A mock server we can re-use for different kinds of unit tests against batch-write request.
+type mock struct {
+	tracepb.UnimplementedTraceServiceServer
+	batchWriteSpans func(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error)
 }
 
-func init() {
-	lis = bufconn.Listen(bufSize)
-	s := grpc.NewServer()
-	// register cloud trace mock
-	tracepb.RegisterTraceServiceServer(s, &TestServer{})
-	go func() {
-		if err := s.Serve(lis); err != nil {
-			log.Fatalf("Server exited with error: %v", err)
-		}
-	}()
-}
-
-func bufDialer(context.Context, string) (net.Conn, error) {
-	return lis.Dial()
+func (m *mock) BatchWriteSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
+	return m.batchWriteSpans(ctx, req)
 }
 
 func TestExporter_ExportWithUserAgent(t *testing.T) {
-	// Initialize our buffer-dumper grpc
-	ctx := context.Background()
-	conn, err := grpc.DialContext(ctx, "bufnet",
-		grpc.WithContextDialer(bufDialer),
-		grpc.WithInsecure(),
-		// TODO - Figure out how to get this from the `newTraceExporter`
-		// method.  Right now we're just testin gif we send this config in ourselves
-		// it works locally, not whether the option is appended to users at runtime.
-		grpc.WithUserAgent(userAgent))
-	if err != nil {
-		t.Fatalf("Failed to connecto buffer: %v", err)
+	// Initialize the mock server
+	server := grpc.NewServer()
+	t.Cleanup(server.Stop)
+
+	// Channel we shove our user agent string into.
+	ch := make(chan []string, 1)
+
+	m := mock{
+		batchWriteSpans: func(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
+			md, _ := metadata.FromIncomingContext(ctx)
+			ch <- md.Get("User-Agent")
+			return &emptypb.Empty{}, nil
+		},
 	}
-	defer conn.Close()
-	// Handle the incoming connection
-	go func() {
-		fmt.Println("Waiting for connection")
-		conn2, _ := lis.Accept()
-		result, _ := bufio.NewReader(conn2).ReadString('\n')
-		fmt.Print("Connection input: ")
-		fmt.Println(result)
-	}()
+	tracepb.RegisterTraceServiceServer(server, &m)
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	// GO GO gadget local server!
+	go server.Serve(lis)
 
 	// Wire into buffer output.
-	clientOpt := []option.ClientOption{option.WithGRPCConn(conn)}
+	clientOpt := []option.ClientOption{
+		option.WithEndpoint(lis.Addr().String()),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithInsecure()),
+	}
 	// Create Google Cloud Trace Exporter
 	_, flush, err := InstallNewPipeline(
 		[]Option{
@@ -398,12 +377,10 @@ func TestExporter_ExportWithUserAgent(t *testing.T) {
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
-	_, span = otel.Tracer("test-tracer").Start(context.Background(), "test-span-with-error-status")
-	span.SetStatus(codes.Error, "Error Message")
-	span.End()
-
 	// wait exporter to flush
 	flush()
 	// Now check for user agent string in the buffer.
+	ua := <-ch
+	require.Regexp(t, "opentelemetry-go .*; google-cloud-trace-exporter .*", ua[0])
 
 }
