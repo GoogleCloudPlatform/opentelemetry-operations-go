@@ -25,7 +25,7 @@ import (
 	apioption "google.golang.org/api/option"
 )
 
-var userAgent = fmt.Sprintf("opentelemetry-go %s; metric-exporter %s", otel.Version(), Version())
+var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-metric-exporter %s", otel.Version(), Version())
 
 // Option is function type that is passed to the exporter initialization function.
 type Option func(*options)
