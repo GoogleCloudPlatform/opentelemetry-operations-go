@@ -1,4 +1,5 @@
 // Copyright 2019, OpenTelemetry Authors
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +26,7 @@ import (
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
+	"google.golang.org/api/option"
 	"google.golang.org/api/support/bundler"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	"google.golang.org/protobuf/proto"
@@ -49,7 +51,8 @@ const defaultBundleByteLimit = 0
 const defaultBufferedByteLimit = 8 * 1024 * 1024
 
 func newTraceExporter(o *options) (*traceExporter, error) {
-	client, err := traceclient.NewClient(o.Context, o.TraceClientOptions...)
+	clientOps := append(o.TraceClientOptions, option.WithUserAgent(userAgent))
+	client, err := traceclient.NewClient(o.Context, clientOps...)
 	if err != nil {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
 	}

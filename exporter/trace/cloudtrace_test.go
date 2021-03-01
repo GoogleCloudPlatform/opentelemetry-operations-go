@@ -1,4 +1,5 @@
 // Copyright 2019, OpenTelemetry Authors
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +18,7 @@ package trace
 import (
 	"context"
 	"log"
+	"net"
 	"os"
 	"regexp"
 	"sync"
@@ -30,8 +32,12 @@ import (
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 func TestExporter_ExportSpan(t *testing.T) {
@@ -315,4 +321,67 @@ type logBuffer struct {
 func (lb *logBuffer) Write(b []byte) (n int, err error) {
 	lb.logInputChan <- b
 	return len(b), nil
+}
+
+// A mock server we can re-use for different kinds of unit tests against batch-write request.
+type mock struct {
+	tracepb.UnimplementedTraceServiceServer
+	batchWriteSpans func(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error)
+}
+
+func (m *mock) BatchWriteSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
+	return m.batchWriteSpans(ctx, req)
+}
+
+func TestExporter_ExportWithUserAgent(t *testing.T) {
+	// Initialize the mock server
+	server := grpc.NewServer()
+	t.Cleanup(server.Stop)
+
+	// Channel we shove our user agent string into.
+	ch := make(chan []string, 1)
+
+	m := mock{
+		batchWriteSpans: func(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
+			md, _ := metadata.FromIncomingContext(ctx)
+			ch <- md.Get("User-Agent")
+			return &emptypb.Empty{}, nil
+		},
+	}
+	tracepb.RegisterTraceServiceServer(server, &m)
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	// GO GO gadget local server!
+	go server.Serve(lis)
+
+	// Wire into buffer output.
+	clientOpt := []option.ClientOption{
+		option.WithEndpoint(lis.Addr().String()),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithInsecure()),
+	}
+	// Create Google Cloud Trace Exporter
+	_, flush, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithTraceClientOptions(clientOpt),
+			// handle bundle as soon as span is received
+			WithBundleCountThreshold(1),
+		},
+		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+	)
+	assert.NoError(t, err)
+
+	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
+	span.SetStatus(codes.Ok, "Status Message")
+	span.End()
+	assert.True(t, span.SpanContext().IsValid())
+
+	// wait exporter to flush
+	flush()
+	// Now check for user agent string in the buffer.
+	ua := <-ch
+	require.Regexp(t, "opentelemetry-go .*; google-cloud-trace-exporter .*", ua[0])
+
 }

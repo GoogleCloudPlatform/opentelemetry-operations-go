@@ -1,4 +1,4 @@
-// Copyright 2020, Google Inc.
+// Copyright 2020-2021, Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ package metric
 import (
 	"context"
 	"fmt"
+	"net"
 	"reflect"
 	"testing"
 	"time"
@@ -32,10 +33,16 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	"github.com/golang/protobuf/ptypes"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
+	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 var (
@@ -421,4 +428,83 @@ func TestTimeIntervalPassthru(t *testing.T) {
 
 	assert.Equal(t, start, tm)
 	assert.Equal(t, end, tm.Add(time.Second))
+}
+
+type mock struct {
+	monitoringpb.UnimplementedMetricServiceServer
+	createTimeSeries       func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*empty.Empty, error)
+	createMetricDescriptor func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error)
+}
+
+func (m *mock) CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*empty.Empty, error) {
+	return m.createTimeSeries(ctx, req)
+}
+
+func (m *mock) CreateMetricDescriptor(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
+	return m.createMetricDescriptor(ctx, req)
+}
+
+func TestExportMetricsWithUserAgent(t *testing.T) {
+	server := grpc.NewServer()
+	t.Cleanup(server.Stop)
+
+	// Channel to shove user agent strings from createTimeSeries
+	ch := make(chan []string, 1)
+
+	m := mock{
+		createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*empty.Empty, error) {
+			md, _ := metadata.FromIncomingContext(ctx)
+			ch <- md.Get("User-Agent")
+			return &emptypb.Empty{}, nil
+		},
+		createMetricDescriptor: func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
+			md, _ := metadata.FromIncomingContext(ctx)
+			ch <- md.Get("User-Agent")
+			return req.MetricDescriptor, nil
+		},
+	}
+	// Make sure all the calls have the right user agents.
+	// We have to run this in parallel because BOTH calls happen seamlessly when exporting metrics.
+	go func() {
+		for {
+			ua := <-ch
+			require.Regexp(t, "opentelemetry-go .*; google-cloud-metric-exporter .*", ua[0])
+		}
+	}()
+	monitoringpb.RegisterMetricServiceServer(server, &m)
+
+	lis, err := net.Listen("tcp", "127.0.0.1:0")
+	require.NoError(t, err)
+	go server.Serve(lis)
+
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint(lis.Addr().String()),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithInsecure()),
+	}
+	res := &resource.Resource{}
+	cps := metrictest.NewCheckpointSet(res)
+	ctx := context.Background()
+	desc := metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind)
+
+	lvagg := &lastvalue.New(1)[0]
+	aggtest.CheckedUpdate(t, lvagg, number.NewFloat64Number(12.34), &desc)
+	lvagg.Update(ctx, number.NewFloat64Number(12.34), &desc)
+	cps.Add(&desc, lvagg, label.String("a", "A"), label.String("b", "B"))
+
+	opts := []Option{
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithMonitoringClientOptions(clientOpts...),
+		WithMetricDescriptorTypeFormatter(formatter),
+	}
+
+	exporter, err := NewRawExporter(opts...)
+	if err != nil {
+		t.Errorf("Error occurred when creating exporter: %v", err)
+	}
+
+	err = exporter.Export(ctx, cps)
+	assert.NoError(t, err)
+
+	// User agent checking happens above in parallel to this flow.
 }

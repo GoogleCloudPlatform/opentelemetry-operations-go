@@ -1,4 +1,4 @@
-// Copyright 2020, Google Inc.
+// Copyright 2020-2021, Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import (
 	apioption "google.golang.org/api/option"
 )
 
-var userAgent = fmt.Sprintf("opentelemetry-go %s; metric-exporter %s", otel.Version(), Version())
+var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-metric-exporter %s", otel.Version(), Version())
 
 // Option is function type that is passed to the exporter initialization function.
 type Option func(*options)
