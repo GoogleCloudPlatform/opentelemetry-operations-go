@@ -448,8 +448,8 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 	server := grpc.NewServer()
 	t.Cleanup(server.Stop)
 
-	// Channel to shove user agent strings into
-	ch := make(chan []string, 2)
+	// Channel to shove user agent strings from createTimeSeries
+	ch := make(chan []string, 1)
 
 	m := mock{
 		createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*empty.Empty, error) {
@@ -463,6 +463,14 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 			return req.MetricDescriptor, nil
 		},
 	}
+	// Make sure all the calls have the right user agents.
+	// We have to run this in parallel because BOTH calls happen seamlessly when exporting metrics.
+	go func() {
+		for {
+			ua := <-ch
+			require.Regexp(t, "opentelemetry-go .*; google-cloud-metric-exporter .*", ua[0])
+		}
+	}()
 	monitoringpb.RegisterMetricServiceServer(server, &m)
 
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
@@ -498,7 +506,5 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 	err = exporter.Export(ctx, cps)
 	assert.NoError(t, err)
 
-	// Now check for user agent string in the buffer from one call.
-	ua := <-ch
-	require.Regexp(t, "opentelemetry-go .*; google-cloud-metric-exporter .*", ua[0])
+	// User agent checking happens above in parallel to this flow.
 }
