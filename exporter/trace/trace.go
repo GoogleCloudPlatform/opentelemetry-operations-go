@@ -79,6 +79,11 @@ func (e *traceExporter) ConvertSpan(_ context.Context, sd *export.SpanSnapshot) 
 	return protoFromSpanSnapshot(sd, e.projectID, e.o.DisplayNameFormatter)
 }
 
+func (e *traceExporter) Shutdown(ctx context.Context) error {
+	// return e.client.Close()
+	return nil
+}
+
 // uploadSpans sends a set of spans to Stackdriver.
 func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) error {
 	req := tracepb.BatchWriteSpansRequest{

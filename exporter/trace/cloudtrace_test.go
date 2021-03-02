@@ -44,7 +44,7 @@ func TestExporter_ExportSpan(t *testing.T) {
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := InstallNewPipeline(
+	_, shutdown, err := InstallNewPipeline(
 		[]Option{
 			WithProjectID("PROJECT_ID_NOT_REAL"),
 			WithTraceClientOptions(clientOpt),
@@ -62,8 +62,8 @@ func TestExporter_ExportSpan(t *testing.T) {
 	span.SetStatus(codes.Error, "Error Message")
 	span.End()
 
-	// wait exporter to flush
-	flush()
+	// wait exporter to shutdown
+	shutdown()
 	assert.EqualValues(t, 2, mock.GetNumSpans())
 	assert.EqualValues(t, "Status Message", mock.GetSpan(0).GetStatus().Message)
 	assert.EqualValues(t, "Error Message", mock.GetSpan(1).GetStatus().Message)
@@ -81,7 +81,7 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	}
 
 	// Create Google Cloud Trace Exporter
-	_, flush, err := InstallNewPipeline(
+	_, shutdown, err := InstallNewPipeline(
 		[]Option{
 			WithProjectID("PROJECT_ID_NOT_REAL"),
 			WithTraceClientOptions(clientOpt),
@@ -95,8 +95,8 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
-	// wait exporter to flush
-	flush()
+	// wait exporter to shutdown
+	shutdown()
 	assert.EqualValues(t, 1, mock.GetNumSpans())
 	assert.EqualValues(t, "TEST_FORMAT"+spanName, mock.GetSpan(0).DisplayName.Value)
 }
@@ -110,7 +110,7 @@ func TestExporter_Timeout(t *testing.T) {
 	var exportErrors []error
 
 	// Create Google Cloud Trace Exporter
-	_, _, err := InstallNewPipeline(
+	_, shutdown, err := InstallNewPipeline(
 		[]Option{
 			WithProjectID("PROJECT_ID_NOT_REAL"),
 			WithTraceClientOptions(clientOpt),
@@ -129,6 +129,7 @@ func TestExporter_Timeout(t *testing.T) {
 	assert.True(t, span.SpanContext().IsValid())
 
 	// wait for error to be handled
+	shutdown()
 	assert.EqualValues(t, 0, mock.GetNumSpans())
 	if got, want := len(exportErrors), 1; got != want {
 		t.Fatalf("len(exportErrors) = %q; want %q", got, want)
@@ -187,7 +188,7 @@ func TestExporter_ExportWithUserAgent(t *testing.T) {
 		option.WithGRPCDialOption(grpc.WithInsecure()),
 	}
 	// Create Google Cloud Trace Exporter
-	_, flush, err := InstallNewPipeline(
+	_, shutdown, err := InstallNewPipeline(
 		[]Option{
 			WithProjectID("PROJECT_ID_NOT_REAL"),
 			WithTraceClientOptions(clientOpt),
@@ -201,8 +202,8 @@ func TestExporter_ExportWithUserAgent(t *testing.T) {
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
-	// wait exporter to flush
-	flush()
+	// wait exporter to shutdown
+	shutdown()
 	// Now check for user agent string in the buffer.
 	ua := <-ch
 	require.Regexp(t, "opentelemetry-go .*; google-cloud-trace-exporter .*", ua[0])

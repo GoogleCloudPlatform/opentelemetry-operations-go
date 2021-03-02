@@ -39,7 +39,7 @@ func initTracer() func() {
 
 	// Create Google Cloud Trace exporter to be able to retrieve
 	// the collected spans.
-	_, flush, err := texporter.InstallNewPipeline(
+	_, shutdown, err := texporter.InstallNewPipeline(
 		[]texporter.Option{texporter.WithProjectID(projectID)},
 		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
@@ -48,12 +48,12 @@ func initTracer() func() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	return flush
+	return shutdown
 }
 
 func main() {
-	flush := initTracer()
-	defer flush()
+	shutdown := initTracer()
+	defer shutdown()
 	tr := otel.Tracer("cloudtrace/example/client")
 
 	client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}

@@ -167,23 +167,26 @@ type Exporter struct {
 
 // InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
 func InstallNewPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (trace.TracerProvider, func(), error) {
-	tp, flush, err := NewExportPipeline(opts, topts...)
+	tp, shutdown, err := NewExportPipeline(opts, topts...)
 	if err != nil {
 		return nil, nil, err
 	}
 	otel.SetTracerProvider(tp)
-	return tp, flush, err
+	return tp, shutdown, err
 }
 
 // NewExportPipeline sets up a complete export pipeline with the recommended setup
-// for trace provider. Returns provider, flush function, and errors.
+// for trace provider. Returns provider, shutdown function, and errors.
 func NewExportPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (trace.TracerProvider, func(), error) {
 	exporter, err := NewExporter(opts...)
 	if err != nil {
 		return nil, nil, err
 	}
-	tp := sdktrace.NewTracerProvider(append(topts, sdktrace.WithSyncer(exporter))...)
-	return tp, func() {}, nil
+	// TODO(suereth): Allow users to configure new batcher.
+	tp := sdktrace.NewTracerProvider(append(topts, sdktrace.WithBatcher(exporter))...)
+	return tp, func() {
+		tp.Shutdown(context.Background())
+	}, nil
 }
 
 // NewExporter creates a new Exporter thats implements trace.Exporter.
@@ -235,14 +238,11 @@ func (e *Exporter) ExportSpans(ctx context.Context, spanData []*export.SpanSnaps
 	return e.traceExporter.ExportSpans(ctx, spanData)
 }
 
-// TODO - delete this?
 // Shutdown waits for exported data to be uploaded.
 //
-// This is useful if your program is ending and you do not
-// want to lose recent spans.
+// For our purposes it closed down the client.
 func (e *Exporter) Shutdown(ctx context.Context) error {
-	// e.traceExporter.Flush()
-	return nil
+	return e.traceExporter.Shutdown(ctx)
 }
 
 func (e *Exporter) sdWithDefaultTraceAttributes(sd *export.SpanSnapshot) *export.SpanSnapshot {

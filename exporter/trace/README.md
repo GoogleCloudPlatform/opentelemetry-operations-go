@@ -33,7 +33,7 @@ import (
 
 func main() {
     // Create exporter and trace provider pipeline, and register provider.
-    _, flush, err := texporter.InstallNewPipeline(
+    _, shutdown, err := texporter.InstallNewPipeline(
         []texporter.Option {
             // optional exporter options
         },
@@ -53,7 +53,7 @@ func main() {
         log.Fatalf("texporter.InstallNewPipeline: %v", err)
     }
     // before ending program, wait for all enqueued spans to be exported
-    defer flush()
+    defer shutdown()
 
     // Create custom span.
     tracer := otel.TraceProvider().Tracer("example.com/trace")
@@ -79,7 +79,7 @@ When running code locally, you may need to specify a Google Project ID in additi
 
 ```go
 projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-_, flush, err := texporter.InstallNewPipeline(
+_, shutdown, err := texporter.InstallNewPipeline(
     []texporter.Option {
         texporter.WithProjectID(projectID),
         // other optional exporter options
