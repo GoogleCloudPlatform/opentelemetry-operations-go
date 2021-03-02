@@ -67,41 +67,10 @@ type options struct {
 	// Optional.
 	OnError func(err error)
 
-	// MonitoringClientOptions are additional options to be passed
-	// to the underlying Stackdriver Monitoring API client.
-	// Optional.
-	MonitoringClientOptions []option.ClientOption
-
 	// TraceClientOptions are additional options to be passed
 	// to the underlying Stackdriver Trace API client.
 	// Optional.
 	TraceClientOptions []option.ClientOption
-
-	// BundleDelayThreshold determines the max amount of time
-	// the exporter can wait before uploading view data or trace spans to
-	// the backend.
-	// Optional. Default value is 2 seconds.
-	BundleDelayThreshold time.Duration
-
-	// BundleCountThreshold determines how many view data events or trace spans
-	// can be buffered before batch uploading them to the backend.
-	// Optional. Default value is 50.
-	BundleCountThreshold int
-
-	// BundleByteThreshold is the number of bytes that can be buffered before
-	// batch uploading them to the backend.
-	// Optional. Default value is 15KB.
-	BundleByteThreshold int
-
-	// BundleByteLimit is the maximum size of a bundle, in bytes. Zero means unlimited.
-	// Optional. Default value is unlimited.
-	BundleByteLimit int
-
-	// BufferMaxBytes is the maximum size (in bytes) of spans that
-	// will be buffered in memory before being dropped.
-	//
-	// If unset, a default of 8MB will be used.
-	BufferMaxBytes int
 
 	// DefaultTraceAttributes will be appended to every span that is exported to
 	// Stackdriver Trace.
@@ -118,27 +87,13 @@ type options struct {
 	// If unset, context.Background() will be used.
 	Context context.Context
 
-	// SkipCMD enforces to skip all the CreateMetricDescriptor calls.
-	// These calls are important in order to configure the unit of the metrics,
-	// but in some cases all the exported metrics are builtin (unit is configured)
-	// or the unit is not important.
-	SkipCMD bool
-
 	// Timeout for all API calls. If not set, defaults to 5 seconds.
 	Timeout time.Duration
-
-	// ReportingInterval sets the interval between reporting metrics.
-	// If it is set to zero then default value is used.
-	ReportingInterval time.Duration
 
 	// DisplayNameFormatter is a function that produces the display name of a span
 	// given its SpanSnapshot.
 	// Optional. Default format for SpanSnapshot s is "Span.{s.SpanKind}-{s.Name}"
 	DisplayNameFormatter
-
-	// MaxNumberOfWorkers sets the maximum number of go rountines that send requests
-	// to Cloud Trace. The minimum number of workers is 1.
-	MaxNumberOfWorkers int
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -161,57 +116,10 @@ func WithOnError(onError func(err error)) func(o *options) {
 	}
 }
 
-// WithBundleDelayThreshold sets the max amount of time the exporter can wait before
-// uploading trace spans to the backend.
-func WithBundleDelayThreshold(bundleDelayThreshold time.Duration) func(o *options) {
-	return func(o *options) {
-		o.BundleDelayThreshold = bundleDelayThreshold
-	}
-}
-
-// WithBundleCountThreshold sets how many trace spans can be buffered before batch
-// uploading them to the backend.
-func WithBundleCountThreshold(bundleCountThreshold int) func(o *options) {
-	return func(o *options) {
-		o.BundleCountThreshold = bundleCountThreshold
-	}
-}
-
-// WithBundleByteThreshold sets the number of bytes that can be buffered before
-// batch uploading them to the backend.
-func WithBundleByteThreshold(bundleByteThreshold int) func(o *options) {
-	return func(o *options) {
-		o.BundleByteThreshold = bundleByteThreshold
-	}
-}
-
-// WithBundleByteLimit sets the maximum size of a bundle, in bytes. Zero means
-// unlimited.
-func WithBundleByteLimit(bundleByteLimit int) func(o *options) {
-	return func(o *options) {
-		o.BundleByteLimit = bundleByteLimit
-	}
-}
-
-// WithBufferMaxBytes sets the maximum size (in bytes) of spans that will
-// be buffered in memory before being dropped
-func WithBufferMaxBytes(bufferMaxBytes int) func(o *options) {
-	return func(o *options) {
-		o.BufferMaxBytes = bufferMaxBytes
-	}
-}
-
 // WithTraceClientOptions sets additionial client options for tracing.
 func WithTraceClientOptions(opts []option.ClientOption) func(o *options) {
 	return func(o *options) {
 		o.TraceClientOptions = opts
-	}
-}
-
-// WithMonitoringClientOptions sets additionial client options for monitoring.
-func WithMonitoringClientOptions(opts []option.ClientOption) func(o *options) {
-	return func(o *options) {
-		o.MonitoringClientOptions = opts
 	}
 }
 
@@ -220,14 +128,6 @@ func WithMonitoringClientOptions(opts []option.ClientOption) func(o *options) {
 func WithContext(ctx context.Context) func(o *options) {
 	return func(o *options) {
 		o.Context = ctx
-	}
-}
-
-// WithMaxNumberOfWorkers sets the number of go routines that send requests
-// to the Cloud Trace backend.
-func WithMaxNumberOfWorkers(n int) func(o *options) {
-	return func(o *options) {
-		o.MaxNumberOfWorkers = n
 	}
 }
 
@@ -283,7 +183,7 @@ func NewExportPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (t
 		return nil, nil, err
 	}
 	tp := sdktrace.NewTracerProvider(append(topts, sdktrace.WithSyncer(exporter))...)
-	return tp, exporter.traceExporter.Flush, nil
+	return tp, func() {}, nil
 }
 
 // NewExporter creates a new Exporter thats implements trace.Exporter.
@@ -324,22 +224,24 @@ func newContextWithTimeout(ctx context.Context, timeout time.Duration) (context.
 
 // ExportSpans exports a SpanSnapshot to Stackdriver Trace.
 func (e *Exporter) ExportSpans(ctx context.Context, spanData []*export.SpanSnapshot) error {
-	for _, sd := range spanData {
-		if len(e.traceExporter.o.DefaultTraceAttributes) > 0 {
-			sd = e.sdWithDefaultTraceAttributes(sd)
+	if len(e.traceExporter.o.DefaultTraceAttributes) > 0 {
+		converted := make([]*export.SpanSnapshot, len(spanData))
+		for i, sd := range spanData {
+			converted[i] = e.sdWithDefaultTraceAttributes((sd))
 		}
-		e.traceExporter.ExportSpan(ctx, sd)
+		return e.traceExporter.ExportSpans(ctx, converted)
 	}
 
-	return nil
+	return e.traceExporter.ExportSpans(ctx, spanData)
 }
 
+// TODO - delete this?
 // Shutdown waits for exported data to be uploaded.
 //
 // This is useful if your program is ending and you do not
 // want to lose recent spans.
 func (e *Exporter) Shutdown(ctx context.Context) error {
-	e.traceExporter.Flush()
+	// e.traceExporter.Flush()
 	return nil
 }
 
