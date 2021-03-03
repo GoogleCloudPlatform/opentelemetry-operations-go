@@ -72,6 +72,10 @@ type options struct {
 	// Optional.
 	TraceClientOptions []option.ClientOption
 
+	// BatchSpanProcessorOptions are additional options to be based
+	// to the underlying BatchSpanProcessor when call making a new export pipeline.
+	BatchSpanProcessorOptions []sdktrace.BatchSpanProcessorOption
+
 	// DefaultTraceAttributes will be appended to every span that is exported to
 	// Stackdriver Trace.
 	DefaultTraceAttributes map[string]interface{}
@@ -178,26 +182,36 @@ func InstallNewPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (
 // NewExportPipeline sets up a complete export pipeline with the recommended setup
 // for trace provider. Returns provider, shutdown function, and errors.
 func NewExportPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (trace.TracerProvider, func(), error) {
-	exporter, err := NewExporter(opts...)
+	// TODO(suereth): Don't flesh options twice.
+	o := options{Context: context.Background()}
+	for _, opt := range opts {
+		opt(&o)
+	}
+	exporter, err := NewExporterWithOptions(&o)
 	if err != nil {
 		return nil, nil, err
 	}
-	// TODO(suereth): Allow users to configure new batcher.
-	tp := sdktrace.NewTracerProvider(append(topts, sdktrace.WithBatcher(exporter))...)
+	tp := sdktrace.NewTracerProvider(
+		append(topts,
+			sdktrace.WithBatcher(exporter, o.BatchSpanProcessorOptions...))...)
 	return tp, func() {
 		tp.Shutdown(context.Background())
 	}, nil
 }
 
 // NewExporter creates a new Exporter thats implements trace.Exporter.
-//
-// TODO(yoshifumi): add a metrics exporter one the spec definition
-// process and the sampler implementation are done.
 func NewExporter(opts ...Option) (*Exporter, error) {
 	o := options{Context: context.Background()}
 	for _, opt := range opts {
 		opt(&o)
 	}
+	return NewExporterWithOptions(&o)
+}
+
+// NewExporter creates a new Exporter thats implements trace.Exporter.
+// This version takes a single options struct.  This shouldn't be called
+// by user code, instead use `NewExportPipeline` or `NewExporter`.
+func NewExporterWithOptions(o *options) (*Exporter, error) {
 	if o.ProjectID == "" {
 		creds, err := google.FindDefaultCredentials(o.Context, traceapi.DefaultAuthScopes()...)
 		if err != nil {
@@ -208,7 +222,7 @@ func NewExporter(opts ...Option) (*Exporter, error) {
 		}
 		o.ProjectID = creds.ProjectID
 	}
-	te, err := newTraceExporter(&o)
+	te, err := newTraceExporter(o)
 	if err != nil {
 		return nil, err
 	}
