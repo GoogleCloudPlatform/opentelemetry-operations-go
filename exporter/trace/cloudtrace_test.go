@@ -40,7 +40,6 @@ import (
 func TestExporter_ExportSpan(t *testing.T) {
 	// Initial test precondition
 	mock := cloudmock.NewCloudMock()
-	defer mock.Shutdown()
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	// Create Google Cloud Trace Exporter
@@ -62,7 +61,7 @@ func TestExporter_ExportSpan(t *testing.T) {
 	span.SetStatus(codes.Error, "Error Message")
 	span.End()
 
-	// wait exporter to shutdown
+	// wait exporter to shutdown (closes grpc connection)
 	shutdown()
 	assert.EqualValues(t, 2, mock.GetNumSpans())
 	assert.EqualValues(t, "Status Message", mock.GetSpan(0).GetStatus().Message)
@@ -72,7 +71,6 @@ func TestExporter_ExportSpan(t *testing.T) {
 func TestExporter_DisplayNameFormatter(t *testing.T) {
 	// Initial test precondition
 	mock := cloudmock.NewCloudMock()
-	defer mock.Shutdown()
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	spanName := "span1234"
@@ -95,7 +93,7 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
-	// wait exporter to shutdown
+	// wait exporter to shutdown (closes grpc connection)
 	shutdown()
 	assert.EqualValues(t, 1, mock.GetNumSpans())
 	assert.EqualValues(t, "TEST_FORMAT"+spanName, mock.GetSpan(0).DisplayName.Value)
@@ -104,7 +102,6 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 func TestExporter_Timeout(t *testing.T) {
 	// Initial test precondition
 	mock := cloudmock.NewCloudMock()
-	defer mock.Shutdown()
 	mock.SetDelay(20 * time.Millisecond)
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 	var exportErrors []error
@@ -129,7 +126,7 @@ func TestExporter_Timeout(t *testing.T) {
 	assert.True(t, span.SpanContext().IsValid())
 
 	// wait for error to be handled
-	shutdown()
+	shutdown() // closed grpc connection
 	assert.EqualValues(t, 0, mock.GetNumSpans())
 	if got, want := len(exportErrors), 1; got != want {
 		t.Fatalf("len(exportErrors) = %q; want %q", got, want)

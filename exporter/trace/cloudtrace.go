@@ -187,7 +187,7 @@ func NewExportPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (t
 	for _, opt := range opts {
 		opt(&o)
 	}
-	exporter, err := NewExporterWithOptions(&o)
+	exporter, err := newExporterWithOptions(&o)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -205,13 +205,10 @@ func NewExporter(opts ...Option) (*Exporter, error) {
 	for _, opt := range opts {
 		opt(&o)
 	}
-	return NewExporterWithOptions(&o)
+	return newExporterWithOptions(&o)
 }
 
-// NewExporter creates a new Exporter thats implements trace.Exporter.
-// This version takes a single options struct.  This shouldn't be called
-// by user code, instead use `NewExportPipeline` or `NewExporter`.
-func NewExporterWithOptions(o *options) (*Exporter, error) {
+func newExporterWithOptions(o *options) (*Exporter, error) {
 	if o.ProjectID == "" {
 		creds, err := google.FindDefaultCredentials(o.Context, traceapi.DefaultAuthScopes()...)
 		if err != nil {

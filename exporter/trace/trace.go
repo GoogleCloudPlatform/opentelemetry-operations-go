@@ -80,8 +80,7 @@ func (e *traceExporter) ConvertSpan(_ context.Context, sd *export.SpanSnapshot) 
 }
 
 func (e *traceExporter) Shutdown(ctx context.Context) error {
-	// return e.client.Close()
-	return nil
+	return e.client.Close()
 }
 
 // uploadSpans sends a set of spans to Stackdriver.
