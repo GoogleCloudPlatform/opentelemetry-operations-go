@@ -29,7 +29,6 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/support/bundler"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
-	"google.golang.org/protobuf/proto"
 )
 
 // traceExporter is an implementation of trace.Exporter and trace.BatchExporter
@@ -39,7 +38,7 @@ type traceExporter struct {
 	projectID string
 	bundler   *bundler.Bundler
 	// uploadFn defaults in uploadSpans; it can be replaced for tests.
-	uploadFn func(ctx context.Context, spans []*tracepb.Span)
+	uploadFn func(ctx context.Context, spans []*tracepb.Span) error
 	overflowLogger
 	client *traceclient.Client
 }
@@ -62,72 +61,30 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 		o:              o,
 		overflowLogger: overflowLogger{delayDur: 5 * time.Second},
 	}
-	b := bundler.NewBundler((*tracepb.Span)(nil), func(bundle interface{}) {
-		e.uploadFn(context.Background(), bundle.([]*tracepb.Span))
-	})
-
-	if o.BundleDelayThreshold > 0 {
-		b.DelayThreshold = o.BundleDelayThreshold
-	} else {
-		b.DelayThreshold = defaultBundleDelayThreshold
-	}
-
-	if o.BundleCountThreshold > 0 {
-		b.BundleCountThreshold = o.BundleCountThreshold
-	} else {
-		b.BundleCountThreshold = defaultBundleCountThreshold
-	}
-
-	if o.BundleByteThreshold > 0 {
-		b.BundleByteThreshold = o.BundleByteThreshold
-	} else {
-		b.BundleByteThreshold = defaultBundleByteThreshold
-	}
-
-	if o.BundleByteLimit > 0 {
-		b.BundleByteLimit = o.BundleByteLimit
-	} else {
-		b.BundleByteLimit = defaultBundleByteLimit
-	}
-
-	if o.BufferMaxBytes > 0 {
-		b.BufferedByteLimit = o.BufferMaxBytes
-	} else {
-		b.BufferedByteLimit = defaultBufferedByteLimit
-	}
-
-	if o.MaxNumberOfWorkers > 0 {
-		b.HandlerLimit = o.MaxNumberOfWorkers
-	}
-
-	e.bundler = b
 	e.uploadFn = e.uploadSpans
 	return e, nil
 }
 
-func (e *traceExporter) checkBundlerError(err error) {
-	switch err {
-	case nil:
-		return
-	case bundler.ErrOversizedItem:
-		e.overflowLogger.log(true)
-	case bundler.ErrOverflow:
-		e.overflowLogger.log(false)
-	default:
-		e.o.handleError(err)
+func (e *traceExporter) ExportSpans(ctx context.Context, spanData []*export.SpanSnapshot) error {
+	// Ship the whole bundle o data.
+	results := make([]*tracepb.Span, len(spanData))
+	for i, sd := range spanData {
+		results[i] = e.ConvertSpan(ctx, sd)
 	}
+	return e.uploadFn(ctx, results)
 }
 
 // ExportSpan exports a SpanSnapshot to Stackdriver Trace.
-func (e *traceExporter) ExportSpan(_ context.Context, sd *export.SpanSnapshot) {
-	protoSpan := protoFromSpanSnapshot(sd, e.projectID, e.o.DisplayNameFormatter)
-	protoSize := proto.Size(protoSpan)
-	err := e.bundler.Add(protoSpan, protoSize)
-	e.checkBundlerError(err)
+func (e *traceExporter) ConvertSpan(_ context.Context, sd *export.SpanSnapshot) *tracepb.Span {
+	return protoFromSpanSnapshot(sd, e.projectID, e.o.DisplayNameFormatter)
+}
+
+func (e *traceExporter) Shutdown(ctx context.Context) error {
+	return e.client.Close()
 }
 
 // uploadSpans sends a set of spans to Stackdriver.
-func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) {
+func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) error {
 	req := tracepb.BatchWriteSpansRequest{
 		Name:  "projects/" + e.projectID,
 		Spans: spans,
@@ -154,10 +111,7 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 		// span.SetStatus(codes.Unknown)
 		e.o.handleError(err)
 	}
-}
-
-func (e *traceExporter) Flush() {
-	e.bundler.Flush()
+	return err
 }
 
 // overflowLogger ensures that at most one overflow error log message is
