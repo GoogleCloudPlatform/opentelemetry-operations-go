@@ -32,6 +32,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
+	codepb "google.golang.org/genproto/googleapis/rpc/code"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -53,7 +54,9 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.NoError(t, err)
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
-	span.SetStatus(codes.Ok, "Status Message")
+	// NOTE: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#set-status
+	// Status message MUST only be used with error code, so this will be dropped.
+	span.SetStatus(codes.Ok, "Status message")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
@@ -64,7 +67,10 @@ func TestExporter_ExportSpan(t *testing.T) {
 	// wait exporter to shutdown (closes grpc connection)
 	shutdown()
 	assert.EqualValues(t, 2, mock.GetNumSpans())
-	assert.EqualValues(t, "Status Message", mock.GetSpan(0).GetStatus().Message)
+	// Note: Go returns empty string for an unset member.
+	assert.EqualValues(t, codepb.Code_OK, mock.GetSpan(0).GetStatus().Code)
+	assert.EqualValues(t, "", mock.GetSpan(0).GetStatus().Message)
+	assert.EqualValues(t, codepb.Code_UNKNOWN, mock.GetSpan(1).GetStatus().Code)
 	assert.EqualValues(t, "Error Message", mock.GetSpan(1).GetStatus().Message)
 }
 

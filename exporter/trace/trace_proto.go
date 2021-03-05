@@ -30,6 +30,7 @@ import (
 	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 	wrapperspb "github.com/golang/protobuf/ptypes/wrappers"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
+	codepb "google.golang.org/genproto/googleapis/rpc/code"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
 )
 
@@ -115,11 +116,14 @@ func protoFromSpanSnapshot(s *export.SpanSnapshot, projectID string, format Disp
 	if s.ParentSpanID != s.SpanContext.SpanID && s.ParentSpanID.IsValid() {
 		sp.ParentSpanId = s.ParentSpanID.String()
 	}
-	if s.StatusCode != codes.Ok {
-		sp.Status = &statuspb.Status{Code: int32(s.StatusCode), Message: s.StatusMessage}
-	}
-	if s.StatusCode == codes.Ok && s.StatusMessage != "" {
-		sp.Status = &statuspb.Status{Code: int32(s.StatusCode), Message: s.StatusMessage}
+	if s.StatusCode == codes.Ok {
+		sp.Status = &statuspb.Status{Code: int32(codepb.Code_OK)}
+	} else if s.StatusCode == codes.Unset {
+		// Don't set status code.
+	} else if s.StatusCode == codes.Error {
+		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN), Message: s.StatusMessage}
+	} else {
+		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN)}
 	}
 
 	copyAttributes(&sp.Attributes, s.Attributes)
