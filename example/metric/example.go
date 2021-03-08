@@ -23,7 +23,7 @@ import (
 
 	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
-	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -63,8 +63,8 @@ func main() {
 	// it returned hard coded "global" resource.
 	// This should be fixed in #29.
 	resOpt := basic.WithResource(resource.NewWithAttributes(
-		label.String("instance_id", "abc123"),
-		label.String("application", "example-app"),
+		attribute.String("instance_id", "abc123"),
+		attribute.String("application", "example-app"),
 	))
 	pusher, err := mexporter.InstallNewPipeline(opts, resOpt)
 	if err != nil {
@@ -78,13 +78,13 @@ func main() {
 
 	// Register counter value
 	counter := metric.Must(meter).NewInt64Counter("counter-a")
-	clabels := []label.KeyValue{label.Key("key").String("value")}
+	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
 	counter.Add(ctx, 100, clabels...)
 
 	// Register observer value
-	olabels := []label.KeyValue{
-		label.String("foo", "Tokyo"),
-		label.String("bar", "Sushi"),
+	olabels := []attribute.KeyValue{
+		attribute.String("foo", "Tokyo"),
+		attribute.String("bar", "Sushi"),
 	}
 	of := newObservedFloat(12.34)
 

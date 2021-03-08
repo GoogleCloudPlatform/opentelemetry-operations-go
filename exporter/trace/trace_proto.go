@@ -23,8 +23,8 @@ import (
 	"unicode/utf8"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	"go.opentelemetry.io/otel/label"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 
 	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
@@ -80,7 +80,7 @@ func injectLabelsFromResources(sd *export.SpanSnapshot) {
 	if sd.Resource.Len() == 0 {
 		return
 	}
-	uniqueAttrs := make(map[label.Key]bool, len(sd.Attributes))
+	uniqueAttrs := make(map[attribute.Key]bool, len(sd.Attributes))
 	for _, attr := range sd.Attributes {
 		uniqueAttrs[attr.Key] = true
 	}
@@ -194,7 +194,7 @@ func timestampProto(t time.Time) *timestamppb.Timestamp {
 
 // copyAttributes copies a map of attributes to a proto map field.
 // It creates the map if it is nil.
-func copyAttributes(out **tracepb.Span_Attributes, in []label.KeyValue) {
+func copyAttributes(out **tracepb.Span_Attributes, in []attribute.KeyValue) {
 	if len(in) == 0 {
 		return
 	}
@@ -234,25 +234,25 @@ func copyAttributes(out **tracepb.Span_Attributes, in []label.KeyValue) {
 	(*out).DroppedAttributesCount = dropped
 }
 
-func attributeValue(keyValue label.KeyValue) *tracepb.AttributeValue {
+func attributeValue(keyValue attribute.KeyValue) *tracepb.AttributeValue {
 	v := keyValue.Value
 	switch v.Type() {
-	case label.BOOL:
+	case attribute.BOOL:
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_BoolValue{BoolValue: v.AsBool()},
 		}
-	case label.INT64:
+	case attribute.INT64:
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_IntValue{IntValue: v.AsInt64()},
 		}
-	case label.FLOAT64:
+	case attribute.FLOAT64:
 		// TODO: set double value if Google Cloud Trace support it in the future.
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_StringValue{
 				StringValue: trunc(strconv.FormatFloat(v.AsFloat64(), 'f', -1, 64),
 					maxAttributeStringValue)},
 		}
-	case label.STRING:
+	case attribute.STRING:
 		return &tracepb.AttributeValue{
 			Value: &tracepb.AttributeValue_StringValue{StringValue: trunc(v.AsString(), maxAttributeStringValue)},
 		}

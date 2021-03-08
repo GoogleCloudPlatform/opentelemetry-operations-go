@@ -21,7 +21,7 @@ import (
 	"os"
 
 	otelhttp "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
@@ -52,7 +52,7 @@ func main() {
 	helloHandler := func(w http.ResponseWriter, req *http.Request) {
 		ctx := req.Context()
 		span := trace.SpanFromContext(ctx)
-		span.SetAttributes(label.String("server", "handling this..."))
+		span.SetAttributes(attribute.String("server", "handling this..."))
 
 		_, _ = io.WriteString(w, "Hello, world!\n")
 	}

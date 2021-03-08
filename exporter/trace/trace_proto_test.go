@@ -17,7 +17,7 @@ package trace
 import (
 	"testing"
 
-	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/attribute"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
 )
@@ -32,14 +32,14 @@ func TestInjectLabelsFromResources(t *testing.T) {
 			name: "empty resource",
 			input: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(),
-				Attributes: []label.KeyValue{
-					label.String("a", "1"),
+				Attributes: []attribute.KeyValue{
+					attribute.String("a", "1"),
 				},
 			},
 			expected: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(),
-				Attributes: []label.KeyValue{
-					label.String("a", "1"),
+				Attributes: []attribute.KeyValue{
+					attribute.String("a", "1"),
 				},
 			},
 		},
@@ -47,16 +47,16 @@ func TestInjectLabelsFromResources(t *testing.T) {
 			name: "empty attributes",
 			input: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
-					label.String("b", "2"),
+					attribute.String("b", "2"),
 				),
-				Attributes: []label.KeyValue{},
+				Attributes: []attribute.KeyValue{},
 			},
 			expected: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
-					label.String("b", "2"),
+					attribute.String("b", "2"),
 				),
-				Attributes: []label.KeyValue{
-					label.String("b", "2"),
+				Attributes: []attribute.KeyValue{
+					attribute.String("b", "2"),
 				},
 			},
 		},
@@ -64,19 +64,19 @@ func TestInjectLabelsFromResources(t *testing.T) {
 			name: "normal insert",
 			input: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
-					label.String("b", "2"),
+					attribute.String("b", "2"),
 				),
-				Attributes: []label.KeyValue{
-					label.String("a", "1"),
+				Attributes: []attribute.KeyValue{
+					attribute.String("a", "1"),
 				},
 			},
 			expected: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
-					label.String("b", "2"),
+					attribute.String("b", "2"),
 				),
-				Attributes: []label.KeyValue{
-					label.String("a", "1"),
-					label.String("b", "2"),
+				Attributes: []attribute.KeyValue{
+					attribute.String("a", "1"),
+					attribute.String("b", "2"),
 				},
 			},
 		},
@@ -84,18 +84,18 @@ func TestInjectLabelsFromResources(t *testing.T) {
 			name: "conflicts with the existing keys",
 			input: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
-					label.String("a", "2"),
+					attribute.String("a", "2"),
 				),
-				Attributes: []label.KeyValue{
-					label.String("a", "1"),
+				Attributes: []attribute.KeyValue{
+					attribute.String("a", "1"),
 				},
 			},
 			expected: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
-					label.String("a", "2"),
+					attribute.String("a", "2"),
 				),
-				Attributes: []label.KeyValue{
-					label.String("a", "1"),
+				Attributes: []attribute.KeyValue{
+					attribute.String("a", "1"),
 				},
 			},
 		},
@@ -103,25 +103,25 @@ func TestInjectLabelsFromResources(t *testing.T) {
 			name: "allowed duplicate keys in attributes",
 			input: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
-					label.String("c", "1"),
+					attribute.String("c", "1"),
 				),
-				Attributes: []label.KeyValue{
-					label.String("a", "1"),
-					label.String("b", "1"),
-					label.String("b", "2"),
-					label.String("b", "3"),
+				Attributes: []attribute.KeyValue{
+					attribute.String("a", "1"),
+					attribute.String("b", "1"),
+					attribute.String("b", "2"),
+					attribute.String("b", "3"),
 				},
 			},
 			expected: export.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
-					label.String("c", "1"),
+					attribute.String("c", "1"),
 				),
-				Attributes: []label.KeyValue{
-					label.String("a", "1"),
-					label.String("b", "1"),
-					label.String("b", "2"),
-					label.String("b", "3"),
-					label.String("c", "1"),
+				Attributes: []attribute.KeyValue{
+					attribute.String("a", "1"),
+					attribute.String("b", "1"),
+					attribute.String("b", "2"),
+					attribute.String("b", "3"),
+					attribute.String("c", "1"),
 				},
 			},
 		},
@@ -134,7 +134,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 				t.Errorf("expected: %v, actual: %v", tc.expected.Attributes, tc.input.Attributes)
 				return
 			}
-			attrs := make(map[label.KeyValue]bool, len(tc.input.Attributes))
+			attrs := make(map[attribute.KeyValue]bool, len(tc.input.Attributes))
 
 			for _, ele := range tc.input.Attributes {
 				attrs[ele] = true
