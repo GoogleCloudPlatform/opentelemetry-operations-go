@@ -131,12 +131,16 @@ gotidy:
 update-dep:
 	$(MAKE) for-all CMD="$(PWD)/internal/buildscripts/update-dep"
 
-OTEL_VERSION=v0.14.0
+OTEL_VERSION=v0.18.0
 
 .PHONY: update-otel
 update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel VERSION=$(OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/metric VERSION=$(OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk VERSION=$(OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/export/metric VERSION=$(OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/metric VERSION=$(OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/trace VERSION=$(OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(OTEL_VERSION)
 	$(MAKE) build
 	$(MAKE) gotidy

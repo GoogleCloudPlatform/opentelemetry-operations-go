@@ -23,7 +23,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/label"
+	"go.opentelemetry.io/otel/attribute"
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
@@ -261,13 +261,13 @@ func (e *Exporter) sdWithDefaultTraceAttributes(sd *export.SpanSnapshot) *export
 	for k, v := range e.traceExporter.o.DefaultTraceAttributes {
 		switch val := v.(type) {
 		case bool:
-			newSD.Attributes = append(newSD.Attributes, label.Bool(k, val))
+			newSD.Attributes = append(newSD.Attributes, attribute.Bool(k, val))
 		case int64:
-			newSD.Attributes = append(newSD.Attributes, label.Int64(k, val))
+			newSD.Attributes = append(newSD.Attributes, attribute.Int64(k, val))
 		case float64:
-			newSD.Attributes = append(newSD.Attributes, label.Float64(k, val))
+			newSD.Attributes = append(newSD.Attributes, attribute.Float64(k, val))
 		case string:
-			newSD.Attributes = append(newSD.Attributes, label.String(k, val))
+			newSD.Attributes = append(newSD.Attributes, attribute.String(k, val))
 		}
 	}
 	newSD.Attributes = append(newSD.Attributes, sd.Attributes...)
