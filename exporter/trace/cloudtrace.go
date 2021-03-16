@@ -96,7 +96,7 @@ type options struct {
 
 	// DisplayNameFormatter is a function that produces the display name of a span
 	// given its SpanSnapshot.
-	// Optional. Default format for SpanSnapshot s is "Span.{s.SpanKind}-{s.Name}"
+	// Optional. Default display name for SpanSnapshot s is "{s.Name}"
 	DisplayNameFormatter
 }
 

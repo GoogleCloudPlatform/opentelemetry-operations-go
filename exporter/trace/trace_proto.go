@@ -67,11 +67,8 @@ func generateDisplayName(s *export.SpanSnapshot, format DisplayNameFormatter) st
 	if format != nil {
 		return format(s)
 	}
-	switch s.SpanKind {
+	return s.Name
 	// TODO(ymotongpoo): add cases for "Send" and "Recv".
-	default:
-		return fmt.Sprintf("Span.%s-%s", s.SpanKind, s.Name)
-	}
 }
 
 // If there are duplicate keys present in the list of attributes,
