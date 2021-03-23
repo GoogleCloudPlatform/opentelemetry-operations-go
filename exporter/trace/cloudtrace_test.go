@@ -49,7 +49,7 @@ func TestExporter_ExportSpan(t *testing.T) {
 			WithProjectID("PROJECT_ID_NOT_REAL"),
 			WithTraceClientOptions(clientOpt),
 		},
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 	assert.NoError(t, err)
 
@@ -88,7 +88,7 @@ func TestExporter_DisplayNameNoFormatter(t *testing.T) {
 			WithTraceClientOptions(clientOpt),
 			WithDisplayNameFormatter(nil),
 		},
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 	assert.NoError(t, err)
 
@@ -119,7 +119,7 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 			WithTraceClientOptions(clientOpt),
 			WithDisplayNameFormatter(format),
 		},
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 	assert.NoError(t, err)
 
@@ -151,7 +151,7 @@ func TestExporter_Timeout(t *testing.T) {
 				exportErrors = append(exportErrors, err)
 			}),
 		},
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 	assert.NoError(t, err)
 
@@ -224,7 +224,7 @@ func TestExporter_ExportWithUserAgent(t *testing.T) {
 			WithProjectID("PROJECT_ID_NOT_REAL"),
 			WithTraceClientOptions(clientOpt),
 		},
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 	assert.NoError(t, err)
 

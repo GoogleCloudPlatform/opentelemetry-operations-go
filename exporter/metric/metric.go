@@ -174,7 +174,7 @@ func NewExportPipeline(opts []Option, popts ...controller.Option) (*controller.C
 	pusher := controller.New(
 		checkpointer,
 		append([]controller.Option{
-			controller.WithPusher(exporter),
+			controller.WithExporter(exporter),
 			controller.WithCollectPeriod(period),
 		}, popts...)...,
 	)

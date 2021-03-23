@@ -43,7 +43,7 @@ func initTracer() func() {
 		[]texporter.Option{texporter.WithProjectID(projectID)},
 		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 	if err != nil {
 		log.Fatal(err)
