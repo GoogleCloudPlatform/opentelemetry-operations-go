@@ -1,4 +1,5 @@
 // Copyright 2019, OpenTelemetry Authors
+// Copyright 2021, Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,7 +38,7 @@ func initTracer() func() {
 		[]cloudtrace.Option{cloudtrace.WithProjectID(projectID)},
 		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
-		sdktrace.WithConfig(sdktrace.Config{DefaultSampler: sdktrace.AlwaysSample()}),
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
 	if err != nil {
 		log.Fatal(err)

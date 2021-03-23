@@ -97,8 +97,8 @@ func protoFromSpanSnapshot(s *export.SpanSnapshot, projectID string, format Disp
 
 	injectLabelsFromResources(s)
 
-	traceIDString := s.SpanContext.TraceID.String()
-	spanIDString := s.SpanContext.SpanID.String()
+	traceIDString := s.SpanContext.TraceID().String()
+	spanIDString := s.SpanContext.SpanID().String()
 
 	displayName := generateDisplayName(s, format)
 
@@ -110,7 +110,7 @@ func protoFromSpanSnapshot(s *export.SpanSnapshot, projectID string, format Disp
 		EndTime:                 timestampProto(s.EndTime),
 		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.HasRemoteParent},
 	}
-	if s.ParentSpanID != s.SpanContext.SpanID && s.ParentSpanID.IsValid() {
+	if s.ParentSpanID != s.SpanContext.SpanID() && s.ParentSpanID.IsValid() {
 		sp.ParentSpanId = s.ParentSpanID.String()
 	}
 	if s.StatusCode == codes.Ok {
