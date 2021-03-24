@@ -78,7 +78,7 @@ type options struct {
 
 	// DefaultTraceAttributes will be appended to every span that is exported to
 	// Stackdriver Trace.
-	DefaultTraceAttributes map[string]interface{}
+	DefaultTraceAttributes []attribute.KeyValue
 
 	// Context allows you to provide a custom context for API calls.
 	//
@@ -147,6 +147,14 @@ func WithTimeout(t time.Duration) func(o *options) {
 func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
 	return func(o *options) {
 		o.DisplayNameFormatter = f
+	}
+}
+
+// WithDefaultTraceAttributes sets the attributes that will be appended
+// to every span by default
+func WithDefaultTraceAttributes(attr map[string]interface{}) func(o *options) {
+	return func(o *options) {
+		o.DefaultTraceAttributes = createKeyValueAttributes(attr)
 	}
 }
 
@@ -239,11 +247,9 @@ func newContextWithTimeout(ctx context.Context, timeout time.Duration) (context.
 // ExportSpans exports a SpanSnapshot to Stackdriver Trace.
 func (e *Exporter) ExportSpans(ctx context.Context, spanData []*export.SpanSnapshot) error {
 	if len(e.traceExporter.o.DefaultTraceAttributes) > 0 {
-		converted := make([]*export.SpanSnapshot, len(spanData))
-		for i, sd := range spanData {
-			converted[i] = e.sdWithDefaultTraceAttributes((sd))
+		for _, sd := range spanData {
+			sd.Attributes = append(sd.Attributes, e.traceExporter.o.DefaultTraceAttributes...)
 		}
-		return e.traceExporter.ExportSpans(ctx, converted)
 	}
 
 	return e.traceExporter.ExportSpans(ctx, spanData)
@@ -256,20 +262,21 @@ func (e *Exporter) Shutdown(ctx context.Context) error {
 	return e.traceExporter.Shutdown(ctx)
 }
 
-func (e *Exporter) sdWithDefaultTraceAttributes(sd *export.SpanSnapshot) *export.SpanSnapshot {
-	newSD := *sd
-	for k, v := range e.traceExporter.o.DefaultTraceAttributes {
+func createKeyValueAttributes(attr map[string]interface{}) []attribute.KeyValue {
+	kv := make([]attribute.KeyValue, len(attr))
+
+	for k, v := range attr {
 		switch val := v.(type) {
 		case bool:
-			newSD.Attributes = append(newSD.Attributes, attribute.Bool(k, val))
+			kv = append(kv, attribute.Bool(k, val))
 		case int64:
-			newSD.Attributes = append(newSD.Attributes, attribute.Int64(k, val))
+			kv = append(kv, attribute.Int64(k, val))
 		case float64:
-			newSD.Attributes = append(newSD.Attributes, attribute.Float64(k, val))
+			kv = append(kv, attribute.Float64(k, val))
 		case string:
-			newSD.Attributes = append(newSD.Attributes, attribute.String(k, val))
+			kv = append(kv, attribute.String(k, val))
 		}
 	}
-	newSD.Attributes = append(newSD.Attributes, sd.Attributes...)
-	return &newSD
+
+	return kv
 }
