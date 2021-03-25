@@ -7,6 +7,7 @@ require (
 	github.com/golang/protobuf v1.4.2
 	github.com/googleinterns/cloud-operations-api-mock v0.0.0-20200709193332-a1e58c29bdd3
 	github.com/stretchr/testify v1.7.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.19.0
 	go.opentelemetry.io/otel v0.19.0
 	go.opentelemetry.io/otel/sdk v0.19.0
 	go.opentelemetry.io/otel/trace v0.19.0
