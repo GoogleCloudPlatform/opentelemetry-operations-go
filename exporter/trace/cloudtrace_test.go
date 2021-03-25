@@ -171,15 +171,6 @@ func TestExporter_Timeout(t *testing.T) {
 	}
 }
 
-type logBuffer struct {
-	logInputChan chan []byte
-}
-
-func (lb *logBuffer) Write(b []byte) (n int, err error) {
-	lb.logInputChan <- b
-	return len(b), nil
-}
-
 // A mock server we can re-use for different kinds of unit tests against batch-write request.
 type mock struct {
 	tracepb.UnimplementedTraceServiceServer

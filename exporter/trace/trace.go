@@ -18,16 +18,12 @@ package trace
 import (
 	"context"
 	"fmt"
-	"log"
-	"strings"
-	"sync"
 	"time"
 
 	export "go.opentelemetry.io/otel/sdk/export/trace"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
 	"google.golang.org/api/option"
-	"google.golang.org/api/support/bundler"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 )
 
@@ -36,18 +32,11 @@ import (
 type traceExporter struct {
 	o         *options
 	projectID string
-	bundler   *bundler.Bundler
 	// uploadFn defaults in uploadSpans; it can be replaced for tests.
 	uploadFn func(ctx context.Context, spans []*tracepb.Span) error
 	overflowLogger
 	client *traceclient.Client
 }
-
-const defaultBundleDelayThreshold = 2 * time.Second
-const defaultBundleCountThreshold = 50
-const defaultBundleByteThreshold = 15000
-const defaultBundleByteLimit = 0
-const defaultBufferedByteLimit = 8 * 1024 * 1024
 
 func newTraceExporter(o *options) (*traceExporter, error) {
 	clientOps := append(o.TraceClientOptions, option.WithUserAgent(userAgent))
@@ -117,51 +106,5 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 // overflowLogger ensures that at most one overflow error log message is
 // written every 5 seconds.
 type overflowLogger struct {
-	mu         sync.Mutex
-	pause      bool
-	delayDur   time.Duration
-	bufferErrs int
-	oversized  int
-}
-
-func (o *overflowLogger) log(oversized bool) {
-	o.mu.Lock()
-	defer o.mu.Unlock()
-	if !o.pause {
-		o.delay()
-	}
-
-	if oversized {
-		o.oversized++
-	} else {
-		o.bufferErrs++
-	}
-}
-
-func (o *overflowLogger) delay() {
-	o.pause = true
-	time.AfterFunc(o.delayDur, func() {
-		o.mu.Lock()
-		defer o.mu.Unlock()
-		o.pause = false
-		logBufferErrors(o.bufferErrs, o.oversized)
-		o.bufferErrs = 0
-		o.oversized = 0
-	})
-}
-
-func logBufferErrors(bufferFull, oversized int) {
-	if bufferFull == 0 && oversized == 0 {
-		return
-	}
-
-	msgs := make([]string, 0, 2)
-	if bufferFull > 0 {
-		msgs = append(msgs, fmt.Sprintf("buffer full: %v", bufferFull))
-	}
-	if oversized > 0 {
-		msgs = append(msgs, fmt.Sprintf("oversized item: %v", oversized))
-	}
-
-	log.Printf("OpenTelemetry Cloud Trace exporter: failed to upload spans: %s\n", strings.Join(msgs, ", "))
+	delayDur time.Duration
 }
