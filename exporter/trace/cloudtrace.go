@@ -263,7 +263,7 @@ func (e *Exporter) Shutdown(ctx context.Context) error {
 }
 
 func createKeyValueAttributes(attr map[string]interface{}) []attribute.KeyValue {
-	kv := make([]attribute.KeyValue, len(attr))
+	kv := make([]attribute.KeyValue, 0, len(attr))
 
 	for k, v := range attr {
 		switch val := v.(type) {
