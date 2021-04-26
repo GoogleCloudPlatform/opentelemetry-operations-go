@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"time"
 
-	export "go.opentelemetry.io/otel/sdk/export/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
 	"google.golang.org/api/option"
@@ -54,7 +54,7 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	return e, nil
 }
 
-func (e *traceExporter) ExportSpans(ctx context.Context, spanData []*export.SpanSnapshot) error {
+func (e *traceExporter) ExportSpans(ctx context.Context, spanData []*sdktrace.SpanSnapshot) error {
 	// Ship the whole bundle o data.
 	results := make([]*tracepb.Span, len(spanData))
 	for i, sd := range spanData {
@@ -64,7 +64,7 @@ func (e *traceExporter) ExportSpans(ctx context.Context, spanData []*export.Span
 }
 
 // ExportSpan exports a SpanSnapshot to Stackdriver Trace.
-func (e *traceExporter) ConvertSpan(_ context.Context, sd *export.SpanSnapshot) *tracepb.Span {
+func (e *traceExporter) ConvertSpan(_ context.Context, sd *sdktrace.SpanSnapshot) *tracepb.Span {
 	return protoFromSpanSnapshot(sd, e.projectID, e.o.DisplayNameFormatter)
 }
 
