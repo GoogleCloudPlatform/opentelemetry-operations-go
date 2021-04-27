@@ -18,25 +18,25 @@ import (
 	"testing"
 
 	"go.opentelemetry.io/otel/attribute"
-	export "go.opentelemetry.io/otel/sdk/export/trace"
 	"go.opentelemetry.io/otel/sdk/resource"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 func TestInjectLabelsFromResources(t *testing.T) {
 	testcases := []struct {
 		name     string
-		input    export.SpanSnapshot
-		expected export.SpanSnapshot
+		input    sdktrace.SpanSnapshot
+		expected sdktrace.SpanSnapshot
 	}{
 		{
 			name: "empty resource",
-			input: export.SpanSnapshot{
+			input: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(),
 				Attributes: []attribute.KeyValue{
 					attribute.String("a", "1"),
 				},
 			},
-			expected: export.SpanSnapshot{
+			expected: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(),
 				Attributes: []attribute.KeyValue{
 					attribute.String("a", "1"),
@@ -45,13 +45,13 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		},
 		{
 			name: "empty attributes",
-			input: export.SpanSnapshot{
+			input: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
 					attribute.String("b", "2"),
 				),
 				Attributes: []attribute.KeyValue{},
 			},
-			expected: export.SpanSnapshot{
+			expected: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
 					attribute.String("b", "2"),
 				),
@@ -62,7 +62,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		},
 		{
 			name: "normal insert",
-			input: export.SpanSnapshot{
+			input: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
 					attribute.String("b", "2"),
 				),
@@ -70,7 +70,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 					attribute.String("a", "1"),
 				},
 			},
-			expected: export.SpanSnapshot{
+			expected: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
 					attribute.String("b", "2"),
 				),
@@ -82,7 +82,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		},
 		{
 			name: "conflicts with the existing keys",
-			input: export.SpanSnapshot{
+			input: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
 					attribute.String("a", "2"),
 				),
@@ -90,7 +90,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 					attribute.String("a", "1"),
 				},
 			},
-			expected: export.SpanSnapshot{
+			expected: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
 					attribute.String("a", "2"),
 				),
@@ -101,7 +101,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 		},
 		{
 			name: "allowed duplicate keys in attributes",
-			input: export.SpanSnapshot{
+			input: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
 					attribute.String("c", "1"),
 				),
@@ -112,7 +112,7 @@ func TestInjectLabelsFromResources(t *testing.T) {
 					attribute.String("b", "3"),
 				},
 			},
-			expected: export.SpanSnapshot{
+			expected: sdktrace.SpanSnapshot{
 				Resource: resource.NewWithAttributes(
 					attribute.String("c", "1"),
 				),

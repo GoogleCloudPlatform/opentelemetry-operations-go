@@ -25,7 +25,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
-	export "go.opentelemetry.io/otel/sdk/export/trace"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 	wrapperspb "github.com/golang/protobuf/ptypes/wrappers"
@@ -63,7 +63,7 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
 
-func generateDisplayName(s *export.SpanSnapshot, format DisplayNameFormatter) string {
+func generateDisplayName(s *sdktrace.SpanSnapshot, format DisplayNameFormatter) string {
 	if format != nil {
 		return format(s)
 	}
@@ -73,7 +73,7 @@ func generateDisplayName(s *export.SpanSnapshot, format DisplayNameFormatter) st
 
 // If there are duplicate keys present in the list of attributes,
 // then the first value found for the key is preserved.
-func injectLabelsFromResources(sd *export.SpanSnapshot) {
+func injectLabelsFromResources(sd *sdktrace.SpanSnapshot) {
 	if sd.Resource.Len() == 0 {
 		return
 	}
@@ -90,7 +90,7 @@ func injectLabelsFromResources(sd *export.SpanSnapshot) {
 	}
 }
 
-func protoFromSpanSnapshot(s *export.SpanSnapshot, projectID string, format DisplayNameFormatter) *tracepb.Span {
+func protoFromSpanSnapshot(s *sdktrace.SpanSnapshot, projectID string, format DisplayNameFormatter) *tracepb.Span {
 	if s == nil {
 		return nil
 	}
@@ -108,10 +108,10 @@ func protoFromSpanSnapshot(s *export.SpanSnapshot, projectID string, format Disp
 		DisplayName:             trunc(displayName, 128),
 		StartTime:               timestampProto(s.StartTime),
 		EndTime:                 timestampProto(s.EndTime),
-		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.HasRemoteParent},
+		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.Parent.IsRemote()},
 	}
-	if s.ParentSpanID != s.SpanContext.SpanID() && s.ParentSpanID.IsValid() {
-		sp.ParentSpanId = s.ParentSpanID.String()
+	if s.Parent.SpanID() != s.SpanContext.SpanID() && s.Parent.SpanID().IsValid() {
+		sp.ParentSpanId = s.Parent.SpanID().String()
 	}
 	if s.StatusCode == codes.Ok {
 		sp.Status = &statuspb.Status{Code: int32(codepb.Code_OK)}

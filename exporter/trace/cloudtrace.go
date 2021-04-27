@@ -24,7 +24,6 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	export "go.opentelemetry.io/otel/sdk/export/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
@@ -38,7 +37,7 @@ type Option func(*options)
 
 // DisplayNameFormatter is is a function that produces the display name of a span
 // given its SpanSnapshot
-type DisplayNameFormatter func(*export.SpanSnapshot) string
+type DisplayNameFormatter func(*sdktrace.SpanSnapshot) string
 
 // options contains options for configuring the exporter.
 type options struct {
@@ -245,7 +244,7 @@ func newContextWithTimeout(ctx context.Context, timeout time.Duration) (context.
 }
 
 // ExportSpans exports a SpanSnapshot to Stackdriver Trace.
-func (e *Exporter) ExportSpans(ctx context.Context, spanData []*export.SpanSnapshot) error {
+func (e *Exporter) ExportSpans(ctx context.Context, spanData []*sdktrace.SpanSnapshot) error {
 	if len(e.traceExporter.o.DefaultTraceAttributes) > 0 {
 		for _, sd := range spanData {
 			sd.Attributes = append(sd.Attributes, e.traceExporter.o.DefaultTraceAttributes...)
