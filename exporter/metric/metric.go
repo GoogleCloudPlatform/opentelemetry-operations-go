@@ -267,6 +267,10 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.Check
 		return nil
 	})
 
+	if len(tss) == 0 {
+		return nil
+	}
+
 	if aggError != nil {
 		if me.o.onError != nil {
 			me.o.onError(aggError)
