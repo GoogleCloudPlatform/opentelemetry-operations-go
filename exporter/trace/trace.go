@@ -54,7 +54,7 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	return e, nil
 }
 
-func (e *traceExporter) ExportSpans(ctx context.Context, spanData []*sdktrace.SpanSnapshot) error {
+func (e *traceExporter) ExportSpans(ctx context.Context, spanData []sdktrace.ReadOnlySpan) error {
 	// Ship the whole bundle o data.
 	results := make([]*tracepb.Span, len(spanData))
 	for i, sd := range spanData {
@@ -63,9 +63,9 @@ func (e *traceExporter) ExportSpans(ctx context.Context, spanData []*sdktrace.Sp
 	return e.uploadFn(ctx, results)
 }
 
-// ExportSpan exports a SpanSnapshot to Stackdriver Trace.
-func (e *traceExporter) ConvertSpan(_ context.Context, sd *sdktrace.SpanSnapshot) *tracepb.Span {
-	return protoFromSpanSnapshot(sd, e.projectID, e.o.DisplayNameFormatter)
+// ConvertSpan converts a ReadOnlySpan to Stackdriver Trace.
+func (e *traceExporter) ConvertSpan(_ context.Context, sd sdktrace.ReadOnlySpan) *tracepb.Span {
+	return protoFromReadOnlySpan(sd, e.projectID, e.o.DisplayNameFormatter)
 }
 
 func (e *traceExporter) Shutdown(ctx context.Context) error {

@@ -47,7 +47,6 @@ func TestExporter_ExportSpan(t *testing.T) {
 		[]Option{
 			WithProjectID("PROJECT_ID_NOT_REAL"),
 			WithTraceClientOptions(clientOpt),
-			WithDefaultTraceAttributes(map[string]interface{}{"TEST_ATTRIBUTE": "TEST_VALUE"}),
 		},
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 	)
@@ -72,7 +71,6 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.EqualValues(t, "", mock.GetSpan(0).GetStatus().Message)
 	assert.EqualValues(t, codepb.Code_UNKNOWN, mock.GetSpan(1).GetStatus().Code)
 	assert.EqualValues(t, "Error Message", mock.GetSpan(1).GetStatus().Message)
-	assert.EqualValues(t, "TEST_VALUE", mock.GetSpan(0).Attributes.AttributeMap["TEST_ATTRIBUTE"].GetStringValue().Value)
 }
 
 func TestExporter_DisplayNameNoFormatter(t *testing.T) {
@@ -109,8 +107,8 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	spanName := "span1234"
-	format := func(s *sdktrace.SpanSnapshot) string {
-		return "TEST_FORMAT" + s.Name
+	format := func(s sdktrace.ReadOnlySpan) string {
+		return "TEST_FORMAT" + s.Name()
 	}
 
 	// Create Google Cloud Trace Exporter

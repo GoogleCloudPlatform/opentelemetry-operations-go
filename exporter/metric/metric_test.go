@@ -22,6 +22,7 @@ import (
 	"testing"
 	"time"
 
+
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/number"
@@ -31,6 +32,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
 	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/empty"
@@ -89,6 +91,7 @@ func TestExportCounter(t *testing.T) {
 
 	resOpt := basic.WithResource(
 		resource.NewWithAttributes(
+			semconv.SchemaURL,
 			attribute.String("test_id", "abc123"),
 		),
 	)
@@ -208,6 +211,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_container
 		{
 			resource.NewWithAttributes(
+				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -228,6 +232,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_node
 		{
 			resource.NewWithAttributes(
+				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -244,6 +249,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_pod
 		{
 			resource.NewWithAttributes(
+				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -262,6 +268,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_cluster
 		{
 			resource.NewWithAttributes(
+				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -276,6 +283,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// k8s_node missing a field
 		{
 			resource.NewWithAttributes(
+				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("host.name", "opentelemetry-node"),
@@ -288,6 +296,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// nonexisting resource types
 		{
 			resource.NewWithAttributes(
+				semconv.SchemaURL,
 				attribute.String("cloud.provider", "none"),
 				attribute.String("cloud.zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
@@ -303,6 +312,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// GCE resource fields
 		{
 			resource.NewWithAttributes(
+				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("host.id", "123"),
 				attribute.String("cloud.zone", "us-central1-a"),
@@ -317,6 +327,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// AWS resources
 		{
 			resource.NewWithAttributes(
+				semconv.SchemaURL,
 				attribute.String("cloud.provider", "aws"),
 				attribute.String("cloud.region", "us-central1-a"),
 				attribute.String("host.id", "123"),
@@ -333,6 +344,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		// Cloud Run
 		{
 			resource.NewWithAttributes(
+				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.region", "utopia"),
 				attribute.String("service.instance.id", "bar"),

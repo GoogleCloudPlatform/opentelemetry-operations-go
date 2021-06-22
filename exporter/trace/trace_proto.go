@@ -63,42 +63,43 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
 
-func generateDisplayName(s *sdktrace.SpanSnapshot, format DisplayNameFormatter) string {
+func generateDisplayName(s sdktrace.ReadOnlySpan, format DisplayNameFormatter) string {
 	if format != nil {
 		return format(s)
 	}
-	return s.Name
+	return s.Name()
 	// TODO(ymotongpoo): add cases for "Send" and "Recv".
 }
 
 // If there are duplicate keys present in the list of attributes,
 // then the first value found for the key is preserved.
-func injectLabelsFromResources(sd *sdktrace.SpanSnapshot) {
-	if sd.Resource.Len() == 0 {
-		return
+func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyValue {
+	attributes := sd.Attributes()
+	if sd.Resource().Len() == 0 {
+		return attributes
 	}
-	uniqueAttrs := make(map[attribute.Key]bool, len(sd.Attributes))
-	for _, attr := range sd.Attributes {
+	uniqueAttrs := make(map[attribute.Key]bool, len(sd.Attributes()))
+	for _, attr := range sd.Attributes() {
 		uniqueAttrs[attr.Key] = true
 	}
-	for _, attr := range sd.Resource.Attributes() {
+	for _, attr := range sd.Resource().Attributes() {
 		if uniqueAttrs[attr.Key] {
 			continue // skip resource attributes which conflict with span attributes
 		}
 		uniqueAttrs[attr.Key] = true
-		sd.Attributes = append(sd.Attributes, attr)
+		attributes = append(attributes, attr)
 	}
+
+	return attributes
 }
 
-func protoFromSpanSnapshot(s *sdktrace.SpanSnapshot, projectID string, format DisplayNameFormatter) *tracepb.Span {
+func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, projectID string, format DisplayNameFormatter) *tracepb.Span {
 	if s == nil {
 		return nil
 	}
 
-	injectLabelsFromResources(s)
-
-	traceIDString := s.SpanContext.TraceID().String()
-	spanIDString := s.SpanContext.SpanID().String()
+	traceIDString := s.SpanContext().TraceID().String()
+	spanIDString := s.SpanContext().SpanID().String()
 
 	displayName := generateDisplayName(s, format)
 
@@ -106,28 +107,28 @@ func protoFromSpanSnapshot(s *sdktrace.SpanSnapshot, projectID string, format Di
 		Name:                    "projects/" + projectID + "/traces/" + traceIDString + "/spans/" + spanIDString,
 		SpanId:                  spanIDString,
 		DisplayName:             trunc(displayName, 128),
-		StartTime:               timestampProto(s.StartTime),
-		EndTime:                 timestampProto(s.EndTime),
-		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.Parent.IsRemote()},
+		StartTime:               timestampProto(s.StartTime()),
+		EndTime:                 timestampProto(s.EndTime()),
+		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.Parent().IsRemote()},
 	}
-	if s.Parent.SpanID() != s.SpanContext.SpanID() && s.Parent.SpanID().IsValid() {
-		sp.ParentSpanId = s.Parent.SpanID().String()
+	if s.Parent().SpanID() != s.SpanContext().SpanID() && s.Parent().SpanID().IsValid() {
+		sp.ParentSpanId = s.Parent().SpanID().String()
 	}
-	if s.StatusCode == codes.Ok {
+	if s.Status().Code == codes.Ok {
 		sp.Status = &statuspb.Status{Code: int32(codepb.Code_OK)}
-	} else if s.StatusCode == codes.Unset {
+	} else if s.Status().Code == codes.Unset {
 		// Don't set status code.
-	} else if s.StatusCode == codes.Error {
-		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN), Message: s.StatusMessage}
+	} else if s.Status().Code == codes.Error {
+		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN), Message: s.Status().Description}
 	} else {
 		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN)}
 	}
 
-	copyAttributes(&sp.Attributes, s.Attributes)
+	copyAttributes(&sp.Attributes, attributeWithLabelsFromResources(s))
 	// NOTE(ymotongpoo): omitting copyMonitoringReesourceAttributes()
 
 	var annotations, droppedAnnotationsCount int
-	es := s.MessageEvents
+	es := s.Events()
 	for i, e := range es {
 		if annotations >= maxAnnotationEventsPerSpan {
 			droppedAnnotationsCount = len(es) - i
