@@ -78,7 +78,8 @@ func main() {
 		req, _ := http.NewRequestWithContext(ctx, "GET", "http://localhost:7777/hello", nil)
 
 		fmt.Printf("Sending request...\n")
-		res, err := client.Do(req)
+		var res *http.Response
+		res, err = client.Do(req)
 		if err != nil {
 			panic(err)
 		}
