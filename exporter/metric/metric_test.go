@@ -22,7 +22,6 @@ import (
 	"testing"
 	"time"
 
-
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/number"
