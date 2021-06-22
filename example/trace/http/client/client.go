@@ -25,11 +25,10 @@ import (
 
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/codes"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/semconv"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
@@ -58,13 +57,22 @@ func main() {
 	tr := otel.Tracer("cloudtrace/example/client")
 
 	client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
-	ctx := baggage.ContextWithValues(context.Background(),
-		attribute.String("username", "donuts"),
-	)
-
+	b, err := baggage.New()
+	if err != nil {
+		panic(err)
+	}
+	member, err := baggage.NewMember("username", "donuts")
+	if err != nil {
+		panic(err)
+	}
+	b, err = b.SetMember(member)
+	if err != nil {
+		panic(err)
+	}
+	ctx := baggage.ContextWithBaggage(context.Background(), b)
 	var body []byte
 
-	err := func(ctx context.Context) error {
+	err = func(ctx context.Context) error {
 		ctx, span := tr.Start(ctx, "say hello", trace.WithAttributes(semconv.PeerServiceKey.String("ExampleService")))
 		defer span.End()
 		req, _ := http.NewRequestWithContext(ctx, "GET", "http://localhost:7777/hello", nil)
