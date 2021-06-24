@@ -57,15 +57,11 @@ func main() {
 	tr := otel.Tracer("cloudtrace/example/client")
 
 	client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
-	b, err := baggage.New()
-	if err != nil {
-		panic(err)
-	}
 	member, err := baggage.NewMember("username", "donuts")
 	if err != nil {
 		panic(err)
 	}
-	b, err = b.SetMember(member)
+	b, err := baggage.New(member)
 	if err != nil {
 		panic(err)
 	}
