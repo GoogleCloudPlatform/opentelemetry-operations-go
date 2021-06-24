@@ -27,6 +27,7 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
 type observedFloat struct {
@@ -63,6 +64,7 @@ func main() {
 	// it returned hard coded "global" resource.
 	// This should be fixed in #29.
 	resOpt := basic.WithResource(resource.NewWithAttributes(
+		semconv.SchemaURL,
 		attribute.String("instance_id", "abc123"),
 		attribute.String("application", "example-app"),
 	))

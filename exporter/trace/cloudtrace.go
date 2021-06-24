@@ -36,8 +36,8 @@ import (
 type Option func(*options)
 
 // DisplayNameFormatter is is a function that produces the display name of a span
-// given its SpanSnapshot
-type DisplayNameFormatter func(*sdktrace.SpanSnapshot) string
+// given its ReadOnlySpan
+type DisplayNameFormatter func(sdktrace.ReadOnlySpan) string
 
 // options contains options for configuring the exporter.
 type options struct {
@@ -94,8 +94,8 @@ type options struct {
 	Timeout time.Duration
 
 	// DisplayNameFormatter is a function that produces the display name of a span
-	// given its SpanSnapshot.
-	// Optional. Default display name for SpanSnapshot s is "{s.Name}"
+	// given its ReadOnlySpan.
+	// Optional. Default display name for ReadOnlySpan s is "{s.Name}"
 	DisplayNameFormatter
 }
 
@@ -142,7 +142,7 @@ func WithTimeout(t time.Duration) func(o *options) {
 }
 
 // WithDisplayNameFormatter sets the way span's display names will be
-// generated from SpanSnapshot
+// generated from ReadOnlySpan
 func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
 	return func(o *options) {
 		o.DisplayNameFormatter = f
@@ -243,14 +243,8 @@ func newContextWithTimeout(ctx context.Context, timeout time.Duration) (context.
 	return context.WithTimeout(ctx, timeout)
 }
 
-// ExportSpans exports a SpanSnapshot to Stackdriver Trace.
-func (e *Exporter) ExportSpans(ctx context.Context, spanData []*sdktrace.SpanSnapshot) error {
-	if len(e.traceExporter.o.DefaultTraceAttributes) > 0 {
-		for _, sd := range spanData {
-			sd.Attributes = append(sd.Attributes, e.traceExporter.o.DefaultTraceAttributes...)
-		}
-	}
-
+// ExportSpans exports a ReadOnlySpan to Stackdriver Trace.
+func (e *Exporter) ExportSpans(ctx context.Context, spanData []sdktrace.ReadOnlySpan) error {
 	return e.traceExporter.ExportSpans(ctx, spanData)
 }
 

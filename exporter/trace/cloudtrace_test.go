@@ -109,8 +109,8 @@ func TestExporter_DisplayNameFormatter(t *testing.T) {
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	spanName := "span1234"
-	format := func(s *sdktrace.SpanSnapshot) string {
-		return "TEST_FORMAT" + s.Name
+	format := func(s sdktrace.ReadOnlySpan) string {
+		return "TEST_FORMAT" + s.Name()
 	}
 
 	// Create Google Cloud Trace Exporter
