@@ -93,7 +93,7 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 	return attributes
 }
 
-func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, projectID string, format DisplayNameFormatter) *tracepb.Span {
+func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []attribute.KeyValue, projectID string, format DisplayNameFormatter) *tracepb.Span {
 	if s == nil {
 		return nil
 	}
@@ -124,7 +124,8 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, projectID string, format Dis
 		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN)}
 	}
 
-	copyAttributes(&sp.Attributes, attributeWithLabelsFromResources(s))
+	attributes := append(attributeWithLabelsFromResources(s), defaultTraceAttributes...)
+	copyAttributes(&sp.Attributes, attributes)
 	// NOTE(ymotongpoo): omitting copyMonitoringReesourceAttributes()
 
 	var annotations, droppedAnnotationsCount int

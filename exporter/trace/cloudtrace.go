@@ -75,6 +75,10 @@ type options struct {
 	// to the underlying BatchSpanProcessor when call making a new export pipeline.
 	BatchSpanProcessorOptions []sdktrace.BatchSpanProcessorOption
 
+	// DefaultTraceAttributes will be appended to every span that is exported to
+	// Stackdriver Trace.
+	DefaultTraceAttributes []attribute.KeyValue
+
 	// Context allows you to provide a custom context for API calls.
 	//
 	// This context will be used several times: first, to create Stackdriver
@@ -142,6 +146,14 @@ func WithTimeout(t time.Duration) func(o *options) {
 func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
 	return func(o *options) {
 		o.DisplayNameFormatter = f
+	}
+}
+
+// WithDefaultTraceAttributes sets the attributes that will be appended
+// to every span by default
+func WithDefaultTraceAttributes(attr map[string]interface{}) func(o *options) {
+	return func(o *options) {
+		o.DefaultTraceAttributes = createKeyValueAttributes(attr)
 	}
 }
 
