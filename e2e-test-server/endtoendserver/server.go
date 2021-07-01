@@ -60,7 +60,7 @@ func New() (*Server, error) {
 func (s *Server) Run(ctx context.Context) error {
 	sub := s.pubsubClient.Subscription(requestSubscriptionName)
 	log.Printf("End-to-end test service listening on %s", sub)
-	return sub.Receive(ctx, func(ctx context.Context, m *pubsub.Message) { s.pubsubCallback(ctx, m) })
+	return sub.Receive(ctx, func(ctx context.Context, m *pubsub.Message) { s.onReceive(ctx, m) })
 }
 
 // Shutdown gracefully shuts down the service, flushing and closing resources as
@@ -88,8 +88,8 @@ func (s *Server) Shutdown(ctx context.Context) {
 	wg.Wait()
 }
 
-// pubsubCallback executes a scenario based on the incoming message from the test runner.
-func (s *Server) pubsubCallback(ctx context.Context, m *pubsub.Message) {
+// onReceive executes a scenario based on the incoming message from the test runner.
+func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
 	defer m.Ack()
 
 	testID := m.Attributes[testIDKey]
