@@ -24,7 +24,7 @@ const (
 	instrumentingModuleName = "opentelemetry-ops-e2e-test-server"
 	scenarioKey             = "scenario"
 	testIDKey               = "test_id"
-	statusCode              = "status_code"
+	statusCodeKey           = "status_code"
 )
 
 var (

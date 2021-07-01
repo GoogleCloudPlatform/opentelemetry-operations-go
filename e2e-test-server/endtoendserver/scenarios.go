@@ -68,9 +68,7 @@ func (s *Server) basicTraceHandler(ctx context.Context, req request) *response {
 		defer span.End()
 	}(ctx)
 
-	return &response{
-		statusCode: code.Code_OK,
-	}
+	return &response{statusCode: code.Code_OK}
 }
 
 // complexTraceHandler creates a complex trace and returns an OK response.
