@@ -25,6 +25,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/codes"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
@@ -60,7 +61,11 @@ func TestExporter_ExportSpan(t *testing.T) {
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
-	_, span = otel.Tracer("test-tracer").Start(context.Background(), "test-span-with-error-status")
+	_, span = otel.Tracer("test-tracer").Start(
+		context.Background(),
+		"test-span-with-error-status",
+		trace.WithLinks(trace.Link{SpanContext: genSpanContext()}),
+	)
 	span.SetStatus(codes.Error, "Error Message")
 	span.End()
 
@@ -73,6 +78,8 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.EqualValues(t, codepb.Code_UNKNOWN, mock.GetSpan(1).GetStatus().Code)
 	assert.EqualValues(t, "Error Message", mock.GetSpan(1).GetStatus().Message)
 	assert.EqualValues(t, "TEST_VALUE", mock.GetSpan(0).Attributes.AttributeMap["TEST_ATTRIBUTE"].GetStringValue().Value)
+	assert.Nil(t, mock.GetSpan(0).Links)
+	assert.Len(t, mock.GetSpan(1).Links.Link, 1)
 }
 
 func TestExporter_DisplayNameNoFormatter(t *testing.T) {
