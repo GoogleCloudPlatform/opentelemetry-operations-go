@@ -37,7 +37,6 @@ type scenarioHandler func(*Server, context.Context, request) *response
 type request struct {
 	scenario string
 	testID   string
-	headers  map[string]string
 	data     []byte
 }
 

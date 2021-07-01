@@ -1,18 +1,3 @@
-// Copyright 2019 OpenTelemetry Authors
-// Copyright 2021 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 package endtoendserver
 
 import (
@@ -29,11 +14,13 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
+// Server is an end-to-end test service.
 type Server struct {
 	pubsubClient  *pubsub.Client
 	traceProvider *sdktrace.TracerProvider
 }
 
+// New instanciates a new end-to-end test service.
 func New() (*Server, error) {
 	if subscriptionMode != "pull" {
 		return nil, fmt.Errorf("server does not support subscription mode %v", subscriptionMode)
@@ -127,7 +114,6 @@ func (s *Server) pubsubCallback(ctx context.Context, m *pubsub.Message) {
 	req := request{
 		scenario: scenario,
 		testID:   testID,
-		headers:  m.Attributes,
 		data:     m.Data,
 	}
 
@@ -144,8 +130,8 @@ func (s *Server) respond(ctx context.Context, testID string, res *response) erro
 	m := &pubsub.Message{
 		Data: res.data,
 		Attributes: map[string]string{
-			testIDKey:  testID,
-			statusCode: strconv.Itoa(int(res.statusCode)),
+			testIDKey:     testID,
+			statusCodeKey: strconv.Itoa(int(res.statusCode)),
 		},
 	}
 	publishResult := s.pubsubClient.Topic(responseTopicName).Publish(ctx, m)
