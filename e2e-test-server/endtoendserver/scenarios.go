@@ -71,7 +71,7 @@ func (s *Server) basicTraceHandler(ctx context.Context, req request) *response {
 }
 
 // complexTraceHandler creates a complex trace and returns an OK response.
-func (S *Server) complexTraceHandler(ctx context.Context, req request) *response {
+func (s *Server) complexTraceHandler(ctx context.Context, req request) *response {
 	if req.testID == "" {
 		log.Printf("request is missing required field 'testID'. request: %+v", req)
 		return &response{

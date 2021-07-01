@@ -26,7 +26,7 @@ import (
 )
 
 func main() {
-	runCtx, stopRunningFn := context.WithCancel(context.Background())
+	runCtx, cancelRunning := context.WithCancel(context.Background())
 
 	// Gracefully close on SIGINT
 	interupted := make(chan os.Signal, 1)
@@ -34,7 +34,7 @@ func main() {
 	go func() {
 		<-interupted
 		log.Println("Received interrupt signal, shutting down.")
-		stopRunningFn()
+		cancelRunning()
 	}()
 
 	server, err := endtoendserver.New()
@@ -47,6 +47,7 @@ func main() {
 		log.Printf("Shutting down due to unexpected error: %v", err)
 	}
 
-	shutdownCtx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancelShutdown()
 	server.Shutdown(shutdownCtx)
 }
