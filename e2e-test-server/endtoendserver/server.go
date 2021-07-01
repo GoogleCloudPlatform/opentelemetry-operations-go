@@ -23,10 +23,11 @@ import (
 	"sync"
 
 	"cloud.google.com/go/pubsub"
-	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/genproto/googleapis/rpc/code"
+
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
 
 // Server is an end-to-end test service.
@@ -35,7 +36,7 @@ type Server struct {
 	traceProvider *sdktrace.TracerProvider
 }
 
-// New instanciates a new end-to-end test service.
+// New instantiates a new end-to-end test service.
 func New() (*Server, error) {
 	if subscriptionMode != "pull" {
 		return nil, fmt.Errorf("server does not support subscription mode %v", subscriptionMode)
@@ -129,10 +130,11 @@ func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
 	req := request{
 		scenario: scenario,
 		testID:   testID,
-		data:     m.Data,
 	}
-
 	res := handler(s, ctx, req)
+	if err := s.traceProvider.ForceFlush(ctx); err != nil {
+		log.Printf("could not flush traces: %v", err)
+	}
 
 	if err := s.respond(ctx, testID, res); err != nil {
 		log.Printf("could not publish response: %v", err)

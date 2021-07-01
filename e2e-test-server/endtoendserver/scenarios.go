@@ -19,7 +19,6 @@ import (
 	"context"
 	"log"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/genproto/googleapis/rpc/code"
@@ -37,7 +36,6 @@ type scenarioHandler func(*Server, context.Context, request) *response
 type request struct {
 	scenario string
 	testID   string
-	data     []byte
 }
 
 type response struct {
@@ -60,7 +58,7 @@ func (s *Server) basicTraceHandler(ctx context.Context, req request) *response {
 		}
 	}
 
-	tracer := otel.GetTracerProvider().Tracer(instrumentingModuleName)
+	tracer := s.traceProvider.Tracer(instrumentingModuleName)
 	func(ctx context.Context) {
 		_, span := tracer.Start(ctx, "basicTrace",
 			trace.WithAttributes(attribute.String(testIDKey, req.testID)))
@@ -80,7 +78,7 @@ func (s *Server) complexTraceHandler(ctx context.Context, req request) *response
 		}
 	}
 
-	tracer := otel.GetTracerProvider().Tracer(instrumentingModuleName)
+	tracer := s.traceProvider.Tracer(instrumentingModuleName)
 	func(ctx context.Context) {
 		ctx, span := tracer.Start(ctx, "complexTrace/root",
 			trace.WithAttributes(attribute.String(testIDKey, req.testID)))

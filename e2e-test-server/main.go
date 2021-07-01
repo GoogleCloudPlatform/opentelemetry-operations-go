@@ -29,10 +29,10 @@ func main() {
 	runCtx, cancelRunning := context.WithCancel(context.Background())
 
 	// Gracefully close on SIGINT
-	interupted := make(chan os.Signal, 1)
-	signal.Notify(interupted, os.Interrupt)
+	interrupted := make(chan os.Signal, 1)
+	signal.Notify(interrupted, os.Interrupt)
 	go func() {
-		<-interupted
+		<-interrupted
 		log.Println("Received interrupt signal, shutting down.")
 		cancelRunning()
 	}()
