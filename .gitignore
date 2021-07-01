@@ -10,3 +10,4 @@ Thumbs.db
 coverage.*
 
 /example/metric/metric
+e2e-test-server/main
