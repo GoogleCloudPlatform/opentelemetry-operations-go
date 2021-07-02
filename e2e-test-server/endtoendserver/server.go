@@ -57,7 +57,8 @@ func New() (*Server, error) {
 		if err != nil {
 			return err
 		}
-		traceProvider = sdktrace.NewTracerProvider(sdktrace.WithBatcher(exporter))
+		traceProvider = sdktrace.NewTracerProvider(
+			sdktrace.WithBatcher(exporter, sdktrace.WithBatchTimeout(traceBatchTimeout)))
 		return nil
 	})
 
@@ -132,9 +133,6 @@ func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
 		testID:   testID,
 	}
 	res := handler(s, ctx, req)
-	if err := s.traceProvider.ForceFlush(ctx); err != nil {
-		log.Printf("could not flush traces: %v", err)
-	}
 
 	if err := s.respond(ctx, testID, res); err != nil {
 		log.Printf("could not publish response: %v", err)

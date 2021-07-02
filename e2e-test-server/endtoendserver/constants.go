@@ -18,6 +18,7 @@ package endtoendserver
 import (
 	"log"
 	"os"
+	"time"
 )
 
 const (
@@ -25,6 +26,9 @@ const (
 	scenarioKey             = "scenario"
 	testIDKey               = "test_id"
 	statusCodeKey           = "status_code"
+
+	// This is set small to reduce the latency in sending traces so that the tests finish faster.
+	traceBatchTimeout = 100 * time.Millisecond
 )
 
 var (
