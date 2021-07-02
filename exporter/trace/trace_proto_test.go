@@ -22,6 +22,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
+	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 )
 
 func genSpanContext() trace.SpanContext {
@@ -50,6 +51,7 @@ func TestTraceProto_linksProtoFromLinks(t *testing.T) {
 		assert.Len(t, linksPb.Link, 1)
 		assert.Equal(t, spanContext.TraceID().String(), linksPb.Link[0].TraceId)
 		assert.Equal(t, spanContext.SpanID().String(), linksPb.Link[0].SpanId)
+		assert.Equal(t, tracepb.Span_Link_TYPE_UNSPECIFIED, linksPb.Link[0].Type)
 		assert.Len(t, linksPb.Link[0].Attributes.AttributeMap, 1)
 		assert.Contains(t, linksPb.Link[0].Attributes.AttributeMap, "hello")
 		assert.Equal(

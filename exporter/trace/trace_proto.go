@@ -186,26 +186,27 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []att
 }
 
 func linksProtoFromLinks(links []trace.Link) *tracepb.Span_Links {
-	var linksPb *tracepb.Span_Links
-
-	if numLinks := len(links); numLinks > 0 {
-		linksPb = &tracepb.Span_Links{}
-		numLinksToKeep := numLinks
-		if numLinksToKeep > maxNumLinks {
-			numLinksToKeep = maxNumLinks
-		}
-
-		for _, link := range links[:numLinksToKeep] {
-			linkPb := &tracepb.Span_Link{
-				TraceId: link.SpanContext.TraceID().String(),
-				SpanId:  link.SpanContext.SpanID().String(),
-				Type:    tracepb.Span_Link_TYPE_UNSPECIFIED,
-			}
-			copyAttributes(&linkPb.Attributes, link.Attributes)
-			linksPb.Link = append(linksPb.Link, linkPb)
-		}
-		linksPb.DroppedLinksCount = clip32(numLinks - numLinksToKeep)
+	numLinks := len(links)
+	if numLinks == 0 {
+		return nil
 	}
+
+	linksPb := &tracepb.Span_Links{}
+	numLinksToKeep := numLinks
+	if numLinksToKeep > maxNumLinks {
+		numLinksToKeep = maxNumLinks
+	}
+
+	for _, link := range links[:numLinksToKeep] {
+		linkPb := &tracepb.Span_Link{
+			TraceId: link.SpanContext.TraceID().String(),
+			SpanId:  link.SpanContext.SpanID().String(),
+			Type:    tracepb.Span_Link_TYPE_UNSPECIFIED,
+		}
+		copyAttributes(&linkPb.Attributes, link.Attributes)
+		linksPb.Link = append(linksPb.Link, linkPb)
+	}
+	linksPb.DroppedLinksCount = clip32(numLinks - numLinksToKeep)
 
 	return linksPb
 }
