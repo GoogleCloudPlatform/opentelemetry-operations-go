@@ -17,7 +17,6 @@ package trace
 
 import (
 	"fmt"
-	"log"
 	"math"
 	"strconv"
 	"time"
@@ -312,7 +311,6 @@ func convertSpanKind(kind trace.SpanKind) tracepb.Span_SpanKind {
 	case trace.SpanKindConsumer:
 		return tracepb.Span_CONSUMER
 	default:
-		log.Printf("warning: unknown span kind %v", kind)
 		return tracepb.Span_INTERNAL
 	}
 }
