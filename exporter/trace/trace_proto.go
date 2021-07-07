@@ -26,6 +26,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 
 	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 	wrapperspb "github.com/golang/protobuf/ptypes/wrappers"
@@ -39,6 +40,7 @@ const (
 	// TODO(ymotongpoo): uncomment this after gRPC trace get supported.
 	// maxMessageEventsPerSpan    = 128
 	maxAttributeStringValue = 256
+	maxNumLinks             = 128
 	agentLabel              = "g.co/agent"
 
 	// Attributes recorded on the span for the requests.
@@ -178,9 +180,38 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []att
 		sp.TimeEvents.DroppedAnnotationsCount = clip32(droppedAnnotationsCount)
 	}
 
-	// TODO(ymotongpoo): add implementations for Links
+	sp.Links = linksProtoFromLinks(s.Links())
 
 	return sp
+}
+
+// Converts OTel span links to Cloud Trace links proto in order. If there are
+// more than maxNumLinks links, the first maxNumLinks will be taken and the rest
+// dropped.
+func linksProtoFromLinks(links []trace.Link) *tracepb.Span_Links {
+	numLinks := len(links)
+	if numLinks == 0 {
+		return nil
+	}
+
+	linksPb := &tracepb.Span_Links{}
+	numLinksToKeep := numLinks
+	if numLinksToKeep > maxNumLinks {
+		numLinksToKeep = maxNumLinks
+	}
+
+	for _, link := range links[:numLinksToKeep] {
+		linkPb := &tracepb.Span_Link{
+			TraceId: link.SpanContext.TraceID().String(),
+			SpanId:  link.SpanContext.SpanID().String(),
+			Type:    tracepb.Span_Link_TYPE_UNSPECIFIED,
+		}
+		copyAttributes(&linkPb.Attributes, link.Attributes)
+		linksPb.Link = append(linksPb.Link, linkPb)
+	}
+	linksPb.DroppedLinksCount = clip32(numLinks - numLinksToKeep)
+
+	return linksPb
 }
 
 // timestampProto creates a timestamp proto for a time.Time.
