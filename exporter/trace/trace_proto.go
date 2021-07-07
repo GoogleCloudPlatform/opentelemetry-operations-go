@@ -308,7 +308,7 @@ func convertSpanKind(kind trace.SpanKind) tracepb.Span_SpanKind {
 	case trace.SpanKindClient:
 		return tracepb.Span_CLIENT
 	case trace.SpanKindProducer:
-		return tracepb.Span_CONSUMER
+		return tracepb.Span_PRODUCER
 	case trace.SpanKindConsumer:
 		return tracepb.Span_CONSUMER
 	default:
