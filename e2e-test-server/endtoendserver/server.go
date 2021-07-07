@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"cloud.google.com/go/pubsub"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"golang.org/x/sync/errgroup"
 	"google.golang.org/genproto/googleapis/rpc/code"
@@ -58,7 +59,10 @@ func New() (*Server, error) {
 			return err
 		}
 		traceProvider = sdktrace.NewTracerProvider(
-			sdktrace.WithBatcher(exporter, sdktrace.WithBatchTimeout(traceBatchTimeout)))
+			sdktrace.WithBatcher(exporter, sdktrace.WithBatchTimeout(traceBatchTimeout)),
+			// Set resource to empty so we don't add labels that the
+			// e2e test runner doesn't expect. See b/192584837.
+			sdktrace.WithResource(resource.Empty()))
 		return nil
 	})
 
