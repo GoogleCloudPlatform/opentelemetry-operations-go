@@ -112,6 +112,7 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []att
 		StartTime:               timestampProto(s.StartTime()),
 		EndTime:                 timestampProto(s.EndTime()),
 		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.Parent().IsRemote()},
+		SpanKind:                convertSpanKind(s.SpanKind()),
 	}
 	if s.Parent().SpanID() != s.SpanContext().SpanID() && s.Parent().SpanID().IsValid() {
 		sp.ParentSpanId = s.Parent().SpanID().String()
@@ -322,4 +323,24 @@ func clip32(x int) int32 {
 		return math.MaxInt32
 	}
 	return int32(x)
+}
+
+func convertSpanKind(kind trace.SpanKind) tracepb.Span_SpanKind {
+	switch kind {
+	case trace.SpanKindUnspecified, trace.SpanKindInternal:
+		// SpanKindUnspecified is an unspecified SpanKind and is not a
+		// valid SpanKind. SpanKindUnspecified should be replaced with
+		// SpanKindInternal if it is received.
+		return tracepb.Span_INTERNAL
+	case trace.SpanKindServer:
+		return tracepb.Span_SERVER
+	case trace.SpanKindClient:
+		return tracepb.Span_CLIENT
+	case trace.SpanKindProducer:
+		return tracepb.Span_PRODUCER
+	case trace.SpanKindConsumer:
+		return tracepb.Span_CONSUMER
+	default:
+		return tracepb.Span_INTERNAL
+	}
 }
