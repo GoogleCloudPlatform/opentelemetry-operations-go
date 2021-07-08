@@ -1,4 +1,3 @@
-// Copyright 2019 OpenTelemetry Authors
 // Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -127,7 +126,7 @@ func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
 		return
 	}
 
-	handler := scenarioHanders[scenario]
+	handler := scenarioHandlers[scenario]
 	if handler == nil {
 		handler = (*Server).unimplementedHandler
 	}

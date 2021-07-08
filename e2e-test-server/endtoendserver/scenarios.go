@@ -1,4 +1,3 @@
-// Copyright 2019 OpenTelemetry Authors
 // Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +23,7 @@ import (
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
-var scenarioHanders = map[string]scenarioHandler{
+var scenarioHandlers = map[string]scenarioHandler{
 	"/basicPropagator": (*Server).unimplementedHandler,
 	"/basicTrace":      (*Server).basicTraceHandler,
 	"/complexTrace":    (*Server).complexTraceHandler,
