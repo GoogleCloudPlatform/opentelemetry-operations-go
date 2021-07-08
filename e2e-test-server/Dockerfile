@@ -14,24 +14,27 @@
 
 FROM golang:1.16 as builder
 
-WORKDIR /workspace
+WORKDIR /workspace/e2e-test-server/
 
-COPY go.mod go.sum ./
+# In-repo dependencies
+COPY exporter/trace/ ../exporter/trace/
+
 # cache deps before copying source so that source changes don't invalidate our
 # downloaded layer and we don't need to re-download as much.
+COPY e2e-test-server/go.mod e2e-test-server/go.sum ./
 RUN go mod download
 
 # Copy the go source
-COPY main.go ./
-COPY endtoendserver/ endtoendserver/
+COPY e2e-test-server/app.go ./
+COPY e2e-test-server/endtoendserver/ endtoendserver/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o end-to-end-test-server main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o app app.go
 
 # Use distroless as minimal base image to package the manager binary
 # Refer to https://github.com/GoogleContainerTools/distroless for more details
 FROM gcr.io/distroless/static
 WORKDIR /
-COPY --from=builder /workspace/end-to-end-test-server .
+COPY --from=builder /workspace/e2e-test-server/app ./
 
-ENTRYPOINT ["/end-to-end-test-server"]
+ENTRYPOINT ["/app"]
