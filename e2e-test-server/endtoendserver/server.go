@@ -125,6 +125,7 @@ func (s *Server) respond(ctx context.Context, testID string, res *response) erro
 		Attributes: map[string]string{
 			testIDKey:     testID,
 			statusCodeKey: strconv.Itoa(int(res.statusCode)),
+			traceIDKey:    res.traceID.String(),
 		},
 	}
 	publishResult := s.pubsubClient.Topic(responseTopicName).Publish(ctx, m)

@@ -41,6 +41,7 @@ type request struct {
 type response struct {
 	statusCode code.Code
 	data       []byte
+	traceID    trace.TraceID
 }
 
 // healthHandler returns an OK response without creating any traces.
@@ -63,7 +64,7 @@ func (s *Server) basicTraceHandler(ctx context.Context, req request, tracerProvi
 		trace.WithAttributes(attribute.String(testIDKey, req.testID)))
 	span.End()
 
-	return &response{statusCode: code.Code_OK}
+	return &response{statusCode: code.Code_OK, traceID: span.SpanContext().TraceID()}
 }
 
 // complexTraceHandler creates a complex trace and returns an OK response.
@@ -77,33 +78,31 @@ func (s *Server) complexTraceHandler(ctx context.Context, req request, tracerPro
 	}
 
 	tracer := tracerProvider.Tracer(instrumentingModuleName)
+	ctx, span := tracer.Start(ctx, "complexTrace/root",
+		trace.WithAttributes(attribute.String(testIDKey, req.testID)))
+
 	func(ctx context.Context) {
-		ctx, span := tracer.Start(ctx, "complexTrace/root",
+		ctx, span := tracer.Start(ctx, "complexTrace/child1",
+			trace.WithSpanKind(trace.SpanKindServer),
 			trace.WithAttributes(attribute.String(testIDKey, req.testID)))
-		defer span.End()
+		span.End()
 
 		func(ctx context.Context) {
-			ctx, span := tracer.Start(ctx, "complexTrace/child1",
-				trace.WithSpanKind(trace.SpanKindServer),
-				trace.WithAttributes(attribute.String(testIDKey, req.testID)))
-			span.End()
-
-			func(ctx context.Context) {
-				_, span := tracer.Start(ctx, "complexTrace/child2",
-					trace.WithSpanKind(trace.SpanKindClient),
-					trace.WithAttributes(attribute.String(testIDKey, req.testID)))
-				span.End()
-			}(ctx)
-		}(ctx)
-
-		func(ctx context.Context) {
-			_, span := tracer.Start(ctx, "complexTrace/child3",
+			_, span := tracer.Start(ctx, "complexTrace/child2",
+				trace.WithSpanKind(trace.SpanKindClient),
 				trace.WithAttributes(attribute.String(testIDKey, req.testID)))
 			span.End()
 		}(ctx)
 	}(ctx)
 
-	return &response{statusCode: code.Code_OK}
+	func(ctx context.Context) {
+		_, span := tracer.Start(ctx, "complexTrace/child3",
+			trace.WithAttributes(attribute.String(testIDKey, req.testID)))
+		span.End()
+	}(ctx)
+	span.End()
+
+	return &response{statusCode: code.Code_OK, traceID: span.SpanContext().TraceID()}
 }
 
 // unimplementedHandler returns an UNIMPLEMENTED response without creating any traces.
