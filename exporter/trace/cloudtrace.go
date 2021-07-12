@@ -245,6 +245,14 @@ func newContextWithTimeout(ctx context.Context, timeout time.Duration) (context.
 
 // ExportSpans exports a ReadOnlySpan to Stackdriver Trace.
 func (e *Exporter) ExportSpans(ctx context.Context, spanData []sdktrace.ReadOnlySpan) error {
+	sd := make([]ReadOnlySpan, len(spanData))
+	for i := range spanData {
+		sd[i] = spanData[i]
+	}
+	return e.traceExporter.ExportSpans(ctx, sd)
+}
+
+func (e *Exporter) ExportCustomSpans(ctx context.Context, spanData []ReadOnlySpan) error {
 	return e.traceExporter.ExportSpans(ctx, spanData)
 }
 
