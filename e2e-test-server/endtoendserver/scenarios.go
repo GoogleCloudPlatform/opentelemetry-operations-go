@@ -58,11 +58,9 @@ func (s *Server) basicTraceHandler(ctx context.Context, req request) *response {
 	}
 
 	tracer := s.traceProvider.Tracer(instrumentingModuleName)
-	func(ctx context.Context) {
-		_, span := tracer.Start(ctx, "basicTrace",
-			trace.WithAttributes(attribute.String(testIDKey, req.testID)))
-		defer span.End()
-	}(ctx)
+	_, span := tracer.Start(ctx, "basicTrace", 
+		trace.WithAttributes(attribute.String(testIDKey, req.testID)))
+	span.End()
 
 	return &response{statusCode: code.Code_OK}
 }
