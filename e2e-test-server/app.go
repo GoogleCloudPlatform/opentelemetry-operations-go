@@ -43,9 +43,10 @@ func main() {
 
 	err = server.Run(runCtx)
 	if err != nil {
-		log.Printf("Shutting down due to unexpected error: %v", err)
+		log.Printf("Unexpected error occurred: %v", err)
 	}
-
+	
+	log.Print("Shutting down")
 	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancelShutdown()
 	server.Shutdown(shutdownCtx)
