@@ -58,7 +58,7 @@ func (s *Server) basicTraceHandler(ctx context.Context, req request) *response {
 	}
 
 	tracer := s.traceProvider.Tracer(instrumentingModuleName)
-	_, span := tracer.Start(ctx, "basicTrace", 
+	_, span := tracer.Start(ctx, "basicTrace",
 		trace.WithAttributes(attribute.String(testIDKey, req.testID)))
 	span.End()
 
@@ -85,24 +85,23 @@ func (s *Server) complexTraceHandler(ctx context.Context, req request) *response
 			ctx, span := tracer.Start(ctx, "complexTrace/child1",
 				trace.WithSpanKind(trace.SpanKindServer),
 				trace.WithAttributes(attribute.String(testIDKey, req.testID)))
-			defer span.End()
+			span.End()
 
 			func(ctx context.Context) {
 				_, span := tracer.Start(ctx, "complexTrace/child2",
 					trace.WithSpanKind(trace.SpanKindClient),
 					trace.WithAttributes(attribute.String(testIDKey, req.testID)))
-				defer span.End()
+				span.End()
 			}(ctx)
 		}(ctx)
 
 		func(ctx context.Context) {
 			_, span := tracer.Start(ctx, "complexTrace/child3",
 				trace.WithAttributes(attribute.String(testIDKey, req.testID)))
-			defer span.End()
-
+			span.End()
 		}(ctx)
-
 	}(ctx)
+
 	return &response{statusCode: code.Code_OK}
 }
 
