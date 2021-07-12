@@ -45,7 +45,7 @@ func main() {
 	if err != nil {
 		log.Printf("Unexpected error occurred: %v", err)
 	}
-	
+
 	log.Print("Shutting down")
 	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancelShutdown()
