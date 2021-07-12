@@ -19,6 +19,7 @@ import (
 	"log"
 
 	"go.opentelemetry.io/otel/attribute"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
@@ -30,7 +31,7 @@ var scenarioHandlers = map[string]scenarioHandler{
 	"/health":          (*Server).healthHandler,
 }
 
-type scenarioHandler func(*Server, context.Context, request) *response
+type scenarioHandler func(*Server, context.Context, request, *sdktrace.TracerProvider) *response
 
 type request struct {
 	scenario string
@@ -43,12 +44,12 @@ type response struct {
 }
 
 // healthHandler returns an OK response without creating any traces.
-func (s *Server) healthHandler(ctx context.Context, req request) *response {
+func (s *Server) healthHandler(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
 	return &response{statusCode: code.Code_OK}
 }
 
 // basicTraceHandler creates a basic trace and returns an OK response.
-func (s *Server) basicTraceHandler(ctx context.Context, req request) *response {
+func (s *Server) basicTraceHandler(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
 	if req.testID == "" {
 		log.Printf("request is missing required field 'testID'. request: %+v", req)
 		return &response{
@@ -57,7 +58,7 @@ func (s *Server) basicTraceHandler(ctx context.Context, req request) *response {
 		}
 	}
 
-	tracer := s.traceProvider.Tracer(instrumentingModuleName)
+	tracer := tracerProvider.Tracer(instrumentingModuleName)
 	_, span := tracer.Start(ctx, "basicTrace",
 		trace.WithAttributes(attribute.String(testIDKey, req.testID)))
 	span.End()
@@ -66,7 +67,7 @@ func (s *Server) basicTraceHandler(ctx context.Context, req request) *response {
 }
 
 // complexTraceHandler creates a complex trace and returns an OK response.
-func (s *Server) complexTraceHandler(ctx context.Context, req request) *response {
+func (s *Server) complexTraceHandler(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
 	if req.testID == "" {
 		log.Printf("request is missing required field 'testID'. request: %+v", req)
 		return &response{
@@ -75,7 +76,7 @@ func (s *Server) complexTraceHandler(ctx context.Context, req request) *response
 		}
 	}
 
-	tracer := s.traceProvider.Tracer(instrumentingModuleName)
+	tracer := tracerProvider.Tracer(instrumentingModuleName)
 	func(ctx context.Context) {
 		ctx, span := tracer.Start(ctx, "complexTrace/root",
 			trace.WithAttributes(attribute.String(testIDKey, req.testID)))
@@ -106,7 +107,7 @@ func (s *Server) complexTraceHandler(ctx context.Context, req request) *response
 }
 
 // unimplementedHandler returns an UNIMPLEMENTED response without creating any traces.
-func (s *Server) unimplementedHandler(ctx context.Context, req request) *response {
+func (s *Server) unimplementedHandler(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
 	log.Printf("received unhandled scenario %q", req.scenario)
 	return &response{statusCode: code.Code_UNIMPLEMENTED}
 }

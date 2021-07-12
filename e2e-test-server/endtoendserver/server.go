@@ -19,12 +19,10 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"sync"
 
 	"cloud.google.com/go/pubsub"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"golang.org/x/sync/errgroup"
 	"google.golang.org/genproto/googleapis/rpc/code"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
@@ -32,8 +30,8 @@ import (
 
 // Server is an end-to-end test service.
 type Server struct {
-	pubsubClient  *pubsub.Client
-	traceProvider *sdktrace.TracerProvider
+	pubsubClient *pubsub.Client
+	// traceProvider *sdktrace.TracerProvider
 }
 
 // New instantiates a new end-to-end test service.
@@ -42,36 +40,14 @@ func New() (*Server, error) {
 		return nil, fmt.Errorf("server does not support subscription mode %v", subscriptionMode)
 	}
 
-	var eg errgroup.Group
-
-	var pubsubClient *pubsub.Client
-	eg.Go(func() error {
-		var err error
-		pubsubClient, err = pubsub.NewClient(context.Background(), projectID)
-		return err
-	})
-
-	var traceProvider *sdktrace.TracerProvider
-	eg.Go(func() error {
-		exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
-		if err != nil {
-			return err
-		}
-		traceProvider = sdktrace.NewTracerProvider(
-			sdktrace.WithBatcher(exporter, sdktrace.WithBatchTimeout(traceBatchTimeout)),
-			// Set resource to empty so we don't add labels that the
-			// e2e test runner doesn't expect. See b/192584837.
-			sdktrace.WithResource(resource.Empty()))
-		return nil
-	})
-
-	if err := eg.Wait(); err != nil {
+	pubsubClient, err := pubsub.NewClient(context.Background(), projectID)
+	if err != nil {
 		return nil, err
 	}
 
 	return &Server{
-		pubsubClient:  pubsubClient,
-		traceProvider: traceProvider,
+		pubsubClient: pubsubClient,
+		// traceProvider: traceProvider,
 	}, nil
 }
 
@@ -86,31 +62,20 @@ func (s *Server) Run(ctx context.Context) error {
 // Shutdown gracefully shuts down the service, flushing and closing resources as
 // appropriate.
 func (s *Server) Shutdown(ctx context.Context) {
-	var wg sync.WaitGroup
-	wg.Add(2)
-
-	go func() {
-		if err := s.pubsubClient.Close(); err != nil {
-			log.Printf("pubsubClient.Close(): %v", err)
-		}
-		wg.Done()
-	}()
-
-	go func() {
-		if err := s.traceProvider.ForceFlush(ctx); err != nil {
-			log.Printf("traceProvider.ForceFlush(): %v", err)
-		}
-		if err := s.traceProvider.Shutdown(ctx); err != nil {
-			log.Printf("traceProvider.Shutdown(): %v", err)
-		}
-		wg.Done()
-	}()
-	wg.Wait()
+	if err := s.pubsubClient.Close(); err != nil {
+		log.Printf("pubsubClient.Close(): %v", err)
+	}
 }
 
 // onReceive executes a scenario based on the incoming message from the test runner.
 func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
 	defer m.Ack()
+
+	tracerProvider, err := newTraceProvider()
+	if err != nil {
+		log.Printf("could not initialize a tracer-provider: %v", err)
+		return
+	}
 
 	testID := m.Attributes[testIDKey]
 	scenario := m.Attributes[scenarioKey]
@@ -135,7 +100,17 @@ func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
 		scenario: scenario,
 		testID:   testID,
 	}
-	res := handler(s, ctx, req)
+
+	res := handler(s, ctx, req, tracerProvider)
+
+	if err := shutdownTraceProvider(ctx, tracerProvider); err != nil {
+		log.Printf("could not shutdown tracer-provider: %v", err)
+		s.respond(ctx, testID, &response{
+			statusCode: code.Code_INTERNAL,
+			data:       []byte(fmt.Sprintf("could not shutdown tracer-provider: %v", err)),
+		})
+		return
+	}
 
 	if err := s.respond(ctx, testID, res); err != nil {
 		log.Printf("could not publish response: %v", err)
@@ -155,4 +130,29 @@ func (s *Server) respond(ctx context.Context, testID string, res *response) erro
 	publishResult := s.pubsubClient.Topic(responseTopicName).Publish(ctx, m)
 	_, err := publishResult.Get(ctx)
 	return err
+}
+
+func newTraceProvider() (*sdktrace.TracerProvider, error) {
+	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+	if err != nil {
+		return nil, err
+	}
+
+	traceProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter, sdktrace.WithBatchTimeout(traceBatchTimeout)),
+		// Set resource to empty so we don't add labels that the
+		// e2e test runner doesn't expect. See b/192584837.
+		sdktrace.WithResource(resource.Empty()))
+
+	return traceProvider, nil
+}
+
+func shutdownTraceProvider(ctx context.Context, tracerProvider *sdktrace.TracerProvider) error {
+	if err := tracerProvider.ForceFlush(ctx); err != nil {
+		return fmt.Errorf("traceProvider.ForceFlush(): %v", err)
+	}
+	if err := tracerProvider.Shutdown(ctx); err != nil {
+		return fmt.Errorf("traceProvider.Shutdown(): %v", err)
+	}
+	return nil
 }
