@@ -37,7 +37,7 @@ type Option func(*options)
 
 // DisplayNameFormatter is is a function that produces the display name of a span
 // given its ReadOnlySpan
-type DisplayNameFormatter func(sdktrace.ReadOnlySpan) string
+type DisplayNameFormatter func(ReadOnlySpan) string
 
 // options contains options for configuring the exporter.
 type options struct {
