@@ -78,8 +78,9 @@ func (s *Server) complexTraceHandler(ctx context.Context, req request, tracerPro
 	}
 
 	tracer := tracerProvider.Tracer(instrumentingModuleName)
-	ctx, span := tracer.Start(ctx, "complexTrace/root",
+	ctx, rootSpan := tracer.Start(ctx, "complexTrace/root",
 		trace.WithAttributes(attribute.String(testIDKey, req.testID)))
+	defer rootSpan.End()
 
 	func(ctx context.Context) {
 		ctx, span := tracer.Start(ctx, "complexTrace/child1",
@@ -100,9 +101,8 @@ func (s *Server) complexTraceHandler(ctx context.Context, req request, tracerPro
 			trace.WithAttributes(attribute.String(testIDKey, req.testID)))
 		span.End()
 	}(ctx)
-	span.End()
 
-	return &response{statusCode: code.Code_OK, traceID: span.SpanContext().TraceID()}
+	return &response{statusCode: code.Code_OK, traceID: rootSpan.SpanContext().TraceID()}
 }
 
 // unimplementedHandler returns an UNIMPLEMENTED response without creating any traces.
