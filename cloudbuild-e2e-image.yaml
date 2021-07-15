@@ -1,0 +1,49 @@
+# Copyright 2021 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+  # If the image doesn't exist, create a skip file for the next step to know
+  - name: "gcr.io/cloud-builders/gcloud"
+    entrypoint: "bash"
+    args:
+      - -c
+      - |
+        existing_tags=$(
+          gcloud container images list-tags \
+            --filter="tags:${SHORT_SHA}" --format=json \
+            ${_TEST_SERVER_IMAGE_NAME}
+        )
+        if [ "$existing_tags" == "[]" ]; then
+          echo "Image doesn't exist, will build it"
+        else
+          echo "Image already exists, will skip building"
+          touch skip
+        fi
+  # If skip doesn't exist, build and push
+  - name: docker
+    id: build-test-server
+    entrypoint: "sh"
+    args:
+      - -c
+      - |
+        if [ -e "skip" ]; then
+          return
+        else
+          docker build --tag=${_TEST_SERVER_IMAGE} --file=e2e-test-server/Dockerfile .
+          docker push ${_TEST_SERVER_IMAGE}
+        fi
+logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs
+substitutions:
+  _TEST_SERVER_IMAGE: ${_TEST_SERVER_IMAGE_NAME}:${SHORT_SHA}
+  _TEST_SERVER_IMAGE_NAME: gcr.io/${PROJECT_ID}/opentelemetry-operations-go-e2e-test-server
