@@ -98,7 +98,7 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 	if err != nil {
 		// TODO(ymotongpoo): handle detailed error categories
 		// span.SetStatus(codes.Unknown)
-		e.o.handleError(err)
+		e.o.handleError(fmt.Errorf("failed to export to Stackdriver: %v", err))
 	}
 	return err
 }

@@ -19,7 +19,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"go.opentelemetry.io/otel"
@@ -60,11 +59,12 @@ type options struct {
 	// on-premise resource like k8s_container or generic_task.
 	Location string
 
-	// OnError is the hook to be called when there is
+	// errorHandler is the hook to be called when there is
 	// an error uploading the stats or tracing data.
-	// If no custom hook is set, errors are logged.
+	// If no custom hook is set, errors are handled with the
+	// OpenTelemetry global handler, which defaults to logging.
 	// Optional.
-	OnError func(err error)
+	errorHandler otel.ErrorHandler
 
 	// TraceClientOptions are additional options to be passed
 	// to the underlying Stackdriver Trace API client.
@@ -110,12 +110,12 @@ func WithProjectID(projectID string) func(o *options) {
 	}
 }
 
-// WithOnError sets the hook to be called when there is an error
+// WithErrorHandler sets the hook to be called when there is an error
 // occurred on uploading the span data to Stackdriver.
 // If no custom hook is set, errors are logged.
-func WithOnError(onError func(err error)) func(o *options) {
+func WithErrorHandler(handler otel.ErrorHandler) func(o *options) {
 	return func(o *options) {
-		o.OnError = onError
+		o.errorHandler = handler
 	}
 }
 
@@ -158,11 +158,11 @@ func WithDefaultTraceAttributes(attr map[string]interface{}) func(o *options) {
 }
 
 func (o *options) handleError(err error) {
-	if o.OnError != nil {
-		o.OnError(err)
+	if o.errorHandler != nil {
+		o.errorHandler.Handle(err)
 		return
 	}
-	log.Printf("Failed to export to Stackdriver: %v", err)
+	otel.Handle(err)
 }
 
 // defaultTimeout is used as default when timeout is not set in newContextWithTimout.
