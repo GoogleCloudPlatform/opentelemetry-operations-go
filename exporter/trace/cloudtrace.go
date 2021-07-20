@@ -51,15 +51,6 @@ type options struct {
 	// project, e.g. on-premise resource like k8s_container or generic_task.
 	ProjectID string
 
-	// Location is the identifier of the GCP or AWS cloud region/zone in which
-	// the data for a resource is stored.
-	// If not set, it will default to the location provided by the metadata server.
-	//
-	// It will be used in the location label of a Stackdriver monitored resource
-	// if the resource does not inherently belong to a specific project, e.g.
-	// on-premise resource like k8s_container or generic_task.
-	Location string
-
 	// OnError is the hook to be called when there is
 	// an error uploading the stats or tracing data.
 	// If no custom hook is set, errors are logged.
