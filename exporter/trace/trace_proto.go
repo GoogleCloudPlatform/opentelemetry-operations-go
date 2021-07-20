@@ -45,13 +45,13 @@ const (
 
 	// Attributes recorded on the span for the requests.
 	// Only trace exporters will need them.
-	HostAttribute       = "http.host"
-	MethodAttribute     = "http.method"
-	PathAttribute       = "http.path"
-	URLAttribute        = "http.url"
-	UserAgentAttribute  = "http.user_agent"
-	StatusCodeAttribute = "http.status_code"
-	ServiceAttribute    = "service.name"
+	hostAttribute       = "http.host"
+	methodAttribute     = "http.method"
+	pathAttribute       = "http.path"
+	urlAttribute        = "http.url"
+	userAgentAttribute  = "http.user_agent"
+	statusCodeAttribute = "http.status_code"
+	serviceAttribute    = "service.name"
 
 	labelHTTPHost       = `/http/host`
 	labelHTTPMethod     = `/http/method`
@@ -242,17 +242,17 @@ func copyAttributes(out **tracepb.Span_Attributes, in []attribute.KeyValue) {
 			continue
 		}
 		switch kv.Key {
-		case PathAttribute:
+		case pathAttribute:
 			(*out).AttributeMap[labelHTTPPath] = av
-		case HostAttribute:
+		case hostAttribute:
 			(*out).AttributeMap[labelHTTPHost] = av
-		case MethodAttribute:
+		case methodAttribute:
 			(*out).AttributeMap[labelHTTPMethod] = av
-		case UserAgentAttribute:
+		case userAgentAttribute:
 			(*out).AttributeMap[labelHTTPUserAgent] = av
-		case StatusCodeAttribute:
+		case statusCodeAttribute:
 			(*out).AttributeMap[labelHTTPStatusCode] = av
-		case ServiceAttribute:
+		case serviceAttribute:
 			(*out).AttributeMap[labelService] = av
 		default:
 			if len(kv.Key) > 128 {
