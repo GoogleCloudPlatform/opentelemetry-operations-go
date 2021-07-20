@@ -25,6 +25,7 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
 	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
@@ -64,7 +65,7 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
 
-func generateDisplayName(s ReadOnlySpan, format DisplayNameFormatter) string {
+func generateDisplayName(s sdktrace.ReadOnlySpan, format DisplayNameFormatter) string {
 	if format != nil {
 		return format(s)
 	}
@@ -74,7 +75,7 @@ func generateDisplayName(s ReadOnlySpan, format DisplayNameFormatter) string {
 
 // If there are duplicate keys present in the list of attributes,
 // then the first value found for the key is preserved.
-func attributeWithLabelsFromResources(sd ReadOnlySpan) []attribute.KeyValue {
+func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyValue {
 	attributes := sd.Attributes()
 	if sd.Resource().Len() == 0 {
 		return attributes
@@ -94,7 +95,7 @@ func attributeWithLabelsFromResources(sd ReadOnlySpan) []attribute.KeyValue {
 	return attributes
 }
 
-func protoFromReadOnlySpan(s ReadOnlySpan, defaultTraceAttributes []attribute.KeyValue, projectID string, format DisplayNameFormatter) *tracepb.Span {
+func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []attribute.KeyValue, projectID string, format DisplayNameFormatter) *tracepb.Span {
 	if s == nil {
 		return nil
 	}
