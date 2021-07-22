@@ -34,11 +34,11 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
-	"github.com/golang/protobuf/ptypes"
 	"google.golang.org/api/option"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 const (
@@ -579,15 +579,16 @@ func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind number.Kin
 		return nil, nil, err
 	}
 
-	timestamppb, err := ptypes.TimestampProto(timestamp)
+	timestampPb := timestamppb.New(timestamp)
+	err = timestampPb.CheckValid()
 	if err != nil {
 		return nil, nil, err
 	}
 
 	// TODO: Consider the expression of TimeInterval (#25)
 	t := &monitoringpb.TimeInterval{
-		StartTime: timestamppb,
-		EndTime:   timestamppb,
+		StartTime: timestampPb,
+		EndTime:   timestampPb,
 	}
 
 	tv, err := aggToTypedValue(kind, value)
@@ -623,13 +624,13 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 		end = start.Add(time.Millisecond)
 	}
 
-	startpb, err := ptypes.TimestampProto(start)
-	if err != nil {
+	startpb := timestamppb.New(start)
+	if err := startpb.CheckValid(); err != nil {
 		return nil, err
 	}
 
-	endpb, err := ptypes.TimestampProto(end)
-	if err != nil {
+	endpb := timestamppb.New(end)
+	if err := endpb.CheckValid(); err != nil {
 		return nil, err
 	}
 
