@@ -189,7 +189,7 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []att
 // Converts OTel span links to Cloud Trace links proto in order. If there are
 // more than maxNumLinks links, the first maxNumLinks will be taken and the rest
 // dropped.
-func linksProtoFromLinks(links []trace.Link) *tracepb.Span_Links {
+func linksProtoFromLinks(links []sdktrace.Link) *tracepb.Span_Links {
 	numLinks := len(links)
 	if numLinks == 0 {
 		return nil
