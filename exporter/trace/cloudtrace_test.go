@@ -44,14 +44,16 @@ func TestExporter_ExportSpan(t *testing.T) {
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	// Create Google Cloud Trace Exporter
-	_, shutdown, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithTraceClientOptions(clientOpt),
-		},
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	)
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithTraceClientOptions(clientOpt))
 	assert.NoError(t, err)
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter))
+
+	otel.SetTracerProvider(tp)
+	shutdown := func() { tp.Shutdown(context.Background()) }
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	// NOTE: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#set-status
@@ -88,19 +90,21 @@ func TestExporter_Timeout(t *testing.T) {
 	var exportErrors []error
 
 	// Create Google Cloud Trace Exporter
-	_, shutdown, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithTraceClientOptions(clientOpt),
-			WithTimeout(1 * time.Millisecond),
-			// handle bundle as soon as span is received
-			WithOnError(func(err error) {
-				exportErrors = append(exportErrors, err)
-			}),
-		},
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	)
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithTraceClientOptions(clientOpt),
+		WithTimeout(1*time.Millisecond),
+		// handle bundle as soon as span is received
+		WithOnError(func(err error) {
+			exportErrors = append(exportErrors, err)
+		}))
 	assert.NoError(t, err)
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter))
+
+	otel.SetTracerProvider(tp)
+	shutdown := func() { tp.Shutdown(context.Background()) }
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.End()
@@ -156,15 +160,18 @@ func TestExporter_ExportWithUserAgent(t *testing.T) {
 		option.WithoutAuthentication(),
 		option.WithGRPCDialOption(grpc.WithInsecure()),
 	}
+
 	// Create Google Cloud Trace Exporter
-	_, shutdown, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithTraceClientOptions(clientOpt),
-		},
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	)
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithTraceClientOptions(clientOpt))
 	assert.NoError(t, err)
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter))
+
+	otel.SetTracerProvider(tp)
+	shutdown := func() { tp.Shutdown(context.Background()) }
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.SetStatus(codes.Ok, "Status Message")
