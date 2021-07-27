@@ -82,6 +82,14 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.Len(t, mock.GetSpan(1).Links.Link, 1)
 }
 
+type errorHandler struct {
+	errs []error
+}
+
+func (e *errorHandler) Handle(err error) {
+	e.errs = append(e.errs, err)
+}
+
 func TestExporter_Timeout(t *testing.T) {
 	// Initial test precondition
 	mock := cloudmock.NewCloudMock()
@@ -95,8 +103,8 @@ func TestExporter_Timeout(t *testing.T) {
 		WithTraceClientOptions(clientOpt),
 		WithTimeout(1*time.Millisecond),
 		// handle bundle as soon as span is received
-    WithErrorHandler(handler),
-  )
+		WithErrorHandler(handler),
+	)
 	assert.NoError(t, err)
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
