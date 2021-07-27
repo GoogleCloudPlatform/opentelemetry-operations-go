@@ -82,12 +82,20 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.Len(t, mock.GetSpan(1).Links.Link, 1)
 }
 
+type errorHandler struct {
+	errs []error
+}
+
+func (e *errorHandler) Handle(err error) {
+	e.errs = append(e.errs, err)
+}
+
 func TestExporter_Timeout(t *testing.T) {
 	// Initial test precondition
 	mock := cloudmock.NewCloudMock()
 	mock.SetDelay(20 * time.Millisecond)
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
-	var exportErrors []error
+	handler := &errorHandler{}
 
 	// Create Google Cloud Trace Exporter
 	exporter, err := New(
@@ -95,9 +103,8 @@ func TestExporter_Timeout(t *testing.T) {
 		WithTraceClientOptions(clientOpt),
 		WithTimeout(1*time.Millisecond),
 		// handle bundle as soon as span is received
-		WithOnError(func(err error) {
-			exportErrors = append(exportErrors, err)
-		}))
+		WithErrorHandler(handler),
+	)
 	assert.NoError(t, err)
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
@@ -113,10 +120,10 @@ func TestExporter_Timeout(t *testing.T) {
 	// wait for error to be handled
 	shutdown() // closed grpc connection
 	assert.EqualValues(t, 0, mock.GetNumSpans())
-	if got, want := len(exportErrors), 1; got != want {
+	if got, want := len(handler.errs), 1; got != want {
 		t.Fatalf("len(exportErrors) = %q; want %q", got, want)
 	}
-	got, want := exportErrors[0].Error(), "rpc error: code = (DeadlineExceeded|Unknown) desc = context deadline exceeded"
+	got, want := handler.errs[0].Error(), "rpc error: code = (DeadlineExceeded|Unknown) desc = context deadline exceeded"
 	if match, _ := regexp.MatchString(want, got); !match {
 		t.Fatalf("err.Error() = %q; want %q", got, want)
 	}
