@@ -44,15 +44,16 @@ func TestExporter_ExportSpan(t *testing.T) {
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
 
 	// Create Google Cloud Trace Exporter
-	_, shutdown, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithTraceClientOptions(clientOpt),
-			WithDefaultTraceAttributes(map[string]interface{}{"TEST_ATTRIBUTE": "TEST_VALUE"}),
-		},
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	)
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithTraceClientOptions(clientOpt))
 	assert.NoError(t, err)
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter))
+
+	otel.SetTracerProvider(tp)
+	shutdown := func() { tp.Shutdown(context.Background()) }
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	// NOTE: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#set-status
@@ -77,68 +78,16 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.EqualValues(t, "", mock.GetSpan(0).GetStatus().Message)
 	assert.EqualValues(t, codepb.Code_UNKNOWN, mock.GetSpan(1).GetStatus().Code)
 	assert.EqualValues(t, "Error Message", mock.GetSpan(1).GetStatus().Message)
-	assert.EqualValues(t, "TEST_VALUE", mock.GetSpan(0).Attributes.AttributeMap["TEST_ATTRIBUTE"].GetStringValue().Value)
 	assert.Nil(t, mock.GetSpan(0).Links)
 	assert.Len(t, mock.GetSpan(1).Links.Link, 1)
 }
 
-func TestExporter_DisplayNameNoFormatter(t *testing.T) {
-	// Initial test precondition
-	mock := cloudmock.NewCloudMock()
-	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
-
-	spanName := "span1234"
-
-	// Create Google Cloud Trace Exporter
-	_, shutdown, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithTraceClientOptions(clientOpt),
-			WithDisplayNameFormatter(nil),
-		},
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	)
-	assert.NoError(t, err)
-
-	_, span := otel.Tracer("test-tracer").Start(context.Background(), spanName)
-	span.End()
-	assert.True(t, span.SpanContext().IsValid())
-
-	// wait exporter to shutdown (closes grpc connection)
-	shutdown()
-	assert.EqualValues(t, 1, mock.GetNumSpans())
-	assert.EqualValues(t, spanName, mock.GetSpan(0).DisplayName.Value)
+type errorHandler struct {
+	errs []error
 }
 
-func TestExporter_DisplayNameFormatter(t *testing.T) {
-	// Initial test precondition
-	mock := cloudmock.NewCloudMock()
-	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
-
-	spanName := "span1234"
-	format := func(s sdktrace.ReadOnlySpan) string {
-		return "TEST_FORMAT" + s.Name()
-	}
-
-	// Create Google Cloud Trace Exporter
-	_, shutdown, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithTraceClientOptions(clientOpt),
-			WithDisplayNameFormatter(format),
-		},
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	)
-	assert.NoError(t, err)
-
-	_, span := otel.Tracer("test-tracer").Start(context.Background(), spanName)
-	span.End()
-	assert.True(t, span.SpanContext().IsValid())
-
-	// wait exporter to shutdown (closes grpc connection)
-	shutdown()
-	assert.EqualValues(t, 1, mock.GetNumSpans())
-	assert.EqualValues(t, "TEST_FORMAT"+spanName, mock.GetSpan(0).DisplayName.Value)
+func (e *errorHandler) Handle(err error) {
+	e.errs = append(e.errs, err)
 }
 
 func TestExporter_Timeout(t *testing.T) {
@@ -146,22 +95,23 @@ func TestExporter_Timeout(t *testing.T) {
 	mock := cloudmock.NewCloudMock()
 	mock.SetDelay(20 * time.Millisecond)
 	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
-	var exportErrors []error
+	handler := &errorHandler{}
 
 	// Create Google Cloud Trace Exporter
-	_, shutdown, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithTraceClientOptions(clientOpt),
-			WithTimeout(1 * time.Millisecond),
-			// handle bundle as soon as span is received
-			WithOnError(func(err error) {
-				exportErrors = append(exportErrors, err)
-			}),
-		},
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithTraceClientOptions(clientOpt),
+		WithTimeout(1*time.Millisecond),
+		// handle bundle as soon as span is received
+		WithErrorHandler(handler),
 	)
 	assert.NoError(t, err)
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter))
+
+	otel.SetTracerProvider(tp)
+	shutdown := func() { tp.Shutdown(context.Background()) }
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.End()
@@ -170,10 +120,10 @@ func TestExporter_Timeout(t *testing.T) {
 	// wait for error to be handled
 	shutdown() // closed grpc connection
 	assert.EqualValues(t, 0, mock.GetNumSpans())
-	if got, want := len(exportErrors), 1; got != want {
+	if got, want := len(handler.errs), 1; got != want {
 		t.Fatalf("len(exportErrors) = %q; want %q", got, want)
 	}
-	got, want := exportErrors[0].Error(), "rpc error: code = (DeadlineExceeded|Unknown) desc = context deadline exceeded"
+	got, want := handler.errs[0].Error(), "rpc error: code = (DeadlineExceeded|Unknown) desc = context deadline exceeded"
 	if match, _ := regexp.MatchString(want, got); !match {
 		t.Fatalf("err.Error() = %q; want %q", got, want)
 	}
@@ -217,15 +167,18 @@ func TestExporter_ExportWithUserAgent(t *testing.T) {
 		option.WithoutAuthentication(),
 		option.WithGRPCDialOption(grpc.WithInsecure()),
 	}
+
 	// Create Google Cloud Trace Exporter
-	_, shutdown, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithTraceClientOptions(clientOpt),
-		},
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	)
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithTraceClientOptions(clientOpt))
 	assert.NoError(t, err)
+	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter))
+
+	otel.SetTracerProvider(tp)
+	shutdown := func() { tp.Shutdown(context.Background()) }
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.SetStatus(codes.Ok, "Status Message")

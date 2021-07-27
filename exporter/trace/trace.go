@@ -65,7 +65,7 @@ func (e *traceExporter) ExportSpans(ctx context.Context, spanData []sdktrace.Rea
 
 // ConvertSpan converts a ReadOnlySpan to Stackdriver Trace.
 func (e *traceExporter) ConvertSpan(_ context.Context, sd sdktrace.ReadOnlySpan) *tracepb.Span {
-	return protoFromReadOnlySpan(sd, e.o.DefaultTraceAttributes, e.projectID, e.o.DisplayNameFormatter)
+	return protoFromReadOnlySpan(sd, e.projectID)
 }
 
 func (e *traceExporter) Shutdown(ctx context.Context) error {
@@ -98,7 +98,7 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 	if err != nil {
 		// TODO(ymotongpoo): handle detailed error categories
 		// span.SetStatus(codes.Unknown)
-		e.o.handleError(err)
+		e.o.handleError(fmt.Errorf("failed to export to Google Cloud Monitoring: %w", err))
 	}
 	return err
 }

@@ -19,13 +19,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/trace"
 
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"golang.org/x/oauth2/google"
@@ -34,10 +32,6 @@ import (
 
 // Option is function type that is passed to the exporter initialization function.
 type Option func(*options)
-
-// DisplayNameFormatter is is a function that produces the display name of a span
-// given its ReadOnlySpan
-type DisplayNameFormatter func(sdktrace.ReadOnlySpan) string
 
 // options contains options for configuring the exporter.
 type options struct {
@@ -51,11 +45,21 @@ type options struct {
 	// project, e.g. on-premise resource like k8s_container or generic_task.
 	ProjectID string
 
+	// Location is the identifier of the GCP or AWS cloud region/zone in which
+	// the data for a resource is stored.
+	// If not set, it will default to the location provided by the metadata server.
+	//
+	// It will be used in the location label of a Stackdriver monitored resource
+	// if the resource does not inherently belong to a specific project, e.g.
+	// on-premise resource like k8s_container or generic_task.
+	Location string
+
 	// OnError is the hook to be called when there is
 	// an error uploading the stats or tracing data.
-	// If no custom hook is set, errors are logged.
+	// If no custom hook is set, errors are handled with the
+	// OpenTelemetry global handler, which defaults to logging.
 	// Optional.
-	OnError func(err error)
+	errorHandler otel.ErrorHandler
 
 	// TraceClientOptions are additional options to be passed
 	// to the underlying Stackdriver Trace API client.
@@ -65,10 +69,6 @@ type options struct {
 	// BatchSpanProcessorOptions are additional options to be based
 	// to the underlying BatchSpanProcessor when call making a new export pipeline.
 	BatchSpanProcessorOptions []sdktrace.BatchSpanProcessorOption
-
-	// DefaultTraceAttributes will be appended to every span that is exported to
-	// Stackdriver Trace.
-	DefaultTraceAttributes []attribute.KeyValue
 
 	// Context allows you to provide a custom context for API calls.
 	//
@@ -83,11 +83,6 @@ type options struct {
 
 	// Timeout for all API calls. If not set, defaults to 5 seconds.
 	Timeout time.Duration
-
-	// DisplayNameFormatter is a function that produces the display name of a span
-	// given its ReadOnlySpan.
-	// Optional. Default display name for ReadOnlySpan s is "{s.Name}"
-	DisplayNameFormatter
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -101,12 +96,12 @@ func WithProjectID(projectID string) func(o *options) {
 	}
 }
 
-// WithOnError sets the hook to be called when there is an error
+// WithErrorHandler sets the hook to be called when there is an error
 // occurred on uploading the span data to Stackdriver.
 // If no custom hook is set, errors are logged.
-func WithOnError(onError func(err error)) func(o *options) {
+func WithErrorHandler(handler otel.ErrorHandler) func(o *options) {
 	return func(o *options) {
-		o.OnError = onError
+		o.errorHandler = handler
 	}
 }
 
@@ -132,28 +127,12 @@ func WithTimeout(t time.Duration) func(o *options) {
 	}
 }
 
-// WithDisplayNameFormatter sets the way span's display names will be
-// generated from ReadOnlySpan
-func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
-	return func(o *options) {
-		o.DisplayNameFormatter = f
-	}
-}
-
-// WithDefaultTraceAttributes sets the attributes that will be appended
-// to every span by default
-func WithDefaultTraceAttributes(attr map[string]interface{}) func(o *options) {
-	return func(o *options) {
-		o.DefaultTraceAttributes = createKeyValueAttributes(attr)
-	}
-}
-
 func (o *options) handleError(err error) {
-	if o.OnError != nil {
-		o.OnError(err)
+	if o.errorHandler != nil {
+		o.errorHandler.Handle(err)
 		return
 	}
-	log.Printf("Failed to export to Stackdriver: %v", err)
+	otel.Handle(err)
 }
 
 // defaultTimeout is used as default when timeout is not set in newContextWithTimout.
@@ -167,38 +146,8 @@ type Exporter struct {
 	traceExporter *traceExporter
 }
 
-// InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
-func InstallNewPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (trace.TracerProvider, func(), error) {
-	tp, shutdown, err := NewExportPipeline(opts, topts...)
-	if err != nil {
-		return nil, nil, err
-	}
-	otel.SetTracerProvider(tp)
-	return tp, shutdown, err
-}
-
-// NewExportPipeline sets up a complete export pipeline with the recommended setup
-// for trace provider. Returns provider, shutdown function, and errors.
-func NewExportPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (trace.TracerProvider, func(), error) {
-	// TODO(suereth): Don't flesh options twice.
-	o := options{Context: context.Background()}
-	for _, opt := range opts {
-		opt(&o)
-	}
-	exporter, err := newExporterWithOptions(&o)
-	if err != nil {
-		return nil, nil, err
-	}
-	tp := sdktrace.NewTracerProvider(
-		append(topts,
-			sdktrace.WithBatcher(exporter, o.BatchSpanProcessorOptions...))...)
-	return tp, func() {
-		tp.Shutdown(context.Background())
-	}, nil
-}
-
-// NewExporter creates a new Exporter thats implements trace.Exporter.
-func NewExporter(opts ...Option) (*Exporter, error) {
+// New creates a new Exporter thats implements trace.Exporter.
+func New(opts ...Option) (*Exporter, error) {
 	o := options{Context: context.Background()}
 	for _, opt := range opts {
 		opt(&o)

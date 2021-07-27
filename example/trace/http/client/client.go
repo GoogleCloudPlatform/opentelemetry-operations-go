@@ -39,16 +39,18 @@ func initTracer() func() {
 
 	// Create Google Cloud Trace exporter to be able to retrieve
 	// the collected spans.
-	_, shutdown, err := texporter.InstallNewPipeline(
-		[]texporter.Option{texporter.WithProjectID(projectID)},
-		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
-		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-	)
+	exporter, err := texporter.New(texporter.WithProjectID(projectID))
 	if err != nil {
 		log.Fatal(err)
 	}
-	return shutdown
+	tp := sdktrace.NewTracerProvider(
+		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
+		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
+		sdktrace.WithSampler(sdktrace.AlwaysSample()),
+		sdktrace.WithBatcher(exporter))
+
+	otel.SetTracerProvider(tp)
+	return func() { tp.Shutdown(context.Background()) }
 }
 
 func main() {
