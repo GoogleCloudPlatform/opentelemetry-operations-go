@@ -33,8 +33,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
-	"github.com/golang/protobuf/ptypes"
-	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -404,15 +402,15 @@ func TestTimeIntervalStaggering(t *testing.T) {
 		t.Fatalf("conversion to PB failed: %v", err)
 	}
 
-	start, err := ptypes.Timestamp(interval.StartTime)
-	if err != nil {
+	if err := interval.StartTime.CheckValid(); err != nil {
 		t.Fatalf("unable to convert start time from PB: %v", err)
 	}
+	start := interval.StartTime.AsTime()
 
-	end, err := ptypes.Timestamp(interval.EndTime)
-	if err != nil {
+	if err := interval.EndTime.CheckValid(); err != nil {
 		t.Fatalf("unable to convert end time to PB: %v", err)
 	}
+	end := interval.EndTime.AsTime()
 
 	if end.Before(start.Add(time.Millisecond)) {
 		t.Fatalf("expected end=%v to be at least %v after start=%v, but it wasn't", end, time.Millisecond, start)
@@ -427,15 +425,15 @@ func TestTimeIntervalPassthru(t *testing.T) {
 		t.Fatalf("conversion to PB failed: %v", err)
 	}
 
-	start, err := ptypes.Timestamp(interval.StartTime)
-	if err != nil {
+	if err := interval.StartTime.CheckValid(); err != nil {
 		t.Fatalf("unable to convert start time from PB: %v", err)
 	}
+	start := interval.StartTime.AsTime()
 
-	end, err := ptypes.Timestamp(interval.EndTime)
-	if err != nil {
+	if err := interval.EndTime.CheckValid(); err != nil {
 		t.Fatalf("unable to convert end time to PB: %v", err)
 	}
+	end := interval.EndTime.AsTime()
 
 	assert.Equal(t, start, tm)
 	assert.Equal(t, end, tm.Add(time.Second))
@@ -443,11 +441,11 @@ func TestTimeIntervalPassthru(t *testing.T) {
 
 type mock struct {
 	monitoringpb.UnimplementedMetricServiceServer
-	createTimeSeries       func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*empty.Empty, error)
+	createTimeSeries       func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error)
 	createMetricDescriptor func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error)
 }
 
-func (m *mock) CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*empty.Empty, error) {
+func (m *mock) CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
 	return m.createTimeSeries(ctx, req)
 }
 
@@ -463,7 +461,7 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 	ch := make(chan []string, 1)
 
 	m := mock{
-		createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*empty.Empty, error) {
+		createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
 			md, _ := metadata.FromIncomingContext(ctx)
 			ch <- md.Get("User-Agent")
 			return &emptypb.Empty{}, nil
