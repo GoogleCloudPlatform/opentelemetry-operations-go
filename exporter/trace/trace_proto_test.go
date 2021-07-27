@@ -33,18 +33,18 @@ func genSpanContext() trace.SpanContext {
 
 func TestTraceProto_linksProtoFromLinks(t *testing.T) {
 	t.Run("Should be nil when no links", func(t *testing.T) {
-		assert.Nil(t, linksProtoFromLinks([]trace.Link{}))
+		assert.Nil(t, linksProtoFromLinks([]sdktrace.Link{}))
 	})
 
 	t.Run("Can convert one link", func(t *testing.T) {
 		spanContext := genSpanContext()
-		link := trace.Link{
+		link := sdktrace.Link{
 			SpanContext: spanContext,
 			Attributes: []attribute.KeyValue{
 				attribute.String("hello", "world"),
 			},
 		}
-		linksPb := linksProtoFromLinks([]trace.Link{link})
+		linksPb := linksProtoFromLinks([]sdktrace.Link{link})
 
 		assert.NotNil(t, linksPb)
 		assert.EqualValues(t, linksPb.DroppedLinksCount, 0)
@@ -62,11 +62,11 @@ func TestTraceProto_linksProtoFromLinks(t *testing.T) {
 	})
 
 	t.Run("Drops links when there are more than 128", func(t *testing.T) {
-		var links []trace.Link
+		var links []sdktrace.Link
 		for i := 0; i < 148; i++ {
 			links = append(
 				links,
-				trace.Link{
+				sdktrace.Link{
 					SpanContext: genSpanContext(),
 					Attributes: []attribute.KeyValue{
 						attribute.String("hello", "world"),

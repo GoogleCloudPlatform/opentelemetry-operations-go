@@ -45,13 +45,13 @@ const (
 
 	// Attributes recorded on the span for the requests.
 	// Only trace exporters will need them.
-	HostAttribute       = "http.host"
-	MethodAttribute     = "http.method"
-	PathAttribute       = "http.path"
-	URLAttribute        = "http.url"
-	UserAgentAttribute  = "http.user_agent"
-	StatusCodeAttribute = "http.status_code"
-	ServiceAttribute    = "service.name"
+	hostAttribute       = "http.host"
+	methodAttribute     = "http.method"
+	pathAttribute       = "http.path"
+	urlAttribute        = "http.url"
+	userAgentAttribute  = "http.user_agent"
+	statusCodeAttribute = "http.status_code"
+	serviceAttribute    = "service.name"
 
 	labelHTTPHost       = `/http/host`
 	labelHTTPMethod     = `/http/method`
@@ -64,14 +64,6 @@ const (
 )
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
-
-func generateDisplayName(s sdktrace.ReadOnlySpan, format DisplayNameFormatter) string {
-	if format != nil {
-		return format(s)
-	}
-	return s.Name()
-	// TODO(ymotongpoo): add cases for "Send" and "Recv".
-}
 
 // If there are duplicate keys present in the list of attributes,
 // then the first value found for the key is preserved.
@@ -95,7 +87,7 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 	return attributes
 }
 
-func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []attribute.KeyValue, projectID string, format DisplayNameFormatter) *tracepb.Span {
+func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, projectID string) *tracepb.Span {
 	if s == nil {
 		return nil
 	}
@@ -103,12 +95,10 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []att
 	traceIDString := s.SpanContext().TraceID().String()
 	spanIDString := s.SpanContext().SpanID().String()
 
-	displayName := generateDisplayName(s, format)
-
 	sp := &tracepb.Span{
 		Name:                    "projects/" + projectID + "/traces/" + traceIDString + "/spans/" + spanIDString,
 		SpanId:                  spanIDString,
-		DisplayName:             trunc(displayName, 128),
+		DisplayName:             trunc(s.Name(), 128),
 		StartTime:               timestampProto(s.StartTime()),
 		EndTime:                 timestampProto(s.EndTime()),
 		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.Parent().IsRemote()},
@@ -127,7 +117,7 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []att
 		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN)}
 	}
 
-	attributes := append(attributeWithLabelsFromResources(s), defaultTraceAttributes...)
+	attributes := attributeWithLabelsFromResources(s)
 	copyAttributes(&sp.Attributes, attributes)
 	// NOTE(ymotongpoo): omitting copyMonitoringReesourceAttributes()
 
@@ -189,7 +179,7 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []att
 // Converts OTel span links to Cloud Trace links proto in order. If there are
 // more than maxNumLinks links, the first maxNumLinks will be taken and the rest
 // dropped.
-func linksProtoFromLinks(links []trace.Link) *tracepb.Span_Links {
+func linksProtoFromLinks(links []sdktrace.Link) *tracepb.Span_Links {
 	numLinks := len(links)
 	if numLinks == 0 {
 		return nil
@@ -242,17 +232,17 @@ func copyAttributes(out **tracepb.Span_Attributes, in []attribute.KeyValue) {
 			continue
 		}
 		switch kv.Key {
-		case PathAttribute:
+		case pathAttribute:
 			(*out).AttributeMap[labelHTTPPath] = av
-		case HostAttribute:
+		case hostAttribute:
 			(*out).AttributeMap[labelHTTPHost] = av
-		case MethodAttribute:
+		case methodAttribute:
 			(*out).AttributeMap[labelHTTPMethod] = av
-		case UserAgentAttribute:
+		case userAgentAttribute:
 			(*out).AttributeMap[labelHTTPUserAgent] = av
-		case StatusCodeAttribute:
+		case statusCodeAttribute:
 			(*out).AttributeMap[labelHTTPStatusCode] = av
-		case ServiceAttribute:
+		case serviceAttribute:
 			(*out).AttributeMap[labelService] = av
 		default:
 			if len(kv.Key) > 128 {
