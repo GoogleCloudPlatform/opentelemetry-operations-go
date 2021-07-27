@@ -134,7 +134,7 @@ func (s *Server) respond(ctx context.Context, testID string, res *response) erro
 }
 
 func newTraceProvider() (*sdktrace.TracerProvider, error) {
-	exporter, err := texporter.NewExporter(texporter.WithProjectID(projectID))
+	exporter, err := texporter.New(texporter.WithProjectID(projectID))
 	if err != nil {
 		return nil, err
 	}

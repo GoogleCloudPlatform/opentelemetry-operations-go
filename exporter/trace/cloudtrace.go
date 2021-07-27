@@ -21,10 +21,8 @@ import (
 	"fmt"
 	"time"
 
-	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.opentelemetry.io/otel/trace"
 
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"golang.org/x/oauth2/google"
@@ -147,38 +145,8 @@ type Exporter struct {
 	traceExporter *traceExporter
 }
 
-// InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
-func InstallNewPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (trace.TracerProvider, func(), error) {
-	tp, shutdown, err := NewExportPipeline(opts, topts...)
-	if err != nil {
-		return nil, nil, err
-	}
-	otel.SetTracerProvider(tp)
-	return tp, shutdown, err
-}
-
-// NewExportPipeline sets up a complete export pipeline with the recommended setup
-// for trace provider. Returns provider, shutdown function, and errors.
-func NewExportPipeline(opts []Option, topts ...sdktrace.TracerProviderOption) (trace.TracerProvider, func(), error) {
-	// TODO(suereth): Don't flesh options twice.
-	o := options{Context: context.Background()}
-	for _, opt := range opts {
-		opt(&o)
-	}
-	exporter, err := newExporterWithOptions(&o)
-	if err != nil {
-		return nil, nil, err
-	}
-	tp := sdktrace.NewTracerProvider(
-		append(topts,
-			sdktrace.WithBatcher(exporter, o.BatchSpanProcessorOptions...))...)
-	return tp, func() {
-		tp.Shutdown(context.Background())
-	}, nil
-}
-
-// NewExporter creates a new Exporter thats implements trace.Exporter.
-func NewExporter(opts ...Option) (*Exporter, error) {
+// New creates a new Exporter thats implements trace.Exporter.
+func New(opts ...Option) (*Exporter, error) {
 	o := options{Context: context.Background()}
 	for _, opt := range opts {
 		opt(&o)

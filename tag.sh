@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2020, Google Inc.
+# Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 readonly PROGNAME=$(basename "$0")
 readonly PROGDIR=$(pwd)
 
-readonly EXCLUDE_PACKAGES="tools"
+readonly EXCLUDE_PACKAGES="tools|e2e-test-server"
 readonly SEMVER_REGEX="v(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?"
 
 usage() {
