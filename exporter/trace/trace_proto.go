@@ -65,14 +65,6 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
 
-func generateDisplayName(s sdktrace.ReadOnlySpan, format DisplayNameFormatter) string {
-	if format != nil {
-		return format(s)
-	}
-	return s.Name()
-	// TODO(ymotongpoo): add cases for "Send" and "Recv".
-}
-
 // If there are duplicate keys present in the list of attributes,
 // then the first value found for the key is preserved.
 func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyValue {
@@ -95,7 +87,7 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 	return attributes
 }
 
-func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []attribute.KeyValue, projectID string, format DisplayNameFormatter) *tracepb.Span {
+func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, projectID string) *tracepb.Span {
 	if s == nil {
 		return nil
 	}
@@ -103,12 +95,10 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []att
 	traceIDString := s.SpanContext().TraceID().String()
 	spanIDString := s.SpanContext().SpanID().String()
 
-	displayName := generateDisplayName(s, format)
-
 	sp := &tracepb.Span{
 		Name:                    "projects/" + projectID + "/traces/" + traceIDString + "/spans/" + spanIDString,
 		SpanId:                  spanIDString,
-		DisplayName:             trunc(displayName, 128),
+		DisplayName:             trunc(s.Name(), 128),
 		StartTime:               timestampProto(s.StartTime()),
 		EndTime:                 timestampProto(s.EndTime()),
 		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.Parent().IsRemote()},
@@ -127,7 +117,7 @@ func protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, defaultTraceAttributes []att
 		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN)}
 	}
 
-	attributes := append(attributeWithLabelsFromResources(s), defaultTraceAttributes...)
+	attributes := attributeWithLabelsFromResources(s)
 	copyAttributes(&sp.Attributes, attributes)
 	// NOTE(ymotongpoo): omitting copyMonitoringReesourceAttributes()
 
