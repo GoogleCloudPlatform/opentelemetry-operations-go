@@ -46,8 +46,7 @@ func TestExporter_ExportSpan(t *testing.T) {
 	// Create Google Cloud Trace Exporter
 	exporter, err := New(
 		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithTraceClientOptions(clientOpt),
-		WithDefaultTraceAttributes(map[string]interface{}{"TEST_ATTRIBUTE": "TEST_VALUE"}))
+		WithTraceClientOptions(clientOpt))
 	assert.NoError(t, err)
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
@@ -79,72 +78,8 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.EqualValues(t, "", mock.GetSpan(0).GetStatus().Message)
 	assert.EqualValues(t, codepb.Code_UNKNOWN, mock.GetSpan(1).GetStatus().Code)
 	assert.EqualValues(t, "Error Message", mock.GetSpan(1).GetStatus().Message)
-	assert.EqualValues(t, "TEST_VALUE", mock.GetSpan(0).Attributes.AttributeMap["TEST_ATTRIBUTE"].GetStringValue().Value)
 	assert.Nil(t, mock.GetSpan(0).Links)
 	assert.Len(t, mock.GetSpan(1).Links.Link, 1)
-}
-
-func TestExporter_DisplayNameNoFormatter(t *testing.T) {
-	// Initial test precondition
-	mock := cloudmock.NewCloudMock()
-	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
-
-	spanName := "span1234"
-
-	// Create Google Cloud Trace Exporter
-	exporter, err := New(
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithTraceClientOptions(clientOpt),
-		WithDisplayNameFormatter(nil))
-	assert.NoError(t, err)
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithBatcher(exporter))
-
-	otel.SetTracerProvider(tp)
-	shutdown := func() { tp.Shutdown(context.Background()) }
-
-	_, span := otel.Tracer("test-tracer").Start(context.Background(), spanName)
-	span.End()
-	assert.True(t, span.SpanContext().IsValid())
-
-	// wait exporter to shutdown (closes grpc connection)
-	shutdown()
-	assert.EqualValues(t, 1, mock.GetNumSpans())
-	assert.EqualValues(t, spanName, mock.GetSpan(0).DisplayName.Value)
-}
-
-func TestExporter_DisplayNameFormatter(t *testing.T) {
-	// Initial test precondition
-	mock := cloudmock.NewCloudMock()
-	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
-
-	spanName := "span1234"
-	format := func(s sdktrace.ReadOnlySpan) string {
-		return "TEST_FORMAT" + s.Name()
-	}
-
-	// Create Google Cloud Trace Exporter
-	exporter, err := New(
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithTraceClientOptions(clientOpt),
-		WithDisplayNameFormatter(format))
-	assert.NoError(t, err)
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithBatcher(exporter))
-
-	otel.SetTracerProvider(tp)
-	shutdown := func() { tp.Shutdown(context.Background()) }
-
-	_, span := otel.Tracer("test-tracer").Start(context.Background(), spanName)
-	span.End()
-	assert.True(t, span.SpanContext().IsValid())
-
-	// wait exporter to shutdown (closes grpc connection)
-	shutdown()
-	assert.EqualValues(t, 1, mock.GetNumSpans())
-	assert.EqualValues(t, "TEST_FORMAT"+spanName, mock.GetSpan(0).DisplayName.Value)
 }
 
 func TestExporter_Timeout(t *testing.T) {

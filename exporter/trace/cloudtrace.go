@@ -33,10 +33,6 @@ import (
 // Option is function type that is passed to the exporter initialization function.
 type Option func(*options)
 
-// DisplayNameFormatter is is a function that produces the display name of a span
-// given its ReadOnlySpan
-type DisplayNameFormatter func(sdktrace.ReadOnlySpan) string
-
 // options contains options for configuring the exporter.
 type options struct {
 	// ProjectID is the identifier of the Stackdriver
@@ -49,15 +45,6 @@ type options struct {
 	// project, e.g. on-premise resource like k8s_container or generic_task.
 	ProjectID string
 
-	// Location is the identifier of the GCP or AWS cloud region/zone in which
-	// the data for a resource is stored.
-	// If not set, it will default to the location provided by the metadata server.
-	//
-	// It will be used in the location label of a Stackdriver monitored resource
-	// if the resource does not inherently belong to a specific project, e.g.
-	// on-premise resource like k8s_container or generic_task.
-	Location string
-
 	// OnError is the hook to be called when there is
 	// an error uploading the stats or tracing data.
 	// If no custom hook is set, errors are logged.
@@ -69,9 +56,9 @@ type options struct {
 	// Optional.
 	TraceClientOptions []option.ClientOption
 
-	// DefaultTraceAttributes will be appended to every span that is exported to
-	// Stackdriver Trace.
-	DefaultTraceAttributes []attribute.KeyValue
+	// BatchSpanProcessorOptions are additional options to be based
+	// to the underlying BatchSpanProcessor when call making a new export pipeline.
+	BatchSpanProcessorOptions []sdktrace.BatchSpanProcessorOption
 
 	// Context allows you to provide a custom context for API calls.
 	//
@@ -86,11 +73,6 @@ type options struct {
 
 	// Timeout for all API calls. If not set, defaults to 5 seconds.
 	Timeout time.Duration
-
-	// DisplayNameFormatter is a function that produces the display name of a span
-	// given its ReadOnlySpan.
-	// Optional. Default display name for ReadOnlySpan s is "{s.Name}"
-	DisplayNameFormatter
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -132,22 +114,6 @@ func WithContext(ctx context.Context) func(o *options) {
 func WithTimeout(t time.Duration) func(o *options) {
 	return func(o *options) {
 		o.Timeout = t
-	}
-}
-
-// WithDisplayNameFormatter sets the way span's display names will be
-// generated from ReadOnlySpan
-func WithDisplayNameFormatter(f DisplayNameFormatter) func(o *options) {
-	return func(o *options) {
-		o.DisplayNameFormatter = f
-	}
-}
-
-// WithDefaultTraceAttributes sets the attributes that will be appended
-// to every span by default
-func WithDefaultTraceAttributes(attr map[string]interface{}) func(o *options) {
-	return func(o *options) {
-		o.DefaultTraceAttributes = createKeyValueAttributes(attr)
 	}
 }
 
