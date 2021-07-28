@@ -20,21 +20,21 @@ import (
 )
 
 func TestTraceContextHeaderFormat(t *testing.T) {
-	valid_trace_id := "d36a105d7002f0dee73c0dfb9553764a"
-	valid_span_id := "f5fcf8089dec2751839"
+	validTraceID := "d36a105d7002f0dee73c0dfb9553764a"
+	validSpanID := "f5fcf8089dec2751839"
 
-	header := fmt.Sprintf("%s/%s;o=1", valid_trace_id, valid_span_id)
+	header := fmt.Sprintf("%s/%s;o=1", validTraceID, validSpanID)
 	match := TraceContextHeaderRe.FindStringSubmatch(header)
 	names := TraceContextHeaderRe.SubexpNames()
 	for i, n := range match {
 		switch names[i] {
 		case "trace_id":
-			if n != valid_trace_id {
-				t.Errorf("Expected %s, but got %s", valid_trace_id, n)
+			if n != validTraceID {
+				t.Errorf("Expected %s, but got %s", validTraceID, n)
 			}
 		case "span_id":
-			if n != valid_span_id {
-				t.Errorf("Expected %s, but got %s", valid_span_id, n)
+			if n != validSpanID {
+				t.Errorf("Expected %s, but got %s", validSpanID, n)
 			}
 		case "trace_flags":
 			if n != "1" {
