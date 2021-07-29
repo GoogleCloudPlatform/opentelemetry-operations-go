@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"go.opentelemetry.io/otel/propagation"
@@ -29,7 +30,7 @@ import (
 const TraceContextHeaderName = "x-cloud-trace-context"
 
 // TraceContextHeaderFormat is the regular expression pattan for valid Cloud Trace header value
-const TraceContextHeaderFormat = "(?P<trace_id>[0-9a-f]{32})/(?P<span_id>[0-9]{1,20});o=(?P<trace_flags>[0-9])"
+const TraceContextHeaderFormat = "(?P<trace_id>[0-9a-f]{32})/(?P<span_id>[0-9]{1,20})(;o=(?P<trace_flags>[0-9]))"
 
 // TraceContextHeaderRe is a regular expression object of TraceContextHeaderFormat.
 var TraceContextHeaderRe = regexp.MustCompile(TraceContextHeaderFormat)
@@ -63,9 +64,17 @@ func (p *cloudTraceFormatPropagator) Inject(ctx context.Context, carrier propaga
 	span := trace.SpanFromContext(ctx)
 	sc := span.SpanContext()
 
-	header := fmt.Sprintf("%s/%s;o=%s",
+	// https://cloud.google.com/trace/docs/setup#force-trace
+	// Trace ID: 32-char hexadecimal value representing a 128-bit number.
+	// Span ID: decimal representation of the unsigned interger.
+	sidHex := sc.SpanID().String()
+	sid, err := strconv.ParseUint(sidHex, 16, 64)
+	if err != nil {
+		return
+	}
+	header := fmt.Sprintf("%s/%d;o=%s",
 		sc.TraceID().String(),
-		sc.SpanID().String(),
+		sid,
 		sc.TraceFlags().String(),
 	)
 	carrier.Set(TraceContextHeaderName, header)
@@ -73,12 +82,8 @@ func (p *cloudTraceFormatPropagator) Inject(ctx context.Context, carrier propaga
 
 // Extract extacts a context from the carrier if the header contains Google Cloud Trace header format.
 func (p *cloudTraceFormatPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
-	if ctx == nil {
-		ctx = context.Background()
-	}
-
 	header := p.getHeaderValue(carrier)
-	if header != "" {
+	if header == "" {
 		return ctx
 	}
 
@@ -98,18 +103,28 @@ func (p *cloudTraceFormatPropagator) Extract(ctx context.Context, carrier propag
 			traceFlags = match[i]
 		}
 	}
+	// non-reording Span
 	if traceID == strings.Repeat("0", 32) || spanID == "0" {
 		return ctx
 	}
 
+	// https://cloud.google.com/trace/docs/setup#force-trace
+	// Trace ID: 32-char hexadecimal value representing a 128-bit number.
+	// Span ID: decimal representation of the unsigned interger.
 	tid, err := trace.TraceIDFromHex(traceID)
 	if err != nil {
 		return ctx
 	}
-	sid, err := trace.SpanIDFromHex(spanID)
+	sidUint, err := strconv.ParseUint(spanID, 10, 64)
 	if err != nil {
 		return ctx
 	}
+	sid, err := trace.SpanIDFromHex(strconv.FormatUint(sidUint, 16))
+	if err != nil {
+		return ctx
+	}
+	// XCTC's TRA
+	// https://cloud.google.com/trace/docs/setup#force-trace
 	tf := trace.TraceFlags(0x01)
 	if traceFlags == "0" {
 		tf = trace.TraceFlags(0x00)
