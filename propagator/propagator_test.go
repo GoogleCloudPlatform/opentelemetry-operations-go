@@ -19,26 +19,55 @@ import (
 	"testing"
 )
 
-func TestTraceContextHeaderFormat(t *testing.T) {
-	validTraceID := "d36a105d7002f0dee73c0dfb9553764a"
-	validSpanID := "f5fcf8089dec2751839"
+func TestValidTraceContextHeaderFormats(t *testing.T) {
 
-	header := fmt.Sprintf("%s/%s;o=1", validTraceID, validSpanID)
-	match := TraceContextHeaderRe.FindStringSubmatch(header)
-	names := TraceContextHeaderRe.SubexpNames()
-	for i, n := range match {
-		switch names[i] {
-		case "trace_id":
-			if n != validTraceID {
-				t.Errorf("Expected %s, but got %s", validTraceID, n)
-			}
-		case "span_id":
-			if n != validSpanID {
-				t.Errorf("Expected %s, but got %s", validSpanID, n)
-			}
-		case "trace_flags":
-			if n != "1" {
-				t.Errorf("Expected %s, but got %s", "1", n)
+	headers := []struct {
+		TraceID  string
+		SpanID   string
+		FlagPart string
+		n        string
+	}{
+		{
+			"d36a105d7002f0dee73c0dfb9553764a",
+			"139592093",
+			";o=1",
+			"1",
+		},
+		{
+			"d36a105d7002f0dee73c0dfb9553764a",
+			"139592093",
+			";o=0",
+			"0",
+		},
+		{
+			"d36a105d7002f0dee73c0dfb9553764a",
+			"139592093",
+			"",
+			"",
+		},
+	}
+	for _, h := range headers {
+		header := fmt.Sprintf("%s/%s%s", h.TraceID, h.SpanID, h.FlagPart)
+		match := TraceContextHeaderRe.FindStringSubmatch(header)
+		if len(match) < 2 {
+			t.Errorf("%s: did not match", header)
+		}
+		names := TraceContextHeaderRe.SubexpNames()
+
+		for i, n := range match {
+			switch names[i] {
+			case "trace_id":
+				if n != h.TraceID {
+					t.Errorf("Expected %s, but got %s", h.TraceID, n)
+				}
+			case "span_id":
+				if n != h.SpanID {
+					t.Errorf("Expected %s, but got %s", h.SpanID, n)
+				}
+			case "trace_flags":
+				if n != h.n {
+					t.Errorf("Expected %s, but got %s", h.n, n)
+				}
 			}
 		}
 	}

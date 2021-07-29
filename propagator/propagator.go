@@ -30,7 +30,7 @@ import (
 const TraceContextHeaderName = "x-cloud-trace-context"
 
 // TraceContextHeaderFormat is the regular expression pattan for valid Cloud Trace header value
-const TraceContextHeaderFormat = "(?P<trace_id>[0-9a-f]{32})/(?P<span_id>[0-9]{1,20})(;o=(?P<trace_flags>[0-9]))"
+const TraceContextHeaderFormat = "(?P<trace_id>[0-9a-f]{32})/(?P<span_id>[0-9]{1,20})(;o=(?P<trace_flags>[0-9]))?"
 
 // TraceContextHeaderRe is a regular expression object of TraceContextHeaderFormat.
 var TraceContextHeaderRe = regexp.MustCompile(TraceContextHeaderFormat)
