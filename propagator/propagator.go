@@ -45,7 +45,6 @@ func New() propagation.TextMapPropagator {
 }
 
 func (p CloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCarrier) string {
-	log.Printf("[propagator debug] carrier: %v", carrier.Keys())
 	header := carrier.Get(TraceContextHeaderName)
 	if header != "" {
 		return header
@@ -66,7 +65,6 @@ func (p CloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCa
 func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagation.TextMapCarrier) {
 	span := trace.SpanFromContext(ctx)
 	sc := span.SpanContext()
-	log.Printf("[propagator debug] inject trace: %v, span: %v", sc.TraceID().String(), sc.SpanID().String())
 
 	// https://cloud.google.com/trace/docs/setup#force-trace
 	// Trace ID: 32-char hexadecimal value representing a 128-bit number.
@@ -117,7 +115,7 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 	// Span ID: decimal representation of the unsigned interger.
 	tid, err := trace.TraceIDFromHex(traceID)
 	if err != nil {
-		log.Printf("[propagator debug] invalid trace id %#v: %v", traceID, err)
+		log.Printf("CloudTraceFormatPropagator: invalid trace id %#v: %v", traceID, err)
 		return ctx
 	}
 	sidUint, err := strconv.ParseUint(spanID, 10, 64)
@@ -143,7 +141,6 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 		Remote:     true,
 	}
 	sc := trace.NewSpanContext(scConfig)
-	log.Printf("[propagator debug] trace: %v, span: %v, flag: %v", sc.TraceID().String(), sc.SpanID().String(), sc.TraceFlags().String())
 	return trace.ContextWithRemoteSpanContext(ctx, sc)
 }
 
