@@ -41,7 +41,6 @@ var traceContextHeaders = []string{TraceContextHeaderName}
 type CloudTraceFormatPropagator struct{}
 
 func New() propagation.TextMapPropagator {
-	log.Printf("*** new propagator ***")
 	return CloudTraceFormatPropagator{}
 }
 
