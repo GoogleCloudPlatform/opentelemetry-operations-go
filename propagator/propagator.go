@@ -50,6 +50,8 @@ func (p CloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCa
 		return header
 	}
 
+	// Currently, header name can be in different cases (eg. x-cloud-trace-context),
+	// the following part is for handling those cases.
 	for _, key := range carrier.Keys() {
 		if strings.ToLower(key) == TraceContextHeaderName {
 			header = carrier.Get(key)
