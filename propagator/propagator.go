@@ -130,7 +130,7 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 		log.Printf("CloudTraceFormatPropagator: on SpanIDFromHex %v", err)
 		return ctx
 	}
-	// XCTC's TRA
+	// XCTC's TRACE_TRUE option
 	// https://cloud.google.com/trace/docs/setup#force-trace
 	tf := trace.TraceFlags(0x01)
 	if traceFlags == "0" {
