@@ -17,6 +17,7 @@ package propagator
 import (
 	"context"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -37,12 +38,15 @@ var TraceContextHeaderRe = regexp.MustCompile(TraceContextHeaderFormat)
 
 var traceContextHeaders = []string{TraceContextHeaderName}
 
-// CloudTraceFormatPropagator is a propagator for Cloud Trace format.
-var CloudTraceFormatPropagator = &cloudTraceFormatPropagator{}
+type CloudTraceFormatPropagator struct{}
 
-type cloudTraceFormatPropagator struct{}
+func New() propagation.TextMapPropagator {
+	log.Printf("*** new propagator ***")
+	return CloudTraceFormatPropagator{}
+}
 
-func (p *cloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCarrier) string {
+func (p CloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCarrier) string {
+	log.Printf("[propagator debug] carrier: %v", carrier.Keys())
 	header := carrier.Get(TraceContextHeaderName)
 	if header != "" {
 		return header
@@ -60,9 +64,10 @@ func (p *cloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapC
 }
 
 // Inject injects a context to the carrier following Google Cloud Trace format.
-func (p *cloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagation.TextMapCarrier) {
+func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagation.TextMapCarrier) {
 	span := trace.SpanFromContext(ctx)
 	sc := span.SpanContext()
+	log.Printf("[propagator debug] inject trace: %v, span: %v", sc.TraceID().String(), sc.SpanID().String())
 
 	// https://cloud.google.com/trace/docs/setup#force-trace
 	// Trace ID: 32-char hexadecimal value representing a 128-bit number.
@@ -81,7 +86,7 @@ func (p *cloudTraceFormatPropagator) Inject(ctx context.Context, carrier propaga
 }
 
 // Extract extacts a context from the carrier if the header contains Google Cloud Trace header format.
-func (p *cloudTraceFormatPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
+func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
 	header := p.getHeaderValue(carrier)
 	if header == "" {
 		return ctx
@@ -113,14 +118,17 @@ func (p *cloudTraceFormatPropagator) Extract(ctx context.Context, carrier propag
 	// Span ID: decimal representation of the unsigned interger.
 	tid, err := trace.TraceIDFromHex(traceID)
 	if err != nil {
+		log.Printf("[propagator debug] invalid trace id %#v: %v", traceID, err)
 		return ctx
 	}
 	sidUint, err := strconv.ParseUint(spanID, 10, 64)
 	if err != nil {
+		log.Printf("CloudTraceFormatPropagator: on span ID conversion: %v", err)
 		return ctx
 	}
-	sid, err := trace.SpanIDFromHex(strconv.FormatUint(sidUint, 16))
+	sid, err := trace.SpanIDFromHex(fmt.Sprintf("%016x", sidUint))
 	if err != nil {
+		log.Printf("CloudTraceFormatPropagator: on SpanIDFromHex %v", err)
 		return ctx
 	}
 	// XCTC's TRA
@@ -136,12 +144,13 @@ func (p *cloudTraceFormatPropagator) Extract(ctx context.Context, carrier propag
 		Remote:     true,
 	}
 	sc := trace.NewSpanContext(scConfig)
+	log.Printf("[propagator debug] trace: %v, span: %v, flag: %v", sc.TraceID().String(), sc.SpanID().String(), sc.TraceFlags().String())
 	return trace.ContextWithRemoteSpanContext(ctx, sc)
 }
 
 // Fields just returns the header name.
-func (p *cloudTraceFormatPropagator) Fields() []string {
+func (p CloudTraceFormatPropagator) Fields() []string {
 	return traceContextHeaders
 }
 
-var _ propagation.TextMapPropagator = (*cloudTraceFormatPropagator)(nil)
+var _ propagation.TextMapPropagator = CloudTraceFormatPropagator{}
