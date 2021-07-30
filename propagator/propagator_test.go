@@ -81,16 +81,25 @@ func TestValidTraceContextHeaderFormats(t *testing.T) {
 
 func TestCloudTraceContextHeaderExtract(t *testing.T) {
 	headers := []struct {
+		Key      string
 		TraceID  string
 		SpanID   string
 		FlagPart string
 	}{
 		{
+			"X-Cloud-Trace-Context",
 			"d36a105d7002f0dee73c0dfb9553764a",
 			"139592093",
 			"1",
 		},
 		{
+			"X-Cloud-Trace-Context",
+			"d36a105d7002f0dee73c0dfb9553764a",
+			"139592093",
+			"0",
+		},
+		{
+			"x-cloud-trace-context",
 			"d36a105d7002f0dee73c0dfb9553764a",
 			"139592093",
 			"0",
@@ -100,7 +109,7 @@ func TestCloudTraceContextHeaderExtract(t *testing.T) {
 	for _, h := range headers {
 		req := httptest.NewRequest("GET", "http://example.com", nil)
 		value := fmt.Sprintf("%s/%s;o=%s", h.TraceID, h.SpanID, h.FlagPart)
-		req.Header.Set("X-Cloud-Trace-Context", value)
+		req.Header.Set(h.Key, value)
 
 		ctx := context.Background()
 		propagator := New()
