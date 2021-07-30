@@ -107,7 +107,7 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 			traceFlags = match[i]
 		}
 	}
-	// non-reording Span
+	// non-recording Span
 	if traceID == strings.Repeat("0", 32) || spanID == "0" {
 		return ctx
 	}
