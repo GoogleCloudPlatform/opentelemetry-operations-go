@@ -17,12 +17,25 @@ package propagator
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 
+	"github.com/google/go-cmp/cmp"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+)
+
+const (
+	validTraceIDStr = "d36a105d7002f0dee73c0dfb9553764a"
+	validSpanIDStr  = "139592093"
+	xctcCamel       = "X-Cloud-Trace-Context"
+)
+
+var (
+	validTraceID = trace.TraceID{0xd3, 0x6a, 0x10, 0x5d, 0x70, 0x02, 0xf0, 0xde, 0xe7, 0x3c, 0x0d, 0xfb, 0x95, 0x53, 0x76, 0x4a}
+	validSpanID  = trace.SpanID{0x00, 0x00, 0x00, 0x00, 0x08, 0x52, 0x01, 0x9d}
 )
 
 func TestValidTraceContextHeaderFormats(t *testing.T) {
@@ -34,20 +47,20 @@ func TestValidTraceContextHeaderFormats(t *testing.T) {
 		n        string
 	}{
 		{
-			"d36a105d7002f0dee73c0dfb9553764a",
-			"139592093",
+			validTraceIDStr,
+			validSpanIDStr,
 			";o=1",
 			"1",
 		},
 		{
-			"d36a105d7002f0dee73c0dfb9553764a",
-			"139592093",
+			validTraceIDStr,
+			validSpanIDStr,
 			";o=0",
 			"0",
 		},
 		{
-			"d36a105d7002f0dee73c0dfb9553764a",
-			"139592093",
+			validTraceIDStr,
+			validSpanIDStr,
 			"",
 			"",
 		},
@@ -80,36 +93,36 @@ func TestValidTraceContextHeaderFormats(t *testing.T) {
 }
 
 func TestCloudTraceContextHeaderExtract(t *testing.T) {
-	headers := []struct {
-		Key      string
-		TraceID  string
-		SpanID   string
-		FlagPart string
+	testCases := []struct {
+		key      string
+		traceID  string
+		spanID   string
+		flagPart string
 	}{
 		{
 			"X-Cloud-Trace-Context",
-			"d36a105d7002f0dee73c0dfb9553764a",
-			"139592093",
+			validTraceIDStr,
+			validSpanIDStr,
 			"1",
 		},
 		{
 			"X-Cloud-Trace-Context",
-			"d36a105d7002f0dee73c0dfb9553764a",
-			"139592093",
+			validTraceIDStr,
+			validSpanIDStr,
 			"0",
 		},
 		{
 			"x-cloud-trace-context",
-			"d36a105d7002f0dee73c0dfb9553764a",
-			"139592093",
+			validTraceIDStr,
+			validSpanIDStr,
 			"0",
 		},
 	}
 
-	for _, h := range headers {
+	for _, c := range testCases {
 		req := httptest.NewRequest("GET", "http://example.com", nil)
-		value := fmt.Sprintf("%s/%s;o=%s", h.TraceID, h.SpanID, h.FlagPart)
-		req.Header.Set(h.Key, value)
+		value := fmt.Sprintf("%s/%s;o=%s", c.traceID, c.spanID, c.flagPart)
+		req.Header.Set(c.key, value)
 
 		ctx := context.Background()
 		propagator := New()
@@ -125,14 +138,75 @@ func TestCloudTraceContextHeaderExtract(t *testing.T) {
 
 		flag := fmt.Sprintf("%d", sc.TraceFlags())
 
-		if sc.TraceID().String() != h.TraceID {
-			t.Errorf("TraceID unmatch: expected %v, but got %v", h.TraceID, sc.TraceID())
+		if sc.TraceID().String() != c.traceID {
+			t.Errorf("TraceID unmatch: expected %v, but got %v", c.traceID, sc.TraceID())
 		}
-		if sidStr != h.SpanID {
-			t.Errorf("SpanID unmatch: expected %v, but got %v", h.SpanID, sidStr)
+		if sidStr != c.spanID {
+			t.Errorf("SpanID unmatch: expected %v, but got %v", c.spanID, sidStr)
 		}
-		if flag != h.FlagPart {
-			t.Errorf("FlagPart unmatch: expected %v, but got %v", h.FlagPart, flag)
+		if flag != c.flagPart {
+			t.Errorf("FlagPart unmatch: expected %v, but got %v", c.flagPart, flag)
 		}
+	}
+}
+
+func TestCloudTraceContextHeaderInject(t *testing.T) {
+	propagator := New()
+
+	testCases := []struct {
+		name        string
+		scc         trace.SpanContextConfig
+		wantHeaders map[string]string
+	}{
+		{
+			"valid TraceID and SpanID with sampled flag",
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: trace.FlagsSampled,
+			},
+			map[string]string{
+				TraceContextHeaderName: fmt.Sprintf("%s/%s;o=1", validTraceIDStr, validSpanIDStr),
+			},
+		},
+		{
+			"valid TraceID and SpanID without sampled flag",
+			trace.SpanContextConfig{
+				TraceID: validTraceID,
+				SpanID:  validSpanID,
+			},
+			map[string]string{
+				TraceContextHeaderName: fmt.Sprintf("%s/%s;o=0", validTraceIDStr, validSpanIDStr),
+			},
+		},
+		{
+			"valid TraceID and SpanID with sampled flag and proper camelcase header name",
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: trace.FlagsSampled,
+			},
+			map[string]string{
+				xctcCamel: fmt.Sprintf("%s/%s;o=1", validTraceIDStr, validSpanIDStr),
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			header := http.Header{}
+			ctx := trace.ContextWithSpanContext(
+				context.Background(),
+				trace.NewSpanContext(tc.scc),
+			)
+			propagator.Inject(ctx, propagation.HeaderCarrier(header))
+
+			for h, v := range tc.wantHeaders {
+				result, want := header.Get(h), v
+				if diff := cmp.Diff(want, result); diff != "" {
+					t.Errorf("%v, header: %s diff: %s", tc.name, h, diff)
+				}
+			}
+		})
 	}
 }

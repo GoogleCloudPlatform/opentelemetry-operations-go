@@ -76,10 +76,14 @@ func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagat
 	if err != nil {
 		return
 	}
-	header := fmt.Sprintf("%s/%d;o=%s",
+	flag, err := strconv.Atoi(sc.TraceFlags().String())
+	if err != nil {
+		return
+	}
+	header := fmt.Sprintf("%s/%d;o=%d",
 		sc.TraceID().String(),
 		sid,
-		sc.TraceFlags().String(),
+		flag,
 	)
 	carrier.Set(TraceContextHeaderName, header)
 }
