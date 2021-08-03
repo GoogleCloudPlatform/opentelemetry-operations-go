@@ -30,11 +30,11 @@ import (
 // https://cloud.google.com/trace/docs/setup#force-trace
 const TraceContextHeaderName = "x-cloud-trace-context"
 
-// TraceContextHeaderFormat is the regular expression pattan for valid Cloud Trace header value
-const TraceContextHeaderFormat = "(?P<trace_id>[0-9a-f]{32})/(?P<span_id>[0-9]{1,20})(;o=(?P<trace_flags>[0-9]))?"
+// traceContextHeaderFormat is the regular expression pattan for valid Cloud Trace header value
+const traceContextHeaderFormat = "^(?P<trace_id>[0-9a-f]{32})/(?P<span_id>[0-9]{1,20})(;o=(?P<trace_flags>[0-9]))?$"
 
-// TraceContextHeaderRe is a regular expression object of TraceContextHeaderFormat.
-var TraceContextHeaderRe = regexp.MustCompile(TraceContextHeaderFormat)
+// traceContextHeaderRe is a regular expression object of TraceContextHeaderFormat.
+var traceContextHeaderRe = regexp.MustCompile(traceContextHeaderFormat)
 
 var traceContextHeaders = []string{TraceContextHeaderName}
 
@@ -45,22 +45,7 @@ func New() propagation.TextMapPropagator {
 }
 
 func (p CloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCarrier) string {
-	header := carrier.Get(TraceContextHeaderName)
-	if header != "" {
-		return header
-	}
-
-	// Currently, header name can be in different cases (eg. x-cloud-trace-context),
-	// the following part is for handling those cases.
-	for _, key := range carrier.Keys() {
-		if strings.ToLower(key) == TraceContextHeaderName {
-			header = carrier.Get(key)
-			if header != "" {
-				return header
-			}
-		}
-	}
-	return ""
+	return carrier.Get(TraceContextHeaderName)
 }
 
 // Inject injects a context to the carrier following Google Cloud Trace format.
@@ -95,11 +80,11 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 		return ctx
 	}
 
-	match := TraceContextHeaderRe.FindStringSubmatch(header)
+	match := traceContextHeaderRe.FindStringSubmatch(header)
 	if match == nil {
 		return ctx
 	}
-	names := TraceContextHeaderRe.SubexpNames()
+	names := traceContextHeaderRe.SubexpNames()
 	var traceID, spanID, traceFlags string
 	for i, n := range names {
 		switch n {
@@ -155,4 +140,5 @@ func (p CloudTraceFormatPropagator) Fields() []string {
 	return traceContextHeaders
 }
 
+// Confirming if CloudTraceFormatPropagator satisifies the TextMapPropagator interface.
 var _ propagation.TextMapPropagator = CloudTraceFormatPropagator{}

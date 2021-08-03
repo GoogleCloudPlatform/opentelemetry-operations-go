@@ -38,8 +38,30 @@ var (
 	validSpanID  = trace.SpanID{0x00, 0x00, 0x00, 0x00, 0x08, 0x52, 0x01, 0x9d}
 )
 
-func TestValidTraceContextHeaderFormats(t *testing.T) {
+func TestGetHeaderValue(t *testing.T) {
+	// carrier.Get called in getHeaderValue should handle case sensitivity by spec.
+	// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/context/api-propagators.md#get
+	testCases := []string{
+		"X-Cloud-Trace-Context",
+		"x-cloud-trace-context",
+		"X-CLOUD-TRACE-CONTEXT",
+	}
 
+	dummyHeader := "dummy"
+
+	for _, tc := range testCases {
+		propagator := &CloudTraceFormatPropagator{}
+		carrier := propagation.HeaderCarrier{}
+		carrier.Set(tc, dummyHeader)
+
+		value := propagator.getHeaderValue(carrier)
+		if value != dummyHeader {
+			t.Errorf("Expected %s, but got %s", dummyHeader, value)
+		}
+	}
+}
+
+func TestValidTraceContextHeaderFormats(t *testing.T) {
 	headers := []struct {
 		TraceID  string
 		SpanID   string
@@ -67,11 +89,11 @@ func TestValidTraceContextHeaderFormats(t *testing.T) {
 	}
 	for _, h := range headers {
 		header := fmt.Sprintf("%s/%s%s", h.TraceID, h.SpanID, h.FlagPart)
-		match := TraceContextHeaderRe.FindStringSubmatch(header)
+		match := traceContextHeaderRe.FindStringSubmatch(header)
 		if len(match) < 2 {
 			t.Errorf("%s: did not match", header)
 		}
-		names := TraceContextHeaderRe.SubexpNames()
+		names := traceContextHeaderRe.SubexpNames()
 
 		for i, n := range match {
 			switch names[i] {
