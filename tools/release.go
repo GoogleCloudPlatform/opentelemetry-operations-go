@@ -18,7 +18,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/fs"
 	"log"
 	"os"
 	"os/exec"
@@ -47,7 +46,7 @@ type module string
 
 func allModules() ([]module, error) {
 	var out []module
-	err := filepath.Walk(".", func(path string, info fs.FileInfo, err error) error {
+	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
