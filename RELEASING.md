@@ -2,31 +2,27 @@
 
 ## Pre-Release
 
-Update go.mod for submodules to depend on the new release which will happen in the next step.
+```
+$ git fetch
+$ git checkout origin/main -b pre-release
+$ # ensure that version numbers in tools/release.go are what you want
+$ go run tools/release.go prepare
+$ git commit -a
+$ git push -u origin HEAD
+$ # create a PR with a link to draft release notes
+$ # get the PR reviewed and merged
+```
 
-1. Run the pre-release script. It creates a branch `pre_release_<new tag>` that will contain all release changes.
+## Release
 
-    ```
-    ./pre_release.sh -t <new tag>
-    ```
-
-2. Verify the changes.
-
-    ```
-    git diff main
-    ```
-
-    This should have changed the version for all modules to be `<new tag>`.
-
-3. TODO: Consider adding [Changelog](./CHANGELOG.md) and update this for each release.
-
-4. Push the changes to upstream and create a Pull Request on GitHub.
-    Be sure to include the curated changes from the [Changelog](./CHANGELOG.md) in the description.
-
-
-## Tag
-
-Once the Pull Request with all the version changes has been approved and merged it is time to tag the merged commit.
+```
+$ # do this after the pre-release PR is merged
+$ git fetch
+$ git checkout origin/main
+$ go run tools/release.go tag
+$ # make sure you don't have any stray tags lying around
+$ git push --tags
+```
 
 ***IMPORTANT***: It is critical you use the same tag that you used in the Pre-Release step!
 Failure to do so will leave things in a broken state.
@@ -35,32 +31,9 @@ Failure to do so will leave things in a broken state.
 It is critical you make sure the version you push upstream is correct.
 [Failure to do so will lead to minor emergencies and tough to work around](https://github.com/open-telemetry/opentelemetry-go/issues/331).
 
-1. Run the tag.sh script using the `<commit-hash>` of the commit on the main branch for the merged Pull Request.
+## Post-release
 
-    ```
-    ./tag.sh <new tag> <commit-hash>
-    ```
-
-2. Push tags to the upstream remote (not your fork: `github.com/GoogleCloudPlatform/opentelemetry-operations-go.git`).
-
-    ```
-    git push upstream <new tag>
-    ```
-
-## Release
-
-Finally create a Release for the new `<new tag>` on GitHub.
-
-Make sure all relevant changes for this release are included in the release notes and are in language that non-contributors to the project can understand. The `tag.sh` script generates commit logs since last release which can be used to derive the release notes from. These are generated using:
-
-```
-git --no-pager log --pretty=oneline "<last tag>..HEAD"
-```
-
-## Verify Examples
-
-After releasing verify that examples build outside of the repository.
-
+* Verify the examples
 ```
 ./verify_examples.sh
 ```
@@ -68,4 +41,6 @@ After releasing verify that examples build outside of the repository.
 The script copies examples into a different directory removes any `replace` declarations in `go.mod` and builds them.
 This ensures they build with the published release, not the local copy.
 
-Also update the examples maintained outside this repo at https://github.com/GoogleCloudPlatform/golang-samples/tree/master/opentelemetry.
+* Update the examples maintained outside this repo at https://github.com/GoogleCloudPlatform/golang-samples/tree/master/opentelemetry.
+
+* Update the collector exporter
