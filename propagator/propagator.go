@@ -30,7 +30,7 @@ import (
 // https://cloud.google.com/trace/docs/setup#force-trace
 const TraceContextHeaderName = "x-cloud-trace-context"
 
-// traceContextHeaderFormat is the regular expression pattan for valid Cloud Trace header value
+// traceContextHeaderFormat is the regular expression pattern for valid Cloud Trace header value
 const traceContextHeaderFormat = "^(?P<trace_id>[0-9a-f]{32})/(?P<span_id>[0-9]{1,20})(;o=(?P<trace_flags>[0-9]))?$"
 
 // traceContextHeaderRe is a regular expression object of TraceContextHeaderFormat.
