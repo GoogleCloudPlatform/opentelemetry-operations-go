@@ -55,6 +55,7 @@ func (p CloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCa
 }
 
 // Inject injects a context to the carrier following Google Cloud Trace format.
+// In this method, SpanID is expected to be stored in big endian.
 func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagation.TextMapCarrier) {
 	span := trace.SpanFromContext(ctx)
 	sc := span.SpanContext()
@@ -78,6 +79,7 @@ func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagat
 }
 
 // Extract extacts a context from the carrier if the header contains Google Cloud Trace header format.
+// In this method, SpanID in carrier is decimal, and it is converted to trace.SpanID in big endian.
 func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
 	header := p.getHeaderValue(carrier)
 	if header == "" {
