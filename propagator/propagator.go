@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -40,7 +41,7 @@ var traceContextHeaders = []string{TraceContextHeaderName}
 
 type CloudTraceFormatPropagator struct{}
 
-func New() propagation.TextMapPropagator {
+func New() CloudTraceFormatPropagator {
 	return CloudTraceFormatPropagator{}
 }
 
@@ -73,16 +74,11 @@ func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagat
 	carrier.Set(TraceContextHeaderName, header)
 }
 
-// Extract extacts a context from the carrier if the header contains Google Cloud Trace header format.
-func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
-	header := p.getHeaderValue(carrier)
-	if header == "" {
-		return ctx
-	}
-
+// spanContextFromHeader creates trace.SpanContext from XCTC header value.
+func (p CloudTraceFormatPropagator) spanContextFromHeader(header string) (sc trace.SpanContext, ok bool) {
 	match := traceContextHeaderRe.FindStringSubmatch(header)
 	if match == nil {
-		return ctx
+		return trace.SpanContext{}, false
 	}
 	names := traceContextHeaderRe.SubexpNames()
 	var traceID, spanID, traceFlags string
@@ -98,7 +94,7 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 	}
 	// non-recording Span
 	if traceID == strings.Repeat("0", 32) || spanID == "0" {
-		return ctx
+		return trace.SpanContext{}, false
 	}
 
 	// https://cloud.google.com/trace/docs/setup#force-trace
@@ -107,22 +103,22 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 	tid, err := trace.TraceIDFromHex(traceID)
 	if err != nil {
 		log.Printf("CloudTraceFormatPropagator: invalid trace id %#v: %v", traceID, err)
-		return ctx
+		return trace.SpanContext{}, false
 	}
 	sidUint, err := strconv.ParseUint(spanID, 10, 64)
 	if err != nil {
 		log.Printf("CloudTraceFormatPropagator: on span ID conversion: %v", err)
-		return ctx
+		return trace.SpanContext{}, false
 	}
 	sid, err := trace.SpanIDFromHex(fmt.Sprintf("%016x", sidUint))
 	if err != nil {
 		log.Printf("CloudTraceFormatPropagator: on SpanIDFromHex %v", err)
-		return ctx
+		return trace.SpanContext{}, false
 	}
 	// XCTC's TRACE_TRUE option
 	// https://cloud.google.com/trace/docs/setup#force-trace
 	tf := trace.TraceFlags(0x01)
-	if traceFlags == "0" {
+	if traceFlags == "0" || traceFlags == "" {
 		tf = trace.TraceFlags(0x00)
 	}
 	scConfig := trace.SpanContextConfig{
@@ -131,7 +127,25 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 		TraceFlags: tf,
 		Remote:     true,
 	}
-	sc := trace.NewSpanContext(scConfig)
+	return trace.NewSpanContext(scConfig), true
+}
+
+// SpanContextFromRequest extracts a trace.SpanContext from the HTTP request req.
+func (p CloudTraceFormatPropagator) SpanContextFromRequest(req *http.Request) (sc trace.SpanContext, ok bool) {
+	h := req.Header.Get(TraceContextHeaderName)
+	return p.spanContextFromHeader(h)
+}
+
+// Extract extacts a context from the carrier if the header contains Google Cloud Trace header format.
+func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
+	header := p.getHeaderValue(carrier)
+	if header == "" {
+		return ctx
+	}
+	sc, ok := p.spanContextFromHeader(header)
+	if !ok {
+		return ctx
+	}
 	return trace.ContextWithRemoteSpanContext(ctx, sc)
 }
 

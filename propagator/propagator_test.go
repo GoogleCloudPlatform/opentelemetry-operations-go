@@ -232,3 +232,71 @@ func TestCloudTraceContextHeaderInject(t *testing.T) {
 		})
 	}
 }
+
+func TestSpanContextFromRequest(t *testing.T) {
+	propagator := New()
+
+	testCases := []struct {
+		name     string
+		key      string
+		traceID  string
+		spanID   string
+		flagPart string
+		scc      trace.SpanContextConfig
+	}{
+		{
+			"camelcase, valid traceID and SpanID with flag",
+			"X-Cloud-Trace-Context",
+			validTraceIDStr,
+			validSpanIDStr,
+			";o=1",
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: trace.FlagsSampled,
+				Remote:     true,
+			},
+		},
+		{
+			"lowercase, valid traceID and SpanID with flag",
+			"x-cloud-trace-context",
+			validTraceIDStr,
+			validSpanIDStr,
+			";o=1",
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: trace.FlagsSampled,
+				Remote:     true,
+			},
+		},
+		{
+			"camelcase, valid traceID and SpanID without flag",
+			"X-Cloud-Trace-Context",
+			validTraceIDStr,
+			validSpanIDStr,
+			"",
+			trace.SpanContextConfig{
+				TraceID: validTraceID,
+				SpanID:  validSpanID,
+				Remote:  true,
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest("GET", "http://example.com", nil)
+			req.Header.Set(tc.key, fmt.Sprintf("%s/%s%s", tc.traceID, tc.spanID, tc.flagPart))
+
+			sc, ok := propagator.SpanContextFromRequest(req)
+			if !ok {
+				t.Errorf("%v: SpanContextFromRequest returned false", tc.name)
+			}
+			want := trace.NewSpanContext(tc.scc)
+			if diff := cmp.Diff(want, sc); diff != "" {
+				t.Errorf("%v: SpanContextFromRequest returned diff: %v", tc.name, diff)
+			}
+		})
+	}
+}
