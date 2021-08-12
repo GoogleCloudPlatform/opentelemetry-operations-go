@@ -16,6 +16,7 @@ package propagator
 
 import (
 	"context"
+	"encoding/binary"
 	"fmt"
 	"log"
 	"regexp"
@@ -36,10 +37,15 @@ const traceContextHeaderFormat = "^(?P<trace_id>[0-9a-f]{32})/(?P<span_id>[0-9]{
 // traceContextHeaderRe is a regular expression object of TraceContextHeaderFormat.
 var traceContextHeaderRe = regexp.MustCompile(traceContextHeaderFormat)
 
+// traceContextHeaders is the list of headers that are propagated. Cloud Trace only requires
+// one element in the list.
 var traceContextHeaders = []string{TraceContextHeaderName}
 
+// CloudTraceFormatPropagator is a TextMapPropagator that injects/extracts a context to/from the carrier
+// following Google Cloud Trace format.
 type CloudTraceFormatPropagator struct{}
 
+// New returns a new CloudTraceFormatPropagator.
 func New() propagation.TextMapPropagator {
 	return CloudTraceFormatPropagator{}
 }
@@ -49,6 +55,7 @@ func (p CloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCa
 }
 
 // Inject injects a context to the carrier following Google Cloud Trace format.
+// In this method, SpanID is expected to be stored in big endian.
 func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagation.TextMapCarrier) {
 	span := trace.SpanFromContext(ctx)
 	sc := span.SpanContext()
@@ -56,11 +63,9 @@ func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagat
 	// https://cloud.google.com/trace/docs/setup#force-trace
 	// Trace ID: 32-char hexadecimal value representing a 128-bit number.
 	// Span ID: decimal representation of the unsigned interger.
-	sidHex := sc.SpanID().String()
-	sid, err := strconv.ParseUint(sidHex, 16, 64)
-	if err != nil {
-		return
-	}
+	ary := sc.SpanID()
+	sid := binary.BigEndian.Uint64(ary[:])
+
 	flag, err := strconv.Atoi(sc.TraceFlags().String())
 	if err != nil {
 		return
@@ -74,6 +79,7 @@ func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagat
 }
 
 // Extract extacts a context from the carrier if the header contains Google Cloud Trace header format.
+// In this method, SpanID in carrier is decimal, and it is converted to trace.SpanID in big endian.
 func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
 	header := p.getHeaderValue(carrier)
 	if header == "" {
@@ -114,11 +120,12 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 		log.Printf("CloudTraceFormatPropagator: on span ID conversion: %v", err)
 		return ctx
 	}
-	sid, err := trace.SpanIDFromHex(fmt.Sprintf("%016x", sidUint))
-	if err != nil {
-		log.Printf("CloudTraceFormatPropagator: on SpanIDFromHex %v", err)
-		return ctx
-	}
+	buf := make([]byte, 8)
+	binary.BigEndian.PutUint64(buf, sidUint)
+	ary := [8]byte{}
+	copy(ary[:], buf)
+	sid := trace.SpanID(ary)
+
 	// XCTC's TRACE_TRUE option
 	// https://cloud.google.com/trace/docs/setup#force-trace
 	tf := trace.TraceFlags(0x01)
