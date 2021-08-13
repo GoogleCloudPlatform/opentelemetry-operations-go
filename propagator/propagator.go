@@ -42,6 +42,14 @@ var traceContextHeaderRe = regexp.MustCompile(traceContextHeaderFormat)
 // one element in the list.
 var traceContextHeaders = []string{TraceContextHeaderName}
 
+type errInvalidHeader struct {
+	header string
+}
+
+func (e errInvalidHeader) Error() string {
+	return fmt.Sprintf("invalid header %s", e.header)
+}
+
 // CloudTraceFormatPropagator is a TextMapPropagator that injects/extracts a context to/from the carrier
 // following Google Cloud Trace format.
 type CloudTraceFormatPropagator struct{}
@@ -79,10 +87,10 @@ func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagat
 }
 
 // spanContextFromHeader creates trace.SpanContext from XCTC header value.
-func (p CloudTraceFormatPropagator) spanContextFromHeader(header string) (sc trace.SpanContext, ok bool) {
+func (p CloudTraceFormatPropagator) spanContextFromHeader(header string) (trace.SpanContext, error) {
 	match := traceContextHeaderRe.FindStringSubmatch(header)
 	if match == nil {
-		return trace.SpanContext{}, false
+		return trace.SpanContext{}, errInvalidHeader{header}
 	}
 	names := traceContextHeaderRe.SubexpNames()
 	var traceID, spanID, traceFlags string
@@ -98,7 +106,7 @@ func (p CloudTraceFormatPropagator) spanContextFromHeader(header string) (sc tra
 	}
 	// non-recording Span
 	if traceID == strings.Repeat("0", 32) || spanID == "0" {
-		return trace.SpanContext{}, false
+		return trace.SpanContext{}, errInvalidHeader{header}
 	}
 
 	// https://cloud.google.com/trace/docs/setup#force-trace
@@ -107,12 +115,12 @@ func (p CloudTraceFormatPropagator) spanContextFromHeader(header string) (sc tra
 	tid, err := trace.TraceIDFromHex(traceID)
 	if err != nil {
 		log.Printf("CloudTraceFormatPropagator: invalid trace id %#v: %v", traceID, err)
-		return trace.SpanContext{}, false
+		return trace.SpanContext{}, errInvalidHeader{header}
 	}
 	sidUint, err := strconv.ParseUint(spanID, 10, 64)
 	if err != nil {
 		log.Printf("CloudTraceFormatPropagator: on span ID conversion: %v", err)
-		return trace.SpanContext{}, false
+		return trace.SpanContext{}, errInvalidHeader{header}
 	}
 	buf := make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, sidUint)
@@ -132,12 +140,12 @@ func (p CloudTraceFormatPropagator) spanContextFromHeader(header string) (sc tra
 		TraceFlags: tf,
 		Remote:     true,
 	}
-	return trace.NewSpanContext(scConfig), true
+	return trace.NewSpanContext(scConfig), nil
 }
 
 // SpanContextFromRequest extracts a trace.SpanContext from the HTTP request req.
 // In this method, SpanID is expected to be stored in big endian.
-func (p CloudTraceFormatPropagator) SpanContextFromRequest(req *http.Request) (sc trace.SpanContext, ok bool) {
+func (p CloudTraceFormatPropagator) SpanContextFromRequest(req *http.Request) (trace.SpanContext, error) {
 	h := req.Header.Get(TraceContextHeaderName)
 	return p.spanContextFromHeader(h)
 }
@@ -149,8 +157,9 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 	if header == "" {
 		return ctx
 	}
-	sc, ok := p.spanContextFromHeader(header)
-	if !ok {
+	sc, err := p.spanContextFromHeader(header)
+	if err != nil {
+		log.Printf("CloudTraceFormatPropagator: %v", err)
 		return ctx
 	}
 	return trace.ContextWithRemoteSpanContext(ctx, sc)

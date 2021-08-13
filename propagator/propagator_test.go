@@ -289,9 +289,9 @@ func TestSpanContextFromRequest(t *testing.T) {
 			req := httptest.NewRequest("GET", "http://example.com", nil)
 			req.Header.Set(tc.key, fmt.Sprintf("%s/%s%s", tc.traceID, tc.spanID, tc.flagPart))
 
-			sc, ok := propagator.SpanContextFromRequest(req)
-			if !ok {
-				t.Errorf("%v: SpanContextFromRequest returned false", tc.name)
+			sc, err := propagator.SpanContextFromRequest(req)
+			if err != nil {
+				t.Errorf("%v: SpanContextFromRequest returned false: %v", tc.name, err)
 			}
 			want := trace.NewSpanContext(tc.scc)
 			if diff := cmp.Diff(want, sc); diff != "" {
