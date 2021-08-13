@@ -54,6 +54,7 @@ func (e errInvalidHeader) Error() string {
 // following Google Cloud Trace format.
 type CloudTraceFormatPropagator struct{}
 
+// New returns a new CloudTraceFormatPropagator.
 func New() CloudTraceFormatPropagator {
 	return CloudTraceFormatPropagator{}
 }
