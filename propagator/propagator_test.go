@@ -291,7 +291,7 @@ func TestSpanContextFromRequest(t *testing.T) {
 
 			sc, err := propagator.SpanContextFromRequest(req)
 			if err != nil {
-				t.Errorf("%v: SpanContextFromRequest returned false: %v", tc.name, err)
+				t.Errorf("%v: SpanContextFromRequest returned non nil: %v", tc.name, err)
 			}
 			want := trace.NewSpanContext(tc.scc)
 			if diff := cmp.Diff(want, sc); diff != "" {
