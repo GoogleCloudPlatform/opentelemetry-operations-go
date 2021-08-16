@@ -19,6 +19,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -41,12 +42,20 @@ var traceContextHeaderRe = regexp.MustCompile(traceContextHeaderFormat)
 // one element in the list.
 var traceContextHeaders = []string{TraceContextHeaderName}
 
+type errInvalidHeader struct {
+	header string
+}
+
+func (e errInvalidHeader) Error() string {
+	return fmt.Sprintf("invalid header %s", e.header)
+}
+
 // CloudTraceFormatPropagator is a TextMapPropagator that injects/extracts a context to/from the carrier
 // following Google Cloud Trace format.
 type CloudTraceFormatPropagator struct{}
 
 // New returns a new CloudTraceFormatPropagator.
-func New() propagation.TextMapPropagator {
+func New() CloudTraceFormatPropagator {
 	return CloudTraceFormatPropagator{}
 }
 
@@ -78,17 +87,11 @@ func (p CloudTraceFormatPropagator) Inject(ctx context.Context, carrier propagat
 	carrier.Set(TraceContextHeaderName, header)
 }
 
-// Extract extacts a context from the carrier if the header contains Google Cloud Trace header format.
-// In this method, SpanID in carrier is decimal, and it is converted to trace.SpanID in big endian.
-func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
-	header := p.getHeaderValue(carrier)
-	if header == "" {
-		return ctx
-	}
-
+// spanContextFromHeader creates trace.SpanContext from XCTC header value.
+func (p CloudTraceFormatPropagator) spanContextFromHeader(header string) (trace.SpanContext, error) {
 	match := traceContextHeaderRe.FindStringSubmatch(header)
 	if match == nil {
-		return ctx
+		return trace.SpanContext{}, errInvalidHeader{header}
 	}
 	names := traceContextHeaderRe.SubexpNames()
 	var traceID, spanID, traceFlags string
@@ -104,7 +107,7 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 	}
 	// non-recording Span
 	if traceID == strings.Repeat("0", 32) || spanID == "0" {
-		return ctx
+		return trace.SpanContext{}, errInvalidHeader{header}
 	}
 
 	// https://cloud.google.com/trace/docs/setup#force-trace
@@ -113,12 +116,12 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 	tid, err := trace.TraceIDFromHex(traceID)
 	if err != nil {
 		log.Printf("CloudTraceFormatPropagator: invalid trace id %#v: %v", traceID, err)
-		return ctx
+		return trace.SpanContext{}, errInvalidHeader{header}
 	}
 	sidUint, err := strconv.ParseUint(spanID, 10, 64)
 	if err != nil {
 		log.Printf("CloudTraceFormatPropagator: on span ID conversion: %v", err)
-		return ctx
+		return trace.SpanContext{}, errInvalidHeader{header}
 	}
 	buf := make([]byte, 8)
 	binary.BigEndian.PutUint64(buf, sidUint)
@@ -129,7 +132,7 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 	// XCTC's TRACE_TRUE option
 	// https://cloud.google.com/trace/docs/setup#force-trace
 	tf := trace.TraceFlags(0x01)
-	if traceFlags == "0" {
+	if traceFlags == "0" || traceFlags == "" {
 		tf = trace.TraceFlags(0x00)
 	}
 	scConfig := trace.SpanContextConfig{
@@ -138,7 +141,28 @@ func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propaga
 		TraceFlags: tf,
 		Remote:     true,
 	}
-	sc := trace.NewSpanContext(scConfig)
+	return trace.NewSpanContext(scConfig), nil
+}
+
+// SpanContextFromRequest extracts a trace.SpanContext from the HTTP request req.
+// In this method, SpanID is expected to be stored in big endian.
+func (p CloudTraceFormatPropagator) SpanContextFromRequest(req *http.Request) (trace.SpanContext, error) {
+	h := req.Header.Get(TraceContextHeaderName)
+	return p.spanContextFromHeader(h)
+}
+
+// Extract extacts a context from the carrier if the header contains Google Cloud Trace header format.
+// In this method, SpanID is expected to be stored in big endian.
+func (p CloudTraceFormatPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
+	header := p.getHeaderValue(carrier)
+	if header == "" {
+		return ctx
+	}
+	sc, err := p.spanContextFromHeader(header)
+	if err != nil {
+		log.Printf("CloudTraceFormatPropagator: %v", err)
+		return ctx
+	}
 	return trace.ContextWithRemoteSpanContext(ctx, sc)
 }
 
