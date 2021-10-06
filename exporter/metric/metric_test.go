@@ -24,12 +24,15 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/metrictest"
 	"go.opentelemetry.io/otel/metric/number"
+	"go.opentelemetry.io/otel/metric/sdkapi"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
-	"go.opentelemetry.io/otel/sdk/export/metric/metrictest"
-	aggtest "go.opentelemetry.io/otel/sdk/metric/aggregator/aggregatortest"
-	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
+	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
+	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
+	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
+	"go.opentelemetry.io/otel/sdk/metric/processor/processortest"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
@@ -51,19 +54,14 @@ var (
 )
 
 func TestExportMetrics(t *testing.T) {
+	ctx := context.Background()
 	cloudMock := cloudmock.NewCloudMock()
 	defer cloudMock.Shutdown()
 
 	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 	res := &resource.Resource{}
-	cps := metrictest.NewCheckpointSet(res)
-	ctx := context.Background()
-	desc := metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind)
-
-	lvagg := &lastvalue.New(1)[0]
-	aggtest.CheckedUpdate(t, lvagg, number.NewFloat64Number(12.34), &desc)
-	lvagg.Update(ctx, number.NewFloat64Number(12.34), &desc)
-	cps.Add(&desc, lvagg, attribute.String("a", "A"), attribute.String("b", "B"))
+	aggSel := processortest.AggregatorSelector()
+	proc := processor.NewFactory(aggSel, export.CumulativeExportKindSelector())
 
 	opts := []Option{
 		WithProjectID("PROJECT_ID_NOT_REAL"),
@@ -75,9 +73,17 @@ func TestExportMetrics(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error occurred when creating exporter: %v", err)
 	}
+	cont := controller.New(proc,
+		controller.WithExporter(exporter),
+		controller.WithResource(res),
+	)
 
-	err = exporter.Export(ctx, cps)
-	assert.NoError(t, err)
+	assert.NoError(t, cont.Start(ctx))
+	meter := cont.Meter("test")
+	counter := metric.Must(meter).NewInt64Counter("name.lastvalue")
+
+	counter.Add(ctx, 1)
+	require.NoError(t, cont.Stop(ctx))
 }
 
 func TestExportCounter(t *testing.T) {
@@ -107,7 +113,7 @@ func TestExportCounter(t *testing.T) {
 	defer pusher.Stop(ctx)
 
 	// Start meter
-	meter := pusher.MeterProvider().Meter("cloudmonitoring/test")
+	meter := pusher.Meter("cloudmonitoring/test")
 
 	// Register counter value
 	counter := metric.Must(meter).NewInt64Counter("counter-a")
@@ -128,8 +134,8 @@ func TestDescToMetricType(t *testing.T) {
 	}
 
 	inDesc := []metric.Descriptor{
-		metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind),
-		metric.NewDescriptor("test/of/path", metric.ValueRecorderInstrumentKind, number.Float64Kind),
+		metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind),
+		metrictest.NewDescriptor("test/of/path", sdkapi.HistogramInstrumentKind, number.Float64Kind),
 	}
 
 	wants := []string{
@@ -146,19 +152,29 @@ func TestDescToMetricType(t *testing.T) {
 }
 
 func TestRecordToMpb(t *testing.T) {
-	res := &resource.Resource{}
-	cps := metrictest.NewCheckpointSet(res)
-	ctx := context.Background()
+	cloudMock := cloudmock.NewCloudMock()
+	defer cloudMock.Shutdown()
 
-	desc := metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind)
+	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 
-	lvagg := &lastvalue.New(1)[0]
-	aggtest.CheckedUpdate(t, lvagg, number.NewFloat64Number(12.34), &desc)
-	err := lvagg.Update(ctx, 1, &desc)
-	if err != nil {
-		t.Errorf("%v", err)
-	}
-	cps.Add(&desc, lvagg, attribute.String("a", "A"), attribute.String("b.b", "B"))
+	resOpt := basic.WithResource(
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			attribute.String("test_id", "abc123"),
+		),
+	)
+
+	pusher, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithMonitoringClientOptions(clientOpt),
+			WithMetricDescriptorTypeFormatter(formatter),
+		},
+		resOpt,
+	)
+	assert.NoError(t, err)
+
+	desc := metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind)
 
 	md := &googlemetricpb.MetricDescriptor{
 		Name:        desc.Name(),
@@ -187,12 +203,14 @@ func TestRecordToMpb(t *testing.T) {
 		},
 	}
 
-	aggError := cps.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
-		out := me.recordToMpb(&r)
-		if !reflect.DeepEqual(want, out) {
-			return fmt.Errorf("expected: %v, actual: %v", want, out)
-		}
-		return nil
+	aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
+		return reader.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
+			out := me.recordToMpb(&r, library)
+			if !reflect.DeepEqual(want, out) {
+				return fmt.Errorf("expected: %v, actual: %v", want, out)
+			}
+			return nil
+		})
 	})
 	if aggError != nil {
 		t.Errorf("%v", aggError)
@@ -359,7 +377,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 	}
 
-	desc := metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind)
+	desc := metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind)
 
 	md := &googlemetricpb.MetricDescriptor{
 		Name:        desc.Name(),
@@ -492,14 +510,9 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 		option.WithGRPCDialOption(grpc.WithInsecure()),
 	}
 	res := &resource.Resource{}
-	cps := metrictest.NewCheckpointSet(res)
+	aggSel := processortest.AggregatorSelector()
+	proc := processor.NewFactory(aggSel, export.CumulativeExportKindSelector())
 	ctx := context.Background()
-	desc := metric.NewDescriptor("testing", metric.ValueRecorderInstrumentKind, number.Float64Kind)
-
-	lvagg := &lastvalue.New(1)[0]
-	aggtest.CheckedUpdate(t, lvagg, number.NewFloat64Number(12.34), &desc)
-	lvagg.Update(ctx, number.NewFloat64Number(12.34), &desc)
-	cps.Add(&desc, lvagg, attribute.String("a", "A"), attribute.String("b", "B"))
 
 	opts := []Option{
 		WithProjectID("PROJECT_ID_NOT_REAL"),
@@ -511,9 +524,18 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error occurred when creating exporter: %v", err)
 	}
+	cont := controller.New(proc,
+		controller.WithExporter(exporter),
+		controller.WithResource(res),
+	)
 
-	err = exporter.Export(ctx, cps)
-	assert.NoError(t, err)
+	assert.NoError(t, cont.Start(ctx))
+	meter := cont.Meter("test")
+
+	counter := metric.Must(meter).NewInt64Counter("name.lastvalue")
+
+	counter.Add(ctx, 1)
+	require.NoError(t, cont.Stop(ctx))
 
 	// User agent checking happens above in parallel to this flow.
 }

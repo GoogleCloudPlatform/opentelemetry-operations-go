@@ -23,6 +23,7 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
+	"go.opentelemetry.io/otel/sdk/resource"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"golang.org/x/oauth2/google"
@@ -82,8 +83,8 @@ func NewRawExporter(opts ...Option) (*Exporter, error) {
 }
 
 // Export exports the provide metric record to Google Cloud Monitoring.
-func (e *Exporter) Export(ctx context.Context, cps export.CheckpointSet) error {
-	return e.metricExporter.ExportMetrics(ctx, cps)
+func (e *Exporter) Export(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
+	return e.metricExporter.ExportMetrics(ctx, res, ilr)
 }
 
 // ExportKindFor returns cumulative export kind
