@@ -25,12 +25,14 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/metric/number"
+	"go.opentelemetry.io/otel/metric/sdkapi"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/minmaxsumcount"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
-	"go.opentelemetry.io/otel/sdk/metric/processor/basic"
+	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
@@ -54,10 +56,10 @@ type key struct {
 	libraryname string
 }
 
-func keyOf(descriptor *metric.Descriptor) key {
+func keyOf(descriptor *metric.Descriptor, library instrumentation.Library) key {
 	return key{
 		name:        descriptor.Name(),
-		libraryname: descriptor.InstrumentationName(),
+		libraryname: library.Name,
 	}
 }
 
@@ -156,7 +158,7 @@ func InstallNewPipeline(opts []Option, popts ...controller.Option) (*controller.
 	if err != nil {
 		return nil, err
 	}
-	global.SetMeterProvider(pusher.MeterProvider())
+	global.SetMeterProvider(pusher)
 	return pusher, err
 }
 
@@ -169,7 +171,7 @@ func NewExportPipeline(opts []Option, popts ...controller.Option) (*controller.C
 		return nil, err
 	}
 	period := exporter.metricExporter.o.ReportingInterval
-	checkpointer := basic.New(selector, exporter)
+	checkpointer := processor.NewFactory(selector, exporter)
 
 	pusher := controller.New(
 		checkpointer,
@@ -183,12 +185,12 @@ func NewExportPipeline(opts []Option, popts ...controller.Option) (*controller.C
 }
 
 // ExportMetrics exports OpenTelemetry Metrics to Google Cloud Monitoring.
-func (me *metricExporter) ExportMetrics(ctx context.Context, cps export.CheckpointSet) error {
-	if err := me.exportMetricDescriptor(ctx, cps); err != nil {
+func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
+	if err := me.exportMetricDescriptor(ctx, res, ilr); err != nil {
 		return err
 	}
 
-	if err := me.exportTimeSeries(ctx, cps); err != nil {
+	if err := me.exportTimeSeries(ctx, res, ilr); err != nil {
 		return err
 	}
 	return nil
@@ -196,20 +198,23 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, cps export.Checkpoi
 
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registered in Cloud Monitoring yet.
-func (me *metricExporter) exportMetricDescriptor(ctx context.Context, cps export.CheckpointSet) error {
+func (me *metricExporter) exportMetricDescriptor(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
-	aggError := cps.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
-		k := keyOf(r.Descriptor())
+	aggError := ilr.ForEach(func(library instrumentation.Library, reader export.Reader) error {
+		return reader.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
+			k := keyOf(r.Descriptor(), library)
 
-		if _, ok := me.mdCache[k]; ok {
+			if _, ok := me.mdCache[k]; ok {
+				return nil
+			}
+
+			if _, localok := mds[k]; !localok {
+				md := me.recordToMdpb(&r)
+				mds[k] = md
+			}
 			return nil
-		}
+		})
 
-		if _, localok := mds[k]; !localok {
-			md := me.recordToMdpb(&r)
-			mds[k] = md
-		}
-		return nil
 	})
 	if aggError != nil {
 		return aggError
@@ -255,16 +260,18 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 
 // exportTimeSeriees create TimeSeries from the records in cps.
 // res should be the common resource among all TimeSeries, such as instance id, application name and so on.
-func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.CheckpointSet) error {
+func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
 	tss := []*monitoringpb.TimeSeries{}
 
-	aggError := cps.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
-		ts, err := me.recordToTspb(&r)
-		if err != nil {
-			return err
-		}
-		tss = append(tss, ts)
-		return nil
+	aggError := ilr.ForEach(func(library instrumentation.Library, reader export.Reader) error {
+		return reader.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
+			ts, err := me.recordToTspb(&r, res, library)
+			if err != nil {
+				return err
+			}
+			tss = append(tss, ts)
+			return nil
+		})
 	})
 
 	if len(tss) == 0 {
@@ -289,10 +296,10 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, cps export.Check
 
 // recordToTspb converts record to TimeSeries proto type with common resource.
 // ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
-func (me *metricExporter) recordToTspb(r *export.Record) (*monitoringpb.TimeSeries, error) {
-	m := me.recordToMpb(r)
+func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource, library instrumentation.Library) (*monitoringpb.TimeSeries, error) {
+	m := me.recordToMpb(r, library)
 
-	mr := me.resourceToMonitoredResourcepb(r.Resource())
+	mr := me.resourceToMonitoredResourcepb(res)
 
 	tv, t, err := me.recordToTypedValueAndTimestamp(r)
 	if err != nil {
@@ -453,11 +460,11 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 
 	var kind googlemetricpb.MetricDescriptor_MetricKind
 	switch ikind {
-	// TODO: Decide how UpDownCounterKind and UpDownSumObserverKind should be handled.
+	// TODO: Decide how UpDownCounterKind and UpDownCounterObserverKind should be handled.
 	// CUMULATIVE might not be correct as it assumes the metric always goes up.
-	case metric.CounterInstrumentKind, metric.UpDownCounterInstrumentKind, metric.SumObserverInstrumentKind, metric.UpDownSumObserverInstrumentKind:
+	case sdkapi.CounterInstrumentKind, sdkapi.UpDownCounterInstrumentKind, sdkapi.CounterObserverInstrumentKind, sdkapi.UpDownCounterObserverInstrumentKind:
 		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
-	case metric.ValueObserverInstrumentKind, metric.ValueRecorderInstrumentKind:
+	case sdkapi.GaugeObserverInstrumentKind, sdkapi.HistogramInstrumentKind:
 		kind = googlemetricpb.MetricDescriptor_GAUGE
 	default:
 		kind = googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
@@ -479,9 +486,9 @@ func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_Met
 }
 
 // recordToMpb converts data from records to Metric proto type for Cloud Monitoring.
-func (me *metricExporter) recordToMpb(r *export.Record) *googlemetricpb.Metric {
+func (me *metricExporter) recordToMpb(r *export.Record, library instrumentation.Library) *googlemetricpb.Metric {
 	desc := r.Descriptor()
-	k := keyOf(desc)
+	k := keyOf(desc, library)
 	md, ok := me.mdCache[k]
 	if !ok {
 		md = me.recordToMdpb(r)
@@ -525,12 +532,12 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	// In OpenCensus, view interface provided the bundle of name, measure, labels and aggregation in one place,
 	// and it should return the appropriate value based on the aggregation type specified there.
 	switch ikind {
-	case metric.ValueObserverInstrumentKind, metric.ValueRecorderInstrumentKind:
+	case sdkapi.GaugeObserverInstrumentKind, sdkapi.HistogramInstrumentKind:
 		if lv, ok := agg.(*lastvalue.Aggregator); ok {
 			return lastValueToTypedValueAndTimestamp(lv, nkind)
 		}
 		return nil, nil, errUnsupportedAggregation{agg: agg}
-	case metric.CounterInstrumentKind, metric.UpDownCounterInstrumentKind, metric.SumObserverInstrumentKind, metric.UpDownSumObserverInstrumentKind:
+	case sdkapi.CounterInstrumentKind, sdkapi.UpDownCounterInstrumentKind, sdkapi.CounterObserverInstrumentKind, sdkapi.UpDownCounterObserverInstrumentKind:
 		// CUMULATIVE measurement should have the same start time and increasing end time.
 		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
 		if sum, ok := agg.(*sum.Aggregator); ok {

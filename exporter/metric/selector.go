@@ -16,6 +16,7 @@ package metric
 
 import (
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/sdkapi"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
@@ -29,7 +30,7 @@ var _ export.AggregatorSelector = selectorCloudMonitoring{}
 // that uses lastvalue, counter, array, and aggregator for three kinds of metric.
 //
 // NOTE: this selector is just to ensure that LastValue is used for
-// ValueObserverKind and ValueRecorderKind.
+// GaugeKind and HistogramKind.
 // All other metric kinds have Sum default aggregation
 // c.f. https://github.com/open-telemetry/opentelemetry-go/blob/main/sdk/metric/selector/simple/simple.go
 //
@@ -43,7 +44,7 @@ func NewWithCloudMonitoringDistribution() export.AggregatorSelector {
 
 func (selectorCloudMonitoring) AggregatorFor(descriptor *metric.Descriptor, aggPtrs ...*export.Aggregator) {
 	switch descriptor.InstrumentKind() {
-	case metric.ValueObserverInstrumentKind, metric.ValueRecorderInstrumentKind:
+	case sdkapi.GaugeObserverInstrumentKind, sdkapi.HistogramInstrumentKind:
 		aggs := lastvalue.New(len(aggPtrs))
 		for i := range aggPtrs {
 			*aggPtrs[i] = &aggs[i]

@@ -18,8 +18,8 @@ import (
 	"errors"
 	"fmt"
 
-	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/number"
+	"go.opentelemetry.io/otel/metric/sdkapi"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 )
 
@@ -44,7 +44,7 @@ func (e errUnexpectedNumberKind) Error() string {
 }
 
 type errUnexpectedInstrumentKind struct {
-	kind metric.InstrumentKind
+	kind sdkapi.InstrumentKind
 }
 
 func (e errUnexpectedInstrumentKind) Error() string {
