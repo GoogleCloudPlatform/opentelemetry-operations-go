@@ -1,4 +1,5 @@
 // Copyright 2021 OpenCensus Authors
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -326,14 +327,14 @@ func TestExportTrace(t *testing.T) {
 		for _, s := range spbs {
 			bytes, err := prototext.Marshal(s)
 			if err != nil {
-				t.Fatalf("Error marshalling span: %s", err)
+				t.Fatalf("Error marshaling span: %s", err)
 			}
 			got = append(got, string(bytes))
 		}
 		for _, s := range expectedSpans {
 			bytes, err := prototext.Marshal(s)
 			if err != nil {
-				t.Fatalf("Error marshalling span: %s", err)
+				t.Fatalf("Error marshaling span: %s", err)
 			}
 			want = append(want, string(bytes))
 		}

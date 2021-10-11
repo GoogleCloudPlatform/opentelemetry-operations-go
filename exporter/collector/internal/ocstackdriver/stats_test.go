@@ -1,4 +1,5 @@
 // Copyright 2021 OpenCensus Authors
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,7 +24,6 @@ import (
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"contrib.go.opencensus.io/exporter/stackdriver/monitoredresource"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/google/go-cmp/cmp"
 	"go.opencensus.io/stats"
@@ -500,15 +500,15 @@ func TestTimeIntervalStaggering(t *testing.T) {
 
 	interval := toValidTimeIntervalpb(now, now)
 
-	start, err := ptypes.Timestamp(interval.StartTime)
-	if err != nil {
+	if err := interval.StartTime.CheckValid(); err != nil {
 		t.Fatalf("unable to convert start time from PB: %v", err)
 	}
+	start := interval.StartTime.AsTime()
 
-	end, err := ptypes.Timestamp(interval.EndTime)
-	if err != nil {
+	if err := interval.EndTime.CheckValid(); err != nil {
 		t.Fatalf("unable to convert end time to PB: %v", err)
 	}
+	end := interval.EndTime.AsTime()
 
 	if end.Before(start.Add(time.Millisecond)) {
 		t.Fatalf("expected end=%v to be at least %v after start=%v, but it wasn't", end, time.Millisecond, start)

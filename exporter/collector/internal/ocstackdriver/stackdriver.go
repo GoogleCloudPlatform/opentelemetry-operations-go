@@ -1,4 +1,5 @@
 // Copyright 2021 OpenCensus Authors
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -402,7 +403,7 @@ func (e *Exporter) ExportMetricsProto(ctx context.Context, node *commonpb.Node, 
 	return err
 }
 
-// PushMetricsProto simliar with ExportMetricsProto but returns the number of dropped timeseries.
+// PushMetricsProto similar with ExportMetricsProto but returns the number of dropped timeseries.
 func (e *Exporter) PushMetricsProto(ctx context.Context, node *commonpb.Node, rsc *resourcepb.Resource, metrics []*metricspb.Metric) (int, error) {
 	return e.statsExporter.PushMetricsProto(ctx, node, rsc, metrics)
 }

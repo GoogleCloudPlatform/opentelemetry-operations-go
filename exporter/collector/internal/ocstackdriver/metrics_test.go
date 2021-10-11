@@ -1,4 +1,5 @@
 // Copyright 2021 OpenCensus Authors
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +21,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"google.golang.org/protobuf/proto"
@@ -91,12 +91,12 @@ func TestMetricToCreateTimeSeriesRequest(t *testing.T) {
 		Seconds: 1543160298,
 		Nanos:   100000090,
 	}
-	startTime, _ := ptypes.Timestamp(startTimestamp)
+	startTime := startTimestamp.AsTime()
 	endTimestamp := &timestamp.Timestamp{
 		Seconds: 1543160298,
 		Nanos:   101000090,
 	}
-	endTime, _ := ptypes.Timestamp(endTimestamp)
+	endTime := endTimestamp.AsTime()
 
 	// TODO:[rghetia] add test for built-in metrics.
 	tests := []struct {
@@ -432,12 +432,12 @@ func TestMetricsToMonitoringMetrics_fromProtoPoint(t *testing.T) {
 		Seconds: 1543160298,
 		Nanos:   100000090,
 	}
-	startTime, _ := ptypes.Timestamp(startTimestamp)
+	startTime := startTimestamp.AsTime()
 	endTimestamp := &timestamp.Timestamp{
 		Seconds: 1543160298,
 		Nanos:   101000090,
 	}
-	endTime, _ := ptypes.Timestamp(endTimestamp)
+	endTime := endTimestamp.AsTime()
 
 	traceID := trace.TraceID{1, 2, 3, 4, 5, 6, 7, 8, 1, 2, 4, 8, 16, 32, 64, 128}
 	spanID := trace.SpanID{1, 2, 4, 8, 16, 32, 64, 128}
@@ -566,12 +566,12 @@ func TestResourceByDescriptor(t *testing.T) {
 		Seconds: 1543160298,
 		Nanos:   100000090,
 	}
-	startTime, _ := ptypes.Timestamp(startTimestamp)
+	startTime := startTimestamp.AsTime()
 	endTimestamp := &timestamp.Timestamp{
 		Seconds: 1543160298,
 		Nanos:   101000090,
 	}
-	endTime, _ := ptypes.Timestamp(endTimestamp)
+	endTime := endTimestamp.AsTime()
 
 	tests := []struct {
 		in      *metricdata.Metric

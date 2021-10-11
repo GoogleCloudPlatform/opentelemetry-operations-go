@@ -1,4 +1,5 @@
 // Copyright 2021 OpenCensus Authors
+// Copyright 2021 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -374,7 +375,7 @@ func (se *statsExporter) metricTsToMpbPoint(ts *metricdata.TimeSeries, metricKin
 			startTime = nil
 		}
 
-		spt, err := metricPointToMpbPoint(startTime, &pt, se.o.ProjectID)
+		spt, err := metricPointToMpbPoint(startTime, &pt, se.o.ProjectID) //nolint:scopelint
 		if err != nil {
 			return nil, err
 		}
