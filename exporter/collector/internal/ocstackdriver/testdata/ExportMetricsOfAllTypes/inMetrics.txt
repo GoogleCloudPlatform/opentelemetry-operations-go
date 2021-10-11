@@ -1,0 +1,332 @@
+metric_descriptor: <
+  name: "ocagent.io/metricCummDouble"
+  description: "Description of metricCummDouble"
+  unit: "ms"
+  type: CUMULATIVE_DOUBLE
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  start_timestamp: <
+    seconds: 1543160298
+    nanos: 100000090
+  >
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "test_1"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    double_value: 35.5
+  >
+>
+---
+metric_descriptor: <
+  name: "ocagent.io/metricGaugeDouble"
+  description: "Description of metricGaugeDouble"
+  unit: "ms"
+  type: GAUGE_DOUBLE
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "test_2"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    double_value: 35.5
+  >
+>
+---
+metric_descriptor: <
+  name: "ocagent.io/metricCummInt64"
+  description: "Description of metricCummInt64"
+  unit: "ms"
+  type: CUMULATIVE_INT64
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  start_timestamp: <
+    seconds: 1543160298
+    nanos: 100000090
+  >
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "test_1"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    int64_value: 1
+  >
+>
+---
+metric_descriptor: <
+  name: "ocagent.io/metricGaugeInt64"
+  description: "Description of metricGaugeInt64"
+  unit: "ms"
+  type: GAUGE_INT64
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "test_2"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    int64_value: 1
+  >
+>
+---
+metric_descriptor: <
+  name: "ocagent.io/metricCummDist"
+  description: "Description of metricCummDist"
+  unit: "ms"
+  type: CUMULATIVE_DISTRIBUTION
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  start_timestamp: <
+    seconds: 1543160298
+    nanos: 100000090
+  >
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "test_1"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    distribution_value: <
+      count: 1
+      sum: 11.9
+      bucket_options: <
+        explicit: <
+          bounds: 10
+          bounds: 20
+          bounds: 30
+          bounds: 40
+        >
+      >
+      buckets: <
+        count: 1
+      >
+      buckets: <
+      >
+      buckets: <
+      >
+      buckets: <
+      >
+    >
+  >
+>
+---
+metric_descriptor: <
+  name: "ocagent.io/metricGuageDist"
+  description: "Description of metricGuageDist"
+  unit: "ms"
+  type: GAUGE_DISTRIBUTION
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  start_timestamp: <
+    seconds: 1543160298
+    nanos: 100000090
+  >
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "test_1"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    distribution_value: <
+      count: 1
+      sum: 11.9
+      bucket_options: <
+        explicit: <
+          bounds: 10
+          bounds: 20
+          bounds: 30
+          bounds: 40
+        >
+      >
+      buckets: <
+        count: 1
+      >
+      buckets: <
+      >
+      buckets: <
+      >
+      buckets: <
+      >
+    >
+  >
+>
+---
+metric_descriptor: <
+  name: "ocagent.io/metricSummary"
+  description: "Description of metricSummary"
+  unit: "ms"
+  type: SUMMARY
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  start_timestamp: <
+    seconds: 1543160298
+    nanos: 100000090
+  >
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "test_1"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    summary_value: <
+      count: <
+        value: 10
+      >
+      sum: <
+        value: 119
+      >
+      snapshot: <
+        percentile_values: <
+          percentile: 10
+          value: 5.6
+        >
+        percentile_values: <
+          percentile: 50
+          value: 9.6
+        >
+        percentile_values: <
+          percentile: 90
+          value: 12.6
+        >
+        percentile_values: <
+          percentile: 99
+          value: 17.6
+        >
+      >
+    >
+  >
+>
+timeseries: <
+  start_timestamp: <
+    seconds: 1543160298
+    nanos: 100000090
+  >
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "test_2"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    summary_value: <
+      count: <
+        value: 10
+      >
+      sum: <
+        value: 119
+      >
+      snapshot: <
+        percentile_values: <
+          percentile: 10
+          value: 5.6
+        >
+        percentile_values: <
+          percentile: 50
+          value: 9.6
+        >
+        percentile_values: <
+          percentile: 90
+          value: 12.6
+        >
+        percentile_values: <
+          percentile: 99
+          value: 17.6
+        >
+      >
+    >
+  >
+>

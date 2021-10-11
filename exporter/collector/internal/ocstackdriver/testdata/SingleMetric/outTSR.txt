@@ -1,0 +1,34 @@
+name: "projects/metrics_proto_test"
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/calls"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "value_0"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: CUMULATIVE
+  value_type: INT64
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+      start_time: <
+        seconds: 1543160298
+        nanos: 100000090
+      >
+    >
+    value: <
+      int64_value: 1
+    >
+  >
+>

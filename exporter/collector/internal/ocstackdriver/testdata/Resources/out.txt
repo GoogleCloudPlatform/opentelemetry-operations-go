@@ -1,0 +1,97 @@
+type: "k8s_container"
+labels: <
+  key: "cluster_name"
+  value: "cluster1"
+>
+labels: <
+  key: "container_name"
+  value: "container-name1"
+>
+labels: <
+  key: "location"
+  value: "zone1"
+>
+labels: <
+  key: "namespace_name"
+  value: "namespace1"
+>
+labels: <
+  key: "pod_name"
+  value: "pod1"
+>
+---
+type: "k8s_pod"
+labels: <
+  key: "cluster_name"
+  value: "cluster1"
+>
+labels: <
+  key: "location"
+  value: "zone1"
+>
+labels: <
+  key: "namespace_name"
+  value: "namespace1"
+>
+labels: <
+  key: "pod_name"
+  value: "pod1"
+>
+---
+type: "k8s_node"
+labels: <
+  key: "cluster_name"
+  value: "cluster1"
+>
+labels: <
+  key: "location"
+  value: "zone1"
+>
+labels: <
+  key: "node_name"
+  value: "host1"
+>
+---
+type: "gce_instance"
+labels: <
+  key: "instance_id"
+  value: "inst1"
+>
+labels: <
+  key: "zone"
+  value: "zone1"
+>
+---
+type: "aws_ec2_instance"
+labels: <
+  key: "aws_account"
+  value: "account1"
+>
+labels: <
+  key: "instance_id"
+  value: "inst1"
+>
+labels: <
+  key: "region"
+  value: "aws:region1"
+>
+---
+type: "global"
+---
+type: "gae_instance"
+labels: <
+  key: "module_id"
+  value: "default"
+>
+labels: <
+  key: "version_id"
+  value: "version1"
+>
+labels: <
+  key: "instance_id"
+  value: "inst1"
+>
+labels: <
+  key: "location"
+  value: "region1"
+>

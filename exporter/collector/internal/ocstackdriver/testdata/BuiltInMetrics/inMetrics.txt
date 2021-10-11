@@ -1,0 +1,99 @@
+metric_descriptor: <
+  name: "googleapis.com/calls"
+  description: "Number of calls"
+  unit: "1"
+  type: CUMULATIVE_INT64
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  start_timestamp: <
+    seconds: 1543160298
+    nanos: 100000090
+  >
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "value_0"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    int64_value: 1
+  >
+>
+---
+metric_descriptor: <
+  name: "kubernetes.io/latency"
+  description: "Description of latency"
+  unit: "ms"
+  type: CUMULATIVE_INT64
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  start_timestamp: <
+    seconds: 1543160298
+    nanos: 100000090
+  >
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "value_0"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    int64_value: 1
+  >
+>
+---
+metric_descriptor: <
+  name: "istio.io/latency"
+  description: "Description of latency"
+  unit: "ms"
+  type: CUMULATIVE_INT64
+  label_keys: <
+    key: "empty_key"
+  >
+  label_keys: <
+    key: "operation_type"
+  >
+>
+timeseries: <
+  start_timestamp: <
+    seconds: 1543160298
+    nanos: 100000090
+  >
+  label_values: <
+    has_value: true
+  >
+  label_values: <
+    value: "value_0"
+    has_value: true
+  >
+  points: <
+    timestamp: <
+      seconds: 1543160298
+      nanos: 101000090
+    >
+    int64_value: 1
+  >
+>
+

@@ -1,0 +1,617 @@
+name: "projects/metrics_proto_test"
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricCummDouble"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: CUMULATIVE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+      start_time: <
+        seconds: 1543160298
+        nanos: 100000090
+      >
+    >
+    value: <
+      double_value: 35.5
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricGaugeDouble"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_2"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      double_value: 35.5
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricCummInt64"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: CUMULATIVE
+  value_type: INT64
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+      start_time: <
+        seconds: 1543160298
+        nanos: 100000090
+      >
+    >
+    value: <
+      int64_value: 1
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricGaugeInt64"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_2"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: INT64
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      int64_value: 1
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricCummDist"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: CUMULATIVE
+  value_type: DISTRIBUTION
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+      start_time: <
+        seconds: 1543160298
+        nanos: 100000090
+      >
+    >
+    value: <
+      distribution_value: <
+        count: 1
+        mean: 11.9
+        bucket_options: <
+          explicit_buckets: <
+            bounds: 0
+            bounds: 10
+            bounds: 20
+            bounds: 30
+            bounds: 40
+          >
+        >
+        bucket_counts: 0
+        bucket_counts: 1
+        bucket_counts: 0
+        bucket_counts: 0
+        bucket_counts: 0
+      >
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricGuageDist"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DISTRIBUTION
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      distribution_value: <
+        count: 1
+        mean: 11.9
+        bucket_options: <
+          explicit_buckets: <
+            bounds: 0
+            bounds: 10
+            bounds: 20
+            bounds: 30
+            bounds: 40
+          >
+        >
+        bucket_counts: 0
+        bucket_counts: 1
+        bucket_counts: 0
+        bucket_counts: 0
+        bucket_counts: 0
+      >
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_sum"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: CUMULATIVE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+      start_time: <
+        seconds: 1543160298
+        nanos: 100000090
+      >
+    >
+    value: <
+      double_value: 119
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_count"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: CUMULATIVE
+  value_type: INT64
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+      start_time: <
+        seconds: 1543160298
+        nanos: 100000090
+      >
+    >
+    value: <
+      int64_value: 10
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_percentile"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+    labels: <
+      key: "percentile"
+      value: "10.000000"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      double_value: 5.6
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_percentile"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+    labels: <
+      key: "percentile"
+      value: "50.000000"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      double_value: 9.6
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_percentile"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+    labels: <
+      key: "percentile"
+      value: "90.000000"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      double_value: 12.6
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_percentile"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_1"
+    >
+    labels: <
+      key: "percentile"
+      value: "99.000000"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      double_value: 17.6
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_sum"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_2"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: CUMULATIVE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+      start_time: <
+        seconds: 1543160298
+        nanos: 100000090
+      >
+    >
+    value: <
+      double_value: 119
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_count"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_2"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: CUMULATIVE
+  value_type: INT64
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+      start_time: <
+        seconds: 1543160298
+        nanos: 100000090
+      >
+    >
+    value: <
+      int64_value: 10
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_percentile"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_2"
+    >
+    labels: <
+      key: "percentile"
+      value: "10.000000"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      double_value: 5.6
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_percentile"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_2"
+    >
+    labels: <
+      key: "percentile"
+      value: "50.000000"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      double_value: 9.6
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_percentile"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_2"
+    >
+    labels: <
+      key: "percentile"
+      value: "90.000000"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      double_value: 12.6
+    >
+  >
+>
+time_series: <
+  metric: <
+    type: "custom.googleapis.com/opencensus/ocagent.io/metricSummary_summary_percentile"
+    labels: <
+      key: "empty_key"
+      value: ""
+    >
+    labels: <
+      key: "operation_type"
+      value: "test_2"
+    >
+    labels: <
+      key: "percentile"
+      value: "99.000000"
+    >
+  >
+  resource: <
+    type: "global"
+  >
+  metric_kind: GAUGE
+  value_type: DOUBLE
+  points: <
+    interval: <
+      end_time: <
+        seconds: 1543160298
+        nanos: 101000090
+      >
+    >
+    value: <
+      double_value: 17.6
+    >
+  >
+>

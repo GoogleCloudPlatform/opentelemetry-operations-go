@@ -1,0 +1,2 @@
+# Empty file required to specify that no CreateMetricDescriptorRequest will be generated.
+

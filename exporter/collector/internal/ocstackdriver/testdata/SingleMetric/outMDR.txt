@@ -1,0 +1,16 @@
+name: "projects/metrics_proto_test"
+metric_descriptor: <
+  name: "projects/metrics_proto_test/metricDescriptors/custom.googleapis.com/opencensus/ocagent.io/calls"
+  type: "custom.googleapis.com/opencensus/ocagent.io/calls"
+  labels: <
+    key: "empty_key"
+  >
+  labels: <
+    key: "operation_type"
+  >
+  metric_kind: CUMULATIVE
+  value_type: INT64
+  unit: "1"
+  description: "Number of calls"
+  display_name: "OpenCensus/ocagent.io/calls"
+>

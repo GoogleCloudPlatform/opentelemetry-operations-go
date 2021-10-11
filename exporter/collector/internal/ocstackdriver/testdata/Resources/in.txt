@@ -1,0 +1,141 @@
+type: "container"
+labels: <
+  key: "cloud.zone"
+  value: "zone1"
+>
+labels: <
+  key: "container.name"
+  value: "container-name1"
+>
+labels: <
+  key: "k8s.cluster.name"
+  value: "cluster1"
+>
+labels: <
+  key: "k8s.namespace.name"
+  value: "namespace1"
+>
+labels: <
+  key: "k8s.pod.name"
+  value: "pod1"
+>
+---
+type: "k8s"
+labels: <
+  key: "cloud.zone"
+  value: "zone1"
+>
+labels: <
+  key: "container.name"
+  value: "container-name1"
+>
+labels: <
+  key: "k8s.cluster.name"
+  value: "cluster1"
+>
+labels: <
+  key: "k8s.namespace.name"
+  value: "namespace1"
+>
+labels: <
+  key: "k8s.pod.name"
+  value: "pod1"
+>
+---
+type: "host"
+labels: <
+  key: "cloud.zone"
+  value: "zone1"
+>
+labels: <
+  key: "container.name"
+  value: "container-name1"
+>
+labels: <
+  key: "host.name"
+  value: "host1"
+>
+labels: <
+  key: "k8s.cluster.name"
+  value: "cluster1"
+>
+labels: <
+  key: "k8s.namespace.name"
+  value: "namespace1"
+>
+labels: <
+  key: "k8s.pod.name"
+  value: "pod1"
+>
+---
+type: "cloud"
+labels: <
+  key: "cloud.provider"
+  value: "gcp"
+>
+labels: <
+  key: "cloud.zone"
+  value: "zone1"
+>
+labels: <
+  key: "host.id"
+  value: "inst1"
+>
+---
+type: "cloud"
+labels: <
+  key: "cloud.account.id"
+  value: "account1"
+>
+labels: <
+  key: "cloud.provider"
+  value: "aws"
+>
+labels: <
+  key: "cloud.region"
+  value: "region1"
+>
+labels: <
+  key: "host.id"
+  value: "inst1"
+>
+---
+type: "Unknown"
+labels: <
+  key: "cloud.zone"
+  value: "zone1"
+>
+labels: <
+  key: "container.name"
+  value: "container-name1"
+>
+labels: <
+  key: "k8s.cluster.name"
+  value: "cluster1"
+>
+labels: <
+  key: "k8s.namespace.name"
+  value: "namespace1"
+>
+labels: <
+  key: "k8s.pod.name"
+  value: "pod1"
+>
+---
+type: "gae_instance"
+labels: <
+  key: "appengine.service.id"
+  value: "default"
+>
+labels: <
+  key: "appengine.version.id"
+  value: "version1"
+>
+labels: <
+  key: "appengine.instance.id"
+  value: "inst1"
+>
+labels: <
+  key: "cloud.region"
+  value: "region1"
+>
