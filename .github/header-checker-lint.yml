@@ -1,6 +1,7 @@
 allowedCopyrightHolders:
   - Google LLC
   - OpenTelemetry Authors
+  - OpenCensus Authors
 allowedLicenses:
   - Apache-2.0
 sourceFileExtensions:
