@@ -26,7 +26,7 @@ const (
 	CloudKeyProvider  = "cloud.provider"
 	CloudKeyAccountID = "cloud.account.id"
 	CloudKeyRegion    = "cloud.region"
-	CloudKeyZone      = "cloud.zone"
+	CloudKeyZone      = "cloud.availability_zone"
 
 	ServiceKeyNamespace  = "service.namespace"
 	ServiceKeyInstanceID = "service.instance.id"
