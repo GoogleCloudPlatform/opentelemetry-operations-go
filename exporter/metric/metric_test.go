@@ -228,7 +228,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.zone", "us-central1-a"),
+				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("k8s.namespace.name", "default"),
 				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
@@ -249,7 +249,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.zone", "us-central1-a"),
+				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("host.name", "opentelemetry-node"),
 			),
@@ -266,7 +266,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.zone", "us-central1-a"),
+				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("k8s.namespace.name", "default"),
 				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
@@ -285,7 +285,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.zone", "us-central1-a"),
+				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 			),
 			"k8s_cluster",
@@ -313,7 +313,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "none"),
-				attribute.String("cloud.zone", "us-central1-a"),
+				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("k8s.namespace.name", "default"),
 				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
@@ -330,7 +330,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("host.id", "123"),
-				attribute.String("cloud.zone", "us-central1-a"),
+				attribute.String("cloud.availability_zone", "us-central1-a"),
 			),
 			"gce_instance",
 			map[string]string{
