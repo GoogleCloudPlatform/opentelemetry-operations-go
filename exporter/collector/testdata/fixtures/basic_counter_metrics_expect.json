@@ -1,0 +1,23 @@
+{
+  "name": "projects/foo",
+  "timeSeries": [
+    {
+      "metric": {
+        "type": "custom.googleapis.com/opencensus/testcounter",
+        "labels": { "foo": "bar" }
+      },
+      "resource": { "type": "global" },
+      "metricKind": "CUMULATIVE",
+      "valueType": "INT64",
+      "points": [
+        {
+          "interval": {
+            "endTime": "2021-10-16T03:58:59.285551925Z",
+            "startTime": "2021-10-16T03:58:58.285551925Z"
+          },
+          "value": { "int64Value": "253" }
+        }
+      ]
+    }
+  ]
+}
