@@ -14,11 +14,5 @@
 
 steps:
   - name: golang:1.14
-    dir: exporter/collector
-    args:
-      - go
-      - test
-      - -v
-      - -tags=integrationtest
-      - -run=TestIntegration
+    args: ["make", "integrationtest"]
 logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs

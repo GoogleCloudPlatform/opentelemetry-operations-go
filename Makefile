@@ -84,6 +84,14 @@ test:
 	    $(GOTEST) ./...); \
 	done
 
+.PHONY: integrationtest
+integrationtest:
+	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
+	  echo "go test ./... + race in $${dir}"; \
+	  (cd "$${dir}" && \
+	    $(GOTEST) -tags=integrationtest -run=TestIntegration ./...); \
+	done
+
 .PHONY: test-386
 test-386:
 	if [ $(SKIP_386_TEST) = true ] ; then \
