@@ -30,10 +30,6 @@ import (
 	"go.opentelemetry.io/collector/model/pdata"
 )
 
-const (
-	testTimeout = time.Second * 30
-)
-
 func createMetricsExporter(ctx context.Context, t *testing.T) component.MetricsExporter {
 	factory := collector.NewFactory()
 	cfg := factory.CreateDefaultConfig()
