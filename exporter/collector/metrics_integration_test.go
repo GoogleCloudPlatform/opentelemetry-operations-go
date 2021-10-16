@@ -56,8 +56,7 @@ func createMetricsExporter(ctx context.Context, t *testing.T) component.MetricsE
 }
 
 func TestIntegrationMetrics(t *testing.T) {
-	ctx, cancel := context.WithTimeout(context.Background(), testTimeout)
-	defer cancel()
+	ctx := context.Background()
 
 	exporter := createMetricsExporter(ctx, t)
 	defer func() {
