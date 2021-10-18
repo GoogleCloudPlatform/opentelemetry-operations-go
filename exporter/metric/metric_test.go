@@ -424,7 +424,7 @@ func TestGenerateResLabelMap(t *testing.T) {
 				attribute.Bool("key", true),
 			),
 			map[string]string{
-				"key":     "true",
+				"key": "true",
 			},
 		},
 		// Int attribute
@@ -434,7 +434,7 @@ func TestGenerateResLabelMap(t *testing.T) {
 				attribute.Int("key", 1),
 			),
 			map[string]string{
-				"key":     "1",
+				"key": "1",
 			},
 		},
 		// Int64 attribute
@@ -444,7 +444,7 @@ func TestGenerateResLabelMap(t *testing.T) {
 				attribute.Int64("key", 1),
 			),
 			map[string]string{
-				"key":     "1",
+				"key": "1",
 			},
 		},
 		// Float64 attribute
@@ -454,7 +454,7 @@ func TestGenerateResLabelMap(t *testing.T) {
 				attribute.Float64("key", 1.3),
 			),
 			map[string]string{
-				"key":     "1.3",
+				"key": "1.3",
 			},
 		},
 		// String attribute
@@ -464,7 +464,7 @@ func TestGenerateResLabelMap(t *testing.T) {
 				attribute.String("key", "str"),
 			),
 			map[string]string{
-				"key":     "str",
+				"key": "str",
 			},
 		},
 	}
