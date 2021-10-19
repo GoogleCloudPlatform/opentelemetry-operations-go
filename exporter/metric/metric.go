@@ -432,7 +432,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 func generateResLabelMap(res *resource.Resource) map[string]string {
 	resLabelMap := make(map[string]string)
 	for _, label := range res.Attributes() {
-		resLabelMap[string(label.Key)] = label.Value.AsString()
+		resLabelMap[string(label.Key)] = label.Value.Emit()
 	}
 	return resLabelMap
 }

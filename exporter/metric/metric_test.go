@@ -412,6 +412,73 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	}
 }
 
+func TestGenerateResLabelMap(t *testing.T) {
+	testCases := []struct {
+		resource       *resource.Resource
+		expectedLabels map[string]string
+	}{
+		// Bool attribute
+		{
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.Bool("key", true),
+			),
+			map[string]string{
+				"key": "true",
+			},
+		},
+		// Int attribute
+		{
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.Int("key", 1),
+			),
+			map[string]string{
+				"key": "1",
+			},
+		},
+		// Int64 attribute
+		{
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.Int64("key", 1),
+			),
+			map[string]string{
+				"key": "1",
+			},
+		},
+		// Float64 attribute
+		{
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.Float64("key", 1.3),
+			),
+			map[string]string{
+				"key": "1.3",
+			},
+		},
+		// String attribute
+		{
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("key", "str"),
+			),
+			map[string]string{
+				"key": "str",
+			},
+		},
+	}
+
+	for _, test := range testCases {
+		t.Run(test.resource.String(), func(t *testing.T) {
+			got := generateResLabelMap(test.resource)
+			if !reflect.DeepEqual(got, test.expectedLabels) {
+				t.Errorf("expected: %v, actual: %v", test.expectedLabels, got)
+			}
+		})
+	}
+}
+
 func TestTimeIntervalStaggering(t *testing.T) {
 	var tm time.Time
 
