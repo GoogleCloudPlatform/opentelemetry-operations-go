@@ -92,20 +92,22 @@ func TestIntegrationMetrics(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	testServer, err := integrationtest.NewMetricTestServer()
-	go testServer.Serve()
-	require.NoError(t, err)
-	exporter := createMetricsExporter(ctx, t)
-	testServerExporter := createMetricsTestServerExporter(ctx, t, testServer)
-
-	defer func() {
-		testServer.Shutdown()
-		require.NoError(t, exporter.Shutdown(ctx))
-		require.NoError(t, testServerExporter.Shutdown(ctx))
-	}()
-
 	for _, test := range testCases {
+		test := test
+
 		t.Run(test.Name, func(t *testing.T) {
+			testServer, err := integrationtest.NewMetricTestServer()
+			require.NoError(t, err)
+			go testServer.Serve()
+			exporter := createMetricsExporter(ctx, t)
+			testServerExporter := createMetricsTestServerExporter(ctx, t, testServer)
+
+			defer func() {
+				testServer.Shutdown()
+				require.NoError(t, exporter.Shutdown(ctx))
+				require.NoError(t, testServerExporter.Shutdown(ctx))
+			}()
+
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 			expectedCreateMetricDescriptorReq := test.LoadCreateMetricDescriptorFixture(
 				t,
@@ -120,7 +122,6 @@ func TestIntegrationMetrics(t *testing.T) {
 				testServerExporter.ConsumeMetrics(ctx, metrics),
 				"Failed to export metrics to local test server",
 			)
-
 			actualCreateMetricDescriptorReq := <-testServer.CreateMetricDescriptorChan
 			diff := integrationtest.DiffProtos(
 				actualCreateMetricDescriptorReq,
@@ -143,7 +144,6 @@ func TestIntegrationMetrics(t *testing.T) {
 				"Expected CreateTimeSeries request and actual GCM request differ:\n%v",
 				diff,
 			)
-
 			// Try exporting with the real GCM exporter
 			require.NoError(t, exporter.ConsumeMetrics(ctx, metrics), "Failed to export metrics")
 		})
