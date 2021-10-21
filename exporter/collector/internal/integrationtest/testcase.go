@@ -125,8 +125,10 @@ func (m *MetricsTestCase) LoadCreateTimeSeriesFixture(
 
 	for _, ts := range gcmRequest.TimeSeries {
 		for _, p := range ts.Points {
-			p.GetInterval().StartTime = timestamppb.New(startTime)
-			p.GetInterval().EndTime = timestamppb.New(endTime)
+			p.Interval = &monitoringpb.TimeInterval{
+				StartTime: timestamppb.New(startTime),
+				EndTime:   timestamppb.New(endTime),
+			}
 		}
 	}
 
