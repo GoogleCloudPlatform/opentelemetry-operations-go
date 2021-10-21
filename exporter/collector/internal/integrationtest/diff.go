@@ -21,16 +21,22 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 )
 
+var (
+	cmpOptions = []cmp.Option{
+		protocmp.Transform(),
+
+		// Ignore project IDs because fixtures may have been dumped from another project.
+		protocmp.IgnoreFields(&monitoringpb.CreateTimeSeriesRequest{}, "name"),
+		protocmp.IgnoreFields(&monitoringpb.CreateMetricDescriptorRequest{}, "name"),
+		protocmp.IgnoreFields(&metricpb.MetricDescriptor{}, "name"),
+	}
+)
+
 // Diff uses cmp.Diff(), protocmp, and some custom options to compare two protobuf messages.
 func DiffProtos(x interface{}, y interface{}) string {
 	return cmp.Diff(
 		x,
 		y,
-		protocmp.Transform(),
-
-		// Ignore project ID because the fixture may have been dumped from another project.
-		protocmp.IgnoreFields(&monitoringpb.CreateTimeSeriesRequest{}, "name"),
-		protocmp.IgnoreFields(&monitoringpb.CreateMetricDescriptorRequest{}, "name"),
-		protocmp.IgnoreFields(&metricpb.MetricDescriptor{}, "name"),
+		cmpOptions...,
 	)
 }

@@ -4,24 +4,23 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/testcounter",
+            "type": "custom.googleapis.com/opencensus/system.memory.usage",
             "labels": {
-              "foo": "bar"
+              "state": "used"
             }
           },
           "resource": {
             "type": "global"
           },
-          "metricKind": "CUMULATIVE",
+          "metricKind": "GAUGE",
           "valueType": "INT64",
           "points": [
             {
               "interval": {
-                "endTime": "1970-01-01T00:00:00Z",
-                "startTime": "1970-01-01T00:00:00Z"
+                "endTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "253"
+                "int64Value": "6641752448"
               }
             }
           ]
@@ -32,17 +31,17 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/testcounter",
+        "type": "custom.googleapis.com/opencensus/system.memory.usage",
         "labels": [
           {
-            "key": "foo"
+            "key": "state"
           }
         ],
-        "metricKind": "CUMULATIVE",
+        "metricKind": "GAUGE",
         "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test counter",
-        "displayName": "OpenCensus/testcounter"
+        "unit": "By",
+        "description": "Bytes of memory in use.",
+        "displayName": "OpenCensus/system.memory.usage"
       }
     }
   ]

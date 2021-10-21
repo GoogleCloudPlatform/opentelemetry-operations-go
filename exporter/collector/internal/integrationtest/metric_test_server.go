@@ -17,11 +17,18 @@ package integrationtest
 import (
 	"context"
 	"net"
+	"os"
+	"testing"
 
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"google.golang.org/genproto/googleapis/api/metric"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 type MetricsTestServer struct {
@@ -116,4 +123,36 @@ func NewMetricTestServer() (*MetricsTestServer, error) {
 	}
 
 	return testServer, nil
+}
+
+func CreateConfig(factory component.ExporterFactory) *collector.Config {
+	cfg := factory.CreateDefaultConfig().(*collector.Config)
+	// If not set it will use ADC
+	cfg.ProjectID = os.Getenv("PROJECT_ID")
+	// Disable queued retries as there is no way to flush them
+	cfg.RetrySettings.Enabled = false
+	cfg.QueueSettings.Enabled = false
+	return cfg
+}
+
+func CreateMetricsTestServerExporter(
+	ctx context.Context,
+	t testing.TB,
+	testServer *MetricsTestServer,
+) component.MetricsExporter {
+	factory := collector.NewFactory()
+	cfg := CreateConfig(factory)
+	cfg.Endpoint = testServer.Endpoint
+	cfg.UseInsecure = true
+	cfg.ProjectID = "fakeprojectid"
+
+	exporter, err := factory.CreateMetricsExporter(
+		ctx,
+		componenttest.NewNopExporterCreateSettings(),
+		cfg,
+	)
+	require.NoError(t, err)
+	require.NoError(t, exporter.Start(ctx, componenttest.NewNopHost()))
+	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.Endpoint)
+	return exporter
 }

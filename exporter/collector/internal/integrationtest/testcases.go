@@ -21,5 +21,10 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
 		},
+		{
+			Name:                 "Non-monotonic Counter",
+			OTLPInputFixturePath: "testdata/fixtures/nonmonotonic_counter_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/nonmonotonic_counter_metrics_expect.json",
+		},
 	}
 )
