@@ -109,12 +109,6 @@ func TestIntegrationMetrics(t *testing.T) {
 			}()
 
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			expectedCreateMetricDescriptorReq := test.LoadCreateMetricDescriptorFixture(
-				t,
-				startTime,
-				endTime,
-			)
-			expectedCreateTimeSeriesReq := test.LoadCreateTimeSeriesFixture(t, startTime, endTime)
 
 			// First try exporting to local GCM test server and compare the requests
 			require.NoError(
@@ -123,6 +117,13 @@ func TestIntegrationMetrics(t *testing.T) {
 				"Failed to export metrics to local test server",
 			)
 			actualCreateMetricDescriptorReq := <-testServer.CreateMetricDescriptorChan
+			actualCreateTimeSeriesReq := <-testServer.CreateTimeSeriesChan
+
+			expectedCreateMetricDescriptorReq := test.LoadCreateMetricDescriptorFixture(
+				t,
+				startTime,
+				endTime,
+			)
 			diff := integrationtest.DiffProtos(
 				actualCreateMetricDescriptorReq,
 				expectedCreateMetricDescriptorReq,
@@ -133,7 +134,7 @@ func TestIntegrationMetrics(t *testing.T) {
 				"Expected CreateMetricDescriptor request and actual GCM request differ:\n%v",
 				diff,
 			)
-			actualCreateTimeSeriesReq := <-testServer.CreateTimeSeriesChan
+			expectedCreateTimeSeriesReq := test.LoadCreateTimeSeriesFixture(t, startTime, endTime)
 			diff = integrationtest.DiffProtos(
 				actualCreateTimeSeriesReq,
 				expectedCreateTimeSeriesReq,
