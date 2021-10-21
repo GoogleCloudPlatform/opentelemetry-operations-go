@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//go:build integrationtest
-// +build integrationtest
-
 package collector_test
 
 import (
@@ -25,7 +22,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
@@ -75,6 +71,7 @@ func createMetricsTestServerExporter(
 	cfg := createConfig(factory)
 	cfg.Endpoint = testServer.Endpoint
 	cfg.UseInsecure = true
+	cfg.ProjectID = "fakeprojectid"
 
 	exporter, err := factory.CreateMetricsExporter(
 		ctx,
@@ -96,57 +93,72 @@ func TestIntegrationMetrics(t *testing.T) {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
-			testServer, err := integrationtest.NewMetricTestServer()
-			require.NoError(t, err)
-			go testServer.Serve()
-			exporter := createMetricsExporter(ctx, t)
-			testServerExporter := createMetricsTestServerExporter(ctx, t, testServer)
-
-			defer func() {
-				testServer.Shutdown()
-				require.NoError(t, exporter.Shutdown(ctx))
-				require.NoError(t, testServerExporter.Shutdown(ctx))
-			}()
-
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 
-			// First try exporting to local GCM test server and compare the requests
-			require.NoError(
-				t,
-				testServerExporter.ConsumeMetrics(ctx, metrics),
-				"Failed to export metrics to local test server",
-			)
-			actualCreateMetricDescriptorReq := <-testServer.CreateMetricDescriptorChan
-			actualCreateTimeSeriesReq := <-testServer.CreateTimeSeriesChan
+			mockExportPassed := t.Run("Mock Export", func(t *testing.T) {
+				testServer, err := integrationtest.NewMetricTestServer()
+				require.NoError(t, err)
+				go testServer.Serve()
+				testServerExporter := createMetricsTestServerExporter(ctx, t, testServer)
 
-			expectedCreateMetricDescriptorReq := test.LoadCreateMetricDescriptorFixture(
-				t,
-				startTime,
-				endTime,
-			)
-			diff := integrationtest.DiffProtos(
-				actualCreateMetricDescriptorReq,
-				expectedCreateMetricDescriptorReq,
-			)
-			assert.Emptyf(
-				t,
-				diff,
-				"Expected CreateMetricDescriptor request and actual GCM request differ:\n%v",
-				diff,
-			)
-			expectedCreateTimeSeriesReq := test.LoadCreateTimeSeriesFixture(t, startTime, endTime)
-			diff = integrationtest.DiffProtos(
-				actualCreateTimeSeriesReq,
-				expectedCreateTimeSeriesReq,
-			)
-			assert.Emptyf(
-				t,
-				diff,
-				"Expected CreateTimeSeries request and actual GCM request differ:\n%v",
-				diff,
-			)
-			// Try exporting with the real GCM exporter
-			require.NoError(t, exporter.ConsumeMetrics(ctx, metrics), "Failed to export metrics")
+				defer func() {
+					testServer.Shutdown()
+					require.NoError(t, testServerExporter.Shutdown(ctx))
+				}()
+
+				// First try exporting to local GCM test server and compare the requests
+				require.NoError(
+					t,
+					testServerExporter.ConsumeMetrics(ctx, metrics),
+					"Failed to export metrics to local test server",
+				)
+				actualCreateMetricDescriptorReq := <-testServer.CreateMetricDescriptorChan
+				actualCreateTimeSeriesReq := <-testServer.CreateTimeSeriesChan
+
+				expectedCreateMetricDescriptorReq := test.LoadCreateMetricDescriptorFixture(
+					t,
+					startTime,
+					endTime,
+				)
+				diff := integrationtest.DiffProtos(
+					actualCreateMetricDescriptorReq,
+					expectedCreateMetricDescriptorReq,
+				)
+				require.Emptyf(
+					t,
+					diff,
+					"Expected CreateMetricDescriptor request and actual GCM request differ:\n%v",
+					diff,
+				)
+				expectedCreateTimeSeriesReq := test.LoadCreateTimeSeriesFixture(t, startTime, endTime)
+				diff = integrationtest.DiffProtos(
+					actualCreateTimeSeriesReq,
+					expectedCreateTimeSeriesReq,
+				)
+				require.Emptyf(
+					t,
+					diff,
+					"Expected CreateTimeSeries request and actual GCM request differ:\n%v",
+					diff,
+				)
+			})
+
+			t.Run("Real Export", func(t *testing.T) {
+				integrationtest.SkipIfNotExportToGcp(t)
+				if !mockExportPassed {
+					t.Skip("Skipping export to real GCP APIs because mock export failed")
+				}
+
+				exporter := createMetricsExporter(ctx, t)
+				defer func() { require.NoError(t, exporter.Shutdown(ctx)) }()
+
+				// Try exporting with the real GCM exporter
+				require.NoError(
+					t,
+					exporter.ConsumeMetrics(ctx, metrics),
+					"Failed to export metrics",
+				)
+			})
 		})
 	}
 }

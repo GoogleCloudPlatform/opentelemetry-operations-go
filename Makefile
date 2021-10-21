@@ -89,7 +89,7 @@ integrationtest:
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "go test ./... + race in $${dir}"; \
 	  (cd "$${dir}" && \
-	    $(GOTEST) -tags=integrationtest -run=TestIntegration ./...); \
+	    EXPORT_TO_GCP=true $(GOTEST) -tags=integrationtest -run=TestIntegration ./...); \
 	done
 
 .PHONY: test-386
