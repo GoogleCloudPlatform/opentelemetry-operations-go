@@ -27,6 +27,6 @@ const (
 func SkipIfNotExportToGcp(t *testing.T) {
 	t.Helper()
 	if strings.ToLower(os.Getenv(exportToGcpEnv)) != "true" {
-		t.Skip("Skipping export to real GCP APIs because -sendtogcp flag is false")
+		t.Skipf("Skipping export to real GCP APIs because %v env is not 'true'", exportToGcpEnv)
 	}
 }
