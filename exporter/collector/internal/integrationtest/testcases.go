@@ -14,19 +14,13 @@
 
 package integrationtest
 
-import (
-	"os"
-	"strings"
-	"testing"
-)
-
-const (
-	exportToGcpEnv = "EXPORT_TO_GCP"
-)
-
-func SkipIfNotExportToGcp(t *testing.T) {
-	t.Helper()
-	if strings.ToLower(os.Getenv(exportToGcpEnv)) != "true" {
-		t.Skipf("Skipping export to real GCP APIs because %v env is not 'true'", exportToGcpEnv)
+var (
+	TestCases = []MetricsTestCase{
+		{
+			Name:                                     "Basic Counter",
+			OTLPInputFixturePath:                     "testdata/fixtures/basic_counter_metrics.json",
+			CreateMetricDescriptorRequestFixturePath: "testdata/fixtures/basic_counter_metricdescriptor_expect.json",
+			CreateTimeSeriesRequestFixturePath:       "testdata/fixtures/basic_counter_metrics_expect.json",
+		},
 	}
-}
+)
