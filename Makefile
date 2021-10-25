@@ -42,6 +42,20 @@ $(TOOLS_DIR)/gojq: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_D
 	cd $(TOOLS_MOD_DIR) && \
 	go build -o $(TOOLS_DIR)/gojq github.com/itchyny/gojq/cmd/gojq
 
+$(TOOLS_DIR)/protoc-gen-go: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
+	cd $(TOOLS_MOD_DIR) && \
+	go build -o $(TOOLS_DIR)/protoc-gen-go google.golang.org/protobuf/cmd/protoc-gen-go
+
+PROTOBUF_VERSION = 3.19.0
+$(TOOLS_DIR)/protoc: $(TOOLS_DIR)/protoc-gen-go
+	tmpdir=$$(mktemp -d) && \
+	cd $$tmpdir && \
+	curl -L https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOBUF_VERSION)/protoc-$(PROTOBUF_VERSION)-linux-x86_64.zip \
+		-o protoc.zip && \
+	unzip protoc.zip bin/protoc && \
+	cp bin/protoc $(TOOLS_DIR)/ ; \
+	rm -rf $$tmpdir
+
 precommit: generate build lint test
 
 .PHONY: test-with-coverage
@@ -119,8 +133,8 @@ lint: $(TOOLS_DIR)/golangci-lint $(TOOLS_DIR)/misspell
 	    go mod tidy); \
 	done
 
-generate: $(TOOLS_DIR)/stringer
-	PATH="$(TOOLS_DIR):$${PATH}" go generate ./...
+generate: $(TOOLS_DIR)/stringer $(TOOLS_DIR)/protoc
+	$(MAKE) for-all PATH="$(TOOLS_DIR):$${PATH}" CMD="go generate ./..."
 
 .PHONY: for-all
 for-all:

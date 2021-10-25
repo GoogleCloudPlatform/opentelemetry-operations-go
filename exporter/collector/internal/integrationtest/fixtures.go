@@ -12,14 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package integrationtest
+//go:build generate
+// +build generate
 
-var (
-	TestCases = []MetricsTestCase{
-		{
-			Name:                 "Basic Counter",
-			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
-			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
-		},
-	}
-)
+//go:generate protoc -I=. --go_opt=paths=source_relative --go_out=. fixtures.proto
+
+package integrationtest

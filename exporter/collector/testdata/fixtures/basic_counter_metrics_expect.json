@@ -1,21 +1,40 @@
 {
-  "name": "projects/foo",
-  "timeSeries": [
+  "createMetricDescriptorRequests": [
     {
-      "metric": {
+      "name": "projects/foo",
+      "metricDescriptor": {
+        "name": "projects/foo/metricDescriptors/custom.googleapis.com/opencensus/testcounter",
         "type": "custom.googleapis.com/opencensus/testcounter",
-        "labels": { "foo": "bar" }
-      },
-      "resource": { "type": "global" },
-      "metricKind": "CUMULATIVE",
-      "valueType": "INT64",
-      "points": [
+        "labels": [{ "key": "foo" }],
+        "metricKind": "CUMULATIVE",
+        "valueType": "INT64",
+        "unit": "1",
+        "description": "This is a test counter",
+        "displayName": "OpenCensus/testcounter"
+      }
+    }
+  ],
+  "createTimeSeriesRequests": [
+    {
+      "name": "projects/foo",
+      "timeSeries": [
         {
-          "interval": {
-            "endTime": "2021-10-16T03:58:59.285551925Z",
-            "startTime": "2021-10-16T03:58:58.285551925Z"
+          "metric": {
+            "type": "custom.googleapis.com/opencensus/testcounter",
+            "labels": { "foo": "bar" }
           },
-          "value": { "int64Value": "253" }
+          "resource": { "type": "global" },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "2021-10-16T03:58:59.285551925Z",
+                "startTime": "2021-10-16T03:58:58.285551925Z"
+              },
+              "value": { "int64Value": "253" }
+            }
+          ]
         }
       ]
     }

@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package integrationtest
+// This is a stub of
+// https://github.com/googleapis/googleapis/blob/master/google/monitoring/v3/metric_service.proto
+// to avoid taking full dependency on googleapis repo
 
-var (
-	TestCases = []MetricsTestCase{
-		{
-			Name:                 "Basic Counter",
-			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
-			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
-		},
-	}
-)
+syntax = "proto3";
+package google.monitoring.v3;
+option go_package = "google.golang.org/genproto/googleapis/monitoring/v3;monitoring";
+
+message CreateTimeSeriesRequest {}
+message CreateMetricDescriptorRequest {}
