@@ -23,6 +23,7 @@ require (
 require (
 	cloud.google.com/go/monitoring v0.1.0 // indirect
 	cloud.google.com/go/trace v0.1.0 // indirect
+	github.com/google/go-cmp v0.5.6
 )
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../trace

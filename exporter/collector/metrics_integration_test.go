@@ -19,31 +19,24 @@ package collector_test
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
-	"go.opentelemetry.io/collector/model/pdata"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
 
 func createMetricsExporter(ctx context.Context, t *testing.T) component.MetricsExporter {
 	factory := collector.NewFactory()
-	cfg := factory.CreateDefaultConfig()
-	eCfg := cfg.(*collector.Config)
-	// If not set it will use ADC
-	eCfg.ProjectID = os.Getenv("PROJECT_ID")
-	// Disable queued retries as there is no way to flush them
-	eCfg.RetrySettings.Enabled = false
-	eCfg.QueueSettings.Enabled = false
 
 	exporter, err := factory.CreateMetricsExporter(
 		ctx,
 		componenttest.NewNopExporterCreateSettings(),
-		eCfg,
+		createConfig(factory),
 	)
 	require.NoError(t, err)
 	require.NoError(t, exporter.Start(ctx, componenttest.NewNopHost()))
@@ -53,36 +46,22 @@ func createMetricsExporter(ctx context.Context, t *testing.T) component.MetricsE
 
 func TestIntegrationMetrics(t *testing.T) {
 	ctx := context.Background()
+	endTime := time.Now()
+	startTime := endTime.Add(-time.Second)
 
-	exporter := createMetricsExporter(ctx, t)
-	defer func() {
-		if err := exporter.Shutdown(ctx); err != nil {
-			t.Errorf("Exporter shutdown failed: %v", err)
-		}
-		t.Log("Exporter shutdown successfully")
-	}()
+	for _, test := range integrationtest.TestCases {
+		test := test
 
-	// Temporary just for testing CI setup. This will be replaced with OTLP fixtures.
-	metrics := pdata.NewMetrics()
-	metric := metrics.ResourceMetrics().
-		AppendEmpty().
-		InstrumentationLibraryMetrics().
-		AppendEmpty().
-		Metrics().
-		AppendEmpty()
-	metric.SetDataType(pdata.MetricDataTypeSum)
-	metric.SetName("testcounter")
-	metric.SetDescription("This is a test counter")
-	metric.SetUnit("1")
-	sum := metric.Sum()
-	sum.SetIsMonotonic(true)
-	sum.SetAggregationTemporality(pdata.AggregationTemporalityCumulative)
-	point := sum.DataPoints().AppendEmpty()
-	now := time.Now()
-	point.SetStartTimestamp(pdata.NewTimestampFromTime(now.Add(-5 * time.Second)))
-	point.SetTimestamp(pdata.NewTimestampFromTime(now))
-	point.SetIntVal(253)
-	point.Attributes().Insert("foo", pdata.NewAttributeValueString("bar"))
+		t.Run(test.Name, func(t *testing.T) {
+			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
+			exporter := createMetricsExporter(ctx, t)
+			defer require.NoError(t, exporter.Shutdown(ctx))
 
-	require.NoError(t, exporter.ConsumeMetrics(ctx, metrics), "Failed to export metrics")
+			require.NoError(
+				t,
+				exporter.ConsumeMetrics(ctx, metrics),
+				"Failed to export metrics",
+			)
+		})
+	}
 }

@@ -1,0 +1,13 @@
+{
+  "name": "projects/foo",
+  "metricDescriptor": {
+    "name": "projects/foo/metricDescriptors/custom.googleapis.com/opencensus/testcounter",
+    "type": "custom.googleapis.com/opencensus/testcounter",
+    "labels": [{ "key": "foo" }],
+    "metricKind": "CUMULATIVE",
+    "valueType": "INT64",
+    "unit": "1",
+    "description": "This is a test counter",
+    "displayName": "OpenCensus/testcounter"
+  }
+}
