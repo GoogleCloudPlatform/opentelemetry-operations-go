@@ -47,10 +47,15 @@ $(TOOLS_DIR)/protoc-gen-go: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TO
 	go build -o $(TOOLS_DIR)/protoc-gen-go google.golang.org/protobuf/cmd/protoc-gen-go
 
 PROTOBUF_VERSION = 3.19.0
+PROTOBUF_OS = linux
+ifeq ($(UNAME_S),Darwin)
+	PROTOBUF_OS = osx
+endif
+
 $(TOOLS_DIR)/protoc: $(TOOLS_DIR)/protoc-gen-go
 	tmpdir=$$(mktemp -d) && \
 	cd $$tmpdir && \
-	curl -L https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOBUF_VERSION)/protoc-$(PROTOBUF_VERSION)-linux-x86_64.zip \
+	curl -L https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOBUF_VERSION)/protoc-$(PROTOBUF_VERSION)-$(PROTOBUF_OS)-x86_64.zip \
 		-o protoc.zip && \
 	unzip protoc.zip bin/protoc && \
 	cp bin/protoc $(TOOLS_DIR)/ ; \
