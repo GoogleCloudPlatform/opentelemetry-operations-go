@@ -42,29 +42,27 @@ func (m *MetricsTestServer) Shutdown() {
 // Pops out the CreateMetricDescriptorRequests which the test server has received so far
 func (m *MetricsTestServer) CreateMetricDescriptorRequests() []*monitoringpb.CreateMetricDescriptorRequest {
 	reqs := []*monitoringpb.CreateMetricDescriptorRequest{}
-	for hasItems := true; hasItems; {
+	for {
 		select {
 		case req := <-m.createMetricDescriptorChan:
 			reqs = append(reqs, req)
 		default:
-			hasItems = false
+			return reqs
 		}
 	}
-	return reqs
 }
 
 // Pops out the CreateTimeSeriesRequests which the test server has received so far
 func (m *MetricsTestServer) CreateTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
 	reqs := []*monitoringpb.CreateTimeSeriesRequest{}
-	for hasItems := true; hasItems; {
+	for {
 		select {
 		case req := <-m.createTimeSeriesChan:
 			reqs = append(reqs, req)
 		default:
-			hasItems = false
+			return reqs
 		}
 	}
-	return reqs
 }
 
 func (m *MetricsTestServer) Serve() error {
