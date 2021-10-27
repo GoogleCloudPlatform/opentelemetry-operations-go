@@ -21,4 +21,5 @@ import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "github.com/itchyny/gojq/cmd/gojq"
 	_ "golang.org/x/tools/cmd/stringer"
+	_ "google.golang.org/protobuf/cmd/protoc-gen-go"
 )

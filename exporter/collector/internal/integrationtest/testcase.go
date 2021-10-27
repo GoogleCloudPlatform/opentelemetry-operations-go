@@ -42,13 +42,9 @@ type MetricsTestCase struct {
 	// Path to the JSON encoded OTLP ExportMetricsServiceRequest input metrics fixture.
 	OTLPInputFixturePath string
 
-	// Path to the JSON encoded GCM CreateMetricDescriptorRequest output fixture that we expect
-	// the exporter to send.
-	CreateMetricDescriptorRequestFixturePath string
-
-	// Path to the JSON encoded GCM CreateTimeSeriesRequest output fixture that we expect the
-	// exporter to send.
-	CreateTimeSeriesRequestFixturePath string
+	// Path to the JSON encoded MetricExpectFixture (see fixtures.proto) that contains request
+	// messages the exporter is expected to send.
+	ExpectFixturePath string
 }
 
 // Load OTLP metric fixture, test expectation fixtures and modify them so they're suitable for
@@ -101,36 +97,35 @@ func (m *MetricsTestCase) LoadOTLPMetricsInput(
 	return metrics
 }
 
-func (m *MetricsTestCase) LoadCreateMetricDescriptorFixture(
+func (m *MetricsTestCase) LoadExpectFixture(
 	t *testing.T,
 	startTime time.Time,
 	endTime time.Time,
-) *monitoringpb.CreateMetricDescriptorRequest {
-	bytes, err := ioutil.ReadFile(m.CreateMetricDescriptorRequestFixturePath)
+) *MetricExpectFixture {
+	bytes, err := ioutil.ReadFile(m.ExpectFixturePath)
 	require.NoError(t, err)
-	gcmRequest := &monitoringpb.CreateMetricDescriptorRequest{}
-	require.NoError(t, protojson.Unmarshal(bytes, gcmRequest))
-	return gcmRequest
+	fixture := &MetricExpectFixture{}
+	require.NoError(t, protojson.Unmarshal(bytes, fixture))
+	m.updateExpectFixture(t, startTime, endTime, fixture)
+
+	return fixture
 }
 
-func (m *MetricsTestCase) LoadCreateTimeSeriesFixture(
+func (m *MetricsTestCase) updateExpectFixture(
 	t *testing.T,
 	startTime time.Time,
 	endTime time.Time,
-) *monitoringpb.CreateTimeSeriesRequest {
-	bytes, err := ioutil.ReadFile(m.CreateTimeSeriesRequestFixturePath)
-	require.NoError(t, err)
-	gcmRequest := &monitoringpb.CreateTimeSeriesRequest{}
-	require.NoError(t, protojson.Unmarshal(bytes, gcmRequest))
-
-	for _, ts := range gcmRequest.TimeSeries {
-		for _, p := range ts.Points {
-			p.Interval = &monitoringpb.TimeInterval{
-				StartTime: timestamppb.New(startTime),
-				EndTime:   timestamppb.New(endTime),
+	fixture *MetricExpectFixture,
+) {
+	for _, req := range fixture.GetCreateTimeSeriesRequests() {
+		for _, ts := range req.GetTimeSeries() {
+			for _, p := range ts.GetPoints() {
+				p.Interval = &monitoringpb.TimeInterval{
+					StartTime: timestamppb.New(startTime),
+					EndTime:   timestamppb.New(endTime),
+				}
 			}
 		}
-	}
 
-	return gcmRequest
+	}
 }

@@ -25,22 +25,44 @@ import (
 )
 
 type MetricsTestServer struct {
-	// Outputs the CreateMetricDescriptorRequest which the test server has received
-	CreateMetricDescriptorChan <-chan *monitoringpb.CreateMetricDescriptorRequest
-
-	// Outputs the CreateTimeSeriesRequests which the test server has received
-	CreateTimeSeriesChan <-chan *monitoringpb.CreateTimeSeriesRequest
-
 	// Address where the gRPC server is listening
 	Endpoint string
 
-	lis net.Listener
-	srv *grpc.Server
+	createMetricDescriptorChan <-chan *monitoringpb.CreateMetricDescriptorRequest
+	createTimeSeriesChan       <-chan *monitoringpb.CreateTimeSeriesRequest
+	lis                        net.Listener
+	srv                        *grpc.Server
 }
 
 func (m *MetricsTestServer) Shutdown() {
 	// this will close mts.lis
 	m.srv.GracefulStop()
+}
+
+// Pops out the CreateMetricDescriptorRequests which the test server has received so far
+func (m *MetricsTestServer) CreateMetricDescriptorRequests() []*monitoringpb.CreateMetricDescriptorRequest {
+	reqs := []*monitoringpb.CreateMetricDescriptorRequest{}
+	for {
+		select {
+		case req := <-m.createMetricDescriptorChan:
+			reqs = append(reqs, req)
+		default:
+			return reqs
+		}
+	}
+}
+
+// Pops out the CreateTimeSeriesRequests which the test server has received so far
+func (m *MetricsTestServer) CreateTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
+	reqs := []*monitoringpb.CreateTimeSeriesRequest{}
+	for {
+		select {
+		case req := <-m.createTimeSeriesChan:
+			reqs = append(reqs, req)
+		default:
+			return reqs
+		}
+	}
 }
 
 func (m *MetricsTestServer) Serve() error {
@@ -75,8 +97,8 @@ func NewMetricTestServer() (*MetricsTestServer, error) {
 	if err != nil {
 		return nil, err
 	}
-	createMetricDescriptorCh := make(chan *monitoringpb.CreateMetricDescriptorRequest)
-	createTimeSeriesCh := make(chan *monitoringpb.CreateTimeSeriesRequest)
+	createMetricDescriptorCh := make(chan *monitoringpb.CreateMetricDescriptorRequest, 10)
+	createTimeSeriesCh := make(chan *monitoringpb.CreateTimeSeriesRequest, 10)
 	monitoringpb.RegisterMetricServiceServer(
 		srv,
 		&fakeMetricServiceServer{
@@ -86,9 +108,9 @@ func NewMetricTestServer() (*MetricsTestServer, error) {
 	)
 
 	testServer := &MetricsTestServer{
-		CreateMetricDescriptorChan: createMetricDescriptorCh,
-		CreateTimeSeriesChan:       createTimeSeriesCh,
 		Endpoint:                   lis.Addr().String(),
+		createMetricDescriptorChan: createMetricDescriptorCh,
+		createTimeSeriesChan:       createTimeSeriesCh,
 		lis:                        lis,
 		srv:                        srv,
 	}

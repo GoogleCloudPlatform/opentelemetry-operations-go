@@ -83,17 +83,17 @@ func TestMetrics(t *testing.T) {
 				testServerExporter.ConsumeMetrics(ctx, metrics),
 				"Failed to export metrics to local test server",
 			)
-			actualCreateMetricDescriptorReq := <-testServer.CreateMetricDescriptorChan
-			actualCreateTimeSeriesReq := <-testServer.CreateTimeSeriesChan
+			actualCreateMetricDescriptorReq := testServer.CreateMetricDescriptorRequests()
+			actualCreateTimeSeriesReq := testServer.CreateTimeSeriesRequests()
 
-			expectedCreateMetricDescriptorReq := test.LoadCreateMetricDescriptorFixture(
+			expectFixture := test.LoadExpectFixture(
 				t,
 				startTime,
 				endTime,
 			)
 			diff := integrationtest.DiffProtos(
 				actualCreateMetricDescriptorReq,
-				expectedCreateMetricDescriptorReq,
+				expectFixture.GetCreateMetricDescriptorRequests(),
 			)
 			require.Emptyf(
 				t,
@@ -101,10 +101,9 @@ func TestMetrics(t *testing.T) {
 				"Expected CreateMetricDescriptor request and actual GCM request differ:\n%v",
 				diff,
 			)
-			expectedCreateTimeSeriesReq := test.LoadCreateTimeSeriesFixture(t, startTime, endTime)
 			diff = integrationtest.DiffProtos(
 				actualCreateTimeSeriesReq,
-				expectedCreateTimeSeriesReq,
+				expectFixture.GetCreateTimeSeriesRequests(),
 			)
 			require.Emptyf(
 				t,
