@@ -15,6 +15,8 @@
 package integrationtest
 
 import (
+	"bytes"
+	"encoding/json"
 	"io/ioutil"
 	"testing"
 	"time"
@@ -22,7 +24,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/otlp"
 	"go.opentelemetry.io/collector/model/pdata"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -50,7 +51,7 @@ type MetricsTestCase struct {
 // Load OTLP metric fixture, test expectation fixtures and modify them so they're suitable for
 // testing. Currently, this just updates the timestamps.
 func (m *MetricsTestCase) LoadOTLPMetricsInput(
-	t *testing.T,
+	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
 ) pdata.Metrics {
@@ -87,8 +88,12 @@ func (m *MetricsTestCase) LoadOTLPMetricsInput(
 				}
 
 				for _, p := range points {
-					p.SetStartTimestamp(pdata.NewTimestampFromTime(startTime))
-					p.SetTimestamp(pdata.NewTimestampFromTime(endTime))
+					if p.StartTimestamp() != 0 {
+						p.SetStartTimestamp(pdata.NewTimestampFromTime(startTime))
+					}
+					if p.Timestamp() != 0 {
+						p.SetTimestamp(pdata.NewTimestampFromTime(endTime))
+					}
 				}
 			}
 		}
@@ -98,7 +103,7 @@ func (m *MetricsTestCase) LoadOTLPMetricsInput(
 }
 
 func (m *MetricsTestCase) LoadExpectFixture(
-	t *testing.T,
+	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
 ) *MetricExpectFixture {
@@ -112,7 +117,7 @@ func (m *MetricsTestCase) LoadExpectFixture(
 }
 
 func (m *MetricsTestCase) updateExpectFixture(
-	t *testing.T,
+	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
 	fixture *MetricExpectFixture,
@@ -120,12 +125,57 @@ func (m *MetricsTestCase) updateExpectFixture(
 	for _, req := range fixture.GetCreateTimeSeriesRequests() {
 		for _, ts := range req.GetTimeSeries() {
 			for _, p := range ts.GetPoints() {
-				p.Interval = &monitoringpb.TimeInterval{
-					StartTime: timestamppb.New(startTime),
-					EndTime:   timestamppb.New(endTime),
+				if p.GetInterval().GetStartTime() != nil {
+					p.GetInterval().StartTime = timestamppb.New(startTime)
+				}
+				if p.GetInterval().GetEndTime() != nil {
+					p.GetInterval().EndTime = timestamppb.New(endTime)
 				}
 			}
 		}
 
+	}
+}
+
+func (m *MetricsTestCase) SaveRecordedFixtures(
+	t testing.TB,
+	fixture *MetricExpectFixture,
+) {
+	normalizeFixture(fixture)
+
+	jsonBytes, err := protojson.Marshal(fixture)
+	require.NoError(t, err)
+	formatted := bytes.Buffer{}
+	require.NoError(t, json.Indent(&formatted, jsonBytes, "", "  "))
+	formatted.WriteString("\n")
+	require.NoError(t, ioutil.WriteFile(m.ExpectFixturePath, formatted.Bytes(), 0640))
+	t.Logf("Updated fixture %v", m.ExpectFixturePath)
+}
+
+// Normalizes timestamps and removes project ID fields which create noise in the fixture
+// because they can vary each test run
+func normalizeFixture(fixture *MetricExpectFixture) {
+	for _, req := range fixture.GetCreateTimeSeriesRequests() {
+		// clear project ID
+		req.Name = ""
+
+		for _, ts := range req.GetTimeSeries() {
+			for _, p := range ts.GetPoints() {
+				// Normalize timestamps if they are set
+				if p.GetInterval().GetStartTime() != nil {
+					p.GetInterval().StartTime = &timestamppb.Timestamp{}
+				}
+				if p.GetInterval().GetEndTime() != nil {
+					p.GetInterval().EndTime = &timestamppb.Timestamp{}
+				}
+			}
+		}
+	}
+
+	for _, req := range fixture.GetCreateMetricDescriptorRequests() {
+		req.Name = ""
+		if md := req.GetMetricDescriptor(); md != nil {
+			md.Name = ""
+		}
 	}
 }

@@ -36,7 +36,7 @@ func createMetricsExporter(ctx context.Context, t *testing.T) component.MetricsE
 	exporter, err := factory.CreateMetricsExporter(
 		ctx,
 		componenttest.NewNopExporterCreateSettings(),
-		createConfig(factory),
+		integrationtest.CreateConfig(factory),
 	)
 	require.NoError(t, err)
 	require.NoError(t, exporter.Start(ctx, componenttest.NewNopHost()))

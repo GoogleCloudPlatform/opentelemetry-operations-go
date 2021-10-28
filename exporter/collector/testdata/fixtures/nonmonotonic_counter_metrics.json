@@ -1,0 +1,36 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {},
+      "instrumentationLibraryMetrics": [
+        {
+          "instrumentationLibrary": {},
+          "metrics": [
+            {
+              "name": "system.memory.usage",
+              "description": "Bytes of memory in use.",
+              "unit": "By",
+              "sum": {
+                "dataPoints": [
+                  {
+                    "attributes": [
+                      {
+                        "key": "state",
+                        "value": {
+                          "stringValue": "used"
+                        }
+                      }
+                    ],
+                    "timeUnixNano": "1634877479074335121",
+                    "asInt": "6641752448"
+                  }
+                ],
+                "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
