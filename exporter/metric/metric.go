@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -37,6 +38,7 @@ import (
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"google.golang.org/api/option"
+	googlelabelpb "google.golang.org/genproto/googleapis/api/label"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -49,6 +51,10 @@ const (
 
 // TODO: Remove when Count aggregation is used in the implementation
 var _ = countToTypeValueAndTimestamp
+
+var (
+	randSource = rand.NewSource(time.Now().UnixNano())
+)
 
 // key is used to judge the uniqueness of the record descriptor.
 type key struct {
@@ -78,6 +84,8 @@ type metricExporter struct {
 	// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
 	//  TODO: Remove this when OTel SDK provides start time for each record specifically for stateful batcher.
 	startTime time.Time
+
+	uniqueIdentifier string
 }
 
 // Below are maps with monitored resources fields as keys
@@ -142,12 +150,18 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 		return nil, err
 	}
 
+	var uniqueIdentifier string
+	if o.useUniqueID {
+		uniqueIdentifier = fmt.Sprintf("%08x", rand.New(randSource).Uint32())
+	}
+
 	cache := map[key]*googlemetricpb.MetricDescriptor{}
 	e := &metricExporter{
-		o:         o,
-		mdCache:   cache,
-		client:    client,
-		startTime: time.Now(),
+		o:                o,
+		mdCache:          cache,
+		client:           client,
+		startTime:        time.Now(),
+		uniqueIdentifier: uniqueIdentifier,
 	}
 	return e, nil
 }
@@ -333,6 +347,13 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 	name := desc.Name()
 	unit := record.Descriptor().Unit()
 	kind, typ := recordToMdpbKindType(record)
+	var labels []*googlelabelpb.LabelDescriptor
+	if me.uniqueIdentifier != "" {
+		labels = []*googlelabelpb.LabelDescriptor{{
+			Key:       UniqueIdentifier,
+			ValueType: googlelabelpb.LabelDescriptor_STRING,
+		}}
+	}
 
 	// Detailed explanations on MetricDescriptor proto is not documented on
 	// generated Go packages. Refer to the original proto file.
@@ -344,6 +365,7 @@ func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.Me
 		ValueType:   typ,
 		Unit:        string(unit),
 		Description: desc.Description(),
+		Labels:      labels,
 	}
 }
 
@@ -499,6 +521,9 @@ func (me *metricExporter) recordToMpb(r *export.Record, library instrumentation.
 	for iter.Next() {
 		kv := iter.Label()
 		labels[normalizeLabelKey(string(kv.Key))] = kv.Value.AsString()
+	}
+	if me.uniqueIdentifier != "" {
+		labels[UniqueIdentifier] = me.uniqueIdentifier
 	}
 
 	return &googlemetricpb.Metric{

@@ -69,6 +69,10 @@ type options struct {
 	// TODO: This option should be replaced with OTel defining error handler.
 	// c.f. https://pkg.go.dev/go.opentelemetry.io/otel@v0.6.0/sdk/metric/controller/push?tab=doc#Config
 	onError func(error)
+
+	// useUniqueID indicates that a unique identifier for this exporter should be
+	// added to all metrics.
+	useUniqueID bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -113,5 +117,15 @@ func WithMetricDescriptorTypeFormatter(f func(*metric.Descriptor) string) func(o
 func WithOnError(f func(error)) func(o *options) {
 	return func(o *options) {
 		o.onError = f
+	}
+}
+
+// WithUniqueID adds an identifier to each exporter metric. This
+// must be used when there exist two (or more) exporters that may
+// export to the same metric name within WRITE_INTERVAL seconds of
+// each other.
+func WithUniqueID() func(o *options) {
+	return func(o *options) {
+		o.useUniqueID = true
 	}
 }

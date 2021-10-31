@@ -64,4 +64,7 @@ const (
 	GCEInstance    = "gce_instance"
 	AWSEC2Instance = "aws_ec2_instance"
 	GenericTask    = "generic_task"
+
+	// A unique identifier to differtiate concurrent metric updates.
+	UniqueIdentifier = "opentelemetry_id"
 )

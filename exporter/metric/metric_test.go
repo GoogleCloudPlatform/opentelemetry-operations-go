@@ -17,6 +17,7 @@ package metric
 import (
 	"context"
 	"fmt"
+	"math/rand"
 	"net"
 	"reflect"
 	"testing"
@@ -31,6 +32,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
+	"go.opentelemetry.io/otel/sdk/metric/controller/controllertest"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/processor/processortest"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -40,6 +42,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
+	googlelabelpb "google.golang.org/genproto/googleapis/api/label"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/grpc"
@@ -152,68 +155,117 @@ func TestDescToMetricType(t *testing.T) {
 }
 
 func TestRecordToMpb(t *testing.T) {
+	ctx := context.Background()
 	cloudMock := cloudmock.NewCloudMock()
 	defer cloudMock.Shutdown()
 
 	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 
-	resOpt := basic.WithResource(
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			attribute.String("test_id", "abc123"),
-		),
-	)
+	randSource = rand.NewSource(0)
 
-	pusher, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpt),
-			WithMetricDescriptorTypeFormatter(formatter),
+	counterName := "testing.sum"
+	metricType := "test.googleapis.com/" + counterName
+	// Generated string for the seed set above.
+	uniqueIdentifier := "f1f85ff5"
+
+	tests := []struct {
+		name                 string
+		useUniqueID          bool
+		counterLabels        []attribute.KeyValue
+		wantMetricDescriptor *googlemetricpb.MetricDescriptor
+		wantMetric           *googlemetricpb.Metric
+	}{
+		{
+			name:        "no useUniqueID",
+			useUniqueID: false,
+			counterLabels: []attribute.KeyValue{
+				attribute.Key("a").String("A"),
+			},
+			wantMetricDescriptor: &googlemetricpb.MetricDescriptor{
+				Name:       counterName,
+				Type:       metricType,
+				MetricKind: googlemetricpb.MetricDescriptor_CUMULATIVE,
+				ValueType:  googlemetricpb.MetricDescriptor_INT64,
+			},
+			wantMetric: &googlemetricpb.Metric{
+				Type: metricType,
+				Labels: map[string]string{
+					"a": "A",
+				},
+			},
 		},
-		resOpt,
-	)
-	assert.NoError(t, err)
-
-	desc := metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind)
-
-	md := &googlemetricpb.MetricDescriptor{
-		Name:        desc.Name(),
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
-		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
-		Description: "test",
-	}
-
-	mdkey := key{
-		name:        md.Name,
-		libraryname: "",
-	}
-	me := &metricExporter{
-		o: &options{},
-		mdCache: map[key]*googlemetricpb.MetricDescriptor{
-			mdkey: md,
+		{
+			name:        "useUniqueID",
+			useUniqueID: true,
+			counterLabels: []attribute.KeyValue{
+				attribute.Key("a").String("A"),
+			},
+			wantMetricDescriptor: &googlemetricpb.MetricDescriptor{
+				Name:       counterName,
+				Type:       metricType,
+				MetricKind: googlemetricpb.MetricDescriptor_CUMULATIVE,
+				ValueType:  googlemetricpb.MetricDescriptor_INT64,
+				Labels: []*googlelabelpb.LabelDescriptor{{
+					Key:       UniqueIdentifier,
+					ValueType: googlelabelpb.LabelDescriptor_STRING,
+				}},
+			},
+			wantMetric: &googlemetricpb.Metric{
+				Type: metricType,
+				Labels: map[string]string{
+					"a":              "A",
+					UniqueIdentifier: uniqueIdentifier,
+				},
+			},
 		},
 	}
 
-	want := &googlemetricpb.Metric{
-		Type: md.Type,
-		Labels: map[string]string{
-			"a":   "A",
-			"b_b": "B",
-		},
-	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			res := &resource.Resource{}
+			aggSel := processortest.AggregatorSelector()
+			proc := processor.NewFactory(aggSel, export.CumulativeExportKindSelector())
 
-	aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
-		return reader.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
-			out := me.recordToMpb(&r, library)
-			if !reflect.DeepEqual(want, out) {
-				return fmt.Errorf("expected: %v, actual: %v", want, out)
+			exporterOpts := []Option{
+				WithProjectID("PROJECT_ID_NOT_REAL"),
+				WithMonitoringClientOptions(clientOpt),
+				WithMetricDescriptorTypeFormatter(formatter),
 			}
-			return nil
+			if test.useUniqueID {
+				exporterOpts = append(exporterOpts, WithUniqueID())
+			}
+
+			exporter, err := NewRawExporter(exporterOpts...)
+			assert.NoError(t, err)
+
+			cont := controller.New(proc,
+				controller.WithExporter(exporter),
+				controller.WithResource(res),
+			)
+
+			meter := cont.Meter("test")
+			metric.Must(meter).NewInt64Counter(counterName).Add(ctx, 1, test.counterLabels...)
+
+			require.NoError(t, cont.Collect(ctx))
+
+			me := exporter.metricExporter
+
+			var gotMD *googlemetricpb.MetricDescriptor
+			var gotMetric *googlemetricpb.Metric
+			aggError := controllertest.ReadAll(cont, export.CumulativeExportKindSelector(), func(library instrumentation.Library, r export.Record) error {
+				gotMD = me.recordToMdpb(&r)
+				gotMetric = me.recordToMpb(&r, library)
+				return nil
+			})
+			require.NoError(t, aggError)
+
+			if !reflect.DeepEqual(test.wantMetricDescriptor, gotMD) {
+				t.Errorf("recordToMdpb expected: %v, got: %v", test.wantMetricDescriptor, gotMD)
+			}
+			if !reflect.DeepEqual(test.wantMetric, gotMetric) {
+				t.Errorf("recordToMpb expected: %v, actual: %v", test.wantMetricDescriptor, gotMetric)
+			}
 		})
-	})
-	if aggError != nil {
-		t.Errorf("%v", aggError)
 	}
 }
 
