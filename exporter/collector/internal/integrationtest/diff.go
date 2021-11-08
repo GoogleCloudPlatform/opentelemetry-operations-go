@@ -16,6 +16,7 @@ package integrationtest
 
 import (
 	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/protobuf/testing/protocmp"
@@ -29,6 +30,8 @@ var (
 		protocmp.IgnoreFields(&monitoringpb.CreateTimeSeriesRequest{}, "name"),
 		protocmp.IgnoreFields(&monitoringpb.CreateMetricDescriptorRequest{}, "name"),
 		protocmp.IgnoreFields(&metricpb.MetricDescriptor{}, "name"),
+
+		cmpopts.EquateEmpty(),
 	}
 )
 
