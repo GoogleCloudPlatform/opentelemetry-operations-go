@@ -1,0 +1,3047 @@
+{
+  "createTimeSeriesRequests": [
+    {
+      "timeSeries": [
+        {
+          "metric": {
+            "type": "agent.googleapis.com/swap/io",
+            "labels": {
+              "direction": "in"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "3652190208"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/swap/io",
+            "labels": {
+              "direction": "out"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "33672253440"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/cpu_time",
+            "labels": {
+              "command": "systemd",
+              "command_line": "/lib/systemd/systemd --user",
+              "owner": "joshuasuereth_google_com",
+              "pid": "578",
+              "process": "all",
+              "user_or_syst": "user"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "40000"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/cpu_time",
+            "labels": {
+              "command": "systemd",
+              "command_line": "/lib/systemd/systemd --user",
+              "owner": "joshuasuereth_google_com",
+              "pid": "578",
+              "process": "all",
+              "user_or_syst": "syst"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/cpu_time",
+            "labels": {
+              "command": "bash",
+              "command_line": "-bash",
+              "owner": "joshuasuereth_google_com",
+              "pid": "595",
+              "process": "all",
+              "user_or_syst": "user"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "80000"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/cpu_time",
+            "labels": {
+              "command": "bash",
+              "command_line": "-bash",
+              "owner": "joshuasuereth_google_com",
+              "pid": "595",
+              "process": "all",
+              "user_or_syst": "syst"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "120000"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/cpu_time",
+            "labels": {
+              "command": "google-cloud-metrics-agent",
+              "command_line": "./bin/google-cloud-metrics-agent --config=otel-col.yml",
+              "owner": "joshuasuereth_google_com",
+              "pid": "2725",
+              "process": "all",
+              "user_or_syst": "user"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "100000"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/cpu_time",
+            "labels": {
+              "command": "google-cloud-metrics-agent",
+              "command_line": "./bin/google-cloud-metrics-agent --config=otel-col.yml",
+              "owner": "joshuasuereth_google_com",
+              "pid": "2725",
+              "process": "all",
+              "user_or_syst": "syst"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "30000"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/rss_usage",
+            "labels": {
+              "command": "systemd",
+              "command_line": "/lib/systemd/systemd --user",
+              "owner": "joshuasuereth_google_com",
+              "pid": "578",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 5431296
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/rss_usage",
+            "labels": {
+              "command": "bash",
+              "command_line": "-bash",
+              "owner": "joshuasuereth_google_com",
+              "pid": "595",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 6938624
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/rss_usage",
+            "labels": {
+              "command": "google-cloud-metrics-agent",
+              "command_line": "./bin/google-cloud-metrics-agent --config=otel-col.yml",
+              "owner": "joshuasuereth_google_com",
+              "pid": "2725",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 73625600
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/vm_usage",
+            "labels": {
+              "command": "systemd",
+              "command_line": "/lib/systemd/systemd --user",
+              "owner": "joshuasuereth_google_com",
+              "pid": "578",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 21528576
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/vm_usage",
+            "labels": {
+              "command": "bash",
+              "command_line": "-bash",
+              "owner": "joshuasuereth_google_com",
+              "pid": "595",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 30916608
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/vm_usage",
+            "labels": {
+              "command": "google-cloud-metrics-agent",
+              "command_line": "./bin/google-cloud-metrics-agent --config=otel-col.yml",
+              "owner": "joshuasuereth_google_com",
+              "pid": "2725",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1355685888
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/disk/read_bytes_count",
+            "labels": {
+              "command": "systemd",
+              "command_line": "/lib/systemd/systemd --user",
+              "owner": "joshuasuereth_google_com",
+              "pid": "578",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1073152"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/disk/read_bytes_count",
+            "labels": {
+              "command": "bash",
+              "command_line": "-bash",
+              "owner": "joshuasuereth_google_com",
+              "pid": "595",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "766906368"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/disk/read_bytes_count",
+            "labels": {
+              "command": "google-cloud-metrics-agent",
+              "command_line": "./bin/google-cloud-metrics-agent --config=otel-col.yml",
+              "owner": "joshuasuereth_google_com",
+              "pid": "2725",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/disk/write_bytes_count",
+            "labels": {
+              "command": "systemd",
+              "command_line": "/lib/systemd/systemd --user",
+              "owner": "joshuasuereth_google_com",
+              "pid": "578",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/disk/write_bytes_count",
+            "labels": {
+              "command": "bash",
+              "command_line": "-bash",
+              "owner": "joshuasuereth_google_com",
+              "pid": "595",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "7915782144"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/disk/write_bytes_count",
+            "labels": {
+              "command": "google-cloud-metrics-agent",
+              "command_line": "./bin/google-cloud-metrics-agent --config=otel-col.yml",
+              "owner": "joshuasuereth_google_com",
+              "pid": "2725",
+              "process": "all"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "4096"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/bytes_used",
+            "labels": {
+              "state": "slab"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 177328128
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/bytes_used",
+            "labels": {
+              "state": "used"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 166518784
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/bytes_used",
+            "labels": {
+              "state": "free"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 2614779904
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/bytes_used",
+            "labels": {
+              "state": "buffered"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 148340736
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/bytes_used",
+            "labels": {
+              "state": "cached"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1208135680
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/percent_used",
+            "labels": {
+              "state": "slab"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 4.10947591438758
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/percent_used",
+            "labels": {
+              "state": "used"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 3.858975673284657
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/percent_used",
+            "labels": {
+              "state": "free"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 60.59599883055591
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/percent_used",
+            "labels": {
+              "state": "buffered"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 3.437710015833058
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/memory/percent_used",
+            "labels": {
+              "state": "cached"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 27.997839565938804
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/cpu/load_1m"
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.01
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/cpu/load_5m"
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.07
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/cpu/load_15m"
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.21
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/read_bytes_count",
+            "labels": {
+              "device": "sda"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "913047552"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/read_bytes_count",
+            "labels": {
+              "device": "sda1"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "886438912"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/read_bytes_count",
+            "labels": {
+              "device": "sda14"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "163840"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/read_bytes_count",
+            "labels": {
+              "device": "sda15"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "2281984"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/operation_count",
+            "labels": {
+              "device": "sda14",
+              "direction": "read"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "40"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/operation_count",
+            "labels": {
+              "device": "sda14",
+              "direction": "write"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/operation_count",
+            "labels": {
+              "device": "sda15",
+              "direction": "read"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "343"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/operation_count",
+            "labels": {
+              "device": "sda15",
+              "direction": "write"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/operation_count",
+            "labels": {
+              "device": "sda",
+              "direction": "read"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "40273"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/operation_count",
+            "labels": {
+              "device": "sda",
+              "direction": "write"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "116910"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/operation_count",
+            "labels": {
+              "device": "sda1",
+              "direction": "read"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "38979"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/operation_count",
+            "labels": {
+              "device": "sda1",
+              "direction": "write"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "92252"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/io_time",
+            "labels": {
+              "device": "sda"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "6065204"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/io_time",
+            "labels": {
+              "device": "sda1"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "164692"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/io_time",
+            "labels": {
+              "device": "sda14"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "12"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/io_time",
+            "labels": {
+              "device": "sda15"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "36"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/pending_operations",
+            "labels": {
+              "device": "sda15"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/pending_operations",
+            "labels": {
+              "device": "sda"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/pending_operations",
+            "labels": {
+              "device": "sda1"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/pending_operations",
+            "labels": {
+              "device": "sda14"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/weighted_io_time",
+            "labels": {
+              "device": "sda1"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "4893248"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/weighted_io_time",
+            "labels": {
+              "device": "sda14"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "12"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/weighted_io_time",
+            "labels": {
+              "device": "sda15"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1156"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/weighted_io_time",
+            "labels": {
+              "device": "sda"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "10807004"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/merged_operations",
+            "labels": {
+              "device": "sda",
+              "direction": "read"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/merged_operations",
+            "labels": {
+              "device": "sda",
+              "direction": "write"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "276190"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/merged_operations",
+            "labels": {
+              "device": "sda1",
+              "direction": "read"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/merged_operations",
+            "labels": {
+              "device": "sda1",
+              "direction": "write"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "276174"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/merged_operations",
+            "labels": {
+              "device": "sda14",
+              "direction": "read"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/merged_operations",
+            "labels": {
+              "device": "sda14",
+              "direction": "write"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/merged_operations",
+            "labels": {
+              "device": "sda15",
+              "direction": "read"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/merged_operations",
+            "labels": {
+              "device": "sda15",
+              "direction": "write"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/write_bytes_count",
+            "labels": {
+              "device": "sda"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "8594224640"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/write_bytes_count",
+            "labels": {
+              "device": "sda1"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "8594138112"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/write_bytes_count",
+            "labels": {
+              "device": "sda14"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/write_bytes_count",
+            "labels": {
+              "device": "sda15"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "512"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/packets",
+            "labels": {
+              "device": "lo",
+              "direction": "tx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "37"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/packets",
+            "labels": {
+              "device": "lo",
+              "direction": "rx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "37"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/packets",
+            "labels": {
+              "device": "ens4",
+              "direction": "tx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "179493"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/packets",
+            "labels": {
+              "device": "ens4",
+              "direction": "rx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "329601"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/errors",
+            "labels": {
+              "device": "lo",
+              "direction": "tx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/errors",
+            "labels": {
+              "device": "lo",
+              "direction": "rx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/errors",
+            "labels": {
+              "device": "ens4",
+              "direction": "tx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/errors",
+            "labels": {
+              "device": "ens4",
+              "direction": "rx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/traffic",
+            "labels": {
+              "device": "lo",
+              "direction": "tx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "5253"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/traffic",
+            "labels": {
+              "device": "lo",
+              "direction": "rx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "5253"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/traffic",
+            "labels": {
+              "device": "ens4",
+              "direction": "tx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "16550487"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/interface/traffic",
+            "labels": {
+              "device": "ens4",
+              "direction": "rx"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "3075430661"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "SYN_RECV"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "CLOSE"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "FIN_WAIT_1"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "LAST_ACK"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "TIME_WAIT"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "CLOSE_WAIT"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "FIN_WAIT_2"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "LISTEN"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 3
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "SYN_SENT"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "CLOSING"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "DELETE"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/network/tcp_connections",
+            "labels": {
+              "port": "all",
+              "tcp_state": "ESTABLISHED"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 7
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/bytes_used",
+            "labels": {
+              "device": "/dev/sda1",
+              "state": "used"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 8255782912
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/bytes_used",
+            "labels": {
+              "device": "/dev/sda1",
+              "state": "free"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 11705372672
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/bytes_used",
+            "labels": {
+              "device": "/dev/sda1",
+              "state": "reserved"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 976375808
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/bytes_used",
+            "labels": {
+              "device": "/dev/sda15",
+              "state": "used"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 5904384
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/bytes_used",
+            "labels": {
+              "device": "/dev/sda15",
+              "state": "free"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 123846656
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/bytes_used",
+            "labels": {
+              "device": "/dev/sda15",
+              "state": "reserved"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/percent_used",
+            "labels": {
+              "device": "/dev/sda15",
+              "state": "used"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 4.5505484965669645
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/percent_used",
+            "labels": {
+              "device": "/dev/sda15",
+              "state": "free"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 95.44945150343304
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/percent_used",
+            "labels": {
+              "device": "/dev/sda15",
+              "state": "reserved"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/percent_used",
+            "labels": {
+              "device": "/dev/sda1",
+              "state": "used"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 39.43054583385338
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/percent_used",
+            "labels": {
+              "device": "/dev/sda1",
+              "state": "free"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 55.90617371669945
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/disk/percent_used",
+            "labels": {
+              "device": "/dev/sda1",
+              "state": "reserved"
+            }
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 4.6632804494471705
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "agent.googleapis.com/processes/fork_count"
+          },
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "1447596667076884797",
+              "zone": "us-central1-a"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "35156"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
