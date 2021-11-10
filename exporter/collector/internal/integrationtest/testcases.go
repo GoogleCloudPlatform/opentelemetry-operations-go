@@ -26,5 +26,15 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/nonmonotonic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/nonmonotonic_counter_metrics_expect.json",
 		},
+		{
+			Name:                 "Ops Agent Self-Reported metrics",
+			OTLPInputFixturePath: "testdata/fixtures/ops_agent_self_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/ops_agent_self_metrics_expect.json",
+		},
+		{
+			Name:                 "Ops Agent Host Metrics",
+			OTLPInputFixturePath: "testdata/fixtures/ops_agent_host_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/ops_agent_host_metrics_expect.json",
+		},
 	}
 )
