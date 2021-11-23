@@ -55,7 +55,7 @@ func TestIntegrationMetrics(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 			exporter := createMetricsExporter(ctx, t)
-			defer require.NoError(t, exporter.Shutdown(ctx))
+			defer func() { require.NoError(t, exporter.Shutdown(ctx)) }()
 
 			require.NoError(
 				t,

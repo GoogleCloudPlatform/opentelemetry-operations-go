@@ -76,7 +76,7 @@ func TestMetrics(t *testing.T) {
 			go testServer.Serve()
 			defer testServer.Shutdown()
 			testServerExporter := createMetricsTestServerExporter(ctx, t, testServer)
-			defer require.NoError(t, testServerExporter.Shutdown(ctx))
+			defer func() { require.NoError(t, testServerExporter.Shutdown(ctx)) }()
 
 			require.NoError(
 				t,
