@@ -169,6 +169,9 @@ func normalizeFixture(fixture *MetricExpectFixture) {
 					p.GetInterval().EndTime = &timestamppb.Timestamp{}
 				}
 			}
+
+			// clear project ID from monitored resource
+			delete(ts.GetResource().GetLabels(), "project_id")
 		}
 	}
 

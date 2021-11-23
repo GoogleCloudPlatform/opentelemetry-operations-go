@@ -92,23 +92,16 @@ func TestMetrics(t *testing.T) {
 				endTime,
 			)
 			diff := integrationtest.DiffProtos(
-				actualCreateMetricDescriptorReq,
-				expectFixture.GetCreateMetricDescriptorRequests(),
+				&integrationtest.MetricExpectFixture{
+					CreateTimeSeriesRequests:       actualCreateTimeSeriesReq,
+					CreateMetricDescriptorRequests: actualCreateMetricDescriptorReq,
+				},
+				expectFixture,
 			)
 			require.Emptyf(
 				t,
 				diff,
-				"Expected CreateMetricDescriptor request and actual GCM request differ:\n%v",
-				diff,
-			)
-			diff = integrationtest.DiffProtos(
-				actualCreateTimeSeriesReq,
-				expectFixture.GetCreateTimeSeriesRequests(),
-			)
-			require.Emptyf(
-				t,
-				diff,
-				"Expected CreateTimeSeries request and actual GCM request differ:\n%v",
+				"Expected requests fixture and actual GCM requests differ:\n%v",
 				diff,
 			)
 		})
