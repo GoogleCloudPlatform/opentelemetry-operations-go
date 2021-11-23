@@ -18,6 +18,7 @@ import (
 	"context"
 	"net"
 	"os"
+	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -35,10 +36,12 @@ type MetricsTestServer struct {
 	// Address where the gRPC server is listening
 	Endpoint string
 
-	createMetricDescriptorChan <-chan *monitoringpb.CreateMetricDescriptorRequest
-	createTimeSeriesChan       <-chan *monitoringpb.CreateTimeSeriesRequest
-	lis                        net.Listener
-	srv                        *grpc.Server
+	createMetricDescriptorReqs []*monitoringpb.CreateMetricDescriptorRequest
+	createTimeSeriesReqs       []*monitoringpb.CreateTimeSeriesRequest
+
+	lis net.Listener
+	srv *grpc.Server
+	mu  sync.Mutex
 }
 
 func (m *MetricsTestServer) Shutdown() {
@@ -48,28 +51,31 @@ func (m *MetricsTestServer) Shutdown() {
 
 // Pops out the CreateMetricDescriptorRequests which the test server has received so far
 func (m *MetricsTestServer) CreateMetricDescriptorRequests() []*monitoringpb.CreateMetricDescriptorRequest {
-	reqs := []*monitoringpb.CreateMetricDescriptorRequest{}
-	for {
-		select {
-		case req := <-m.createMetricDescriptorChan:
-			reqs = append(reqs, req)
-		default:
-			return reqs
-		}
-	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	reqs := m.createMetricDescriptorReqs
+	m.createMetricDescriptorReqs = nil
+	return reqs
 }
 
 // Pops out the CreateTimeSeriesRequests which the test server has received so far
 func (m *MetricsTestServer) CreateTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
-	reqs := []*monitoringpb.CreateTimeSeriesRequest{}
-	for {
-		select {
-		case req := <-m.createTimeSeriesChan:
-			reqs = append(reqs, req)
-		default:
-			return reqs
-		}
-	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	reqs := m.createTimeSeriesReqs
+	m.createTimeSeriesReqs = nil
+	return reqs
+}
+
+func (m *MetricsTestServer) appendCreateMetricDescriptorReq(req *monitoringpb.CreateMetricDescriptorRequest) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.createMetricDescriptorReqs = append(m.createMetricDescriptorReqs, req)
+}
+func (m *MetricsTestServer) appendCreateTimeSeriesReq(req *monitoringpb.CreateTimeSeriesRequest) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.createTimeSeriesReqs = append(m.createTimeSeriesReqs, req)
 }
 
 func (m *MetricsTestServer) Serve() error {
@@ -78,15 +84,15 @@ func (m *MetricsTestServer) Serve() error {
 
 type fakeMetricServiceServer struct {
 	monitoringpb.UnimplementedMetricServiceServer
-	createMetricDescriptorChan chan<- *monitoringpb.CreateMetricDescriptorRequest
-	createTimeSeriesChan       chan<- *monitoringpb.CreateTimeSeriesRequest
+	appendCreateMetricDescriptorReq func(*monitoringpb.CreateMetricDescriptorRequest)
+	appendCreateTimeSeriesReq       func(*monitoringpb.CreateTimeSeriesRequest)
 }
 
 func (f *fakeMetricServiceServer) CreateTimeSeries(
 	ctx context.Context,
 	req *monitoringpb.CreateTimeSeriesRequest,
 ) (*emptypb.Empty, error) {
-	go func() { f.createTimeSeriesChan <- req }()
+	f.appendCreateTimeSeriesReq(req)
 	return &emptypb.Empty{}, nil
 }
 
@@ -94,7 +100,7 @@ func (f *fakeMetricServiceServer) CreateMetricDescriptor(
 	ctx context.Context,
 	req *monitoringpb.CreateMetricDescriptorRequest,
 ) (*metric.MetricDescriptor, error) {
-	go func() { f.createMetricDescriptorChan <- req }()
+	f.appendCreateMetricDescriptorReq(req)
 	return &metric.MetricDescriptor{}, nil
 }
 
@@ -104,23 +110,19 @@ func NewMetricTestServer() (*MetricsTestServer, error) {
 	if err != nil {
 		return nil, err
 	}
-	createMetricDescriptorCh := make(chan *monitoringpb.CreateMetricDescriptorRequest, 10)
-	createTimeSeriesCh := make(chan *monitoringpb.CreateTimeSeriesRequest, 10)
+	testServer := &MetricsTestServer{
+		Endpoint: lis.Addr().String(),
+		lis:      lis,
+		srv:      srv,
+	}
+
 	monitoringpb.RegisterMetricServiceServer(
 		srv,
 		&fakeMetricServiceServer{
-			createMetricDescriptorChan: createMetricDescriptorCh,
-			createTimeSeriesChan:       createTimeSeriesCh,
+			appendCreateMetricDescriptorReq: testServer.appendCreateMetricDescriptorReq,
+			appendCreateTimeSeriesReq:       testServer.appendCreateTimeSeriesReq,
 		},
 	)
-
-	testServer := &MetricsTestServer{
-		Endpoint:                   lis.Addr().String(),
-		createMetricDescriptorChan: createMetricDescriptorCh,
-		createTimeSeriesChan:       createTimeSeriesCh,
-		lis:                        lis,
-		srv:                        srv,
-	}
 
 	return testServer, nil
 }
