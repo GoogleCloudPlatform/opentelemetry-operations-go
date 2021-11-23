@@ -17,29 +17,23 @@ package integrationtest
 import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	metricpb "google.golang.org/genproto/googleapis/api/metric"
-	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/testing/protocmp"
 )
 
 var (
 	cmpOptions = []cmp.Option{
 		protocmp.Transform(),
-
-		// Ignore project IDs because fixtures may have been dumped from another project.
-		protocmp.IgnoreFields(&monitoringpb.CreateTimeSeriesRequest{}, "name"),
-		protocmp.IgnoreFields(&monitoringpb.CreateMetricDescriptorRequest{}, "name"),
-		protocmp.IgnoreFields(&metricpb.MetricDescriptor{}, "name"),
-
 		cmpopts.EquateEmpty(),
 	}
 )
 
 // Diff uses cmp.Diff(), protocmp, and some custom options to compare two protobuf messages.
-func DiffProtos(x interface{}, y interface{}) string {
-	return cmp.Diff(
-		x,
-		y,
-		cmpOptions...,
-	)
+func DiffProtos(x, y *MetricExpectFixture) string {
+	x = proto.Clone(x).(*MetricExpectFixture)
+	y = proto.Clone(y).(*MetricExpectFixture)
+	normalizeFixture(x)
+	normalizeFixture(y)
+
+	return cmp.Diff(x, y, cmpOptions...)
 }
