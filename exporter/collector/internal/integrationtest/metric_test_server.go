@@ -92,7 +92,7 @@ func (f *fakeMetricServiceServer) CreateTimeSeries(
 	ctx context.Context,
 	req *monitoringpb.CreateTimeSeriesRequest,
 ) (*emptypb.Empty, error) {
-	go f.appendCreateTimeSeriesReq(req)
+	f.appendCreateTimeSeriesReq(req)
 	return &emptypb.Empty{}, nil
 }
 
@@ -100,7 +100,7 @@ func (f *fakeMetricServiceServer) CreateMetricDescriptor(
 	ctx context.Context,
 	req *monitoringpb.CreateMetricDescriptorRequest,
 ) (*metric.MetricDescriptor, error) {
-	go f.appendCreateMetricDescriptorReq(req)
+	f.appendCreateMetricDescriptorReq(req)
 	return &metric.MetricDescriptor{}, nil
 }
 
