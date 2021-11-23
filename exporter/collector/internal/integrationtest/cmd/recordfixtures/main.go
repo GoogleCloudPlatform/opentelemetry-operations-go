@@ -57,7 +57,7 @@ func main() {
 	go testServer.Serve()
 	defer testServer.Shutdown()
 	testServerExporter := integrationtest.CreateMetricsTestServerExporter(ctx, t, testServer)
-	defer require.NoError(t, testServerExporter.Shutdown(ctx))
+	defer func() { require.NoError(t, testServerExporter.Shutdown(ctx)) }()
 
 	for _, test := range integrationtest.TestCases {
 		metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
