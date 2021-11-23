@@ -22,6 +22,11 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
 		},
 		{
+			Name:                 "Delta Counter",
+			OTLPInputFixturePath: "testdata/fixtures/delta_counter_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/delta_counter_metrics_expect.json",
+		},
+		{
 			Name:                 "Non-monotonic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/nonmonotonic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/nonmonotonic_counter_metrics_expect.json",

@@ -1,0 +1,38 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {},
+      "instrumentationLibraryMetrics": [
+        {
+          "instrumentationLibrary": {},
+          "metrics": [
+            {
+              "name": "deltacounter",
+              "description": "This is a test counter with delta temporality",
+              "unit": "1",
+              "sum": {
+                "dataPoints": [
+                  {
+                    "attributes": [
+                      {
+                        "key": "foo",
+                        "value": {
+                          "stringValue": "bar"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1634322229906722370",
+                    "timeUnixNano": "1634322234906722370",
+                    "asInt": "253"
+                  }
+                ],
+                "aggregationTemporality": "AGGREGATION_TEMPORALITY_DELTA",
+                "isMonotonic": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
