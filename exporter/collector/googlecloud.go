@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// package collector contains the wrapper for OpenTelemetry-GoogleCloud
+// Package collector contains the wrapper for OpenTelemetry-GoogleCloud
 // exporter to be used in opentelemetry-collector.
 package collector
 
@@ -25,7 +25,6 @@ import (
 	agentmetricspb "github.com/census-instrumentation/opencensus-proto/gen-go/agent/metrics/v1"
 	metricspb "github.com/census-instrumentation/opencensus-proto/gen-go/metrics/v1"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
 	conventions "go.opentelemetry.io/collector/model/semconv/v1.5.0"
@@ -55,7 +54,7 @@ func (te *traceExporter) Shutdown(ctx context.Context) error {
 func (me *metricsExporter) Shutdown(context.Context) error {
 	me.mexporter.Flush()
 	me.mexporter.StopMetricsExporter()
-	return nil
+	return me.mexporter.Close()
 }
 
 func setVersionInUserAgent(cfg *Config, version string) {
@@ -237,7 +236,6 @@ func exportAdditionalLabels(mds []*agentmetricspb.ExportMetricsServiceRequest) [
 
 // pushTraces calls texporter.ExportSpan for each span in the given traces
 func (te *traceExporter) pushTraces(ctx context.Context, td pdata.Traces) error {
-	var errs []error
 	resourceSpans := td.ResourceSpans()
 	spans := make([]sdktrace.ReadOnlySpan, 0, td.SpanCount())
 	for i := 0; i < resourceSpans.Len(); i++ {
@@ -245,11 +243,7 @@ func (te *traceExporter) pushTraces(ctx context.Context, td pdata.Traces) error 
 		spans = append(spans, sd...)
 	}
 
-	err := te.texporter.ExportSpans(ctx, spans)
-	if err != nil {
-		errs = append(errs, err)
-	}
-	return consumererror.Combine(errs)
+	return te.texporter.ExportSpans(ctx, spans)
 }
 
 func numPoints(metrics []*metricspb.Metric) int {
