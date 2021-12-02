@@ -1,0 +1,51 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {},
+      "instrumentationLibraryMetrics": [
+        {
+          "instrumentationLibrary": {},
+          "metrics": [
+            {
+              "name": "testsummary",
+              "description": "This is a test summary",
+              "unit": "1",
+              "summary": {
+                "dataPoints": [
+                  {
+                    "attributes": [
+                      {
+                        "key": "foo",
+                        "value": {
+                          "stringValue": "bar"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1634322229906722370",
+                    "timeUnixNano": "1634322234906722370",
+                    "count": "10",
+                    "sum": 123.4,
+                    "quantile_values": [
+                      {
+                        "quantile": 0.5,
+                        "value": 10.2
+                      },
+                      {
+                        "quantile": 0.75,
+                        "value": 25.5
+                      },
+                      {
+                        "quantile": 0.9,
+                        "value": 100.2
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

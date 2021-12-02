@@ -32,6 +32,11 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/nonmonotonic_counter_metrics_expect.json",
 		},
 		{
+			Name:                 "Summary",
+			OTLPInputFixturePath: "testdata/fixtures/summary_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/summary_metrics_expect.json",
+		},
+		{
 			Name:                 "Ops Agent Self-Reported metrics",
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_self_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_self_metrics_expect.json",
