@@ -46,6 +46,9 @@ type MetricsTestCase struct {
 	// Path to the JSON encoded MetricExpectFixture (see fixtures.proto) that contains request
 	// messages the exporter is expected to send.
 	ExpectFixturePath string
+
+	// Whether to skip this test case
+	Skip bool
 }
 
 // Load OTLP metric fixture, test expectation fixtures and modify them so they're suitable for
@@ -180,5 +183,11 @@ func normalizeFixture(fixture *MetricExpectFixture) {
 		if md := req.GetMetricDescriptor(); md != nil {
 			md.Name = ""
 		}
+	}
+}
+
+func (m *MetricsTestCase) SkipIfNeeded(t testing.TB) {
+	if m.Skip {
+		t.Skip("Test case is marked to skip in internal/integrationtest/testcases.go")
 	}
 }

@@ -53,6 +53,7 @@ func TestIntegrationMetrics(t *testing.T) {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
+			test.SkipIfNeeded(t)
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 			exporter := createMetricsExporter(ctx, t)
 			defer func() { require.NoError(t, exporter.Shutdown(ctx)) }()
