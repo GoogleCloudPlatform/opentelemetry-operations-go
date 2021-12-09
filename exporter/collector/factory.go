@@ -70,9 +70,9 @@ func createTracesExporter(
 
 // createMetricsExporter creates a metrics exporter based on this config.
 func createMetricsExporter(
-	_ context.Context,
+	ctx context.Context,
 	params component.ExporterCreateSettings,
 	cfg config.Exporter) (component.MetricsExporter, error) {
 	eCfg := cfg.(*Config)
-	return newGoogleCloudMetricsExporter(eCfg, params)
+	return newGoogleCloudMetricsExporter(ctx, eCfg, params)
 }

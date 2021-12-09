@@ -21,6 +21,7 @@ require (
 )
 
 require (
+	cloud.google.com/go/monitoring v1.1.0
 	github.com/aws/aws-sdk-go v1.42.14 // indirect
 	github.com/google/go-cmp v0.5.6
 )
