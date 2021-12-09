@@ -69,6 +69,7 @@ func TestMetrics(t *testing.T) {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
+			test.SkipIfNeeded(t)
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 
 			testServer, err := integrationtest.NewMetricTestServer()

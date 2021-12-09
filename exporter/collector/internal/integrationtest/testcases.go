@@ -20,31 +20,37 @@ var (
 			Name:                 "Basic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
+			Skip:                 true,
 		},
 		{
 			Name:                 "Delta Counter",
 			OTLPInputFixturePath: "testdata/fixtures/delta_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/delta_counter_metrics_expect.json",
+			Skip:                 true,
 		},
 		{
 			Name:                 "Non-monotonic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/nonmonotonic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/nonmonotonic_counter_metrics_expect.json",
+			Skip:                 true,
 		},
 		{
 			Name:                 "Summary",
 			OTLPInputFixturePath: "testdata/fixtures/summary_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/summary_metrics_expect.json",
+			Skip:                 true,
 		},
 		{
 			Name:                 "Ops Agent Self-Reported metrics",
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_self_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_self_metrics_expect.json",
+			Skip:                 true,
 		},
 		{
 			Name:                 "Ops Agent Host Metrics",
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_host_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_host_metrics_expect.json",
+			Skip:                 true,
 		},
 	}
 )
