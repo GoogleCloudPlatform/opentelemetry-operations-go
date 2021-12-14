@@ -26,15 +26,23 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
-	"google.golang.org/genproto/googleapis/api/metric"
+	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 // metricsExporter is the GCM exporter that uses pdata directly
 type metricsExporter struct {
 	cfg    *Config
 	client *monitoring.MetricClient
+	mapper metricMapper
+}
+
+// metricMapper is the part that transforms metrics. Separate from metricsExporter since it has
+// all pure functions.
+type metricMapper struct {
+	cfg *Config
 }
 
 type labels map[string]string
@@ -60,6 +68,7 @@ func newGoogleCloudMetricsExporter(
 	mExp := &metricsExporter{
 		cfg:    cfg,
 		client: client,
+		mapper: metricMapper{cfg},
 	}
 
 	return exporterhelper.NewMetricsExporter(
@@ -79,7 +88,7 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
-		monitoredResource, extraResourceLabels := resourceMetricsToMonitoredResource(rm.Resource())
+		monitoredResource, extraResourceLabels := me.mapper.resourceMetricsToMonitoredResource(rm.Resource())
 		ilms := rm.InstrumentationLibraryMetrics()
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
@@ -87,8 +96,8 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 			extraLabels := mergeLabels(instrumentationLibraryToLabels(ilm.InstrumentationLibrary()), extraResourceLabels)
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
-				me := mes.At(k)
-				timeSeries = append(timeSeries, metricToTimeSeries(monitoredResource, extraLabels, ilm, me)...)
+				metric := mes.At(k)
+				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, extraLabels, metric)...)
 			}
 		}
 	}
@@ -111,7 +120,7 @@ func (me *metricsExporter) createTimeSeries(ctx context.Context, ts []*monitorin
 
 // Transforms pdata Resource to a GCM Monitored Resource. Any resource attributes not accounted
 // for in the monitored resource which should be merged into metric labels are also returned.
-func resourceMetricsToMonitoredResource(
+func (m *metricMapper) resourceMetricsToMonitoredResource(
 	resource pdata.Resource,
 ) (*monitoredrespb.MonitoredResource, labels) {
 	// TODO
@@ -123,20 +132,19 @@ func instrumentationLibraryToLabels(il pdata.InstrumentationLibrary) labels {
 	return nil
 }
 
-func metricToTimeSeries(
+func (m *metricMapper) metricToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
-	ilm pdata.InstrumentationLibraryMetrics,
-	me pdata.Metric,
+	metric pdata.Metric,
 ) []*monitoringpb.TimeSeries {
 	timeSeries := []*monitoringpb.TimeSeries{}
 
-	switch me.DataType() {
+	switch metric.DataType() {
 	case pdata.MetricDataTypeSum:
-		sum := me.Sum()
+		sum := metric.Sum()
 		points := sum.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			ts := sumPointToTimeSeries(resource, extraLabels, ilm, me, sum, points.At(i))
+			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
 			timeSeries = append(timeSeries, ts)
 		}
 	// TODO: add cases for other metric data types
@@ -147,28 +155,60 @@ func metricToTimeSeries(
 	return timeSeries
 }
 
-func sumPointToTimeSeries(
+func (m *metricMapper) sumPointToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
-	ilm pdata.InstrumentationLibraryMetrics,
-	me pdata.Metric,
+	metric pdata.Metric,
 	sum pdata.Sum,
 	point pdata.NumberDataPoint,
 ) *monitoringpb.TimeSeries {
-	// TODO
+	metricKind := metricpb.MetricDescriptor_CUMULATIVE
+	startTime := timestamppb.New(point.StartTimestamp().AsTime())
+	if !sum.IsMonotonic() {
+		metricKind = metricpb.MetricDescriptor_GAUGE
+		startTime = nil
+	}
+
+	var valueType metricpb.MetricDescriptor_ValueType
+	var value *monitoringpb.TypedValue
+	if point.Type() == pdata.MetricValueTypeInt {
+		valueType = metricpb.MetricDescriptor_INT64
+		value = &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
+			Int64Value: point.IntVal(),
+		}}
+	} else {
+		valueType = metricpb.MetricDescriptor_DOUBLE
+		value = &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+			DoubleValue: point.DoubleVal(),
+		}}
+	}
+
 	return &monitoringpb.TimeSeries{
-		Resource: resource,
-		Unit:     me.Unit(),
-		Metric: &metric.Metric{
+		Resource:   resource,
+		Unit:       metric.Unit(),
+		MetricKind: metricKind,
+		ValueType:  valueType,
+		Points: []*monitoringpb.Point{{
+			Interval: &monitoringpb.TimeInterval{
+				StartTime: startTime,
+				EndTime:   timestamppb.New(point.Timestamp().AsTime()),
+			},
+			Value: value,
+		}},
+		Metric: &metricpb.Metric{
+			Type: m.metricNameToType(metric.Name()),
 			Labels: mergeLabels(
 				attributesToLabels(point.Attributes()),
 				extraLabels,
-				// ... instrumentation library
 			),
-			// ...
 		},
-		// ...
 	}
+}
+
+// metricNameToType maps OTLP metric name to GCM metric type (aka name)
+func (m *metricMapper) metricNameToType(name string) string {
+	// TODO
+	return "workload.googleapis.com/" + name
 }
 
 func attributesToLabels(

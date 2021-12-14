@@ -11,3 +11,10 @@ The new code does not:
 
 - truncate label keys longer than 100 characters.
 - prepend `key` when the first character is `_`.
+
+## OTLP Sum
+
+In the old exporter, delta sums were converted into GAUGE points ([see test
+fixture](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/9bc1f49ebe000b0b3b1aa5b7f201e7996effdcd8/exporter/collector/testdata/fixtures/delta_counter_metrics_expect.json#L15)).
+The new pdata exporter sends these as CUMULATIVE points with the same delta time window
+(reseting at each point) aka pseudo-cumulatives.
