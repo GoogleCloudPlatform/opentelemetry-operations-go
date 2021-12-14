@@ -65,3 +65,65 @@ func TestMergeLabels(t *testing.T) {
 		"Should merge intersecting labels, keeping the last value",
 	)
 }
+
+func TestAttributesToLabels(t *testing.T) {
+	// string to string
+	assert.Equal(
+		t,
+		attributesToLabels(pdata.NewAttributeMapFromMap(map[string]pdata.AttributeValue{
+			"foo": pdata.NewAttributeValueString("bar"),
+			"bar": pdata.NewAttributeValueString("baz"),
+		})),
+		labels{"foo": "bar", "bar": "baz"},
+	)
+
+	// various key special cases
+	assert.Equal(
+		t,
+		attributesToLabels(pdata.NewAttributeMapFromMap(map[string]pdata.AttributeValue{
+			"foo.bar":   pdata.NewAttributeValueString("bar"),
+			"_foo":      pdata.NewAttributeValueString("bar"),
+			"123.hello": pdata.NewAttributeValueString("bar"),
+			"":          pdata.NewAttributeValueString("bar"),
+		})),
+		labels{
+			"foo_bar":       "bar",
+			"_foo":          "bar",
+			"key_123_hello": "bar",
+			"":              "bar",
+		},
+	)
+
+	attribSlice := pdata.NewAttributeValueArray()
+	attribSlice.SliceVal().AppendEmpty().SetStringVal("x")
+	attribSlice.SliceVal().AppendEmpty()
+	attribSlice.SliceVal().AppendEmpty().SetStringVal("y")
+
+	attribMap := pdata.NewAttributeValueMap()
+	attribMap.MapVal().InsertString("a", "b")
+
+	// value special cases
+	assert.Equal(
+		t,
+		attributesToLabels(pdata.NewAttributeMapFromMap(map[string]pdata.AttributeValue{
+			"a": pdata.NewAttributeValueBool(true),
+			"b": pdata.NewAttributeValueBool(false),
+			"c": pdata.NewAttributeValueInt(12),
+			"d": pdata.NewAttributeValueDouble(12.3),
+			"e": pdata.NewAttributeValueEmpty(),
+			"f": pdata.NewAttributeValueBytes([]byte{0xde, 0xad, 0xbe, 0xef}),
+			"g": attribSlice,
+			"h": attribMap,
+		})),
+		labels{
+			"a": "true",
+			"b": "false",
+			"c": "12",
+			"d": "12.3",
+			"e": "",
+			"f": "3q2+7w==",
+			"g": `["x",null,"y"]`,
+			"h": `{"a":"b"}`,
+		},
+	)
+}
