@@ -147,6 +147,13 @@ func (m *metricMapper) metricToTimeSeries(
 			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
 			timeSeries = append(timeSeries, ts)
 		}
+	case pdata.MetricDataTypeGauge:
+		gauge := metric.Gauge()
+		points := gauge.DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
+			timeSeries = append(timeSeries, ts)
+		}
 	// TODO: add cases for other metric data types
 	default:
 		// TODO: log unsupported metric
@@ -168,20 +175,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 		metricKind = metricpb.MetricDescriptor_GAUGE
 		startTime = nil
 	}
-
-	var valueType metricpb.MetricDescriptor_ValueType
-	var value *monitoringpb.TypedValue
-	if point.Type() == pdata.MetricValueTypeInt {
-		valueType = metricpb.MetricDescriptor_INT64
-		value = &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
-			Int64Value: point.IntVal(),
-		}}
-	} else {
-		valueType = metricpb.MetricDescriptor_DOUBLE
-		value = &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
-			DoubleValue: point.DoubleVal(),
-		}}
-	}
+	value, valueType := numberDataPointToValue(point)
 
 	return &monitoringpb.TimeSeries{
 		Resource:   resource,
@@ -205,10 +199,56 @@ func (m *metricMapper) sumPointToTimeSeries(
 	}
 }
 
+func (m *metricMapper) gaugePointToTimeSeries(
+	resource *monitoredrespb.MonitoredResource,
+	extraLabels labels,
+	metric pdata.Metric,
+	gauge pdata.Gauge,
+	point pdata.NumberDataPoint,
+) *monitoringpb.TimeSeries {
+	metricKind := metricpb.MetricDescriptor_GAUGE
+	value, valueType := numberDataPointToValue(point)
+
+	return &monitoringpb.TimeSeries{
+		Resource:   resource,
+		Unit:       metric.Unit(),
+		MetricKind: metricKind,
+		ValueType:  valueType,
+		Points: []*monitoringpb.Point{{
+			Interval: &monitoringpb.TimeInterval{
+				EndTime: timestamppb.New(point.Timestamp().AsTime()),
+			},
+			Value: value,
+		}},
+		Metric: &metricpb.Metric{
+			Type: m.metricNameToType(metric.Name()),
+			Labels: mergeLabels(
+				attributesToLabels(point.Attributes()),
+				extraLabels,
+			),
+		},
+	}
+}
+
 // metricNameToType maps OTLP metric name to GCM metric type (aka name)
 func (m *metricMapper) metricNameToType(name string) string {
 	// TODO
 	return "workload.googleapis.com/" + name
+}
+
+func numberDataPointToValue(
+	point pdata.NumberDataPoint,
+) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
+	if point.Type() == pdata.MetricValueTypeInt {
+		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
+				Int64Value: point.IntVal(),
+			}},
+			metricpb.MetricDescriptor_INT64
+	}
+	return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+			DoubleValue: point.DoubleVal(),
+		}},
+		metricpb.MetricDescriptor_DOUBLE
 }
 
 func attributesToLabels(

@@ -32,24 +32,47 @@ var (
 )
 
 func TestMetricToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{}}
-	metric := pdata.NewMetric()
-	metric.SetDataType(pdata.MetricDataTypeSum)
-	sum := metric.Sum()
-	sum.SetIsMonotonic(true)
-	sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
-	point := sum.DataPoints().AppendEmpty()
-	point.SetDoubleVal(10)
 	mr := &monitoredrespb.MonitoredResource{}
 
-	ts := mapper.metricToTimeSeries(
-		mr,
-		labels{},
-		metric,
-	)
+	t.Run("Sum", func(t *testing.T) {
+		mapper := metricMapper{cfg: &Config{}}
+		metric := pdata.NewMetric()
+		metric.SetDataType(pdata.MetricDataTypeSum)
+		sum := metric.Sum()
+		sum.SetIsMonotonic(true)
+		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+		// Add three points
+		sum.DataPoints().AppendEmpty().SetDoubleVal(10)
+		sum.DataPoints().AppendEmpty().SetDoubleVal(15)
+		sum.DataPoints().AppendEmpty().SetDoubleVal(16)
 
-	require.Len(t, ts, 1, "Should create one timeseries for sum")
-	require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
+		ts := mapper.metricToTimeSeries(
+			mr,
+			labels{},
+			metric,
+		)
+		require.Len(t, ts, 3, "Should create one timeseries for each sum point")
+		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
+	})
+
+	t.Run("Gauge", func(t *testing.T) {
+		mapper := metricMapper{cfg: &Config{}}
+		metric := pdata.NewMetric()
+		metric.SetDataType(pdata.MetricDataTypeGauge)
+		gauge := metric.Gauge()
+		// Add three points
+		gauge.DataPoints().AppendEmpty().SetIntVal(10)
+		gauge.DataPoints().AppendEmpty().SetIntVal(15)
+		gauge.DataPoints().AppendEmpty().SetIntVal(16)
+
+		ts := mapper.metricToTimeSeries(
+			mr,
+			labels{},
+			metric,
+		)
+		require.Len(t, ts, 3, "Should create one timeseries for each gauge point")
+		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
+	})
 }
 
 func TestMergeLabels(t *testing.T) {
@@ -82,7 +105,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		return metric, sum, point
 	}
 
-	t.Run("cumulative monotonic", func(t *testing.T) {
+	t.Run("Cumulative monotonic", func(t *testing.T) {
 		metric, sum, point := newCase()
 		metric.SetName("mysum")
 		unit := "s"
@@ -121,7 +144,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		assert.Equal(t, ts.Points[0].Value.GetDoubleValue(), float64(value))
 	})
 
-	t.Run("delta monotonic", func(t *testing.T) {
+	t.Run("Delta monotonic", func(t *testing.T) {
 		metric, sum, point := newCase()
 		metric.SetName("mysum")
 		sum.SetIsMonotonic(true)
@@ -140,7 +163,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		})
 	})
 
-	t.Run("non monotonic", func(t *testing.T) {
+	t.Run("Non monotonic", func(t *testing.T) {
 		metric, sum, point := newCase()
 		metric.SetName("mysum")
 		sum.SetIsMonotonic(false)
@@ -165,12 +188,73 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		})
 	})
 
-	t.Run("add extra labels", func(t *testing.T) {
+	t.Run("Add labels", func(t *testing.T) {
 		metric, sum, point := newCase()
 		extraLabels := map[string]string{"foo": "bar"}
 		ts := mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
 		assert.Equal(t, ts.Metric.Labels, extraLabels)
+
+		// Full set of labels
+		point.Attributes().InsertString("baz", "bar")
+		ts = mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
+		assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 	})
+}
+
+func TestGaugePointToTimeSeries(t *testing.T) {
+	mapper := metricMapper{cfg: &Config{}}
+	mr := &monitoredrespb.MonitoredResource{}
+
+	newCase := func() (pdata.Metric, pdata.Gauge, pdata.NumberDataPoint) {
+		metric := pdata.NewMetric()
+		metric.SetDataType(pdata.MetricDataTypeGauge)
+		gauge := metric.Gauge()
+		point := gauge.DataPoints().AppendEmpty()
+		return metric, gauge, point
+	}
+
+	metric, gauge, point := newCase()
+	metric.SetName("mygauge")
+	unit := "1"
+	metric.SetUnit(unit)
+	var value int64 = 10
+	point.SetIntVal(value)
+	end := start.Add(time.Hour)
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+
+	ts := mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
+	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_INT64)
+	assert.Equal(t, ts.Unit, unit)
+	assert.Same(t, ts.Resource, mr)
+
+	assert.Equal(t, ts.Metric.Type, "workload.googleapis.com/mygauge")
+	assert.Equal(t, ts.Metric.Labels, map[string]string{})
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, ts.Points[0].Interval, &monitoringpb.TimeInterval{
+		EndTime: timestamppb.New(end),
+	})
+	assert.Equal(t, ts.Points[0].Value.GetInt64Value(), value)
+
+	// Test double as well
+	point.SetDoubleVal(float64(value))
+	ts = mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
+	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_DOUBLE)
+	assert.Equal(t, ts.Points[0].Value.GetDoubleValue(), float64(value))
+
+	// Add extra labels
+	extraLabels := map[string]string{"foo": "bar"}
+	ts = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	assert.Equal(t, ts.Metric.Labels, extraLabels)
+
+	// Full set of labels
+	point.Attributes().InsertString("baz", "bar")
+	ts = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 }
 
 func TestMetricNameToType(t *testing.T) {
@@ -243,4 +327,18 @@ func TestAttributesToLabels(t *testing.T) {
 			"h": `{"a":"b"}`,
 		},
 	)
+}
+
+func TestNumberDataPointToValue(t *testing.T) {
+	point := pdata.NewNumberDataPoint()
+
+	point.SetIntVal(12)
+	value, valueType := numberDataPointToValue(point)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_INT64)
+	assert.EqualValues(t, value.GetInt64Value(), 12)
+
+	point.SetDoubleVal(12.3)
+	value, valueType = numberDataPointToValue(point)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_DOUBLE)
+	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
 }
