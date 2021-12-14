@@ -19,6 +19,8 @@ package collector
 
 import (
 	"context"
+	"strings"
+	"unicode"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"go.opentelemetry.io/collector/component"
@@ -173,7 +175,35 @@ func attributesToLabels(
 	attrs pdata.AttributeMap,
 ) labels {
 	// TODO
-	return nil
+	ls := make(labels, attrs.Len())
+	attrs.Range(func(k string, v pdata.AttributeValue) bool {
+		ls[sanitizeKey(k)] = v.AsString()
+		return true
+	})
+	return ls
+}
+
+// Replaces non-alphanumeric characters to underscores. Note, this does not truncate label keys
+// longer than 100 characters or prepend "key" when the first character is "_" like OpenCensus
+// did.
+func sanitizeKey(s string) string {
+	if len(s) == 0 {
+		return s
+	}
+	s = strings.Map(sanitizeRune, s)
+	if unicode.IsDigit(rune(s[0])) {
+		s = "key_" + s
+	}
+	return s
+}
+
+// converts anything that is not a letter or digit to an underscore
+func sanitizeRune(r rune) rune {
+	if unicode.IsLetter(r) || unicode.IsDigit(r) {
+		return r
+	}
+	// Everything else turns into an underscore
+	return '_'
 }
 
 func mergeLabels(mergeInto labels, others ...labels) labels {
