@@ -19,7 +19,6 @@ package collector
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"unicode"
 
@@ -209,7 +208,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 // metricNameToType maps OTLP metric name to GCM metric type (aka name)
 func (m *metricMapper) metricNameToType(name string) string {
 	// TODO
-	return fmt.Sprintf("workload.googleapis.com/%v", name)
+	return "workload.googleapis.com/" + name
 }
 
 func attributesToLabels(
