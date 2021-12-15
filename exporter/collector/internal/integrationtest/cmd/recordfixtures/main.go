@@ -63,8 +63,9 @@ func main() {
 		metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 		require.NoError(t, testServerExporter.ConsumeMetrics(ctx, metrics), "failed to export metrics to local test server")
 		fixture := &integrationtest.MetricExpectFixture{
-			CreateMetricDescriptorRequests: testServer.CreateMetricDescriptorRequests(),
-			CreateTimeSeriesRequests:       testServer.CreateTimeSeriesRequests(),
+			CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
+			CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
+			CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
 		}
 		test.SaveRecordedFixtures(t, fixture)
 	}
