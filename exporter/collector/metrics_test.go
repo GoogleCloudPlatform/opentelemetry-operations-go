@@ -85,6 +85,7 @@ func TestMetrics(t *testing.T) {
 			)
 			actualCreateMetricDescriptorReq := testServer.CreateMetricDescriptorRequests()
 			actualCreateTimeSeriesReq := testServer.CreateTimeSeriesRequests()
+			actualCreateServiceTimeSeriesReq := testServer.CreateServiceTimeSeriesRequests()
 
 			expectFixture := test.LoadExpectFixture(
 				t,
@@ -93,8 +94,9 @@ func TestMetrics(t *testing.T) {
 			)
 			diff := integrationtest.DiffProtos(
 				&integrationtest.MetricExpectFixture{
-					CreateTimeSeriesRequests:       actualCreateTimeSeriesReq,
-					CreateMetricDescriptorRequests: actualCreateMetricDescriptorReq,
+					CreateTimeSeriesRequests:        actualCreateTimeSeriesReq,
+					CreateMetricDescriptorRequests:  actualCreateMetricDescriptorReq,
+					CreateServiceTimeSeriesRequests: actualCreateServiceTimeSeriesReq,
 				},
 				expectFixture,
 			)

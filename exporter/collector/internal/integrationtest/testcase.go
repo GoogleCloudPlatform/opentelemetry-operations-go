@@ -122,7 +122,11 @@ func (m *MetricsTestCase) updateExpectFixture(
 	endTime time.Time,
 	fixture *MetricExpectFixture,
 ) {
-	for _, req := range fixture.GetCreateTimeSeriesRequests() {
+	reqs := append(
+		fixture.GetCreateTimeSeriesRequests(),
+		fixture.GetCreateServiceTimeSeriesRequests()...,
+	)
+	for _, req := range reqs {
 		for _, ts := range req.GetTimeSeries() {
 			for _, p := range ts.GetPoints() {
 				if p.GetInterval().GetStartTime() != nil {
@@ -155,7 +159,11 @@ func (m *MetricsTestCase) SaveRecordedFixtures(
 // Normalizes timestamps and removes project ID fields which create noise in the fixture
 // because they can vary each test run
 func normalizeFixture(fixture *MetricExpectFixture) {
-	for _, req := range fixture.GetCreateTimeSeriesRequests() {
+	timeSeriesReqs := append(
+		fixture.GetCreateTimeSeriesRequests(),
+		fixture.GetCreateServiceTimeSeriesRequests()...,
+	)
+	for _, req := range timeSeriesReqs {
 		// clear project ID
 		req.Name = ""
 

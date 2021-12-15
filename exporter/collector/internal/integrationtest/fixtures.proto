@@ -21,4 +21,5 @@ import "metric_service.proto";
 message MetricExpectFixture {
   repeated google.monitoring.v3.CreateTimeSeriesRequest create_time_series_requests = 1;
   repeated google.monitoring.v3.CreateMetricDescriptorRequest create_metric_descriptor_requests = 2;
+  repeated google.monitoring.v3.CreateTimeSeriesRequest create_service_time_series_requests = 3;
 }
