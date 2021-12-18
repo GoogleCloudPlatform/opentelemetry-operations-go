@@ -95,6 +95,7 @@ func TestMergeLabels(t *testing.T) {
 
 func TestSumPointToTimeSeries(t *testing.T) {
 	mapper := metricMapper{cfg: &Config{}}
+	mapper.SetMetricDefaults()
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Sum, pdata.NumberDataPoint) {
@@ -203,6 +204,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 
 func TestGaugePointToTimeSeries(t *testing.T) {
 	mapper := metricMapper{cfg: &Config{}}
+	mapper.SetMetricDefaults()
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Gauge, pdata.NumberDataPoint) {
@@ -259,6 +261,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 
 func TestMetricNameToType(t *testing.T) {
 	mapper := metricMapper{cfg: &Config{}}
+	mapper.SetMetricDefaults()
 	assert.Equal(
 		t,
 		mapper.metricNameToType("foo"),

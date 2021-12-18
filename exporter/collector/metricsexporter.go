@@ -38,11 +38,11 @@ import (
 
 // metricsExporter is the GCM exporter that uses pdata directly
 type metricsExporter struct {
-	cfg        *Config
-	client     *monitoring.MetricClient
-	mapper     metricMapper
-	mds        chan *metric.MetricDescriptor
-	mdshutdown chan bool
+	cfg    *Config
+	client *monitoring.MetricClient
+	mapper metricMapper
+	// A channel that receives metric descriptor and sends them to GCM once.
+	mds chan *metric.MetricDescriptor
 }
 
 // metricMapper is the part that transforms metrics. Separate from metricsExporter since it has
@@ -51,14 +51,13 @@ type metricMapper struct {
 	cfg *Config
 }
 
-// Allowed metric domains
+// Known metric domains. Note: This is now configurable for advanced usages.
 var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
 
 type labels map[string]string
 
 func (me *metricsExporter) Shutdown(context.Context) error {
-	// Kill the metric-descriptor goroutine.
-	me.mdshutdown <- true
+	// TODO - will the context given to us at startup be cancelled already?
 	return me.client.Close()
 }
 
@@ -74,18 +73,12 @@ func (cfg *Config) SetMetricDefaults() {
 	}
 }
 
+// Updates configuration to include all defaults. Used in unit testing.
 func (m *metricMapper) SetMetricDefaults() {
 	if m.cfg == nil {
 		m.cfg = &Config{}
 	}
 	m.cfg.SetMetricDefaults()
-}
-
-func (me *metricsExporter) SetMetricDefaults() {
-	if me.cfg == nil {
-		me.cfg = &Config{}
-	}
-	me.cfg.SetMetricDefaults()
 }
 
 func newGoogleCloudMetricsExporter(
@@ -109,11 +102,10 @@ func newGoogleCloudMetricsExporter(
 	}
 
 	mExp := &metricsExporter{
-		cfg:        cfg,
-		client:     client,
-		mapper:     metricMapper{cfg},
-		mds:        make(chan *metric.MetricDescriptor),
-		mdshutdown: make(chan bool),
+		cfg:    cfg,
+		client: client,
+		mapper: metricMapper{cfg},
+		mds:    make(chan *metric.MetricDescriptor),
 	}
 
 	// Fire up the metric descriptor exporter.
@@ -156,6 +148,7 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 	return err
 }
 
+// Reads metric descriptors from the md channel, and reports them (once) to GCM.
 func (me *metricsExporter) exportMetricDescriptorRunner(ctx context.Context) {
 	mdCache := make(map[string]*metric.MetricDescriptor)
 	for {
@@ -170,14 +163,14 @@ func (me *metricsExporter) exportMetricDescriptorRunner(ctx context.Context) {
 				}
 				mdCache[md.Type] = md
 			}
-		case <-me.mdshutdown:
+		case <-ctx.Done():
+			// Kill this exporter when context is cancelled.
 			return
 		}
-
-		// TODO - check shutdown and kill this.
 	}
 }
 
+// Helper method to send metric descriptors to GCM.
 func (me *metricsExporter) exportMetricDescriptor(ctx context.Context, md *metric.MetricDescriptor) error {
 	// export
 	req := &monitoringpb.CreateMetricDescriptorRequest{
@@ -331,9 +324,6 @@ func (m *metricMapper) metricNameToType(name string) string {
 		return path.Join(*prefix, name)
 	}
 	return name
-
-	// TODO
-	return "workload.googleapis.com/" + name
 }
 
 func numberDataPointToValue(
@@ -399,12 +389,13 @@ func mergeLabels(mergeInto labels, others ...labels) labels {
 	return mergeInto
 }
 
-func (me *metricMapper) mapMetricUrlToDisplayName(m string) string {
+// Takes a GCM metric type, like (workload.googleapis.com/MyCoolMetric) and returns the display name.
+func (m *metricMapper) metricTypeToDisplayName(mUrl string) string {
 	// TODO - user configuration around display name?
-	// strip domain, keep path after domain.
-	u, err := url.Parse(fmt.Sprintf("metrics://%s", m))
+	// Default: strip domain, keep path after domain.
+	u, err := url.Parse(fmt.Sprintf("metrics://%s", mUrl))
 	if err != nil {
-		return m
+		return mUrl
 	}
 	return strings.TrimLeft(u.Path, "/")
 }
@@ -412,15 +403,15 @@ func (me *metricMapper) mapMetricUrlToDisplayName(m string) string {
 // Extract the metric descriptor from a metric data point.
 func (me *metricMapper) metricDescriptor(m pdata.Metric) *metric.MetricDescriptor {
 	kind, typ := mapMetricPointKind(m)
-	metricUrl := me.metricNameToType(m.Name())
+	metricType := me.metricNameToType(m.Name())
 	// Return nil for unsupported types.
 	if kind == metric.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
 		return nil
 	}
 	return &metric.MetricDescriptor{
 		Name:        m.Name(),
-		DisplayName: me.mapMetricUrlToDisplayName(metricUrl),
-		Type:        metricUrl,
+		DisplayName: me.metricTypeToDisplayName(metricType),
+		Type:        metricType,
 		MetricKind:  kind,
 		ValueType:   typ,
 		Unit:        m.Unit(),
@@ -429,7 +420,7 @@ func (me *metricMapper) metricDescriptor(m pdata.Metric) *metric.MetricDescripto
 	}
 }
 
-func toMetricPointValueType(pt pdata.MetricValueType) metric.MetricDescriptor_ValueType {
+func metricPointValueType(pt pdata.MetricValueType) metric.MetricDescriptor_ValueType {
 	switch pt {
 	case pdata.MetricValueTypeInt:
 		return metric.MetricDescriptor_INT64
@@ -447,7 +438,7 @@ func mapMetricPointKind(m pdata.Metric) (metric.MetricDescriptor_MetricKind, met
 	case pdata.MetricDataTypeGauge:
 		kind = metric.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
-			typ = toMetricPointValueType(m.Gauge().DataPoints().At(0).Type())
+			typ = metricPointValueType(m.Gauge().DataPoints().At(0).Type())
 		}
 	case pdata.MetricDataTypeSum:
 		if !m.Sum().IsMonotonic() {
@@ -459,7 +450,7 @@ func mapMetricPointKind(m pdata.Metric) (metric.MetricDescriptor_MetricKind, met
 			kind = metric.MetricDescriptor_CUMULATIVE
 		}
 		if m.Sum().DataPoints().Len() > 0 {
-			typ = toMetricPointValueType(m.Sum().DataPoints().At(0).Type())
+			typ = metricPointValueType(m.Sum().DataPoints().At(0).Type())
 		}
 	case pdata.MetricDataTypeSummary:
 		kind = metric.MetricDescriptor_GAUGE
