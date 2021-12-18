@@ -19,6 +19,9 @@ package collector
 
 import (
 	"context"
+	"fmt"
+	"net/url"
+	"path"
 	"strings"
 	"unicode"
 
@@ -26,6 +29,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
+	"google.golang.org/genproto/googleapis/api/metric"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -34,9 +38,11 @@ import (
 
 // metricsExporter is the GCM exporter that uses pdata directly
 type metricsExporter struct {
-	cfg    *Config
-	client *monitoring.MetricClient
-	mapper metricMapper
+	cfg        *Config
+	client     *monitoring.MetricClient
+	mapper     metricMapper
+	mds        chan *metric.MetricDescriptor
+	mdshutdown chan bool
 }
 
 // metricMapper is the part that transforms metrics. Separate from metricsExporter since it has
@@ -45,10 +51,41 @@ type metricMapper struct {
 	cfg *Config
 }
 
+// Allowed metric domains
+var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
+
 type labels map[string]string
 
 func (me *metricsExporter) Shutdown(context.Context) error {
+	// Kill the metric-descriptor goroutine.
+	me.mdshutdown <- true
 	return me.client.Close()
+}
+
+// Updates config object to include all defaults for metric export.
+func (cfg *Config) SetMetricDefaults() {
+	if cfg.MetricConfig.KnownDomains == nil || len(cfg.MetricConfig.KnownDomains) == 0 {
+		cfg.MetricConfig.KnownDomains = domains
+	}
+	// TODO - if in legacy mode, this should be
+	// external.googleapis.com/OpenCensus/
+	if cfg.MetricConfig.Prefix == "" {
+		cfg.MetricConfig.Prefix = "workload.googleapis.com"
+	}
+}
+
+func (m *metricMapper) SetMetricDefaults() {
+	if m.cfg == nil {
+		m.cfg = &Config{}
+	}
+	m.cfg.SetMetricDefaults()
+}
+
+func (me *metricsExporter) SetMetricDefaults() {
+	if me.cfg == nil {
+		me.cfg = &Config{}
+	}
+	me.cfg.SetMetricDefaults()
 }
 
 func newGoogleCloudMetricsExporter(
@@ -57,19 +94,30 @@ func newGoogleCloudMetricsExporter(
 	set component.ExporterCreateSettings,
 ) (component.MetricsExporter, error) {
 	setVersionInUserAgent(cfg, set.BuildInfo.Version)
+	cfg.SetMetricDefaults()
 
-	// TODO: map cfg options into metric service client configuration with
+	// map cfg options into metric service client configuration with
 	// generateClientOptions()
-	client, err := monitoring.NewMetricClient(ctx)
+	clientOpts, err := generateClientOptions(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := monitoring.NewMetricClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}
 
 	mExp := &metricsExporter{
-		cfg:    cfg,
-		client: client,
-		mapper: metricMapper{cfg},
+		cfg:        cfg,
+		client:     client,
+		mapper:     metricMapper{cfg},
+		mds:        make(chan *metric.MetricDescriptor),
+		mdshutdown: make(chan bool),
 	}
+
+	// Fire up the metric descriptor exporter.
+	go mExp.exportMetricDescriptorRunner(ctx)
 
 	return exporterhelper.NewMetricsExporter(
 		cfg,
@@ -84,7 +132,6 @@ func newGoogleCloudMetricsExporter(
 // pushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary
 func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) error {
 	timeSeries := make([]*monitoringpb.TimeSeries, 0, m.DataPointCount())
-
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
@@ -97,6 +144,7 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
+				me.mds <- me.mapper.metricDescriptor(metric)
 				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, extraLabels, metric)...)
 			}
 		}
@@ -108,12 +156,47 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 	return err
 }
 
+func (me *metricsExporter) exportMetricDescriptorRunner(ctx context.Context) {
+	mdCache := make(map[string]*metric.MetricDescriptor)
+	for {
+		select {
+		case md := <-me.mds:
+			// Not yet sent, now we sent it.
+			if !me.cfg.MetricConfig.SkipCreateMetricDescriptor && md != nil && mdCache[md.Type] == nil {
+				err := me.exportMetricDescriptor(ctx, md)
+				// TODO: Log-once on error, per metric descriptor?
+				if err != nil {
+					fmt.Printf("Unable to send metric descriptor: %s, %s", md, err)
+				}
+				mdCache[md.Type] = md
+			}
+		case <-me.mdshutdown:
+			return
+		}
+
+		// TODO - check shutdown and kill this.
+	}
+}
+
+func (me *metricsExporter) exportMetricDescriptor(ctx context.Context, md *metric.MetricDescriptor) error {
+	// export
+	req := &monitoringpb.CreateMetricDescriptorRequest{
+		// TODO set Name field with project ID from config or ADC
+		Name:             fmt.Sprintf("projects/%s", me.cfg.ProjectID),
+		MetricDescriptor: md,
+	}
+	_, err := me.client.CreateMetricDescriptor(ctx, req)
+	return err
+}
+
 func (me *metricsExporter) createTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
-	return me.client.CreateServiceTimeSeries(
+	// TODO: me.client.CreateServiceTimeSeries(
+	return me.client.CreateTimeSeries(
 		ctx,
 		&monitoringpb.CreateTimeSeriesRequest{
 			TimeSeries: ts,
 			// TODO set Name field with project ID from config or ADC
+			Name: fmt.Sprintf("projects/%s", me.cfg.ProjectID),
 		},
 	)
 }
@@ -230,8 +313,25 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	}
 }
 
+// Returns any configured prefix to add to unknown metric name.
+func (me *metricMapper) getMetricNamePrefix(name string) *string {
+	for _, domain := range me.cfg.MetricConfig.KnownDomains {
+		if strings.Contains(name, domain) {
+			return nil
+		}
+	}
+	result := me.cfg.MetricConfig.Prefix
+	return &result
+}
+
 // metricNameToType maps OTLP metric name to GCM metric type (aka name)
 func (m *metricMapper) metricNameToType(name string) string {
+	prefix := m.getMetricNamePrefix(name)
+	if prefix != nil {
+		return path.Join(*prefix, name)
+	}
+	return name
+
 	// TODO
 	return "workload.googleapis.com/" + name
 }
@@ -297,4 +397,91 @@ func mergeLabels(mergeInto labels, others ...labels) labels {
 	}
 
 	return mergeInto
+}
+
+func (me *metricMapper) mapMetricUrlToDisplayName(m string) string {
+	// TODO - user configuration around display name?
+	// strip domain, keep path after domain.
+	u, err := url.Parse(fmt.Sprintf("metrics://%s", m))
+	if err != nil {
+		return m
+	}
+	return strings.TrimLeft(u.Path, "/")
+}
+
+// Extract the metric descriptor from a metric data point.
+func (me *metricMapper) metricDescriptor(m pdata.Metric) *metric.MetricDescriptor {
+	kind, typ := mapMetricPointKind(m)
+	metricUrl := me.metricNameToType(m.Name())
+	// Return nil for unsupported types.
+	if kind == metric.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
+		return nil
+	}
+	return &metric.MetricDescriptor{
+		Name:        m.Name(),
+		DisplayName: me.mapMetricUrlToDisplayName(metricUrl),
+		Type:        metricUrl,
+		MetricKind:  kind,
+		ValueType:   typ,
+		Unit:        m.Unit(),
+		Description: m.Description(),
+		// TODO: Labels for non-wlm
+	}
+}
+
+func toMetricPointValueType(pt pdata.MetricValueType) metric.MetricDescriptor_ValueType {
+	switch pt {
+	case pdata.MetricValueTypeInt:
+		return metric.MetricDescriptor_INT64
+	case pdata.MetricValueTypeDouble:
+		return metric.MetricDescriptor_DOUBLE
+	default:
+		return metric.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	}
+}
+
+func mapMetricPointKind(m pdata.Metric) (metric.MetricDescriptor_MetricKind, metric.MetricDescriptor_ValueType) {
+	var kind metric.MetricDescriptor_MetricKind
+	var typ metric.MetricDescriptor_ValueType
+	switch m.DataType() {
+	case pdata.MetricDataTypeGauge:
+		kind = metric.MetricDescriptor_GAUGE
+		if m.Gauge().DataPoints().Len() > 0 {
+			typ = toMetricPointValueType(m.Gauge().DataPoints().At(0).Type())
+		}
+	case pdata.MetricDataTypeSum:
+		if !m.Sum().IsMonotonic() {
+			kind = metric.MetricDescriptor_GAUGE
+		} else if m.Sum().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+			// We report fake-deltas for now.
+			kind = metric.MetricDescriptor_CUMULATIVE
+		} else {
+			kind = metric.MetricDescriptor_CUMULATIVE
+		}
+		if m.Sum().DataPoints().Len() > 0 {
+			typ = toMetricPointValueType(m.Sum().DataPoints().At(0).Type())
+		}
+	case pdata.MetricDataTypeSummary:
+		kind = metric.MetricDescriptor_GAUGE
+	case pdata.MetricDataTypeHistogram:
+		typ = metric.MetricDescriptor_DISTRIBUTION
+		if m.Histogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+			// We report fake-deltas for now.
+			kind = metric.MetricDescriptor_CUMULATIVE
+		} else {
+			kind = metric.MetricDescriptor_CUMULATIVE
+		}
+	case pdata.MetricDataTypeExponentialHistogram:
+		typ = metric.MetricDescriptor_DISTRIBUTION
+		if m.ExponentialHistogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+			// We report fake-deltas for now.
+			kind = metric.MetricDescriptor_CUMULATIVE
+		} else {
+			kind = metric.MetricDescriptor_CUMULATIVE
+		}
+	default:
+		kind = metric.MetricDescriptor_METRIC_KIND_UNSPECIFIED
+		typ = metric.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	}
+	return kind, typ
 }
