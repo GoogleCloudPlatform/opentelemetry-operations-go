@@ -51,5 +51,15 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/workload_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/workload_metrics_expect.json",
 		},
+		{
+			Name:                 "GKE Metrics Agent",
+			OTLPInputFixturePath: "testdata/fixtures/gke_metrics_agent_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/gke_metrics_agent_metrics_expect.json",
+		},
+		{
+			Name:                 "GKE Control Plane Metrics Agent",
+			OTLPInputFixturePath: "testdata/fixtures/gke_control_plane_metrics_agent_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/gke_control_plane_metrics_agent_metrics_expect.json",
+		},
 	}
 )

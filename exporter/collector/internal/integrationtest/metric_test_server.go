@@ -72,8 +72,8 @@ func (m *MetricsTestServer) CreateTimeSeriesRequests() []*monitoringpb.CreateTim
 func (m *MetricsTestServer) CreateServiceTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	reqs := m.createTimeSeriesReqs
-	m.createTimeSeriesReqs = nil
+	reqs := m.createServiceTimeSeriesReqs
+	m.createServiceTimeSeriesReqs = nil
 	return reqs
 }
 
