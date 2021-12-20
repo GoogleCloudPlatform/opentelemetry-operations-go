@@ -346,144 +346,164 @@ func TestNumberDataPointToValue(t *testing.T) {
 	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
 }
 
-func TestToMetricDescriptorGauge(t *testing.T) {
-	mapper := &metricMapper{}
-	mapper.SetMetricDefaults()
-	metric := pdata.NewMetric()
-	metric.SetDataType(pdata.MetricDataTypeGauge)
-	metric.SetName("custom.googleapis.com/test.metric")
-	metric.SetDescription("Description")
-	metric.SetUnit("1")
-	gauge := metric.Gauge()
-	point := gauge.DataPoints().AppendEmpty()
-	point.SetDoubleVal(10)
-	md := mapper.metricDescriptor(metric)
-	assert.Equal(t, md, &metricpb.MetricDescriptor{
-		Name:        "custom.googleapis.com/test.metric",
-		DisplayName: "test.metric",
-		Type:        "custom.googleapis.com/test.metric",
-		MetricKind:  metricpb.MetricDescriptor_GAUGE,
-		ValueType:   metricpb.MetricDescriptor_DOUBLE,
-		Unit:        "1",
-		Description: "Description",
-	})
+type metricDescriptorTest struct {
+	name          string
+	metricCreator func() pdata.Metric
+	expected      *metricpb.MetricDescriptor
 }
 
-func TestToMetricDescriptorCumulativeMontonicSum(t *testing.T) {
-	mapper := &metricMapper{}
-	mapper.SetMetricDefaults()
-	metric := pdata.NewMetric()
-	metric.SetDataType(pdata.MetricDataTypeSum)
-	metric.SetName("custom.googleapis.com/test.metric")
-	metric.SetDescription("Description")
-	metric.SetUnit("1")
-	sum := metric.Sum()
-	sum.SetIsMonotonic(true)
-	sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
-	point := sum.DataPoints().AppendEmpty()
-	point.SetDoubleVal(10)
-	md := mapper.metricDescriptor(metric)
-	assert.Equal(t, md, &metricpb.MetricDescriptor{
-		Name:        "custom.googleapis.com/test.metric",
-		DisplayName: "test.metric",
-		Type:        "custom.googleapis.com/test.metric",
-		MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-		ValueType:   metricpb.MetricDescriptor_DOUBLE,
-		Unit:        "1",
-		Description: "Description",
-	})
-}
-
-func TestToMetricDescriptorDeltaMontonicSum(t *testing.T) {
-	mapper := &metricMapper{}
-	mapper.SetMetricDefaults()
-	metric := pdata.NewMetric()
-	metric.SetDataType(pdata.MetricDataTypeSum)
-	metric.SetName("test.metric")
-	metric.SetDescription("Description")
-	metric.SetUnit("1")
-	sum := metric.Sum()
-	sum.SetIsMonotonic(true)
-	sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityDelta)
-	point := sum.DataPoints().AppendEmpty()
-	point.SetDoubleVal(10)
-	md := mapper.metricDescriptor(metric)
-	assert.Equal(t, md, &metricpb.MetricDescriptor{
-		Name:        "test.metric",
-		DisplayName: "test.metric",
-		Type:        "workload.googleapis.com/test.metric",
-		MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-		ValueType:   metricpb.MetricDescriptor_DOUBLE,
-		Unit:        "1",
-		Description: "Description",
-	})
-}
-
-func TestToMetricDescriptorNonMontonicSum(t *testing.T) {
-	mapper := &metricMapper{}
-	mapper.SetMetricDefaults()
-	metric := pdata.NewMetric()
-	metric.SetDataType(pdata.MetricDataTypeSum)
-	metric.SetName("test.metric")
-	metric.SetDescription("Description")
-	metric.SetUnit("1")
-	sum := metric.Sum()
-	sum.SetIsMonotonic(false)
-	sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
-	point := sum.DataPoints().AppendEmpty()
-	point.SetDoubleVal(10)
-	md := mapper.metricDescriptor(metric)
-	assert.Equal(t, md, &metricpb.MetricDescriptor{
-		Name:        "test.metric",
-		DisplayName: "test.metric",
-		Type:        "workload.googleapis.com/test.metric",
-		MetricKind:  metricpb.MetricDescriptor_GAUGE,
-		ValueType:   metricpb.MetricDescriptor_DOUBLE,
-		Unit:        "1",
-		Description: "Description",
-	})
-}
-
-func TestToMetricDescriptorCumulativeHistogram(t *testing.T) {
-	mapper := &metricMapper{}
-	mapper.SetMetricDefaults()
-	metric := pdata.NewMetric()
-	metric.SetDataType(pdata.MetricDataTypeHistogram)
-	metric.SetName("test.metric")
-	metric.SetDescription("Description")
-	metric.SetUnit("1")
-	histogram := metric.Histogram()
-	histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
-	md := mapper.metricDescriptor(metric)
-	assert.Equal(t, md, &metricpb.MetricDescriptor{
-		Name:        "test.metric",
-		DisplayName: "test.metric",
-		Type:        "workload.googleapis.com/test.metric",
-		MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-		ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
-		Unit:        "1",
-		Description: "Description",
-	})
-}
-
-func TestToMetricDescriptorCumulativeExponentialHistogram(t *testing.T) {
-	mapper := &metricMapper{}
-	mapper.SetMetricDefaults()
-	metric := pdata.NewMetric()
-	metric.SetDataType(pdata.MetricDataTypeExponentialHistogram)
-	metric.SetName("test.metric")
-	metric.SetDescription("Description")
-	metric.SetUnit("1")
-	histogram := metric.ExponentialHistogram()
-	histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
-	md := mapper.metricDescriptor(metric)
-	assert.Equal(t, md, &metricpb.MetricDescriptor{
-		Name:        "test.metric",
-		DisplayName: "test.metric",
-		Type:        "workload.googleapis.com/test.metric",
-		MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-		ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
-		Unit:        "1",
-		Description: "Description",
-	})
+func TestMetricDescriptorMapping(t *testing.T) {
+	tests := []metricDescriptorTest{
+		{
+			name: "Gauge",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeGauge)
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				gauge := metric.Gauge()
+				point := gauge.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				return metric
+			},
+			expected: &metricpb.MetricDescriptor{
+				Name:        "custom.googleapis.com/test.metric",
+				DisplayName: "test.metric",
+				Type:        "custom.googleapis.com/test.metric",
+				MetricKind:  metricpb.MetricDescriptor_GAUGE,
+				ValueType:   metricpb.MetricDescriptor_DOUBLE,
+				Unit:        "1",
+				Description: "Description",
+			},
+		},
+		{
+			name: "Cumulative Monotonic Sum",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSum)
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				sum := metric.Sum()
+				sum.SetIsMonotonic(true)
+				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				point := sum.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				return metric
+			},
+			expected: &metricpb.MetricDescriptor{
+				Name:        "custom.googleapis.com/test.metric",
+				DisplayName: "test.metric",
+				Type:        "custom.googleapis.com/test.metric",
+				MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+				ValueType:   metricpb.MetricDescriptor_DOUBLE,
+				Unit:        "1",
+				Description: "Description",
+			},
+		},
+		{
+			name: "Delta Monotonic Sum",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSum)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				sum := metric.Sum()
+				sum.SetIsMonotonic(true)
+				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityDelta)
+				point := sum.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				return metric
+			},
+			expected: &metricpb.MetricDescriptor{
+				Name:        "test.metric",
+				DisplayName: "test.metric",
+				Type:        "workload.googleapis.com/test.metric",
+				MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+				ValueType:   metricpb.MetricDescriptor_DOUBLE,
+				Unit:        "1",
+				Description: "Description",
+			},
+		},
+		{
+			name: "Non-Monotonic Sum",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSum)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				sum := metric.Sum()
+				sum.SetIsMonotonic(false)
+				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				point := sum.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				return metric
+			},
+			expected: &metricpb.MetricDescriptor{
+				Name:        "test.metric",
+				DisplayName: "test.metric",
+				Type:        "workload.googleapis.com/test.metric",
+				MetricKind:  metricpb.MetricDescriptor_GAUGE,
+				ValueType:   metricpb.MetricDescriptor_DOUBLE,
+				Unit:        "1",
+				Description: "Description",
+			},
+		},
+		{
+			name: "Cumulative Histogram",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeHistogram)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				histogram := metric.Histogram()
+				histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				return metric
+			},
+			expected: &metricpb.MetricDescriptor{
+				Name:        "test.metric",
+				DisplayName: "test.metric",
+				Type:        "workload.googleapis.com/test.metric",
+				MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+				ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
+				Unit:        "1",
+				Description: "Description",
+			},
+		},
+		{
+			name: "Cumulative Exponential Histogram",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeExponentialHistogram)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				histogram := metric.ExponentialHistogram()
+				histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				return metric
+			},
+			expected: &metricpb.MetricDescriptor{
+				Name:        "test.metric",
+				DisplayName: "test.metric",
+				Type:        "workload.googleapis.com/test.metric",
+				MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+				ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
+				Unit:        "1",
+				Description: "Description",
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mapper := &metricMapper{}
+			mapper.SetMetricDefaults()
+			metric := test.metricCreator()
+			md := mapper.metricDescriptor(metric)
+			assert.Equal(t, md, test.expected)
+		})
+	}
 }
