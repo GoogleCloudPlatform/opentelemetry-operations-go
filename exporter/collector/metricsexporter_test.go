@@ -21,6 +21,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/pdata"
+	"google.golang.org/genproto/googleapis/api/label"
+	"google.golang.org/genproto/googleapis/api/metric"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -349,7 +351,7 @@ func TestNumberDataPointToValue(t *testing.T) {
 type metricDescriptorTest struct {
 	name          string
 	metricCreator func() pdata.Metric
-	expected      *metricpb.MetricDescriptor
+	expected      []*metricpb.MetricDescriptor
 }
 
 func TestMetricDescriptorMapping(t *testing.T) {
@@ -365,16 +367,24 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				gauge := metric.Gauge()
 				point := gauge.DataPoints().AppendEmpty()
 				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: &metricpb.MetricDescriptor{
-				Name:        "custom.googleapis.com/test.metric",
-				DisplayName: "test.metric",
-				Type:        "custom.googleapis.com/test.metric",
-				MetricKind:  metricpb.MetricDescriptor_GAUGE,
-				ValueType:   metricpb.MetricDescriptor_DOUBLE,
-				Unit:        "1",
-				Description: "Description",
+			expected: []*metric.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
 			},
 		},
 		{
@@ -390,16 +400,24 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
 				point := sum.DataPoints().AppendEmpty()
 				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: &metricpb.MetricDescriptor{
-				Name:        "custom.googleapis.com/test.metric",
-				DisplayName: "test.metric",
-				Type:        "custom.googleapis.com/test.metric",
-				MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-				ValueType:   metricpb.MetricDescriptor_DOUBLE,
-				Unit:        "1",
-				Description: "Description",
+			expected: []*metric.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
 			},
 		},
 		{
@@ -415,16 +433,24 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityDelta)
 				point := sum.DataPoints().AppendEmpty()
 				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: &metricpb.MetricDescriptor{
-				Name:        "test.metric",
-				DisplayName: "test.metric",
-				Type:        "workload.googleapis.com/test.metric",
-				MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-				ValueType:   metricpb.MetricDescriptor_DOUBLE,
-				Unit:        "1",
-				Description: "Description",
+			expected: []*metric.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
 			},
 		},
 		{
@@ -440,16 +466,24 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
 				point := sum.DataPoints().AppendEmpty()
 				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: &metricpb.MetricDescriptor{
-				Name:        "test.metric",
-				DisplayName: "test.metric",
-				Type:        "workload.googleapis.com/test.metric",
-				MetricKind:  metricpb.MetricDescriptor_GAUGE,
-				ValueType:   metricpb.MetricDescriptor_DOUBLE,
-				Unit:        "1",
-				Description: "Description",
+			expected: []*metric.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
 			},
 		},
 		{
@@ -462,16 +496,25 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				metric.SetUnit("1")
 				histogram := metric.Histogram()
 				histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				point := histogram.DataPoints().AppendEmpty()
+				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: &metricpb.MetricDescriptor{
-				Name:        "test.metric",
-				DisplayName: "test.metric",
-				Type:        "workload.googleapis.com/test.metric",
-				MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-				ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
-				Unit:        "1",
-				Description: "Description",
+			expected: []*metric.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
 			},
 		},
 		{
@@ -486,14 +529,76 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
 				return metric
 			},
-			expected: &metricpb.MetricDescriptor{
-				Name:        "test.metric",
-				DisplayName: "test.metric",
-				Type:        "workload.googleapis.com/test.metric",
-				MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-				ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
-				Unit:        "1",
-				Description: "Description",
+			expected: []*metric.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
+					Unit:        "1",
+					Description: "Description",
+					Labels:      []*label.LabelDescriptor{},
+				},
+			},
+		},
+		{
+			name: "Summary",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSummary)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				summary := metric.Summary()
+				point := summary.DataPoints().AppendEmpty()
+				point.Attributes().InsertString("test_label", "value")
+				return metric
+			},
+			expected: []*metric.MetricDescriptor{
+				{
+					DisplayName: "test.metric_summary_sum",
+					Type:        "workload.googleapis.com/test.metric_summary_sum",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+				{
+					DisplayName: "test.metric_summary_count",
+					Type:        "workload.googleapis.com/test.metric_summary_count",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_INT64,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+				{
+					Type:        "workload.googleapis.com/test.metric_summary_percentile",
+					DisplayName: "test.metric_summary_percentile",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+						{
+							Key:         "percentile",
+							Description: "the value at a given percentile of a distribution",
+						},
+					},
+				},
 			},
 		},
 	}

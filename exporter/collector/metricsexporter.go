@@ -29,6 +29,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
+	"google.golang.org/genproto/googleapis/api/label"
 	"google.golang.org/genproto/googleapis/api/metric"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -53,6 +54,13 @@ type metricMapper struct {
 
 // Known metric domains. Note: This is now configurable for advanced usages.
 var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
+
+// Constants we use when translating summary metrics into GCP.
+const (
+	SUMMARY_COUNT_SUFFIX      = "_summary_count"
+	SUMMARY_SUM_SUFFIX        = "_summary_sum"
+	SUMMARY_PERCENTILE_SUFFIX = "_summary_percentile"
+)
 
 type labels map[string]string
 
@@ -136,7 +144,9 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
-				me.mds <- me.mapper.metricDescriptor(metric)
+				for _, md := range me.mapper.metricDescriptor(metric) {
+					me.mds <- md
+				}
 				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, extraLabels, metric)...)
 			}
 		}
@@ -400,23 +410,129 @@ func (m *metricMapper) metricTypeToDisplayName(mUrl string) string {
 	return strings.TrimLeft(u.Path, "/")
 }
 
+// Returns label descriptors for a metric.
+func (me *metricMapper) labelDescriptors(m pdata.Metric) []*label.LabelDescriptor {
+	// TODO - allow customization of label descriptions.
+	result := []*label.LabelDescriptor{}
+	switch m.DataType() {
+	case pdata.MetricDataTypeGauge:
+		points := m.Gauge().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
+				result = append(result, &label.LabelDescriptor{
+					Key: key,
+				})
+				return true
+			})
+		}
+	case pdata.MetricDataTypeSum:
+		points := m.Sum().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
+				result = append(result, &label.LabelDescriptor{
+					Key: key,
+				})
+				return true
+			})
+		}
+	case pdata.MetricDataTypeSummary:
+		points := m.Summary().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
+				result = append(result, &label.LabelDescriptor{
+					Key: key,
+				})
+				return true
+			})
+		}
+	case pdata.MetricDataTypeHistogram:
+		points := m.Histogram().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
+				result = append(result, &label.LabelDescriptor{
+					Key: key,
+				})
+				return true
+			})
+		}
+	case pdata.MetricDataTypeExponentialHistogram:
+		points := m.ExponentialHistogram().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
+				result = append(result, &label.LabelDescriptor{
+					Key: key,
+				})
+				return true
+			})
+		}
+	}
+	return result
+}
+
+func (me *metricMapper) summaryMetricDescriptors(m pdata.Metric) []*metric.MetricDescriptor {
+	sumName := fmt.Sprintf("%s%s", m.Name(), SUMMARY_SUM_SUFFIX)
+	countName := fmt.Sprintf("%s%s", m.Name(), SUMMARY_COUNT_SUFFIX)
+	percentileName := fmt.Sprintf("%s%s", m.Name(), SUMMARY_PERCENTILE_SUFFIX)
+	labels := me.labelDescriptors(m)
+	return []*metric.MetricDescriptor{
+		{
+			Type:        me.metricNameToType(sumName),
+			Labels:      labels,
+			MetricKind:  metric.MetricDescriptor_CUMULATIVE,
+			ValueType:   metric.MetricDescriptor_DOUBLE,
+			Unit:        m.Unit(),
+			Description: m.Description(),
+			DisplayName: sumName,
+		},
+		{
+			Type:        me.metricNameToType(countName),
+			Labels:      labels,
+			MetricKind:  metric.MetricDescriptor_CUMULATIVE,
+			ValueType:   metric.MetricDescriptor_INT64,
+			Unit:        m.Unit(),
+			Description: m.Description(),
+			DisplayName: countName,
+		},
+		{
+			Type: me.metricNameToType(percentileName),
+			Labels: append(
+				labels,
+				&label.LabelDescriptor{
+					Key:         "percentile",
+					Description: "the value at a given percentile of a distribution",
+				}),
+			MetricKind:  metric.MetricDescriptor_GAUGE,
+			ValueType:   metric.MetricDescriptor_DOUBLE,
+			Unit:        m.Unit(),
+			Description: m.Description(),
+			DisplayName: percentileName,
+		},
+	}
+}
+
 // Extract the metric descriptor from a metric data point.
-func (me *metricMapper) metricDescriptor(m pdata.Metric) *metric.MetricDescriptor {
+func (me *metricMapper) metricDescriptor(m pdata.Metric) []*metric.MetricDescriptor {
+	if m.DataType() == pdata.MetricDataTypeSummary {
+		return me.summaryMetricDescriptors(m)
+	}
 	kind, typ := mapMetricPointKind(m)
 	metricType := me.metricNameToType(m.Name())
+	labels := me.labelDescriptors(m)
 	// Return nil for unsupported types.
 	if kind == metric.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
 		return nil
 	}
-	return &metric.MetricDescriptor{
-		Name:        m.Name(),
-		DisplayName: me.metricTypeToDisplayName(metricType),
-		Type:        metricType,
-		MetricKind:  kind,
-		ValueType:   typ,
-		Unit:        m.Unit(),
-		Description: m.Description(),
-		// TODO: Labels for non-wlm
+	return []*metric.MetricDescriptor{
+		{
+			Name:        m.Name(),
+			DisplayName: me.metricTypeToDisplayName(metricType),
+			Type:        metricType,
+			MetricKind:  kind,
+			ValueType:   typ,
+			Unit:        m.Unit(),
+			Description: m.Description(),
+			Labels:      labels,
+		},
 	}
 }
 
