@@ -20,6 +20,7 @@ package collector
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/url"
 	"path"
 	"strings"
@@ -131,6 +132,12 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 	}
 
 	// TODO: self observability
+	// TODO: Figure out how to configure service time series calls.
+	if false {
+		err := me.createServiceTimeSeries(ctx, timeSeries)
+		recordPointCount(ctx, len(timeSeries), m.DataPointCount()-len(timeSeries), err)
+		return err
+	}
 	err := me.createTimeSeries(ctx, timeSeries)
 	recordPointCount(ctx, len(timeSeries), m.DataPointCount()-len(timeSeries), err)
 	return err
@@ -144,11 +151,13 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 	// prior to shutdown.
 	for md := range me.mds {
 		// Not yet sent, now we sent it.
+		// TODO - check to see if this is a service/system metric and doesn't send descriptors.
 		if !me.cfg.MetricConfig.SkipCreateMetricDescriptor && md != nil && mdCache[md.Type] == nil {
 			err := me.exportMetricDescriptor(context.Background(), md)
 			// TODO: Log-once on error, per metric descriptor?
+			// TODO: Re-use passed-in logger to exporter.
 			if err != nil {
-				fmt.Printf("Unable to send metric descriptor: %s, %s", md, err)
+				log.Printf("Unable to send metric descriptor: %s, %s", md, err)
 			}
 			mdCache[md.Type] = md
 		}
@@ -156,26 +165,40 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 	}
 }
 
+func (me *metricsExporter) projectName() string {
+	// TODO set Name field with project ID from config or ADC
+	return fmt.Sprintf("projects/%s", me.cfg.ProjectID)
+}
+
 // Helper method to send metric descriptors to GCM.
 func (me *metricsExporter) exportMetricDescriptor(ctx context.Context, md *metricpb.MetricDescriptor) error {
 	// export
 	req := &monitoringpb.CreateMetricDescriptorRequest{
-		// TODO set Name field with project ID from config or ADC
-		Name:             fmt.Sprintf("projects/%s", me.cfg.ProjectID),
+		Name:             me.projectName(),
 		MetricDescriptor: md,
 	}
 	_, err := me.client.CreateMetricDescriptor(ctx, req)
 	return err
 }
 
+// Sends a user-custom-metric timeseries.
 func (me *metricsExporter) createTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
-	// TODO: me.client.CreateServiceTimeSeries(
 	return me.client.CreateTimeSeries(
 		ctx,
 		&monitoringpb.CreateTimeSeriesRequest{
+			Name:       me.projectName(),
 			TimeSeries: ts,
-			// TODO set Name field with project ID from config or ADC
-			Name: fmt.Sprintf("projects/%s", me.cfg.ProjectID),
+		},
+	)
+}
+
+// Sends a service timeseries.
+func (me *metricsExporter) createServiceTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+	return me.client.CreateServiceTimeSeries(
+		ctx,
+		&monitoringpb.CreateTimeSeriesRequest{
+			Name:       me.projectName(),
+			TimeSeries: ts,
 		},
 	)
 }
@@ -385,56 +408,39 @@ func (m *metricMapper) metricTypeToDisplayName(mURL string) string {
 func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescriptor {
 	// TODO - allow customization of label descriptions.
 	result := []*label.LabelDescriptor{}
+	addAttributes := func(attr pdata.AttributeMap) {
+		attr.Range(func(key string, _ pdata.AttributeValue) bool {
+			result = append(result, &label.LabelDescriptor{
+				Key: key,
+			})
+			return true
+		})
+	}
 	switch pm.DataType() {
 	case pdata.MetricDataTypeGauge:
 		points := pm.Gauge().DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
-				result = append(result, &label.LabelDescriptor{
-					Key: key,
-				})
-				return true
-			})
+			addAttributes(points.At(i).Attributes())
 		}
 	case pdata.MetricDataTypeSum:
 		points := pm.Sum().DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
-				result = append(result, &label.LabelDescriptor{
-					Key: key,
-				})
-				return true
-			})
+			addAttributes(points.At(i).Attributes())
 		}
 	case pdata.MetricDataTypeSummary:
 		points := pm.Summary().DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
-				result = append(result, &label.LabelDescriptor{
-					Key: key,
-				})
-				return true
-			})
+			addAttributes(points.At(i).Attributes())
 		}
 	case pdata.MetricDataTypeHistogram:
 		points := pm.Histogram().DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
-				result = append(result, &label.LabelDescriptor{
-					Key: key,
-				})
-				return true
-			})
+			addAttributes(points.At(i).Attributes())
 		}
 	case pdata.MetricDataTypeExponentialHistogram:
 		points := pm.ExponentialHistogram().DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			points.At(i).Attributes().Range(func(key string, _ pdata.AttributeValue) bool {
-				result = append(result, &label.LabelDescriptor{
-					Key: key,
-				})
-				return true
-			})
+			addAttributes(points.At(i).Attributes())
 		}
 	}
 	return result
