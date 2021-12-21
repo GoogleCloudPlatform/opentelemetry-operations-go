@@ -22,7 +22,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/pdata"
 	"google.golang.org/genproto/googleapis/api/label"
-	"google.golang.org/genproto/googleapis/api/metric"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -370,7 +369,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: []*metric.MetricDescriptor{
+			expected: []*metricpb.MetricDescriptor{
 				{
 					Name:        "custom.googleapis.com/test.metric",
 					DisplayName: "test.metric",
@@ -403,7 +402,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: []*metric.MetricDescriptor{
+			expected: []*metricpb.MetricDescriptor{
 				{
 					Name:        "custom.googleapis.com/test.metric",
 					DisplayName: "test.metric",
@@ -436,7 +435,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: []*metric.MetricDescriptor{
+			expected: []*metricpb.MetricDescriptor{
 				{
 					Name:        "test.metric",
 					DisplayName: "test.metric",
@@ -469,7 +468,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: []*metric.MetricDescriptor{
+			expected: []*metricpb.MetricDescriptor{
 				{
 					Name:        "test.metric",
 					DisplayName: "test.metric",
@@ -500,7 +499,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				point.Attributes().InsertString("test_label", "test_value")
 				return metric
 			},
-			expected: []*metric.MetricDescriptor{
+			expected: []*metricpb.MetricDescriptor{
 				{
 					Name:        "test.metric",
 					DisplayName: "test.metric",
@@ -529,7 +528,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
 				return metric
 			},
-			expected: []*metric.MetricDescriptor{
+			expected: []*metricpb.MetricDescriptor{
 				{
 					Name:        "test.metric",
 					DisplayName: "test.metric",
@@ -555,7 +554,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				point.Attributes().InsertString("test_label", "value")
 				return metric
 			},
-			expected: []*metric.MetricDescriptor{
+			expected: []*metricpb.MetricDescriptor{
 				{
 					DisplayName: "test.metric_summary_sum",
 					Type:        "workload.googleapis.com/test.metric_summary_sum",
