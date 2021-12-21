@@ -163,7 +163,7 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 	for md := range me.mds {
 		// Not yet sent, now we sent it.
 		if mdCache[md.Type] == nil {
-			err := me.exportMetricDescriptor(context.Background(), md)
+			err := me.exportMetricDescriptor(context.TODO(), md)
 			// TODO: Log-once on error, per metric descriptor?
 			// TODO: Re-use passed-in logger to exporter.
 			if err != nil {
