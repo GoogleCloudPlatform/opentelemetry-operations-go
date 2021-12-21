@@ -118,15 +118,6 @@ func (me *metricsExporter) createTimeSeries(ctx context.Context, ts []*monitorin
 	)
 }
 
-// Transforms pdata Resource to a GCM Monitored Resource. Any resource attributes not accounted
-// for in the monitored resource which should be merged into metric labels are also returned.
-func (m *metricMapper) resourceMetricsToMonitoredResource(
-	resource pdata.Resource,
-) (*monitoredrespb.MonitoredResource, labels) {
-	// TODO
-	return nil, nil
-}
-
 func instrumentationLibraryToLabels(il pdata.InstrumentationLibrary) labels {
 	// TODO
 	return nil
