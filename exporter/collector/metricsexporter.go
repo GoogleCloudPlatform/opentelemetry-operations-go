@@ -30,7 +30,6 @@ import (
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
 	"google.golang.org/genproto/googleapis/api/label"
-	"google.golang.org/genproto/googleapis/api/metric"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -43,7 +42,7 @@ type metricsExporter struct {
 	client *monitoring.MetricClient
 	mapper metricMapper
 	// A channel that receives metric descriptor and sends them to GCM once.
-	mds chan *metric.MetricDescriptor
+	mds chan *metricpb.MetricDescriptor
 }
 
 // metricMapper is the part that transforms metrics. Separate from metricsExporter since it has
@@ -71,7 +70,7 @@ func (me *metricsExporter) Shutdown(context.Context) error {
 
 // Updates config object to include all defaults for metric export.
 func (cfg *Config) SetMetricDefaults() {
-	if cfg.MetricConfig.KnownDomains == nil || len(cfg.MetricConfig.KnownDomains) == 0 {
+	if len(cfg.MetricConfig.KnownDomains) == 0 {
 		cfg.MetricConfig.KnownDomains = domains
 	}
 	// TODO - if in legacy mode, this should be
@@ -113,7 +112,7 @@ func newGoogleCloudMetricsExporter(
 		cfg:    cfg,
 		client: client,
 		mapper: metricMapper{cfg},
-		mds:    make(chan *metric.MetricDescriptor),
+		mds:    make(chan *metricpb.MetricDescriptor),
 	}
 
 	// Fire up the metric descriptor exporter.
@@ -160,7 +159,7 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 
 // Reads metric descriptors from the md channel, and reports them (once) to GCM.
 func (me *metricsExporter) exportMetricDescriptorRunner(ctx context.Context) {
-	mdCache := make(map[string]*metric.MetricDescriptor)
+	mdCache := make(map[string]*metricpb.MetricDescriptor)
 	for {
 		select {
 		case md := <-me.mds:
@@ -181,7 +180,7 @@ func (me *metricsExporter) exportMetricDescriptorRunner(ctx context.Context) {
 }
 
 // Helper method to send metric descriptors to GCM.
-func (me *metricsExporter) exportMetricDescriptor(ctx context.Context, md *metric.MetricDescriptor) error {
+func (me *metricsExporter) exportMetricDescriptor(ctx context.Context, md *metricpb.MetricDescriptor) error {
 	// export
 	req := &monitoringpb.CreateMetricDescriptorRequest{
 		// TODO set Name field with project ID from config or ADC
@@ -469,17 +468,17 @@ func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescripto
 	return result
 }
 
-func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metric.MetricDescriptor {
+func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.MetricDescriptor {
 	sumName := fmt.Sprintf("%s%s", pm.Name(), SummarySumSuffix)
 	countName := fmt.Sprintf("%s%s", pm.Name(), SummaryCountPrefix)
 	percentileName := fmt.Sprintf("%s%s", pm.Name(), SummaryPercentileSuffix)
 	labels := m.labelDescriptors(pm)
-	return []*metric.MetricDescriptor{
+	return []*metricpb.MetricDescriptor{
 		{
 			Type:        m.metricNameToType(sumName),
 			Labels:      labels,
-			MetricKind:  metric.MetricDescriptor_CUMULATIVE,
-			ValueType:   metric.MetricDescriptor_DOUBLE,
+			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:   metricpb.MetricDescriptor_DOUBLE,
 			Unit:        pm.Unit(),
 			Description: pm.Description(),
 			DisplayName: sumName,
@@ -487,8 +486,8 @@ func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metric.Metri
 		{
 			Type:        m.metricNameToType(countName),
 			Labels:      labels,
-			MetricKind:  metric.MetricDescriptor_CUMULATIVE,
-			ValueType:   metric.MetricDescriptor_INT64,
+			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:   metricpb.MetricDescriptor_INT64,
 			Unit:        pm.Unit(),
 			Description: pm.Description(),
 			DisplayName: countName,
@@ -501,8 +500,8 @@ func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metric.Metri
 					Key:         "percentile",
 					Description: "the value at a given percentile of a distribution",
 				}),
-			MetricKind:  metric.MetricDescriptor_GAUGE,
-			ValueType:   metric.MetricDescriptor_DOUBLE,
+			MetricKind:  metricpb.MetricDescriptor_GAUGE,
+			ValueType:   metricpb.MetricDescriptor_DOUBLE,
 			Unit:        pm.Unit(),
 			Description: pm.Description(),
 			DisplayName: percentileName,
@@ -511,7 +510,7 @@ func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metric.Metri
 }
 
 // Extract the metric descriptor from a metric data point.
-func (m *metricMapper) metricDescriptor(pm pdata.Metric) []*metric.MetricDescriptor {
+func (m *metricMapper) metricDescriptor(pm pdata.Metric) []*metricpb.MetricDescriptor {
 	if pm.DataType() == pdata.MetricDataTypeSummary {
 		return m.summaryMetricDescriptors(pm)
 	}
@@ -519,10 +518,10 @@ func (m *metricMapper) metricDescriptor(pm pdata.Metric) []*metric.MetricDescrip
 	metricType := m.metricNameToType(pm.Name())
 	labels := m.labelDescriptors(pm)
 	// Return nil for unsupported types.
-	if kind == metric.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
+	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
 		return nil
 	}
-	return []*metric.MetricDescriptor{
+	return []*metricpb.MetricDescriptor{
 		{
 			Name:        pm.Name(),
 			DisplayName: m.metricTypeToDisplayName(metricType),
@@ -536,59 +535,59 @@ func (m *metricMapper) metricDescriptor(pm pdata.Metric) []*metric.MetricDescrip
 	}
 }
 
-func metricPointValueType(pt pdata.MetricValueType) metric.MetricDescriptor_ValueType {
+func metricPointValueType(pt pdata.MetricValueType) metricpb.MetricDescriptor_ValueType {
 	switch pt {
 	case pdata.MetricValueTypeInt:
-		return metric.MetricDescriptor_INT64
+		return metricpb.MetricDescriptor_INT64
 	case pdata.MetricValueTypeDouble:
-		return metric.MetricDescriptor_DOUBLE
+		return metricpb.MetricDescriptor_DOUBLE
 	default:
-		return metric.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+		return metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 	}
 }
 
-func mapMetricPointKind(m pdata.Metric) (metric.MetricDescriptor_MetricKind, metric.MetricDescriptor_ValueType) {
-	var kind metric.MetricDescriptor_MetricKind
-	var typ metric.MetricDescriptor_ValueType
+func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, metricpb.MetricDescriptor_ValueType) {
+	var kind metricpb.MetricDescriptor_MetricKind
+	var typ metricpb.MetricDescriptor_ValueType
 	switch m.DataType() {
 	case pdata.MetricDataTypeGauge:
-		kind = metric.MetricDescriptor_GAUGE
+		kind = metricpb.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
 			typ = metricPointValueType(m.Gauge().DataPoints().At(0).Type())
 		}
 	case pdata.MetricDataTypeSum:
 		if !m.Sum().IsMonotonic() {
-			kind = metric.MetricDescriptor_GAUGE
+			kind = metricpb.MetricDescriptor_GAUGE
 		} else if m.Sum().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
-			kind = metric.MetricDescriptor_CUMULATIVE
+			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
-			kind = metric.MetricDescriptor_CUMULATIVE
+			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
 		if m.Sum().DataPoints().Len() > 0 {
 			typ = metricPointValueType(m.Sum().DataPoints().At(0).Type())
 		}
 	case pdata.MetricDataTypeSummary:
-		kind = metric.MetricDescriptor_GAUGE
+		kind = metricpb.MetricDescriptor_GAUGE
 	case pdata.MetricDataTypeHistogram:
-		typ = metric.MetricDescriptor_DISTRIBUTION
+		typ = metricpb.MetricDescriptor_DISTRIBUTION
 		if m.Histogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
-			kind = metric.MetricDescriptor_CUMULATIVE
+			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
-			kind = metric.MetricDescriptor_CUMULATIVE
+			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
 	case pdata.MetricDataTypeExponentialHistogram:
-		typ = metric.MetricDescriptor_DISTRIBUTION
+		typ = metricpb.MetricDescriptor_DISTRIBUTION
 		if m.ExponentialHistogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
-			kind = metric.MetricDescriptor_CUMULATIVE
+			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
-			kind = metric.MetricDescriptor_CUMULATIVE
+			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
 	default:
-		kind = metric.MetricDescriptor_METRIC_KIND_UNSPECIFIED
-		typ = metric.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+		kind = metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
+		typ = metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 	}
 	return kind, typ
 }
