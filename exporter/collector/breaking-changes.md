@@ -38,6 +38,6 @@ The new pdata exporter sends these as CUMULATIVE points with the same delta time
 ## OTLP Summary
 
 The old exporter relied on upstream conversion of OTLP Summary into Gauge and
-Cumulative points.  The new exporter performas this conversion itself, which
+Cumulative points.  The new exporter performs this conversion itself, which
 means summary metric descriptors will include label description for `percentile`
 labels.

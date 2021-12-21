@@ -76,8 +76,6 @@ func newGoogleCloudMetricsExporter(
 ) (component.MetricsExporter, error) {
 	setVersionInUserAgent(cfg, set.BuildInfo.Version)
 
-	// map cfg options into metric service client configuration with
-	// generateClientOptions()
 	clientOpts, err := generateClientOptions(cfg)
 	if err != nil {
 		return nil, err
@@ -92,7 +90,11 @@ func newGoogleCloudMetricsExporter(
 		cfg:    cfg,
 		client: client,
 		mapper: metricMapper{cfg},
-		mds:    make(chan *metricpb.MetricDescriptor),
+		// We create a buffered channel for metric descriptors.
+		// MetricDescritpors are asycnhronously sent and optimistic.
+		// We only get Unit/Description/Display name from them, so it's ok
+		// to drop / conserve resources for sending timeseries.
+		mds: make(chan *metricpb.MetricDescriptor, 10),
 	}
 
 	// Fire up the metric descriptor exporter.
@@ -123,8 +125,17 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
-				for _, md := range me.mapper.metricDescriptor(metric) {
-					me.mds <- md
+				// TODO - check to see if this is a service/system metric and doesn't send descriptors.
+				if !me.cfg.MetricConfig.SkipCreateMetricDescriptor {
+					for _, md := range me.mapper.metricDescriptor(metric) {
+						if md != nil {
+							select {
+							case me.mds <- md:
+							default:
+								// Ignore drops, we'll catch descriptor next time around.
+							}
+						}
+					}
 				}
 				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, extraLabels, metric)...)
 			}
@@ -151,13 +162,13 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 	// prior to shutdown.
 	for md := range me.mds {
 		// Not yet sent, now we sent it.
-		// TODO - check to see if this is a service/system metric and doesn't send descriptors.
-		if !me.cfg.MetricConfig.SkipCreateMetricDescriptor && md != nil && mdCache[md.Type] == nil {
+		if mdCache[md.Type] == nil {
 			err := me.exportMetricDescriptor(context.Background(), md)
 			// TODO: Log-once on error, per metric descriptor?
 			// TODO: Re-use passed-in logger to exporter.
 			if err != nil {
 				log.Printf("Unable to send metric descriptor: %s, %s", md, err)
+				continue
 			}
 			mdCache[md.Type] = md
 		}
