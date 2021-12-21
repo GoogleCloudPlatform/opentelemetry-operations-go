@@ -185,7 +185,9 @@ func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Ex
 		if err == nil {
 			attachments = append(attachments, sctx)
 		} else {
-			log.Printf("Failure to write span context: %v", err)
+			// This happens in the event of logic error (e.g. missing required fields).
+			// As such we complaining loudly to fail our unit tests.
+			log.Fatalf("Failure to write span context: %v", err)
 		}
 	}
 	if ex.FilteredAttributes().Len() > 0 {
@@ -195,7 +197,9 @@ func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Ex
 		if err == nil {
 			attachments = append(attachments, attr)
 		} else {
-			log.Printf("Failure to write filtered_attributes: %v", err)
+			// This happens in the event of logic error (e.g. missing required fields).
+			// As such we complaining loudly to fail our unit tests.
+			log.Fatalf("Failure to write filtered_attributes: %v", err)
 		}
 	}
 	return &distribution.Distribution_Exemplar{
