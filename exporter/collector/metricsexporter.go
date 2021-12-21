@@ -205,52 +205,60 @@ func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Ex
 	}
 }
 
+func (m *metricMapper) exemplars(exs pdata.ExemplarSlice) []*distribution.Distribution_Exemplar {
+	exemplars := make([]*distribution.Distribution_Exemplar, exs.Len())
+	for i := 0; i < exs.Len(); i++ {
+		exemplars[i] = m.exemplar(exs.At(i))
+	}
+	return exemplars
+}
+
 // Maps an exponential distribution into a GCM point.
 func (m *metricMapper) exponentialPoint(point pdata.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
-
-	growth := math.Exp2(math.Exp2(-float64(point.Scale())))
-	scale := math.Pow(growth, float64(point.Positive().Offset()))
 	// First calculate underflow bucket with all negatives + zeros.
 	underflow := point.ZeroCount()
 	for _, v := range point.Negative().BucketCounts() {
 		underflow += v
 	}
-
 	// Next, pull in remaining buckets.
-	counts := []int64{int64(underflow)}
-	for _, v := range point.Positive().BucketCounts() {
-		counts = append(counts, int64(v))
+	counts := make([]int64, len(point.Positive().BucketCounts())+2)
+	bucketOptions := &distribution.Distribution_BucketOptions{}
+	counts[0] = int64(underflow)
+	for i, v := range point.Positive().BucketCounts() {
+		counts[i+1] = int64(v)
 	}
-
 	// Overflow bucket is always empty
-	counts = append(counts, 0)
+	counts[len(counts)-1] = 0
 
-	// TODO - error handling?
-	if len(counts) < 3 {
-		// Cannot report an exponential distribution with no buckets.
-		return nil
+	if len(point.Positive().BucketCounts()) == 0 {
+		// We cannot send exponential distributions with no positive buckets,
+		// instead we send a simple overflow/underflow histogram.
+		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExplicitBuckets{
+			ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
+				Bounds: []float64{0},
+			},
+		}
+	} else {
+		// Exponential histogram
+		growth := math.Exp2(math.Exp2(-float64(point.Scale())))
+		scale := math.Pow(growth, float64(point.Positive().Offset()))
+		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExponentialBuckets{
+			ExponentialBuckets: &distribution.Distribution_BucketOptions_Exponential{
+				GrowthFactor:     growth,
+				Scale:            scale,
+				NumFiniteBuckets: int32(len(counts) - 2),
+			},
+		}
 	}
-	exemplars := []*distribution.Distribution_Exemplar{}
-	exs := point.Exemplars()
-	for i := 0; i < exs.Len(); i++ {
-		exemplars = append(exemplars, m.exemplar(exs.At(i)))
-	}
+
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distribution.Distribution{
-				Count:        int64(point.Count()),
-				Mean:         float64(point.Sum() / float64(point.Count())),
-				BucketCounts: counts,
-				BucketOptions: &distribution.Distribution_BucketOptions{
-					Options: &distribution.Distribution_BucketOptions_ExponentialBuckets{
-						ExponentialBuckets: &distribution.Distribution_BucketOptions_Exponential{
-							GrowthFactor:     growth,
-							Scale:            scale,
-							NumFiniteBuckets: int32(len(counts) - 2),
-						},
-					},
-				},
-				Exemplars: exemplars,
+				Count:         int64(point.Count()),
+				Mean:          float64(point.Sum() / float64(point.Count())),
+				BucketCounts:  counts,
+				BucketOptions: bucketOptions,
+				Exemplars:     m.exemplars(point.Exemplars()),
 			},
 		},
 	}
@@ -260,12 +268,13 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
 	metric pdata.Metric,
-	sum pdata.ExponentialHistogram,
+	_ pdata.ExponentialHistogram,
 	point pdata.ExponentialHistogramDataPoint,
 ) *monitoringpb.TimeSeries {
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
+	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.exponentialPoint(point)
 	return &monitoringpb.TimeSeries{
 		Resource:   resource,
@@ -275,7 +284,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 		Points: []*monitoringpb.Point{{
 			Interval: &monitoringpb.TimeInterval{
 				StartTime: startTime,
-				EndTime:   timestamppb.New(point.Timestamp().AsTime()),
+				EndTime:   endTime,
 			},
 			Value: value,
 		}},
