@@ -31,14 +31,6 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
-// Interface with common fields that pdata metric points have
-type point interface {
-	StartTimestamp() pdata.Timestamp
-	Timestamp() pdata.Timestamp
-	SetStartTimestamp(pdata.Timestamp)
-	SetTimestamp(pdata.Timestamp)
-}
-
 type MetricsTestCase struct {
 	// Name of the test case
 	Name string
@@ -69,6 +61,22 @@ func (m *MetricsTestCase) LoadOTLPMetricsInput(
 	metrics, err := otlp.NewJSONMetricsUnmarshaler().UnmarshalMetrics(bytes)
 	require.NoError(t, err)
 
+	// Interface with common fields that pdata metric points have
+	type point interface {
+		StartTimestamp() pdata.Timestamp
+		Timestamp() pdata.Timestamp
+		SetStartTimestamp(pdata.Timestamp)
+		SetTimestamp(pdata.Timestamp)
+	}
+	updatePoint := func(p point) {
+		if p.StartTimestamp() != 0 {
+			p.SetStartTimestamp(pdata.NewTimestampFromTime(startTime))
+		}
+		if p.Timestamp() != 0 {
+			p.SetTimestamp(pdata.NewTimestampFromTime(endTime))
+		}
+	}
+
 	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
 		rm := metrics.ResourceMetrics().At(i)
 		for i := 0; i < rm.InstrumentationLibraryMetrics().Len(); i++ {
@@ -76,32 +84,26 @@ func (m *MetricsTestCase) LoadOTLPMetricsInput(
 			for i := 0; i < rmi.Metrics().Len(); i++ {
 				m := rmi.Metrics().At(i)
 
-				points := []point{}
 				switch m.DataType() {
 				case pdata.MetricDataTypeGauge:
 					for i := 0; i < m.Gauge().DataPoints().Len(); i++ {
-						points = append(points, m.Gauge().DataPoints().At(i))
+						updatePoint(m.Gauge().DataPoints().At(i))
 					}
 				case pdata.MetricDataTypeSum:
 					for i := 0; i < m.Sum().DataPoints().Len(); i++ {
-						points = append(points, m.Sum().DataPoints().At(i))
+						updatePoint(m.Sum().DataPoints().At(i))
 					}
 				case pdata.MetricDataTypeHistogram:
 					for i := 0; i < m.Histogram().DataPoints().Len(); i++ {
-						points = append(points, m.Histogram().DataPoints().At(i))
+						updatePoint(m.Histogram().DataPoints().At(i))
 					}
 				case pdata.MetricDataTypeSummary:
 					for i := 0; i < m.Summary().DataPoints().Len(); i++ {
-						points = append(points, m.Summary().DataPoints().At(i))
+						updatePoint(m.Summary().DataPoints().At(i))
 					}
-				}
-
-				for _, p := range points {
-					if p.StartTimestamp() != 0 {
-						p.SetStartTimestamp(pdata.NewTimestampFromTime(startTime))
-					}
-					if p.Timestamp() != 0 {
-						p.SetTimestamp(pdata.NewTimestampFromTime(endTime))
+				case pdata.MetricDataTypeExponentialHistogram:
+					for i := 0; i < m.ExponentialHistogram().DataPoints().Len(); i++ {
+						updatePoint(m.ExponentialHistogram().DataPoints().At(i))
 					}
 				}
 			}

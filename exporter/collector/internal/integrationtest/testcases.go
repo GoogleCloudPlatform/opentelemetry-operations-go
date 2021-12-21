@@ -90,5 +90,10 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/gke_control_plane_metrics_agent_metrics_expect.json",
 			Skip:                 true,
 		},
+		{
+			Name:                 "Exponential Histogram",
+			OTLPInputFixturePath: "testdata/fixtures/exponential_histogram_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/exponential_histogram_metrics_expect.json",
+		},
 	}
 )

@@ -58,6 +58,9 @@ func main() {
 	defer testServer.Shutdown()
 
 	for _, test := range integrationtest.TestCases {
+		if test.Skip {
+			continue
+		}
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 			testServerExporter := testServer.NewExporter(ctx, t, *test.CreateConfig())
