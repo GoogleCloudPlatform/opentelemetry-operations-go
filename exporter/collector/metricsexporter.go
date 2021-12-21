@@ -20,7 +20,6 @@ package collector
 import (
 	"context"
 	"fmt"
-	"log"
 	"math"
 	"strings"
 	"unicode"
@@ -175,6 +174,7 @@ func (m *metricMapper) metricToTimeSeries(
 }
 
 func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Exemplar {
+	ctx := context.TODO()
 	attachments := []*anypb.Any{}
 	// TODO: Look into still sending exemplars with no span.
 	if !ex.TraceID().IsEmpty() && !ex.SpanID().IsEmpty() {
@@ -187,7 +187,7 @@ func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Ex
 		} else {
 			// This happens in the event of logic error (e.g. missing required fields).
 			// As such we complaining loudly to fail our unit tests.
-			log.Fatalf("Failure to write span context: %v", err)
+			recordExemplarFailure(ctx, 1)
 		}
 	}
 	if ex.FilteredAttributes().Len() > 0 {
@@ -199,7 +199,7 @@ func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Ex
 		} else {
 			// This happens in the event of logic error (e.g. missing required fields).
 			// As such we complaining loudly to fail our unit tests.
-			log.Fatalf("Failure to write filtered_attributes: %v", err)
+			recordExemplarFailure(ctx, 1)
 		}
 	}
 	return &distribution.Distribution_Exemplar{
