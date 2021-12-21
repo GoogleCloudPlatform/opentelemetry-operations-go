@@ -152,6 +152,7 @@ func TestDescToMetricType(t *testing.T) {
 }
 
 func TestRecordToMpb(t *testing.T) {
+	ctx := context.Background()
 	cloudMock := cloudmock.NewCloudMock()
 	defer cloudMock.Shutdown()
 
@@ -194,14 +195,24 @@ func TestRecordToMpb(t *testing.T) {
 			mdkey: md,
 		},
 	}
+	meter := pusher.Meter("custom.googleapis.com/opentelemetry")
+	counter := metric.Must(meter).NewInt64Counter(desc.Name())
+	clabels := []attribute.KeyValue{
+		attribute.Key("a").String("A"),
+		attribute.Key("b_b").String("B"),
+		attribute.Key("foo").Int64(100),
+	}
+	counter.Add(ctx, 100, clabels...)
 
 	want := &googlemetricpb.Metric{
 		Type: md.Type,
 		Labels: map[string]string{
 			"a":   "A",
 			"b_b": "B",
+			"foo": "100",
 		},
 	}
+	require.NoError(t, pusher.Stop(ctx))
 
 	aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
 		return reader.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
