@@ -15,6 +15,7 @@
 package collector
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -604,6 +605,58 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			metric := test.metricCreator()
 			md := mapper.metricDescriptor(metric)
 			assert.Equal(t, md, test.expected)
+		})
+	}
+}
+
+type knownDomainsTest struct {
+	name         string
+	metricType   string
+	knownDomains []string
+}
+
+func TestKnownDomains(t *testing.T) {
+	tests := []knownDomainsTest{
+		{
+			name:       "test",
+			metricType: "prefix/test",
+		},
+		{
+			name:       "googleapis.com/test",
+			metricType: "googleapis.com/test",
+		},
+		{
+			name:       "kubernetes.io/test",
+			metricType: "kubernetes.io/test",
+		},
+		{
+			name:       "istio.io/test",
+			metricType: "istio.io/test",
+		},
+		{
+			name:       "knative.dev/test",
+			metricType: "knative.dev/test",
+		},
+		{
+			name:         "knative.dev/test",
+			metricType:   "prefix/knative.dev/test",
+			knownDomains: []string{"example.com"},
+		},
+		{
+			name:         "example.com/test",
+			metricType:   "example.com/test",
+			knownDomains: []string{"example.com"},
+		},
+	}
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("%v to %v", test.name, test.metricType), func(t *testing.T) {
+			config := createDefaultConfig()
+			config.MetricConfig.Prefix = "prefix"
+			if len(test.knownDomains) > 0 {
+				config.MetricConfig.KnownDomains = test.knownDomains
+			}
+			mapper := metricMapper{cfg: config}
+			assert.Equal(t, test.metricType, mapper.metricNameToType(test.name))
 		})
 	}
 }
