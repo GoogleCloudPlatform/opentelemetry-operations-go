@@ -64,28 +64,8 @@ const (
 type labels map[string]string
 
 func (me *metricsExporter) Shutdown(context.Context) error {
-	// TODO - will the context given to us at startup be cancelled already?
+	close(me.mds)
 	return me.client.Close()
-}
-
-// Updates config object to include all defaults for metric export.
-func (cfg *Config) SetMetricDefaults() {
-	if len(cfg.MetricConfig.KnownDomains) == 0 {
-		cfg.MetricConfig.KnownDomains = domains
-	}
-	// TODO - if in legacy mode, this should be
-	// external.googleapis.com/OpenCensus/
-	if cfg.MetricConfig.Prefix == "" {
-		cfg.MetricConfig.Prefix = "workload.googleapis.com"
-	}
-}
-
-// Updates configuration to include all defaults. Used in unit testing.
-func (m *metricMapper) SetMetricDefaults() {
-	if m.cfg == nil {
-		m.cfg = &Config{}
-	}
-	m.cfg.SetMetricDefaults()
 }
 
 func newGoogleCloudMetricsExporter(
@@ -94,7 +74,6 @@ func newGoogleCloudMetricsExporter(
 	set component.ExporterCreateSettings,
 ) (component.MetricsExporter, error) {
 	setVersionInUserAgent(cfg, set.BuildInfo.Version)
-	cfg.SetMetricDefaults()
 
 	// map cfg options into metric service client configuration with
 	// generateClientOptions()
@@ -116,7 +95,7 @@ func newGoogleCloudMetricsExporter(
 	}
 
 	// Fire up the metric descriptor exporter.
-	go mExp.exportMetricDescriptorRunner(ctx)
+	go mExp.exportMetricDescriptorRunner()
 
 	return exporterhelper.NewMetricsExporter(
 		cfg,
@@ -158,24 +137,22 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 }
 
 // Reads metric descriptors from the md channel, and reports them (once) to GCM.
-func (me *metricsExporter) exportMetricDescriptorRunner(ctx context.Context) {
+func (me *metricsExporter) exportMetricDescriptorRunner() {
 	mdCache := make(map[string]*metricpb.MetricDescriptor)
-	for {
-		select {
-		case md := <-me.mds:
-			// Not yet sent, now we sent it.
-			if !me.cfg.MetricConfig.SkipCreateMetricDescriptor && md != nil && mdCache[md.Type] == nil {
-				err := me.exportMetricDescriptor(ctx, md)
-				// TODO: Log-once on error, per metric descriptor?
-				if err != nil {
-					fmt.Printf("Unable to send metric descriptor: %s, %s", md, err)
-				}
-				mdCache[md.Type] = md
+	// We iterate over all metric descritpors until the channel is closed.
+	// Note: if we get terminated, this will still attempt to export all descriptors
+	// prior to shutdown.
+	for md := range me.mds {
+		// Not yet sent, now we sent it.
+		if !me.cfg.MetricConfig.SkipCreateMetricDescriptor && md != nil && mdCache[md.Type] == nil {
+			err := me.exportMetricDescriptor(context.Background(), md)
+			// TODO: Log-once on error, per metric descriptor?
+			if err != nil {
+				fmt.Printf("Unable to send metric descriptor: %s, %s", md, err)
 			}
-		case <-ctx.Done():
-			// Kill this exporter when context is cancelled.
-			return
+			mdCache[md.Type] = md
 		}
+		// TODO: We may want to compare current MD vs. previous and validate no changes.
 	}
 }
 
@@ -316,23 +293,18 @@ func (m *metricMapper) gaugePointToTimeSeries(
 }
 
 // Returns any configured prefix to add to unknown metric name.
-func (m *metricMapper) getMetricNamePrefix(name string) *string {
+func (m *metricMapper) getMetricNamePrefix(name string) string {
 	for _, domain := range m.cfg.MetricConfig.KnownDomains {
 		if strings.Contains(name, domain) {
-			return nil
+			return ""
 		}
 	}
-	result := m.cfg.MetricConfig.Prefix
-	return &result
+	return m.cfg.MetricConfig.Prefix
 }
 
 // metricNameToType maps OTLP metric name to GCM metric type (aka name)
 func (m *metricMapper) metricNameToType(name string) string {
-	prefix := m.getMetricNamePrefix(name)
-	if prefix != nil {
-		return path.Join(*prefix, name)
-	}
-	return name
+	return path.Join(m.getMetricNamePrefix(name), name)
 }
 
 func numberDataPointToValue(

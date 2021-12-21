@@ -42,20 +42,24 @@ func NewFactory() component.ExporterFactory {
 
 	return exporterhelper.NewFactory(
 		typeStr,
-		createDefaultConfig,
+		func() config.Exporter { return createDefaultConfig() },
 		exporterhelper.WithTraces(createTracesExporter),
 		exporterhelper.WithMetrics(createMetricsExporter),
 	)
 }
 
 // createDefaultConfig creates the default configuration for exporter.
-func createDefaultConfig() config.Exporter {
+func createDefaultConfig() *Config {
 	return &Config{
 		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
 		TimeoutSettings:  exporterhelper.TimeoutSettings{Timeout: defaultTimeout},
 		RetrySettings:    exporterhelper.DefaultRetrySettings(),
 		QueueSettings:    exporterhelper.DefaultQueueSettings(),
 		UserAgent:        "opentelemetry-collector-contrib {{version}}",
+		MetricConfig: MetricConfig{
+			KnownDomains: domains,
+			Prefix:       "workload.googleapis.com",
+		},
 	}
 }
 

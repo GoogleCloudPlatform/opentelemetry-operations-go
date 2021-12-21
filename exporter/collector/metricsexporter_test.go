@@ -95,8 +95,7 @@ func TestMergeLabels(t *testing.T) {
 }
 
 func TestSumPointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{}}
-	mapper.SetMetricDefaults()
+	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Sum, pdata.NumberDataPoint) {
@@ -204,8 +203,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 }
 
 func TestGaugePointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{}}
-	mapper.SetMetricDefaults()
+	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Gauge, pdata.NumberDataPoint) {
@@ -261,8 +259,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 }
 
 func TestMetricNameToType(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{}}
-	mapper.SetMetricDefaults()
+	mapper := metricMapper{cfg: createDefaultConfig()}
 	assert.Equal(
 		t,
 		mapper.metricNameToType("foo"),
@@ -603,8 +600,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mapper := &metricMapper{}
-			mapper.SetMetricDefaults()
+			mapper := metricMapper{cfg: createDefaultConfig()}
 			metric := test.metricCreator()
 			md := mapper.metricDescriptor(metric)
 			assert.Equal(t, md, test.expected)
