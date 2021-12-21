@@ -93,6 +93,129 @@ func TestMergeLabels(t *testing.T) {
 	)
 }
 
+func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
+	mapper := metricMapper{cfg: &Config{
+		ProjectID: "myproject",
+	}}
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myexphist")
+	metric.SetDataType(pdata.MetricDataTypeExponentialHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.ExponentialHistogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.Positive().SetBucketCounts([]uint64{1, 2, 3})
+	point.Negative().SetBucketCounts([]uint64{4, 5})
+	point.SetZeroCount(6)
+	point.SetCount(21)
+	point.SetScale(-1)
+	point.SetSum(42)
+	exemplar := point.Exemplars().AppendEmpty()
+	exemplar.SetDoubleVal(2)
+	exemplar.SetTimestamp(pdata.NewTimestampFromTime(end))
+	exemplar.SetTraceID(pdata.NewTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6}))
+	exemplar.SetSpanID(pdata.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
+	exemplar.FilteredAttributes().InsertString("test", "extra")
+
+	ts := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	// Verify aspects
+	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
+	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_DISTRIBUTION)
+	assert.Equal(t, ts.Unit, unit)
+	assert.Same(t, ts.Resource, mr)
+
+	assert.Equal(t, ts.Metric.Type, "workload.googleapis.com/myexphist")
+	assert.Equal(t, ts.Metric.Labels, map[string]string{})
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, ts.Points[0].Interval, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	})
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(21), hdp.Count)
+	assert.ElementsMatch(t, []int64{15, 1, 2, 3, 0}, hdp.BucketCounts)
+	assert.Equal(t, float64(2), hdp.Mean)
+	assert.Equal(t, float64(4), hdp.BucketOptions.GetExponentialBuckets().GrowthFactor)
+	assert.Equal(t, float64(1), hdp.BucketOptions.GetExponentialBuckets().Scale)
+	assert.Equal(t, int32(3), hdp.BucketOptions.GetExponentialBuckets().NumFiniteBuckets)
+	assert.Len(t, hdp.Exemplars, 1)
+	ex := hdp.Exemplars[0]
+	assert.Equal(t, float64(2), ex.Value)
+	assert.Equal(t, timestamppb.New(end), ex.Timestamp)
+	// We should see trace + dropped labels
+	assert.Len(t, ex.Attachments, 2)
+	spanctx := &monitoringpb.SpanContext{}
+	err := ex.Attachments[0].UnmarshalTo(spanctx)
+	assert.Nil(t, err)
+	assert.Equal(t, "projects/myproject/traces/00010203040506070809010203040506/spans/0001020304050607", spanctx.SpanName)
+	dropped := &monitoringpb.DroppedLabels{}
+	err = ex.Attachments[1].UnmarshalTo(dropped)
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
+}
+
+func TestExemplarNoAttachements(t *testing.T) {
+	mapper := metricMapper{cfg: &Config{}}
+	exemplar := pdata.NewExemplar()
+	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
+	exemplar.SetDoubleVal(1)
+
+	result := mapper.exemplar(exemplar)
+	assert.Equal(t, float64(1), result.Value)
+	assert.Equal(t, timestamppb.New(start), result.Timestamp)
+	assert.Len(t, result.Attachments, 0)
+}
+
+func TestExemplarOnlyDroppedLabels(t *testing.T) {
+	mapper := metricMapper{cfg: &Config{}}
+	exemplar := pdata.NewExemplar()
+	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
+	exemplar.SetDoubleVal(1)
+	exemplar.FilteredAttributes().InsertString("test", "drop")
+
+	result := mapper.exemplar(exemplar)
+	assert.Equal(t, float64(1), result.Value)
+	assert.Equal(t, timestamppb.New(start), result.Timestamp)
+	assert.Len(t, result.Attachments, 1)
+
+	dropped := &monitoringpb.DroppedLabels{}
+	err := result.Attachments[0].UnmarshalTo(dropped)
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"test": "drop"}, dropped.Label)
+}
+
+func TestExemplarOnlyTraceId(t *testing.T) {
+	mapper := metricMapper{cfg: &Config{
+		ProjectID: "p",
+	}}
+	exemplar := pdata.NewExemplar()
+	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
+	exemplar.SetDoubleVal(1)
+	exemplar.SetTraceID(pdata.NewTraceID([16]byte{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	}))
+	exemplar.SetSpanID(pdata.NewSpanID([8]byte{
+		0, 0, 0, 0, 0, 0, 0, 2,
+	}))
+
+	result := mapper.exemplar(exemplar)
+	assert.Equal(t, float64(1), result.Value)
+	assert.Equal(t, timestamppb.New(start), result.Timestamp)
+	assert.Len(t, result.Attachments, 1)
+
+	context := &monitoringpb.SpanContext{}
+	err := result.Attachments[0].UnmarshalTo(context)
+	assert.Nil(t, err)
+	assert.Equal(t, "projects/p/traces/00000000000000000000000000000001/spans/0000000000000002", context.SpanName)
+}
+
 func TestSumPointToTimeSeries(t *testing.T) {
 	mapper := metricMapper{cfg: &Config{}}
 	mr := &monitoredrespb.MonitoredResource{}
