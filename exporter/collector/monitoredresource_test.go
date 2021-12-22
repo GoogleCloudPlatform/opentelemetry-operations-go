@@ -38,7 +38,7 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 			},
 			expectMr: &monitoredrespb.MonitoredResource{
 				Type:   "gce_instance",
-				Labels: map[string]string{"instance_id": "abc123", "location": "us-central1"},
+				Labels: map[string]string{"instance_id": "abc123", "zone": "us-central1"},
 			},
 			expectExtraLabels: labels{},
 		},
@@ -157,6 +157,24 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 			expectExtraLabels: labels{},
 		},
 		{
+			name: "Generic task no location",
+			resourceLabels: map[string]string{
+				"service.namespace":   "myservicenamespace",
+				"service.name":        "myservicename",
+				"service.instance.id": "myserviceinstanceid",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "generic_task",
+				Labels: map[string]string{
+					"job":       "myservicename",
+					"location":  "global",
+					"namespace": "myservicenamespace",
+					"task_id":   "myserviceinstanceid",
+				},
+			},
+			expectExtraLabels: labels{},
+		},
+		{
 			name: "Generic task unrecognized cloud.platform",
 			resourceLabels: map[string]string{
 				"cloud.platform":          "fooprovider_kubernetes_service",
@@ -248,6 +266,19 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 					"location":  "my-region",
 					"namespace": "myservicenamespace",
 					"node_id":   "myhostname",
+				},
+			},
+			expectExtraLabels: labels{},
+		},
+		{
+			name:           "Generic node with no labels",
+			resourceLabels: map[string]string{},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "generic_node",
+				Labels: map[string]string{
+					"location":  "global",
+					"namespace": "",
+					"node_id":   "",
 				},
 			},
 			expectExtraLabels: labels{},

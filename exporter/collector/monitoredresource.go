@@ -42,55 +42,73 @@ const (
 	podName        = "pod_name"
 	region         = "region"
 	taskID         = "task_id"
+	zone           = "zone"
 )
 
 var (
-	// monitoredResourceMappings contains mappings of GCM resource label keys onto OTel
-	// resource keys for a given monitored resource type. For entries with multiple OTel
-	// resource keys, the keys' values will be coalesced in order until there is a non-empty
-	// value.
-	monitoredResourceMappings = map[string]map[string][]string{
+	// monitoredResourceMappings contains mappings of GCM resource label keys onto mapping config from OTel
+	// resource for a given monitored resource type.
+	monitoredResourceMappings = map[string]map[string]struct {
+		// OTel resource keys to try and populate the resource label from. For entries with
+		// multiple OTel resource keys, the keys' values will be coalesced in order until there
+		// is a non-empty value.
+		otelKeys []string
+		// If none of the otelKeys are present in the Resource, fallback to this literal value
+		fallbackLiteral string
+	}{
 		gceInstance: {
-			location:   {semconv.AttributeCloudAvailabilityZone},
-			instanceID: {semconv.AttributeHostID},
+			zone:       {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
+			instanceID: {otelKeys: []string{semconv.AttributeHostID}},
 		},
 		k8sContainer: {
-			location:      {semconv.AttributeCloudAvailabilityZone},
-			clusterName:   {semconv.AttributeK8SClusterName},
-			namespaceName: {semconv.AttributeK8SNamespaceName},
-			podName:       {semconv.AttributeK8SPodName},
-			containerName: {semconv.AttributeK8SContainerName},
+			location:      {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
+			clusterName:   {otelKeys: []string{semconv.AttributeK8SClusterName}},
+			namespaceName: {otelKeys: []string{semconv.AttributeK8SNamespaceName}},
+			podName:       {otelKeys: []string{semconv.AttributeK8SPodName}},
+			containerName: {otelKeys: []string{semconv.AttributeK8SContainerName}},
 		},
 		k8sPod: {
-			location:      {semconv.AttributeCloudAvailabilityZone},
-			clusterName:   {semconv.AttributeK8SClusterName},
-			namespaceName: {semconv.AttributeK8SNamespaceName},
-			podName:       {semconv.AttributeK8SPodName},
+			location:      {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
+			clusterName:   {otelKeys: []string{semconv.AttributeK8SClusterName}},
+			namespaceName: {otelKeys: []string{semconv.AttributeK8SNamespaceName}},
+			podName:       {otelKeys: []string{semconv.AttributeK8SPodName}},
 		},
 		k8sNode: {
-			location:    {semconv.AttributeCloudAvailabilityZone},
-			clusterName: {semconv.AttributeK8SClusterName},
-			nodeName:    {semconv.AttributeK8SNodeName},
+			location:    {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
+			clusterName: {otelKeys: []string{semconv.AttributeK8SClusterName}},
+			nodeName:    {otelKeys: []string{semconv.AttributeK8SNodeName}},
 		},
 		k8sCluster: {
-			location:    {semconv.AttributeCloudAvailabilityZone},
-			clusterName: {semconv.AttributeK8SClusterName},
+			location:    {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
+			clusterName: {otelKeys: []string{semconv.AttributeK8SClusterName}},
 		},
 		awsEc2Instance: {
-			instanceID: {semconv.AttributeHostID},
-			region:     {semconv.AttributeCloudAvailabilityZone},
-			awsAccount: {semconv.AttributeCloudAccountID},
+			instanceID: {otelKeys: []string{semconv.AttributeHostID}},
+			region:     {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
+			awsAccount: {otelKeys: []string{semconv.AttributeCloudAccountID}},
 		},
 		genericTask: {
-			location:  {semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion},
-			namespace: {semconv.AttributeServiceNamespace},
-			job:       {semconv.AttributeServiceName},
-			taskID:    {semconv.AttributeServiceInstanceID},
+			location: {
+				otelKeys: []string{
+					semconv.AttributeCloudAvailabilityZone,
+					semconv.AttributeCloudRegion,
+				},
+				fallbackLiteral: "global",
+			},
+			namespace: {otelKeys: []string{semconv.AttributeServiceNamespace}},
+			job:       {otelKeys: []string{semconv.AttributeServiceName}},
+			taskID:    {otelKeys: []string{semconv.AttributeServiceInstanceID}},
 		},
 		genericNode: {
-			location:  {semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion},
-			namespace: {semconv.AttributeServiceNamespace},
-			nodeID:    {semconv.AttributeHostID, semconv.AttributeHostName},
+			location: {
+				otelKeys: []string{
+					semconv.AttributeCloudAvailabilityZone,
+					semconv.AttributeCloudRegion,
+				},
+				fallbackLiteral: "global",
+			},
+			namespace: {otelKeys: []string{semconv.AttributeServiceNamespace}},
+			nodeID:    {otelKeys: []string{semconv.AttributeHostID, semconv.AttributeHostName}},
 		},
 	}
 )
@@ -140,14 +158,17 @@ func createMonitoredResource(
 	// TODO handle extra labels
 	extraLabels := labels{}
 
-	for mrKey, otelKeys := range mappings {
+	for mrKey, mappingConfig := range mappings {
 		mrValue := ""
 		// Coalesce the possible keys in order
-		for _, otelKey := range otelKeys {
+		for _, otelKey := range mappingConfig.otelKeys {
 			mrValue = getStringOrEmpty(resourceAttrs, otelKey)
 			if mrValue != "" {
 				break
 			}
+		}
+		if mrValue == "" {
+			mrValue = mappingConfig.fallbackLiteral
 		}
 		mrLabels[mrKey] = mrValue
 	}
