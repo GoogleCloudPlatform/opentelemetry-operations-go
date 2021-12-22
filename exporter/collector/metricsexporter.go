@@ -20,7 +20,10 @@ package collector
 import (
 	"context"
 	"fmt"
+	"log"
 	"math"
+	"net/url"
+	"path"
 	"strings"
 	"unicode"
 
@@ -29,6 +32,7 @@ import (
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
 	"google.golang.org/genproto/googleapis/api/distribution"
+	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -41,6 +45,8 @@ type metricsExporter struct {
 	cfg    *Config
 	client *monitoring.MetricClient
 	mapper metricMapper
+	// A channel that receives metric descriptor and sends them to GCM once.
+	mds chan *metricpb.MetricDescriptor
 }
 
 // metricMapper is the part that transforms metrics. Separate from metricsExporter since it has
@@ -49,9 +55,20 @@ type metricMapper struct {
 	cfg *Config
 }
 
+// Known metric domains. Note: This is now configurable for advanced usages.
+var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
+
+// Constants we use when translating summary metrics into GCP.
+const (
+	SummaryCountPrefix      = "_summary_count"
+	SummarySumSuffix        = "_summary_sum"
+	SummaryPercentileSuffix = "_summary_percentile"
+)
+
 type labels map[string]string
 
 func (me *metricsExporter) Shutdown(context.Context) error {
+	close(me.mds)
 	return me.client.Close()
 }
 
@@ -62,9 +79,12 @@ func newGoogleCloudMetricsExporter(
 ) (component.MetricsExporter, error) {
 	setVersionInUserAgent(cfg, set.BuildInfo.Version)
 
-	// TODO: map cfg options into metric service client configuration with
-	// generateClientOptions()
-	client, err := monitoring.NewMetricClient(ctx)
+	clientOpts, err := generateClientOptions(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	client, err := monitoring.NewMetricClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +93,15 @@ func newGoogleCloudMetricsExporter(
 		cfg:    cfg,
 		client: client,
 		mapper: metricMapper{cfg},
+		// We create a buffered channel for metric descriptors.
+		// MetricDescritpors are asycnhronously sent and optimistic.
+		// We only get Unit/Description/Display name from them, so it's ok
+		// to drop / conserve resources for sending timeseries.
+		mds: make(chan *metricpb.MetricDescriptor, 10),
 	}
+
+	// Fire up the metric descriptor exporter.
+	go mExp.exportMetricDescriptorRunner()
 
 	return exporterhelper.NewMetricsExporter(
 		cfg,
@@ -88,7 +116,6 @@ func newGoogleCloudMetricsExporter(
 // pushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary
 func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) error {
 	timeSeries := make([]*monitoringpb.TimeSeries, 0, m.DataPointCount())
-
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
@@ -101,23 +128,91 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
+				// TODO - check to see if this is a service/system metric and doesn't send descriptors.
+				if !me.cfg.MetricConfig.SkipCreateMetricDescriptor {
+					for _, md := range me.mapper.metricDescriptor(metric) {
+						if md != nil {
+							select {
+							case me.mds <- md:
+							default:
+								// Ignore drops, we'll catch descriptor next time around.
+							}
+						}
+					}
+				}
 				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, extraLabels, metric)...)
 			}
 		}
 	}
 
 	// TODO: self observability
+	// TODO: Figure out how to configure service time series calls.
+	if false {
+		err := me.createServiceTimeSeries(ctx, timeSeries)
+		recordPointCount(ctx, len(timeSeries), m.DataPointCount()-len(timeSeries), err)
+		return err
+	}
 	err := me.createTimeSeries(ctx, timeSeries)
 	recordPointCount(ctx, len(timeSeries), m.DataPointCount()-len(timeSeries), err)
 	return err
 }
 
+// Reads metric descriptors from the md channel, and reports them (once) to GCM.
+func (me *metricsExporter) exportMetricDescriptorRunner() {
+	mdCache := make(map[string]*metricpb.MetricDescriptor)
+	// We iterate over all metric descritpors until the channel is closed.
+	// Note: if we get terminated, this will still attempt to export all descriptors
+	// prior to shutdown.
+	for md := range me.mds {
+		// Not yet sent, now we sent it.
+		if mdCache[md.Type] == nil {
+			err := me.exportMetricDescriptor(context.TODO(), md)
+			// TODO: Log-once on error, per metric descriptor?
+			// TODO: Re-use passed-in logger to exporter.
+			if err != nil {
+				log.Printf("Unable to send metric descriptor: %s, %s", md, err)
+				continue
+			}
+			mdCache[md.Type] = md
+		}
+		// TODO: We may want to compare current MD vs. previous and validate no changes.
+	}
+}
+
+func (me *metricsExporter) projectName() string {
+	// TODO set Name field with project ID from config or ADC
+	return fmt.Sprintf("projects/%s", me.cfg.ProjectID)
+}
+
+// Helper method to send metric descriptors to GCM.
+func (me *metricsExporter) exportMetricDescriptor(ctx context.Context, md *metricpb.MetricDescriptor) error {
+	// export
+	req := &monitoringpb.CreateMetricDescriptorRequest{
+		Name:             me.projectName(),
+		MetricDescriptor: md,
+	}
+	_, err := me.client.CreateMetricDescriptor(ctx, req)
+	return err
+}
+
+// Sends a user-custom-metric timeseries.
 func (me *metricsExporter) createTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+	return me.client.CreateTimeSeries(
+		ctx,
+		&monitoringpb.CreateTimeSeriesRequest{
+			Name:       me.projectName(),
+			TimeSeries: ts,
+		},
+	)
+}
+
+// Sends a service timeseries.
+func (me *metricsExporter) createServiceTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
 	return me.client.CreateServiceTimeSeries(
 		ctx,
 		&monitoringpb.CreateTimeSeriesRequest{
+			Name:       me.projectName(),
 			TimeSeries: ts,
-			// TODO set Name field with project ID from config or ADC
 		},
 	)
 }
@@ -370,10 +465,19 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	}
 }
 
+// Returns any configured prefix to add to unknown metric name.
+func (m *metricMapper) getMetricNamePrefix(name string) string {
+	for _, domain := range m.cfg.MetricConfig.KnownDomains {
+		if strings.Contains(name, domain) {
+			return ""
+		}
+	}
+	return m.cfg.MetricConfig.Prefix
+}
+
 // metricNameToType maps OTLP metric name to GCM metric type (aka name)
 func (m *metricMapper) metricNameToType(name string) string {
-	// TODO
-	return "workload.googleapis.com/" + name
+	return path.Join(m.getMetricNamePrefix(name), name)
 }
 
 func numberDataPointToValue(
@@ -437,4 +541,181 @@ func mergeLabels(mergeInto labels, others ...labels) labels {
 	}
 
 	return mergeInto
+}
+
+// Takes a GCM metric type, like (workload.googleapis.com/MyCoolMetric) and returns the display name.
+func (m *metricMapper) metricTypeToDisplayName(mURL string) string {
+	// TODO - user configuration around display name?
+	// Default: strip domain, keep path after domain.
+	u, err := url.Parse(fmt.Sprintf("metrics://%s", mURL))
+	if err != nil {
+		return mURL
+	}
+	return strings.TrimLeft(u.Path, "/")
+}
+
+// Returns label descriptors for a metric.
+func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescriptor {
+	// TODO - allow customization of label descriptions.
+	result := []*label.LabelDescriptor{}
+	addAttributes := func(attr pdata.AttributeMap) {
+		attr.Range(func(key string, _ pdata.AttributeValue) bool {
+			result = append(result, &label.LabelDescriptor{
+				Key: key,
+			})
+			return true
+		})
+	}
+	switch pm.DataType() {
+	case pdata.MetricDataTypeGauge:
+		points := pm.Gauge().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			addAttributes(points.At(i).Attributes())
+		}
+	case pdata.MetricDataTypeSum:
+		points := pm.Sum().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			addAttributes(points.At(i).Attributes())
+		}
+	case pdata.MetricDataTypeSummary:
+		points := pm.Summary().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			addAttributes(points.At(i).Attributes())
+		}
+	case pdata.MetricDataTypeHistogram:
+		points := pm.Histogram().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			addAttributes(points.At(i).Attributes())
+		}
+	case pdata.MetricDataTypeExponentialHistogram:
+		points := pm.ExponentialHistogram().DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			addAttributes(points.At(i).Attributes())
+		}
+	}
+	return result
+}
+
+func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.MetricDescriptor {
+	sumName := fmt.Sprintf("%s%s", pm.Name(), SummarySumSuffix)
+	countName := fmt.Sprintf("%s%s", pm.Name(), SummaryCountPrefix)
+	percentileName := fmt.Sprintf("%s%s", pm.Name(), SummaryPercentileSuffix)
+	labels := m.labelDescriptors(pm)
+	return []*metricpb.MetricDescriptor{
+		{
+			Type:        m.metricNameToType(sumName),
+			Labels:      labels,
+			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:   metricpb.MetricDescriptor_DOUBLE,
+			Unit:        pm.Unit(),
+			Description: pm.Description(),
+			DisplayName: sumName,
+		},
+		{
+			Type:        m.metricNameToType(countName),
+			Labels:      labels,
+			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:   metricpb.MetricDescriptor_INT64,
+			Unit:        pm.Unit(),
+			Description: pm.Description(),
+			DisplayName: countName,
+		},
+		{
+			Type: m.metricNameToType(percentileName),
+			Labels: append(
+				labels,
+				&label.LabelDescriptor{
+					Key:         "percentile",
+					Description: "the value at a given percentile of a distribution",
+				}),
+			MetricKind:  metricpb.MetricDescriptor_GAUGE,
+			ValueType:   metricpb.MetricDescriptor_DOUBLE,
+			Unit:        pm.Unit(),
+			Description: pm.Description(),
+			DisplayName: percentileName,
+		},
+	}
+}
+
+// Extract the metric descriptor from a metric data point.
+func (m *metricMapper) metricDescriptor(pm pdata.Metric) []*metricpb.MetricDescriptor {
+	if pm.DataType() == pdata.MetricDataTypeSummary {
+		return m.summaryMetricDescriptors(pm)
+	}
+	kind, typ := mapMetricPointKind(pm)
+	metricType := m.metricNameToType(pm.Name())
+	labels := m.labelDescriptors(pm)
+	// Return nil for unsupported types.
+	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
+		return nil
+	}
+	return []*metricpb.MetricDescriptor{
+		{
+			Name:        pm.Name(),
+			DisplayName: m.metricTypeToDisplayName(metricType),
+			Type:        metricType,
+			MetricKind:  kind,
+			ValueType:   typ,
+			Unit:        pm.Unit(),
+			Description: pm.Description(),
+			Labels:      labels,
+		},
+	}
+}
+
+func metricPointValueType(pt pdata.MetricValueType) metricpb.MetricDescriptor_ValueType {
+	switch pt {
+	case pdata.MetricValueTypeInt:
+		return metricpb.MetricDescriptor_INT64
+	case pdata.MetricValueTypeDouble:
+		return metricpb.MetricDescriptor_DOUBLE
+	default:
+		return metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	}
+}
+
+func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, metricpb.MetricDescriptor_ValueType) {
+	var kind metricpb.MetricDescriptor_MetricKind
+	var typ metricpb.MetricDescriptor_ValueType
+	switch m.DataType() {
+	case pdata.MetricDataTypeGauge:
+		kind = metricpb.MetricDescriptor_GAUGE
+		if m.Gauge().DataPoints().Len() > 0 {
+			typ = metricPointValueType(m.Gauge().DataPoints().At(0).Type())
+		}
+	case pdata.MetricDataTypeSum:
+		if !m.Sum().IsMonotonic() {
+			kind = metricpb.MetricDescriptor_GAUGE
+		} else if m.Sum().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+			// We report fake-deltas for now.
+			kind = metricpb.MetricDescriptor_CUMULATIVE
+		} else {
+			kind = metricpb.MetricDescriptor_CUMULATIVE
+		}
+		if m.Sum().DataPoints().Len() > 0 {
+			typ = metricPointValueType(m.Sum().DataPoints().At(0).Type())
+		}
+	case pdata.MetricDataTypeSummary:
+		kind = metricpb.MetricDescriptor_GAUGE
+	case pdata.MetricDataTypeHistogram:
+		typ = metricpb.MetricDescriptor_DISTRIBUTION
+		if m.Histogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+			// We report fake-deltas for now.
+			kind = metricpb.MetricDescriptor_CUMULATIVE
+		} else {
+			kind = metricpb.MetricDescriptor_CUMULATIVE
+		}
+	case pdata.MetricDataTypeExponentialHistogram:
+		typ = metricpb.MetricDescriptor_DISTRIBUTION
+		if m.ExponentialHistogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+			// We report fake-deltas for now.
+			kind = metricpb.MetricDescriptor_CUMULATIVE
+		} else {
+			kind = metricpb.MetricDescriptor_CUMULATIVE
+		}
+	default:
+		kind = metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
+		typ = metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	}
+	return kind, typ
 }

@@ -15,12 +15,14 @@
 package collector
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/pdata"
+	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -94,9 +96,9 @@ func TestMergeLabels(t *testing.T) {
 }
 
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{
-		ProjectID: "myproject",
-	}}
+	cfg := createDefaultConfig()
+	cfg.ProjectID = "myproject"
+	mapper := metricMapper{cfg: cfg}
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pdata.NewMetric()
 	metric.SetName("myexphist")
@@ -123,21 +125,21 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 
 	ts := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
 	// Verify aspects
-	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_DISTRIBUTION)
-	assert.Equal(t, ts.Unit, unit)
-	assert.Same(t, ts.Resource, mr)
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
 
-	assert.Equal(t, ts.Metric.Type, "workload.googleapis.com/myexphist")
-	assert.Equal(t, ts.Metric.Labels, map[string]string{})
+	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
 
 	assert.Nil(t, ts.Metadata)
 
 	assert.Len(t, ts.Points, 1)
-	assert.Equal(t, ts.Points[0].Interval, &monitoringpb.TimeInterval{
+	assert.Equal(t, &monitoringpb.TimeInterval{
 		StartTime: timestamppb.New(start),
 		EndTime:   timestamppb.New(end),
-	})
+	}, ts.Points[0].Interval)
 	hdp := ts.Points[0].Value.GetDistributionValue()
 	assert.Equal(t, int64(21), hdp.Count)
 	assert.ElementsMatch(t, []int64{15, 1, 2, 3, 0}, hdp.BucketCounts)
@@ -217,7 +219,7 @@ func TestExemplarOnlyTraceId(t *testing.T) {
 }
 
 func TestSumPointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{}}
+	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Sum, pdata.NumberDataPoint) {
@@ -325,7 +327,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 }
 
 func TestGaugePointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{}}
+	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Gauge, pdata.NumberDataPoint) {
@@ -381,7 +383,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 }
 
 func TestMetricNameToType(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{}}
+	mapper := metricMapper{cfg: createDefaultConfig()}
 	assert.Equal(
 		t,
 		mapper.metricNameToType("foo"),
@@ -464,4 +466,320 @@ func TestNumberDataPointToValue(t *testing.T) {
 	value, valueType = numberDataPointToValue(point)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
+}
+
+type metricDescriptorTest struct {
+	name          string
+	metricCreator func() pdata.Metric
+	expected      []*metricpb.MetricDescriptor
+}
+
+func TestMetricDescriptorMapping(t *testing.T) {
+	tests := []metricDescriptorTest{
+		{
+			name: "Gauge",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeGauge)
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				gauge := metric.Gauge()
+				point := gauge.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test_label", "test_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Cumulative Monotonic Sum",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSum)
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				sum := metric.Sum()
+				sum.SetIsMonotonic(true)
+				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				point := sum.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test_label", "test_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Delta Monotonic Sum",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSum)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				sum := metric.Sum()
+				sum.SetIsMonotonic(true)
+				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityDelta)
+				point := sum.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test_label", "test_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Non-Monotonic Sum",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSum)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				sum := metric.Sum()
+				sum.SetIsMonotonic(false)
+				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				point := sum.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test_label", "test_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Cumulative Histogram",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeHistogram)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				histogram := metric.Histogram()
+				histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				point := histogram.DataPoints().AppendEmpty()
+				point.Attributes().InsertString("test_label", "test_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Cumulative Exponential Histogram",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeExponentialHistogram)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				histogram := metric.ExponentialHistogram()
+				histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
+					Unit:        "1",
+					Description: "Description",
+					Labels:      []*label.LabelDescriptor{},
+				},
+			},
+		},
+		{
+			name: "Summary",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSummary)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				summary := metric.Summary()
+				point := summary.DataPoints().AppendEmpty()
+				point.Attributes().InsertString("test_label", "value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					DisplayName: "test.metric_summary_sum",
+					Type:        "workload.googleapis.com/test.metric_summary_sum",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+				{
+					DisplayName: "test.metric_summary_count",
+					Type:        "workload.googleapis.com/test.metric_summary_count",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_INT64,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+				{
+					Type:        "workload.googleapis.com/test.metric_summary_percentile",
+					DisplayName: "test.metric_summary_percentile",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+						{
+							Key:         "percentile",
+							Description: "the value at a given percentile of a distribution",
+						},
+					},
+				},
+			},
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mapper := metricMapper{cfg: createDefaultConfig()}
+			metric := test.metricCreator()
+			md := mapper.metricDescriptor(metric)
+			assert.Equal(t, md, test.expected)
+		})
+	}
+}
+
+type knownDomainsTest struct {
+	name         string
+	metricType   string
+	knownDomains []string
+}
+
+func TestKnownDomains(t *testing.T) {
+	tests := []knownDomainsTest{
+		{
+			name:       "test",
+			metricType: "prefix/test",
+		},
+		{
+			name:       "googleapis.com/test",
+			metricType: "googleapis.com/test",
+		},
+		{
+			name:       "kubernetes.io/test",
+			metricType: "kubernetes.io/test",
+		},
+		{
+			name:       "istio.io/test",
+			metricType: "istio.io/test",
+		},
+		{
+			name:       "knative.dev/test",
+			metricType: "knative.dev/test",
+		},
+		{
+			name:         "knative.dev/test",
+			metricType:   "prefix/knative.dev/test",
+			knownDomains: []string{"example.com"},
+		},
+		{
+			name:         "example.com/test",
+			metricType:   "example.com/test",
+			knownDomains: []string{"example.com"},
+		},
+	}
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("%v to %v", test.name, test.metricType), func(t *testing.T) {
+			config := createDefaultConfig()
+			config.MetricConfig.Prefix = "prefix"
+			if len(test.knownDomains) > 0 {
+				config.MetricConfig.KnownDomains = test.knownDomains
+			}
+			mapper := metricMapper{cfg: config}
+			assert.Equal(t, test.metricType, mapper.metricNameToType(test.name))
+		})
+	}
 }
