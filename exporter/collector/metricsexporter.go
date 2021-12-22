@@ -21,6 +21,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"net/url"
 	"path"
 	"strings"
@@ -30,10 +31,12 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
+	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -250,12 +253,148 @@ func (m *metricMapper) metricToTimeSeries(
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
 			timeSeries = append(timeSeries, ts)
 		}
+	case pdata.MetricDataTypeExponentialHistogram:
+		eh := metric.ExponentialHistogram()
+		points := eh.DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, points.At(i))
+			timeSeries = append(timeSeries, ts)
+		}
 	// TODO: add cases for other metric data types
 	default:
 		// TODO: log unsupported metric
 	}
 
 	return timeSeries
+}
+
+func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Exemplar {
+	ctx := context.TODO()
+	attachments := []*anypb.Any{}
+	// TODO: Look into still sending exemplars with no span.
+	if !ex.TraceID().IsEmpty() && !ex.SpanID().IsEmpty() {
+		sctx, err := anypb.New(&monitoringpb.SpanContext{
+			// TODO - make sure project id is correct.
+			SpanName: fmt.Sprintf("projects/%s/traces/%s/spans/%s", m.cfg.ProjectID, ex.TraceID().HexString(), ex.SpanID().HexString()),
+		})
+		if err == nil {
+			attachments = append(attachments, sctx)
+		} else {
+			// This happens in the event of logic error (e.g. missing required fields).
+			// As such we complaining loudly to fail our unit tests.
+			recordExemplarFailure(ctx, 1)
+		}
+	}
+	if ex.FilteredAttributes().Len() > 0 {
+		attr, err := anypb.New(&monitoringpb.DroppedLabels{
+			Label: attributesToLabels(ex.FilteredAttributes()),
+		})
+		if err == nil {
+			attachments = append(attachments, attr)
+		} else {
+			// This happens in the event of logic error (e.g. missing required fields).
+			// As such we complaining loudly to fail our unit tests.
+			recordExemplarFailure(ctx, 1)
+		}
+	}
+	return &distribution.Distribution_Exemplar{
+		Value:       ex.DoubleVal(),
+		Timestamp:   timestamppb.New(ex.Timestamp().AsTime()),
+		Attachments: attachments,
+	}
+}
+
+func (m *metricMapper) exemplars(exs pdata.ExemplarSlice) []*distribution.Distribution_Exemplar {
+	exemplars := make([]*distribution.Distribution_Exemplar, exs.Len())
+	for i := 0; i < exs.Len(); i++ {
+		exemplars[i] = m.exemplar(exs.At(i))
+	}
+	return exemplars
+}
+
+// Maps an exponential distribution into a GCM point.
+func (m *metricMapper) exponentialPoint(point pdata.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
+	// First calculate underflow bucket with all negatives + zeros.
+	underflow := point.ZeroCount()
+	for _, v := range point.Negative().BucketCounts() {
+		underflow += v
+	}
+	// Next, pull in remaining buckets.
+	counts := make([]int64, len(point.Positive().BucketCounts())+2)
+	bucketOptions := &distribution.Distribution_BucketOptions{}
+	counts[0] = int64(underflow)
+	for i, v := range point.Positive().BucketCounts() {
+		counts[i+1] = int64(v)
+	}
+	// Overflow bucket is always empty
+	counts[len(counts)-1] = 0
+
+	if len(point.Positive().BucketCounts()) == 0 {
+		// We cannot send exponential distributions with no positive buckets,
+		// instead we send a simple overflow/underflow histogram.
+		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExplicitBuckets{
+			ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
+				Bounds: []float64{0},
+			},
+		}
+	} else {
+		// Exponential histogram
+		growth := math.Exp2(math.Exp2(-float64(point.Scale())))
+		scale := math.Pow(growth, float64(point.Positive().Offset()))
+		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExponentialBuckets{
+			ExponentialBuckets: &distribution.Distribution_BucketOptions_Exponential{
+				GrowthFactor:     growth,
+				Scale:            scale,
+				NumFiniteBuckets: int32(len(counts) - 2),
+			},
+		}
+	}
+
+	return &monitoringpb.TypedValue{
+		Value: &monitoringpb.TypedValue_DistributionValue{
+			DistributionValue: &distribution.Distribution{
+				Count:         int64(point.Count()),
+				Mean:          float64(point.Sum() / float64(point.Count())),
+				BucketCounts:  counts,
+				BucketOptions: bucketOptions,
+				Exemplars:     m.exemplars(point.Exemplars()),
+			},
+		},
+	}
+}
+
+func (m *metricMapper) exponentialHistogramToTimeSeries(
+	resource *monitoredrespb.MonitoredResource,
+	extraLabels labels,
+	metric pdata.Metric,
+	_ pdata.ExponentialHistogram,
+	point pdata.ExponentialHistogramDataPoint,
+) *monitoringpb.TimeSeries {
+	// We treat deltas as cumulatives w/ resets.
+	metricKind := metricpb.MetricDescriptor_CUMULATIVE
+	startTime := timestamppb.New(point.StartTimestamp().AsTime())
+	endTime := timestamppb.New(point.Timestamp().AsTime())
+	value := m.exponentialPoint(point)
+	return &monitoringpb.TimeSeries{
+		Resource:   resource,
+		Unit:       metric.Unit(),
+		MetricKind: metricKind,
+		ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
+		Points: []*monitoringpb.Point{{
+			Interval: &monitoringpb.TimeInterval{
+				StartTime: startTime,
+				EndTime:   endTime,
+			},
+			Value: value,
+		}},
+		Metric: &metricpb.Metric{
+			Type: m.metricNameToType(metric.Name()),
+			Labels: mergeLabels(
+				attributesToLabels(point.Attributes()),
+				extraLabels,
+			),
+		},
+	}
 }
 
 func (m *metricMapper) sumPointToTimeSeries(
