@@ -17,7 +17,6 @@ package integrationtest
 import (
 	"context"
 	"net"
-	"os"
 	"sync"
 	"testing"
 
@@ -146,31 +145,22 @@ func NewMetricTestServer() (*MetricsTestServer, error) {
 	return testServer, nil
 }
 
-func CreateConfig(factory component.ExporterFactory) *collector.Config {
-	cfg := factory.CreateDefaultConfig().(*collector.Config)
-	// If not set it will use ADC
-	cfg.ProjectID = os.Getenv("PROJECT_ID")
-	// Disable queued retries as there is no way to flush them
-	cfg.RetrySettings.Enabled = false
-	cfg.QueueSettings.Enabled = false
-	return cfg
-}
-
-func CreateMetricsTestServerExporter(
+// NewExporter creates and starts a googlecloud exporter by updating the
+// given cfg copy to point to the test server.
+func (m *MetricsTestServer) NewExporter(
 	ctx context.Context,
 	t testing.TB,
-	testServer *MetricsTestServer,
+	cfg collector.Config,
 ) component.MetricsExporter {
 	factory := collector.NewFactory()
-	cfg := CreateConfig(factory)
-	cfg.Endpoint = testServer.Endpoint
+	cfg.Endpoint = m.Endpoint
 	cfg.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
 	exporter, err := factory.CreateMetricsExporter(
 		ctx,
 		componenttest.NewNopExporterCreateSettings(),
-		cfg,
+		&cfg,
 	)
 	require.NoError(t, err)
 	require.NoError(t, exporter.Start(ctx, componenttest.NewNopHost()))

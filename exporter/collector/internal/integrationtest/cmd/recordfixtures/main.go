@@ -56,17 +56,20 @@ func main() {
 	}
 	go testServer.Serve()
 	defer testServer.Shutdown()
-	testServerExporter := integrationtest.CreateMetricsTestServerExporter(ctx, t, testServer)
-	defer func() { require.NoError(t, testServerExporter.Shutdown(ctx)) }()
 
 	for _, test := range integrationtest.TestCases {
-		metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-		require.NoError(t, testServerExporter.ConsumeMetrics(ctx, metrics), "failed to export metrics to local test server")
-		fixture := &integrationtest.MetricExpectFixture{
-			CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
-			CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
-			CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
-		}
-		test.SaveRecordedFixtures(t, fixture)
+		func() {
+			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
+			testServerExporter := testServer.NewExporter(ctx, t, *test.CreateConfig())
+			defer func() { require.NoError(t, testServerExporter.Shutdown(ctx)) }()
+
+			require.NoError(t, testServerExporter.ConsumeMetrics(ctx, metrics), "failed to export metrics to local test server")
+			fixture := &integrationtest.MetricExpectFixture{
+				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
+				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
+				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
+			}
+			test.SaveRecordedFixtures(t, fixture)
+		}()
 	}
 }

@@ -30,13 +30,17 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
 
-func createMetricsExporter(ctx context.Context, t *testing.T) component.MetricsExporter {
+func createMetricsExporter(
+	ctx context.Context,
+	t *testing.T,
+	test *integrationtest.MetricsTestCase,
+) component.MetricsExporter {
 	factory := collector.NewFactory()
 
 	exporter, err := factory.CreateMetricsExporter(
 		ctx,
 		componenttest.NewNopExporterCreateSettings(),
-		integrationtest.CreateConfig(factory),
+		test.CreateConfig(),
 	)
 	require.NoError(t, err)
 	require.NoError(t, exporter.Start(ctx, componenttest.NewNopHost()))
@@ -54,7 +58,7 @@ func TestIntegrationMetrics(t *testing.T) {
 
 		t.Run(test.Name, func(t *testing.T) {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			exporter := createMetricsExporter(ctx, t)
+			exporter := createMetricsExporter(ctx, t, &test)
 			defer func() { require.NoError(t, exporter.Shutdown(ctx)) }()
 
 			require.NoError(

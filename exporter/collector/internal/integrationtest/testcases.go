@@ -14,12 +14,30 @@
 
 package integrationtest
 
+import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+
 var (
 	TestCases = []MetricsTestCase{
 		{
 			Name:                 "Basic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
+		},
+		{
+			Name:                 "Modified prefix unknown domain",
+			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/unknown_domain_metrics_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.Prefix = "foobar.org"
+			},
+		},
+		{
+			Name:                 "Modified prefix workload.googleapis.com",
+			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/workloadgoogleapis_prefix_metrics_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.Prefix = "workload.googleapis.com"
+			},
 		},
 		{
 			Name:                 "Delta Counter",

@@ -16,49 +16,13 @@ package collector_test
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
-
-func createConfig(factory component.ExporterFactory) *collector.Config {
-	cfg := factory.CreateDefaultConfig().(*collector.Config)
-	// If not set it will use ADC
-	cfg.ProjectID = os.Getenv("PROJECT_ID")
-	// Disable queued retries as there is no way to flush them
-	cfg.RetrySettings.Enabled = false
-	cfg.QueueSettings.Enabled = false
-	return cfg
-}
-
-func createMetricsTestServerExporter(
-	ctx context.Context,
-	t *testing.T,
-	testServer *integrationtest.MetricsTestServer,
-) component.MetricsExporter {
-	factory := collector.NewFactory()
-	cfg := createConfig(factory)
-	cfg.Endpoint = testServer.Endpoint
-	cfg.UseInsecure = true
-	cfg.ProjectID = "fakeprojectid"
-
-	exporter, err := factory.CreateMetricsExporter(
-		ctx,
-		componenttest.NewNopExporterCreateSettings(),
-		cfg,
-	)
-	require.NoError(t, err)
-	require.NoError(t, exporter.Start(ctx, componenttest.NewNopHost()))
-	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.Endpoint)
-	return exporter
-}
 
 func TestMetrics(t *testing.T) {
 	ctx := context.Background()
@@ -75,7 +39,7 @@ func TestMetrics(t *testing.T) {
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := createMetricsTestServerExporter(ctx, t, testServer)
+			testServerExporter := testServer.NewExporter(ctx, t, *test.CreateConfig())
 			defer func() { require.NoError(t, testServerExporter.Shutdown(ctx)) }()
 
 			require.NoError(
