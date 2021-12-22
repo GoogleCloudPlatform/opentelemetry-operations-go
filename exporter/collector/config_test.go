@@ -90,6 +90,9 @@ func TestLoadConfig(t *testing.T) {
 			MetricConfig: MetricConfig{
 				Prefix:                     "prefix",
 				SkipCreateMetricDescriptor: true,
+				KnownDomains: []string{
+					"googleapis.com", "kubernetes.io", "istio.io", "knative.dev",
+				},
 			},
 		})
 }
