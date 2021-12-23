@@ -1,7 +1,7 @@
 # Breaking changes vs old googlecloud exporter
 
-The new pdata based exporter has some breaking changes from the original OpenCensus stackdriver
-based `googlecloud` exporter:
+The new pdata based exporter has some breaking changes from the original OpenCensus (OC)
+stackdriver based `googlecloud` exporter:
 
 ## Metric Names and Descriptors
 
@@ -18,6 +18,37 @@ Additionally, the DisplayName for a metric used to be exactly the
 domain name of the metric type.  E.g. if a metric called
 `workload.googleapis.com/nginx/latency` is created, the display name will
 be `nginx/latency` instead of `workload.googleapis.com/nginx/latency`.
+
+## Monitored Resources
+
+Mapping from OTel Resource to GCM monitored resource has been completely changed. The OC based
+exporter worked by converting the OTel resource into an OC resource which the exporter
+recognized. The `resource_mappings` config option allowed customizing this conversion so the OC
+exporter would correctly convert to a GCM monitored resource.
+
+Then new pdata based exporter works by interpreting the [OTel Resource semantic
+conventions](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/resource/semantic_conventions/README.md)
+as follows to determine the monitored resource type:
+
+- Switch on the `cloud.platform` Resource attribute and if:
+  - `gcp_compute_engine`, send a `gce_instance` monitored resource.
+  - `gcp_kubernetes_engine`, send the most specific possible k8s monitored resource depending
+  on which resource keys are present and non-empty. In order, try for `k8s_container`,
+  `k8s_pod`, `k8s_node`, `k8s_cluster`.
+  - `aws_ec2`, send a `aws_ec2_instance` monitored resource.
+- Otherwise, fallback to:
+  - `generic_task` if the `service.name` and `service.instance_id` resource attributes are
+  present and non-empty.
+  - `generic_node`
+
+Once the type is determine, the monitored resource labels are populated from the mappings
+defined in [`monitoredresource.go`](monitoredresource.go#L51). The new behavior will never send the
+`global` monitored resource.
+
+For now, it is not possible to customizate the mapping algorithm, beyond using the
+[`resourceprocessor`](https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/resourceprocessor)
+in the collector pipeline before the exporter. If you have a use case for customizing the
+behavior, please open an issue.
 
 ## Labels
 
