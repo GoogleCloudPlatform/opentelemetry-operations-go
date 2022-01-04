@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -26,6 +27,8 @@ import (
 	"go.opentelemetry.io/collector/model/pdata"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 // Interface with common fields that pdata metric points have
@@ -46,6 +49,9 @@ type MetricsTestCase struct {
 	// Path to the JSON encoded MetricExpectFixture (see fixtures.proto) that contains request
 	// messages the exporter is expected to send.
 	ExpectFixturePath string
+
+	// Configure will be called to modify the default configuration for this test case. Optional.
+	Configure func(cfg *collector.Config)
 }
 
 // Load OTLP metric fixture, test expectation fixtures and modify them so they're suitable for
@@ -189,4 +195,19 @@ func normalizeFixture(fixture *MetricExpectFixture) {
 			md.Name = ""
 		}
 	}
+}
+
+func (m *MetricsTestCase) CreateConfig() *collector.Config {
+	cfg := collector.NewFactory().CreateDefaultConfig().(*collector.Config)
+	// If not set it will use ADC
+	cfg.ProjectID = os.Getenv("PROJECT_ID")
+	// Disable queued retries as there is no way to flush them
+	cfg.RetrySettings.Enabled = false
+	cfg.QueueSettings.Enabled = false
+
+	if m.Configure != nil {
+		m.Configure(cfg)
+	}
+
+	return cfg
 }
