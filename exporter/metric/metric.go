@@ -498,7 +498,7 @@ func (me *metricExporter) recordToMpb(r *export.Record, library instrumentation.
 	iter := r.Labels().Iter()
 	for iter.Next() {
 		kv := iter.Label()
-		labels[normalizeLabelKey(string(kv.Key))] = kv.Value.AsString()
+		labels[normalizeLabelKey(string(kv.Key))] = kv.Value.Emit()
 	}
 
 	return &googlemetricpb.Metric{

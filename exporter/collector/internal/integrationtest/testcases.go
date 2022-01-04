@@ -14,6 +14,8 @@
 
 package integrationtest
 
+import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+
 var (
 	TestCases = []MetricsTestCase{
 		{
@@ -21,6 +23,24 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
 			Skip:                 true,
+		},
+		{
+			Name:                 "Modified prefix unknown domain",
+			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/unknown_domain_metrics_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.Prefix = "foobar.org"
+			},
+			Skip: true,
+		},
+		{
+			Name:                 "Modified prefix workload.googleapis.com",
+			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/workloadgoogleapis_prefix_metrics_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.Prefix = "workload.googleapis.com"
+			},
+			Skip: true,
 		},
 		{
 			Name:                 "Delta Counter",
@@ -50,6 +70,24 @@ var (
 			Name:                 "Ops Agent Host Metrics",
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_host_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_host_metrics_expect.json",
+			Skip:                 true,
+		},
+		{
+			Name:                 "GKE Workload Metrics",
+			OTLPInputFixturePath: "testdata/fixtures/workload_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/workload_metrics_expect.json",
+			Skip:                 true,
+		},
+		{
+			Name:                 "GKE Metrics Agent",
+			OTLPInputFixturePath: "testdata/fixtures/gke_metrics_agent_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/gke_metrics_agent_metrics_expect.json",
+			Skip:                 true,
+		},
+		{
+			Name:                 "GKE Control Plane Metrics Agent",
+			OTLPInputFixturePath: "testdata/fixtures/gke_control_plane_metrics_agent_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/gke_control_plane_metrics_agent_metrics_expect.json",
 			Skip:                 true,
 		},
 	}

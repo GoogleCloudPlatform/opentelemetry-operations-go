@@ -17,7 +17,6 @@ package integrationtest
 import (
 	"context"
 	"net"
-	"os"
 	"sync"
 	"testing"
 
@@ -36,8 +35,9 @@ type MetricsTestServer struct {
 	// Address where the gRPC server is listening
 	Endpoint string
 
-	createMetricDescriptorReqs []*monitoringpb.CreateMetricDescriptorRequest
-	createTimeSeriesReqs       []*monitoringpb.CreateTimeSeriesRequest
+	createMetricDescriptorReqs  []*monitoringpb.CreateMetricDescriptorRequest
+	createTimeSeriesReqs        []*monitoringpb.CreateTimeSeriesRequest
+	createServiceTimeSeriesReqs []*monitoringpb.CreateTimeSeriesRequest
 
 	lis net.Listener
 	srv *grpc.Server
@@ -67,6 +67,15 @@ func (m *MetricsTestServer) CreateTimeSeriesRequests() []*monitoringpb.CreateTim
 	return reqs
 }
 
+// Pops out the CreateServiceTimeSeriesRequests which the test server has received so far
+func (m *MetricsTestServer) CreateServiceTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	reqs := m.createServiceTimeSeriesReqs
+	m.createServiceTimeSeriesReqs = nil
+	return reqs
+}
+
 func (m *MetricsTestServer) appendCreateMetricDescriptorReq(req *monitoringpb.CreateMetricDescriptorRequest) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -77,6 +86,11 @@ func (m *MetricsTestServer) appendCreateTimeSeriesReq(req *monitoringpb.CreateTi
 	defer m.mu.Unlock()
 	m.createTimeSeriesReqs = append(m.createTimeSeriesReqs, req)
 }
+func (m *MetricsTestServer) appendCreateServiceTimeSeriesReq(req *monitoringpb.CreateTimeSeriesRequest) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.createServiceTimeSeriesReqs = append(m.createServiceTimeSeriesReqs, req)
+}
 
 func (m *MetricsTestServer) Serve() error {
 	return m.srv.Serve(m.lis)
@@ -84,15 +98,22 @@ func (m *MetricsTestServer) Serve() error {
 
 type fakeMetricServiceServer struct {
 	monitoringpb.UnimplementedMetricServiceServer
-	appendCreateMetricDescriptorReq func(*monitoringpb.CreateMetricDescriptorRequest)
-	appendCreateTimeSeriesReq       func(*monitoringpb.CreateTimeSeriesRequest)
+	metricsTestServer *MetricsTestServer
 }
 
 func (f *fakeMetricServiceServer) CreateTimeSeries(
 	ctx context.Context,
 	req *monitoringpb.CreateTimeSeriesRequest,
 ) (*emptypb.Empty, error) {
-	f.appendCreateTimeSeriesReq(req)
+	f.metricsTestServer.appendCreateTimeSeriesReq(req)
+	return &emptypb.Empty{}, nil
+}
+
+func (f *fakeMetricServiceServer) CreateServiceTimeSeries(
+	ctx context.Context,
+	req *monitoringpb.CreateTimeSeriesRequest,
+) (*emptypb.Empty, error) {
+	f.metricsTestServer.appendCreateServiceTimeSeriesReq(req)
 	return &emptypb.Empty{}, nil
 }
 
@@ -100,7 +121,7 @@ func (f *fakeMetricServiceServer) CreateMetricDescriptor(
 	ctx context.Context,
 	req *monitoringpb.CreateMetricDescriptorRequest,
 ) (*metric.MetricDescriptor, error) {
-	f.appendCreateMetricDescriptorReq(req)
+	f.metricsTestServer.appendCreateMetricDescriptorReq(req)
 	return &metric.MetricDescriptor{}, nil
 }
 
@@ -118,40 +139,28 @@ func NewMetricTestServer() (*MetricsTestServer, error) {
 
 	monitoringpb.RegisterMetricServiceServer(
 		srv,
-		&fakeMetricServiceServer{
-			appendCreateMetricDescriptorReq: testServer.appendCreateMetricDescriptorReq,
-			appendCreateTimeSeriesReq:       testServer.appendCreateTimeSeriesReq,
-		},
+		&fakeMetricServiceServer{metricsTestServer: testServer},
 	)
 
 	return testServer, nil
 }
 
-func CreateConfig(factory component.ExporterFactory) *collector.Config {
-	cfg := factory.CreateDefaultConfig().(*collector.Config)
-	// If not set it will use ADC
-	cfg.ProjectID = os.Getenv("PROJECT_ID")
-	// Disable queued retries as there is no way to flush them
-	cfg.RetrySettings.Enabled = false
-	cfg.QueueSettings.Enabled = false
-	return cfg
-}
-
-func CreateMetricsTestServerExporter(
+// NewExporter creates and starts a googlecloud exporter by updating the
+// given cfg copy to point to the test server.
+func (m *MetricsTestServer) NewExporter(
 	ctx context.Context,
 	t testing.TB,
-	testServer *MetricsTestServer,
+	cfg collector.Config,
 ) component.MetricsExporter {
 	factory := collector.NewFactory()
-	cfg := CreateConfig(factory)
-	cfg.Endpoint = testServer.Endpoint
+	cfg.Endpoint = m.Endpoint
 	cfg.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
 	exporter, err := factory.CreateMetricsExporter(
 		ctx,
 		componenttest.NewNopExporterCreateSettings(),
-		cfg,
+		&cfg,
 	)
 	require.NoError(t, err)
 	require.NoError(t, exporter.Start(ctx, componenttest.NewNopHost()))

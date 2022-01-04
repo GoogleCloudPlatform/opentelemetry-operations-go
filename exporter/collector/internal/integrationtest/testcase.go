@@ -18,6 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -26,6 +27,8 @@ import (
 	"go.opentelemetry.io/collector/model/pdata"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 // Interface with common fields that pdata metric points have
@@ -49,6 +52,9 @@ type MetricsTestCase struct {
 
 	// Whether to skip this test case
 	Skip bool
+
+	// Configure will be called to modify the default configuration for this test case. Optional.
+	Configure func(cfg *collector.Config)
 }
 
 // Load OTLP metric fixture, test expectation fixtures and modify them so they're suitable for
@@ -125,7 +131,11 @@ func (m *MetricsTestCase) updateExpectFixture(
 	endTime time.Time,
 	fixture *MetricExpectFixture,
 ) {
-	for _, req := range fixture.GetCreateTimeSeriesRequests() {
+	reqs := append(
+		fixture.GetCreateTimeSeriesRequests(),
+		fixture.GetCreateServiceTimeSeriesRequests()...,
+	)
+	for _, req := range reqs {
 		for _, ts := range req.GetTimeSeries() {
 			for _, p := range ts.GetPoints() {
 				if p.GetInterval().GetStartTime() != nil {
@@ -158,7 +168,11 @@ func (m *MetricsTestCase) SaveRecordedFixtures(
 // Normalizes timestamps and removes project ID fields which create noise in the fixture
 // because they can vary each test run
 func normalizeFixture(fixture *MetricExpectFixture) {
-	for _, req := range fixture.GetCreateTimeSeriesRequests() {
+	timeSeriesReqs := append(
+		fixture.GetCreateTimeSeriesRequests(),
+		fixture.GetCreateServiceTimeSeriesRequests()...,
+	)
+	for _, req := range timeSeriesReqs {
 		// clear project ID
 		req.Name = ""
 
@@ -190,4 +204,19 @@ func (m *MetricsTestCase) SkipIfNeeded(t testing.TB) {
 	if m.Skip {
 		t.Skip("Test case is marked to skip in internal/integrationtest/testcases.go")
 	}
+}
+
+func (m *MetricsTestCase) CreateConfig() *collector.Config {
+	cfg := collector.NewFactory().CreateDefaultConfig().(*collector.Config)
+	// If not set it will use ADC
+	cfg.ProjectID = os.Getenv("PROJECT_ID")
+	// Disable queued retries as there is no way to flush them
+	cfg.RetrySettings.Enabled = false
+	cfg.QueueSettings.Enabled = false
+
+	if m.Configure != nil {
+		m.Configure(cfg)
+	}
+
+	return cfg
 }
