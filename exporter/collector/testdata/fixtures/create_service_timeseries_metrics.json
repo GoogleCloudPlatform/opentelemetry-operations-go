@@ -1,0 +1,35 @@
+{
+    "resourceMetrics": [
+      {
+        "resource": {},
+        "instrumentationLibraryMetrics": [
+          {
+            "instrumentationLibrary": {},
+            "metrics": [
+                {
+                    "name":"kubernetes.io/internal/nodes/clustermetrics/node_network_availability_transition_time",
+                    "description":"Node network unavailable condition last transition time (seconds since epoch)",
+                    "gauge":{
+                       "dataPoints":[
+                          {
+                             "attributes":[
+                                {
+                                   "key":"network_unavailable",
+                                   "value":{
+                                      "stringValue":"False"
+                                   }
+                                }
+                             ],
+                             "timeUnixNano":"1639162382976000000",
+                             "asInt":"1639069893"
+                          }
+                       ]
+                    }
+                 }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  
