@@ -19,6 +19,7 @@ package collector
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -31,6 +32,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
@@ -78,6 +80,22 @@ func newGoogleCloudMetricsExporter(
 	set component.ExporterCreateSettings,
 ) (component.MetricsExporter, error) {
 	setVersionInUserAgent(cfg, set.BuildInfo.Version)
+
+	// TODO - Share this lookup somewhere
+	if cfg.ProjectID == "" {
+		if ctx == nil {
+			ctx = context.Background()
+		}
+		creds, err := google.FindDefaultCredentials(ctx, monitoring.DefaultAuthScopes()...)
+		// TODO- better error messages, this is copy-pasta from OpenCensus exporter.
+		if err != nil {
+			return nil, fmt.Errorf("google_cloud: %v", err)
+		}
+		if creds.ProjectID == "" {
+			return nil, errors.New("google_cloud: no project found with application default credentials")
+		}
+		cfg.ProjectID = creds.ProjectID
+	}
 
 	clientOpts, err := generateClientOptions(cfg)
 	if err != nil {
