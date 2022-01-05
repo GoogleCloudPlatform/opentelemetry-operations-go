@@ -47,6 +47,8 @@ type metricsExporter struct {
 	mapper metricMapper
 	// A channel that receives metric descriptor and sends them to GCM once.
 	mds chan *metricpb.MetricDescriptor
+	// Channel sends true when the exportMetricDescriptorRunnner goroutine is finished
+	mdsDone chan bool
 }
 
 // metricMapper is the part that transforms metrics. Separate from metricsExporter since it has
@@ -69,6 +71,7 @@ type labels map[string]string
 
 func (me *metricsExporter) Shutdown(context.Context) error {
 	close(me.mds)
+	<-me.mdsDone
 	return me.client.Close()
 }
 
@@ -97,7 +100,8 @@ func newGoogleCloudMetricsExporter(
 		// MetricDescritpors are asycnhronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok
 		// to drop / conserve resources for sending timeseries.
-		mds: make(chan *metricpb.MetricDescriptor, 10),
+		mds:     make(chan *metricpb.MetricDescriptor, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
+		mdsDone: make(chan bool, 1),
 	}
 
 	// Fire up the metric descriptor exporter.
@@ -177,6 +181,7 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 		}
 		// TODO: We may want to compare current MD vs. previous and validate no changes.
 	}
+	me.mdsDone <- true
 }
 
 func (me *metricsExporter) projectName() string {

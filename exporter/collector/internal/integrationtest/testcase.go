@@ -215,6 +215,8 @@ func (m *MetricsTestCase) CreateConfig() *collector.Config {
 	// Disable queued retries as there is no way to flush them
 	cfg.RetrySettings.Enabled = false
 	cfg.QueueSettings.Enabled = false
+	// Set a big buffer to capture all CMD requests without dropping
+	cfg.MetricConfig.CreateMetricDescriptorBufferSize = 500
 
 	if m.Configure != nil {
 		m.Configure(cfg)

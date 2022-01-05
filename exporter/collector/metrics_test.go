@@ -41,17 +41,17 @@ func TestMetrics(t *testing.T) {
 			go testServer.Serve()
 			defer testServer.Shutdown()
 			testServerExporter := testServer.NewExporter(ctx, t, *test.CreateConfig())
-			defer func() { require.NoError(t, testServerExporter.Shutdown(ctx)) }()
 
 			require.NoError(
 				t,
 				testServerExporter.ConsumeMetrics(ctx, metrics),
 				"Failed to export metrics to local test server",
 			)
+			require.NoError(t, testServerExporter.Shutdown(ctx))
+
 			actualCreateMetricDescriptorReq := testServer.CreateMetricDescriptorRequests()
 			actualCreateTimeSeriesReq := testServer.CreateTimeSeriesRequests()
 			actualCreateServiceTimeSeriesReq := testServer.CreateServiceTimeSeriesRequests()
-
 			expectFixture := test.LoadExpectFixture(
 				t,
 				startTime,

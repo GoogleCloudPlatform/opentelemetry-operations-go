@@ -49,6 +49,10 @@ type MetricConfig struct {
 	SkipCreateMetricDescriptor bool   `mapstructure:"skip_create_descriptor"`
 	// If a metric belongs to one of these domains it does not get a prefix.
 	KnownDomains []string `mapstructure:"known_domains"`
+
+	// Programmatic option only. Buffer size for the channel which asynchronously calls
+	// CreateMetricDescriptor.
+	CreateMetricDescriptorBufferSize int `mapstructure:"create_metric_descriptor_buffer_size"`
 }
 
 // ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).

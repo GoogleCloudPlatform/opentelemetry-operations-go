@@ -93,6 +93,7 @@ func TestLoadConfig(t *testing.T) {
 				KnownDomains: []string{
 					"googleapis.com", "kubernetes.io", "istio.io", "knative.dev",
 				},
+				CreateMetricDescriptorBufferSize: 10,
 			},
 		})
 }
