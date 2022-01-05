@@ -86,6 +86,7 @@ func newGoogleCloudMetricsExporter(
 	cfg *Config,
 	set component.ExporterCreateSettings,
 ) (component.MetricsExporter, error) {
+	cfg.checkAndApplyLegacyMode()
 	setVersionInUserAgent(cfg, set.BuildInfo.Version)
 
 	// TODO - Share this lookup somewhere
@@ -309,7 +310,6 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	result := []*monitoringpb.TimeSeries{
 		{
 			Resource:   resource,
-			Unit:       metric.Unit(),
 			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
 			ValueType:  metricpb.MetricDescriptor_DOUBLE,
 			Points: []*monitoringpb.Point{{
@@ -331,7 +331,6 @@ func (m *metricMapper) summaryPointToTimeSeries(
 		},
 		{
 			Resource:   resource,
-			Unit:       metric.Unit(),
 			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
 			ValueType:  metricpb.MetricDescriptor_INT64,
 			Points: []*monitoringpb.Point{{
@@ -352,13 +351,17 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			},
 		},
 	}
+	if !m.cfg.MetricConfig.LegacyMode {
+		result[0].Unit = metric.Unit()
+		result[1].Unit = metric.Unit()
+	}
 	quantiles := point.QuantileValues()
 	for i := 0; i < quantiles.Len(); i++ {
 		quantile := quantiles.At(i)
 		pLabel := labels{
 			"percentile": fmt.Sprintf("%v", quantile.Quantile()),
 		}
-		result = append(result, &monitoringpb.TimeSeries{
+		ts := &monitoringpb.TimeSeries{
 			Resource:   resource,
 			Unit:       metric.Unit(),
 			MetricKind: metricpb.MetricDescriptor_GAUGE,
@@ -380,7 +383,11 @@ func (m *metricMapper) summaryPointToTimeSeries(
 					pLabel,
 				),
 			},
-		})
+		}
+		if !m.cfg.MetricConfig.LegacyMode {
+			ts.Unit = metric.Unit()
+		}
+		result = append(result, ts)
 	}
 	return result
 }
@@ -523,9 +530,8 @@ func (m *metricMapper) histogramToTimeSeries(
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.histogramPoint(point)
-	return &monitoringpb.TimeSeries{
+	ts := &monitoringpb.TimeSeries{
 		Resource:   resource,
-		Unit:       metric.Unit(),
 		MetricKind: metricKind,
 		ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
 		Points: []*monitoringpb.Point{{
@@ -543,6 +549,10 @@ func (m *metricMapper) histogramToTimeSeries(
 			),
 		},
 	}
+	if !m.cfg.MetricConfig.LegacyMode {
+		ts.Unit = metric.Unit()
+	}
+	return ts
 }
 
 func (m *metricMapper) exponentialHistogramToTimeSeries(
@@ -558,7 +568,9 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.exponentialHistogramPoint(point)
 	return &monitoringpb.TimeSeries{
-		Resource:   resource,
+		Resource: resource,
+		// We don't worry about legacy mode, because previous exporter did not
+		// support exponential histograms.
 		Unit:       metric.Unit(),
 		MetricKind: metricKind,
 		ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
@@ -594,9 +606,8 @@ func (m *metricMapper) sumPointToTimeSeries(
 	}
 	value, valueType := numberDataPointToValue(point)
 
-	return &monitoringpb.TimeSeries{
+	ts := &monitoringpb.TimeSeries{
 		Resource:   resource,
-		Unit:       metric.Unit(),
 		MetricKind: metricKind,
 		ValueType:  valueType,
 		Points: []*monitoringpb.Point{{
@@ -614,6 +625,10 @@ func (m *metricMapper) sumPointToTimeSeries(
 			),
 		},
 	}
+	if !m.cfg.MetricConfig.LegacyMode {
+		ts.Unit = metric.Unit()
+	}
+	return ts
 }
 
 func (m *metricMapper) gaugePointToTimeSeries(
@@ -626,9 +641,8 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	metricKind := metricpb.MetricDescriptor_GAUGE
 	value, valueType := numberDataPointToValue(point)
 
-	return &monitoringpb.TimeSeries{
+	ts := &monitoringpb.TimeSeries{
 		Resource:   resource,
-		Unit:       metric.Unit(),
 		MetricKind: metricKind,
 		ValueType:  valueType,
 		Points: []*monitoringpb.Point{{
@@ -645,6 +659,10 @@ func (m *metricMapper) gaugePointToTimeSeries(
 			),
 		},
 	}
+	if !m.cfg.MetricConfig.LegacyMode {
+		ts.Unit = metric.Unit()
+	}
+	return ts
 }
 
 // Returns any configured prefix to add to unknown metric name.
@@ -660,6 +678,16 @@ func (m *metricMapper) getMetricNamePrefix(name string) string {
 // metricNameToType maps OTLP metric name to GCM metric type (aka name)
 func (m *metricMapper) metricNameToType(name string) string {
 	return path.Join(m.getMetricNamePrefix(name), name)
+}
+
+// We support the old OpenCensus exporter features during transition.
+func (m *metricMapper) legacyDisplayNameFromMetricName(name string) string {
+	for _, domain := range m.cfg.MetricConfig.KnownDomains {
+		if strings.Contains(name, domain) {
+			return name
+		}
+	}
+	return path.Join("OpenCensus", name)
 }
 
 func numberDataPointToValue(
@@ -832,6 +860,10 @@ func (m *metricMapper) metricDescriptor(pm pdata.Metric) []*metricpb.MetricDescr
 	}
 	kind, typ := mapMetricPointKind(pm)
 	metricType := m.metricNameToType(pm.Name())
+	displayName := m.metricTypeToDisplayName(metricType)
+	if m.cfg.MetricConfig.LegacyMode {
+		displayName = m.legacyDisplayNameFromMetricName(pm.Name())
+	}
 	labels := m.labelDescriptors(pm)
 	// Return nil for unsupported types.
 	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
@@ -840,7 +872,7 @@ func (m *metricMapper) metricDescriptor(pm pdata.Metric) []*metricpb.MetricDescr
 	return []*metricpb.MetricDescriptor{
 		{
 			Name:        pm.Name(),
-			DisplayName: m.metricTypeToDisplayName(metricType),
+			DisplayName: displayName,
 			Type:        metricType,
 			MetricKind:  kind,
 			ValueType:   typ,

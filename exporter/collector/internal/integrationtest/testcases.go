@@ -22,7 +22,15 @@ var (
 			Name:                 "Basic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
-			Skip:                 true,
+			Skip:                 false,
+		},
+		{
+			Name:                 "Basic Counter Legacy",
+			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect_legacy.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.LegacyMode = true
+			},
 		},
 		{
 			Name:                 "Modified prefix unknown domain",
@@ -64,7 +72,6 @@ var (
 			Name:                 "Ops Agent Self-Reported metrics",
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_self_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_self_metrics_expect.json",
-			Skip:                 false,
 			Configure: func(cfg *collector.Config) {
 				// Previous exporter did NOT export metric descriptors.
 				// TODO: Add a new test that also checks metric descriptors.

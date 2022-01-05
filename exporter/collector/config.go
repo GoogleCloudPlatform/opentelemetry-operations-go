@@ -57,6 +57,10 @@ type MetricConfig struct {
 	// Buffer size for the channel which asynchronously calls CreateMetricDescriptor. Default
 	// is 10.
 	CreateMetricDescriptorBufferSize int `mapstructure:"create_metric_descriptor_buffer_size"`
+
+	// If true, this will adjust any default settings to use the legacy
+	// (OpenCensus) configuration parameters for parity with the previous exporter.
+	LegacyMode bool `mapstructure:"legacy_mode"`
 }
 
 // ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).
@@ -73,4 +77,18 @@ type LabelMapping struct {
 	// Optional flag signals whether we can proceed with transformation if a label is missing in the resource.
 	// When required label is missing, we fallback to default resource mapping.
 	Optional bool `mapstructure:"optional"`
+}
+
+// Called if the LegacyMode flag is set to ensure legacy behavior.
+func (cfg *Config) checkAndApplyLegacyMode() {
+	cfg.MetricConfig.checkAndApplyLegacyMode()
+}
+
+func (cfg *MetricConfig) checkAndApplyLegacyMode() {
+	if !cfg.LegacyMode {
+		return
+	}
+	if cfg.Prefix == "workload.googleapis.com" {
+		cfg.Prefix = "custom.googleapis.com/opencensus"
+	}
 }
