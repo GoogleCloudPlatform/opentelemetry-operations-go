@@ -382,6 +382,79 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 }
 
+func TestSummaryPointToTimeSeries(t *testing.T) {
+	mapper := metricMapper{cfg: createDefaultConfig()}
+	mr := &monitoredrespb.MonitoredResource{}
+
+	metric := pdata.NewMetric()
+	metric.SetDataType(pdata.MetricDataTypeSummary)
+	summary := metric.Summary()
+	point := summary.DataPoints().AppendEmpty()
+
+	metric.SetName("mysummary")
+	unit := "1"
+	metric.SetUnit(unit)
+	var count uint64 = 10
+	var sum float64 = 100.0
+	point.SetCount(count)
+	point.SetSum(sum)
+	quantile := point.QuantileValues().AppendEmpty()
+	quantile.SetQuantile(0.0)
+	quantile.SetValue(1.0)
+	end := start.Add(time.Hour)
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	ts := mapper.metricToTimeSeries(mr, labels{}, metric)
+	assert.Len(t, ts, 3)
+	sumResult := ts[0]
+	countResult := ts[1]
+	quantileResult := ts[2]
+
+	// Test sum mapping
+	assert.Equal(t, sumResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
+	assert.Equal(t, sumResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
+	assert.Equal(t, sumResult.Unit, unit)
+	assert.Same(t, sumResult.Resource, mr)
+	assert.Equal(t, sumResult.Metric.Type, "workload.googleapis.com/mysummary_summary_sum")
+	assert.Equal(t, sumResult.Metric.Labels, map[string]string{})
+	assert.Nil(t, sumResult.Metadata)
+	assert.Len(t, sumResult.Points, 1)
+	assert.Equal(t, sumResult.Points[0].Interval, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	})
+	assert.Equal(t, sumResult.Points[0].Value.GetDoubleValue(), sum)
+	// Test count mapping
+	assert.Equal(t, countResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
+	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_INT64)
+	assert.Equal(t, countResult.Unit, unit)
+	assert.Same(t, countResult.Resource, mr)
+	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_summary_count")
+	assert.Equal(t, countResult.Metric.Labels, map[string]string{})
+	assert.Nil(t, countResult.Metadata)
+	assert.Len(t, countResult.Points, 1)
+	assert.Equal(t, countResult.Points[0].Interval, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	})
+	assert.Equal(t, countResult.Points[0].Value.GetInt64Value(), int64(count))
+	// Test quantile mapping
+	assert.Equal(t, quantileResult.MetricKind, metricpb.MetricDescriptor_GAUGE)
+	assert.Equal(t, quantileResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
+	assert.Equal(t, quantileResult.Unit, unit)
+	assert.Same(t, quantileResult.Resource, mr)
+	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary_summary_percentile")
+	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
+		"percentile": "0",
+	})
+	assert.Nil(t, quantileResult.Metadata)
+	assert.Len(t, quantileResult.Points, 1)
+	assert.Equal(t, quantileResult.Points[0].Interval, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	})
+	assert.Equal(t, quantileResult.Points[0].Value.GetDoubleValue(), 1.0)
+}
+
 func TestMetricNameToType(t *testing.T) {
 	mapper := metricMapper{cfg: createDefaultConfig()}
 	assert.Equal(

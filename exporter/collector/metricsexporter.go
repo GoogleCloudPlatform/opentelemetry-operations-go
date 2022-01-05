@@ -244,6 +244,13 @@ func (m *metricMapper) metricToTimeSeries(
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
 			timeSeries = append(timeSeries, ts)
 		}
+	case pdata.MetricDataTypeSummary:
+		summary := metric.Summary()
+		points := summary.DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, points.At(i))
+			timeSeries = append(timeSeries, ts...)
+		}
 	case pdata.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
@@ -257,6 +264,95 @@ func (m *metricMapper) metricToTimeSeries(
 	}
 
 	return timeSeries
+}
+
+func (m *metricMapper) summaryPointToTimeSeries(
+	resource *monitoredrespb.MonitoredResource,
+	extraLabels labels,
+	metric pdata.Metric,
+	sum pdata.Summary,
+	point pdata.SummaryDataPoint,
+) []*monitoringpb.TimeSeries {
+	sumName, countName, percentileName := summaryMetricNames(metric.Name())
+	startTime := timestamppb.New(point.StartTimestamp().AsTime())
+	endTime := timestamppb.New(point.Timestamp().AsTime())
+	result := []*monitoringpb.TimeSeries{
+		{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:  metricpb.MetricDescriptor_DOUBLE,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: startTime,
+					EndTime:   endTime,
+				},
+				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+					DoubleValue: point.Sum(),
+				}},
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(sumName),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+				),
+			},
+		},
+		{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:  metricpb.MetricDescriptor_INT64,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: startTime,
+					EndTime:   endTime,
+				},
+				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
+					Int64Value: int64(point.Count()),
+				}},
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(countName),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+				),
+			},
+		},
+	}
+	quantiles := point.QuantileValues()
+	for i := 0; i < quantiles.Len(); i++ {
+		quantile := quantiles.At(i)
+		pLabel := labels{
+			"percentile": fmt.Sprintf("%v", quantile.Quantile()),
+		}
+		result = append(result, &monitoringpb.TimeSeries{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricpb.MetricDescriptor_GAUGE,
+			ValueType:  metricpb.MetricDescriptor_DOUBLE,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: startTime,
+					EndTime:   endTime,
+				},
+				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+					DoubleValue: quantile.Value(),
+				}},
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(percentileName),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+					pLabel,
+				),
+			},
+		})
+	}
+	return result
 }
 
 func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Exemplar {
@@ -587,10 +683,16 @@ func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescripto
 	return result
 }
 
+// Returns (sum, count, percentile) metric names for a summary metric.
+func summaryMetricNames(name string) (string, string, string) {
+	sumName := fmt.Sprintf("%s%s", name, SummarySumSuffix)
+	countName := fmt.Sprintf("%s%s", name, SummaryCountPrefix)
+	percentileName := fmt.Sprintf("%s%s", name, SummaryPercentileSuffix)
+	return sumName, countName, percentileName
+}
+
 func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.MetricDescriptor {
-	sumName := fmt.Sprintf("%s%s", pm.Name(), SummarySumSuffix)
-	countName := fmt.Sprintf("%s%s", pm.Name(), SummaryCountPrefix)
-	percentileName := fmt.Sprintf("%s%s", pm.Name(), SummaryPercentileSuffix)
+	sumName, countName, percentileName := summaryMetricNames(pm.Name())
 	labels := m.labelDescriptors(pm)
 	return []*metricpb.MetricDescriptor{
 		{
