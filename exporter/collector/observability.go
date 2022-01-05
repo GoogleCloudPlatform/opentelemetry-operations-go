@@ -38,6 +38,11 @@ var viewPointCount = &view.View{
 	TagKeys:     []tag.Key{statusKey},
 }
 
+// MetricViews returns a slice of views for this exporter's metrics.
+func MetricViews() []*view.View {
+	return []*view.View{viewPointCount}
+}
+
 func recordPointCount(ctx context.Context, success, dropped int, grpcErr error) {
 	if success > 0 {
 		recordPointCountDataPoint(ctx, success, "OK")

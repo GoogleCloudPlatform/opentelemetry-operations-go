@@ -28,6 +28,7 @@ func TestMetrics(t *testing.T) {
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
+	// view.SetReportingPeriod(time.Millisecond * 250)
 
 	for _, test := range integrationtest.TestCases {
 		test := test
@@ -41,15 +42,16 @@ func TestMetrics(t *testing.T) {
 			defer testServer.Shutdown()
 			testServerExporter := testServer.NewExporter(ctx, t, *test.CreateConfig())
 			defer func() { require.NoError(t, testServerExporter.Shutdown(ctx)) }()
+			// For collecting self observability metrics
+			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
+			require.NoError(t, err)
+			defer inMemoryOCExporter.Shutdown(ctx)
 
 			require.NoError(
 				t,
 				testServerExporter.ConsumeMetrics(ctx, metrics),
 				"Failed to export metrics to local test server",
 			)
-			actualCreateMetricDescriptorReq := testServer.CreateMetricDescriptorRequests()
-			actualCreateTimeSeriesReq := testServer.CreateTimeSeriesRequests()
-			actualCreateServiceTimeSeriesReq := testServer.CreateServiceTimeSeriesRequests()
 
 			expectFixture := test.LoadExpectFixture(
 				t,
@@ -58,9 +60,10 @@ func TestMetrics(t *testing.T) {
 			)
 			diff := integrationtest.DiffProtos(
 				&integrationtest.MetricExpectFixture{
-					CreateTimeSeriesRequests:        actualCreateTimeSeriesReq,
-					CreateMetricDescriptorRequests:  actualCreateMetricDescriptorReq,
-					CreateServiceTimeSeriesRequests: actualCreateServiceTimeSeriesReq,
+					CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
+					CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
+					CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
+					SelfObservabilityMetrics:        inMemoryOCExporter.Proto(),
 				},
 				expectFixture,
 			)
