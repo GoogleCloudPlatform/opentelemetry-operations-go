@@ -128,8 +128,8 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
-				// TODO - check to see if this is a service/system metric and doesn't send descriptors.
-				if !me.cfg.MetricConfig.SkipCreateMetricDescriptor {
+				// We only send metric descriptors if we're configured *and* we're not sending service timeseries.
+				if !(me.cfg.MetricConfig.SkipCreateMetricDescriptor || me.cfg.MetricConfig.CreateServiceTimeSeries) {
 					for _, md := range me.mapper.metricDescriptor(metric) {
 						if md != nil {
 							select {
@@ -146,8 +146,7 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 	}
 
 	// TODO: self observability
-	// TODO: Figure out how to configure service time series calls.
-	if false {
+	if me.cfg.MetricConfig.CreateServiceTimeSeries {
 		err := me.createServiceTimeSeries(ctx, timeSeries)
 		recordPointCount(ctx, len(timeSeries), m.DataPointCount()-len(timeSeries), err)
 		return err
