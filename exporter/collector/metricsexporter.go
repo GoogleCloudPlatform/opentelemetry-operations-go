@@ -49,7 +49,7 @@ type metricsExporter struct {
 	mapper metricMapper
 	// A channel that receives metric descriptor and sends them to GCM once.
 	mds chan *metricpb.MetricDescriptor
-	// Channel sends true when the exportMetricDescriptorRunnner goroutine is finished
+	// Channel that is closed when exportMetricDescriptorRunnner goroutine is finished
 	mdsDone chan struct{}
 }
 
@@ -199,7 +199,7 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 		}
 		// TODO: We may want to compare current MD vs. previous and validate no changes.
 	}
-	me.mdsDone <- struct{}{}
+	close(me.mdsDone)
 }
 
 func (me *metricsExporter) projectName() string {
