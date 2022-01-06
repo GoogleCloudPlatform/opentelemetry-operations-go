@@ -57,8 +57,9 @@ func createDefaultConfig() *Config {
 		QueueSettings:    exporterhelper.DefaultQueueSettings(),
 		UserAgent:        "opentelemetry-collector-contrib {{version}}",
 		MetricConfig: MetricConfig{
-			KnownDomains: domains,
-			Prefix:       "workload.googleapis.com",
+			KnownDomains:                 domains,
+			Prefix:                       "workload.googleapis.com",
+			InstrumentationLibraryLabels: true,
 		},
 	}
 }

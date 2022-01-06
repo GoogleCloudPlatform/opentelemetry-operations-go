@@ -139,23 +139,34 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
 
-			extraLabels := mergeLabels(instrumentationLibraryToLabels(ilm.InstrumentationLibrary()), extraResourceLabels)
+			instrumentationLibraryLabels := me.mapper.instrumentationLibraryToLabels(ilm.InstrumentationLibrary())
+
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
+				metricLabels := extraResourceLabels
+
+				// only custom metrics let you add labels not in the metric descriptor
+				if isCustomMetric(metric) {
+					metricLabels = mergeLabels(nil, metricLabels, instrumentationLibraryLabels)
+				}
+
+				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, metricLabels, metric)...)
+
 				// We only send metric descriptors if we're configured *and* we're not sending service timeseries.
-				if !(me.cfg.MetricConfig.SkipCreateMetricDescriptor || me.cfg.MetricConfig.CreateServiceTimeSeries) {
-					for _, md := range me.mapper.metricDescriptor(metric) {
-						if md != nil {
-							select {
-							case me.mds <- md:
-							default:
-								// Ignore drops, we'll catch descriptor next time around.
-							}
+				if me.cfg.MetricConfig.SkipCreateMetricDescriptor || me.cfg.MetricConfig.CreateServiceTimeSeries {
+					continue
+				}
+
+				for _, md := range me.mapper.metricDescriptor(metric) {
+					if md != nil {
+						select {
+						case me.mds <- md:
+						default:
+							// Ignore drops, we'll catch descriptor next time around.
 						}
 					}
 				}
-				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, extraLabels, metric)...)
 			}
 		}
 	}
@@ -231,9 +242,15 @@ func (me *metricsExporter) createServiceTimeSeries(ctx context.Context, ts []*mo
 	)
 }
 
-func instrumentationLibraryToLabels(il pdata.InstrumentationLibrary) labels {
-	// TODO
-	return nil
+func (m *metricMapper) instrumentationLibraryToLabels(il pdata.InstrumentationLibrary) labels {
+	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
+		return labels{}
+	}
+
+	return labels{
+		"instrumentation_source":  il.Name(),
+		"instrumentation_version": il.Version(),
+	}
 }
 
 func (m *metricMapper) metricToTimeSeries(
@@ -714,6 +731,22 @@ func mergeLabels(mergeInto labels, others ...labels) labels {
 	}
 
 	return mergeInto
+}
+
+func isCustomMetric(m pdata.Metric) bool {
+	// it is only allowable to define a custom metric with these prefixes
+	var customMetricPrefixes = []string{
+		"custom.googleapis.com/",
+		"external.googleapis.com/",
+		"prometheus.googleapis.com/",
+		"workload.googleapis.com/"}
+
+	for _, p := range customMetricPrefixes {
+		if strings.HasPrefix(m.Name(), p) {
+			return true
+		}
+	}
+	return false
 }
 
 // Takes a GCM metric type, like (workload.googleapis.com/MyCoolMetric) and returns the display name.

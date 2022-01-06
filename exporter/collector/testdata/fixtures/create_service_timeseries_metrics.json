@@ -31,7 +31,10 @@
         },
         "instrumentationLibraryMetrics": [
           {
-            "instrumentationLibrary": {},
+            "instrumentationLibrary": {
+               "name": "foo",
+               "version": "1.2.3"
+            },
             "metrics": [
                 {
                     "name":"kubernetes.io/internal/nodes/clustermetrics/node_network_availability_transition_time",
