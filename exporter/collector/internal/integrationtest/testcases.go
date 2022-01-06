@@ -64,7 +64,12 @@ var (
 			Name:                 "Ops Agent Self-Reported metrics",
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_self_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_self_metrics_expect.json",
-			Skip:                 true,
+			Skip:                 false,
+			Configure: func(cfg *collector.Config) {
+				// Previous exporter did NOT export metric descriptors.
+				// TODO: Add a new test that also checks metric descriptors.
+				cfg.MetricConfig.SkipCreateMetricDescriptor = true
+			},
 		},
 		{
 			Name:                 "Ops Agent Host Metrics",
