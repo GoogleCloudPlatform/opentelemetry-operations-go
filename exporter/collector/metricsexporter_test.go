@@ -95,6 +95,70 @@ func TestMergeLabels(t *testing.T) {
 	)
 }
 
+func TestHistogramPointToTimeSeries(t *testing.T) {
+	cfg := createDefaultConfig()
+	cfg.ProjectID = "myproject"
+	mapper := metricMapper{cfg: cfg}
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myhist")
+	metric.SetDataType(pdata.MetricDataTypeHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.Histogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.SetBucketCounts([]uint64{1, 2, 3, 4, 5})
+	point.SetCount(15)
+	point.SetSum(42)
+	point.SetExplicitBounds([]float64{10, 20, 30, 40})
+	exemplar := point.Exemplars().AppendEmpty()
+	exemplar.SetDoubleVal(2)
+	exemplar.SetTimestamp(pdata.NewTimestampFromTime(end))
+	exemplar.SetTraceID(pdata.NewTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6}))
+	exemplar.SetSpanID(pdata.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
+	exemplar.FilteredAttributes().InsertString("test", "extra")
+
+	ts := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	// Verify aspects
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
+
+	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	}, ts.Points[0].Interval)
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(15), hdp.Count)
+	assert.ElementsMatch(t, []int64{1, 2, 3, 4, 5}, hdp.BucketCounts)
+	assert.Equal(t, float64(2.8), hdp.Mean)
+	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
+	assert.Len(t, hdp.Exemplars, 1)
+	ex := hdp.Exemplars[0]
+	assert.Equal(t, float64(2), ex.Value)
+	assert.Equal(t, timestamppb.New(end), ex.Timestamp)
+	// We should see trace + dropped labels
+	assert.Len(t, ex.Attachments, 2)
+	spanctx := &monitoringpb.SpanContext{}
+	err := ex.Attachments[0].UnmarshalTo(spanctx)
+	assert.Nil(t, err)
+	assert.Equal(t, "projects/myproject/traces/00010203040506070809010203040506/spans/0001020304050607", spanctx.SpanName)
+	dropped := &monitoringpb.DroppedLabels{}
+	err = ex.Attachments[1].UnmarshalTo(dropped)
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
+}
+
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	cfg := createDefaultConfig()
 	cfg.ProjectID = "myproject"
@@ -380,6 +444,79 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	point.Attributes().InsertString("baz", "bar")
 	ts = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
 	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
+}
+
+func TestSummaryPointToTimeSeries(t *testing.T) {
+	mapper := metricMapper{cfg: createDefaultConfig()}
+	mr := &monitoredrespb.MonitoredResource{}
+
+	metric := pdata.NewMetric()
+	metric.SetDataType(pdata.MetricDataTypeSummary)
+	summary := metric.Summary()
+	point := summary.DataPoints().AppendEmpty()
+
+	metric.SetName("mysummary")
+	unit := "1"
+	metric.SetUnit(unit)
+	var count uint64 = 10
+	var sum float64 = 100.0
+	point.SetCount(count)
+	point.SetSum(sum)
+	quantile := point.QuantileValues().AppendEmpty()
+	quantile.SetQuantile(0.0)
+	quantile.SetValue(1.0)
+	end := start.Add(time.Hour)
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	ts := mapper.metricToTimeSeries(mr, labels{}, metric)
+	assert.Len(t, ts, 3)
+	sumResult := ts[0]
+	countResult := ts[1]
+	quantileResult := ts[2]
+
+	// Test sum mapping
+	assert.Equal(t, sumResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
+	assert.Equal(t, sumResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
+	assert.Equal(t, sumResult.Unit, unit)
+	assert.Same(t, sumResult.Resource, mr)
+	assert.Equal(t, sumResult.Metric.Type, "workload.googleapis.com/mysummary_summary_sum")
+	assert.Equal(t, sumResult.Metric.Labels, map[string]string{})
+	assert.Nil(t, sumResult.Metadata)
+	assert.Len(t, sumResult.Points, 1)
+	assert.Equal(t, sumResult.Points[0].Interval, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	})
+	assert.Equal(t, sumResult.Points[0].Value.GetDoubleValue(), sum)
+	// Test count mapping
+	assert.Equal(t, countResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
+	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_INT64)
+	assert.Equal(t, countResult.Unit, unit)
+	assert.Same(t, countResult.Resource, mr)
+	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_summary_count")
+	assert.Equal(t, countResult.Metric.Labels, map[string]string{})
+	assert.Nil(t, countResult.Metadata)
+	assert.Len(t, countResult.Points, 1)
+	assert.Equal(t, countResult.Points[0].Interval, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	})
+	assert.Equal(t, countResult.Points[0].Value.GetInt64Value(), int64(count))
+	// Test quantile mapping
+	assert.Equal(t, quantileResult.MetricKind, metricpb.MetricDescriptor_GAUGE)
+	assert.Equal(t, quantileResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
+	assert.Equal(t, quantileResult.Unit, unit)
+	assert.Same(t, quantileResult.Resource, mr)
+	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary_summary_percentile")
+	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
+		"percentile": "0",
+	})
+	assert.Nil(t, quantileResult.Metadata)
+	assert.Len(t, quantileResult.Points, 1)
+	assert.Equal(t, quantileResult.Points[0].Interval, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	})
+	assert.Equal(t, quantileResult.Points[0].Value.GetDoubleValue(), 1.0)
 }
 
 func TestMetricNameToType(t *testing.T) {

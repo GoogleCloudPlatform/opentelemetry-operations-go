@@ -19,6 +19,7 @@ package collector
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"math"
@@ -31,6 +32,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
@@ -86,6 +88,19 @@ func newGoogleCloudMetricsExporter(
 ) (component.MetricsExporter, error) {
 	setVersionInUserAgent(cfg, set.BuildInfo.Version)
 
+	// TODO - Share this lookup somewhere
+	if cfg.ProjectID == "" {
+		creds, err := google.FindDefaultCredentials(ctx, monitoring.DefaultAuthScopes()...)
+		// TODO- better error messages, this is copy-pasta from OpenCensus exporter.
+		if err != nil {
+			return nil, fmt.Errorf("google_cloud: %v", err)
+		}
+		if creds.ProjectID == "" {
+			return nil, errors.New("google_cloud: no project found with application default credentials")
+		}
+		cfg.ProjectID = creds.ProjectID
+	}
+
 	clientOpts, err := generateClientOptions(cfg)
 	if err != nil {
 		return nil, err
@@ -136,8 +151,8 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
-				// TODO - check to see if this is a service/system metric and doesn't send descriptors.
-				if !me.cfg.MetricConfig.SkipCreateMetricDescriptor {
+				// We only send metric descriptors if we're configured *and* we're not sending service timeseries.
+				if !(me.cfg.MetricConfig.SkipCreateMetricDescriptor || me.cfg.MetricConfig.CreateServiceTimeSeries) {
 					for _, md := range me.mapper.metricDescriptor(metric) {
 						if md != nil {
 							select {
@@ -154,8 +169,7 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 	}
 
 	// TODO: self observability
-	// TODO: Figure out how to configure service time series calls.
-	if false {
+	if me.cfg.MetricConfig.CreateServiceTimeSeries {
 		err := me.createServiceTimeSeries(ctx, timeSeries)
 		recordPointCount(ctx, len(timeSeries), m.DataPointCount()-len(timeSeries), err)
 		return err
@@ -253,6 +267,20 @@ func (m *metricMapper) metricToTimeSeries(
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
 			timeSeries = append(timeSeries, ts)
 		}
+	case pdata.MetricDataTypeSummary:
+		summary := metric.Summary()
+		points := summary.DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, points.At(i))
+			timeSeries = append(timeSeries, ts...)
+		}
+	case pdata.MetricDataTypeHistogram:
+		hist := metric.Histogram()
+		points := hist.DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i))
+			timeSeries = append(timeSeries, ts)
+		}
 	case pdata.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
@@ -266,6 +294,95 @@ func (m *metricMapper) metricToTimeSeries(
 	}
 
 	return timeSeries
+}
+
+func (m *metricMapper) summaryPointToTimeSeries(
+	resource *monitoredrespb.MonitoredResource,
+	extraLabels labels,
+	metric pdata.Metric,
+	sum pdata.Summary,
+	point pdata.SummaryDataPoint,
+) []*monitoringpb.TimeSeries {
+	sumName, countName, percentileName := summaryMetricNames(metric.Name())
+	startTime := timestamppb.New(point.StartTimestamp().AsTime())
+	endTime := timestamppb.New(point.Timestamp().AsTime())
+	result := []*monitoringpb.TimeSeries{
+		{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:  metricpb.MetricDescriptor_DOUBLE,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: startTime,
+					EndTime:   endTime,
+				},
+				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+					DoubleValue: point.Sum(),
+				}},
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(sumName),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+				),
+			},
+		},
+		{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:  metricpb.MetricDescriptor_INT64,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: startTime,
+					EndTime:   endTime,
+				},
+				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
+					Int64Value: int64(point.Count()),
+				}},
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(countName),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+				),
+			},
+		},
+	}
+	quantiles := point.QuantileValues()
+	for i := 0; i < quantiles.Len(); i++ {
+		quantile := quantiles.At(i)
+		pLabel := labels{
+			"percentile": fmt.Sprintf("%v", quantile.Quantile()),
+		}
+		result = append(result, &monitoringpb.TimeSeries{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricpb.MetricDescriptor_GAUGE,
+			ValueType:  metricpb.MetricDescriptor_DOUBLE,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: startTime,
+					EndTime:   endTime,
+				},
+				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+					DoubleValue: quantile.Value(),
+				}},
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(percentileName),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+					pLabel,
+				),
+			},
+		})
+	}
+	return result
 }
 
 func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Exemplar {
@@ -312,8 +429,39 @@ func (m *metricMapper) exemplars(exs pdata.ExemplarSlice) []*distribution.Distri
 	return exemplars
 }
 
+// histogramPoint maps a histogram data point into a GCM point.
+func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitoringpb.TypedValue {
+	counts := make([]int64, len(point.BucketCounts()))
+	for i, v := range point.BucketCounts() {
+		counts[i] = int64(v)
+	}
+
+	mean := float64(0)
+	if point.Count() > 0 { // Avoid divide-by-zero
+		mean = float64(point.Sum() / float64(point.Count()))
+	}
+
+	return &monitoringpb.TypedValue{
+		Value: &monitoringpb.TypedValue_DistributionValue{
+			DistributionValue: &distribution.Distribution{
+				Count:        int64(point.Count()),
+				Mean:         mean,
+				BucketCounts: counts,
+				BucketOptions: &distribution.Distribution_BucketOptions{
+					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
+						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
+							Bounds: point.ExplicitBounds(),
+						},
+					},
+				},
+				Exemplars: m.exemplars(point.Exemplars()),
+			},
+		},
+	}
+}
+
 // Maps an exponential distribution into a GCM point.
-func (m *metricMapper) exponentialPoint(point pdata.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
+func (m *metricMapper) exponentialHistogramPoint(point pdata.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
 	// First calculate underflow bucket with all negatives + zeros.
 	underflow := point.ZeroCount()
 	for _, v := range point.Negative().BucketCounts() {
@@ -363,6 +511,40 @@ func (m *metricMapper) exponentialPoint(point pdata.ExponentialHistogramDataPoin
 	}
 }
 
+func (m *metricMapper) histogramToTimeSeries(
+	resource *monitoredrespb.MonitoredResource,
+	extraLabels labels,
+	metric pdata.Metric,
+	_ pdata.Histogram,
+	point pdata.HistogramDataPoint,
+) *monitoringpb.TimeSeries {
+	// We treat deltas as cumulatives w/ resets.
+	metricKind := metricpb.MetricDescriptor_CUMULATIVE
+	startTime := timestamppb.New(point.StartTimestamp().AsTime())
+	endTime := timestamppb.New(point.Timestamp().AsTime())
+	value := m.histogramPoint(point)
+	return &monitoringpb.TimeSeries{
+		Resource:   resource,
+		Unit:       metric.Unit(),
+		MetricKind: metricKind,
+		ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
+		Points: []*monitoringpb.Point{{
+			Interval: &monitoringpb.TimeInterval{
+				StartTime: startTime,
+				EndTime:   endTime,
+			},
+			Value: value,
+		}},
+		Metric: &metricpb.Metric{
+			Type: m.metricNameToType(metric.Name()),
+			Labels: mergeLabels(
+				attributesToLabels(point.Attributes()),
+				extraLabels,
+			),
+		},
+	}
+}
+
 func (m *metricMapper) exponentialHistogramToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
@@ -374,7 +556,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
-	value := m.exponentialPoint(point)
+	value := m.exponentialHistogramPoint(point)
 	return &monitoringpb.TimeSeries{
 		Resource:   resource,
 		Unit:       metric.Unit(),
@@ -596,10 +778,16 @@ func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescripto
 	return result
 }
 
+// Returns (sum, count, percentile) metric names for a summary metric.
+func summaryMetricNames(name string) (string, string, string) {
+	sumName := fmt.Sprintf("%s%s", name, SummarySumSuffix)
+	countName := fmt.Sprintf("%s%s", name, SummaryCountPrefix)
+	percentileName := fmt.Sprintf("%s%s", name, SummaryPercentileSuffix)
+	return sumName, countName, percentileName
+}
+
 func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.MetricDescriptor {
-	sumName := fmt.Sprintf("%s%s", pm.Name(), SummarySumSuffix)
-	countName := fmt.Sprintf("%s%s", pm.Name(), SummaryCountPrefix)
-	percentileName := fmt.Sprintf("%s%s", pm.Name(), SummaryPercentileSuffix)
+	sumName, countName, percentileName := summaryMetricNames(pm.Name())
 	labels := m.labelDescriptors(pm)
 	return []*metricpb.MetricDescriptor{
 		{
