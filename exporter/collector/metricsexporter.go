@@ -49,6 +49,8 @@ type metricsExporter struct {
 	mapper metricMapper
 	// A channel that receives metric descriptor and sends them to GCM once.
 	mds chan *metricpb.MetricDescriptor
+	// Channel that is closed when exportMetricDescriptorRunnner goroutine is finished
+	mdsDone chan struct{}
 }
 
 // metricMapper is the part that transforms metrics. Separate from metricsExporter since it has
@@ -69,8 +71,13 @@ const (
 
 type labels map[string]string
 
-func (me *metricsExporter) Shutdown(context.Context) error {
+func (me *metricsExporter) Shutdown(ctx context.Context) error {
 	close(me.mds)
+	select {
+	case <-me.mdsDone:
+	case <-ctx.Done():
+		log.Printf("%v waiting for async CreateMetricDescriptor calls to finish", ctx.Err())
+	}
 	return me.client.Close()
 }
 
@@ -112,7 +119,8 @@ func newGoogleCloudMetricsExporter(
 		// MetricDescritpors are asycnhronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok
 		// to drop / conserve resources for sending timeseries.
-		mds: make(chan *metricpb.MetricDescriptor, 10),
+		mds:     make(chan *metricpb.MetricDescriptor, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
+		mdsDone: make(chan struct{}),
 	}
 
 	// Fire up the metric descriptor exporter.
@@ -146,8 +154,7 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 				metric := mes.At(k)
 				metricLabels := extraResourceLabels
 
-				// only custom metrics let you add labels not in the metric descriptor
-				if isCustomMetric(metric) {
+				if me.mapper.shouldAddInstrumentationLibraryLabels(metric) {
 					metricLabels = mergeLabels(nil, metricLabels, instrumentationLibraryLabels)
 				}
 
@@ -202,6 +209,7 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 		}
 		// TODO: We may want to compare current MD vs. previous and validate no changes.
 	}
+	close(me.mdsDone)
 }
 
 func (me *metricsExporter) projectName() string {
@@ -246,7 +254,6 @@ func (m *metricMapper) instrumentationLibraryToLabels(il pdata.InstrumentationLi
 	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
 		return labels{}
 	}
-
 	return labels{
 		"instrumentation_source":  il.Name(),
 		"instrumentation_version": il.Version(),
@@ -733,16 +740,22 @@ func mergeLabels(mergeInto labels, others ...labels) labels {
 	return mergeInto
 }
 
-func isCustomMetric(m pdata.Metric) bool {
-	// it is only allowable to define a custom metric with these prefixes
-	var customMetricPrefixes = []string{
-		"custom.googleapis.com/",
-		"external.googleapis.com/",
-		"prometheus.googleapis.com/",
-		"workload.googleapis.com/"}
+// only custom metrics let you add labels not in the metric descriptor and it is
+// only allowable to define a custom metric with these prefixes.
+var defaultInstrumentationLibraryPrefixes = []string{
+	"custom.googleapis.com/",
+	"external.googleapis.com/",
+	"prometheus.googleapis.com/",
+	"workload.googleapis.com/"}
 
-	for _, p := range customMetricPrefixes {
-		if strings.HasPrefix(m.Name(), p) {
+func (m *metricMapper) shouldAddInstrumentationLibraryLabels(pm pdata.Metric) bool {
+	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
+		return false
+	}
+
+	metricName := pm.Name()
+	for _, prefix := range m.cfg.MetricConfig.InstrumentationLibraryPrefixes {
+		if strings.HasPrefix(metricName, prefix) {
 			return true
 		}
 	}

@@ -54,9 +54,19 @@ type MetricConfig struct {
 	// labels. Defaults to true.
 	InstrumentationLibraryLabels bool `mapstructure:"instrumentation_library_labels"`
 
+	// Set of metric name prefixes to add instrumentation_source and
+	// instrumentation_version labels to. Defaults to custom metric domains:
+	// "custom.googleapis.com/", "external.googleapis.com/",
+	// "prometheus.googleapis.com/", "workload.googleapis.com/"
+	InstrumentationLibraryPrefixes []string `mapstructure:"instrumentation_library_domains"`
+
 	// If true, this will send all timeseries using `CreateServiceTimeSeries`.
 	// Implicitly, this sets `SkipMetricDescriptor` to true.
 	CreateServiceTimeSeries bool `mapstructure:"create_service_timeseries"`
+
+	// Buffer size for the channel which asynchronously calls CreateMetricDescriptor. Default
+	// is 10.
+	CreateMetricDescriptorBufferSize int `mapstructure:"create_metric_descriptor_buffer_size"`
 }
 
 // ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).

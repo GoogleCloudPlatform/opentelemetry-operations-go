@@ -94,6 +94,13 @@ func TestLoadConfig(t *testing.T) {
 					"googleapis.com", "kubernetes.io", "istio.io", "knative.dev",
 				},
 				InstrumentationLibraryLabels: true,
+				InstrumentationLibraryPrefixes: []string{
+					"custom.googleapis.com/",
+					"external.googleapis.com/",
+					"prometheus.googleapis.com/",
+					"workload.googleapis.com/",
+				},
+				CreateMetricDescriptorBufferSize: 10,
 			},
 		})
 }

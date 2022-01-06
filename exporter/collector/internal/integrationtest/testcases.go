@@ -96,6 +96,11 @@ var (
 			Skip:                 true,
 		},
 		{
+			Name:                 "Exponential Histogram",
+			OTLPInputFixturePath: "testdata/fixtures/exponential_histogram_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/exponential_histogram_metrics_expect.json",
+		},
+		{
 			Name:                 "CreateServiceTimeSeries",
 			OTLPInputFixturePath: "testdata/fixtures/create_service_timeseries_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/create_service_timeseries_metrics_expect.json",

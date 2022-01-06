@@ -922,9 +922,6 @@ func TestKnownDomains(t *testing.T) {
 }
 
 func TestInstrumentationLibraryToLabels(t *testing.T) {
-	if true {
-		return
-	}
 	newInstrumentationLibrary := func(name, version string) pdata.InstrumentationLibrary {
 		il := pdata.NewInstrumentationLibrary()
 		il.SetName("foo")
@@ -956,7 +953,6 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
 			config := createDefaultConfig()
 			config.MetricConfig = test.metricConfig
 			m := metricMapper{cfg: config}
@@ -964,6 +960,30 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 			out := m.instrumentationLibraryToLabels(test.instrumentationLibrary)
 
 			assert.Equal(t, out, test.output)
+		})
+	}
+}
+
+func TestCustomMetricNames(t *testing.T) {
+	tests := map[string]bool{
+		"":                                    false,
+		"_":                                   false,
+		"custom.googleapis.com":               false,
+		"custom.googleapis.com/":              true,
+		"custom.googleapis.com/example-bytes": true,
+		"workload.googleapis.com/":            true,
+		"workload.googleapis.com/example-out": true,
+	}
+
+	for metricName, expected := range tests {
+		t.Run(fmt.Sprintf("shouldAddInstrumentationLibraryLabels(%q)", metricName), func(t *testing.T) {
+			metric := pdata.NewMetric()
+			metric.SetName(metricName)
+
+			config := createDefaultConfig()
+			m := metricMapper{cfg: config}
+			isCustom := m.shouldAddInstrumentationLibraryLabels(metric)
+			assert.Equalf(t, expected, isCustom, "expected isCustomMetric(%q) -> %t, want %t", metricName, isCustom, expected)
 		})
 	}
 }
