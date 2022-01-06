@@ -90,5 +90,13 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/gke_control_plane_metrics_agent_metrics_expect.json",
 			Skip:                 true,
 		},
+		{
+			Name:                 "CreateServiceTimeSeries",
+			OTLPInputFixturePath: "testdata/fixtures/create_service_timeseries_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/create_service_timeseries_metrics_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.CreateServiceTimeSeries = true
+			},
+		},
 	}
 )
