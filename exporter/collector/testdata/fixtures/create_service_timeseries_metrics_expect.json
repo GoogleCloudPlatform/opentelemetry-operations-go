@@ -10,11 +10,11 @@
                 }
             },
             "resource": {
-              "type": "generic_node",
+              "type": "k8s_node",
               "labels": {
-                  "location": "global",
-                  "namespace": "",
-                  "node_id": ""
+                "cluster_name": "rabbitmq-test-dev",
+                "location": "us-central1-c",
+                "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
               }
             },
             "metricKind": "GAUGE",

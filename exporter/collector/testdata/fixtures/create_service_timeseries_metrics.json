@@ -1,7 +1,34 @@
 {
     "resourceMetrics": [
       {
-        "resource": {},
+        "resource": {
+         "attributes": [
+            {
+               "key": "cloud.platform",
+               "value": { 
+                  "stringValue": "gcp_kubernetes_engine"
+               }
+            },
+            {
+               "key": "k8s.node.name",
+               "value": { 
+                  "stringValue": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
+               }
+            },
+            {
+               "key": "cloud.availability_zone",
+               "value": { 
+                  "stringValue": "us-central1-c"
+               }
+            },
+            {
+               "key": "k8s.cluster.name",
+               "value": { 
+                  "stringValue": "rabbitmq-test-dev"
+               }
+            }
+         ]
+        },
         "instrumentationLibraryMetrics": [
           {
             "instrumentationLibrary": {},
