@@ -98,7 +98,7 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 	if err != nil {
 		// TODO(ymotongpoo): handle detailed error categories
 		// span.SetStatus(codes.Unknown)
-		e.o.handleError(fmt.Errorf("failed to export to Google Cloud Monitoring: %w", err))
+		e.o.handleError(fmt.Errorf("failed to export to Google Cloud Trace: %w", err))
 	}
 	return err
 }
