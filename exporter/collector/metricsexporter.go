@@ -83,9 +83,6 @@ func newGoogleCloudMetricsExporter(
 
 	// TODO - Share this lookup somewhere
 	if cfg.ProjectID == "" {
-		if ctx == nil {
-			ctx = context.Background()
-		}
 		creds, err := google.FindDefaultCredentials(ctx, monitoring.DefaultAuthScopes()...)
 		// TODO- better error messages, this is copy-pasta from OpenCensus exporter.
 		if err != nil {
