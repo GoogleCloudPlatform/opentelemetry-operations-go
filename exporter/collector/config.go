@@ -50,8 +50,8 @@ type MetricConfig struct {
 	// If a metric belongs to one of these domains it does not get a prefix.
 	KnownDomains []string `mapstructure:"known_domains"`
 
-	// Programmatic option only. Buffer size for the channel which asynchronously calls
-	// CreateMetricDescriptor.
+	// Buffer size for the channel which asynchronously calls CreateMetricDescriptor. Default
+	// is 10.
 	CreateMetricDescriptorBufferSize int `mapstructure:"create_metric_descriptor_buffer_size"`
 }
 
