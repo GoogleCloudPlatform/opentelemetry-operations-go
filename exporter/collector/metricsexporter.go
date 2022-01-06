@@ -265,6 +265,13 @@ func (m *metricMapper) metricToTimeSeries(
 			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
+	case pdata.MetricDataTypeHistogram:
+		hist := metric.Histogram()
+		points := hist.DataPoints()
+		for i := 0; i < points.Len(); i++ {
+			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i))
+			timeSeries = append(timeSeries, ts)
+		}
 	case pdata.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
@@ -413,8 +420,39 @@ func (m *metricMapper) exemplars(exs pdata.ExemplarSlice) []*distribution.Distri
 	return exemplars
 }
 
+// histogramPoint maps a histogram data point into a GCM point.
+func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitoringpb.TypedValue {
+	counts := make([]int64, len(point.BucketCounts()))
+	for i, v := range point.BucketCounts() {
+		counts[i] = int64(v)
+	}
+
+	mean := float64(0)
+	if point.Count() > 0 { // Avoid divide-by-zero
+		mean = float64(point.Sum() / float64(point.Count()))
+	}
+
+	return &monitoringpb.TypedValue{
+		Value: &monitoringpb.TypedValue_DistributionValue{
+			DistributionValue: &distribution.Distribution{
+				Count:        int64(point.Count()),
+				Mean:         mean,
+				BucketCounts: counts,
+				BucketOptions: &distribution.Distribution_BucketOptions{
+					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
+						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
+							Bounds: point.ExplicitBounds(),
+						},
+					},
+				},
+				Exemplars: m.exemplars(point.Exemplars()),
+			},
+		},
+	}
+}
+
 // Maps an exponential distribution into a GCM point.
-func (m *metricMapper) exponentialPoint(point pdata.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
+func (m *metricMapper) exponentialHistogramPoint(point pdata.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
 	// First calculate underflow bucket with all negatives + zeros.
 	underflow := point.ZeroCount()
 	for _, v := range point.Negative().BucketCounts() {
@@ -464,6 +502,40 @@ func (m *metricMapper) exponentialPoint(point pdata.ExponentialHistogramDataPoin
 	}
 }
 
+func (m *metricMapper) histogramToTimeSeries(
+	resource *monitoredrespb.MonitoredResource,
+	extraLabels labels,
+	metric pdata.Metric,
+	_ pdata.Histogram,
+	point pdata.HistogramDataPoint,
+) *monitoringpb.TimeSeries {
+	// We treat deltas as cumulatives w/ resets.
+	metricKind := metricpb.MetricDescriptor_CUMULATIVE
+	startTime := timestamppb.New(point.StartTimestamp().AsTime())
+	endTime := timestamppb.New(point.Timestamp().AsTime())
+	value := m.histogramPoint(point)
+	return &monitoringpb.TimeSeries{
+		Resource:   resource,
+		Unit:       metric.Unit(),
+		MetricKind: metricKind,
+		ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
+		Points: []*monitoringpb.Point{{
+			Interval: &monitoringpb.TimeInterval{
+				StartTime: startTime,
+				EndTime:   endTime,
+			},
+			Value: value,
+		}},
+		Metric: &metricpb.Metric{
+			Type: m.metricNameToType(metric.Name()),
+			Labels: mergeLabels(
+				attributesToLabels(point.Attributes()),
+				extraLabels,
+			),
+		},
+	}
+}
+
 func (m *metricMapper) exponentialHistogramToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
@@ -475,7 +547,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
-	value := m.exponentialPoint(point)
+	value := m.exponentialHistogramPoint(point)
 	return &monitoringpb.TimeSeries{
 		Resource:   resource,
 		Unit:       metric.Unit(),
