@@ -28,6 +28,7 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	factories, err := componenttest.NopFactories()
 	assert.Nil(t, err)
 

@@ -96,6 +96,7 @@ func TestMergeLabels(t *testing.T) {
 }
 
 func TestHistogramPointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	cfg := createDefaultConfig()
 	cfg.ProjectID = "myproject"
 	mapper := metricMapper{cfg: cfg}
@@ -160,6 +161,7 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	cfg := createDefaultConfig()
 	cfg.ProjectID = "myproject"
 	mapper := metricMapper{cfg: cfg}
@@ -283,6 +285,7 @@ func TestExemplarOnlyTraceId(t *testing.T) {
 }
 
 func TestSumPointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
@@ -391,6 +394,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 }
 
 func TestGaugePointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
@@ -447,6 +451,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 }
 
 func TestSummaryPointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
@@ -520,6 +525,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 }
 
 func TestMetricNameToType(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	mapper := metricMapper{cfg: createDefaultConfig()}
 	assert.Equal(
 		t,
@@ -612,6 +618,7 @@ type metricDescriptorTest struct {
 }
 
 func TestMetricDescriptorMapping(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	tests := []metricDescriptorTest{
 		{
 			name: "Gauge",
@@ -876,6 +883,7 @@ type knownDomainsTest struct {
 }
 
 func TestKnownDomains(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	tests := []knownDomainsTest{
 		{
 			name:       "test",
