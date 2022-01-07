@@ -4,15 +4,21 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/system.memory.usage",
+            "type": "workload.googleapis.com/system.memory.usage",
             "labels": {
               "state": "used"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "GAUGE",
+          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -31,7 +37,7 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/system.memory.usage",
+        "type": "workload.googleapis.com/system.memory.usage",
         "labels": [
           {
             "key": "state"
@@ -41,7 +47,7 @@
         "valueType": "INT64",
         "unit": "By",
         "description": "Bytes of memory in use.",
-        "displayName": "OpenCensus/system.memory.usage"
+        "displayName": "system.memory.usage"
       }
     }
   ]

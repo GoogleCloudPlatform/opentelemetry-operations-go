@@ -50,13 +50,11 @@ var (
 			Name:                 "Non-monotonic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/nonmonotonic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/nonmonotonic_counter_metrics_expect.json",
-			Skip:                 true,
 		},
 		{
 			Name:                 "Summary",
 			OTLPInputFixturePath: "testdata/fixtures/summary_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/summary_metrics_expect.json",
-			Skip:                 true,
 		},
 		{
 			Name:                 "Ops Agent Self-Reported metrics",
