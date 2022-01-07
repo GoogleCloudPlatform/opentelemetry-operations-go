@@ -356,7 +356,8 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	for i := 0; i < quantiles.Len(); i++ {
 		quantile := quantiles.At(i)
 		pLabel := labels{
-			"percentile": fmt.Sprintf("%v", quantile.Quantile()),
+			// Convert to percentile.
+			"percentile": fmt.Sprintf("%f", quantile.Quantile()*100),
 		}
 		result = append(result, &monitoringpb.TimeSeries{
 			Resource:   resource,
@@ -365,8 +366,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			ValueType:  metricpb.MetricDescriptor_DOUBLE,
 			Points: []*monitoringpb.Point{{
 				Interval: &monitoringpb.TimeInterval{
-					StartTime: startTime,
-					EndTime:   endTime,
+					EndTime: endTime,
 				},
 				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
 					DoubleValue: quantile.Value(),

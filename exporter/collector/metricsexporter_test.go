@@ -463,7 +463,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	point.SetCount(count)
 	point.SetSum(sum)
 	quantile := point.QuantileValues().AppendEmpty()
-	quantile.SetQuantile(0.0)
+	quantile.SetQuantile(1.0)
 	quantile.SetValue(1.0)
 	end := start.Add(time.Hour)
 	point.SetTimestamp(pdata.NewTimestampFromTime(end))
@@ -508,13 +508,12 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Same(t, quantileResult.Resource, mr)
 	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary_summary_percentile")
 	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
-		"percentile": "0",
+		"percentile": "100.000000",
 	})
 	assert.Nil(t, quantileResult.Metadata)
 	assert.Len(t, quantileResult.Points, 1)
 	assert.Equal(t, quantileResult.Points[0].Interval, &monitoringpb.TimeInterval{
-		StartTime: timestamppb.New(start),
-		EndTime:   timestamppb.New(end),
+		EndTime: timestamppb.New(end),
 	})
 	assert.Equal(t, quantileResult.Points[0].Value.GetDoubleValue(), 1.0)
 }
