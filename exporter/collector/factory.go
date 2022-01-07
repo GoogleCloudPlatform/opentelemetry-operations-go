@@ -32,8 +32,7 @@ const (
 
 // NewFactory creates a factory for the googlecloud exporter
 func NewFactory() component.ExporterFactory {
-	// Register view for self-observability. Re-registering an existing view is a no-op but
-	// returns an error
+	// Re-registering an existing view is a no-op
 	view.Register(MetricViews()...)
 
 	return exporterhelper.NewFactory(
