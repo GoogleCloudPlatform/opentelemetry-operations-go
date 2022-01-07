@@ -23,13 +23,23 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
+	"go.opentelemetry.io/collector/service/featuregate"
 )
 
 const (
 	// The value of "type" key in configuration.
-	typeStr        = "googlecloud"
-	defaultTimeout = 12 * time.Second // Consistent with Cloud Monitoring's timeout
+	typeStr                  = "googlecloud"
+	defaultTimeout           = 12 * time.Second // Consistent with Cloud Monitoring's timeout
+	pdataExporterFeatureGate = "exporter.googlecloud.OTLPDirect"
 )
+
+func init() {
+	featuregate.Register(featuregate.Gate{
+		ID:          pdataExporterFeatureGate,
+		Description: "When enabled, the googlecloud exporter translates pdata directly to google cloud monitoring's types, rather than first translating to opencensus.",
+		Enabled:     false,
+	})
+}
 
 var once sync.Once
 
@@ -50,18 +60,21 @@ func NewFactory() component.ExporterFactory {
 
 // createDefaultConfig creates the default configuration for exporter.
 func createDefaultConfig() *Config {
-	return &Config{
+	cfg := &Config{
 		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
 		TimeoutSettings:  exporterhelper.TimeoutSettings{Timeout: defaultTimeout},
 		RetrySettings:    exporterhelper.DefaultRetrySettings(),
 		QueueSettings:    exporterhelper.DefaultQueueSettings(),
 		UserAgent:        "opentelemetry-collector-contrib {{version}}",
-		MetricConfig: MetricConfig{
+	}
+	if featuregate.IsEnabled(pdataExporterFeatureGate) {
+		cfg.MetricConfig = MetricConfig{
 			KnownDomains:                     domains,
 			Prefix:                           "workload.googleapis.com",
 			CreateMetricDescriptorBufferSize: 10,
-		},
+		}
 	}
+	return cfg
 }
 
 // createTracesExporter creates a trace exporter based on this config.
@@ -79,5 +92,8 @@ func createMetricsExporter(
 	params component.ExporterCreateSettings,
 	cfg config.Exporter) (component.MetricsExporter, error) {
 	eCfg := cfg.(*Config)
+	if !featuregate.IsEnabled(pdataExporterFeatureGate) {
+		return newLegacyGoogleCloudMetricsExporter(ctx, eCfg, params)
+	}
 	return newGoogleCloudMetricsExporter(ctx, eCfg, params)
 }

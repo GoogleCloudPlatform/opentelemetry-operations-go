@@ -201,6 +201,13 @@ and [memory limiter](https://github.com/open-telemetry/opentelemetry-collector/t
 optimal network usage and avoiding memory overruns.  You may also want to run an additional
 [sampler](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/probabilisticsamplerprocessor), depending on your needs.
 
+## Features and Feature-Gates
+
+See the [Collector feature gates](https://github.com/open-telemetry/opentelemetry-collector/blob/main/service/featuregate/README.md#collector-feature-gates) for an overview of feature gates in the collector.
+
+**ALPHA**: `exporter.googlecloud.OTLPDirect`
+
+When enabled via `--feature-gates=exporter.googlecloud.OTLPDirect`, the googlecloud exporter translates pdata directly to google cloud monitoring's types, rather than first translating to opencensus.
 
 ## Deprecatations
 

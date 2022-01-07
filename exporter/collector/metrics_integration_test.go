@@ -49,6 +49,7 @@ func createMetricsExporter(
 }
 
 func TestIntegrationMetrics(t *testing.T) {
+	defer collector.SetPdataFeatureGateForTest(true)()
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
