@@ -22,7 +22,6 @@ var (
 			Name:                 "Basic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
-			Skip:                 true,
 		},
 		{
 			Name:                 "Modified prefix unknown domain",
