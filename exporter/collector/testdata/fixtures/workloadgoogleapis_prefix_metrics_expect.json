@@ -10,9 +10,15 @@
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "CUMULATIVE",
+          "unit": "1",
           "valueType": "INT64",
           "points": [
             {
@@ -27,6 +33,21 @@
           ]
         }
       ]
+    }
+  ],
+  "createMetricDescriptorRequests": [
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testcounter",
+        "metricKind": "CUMULATIVE",
+        "valueType": "INT64",
+        "unit": "1",
+        "description": "This is a test counter",
+        "displayName": "testcounter",
+        "labels": [{
+          "key": "foo"
+        }]
+      }
     }
   ]
 }

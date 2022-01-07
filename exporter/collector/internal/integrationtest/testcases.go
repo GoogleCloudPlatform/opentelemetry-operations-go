@@ -39,7 +39,6 @@ var (
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.Prefix = "workload.googleapis.com"
 			},
-			Skip: true,
 		},
 		{
 			Name:                 "Delta Counter",
