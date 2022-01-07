@@ -4,19 +4,26 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/deltacounter",
+            "type": "workload.googleapis.com/deltacounter",
             "labels": {
               "foo": "bar"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
-          "metricKind": "GAUGE",
+          "metricKind": "CUMULATIVE",
+          "unit": "1",
           "valueType": "INT64",
           "points": [
             {
               "interval": {
+                "start_time": "1970-01-01T00:00:01Z",
                 "endTime": "1970-01-01T00:00:00Z"
               },
               "value": {
@@ -31,17 +38,17 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/deltacounter",
+        "type": "workload.googleapis.com/deltacounter",
         "labels": [
           {
             "key": "foo"
           }
         ],
-        "metricKind": "GAUGE",
+        "metricKind": "CUMULATIVE",
         "valueType": "INT64",
         "unit": "1",
         "description": "This is a test counter with delta temporality",
-        "displayName": "OpenCensus/deltacounter"
+        "displayName": "deltacounter"
       }
     }
   ]

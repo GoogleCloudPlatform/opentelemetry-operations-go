@@ -45,7 +45,6 @@ var (
 			Name:                 "Delta Counter",
 			OTLPInputFixturePath: "testdata/fixtures/delta_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/delta_counter_metrics_expect.json",
-			Skip:                 true,
 		},
 		{
 			Name:                 "Non-monotonic Counter",
