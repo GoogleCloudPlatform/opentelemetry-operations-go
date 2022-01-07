@@ -20,11 +20,12 @@ import (
 	"sort"
 	"time"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"go.opencensus.io/metric/metricdata"
 	"go.opencensus.io/metric/metricexport"
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/obsreport/obsreporttest"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 var _ metricexport.Exporter = (*InMemoryOCExporter)(nil)
