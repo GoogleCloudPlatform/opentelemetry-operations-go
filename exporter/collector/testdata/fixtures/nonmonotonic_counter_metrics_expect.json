@@ -18,7 +18,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -29,7 +28,8 @@
                 "int64Value": "6641752448"
               }
             }
-          ]
+          ],
+          "unit": "By"
         }
       ]
     }
