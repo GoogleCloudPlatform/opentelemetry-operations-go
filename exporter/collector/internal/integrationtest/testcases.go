@@ -28,9 +28,8 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/unknown_domain_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
-				cfg.MetricConfig.Prefix = "foobar.org"
+				cfg.MetricConfig.Prefix = "custom.googleapis.com/foobar.org"
 			},
-			Skip: true,
 		},
 		{
 			Name:                 "Modified prefix workload.googleapis.com",
