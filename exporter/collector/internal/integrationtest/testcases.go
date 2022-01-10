@@ -86,13 +86,17 @@ var (
 			Name:                 "GKE Metrics Agent",
 			OTLPInputFixturePath: "testdata/fixtures/gke_metrics_agent_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/gke_metrics_agent_metrics_expect.json",
-			Skip:                 true,
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.CreateServiceTimeSeries = true
+			},
 		},
 		{
 			Name:                 "GKE Control Plane Metrics Agent",
 			OTLPInputFixturePath: "testdata/fixtures/gke_control_plane_metrics_agent_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/gke_control_plane_metrics_agent_metrics_expect.json",
-			Skip:                 true,
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.CreateServiceTimeSeries = true
+			},
 		},
 		{
 			Name:                 "Exponential Histogram",
