@@ -30,12 +30,12 @@ const (
 	// The value of "type" key in configuration.
 	typeStr                  = "googlecloud"
 	defaultTimeout           = 12 * time.Second // Consistent with Cloud Monitoring's timeout
-	pdataExporterFeatureGate = "exporter.googlecloud.OTLPDirect"
+	PdataExporterFeatureGate = "exporter.googlecloud.OTLPDirect"
 )
 
 func init() {
 	featuregate.Register(featuregate.Gate{
-		ID:          pdataExporterFeatureGate,
+		ID:          PdataExporterFeatureGate,
 		Description: "When enabled, the googlecloud exporter translates pdata directly to google cloud monitoring's types, rather than first translating to opencensus.",
 		Enabled:     false,
 	})
@@ -67,7 +67,7 @@ func createDefaultConfig() *Config {
 		QueueSettings:    exporterhelper.DefaultQueueSettings(),
 		UserAgent:        "opentelemetry-collector-contrib {{version}}",
 	}
-	if featuregate.IsEnabled(pdataExporterFeatureGate) {
+	if featuregate.IsEnabled(PdataExporterFeatureGate) {
 		cfg.MetricConfig = MetricConfig{
 			KnownDomains:                     domains,
 			Prefix:                           "workload.googleapis.com",
@@ -92,7 +92,7 @@ func createMetricsExporter(
 	params component.ExporterCreateSettings,
 	cfg config.Exporter) (component.MetricsExporter, error) {
 	eCfg := cfg.(*Config)
-	if !featuregate.IsEnabled(pdataExporterFeatureGate) {
+	if !featuregate.IsEnabled(PdataExporterFeatureGate) {
 		return newLegacyGoogleCloudMetricsExporter(ctx, eCfg, params)
 	}
 	return newGoogleCloudMetricsExporter(ctx, eCfg, params)

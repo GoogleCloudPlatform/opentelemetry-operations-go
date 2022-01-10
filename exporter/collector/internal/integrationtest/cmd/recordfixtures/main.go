@@ -24,7 +24,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/service/featuregate"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
 
@@ -46,6 +48,7 @@ func (t *FakeTesting) Name() string { return "record fixtures" }
 
 func main() {
 	t := &FakeTesting{}
+	featuregate.Apply(map[string]bool{collector.PdataExporterFeatureGate: true})
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)

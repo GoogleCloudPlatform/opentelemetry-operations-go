@@ -28,10 +28,10 @@ import (
 // SetPdataFeatureGateForTest changes the pdata feature gate during a test.
 // usage: defer SetPdataFeatureGateForTest(true)()
 func SetPdataFeatureGateForTest(enabled bool) func() {
-	originalValue := featuregate.IsEnabled(pdataExporterFeatureGate)
-	featuregate.Apply(map[string]bool{pdataExporterFeatureGate: enabled})
+	originalValue := featuregate.IsEnabled(PdataExporterFeatureGate)
+	featuregate.Apply(map[string]bool{PdataExporterFeatureGate: enabled})
 	return func() {
-		featuregate.Apply(map[string]bool{pdataExporterFeatureGate: originalValue})
+		featuregate.Apply(map[string]bool{PdataExporterFeatureGate: originalValue})
 	}
 }
 

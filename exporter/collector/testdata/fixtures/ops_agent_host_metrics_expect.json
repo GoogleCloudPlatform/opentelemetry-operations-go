@@ -17,7 +17,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -29,7 +28,8 @@
                 "int64Value": "3652190208"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -46,7 +46,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -58,7 +57,8 @@
                 "int64Value": "33672253440"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -80,7 +80,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -92,7 +91,8 @@
                 "int64Value": "40000"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -114,7 +114,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -126,7 +125,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -148,7 +148,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -160,7 +159,8 @@
                 "int64Value": "80000"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -183,7 +183,6 @@
           },
           "metricKind": "CUMULATIVE",
           "valueType": "INT64",
-          "unit": "s",
           "points": [
             {
               "interval": {
@@ -194,7 +193,8 @@
                 "int64Value": "120000"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -216,7 +216,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -228,7 +227,8 @@
                 "int64Value": "100000"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -250,7 +250,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -262,7 +261,8 @@
                 "int64Value": "30000"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -283,7 +283,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -294,7 +293,8 @@
                 "doubleValue": 5431296
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -315,7 +315,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -326,7 +325,8 @@
                 "doubleValue": 6938624
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -347,7 +347,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -358,7 +357,8 @@
                 "doubleValue": 73625600
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -379,7 +379,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -390,7 +389,8 @@
                 "doubleValue": 21528576
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -411,7 +411,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -422,7 +421,8 @@
                 "doubleValue": 30916608
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -443,7 +443,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -454,7 +453,8 @@
                 "doubleValue": 1355685888
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -475,7 +475,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -487,7 +486,8 @@
                 "int64Value": "1073152"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -508,7 +508,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -520,7 +519,8 @@
                 "int64Value": "766906368"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -541,7 +541,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -553,7 +552,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -574,7 +574,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -586,7 +585,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -607,7 +607,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -619,7 +618,8 @@
                 "int64Value": "7915782144"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -640,7 +640,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -652,7 +651,8 @@
                 "int64Value": "4096"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -669,7 +669,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -680,7 +679,8 @@
                 "doubleValue": 177328128
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -697,7 +697,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -708,7 +707,8 @@
                 "doubleValue": 166518784
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -725,7 +725,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -736,7 +735,8 @@
                 "doubleValue": 2614779904
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -753,7 +753,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -764,7 +763,8 @@
                 "doubleValue": 148340736
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -781,7 +781,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -792,7 +791,8 @@
                 "doubleValue": 1208135680
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -809,7 +809,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -820,7 +819,8 @@
                 "doubleValue": 4.10947591438758
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -837,7 +837,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -848,7 +847,8 @@
                 "doubleValue": 3.858975673284657
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -865,7 +865,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -876,7 +875,8 @@
                 "doubleValue": 60.59599883055591
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -893,7 +893,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -904,7 +903,8 @@
                 "doubleValue": 3.437710015833058
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -921,7 +921,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -932,7 +931,8 @@
                 "doubleValue": 27.997839565938804
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -946,7 +946,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "1",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -957,7 +956,8 @@
                 "doubleValue": 0.01
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -971,7 +971,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "1",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -982,7 +981,8 @@
                 "doubleValue": 0.07
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -996,7 +996,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "1",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -1007,7 +1006,8 @@
                 "doubleValue": 0.21
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -1024,7 +1024,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -1036,7 +1035,8 @@
                 "int64Value": "913047552"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1053,7 +1053,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -1065,7 +1064,8 @@
                 "int64Value": "886438912"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1082,7 +1082,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -1094,7 +1093,8 @@
                 "int64Value": "163840"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1111,7 +1111,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -1123,7 +1122,8 @@
                 "int64Value": "2281984"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1141,7 +1141,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1153,7 +1152,8 @@
                 "int64Value": "40"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1171,7 +1171,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1183,7 +1182,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1201,7 +1201,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1213,7 +1212,8 @@
                 "int64Value": "343"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1231,7 +1231,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1243,7 +1242,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1261,7 +1261,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1273,7 +1272,8 @@
                 "int64Value": "40273"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1291,7 +1291,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1303,7 +1302,8 @@
                 "int64Value": "116910"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1321,7 +1321,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1333,7 +1332,8 @@
                 "int64Value": "38979"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1351,7 +1351,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1363,7 +1362,8 @@
                 "int64Value": "92252"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1380,7 +1380,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -1392,7 +1391,8 @@
                 "int64Value": "6065204"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -1409,7 +1409,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -1421,7 +1420,8 @@
                 "int64Value": "164692"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -1438,7 +1438,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -1450,7 +1449,8 @@
                 "int64Value": "12"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -1467,7 +1467,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -1479,7 +1478,8 @@
                 "int64Value": "36"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -1496,7 +1496,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{operations}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -1507,7 +1506,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1524,7 +1524,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{operations}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -1535,7 +1534,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1552,7 +1552,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{operations}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -1563,7 +1562,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1580,7 +1580,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{operations}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -1591,7 +1590,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1609,7 +1609,6 @@
           },
           "metricKind": "CUMULATIVE",
           "valueType": "INT64",
-          "unit": "s",
           "points": [
             {
               "interval": {
@@ -1620,7 +1619,8 @@
                 "int64Value": "4893248"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -1637,7 +1637,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -1649,7 +1648,8 @@
                 "int64Value": "12"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -1666,7 +1666,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -1678,7 +1677,8 @@
                 "int64Value": "1156"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -1695,7 +1695,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "s",
           "valueType": "INT64",
           "points": [
             {
@@ -1707,7 +1706,8 @@
                 "int64Value": "10807004"
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -1725,7 +1725,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1737,7 +1736,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1755,7 +1755,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1767,7 +1766,8 @@
                 "int64Value": "276190"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1785,7 +1785,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1797,7 +1796,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1815,7 +1815,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1827,7 +1826,8 @@
                 "int64Value": "276174"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1845,7 +1845,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1857,7 +1856,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1875,7 +1875,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1887,7 +1886,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1905,7 +1905,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1917,7 +1916,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1935,7 +1935,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{operations}",
           "valueType": "INT64",
           "points": [
             {
@@ -1947,7 +1946,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{operations}"
         },
         {
           "metric": {
@@ -1964,7 +1964,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -1976,7 +1975,8 @@
                 "int64Value": "8594224640"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1993,7 +1993,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -2005,7 +2004,8 @@
                 "int64Value": "8594138112"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2022,7 +2022,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -2034,7 +2033,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2051,7 +2051,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -2063,7 +2062,8 @@
                 "int64Value": "512"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2081,7 +2081,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{packets}",
           "valueType": "INT64",
           "points": [
             {
@@ -2093,7 +2092,8 @@
                 "int64Value": "37"
               }
             }
-          ]
+          ],
+          "unit": "{packets}"
         },
         {
           "metric": {
@@ -2111,7 +2111,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{packets}",
           "valueType": "INT64",
           "points": [
             {
@@ -2123,7 +2122,8 @@
                 "int64Value": "37"
               }
             }
-          ]
+          ],
+          "unit": "{packets}"
         },
         {
           "metric": {
@@ -2141,7 +2141,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{packets}",
           "valueType": "INT64",
           "points": [
             {
@@ -2153,7 +2152,8 @@
                 "int64Value": "179493"
               }
             }
-          ]
+          ],
+          "unit": "{packets}"
         },
         {
           "metric": {
@@ -2171,7 +2171,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{packets}",
           "valueType": "INT64",
           "points": [
             {
@@ -2183,7 +2182,8 @@
                 "int64Value": "329601"
               }
             }
-          ]
+          ],
+          "unit": "{packets}"
         },
         {
           "metric": {
@@ -2201,7 +2201,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{errors}",
           "valueType": "INT64",
           "points": [
             {
@@ -2213,7 +2212,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{errors}"
         },
         {
           "metric": {
@@ -2231,7 +2231,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{errors}",
           "valueType": "INT64",
           "points": [
             {
@@ -2243,7 +2242,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{errors}"
         },
         {
           "metric": {
@@ -2261,7 +2261,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{errors}",
           "valueType": "INT64",
           "points": [
             {
@@ -2273,7 +2272,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{errors}"
         },
         {
           "metric": {
@@ -2291,7 +2291,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{errors}",
           "valueType": "INT64",
           "points": [
             {
@@ -2303,7 +2302,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "{errors}"
         },
         {
           "metric": {
@@ -2321,7 +2321,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -2333,7 +2332,8 @@
                 "int64Value": "5253"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2351,7 +2351,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -2363,7 +2362,8 @@
                 "int64Value": "5253"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2381,7 +2381,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -2393,7 +2392,8 @@
                 "int64Value": "16550487"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2411,7 +2411,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "By",
           "valueType": "INT64",
           "points": [
             {
@@ -2423,7 +2422,8 @@
                 "int64Value": "3075430661"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2441,7 +2441,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2452,7 +2451,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2470,7 +2470,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2481,7 +2480,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2499,7 +2499,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2510,7 +2509,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2528,7 +2528,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2539,7 +2538,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2557,7 +2557,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2568,7 +2567,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2586,7 +2586,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2597,7 +2596,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2615,7 +2615,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2626,7 +2625,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2644,7 +2644,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2655,7 +2654,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2673,7 +2673,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2684,7 +2683,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2702,7 +2702,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2713,7 +2712,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2731,7 +2731,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2742,7 +2741,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2760,7 +2760,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "{connections}",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2771,7 +2770,8 @@
                 "doubleValue": 7
               }
             }
-          ]
+          ],
+          "unit": "{connections}"
         },
         {
           "metric": {
@@ -2789,7 +2789,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2800,7 +2799,8 @@
                 "doubleValue": 8255782912
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2818,7 +2818,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2829,7 +2828,8 @@
                 "doubleValue": 11705372672
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2847,7 +2847,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2858,7 +2857,8 @@
                 "doubleValue": 976375808
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2876,7 +2876,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2887,7 +2886,8 @@
                 "doubleValue": 5904384
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2905,7 +2905,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2916,7 +2915,8 @@
                 "doubleValue": 123846656
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2934,7 +2934,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2945,7 +2944,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2963,7 +2963,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -2974,7 +2973,8 @@
                 "doubleValue": 4.5505484965669645
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2992,7 +2992,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -3003,7 +3002,8 @@
                 "doubleValue": 95.44945150343304
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3021,7 +3021,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -3032,7 +3031,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3050,7 +3050,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -3061,7 +3060,8 @@
                 "doubleValue": 39.43054583385338
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3079,7 +3079,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -3090,7 +3089,8 @@
                 "doubleValue": 55.90617371669945
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3108,7 +3108,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "unit": "By",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -3119,7 +3118,8 @@
                 "doubleValue": 4.6632804494471705
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3133,7 +3133,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "{processes}",
           "valueType": "INT64",
           "points": [
             {
@@ -3145,7 +3144,8 @@
                 "int64Value": "35156"
               }
             }
-          ]
+          ],
+          "unit": "{processes}"
         }
       ]
     }

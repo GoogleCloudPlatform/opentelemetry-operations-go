@@ -18,7 +18,6 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "unit": "1",
           "valueType": "INT64",
           "points": [
             {
@@ -30,7 +29,8 @@
                 "int64Value": "253"
               }
             }
-          ]
+          ],
+          "unit": "1"
         }
       ]
     }
