@@ -4,19 +4,19 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"rabbitmq"
                    }
                 },
                 {
-                   "key":"host.name",
+                   "key":"k8s.node.name",
                    "value":{
                       "stringValue":"10.92.5.2"
                    }
@@ -49,6 +49,12 @@
                    "key":"k8s.pod.name",
                    "value":{
                       "stringValue":"rabbitmq-server-0"
+                   }
+                },
+                {
+                   "key":"cloud.platform",
+                   "value":{
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 }
              ]
