@@ -28,7 +28,6 @@ func TestMetrics(t *testing.T) {
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
-	// view.SetReportingPeriod(time.Millisecond * 250)
 
 	for _, test := range integrationtest.TestCases {
 		test := test
