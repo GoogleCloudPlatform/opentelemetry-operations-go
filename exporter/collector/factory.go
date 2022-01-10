@@ -16,7 +16,6 @@ package collector
 
 import (
 	"context"
-	"sync"
 	"time"
 
 	"go.opencensus.io/stats/view"
@@ -31,14 +30,10 @@ const (
 	defaultTimeout = 12 * time.Second // Consistent with Cloud Monitoring's timeout
 )
 
-var once sync.Once
-
 // NewFactory creates a factory for the googlecloud exporter
 func NewFactory() component.ExporterFactory {
-	// register view for self-observability
-	once.Do(func() {
-		view.Register(viewPointCount)
-	})
+	// Re-registering an existing view is a no-op
+	view.Register(MetricViews()...)
 
 	return exporterhelper.NewFactory(
 		typeStr,
