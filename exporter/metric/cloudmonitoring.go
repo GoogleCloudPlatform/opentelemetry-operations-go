@@ -20,7 +20,7 @@ import (
 	"fmt"
 	"time"
 
-	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/sdkapi"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
 	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -87,7 +87,7 @@ func (e *Exporter) Export(ctx context.Context, res *resource.Resource, ilr expor
 	return e.metricExporter.ExportMetrics(ctx, res, ilr)
 }
 
-// ExportKindFor returns cumulative export kind
-func (e *Exporter) ExportKindFor(*metric.Descriptor, aggregation.Kind) export.ExportKind {
-	return export.CumulativeExportKind
+// TemporalityFor returns cumulative export kind
+func (e *Exporter) TemporalityFor(*sdkapi.Descriptor, aggregation.Kind) aggregation.Temporality {
+	return aggregation.CumulativeTemporality
 }

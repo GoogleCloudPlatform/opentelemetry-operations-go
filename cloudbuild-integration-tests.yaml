@@ -13,6 +13,6 @@
 # limitations under the License.
 
 steps:
-  - name: golang:1.14
+  - name: golang:1.16
     args: ["make", "integrationtest"]
 logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs
