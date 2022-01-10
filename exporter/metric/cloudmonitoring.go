@@ -87,7 +87,7 @@ func (e *Exporter) Export(ctx context.Context, res *resource.Resource, ilr expor
 	return e.metricExporter.ExportMetrics(ctx, res, ilr)
 }
 
-// TemporalityFor returns cumulative export kind
+// TemporalityFor returns cumulative temporality
 func (e *Exporter) TemporalityFor(*sdkapi.Descriptor, aggregation.Kind) aggregation.Temporality {
 	return aggregation.CumulativeTemporality
 }
