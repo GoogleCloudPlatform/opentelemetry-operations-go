@@ -740,11 +740,17 @@ func (m *metricMapper) metricTypeToDisplayName(mURL string) string {
 func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescriptor {
 	// TODO - allow customization of label descriptions.
 	result := []*label.LabelDescriptor{}
+	seenKeys := map[string]struct{}{}
 	addAttributes := func(attr pdata.AttributeMap) {
 		attr.Range(func(key string, _ pdata.AttributeValue) bool {
+			// Skip keys that have already been set
+			if _, ok := seenKeys[key]; ok {
+				return true
+			}
 			result = append(result, &label.LabelDescriptor{
 				Key: key,
 			})
+			seenKeys[key] = struct{}{}
 			return true
 		})
 	}
