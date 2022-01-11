@@ -72,3 +72,10 @@ The old exporter relied on upstream conversion of OTLP Summary into Gauge and
 Cumulative points.  The new exporter performs this conversion itself, which
 means summary metric descriptors will include label description for `percentile`
 labels.
+
+## Self Observability Metrics
+
+For each OTLP Summary metric point, the old exporter would add 1 to the
+`googlecloudmonitoring/point_count` self-observability counter. For a Summary point with N
+percentile values, the new exporter will add `N + 2` (one for each percentile timeseries, one
+for count, and one for sum) to the counter.
