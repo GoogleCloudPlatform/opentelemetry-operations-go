@@ -4,7 +4,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_mnesia_held_locks",
+            "type": "workload.googleapis.com/erlang_mnesia_held_locks",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -34,7 +34,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_mnesia_lock_queue",
+            "type": "workload.googleapis.com/erlang_mnesia_lock_queue",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -64,7 +64,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_mnesia_transaction_participants",
+            "type": "workload.googleapis.com/erlang_mnesia_transaction_participants",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -94,7 +94,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_mnesia_transaction_coordinators",
+            "type": "workload.googleapis.com/erlang_mnesia_transaction_coordinators",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -124,7 +124,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_mnesia_failed_transactions",
+            "type": "workload.googleapis.com/erlang_mnesia_failed_transactions",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -155,7 +155,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_mnesia_committed_transactions",
+            "type": "workload.googleapis.com/erlang_mnesia_committed_transactions",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -186,7 +186,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_mnesia_logged_transactions",
+            "type": "workload.googleapis.com/erlang_mnesia_logged_transactions",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -217,7 +217,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_mnesia_restarted_transactions",
+            "type": "workload.googleapis.com/erlang_mnesia_restarted_transactions",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -248,7 +248,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_consumers",
+            "type": "workload.googleapis.com/rabbitmq_channel_consumers",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -278,7 +278,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_unacked",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_unacked",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -308,7 +308,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_unconfirmed",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_unconfirmed",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -338,7 +338,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_uncommitted",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_uncommitted",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -368,7 +368,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_acks_uncommitted",
+            "type": "workload.googleapis.com/rabbitmq_channel_acks_uncommitted",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -398,7 +398,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_consumer_prefetch",
+            "type": "workload.googleapis.com/rabbitmq_consumer_prefetch",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -428,7 +428,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_prefetch",
+            "type": "workload.googleapis.com/rabbitmq_channel_prefetch",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -458,7 +458,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_published_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_published_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -489,7 +489,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_confirmed_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_confirmed_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -520,7 +520,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_unroutable_returned_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_unroutable_returned_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -551,7 +551,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_unroutable_dropped_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_unroutable_dropped_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -582,7 +582,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_process_reductions_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_process_reductions_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -613,7 +613,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_get_ack_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_get_ack_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -644,7 +644,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_get_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_get_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -675,7 +675,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_delivered_ack_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_delivered_ack_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -706,7 +706,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_delivered_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_delivered_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -737,7 +737,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_redelivered_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_redelivered_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -768,7 +768,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_acked_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_messages_acked_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -799,7 +799,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channel_get_empty_total",
+            "type": "workload.googleapis.com/rabbitmq_channel_get_empty_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -830,7 +830,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connections_opened_total",
+            "type": "workload.googleapis.com/rabbitmq_connections_opened_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -861,7 +861,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connections_closed_total",
+            "type": "workload.googleapis.com/rabbitmq_connections_closed_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -892,7 +892,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channels_opened_total",
+            "type": "workload.googleapis.com/rabbitmq_channels_opened_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -923,7 +923,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channels_closed_total",
+            "type": "workload.googleapis.com/rabbitmq_channels_closed_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -954,7 +954,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queues_declared_total",
+            "type": "workload.googleapis.com/rabbitmq_queues_declared_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -985,7 +985,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queues_created_total",
+            "type": "workload.googleapis.com/rabbitmq_queues_created_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1016,7 +1016,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queues_deleted_total",
+            "type": "workload.googleapis.com/rabbitmq_queues_deleted_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1047,7 +1047,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connection_incoming_bytes_total",
+            "type": "workload.googleapis.com/rabbitmq_connection_incoming_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1078,7 +1078,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connection_outgoing_bytes_total",
+            "type": "workload.googleapis.com/rabbitmq_connection_outgoing_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1109,7 +1109,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connection_process_reductions_total",
+            "type": "workload.googleapis.com/rabbitmq_connection_process_reductions_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1140,7 +1140,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connection_incoming_packets_total",
+            "type": "workload.googleapis.com/rabbitmq_connection_incoming_packets_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1171,7 +1171,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connection_outgoing_packets_total",
+            "type": "workload.googleapis.com/rabbitmq_connection_outgoing_packets_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1202,7 +1202,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connection_pending_packets",
+            "type": "workload.googleapis.com/rabbitmq_connection_pending_packets",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1232,7 +1232,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connection_channels",
+            "type": "workload.googleapis.com/rabbitmq_connection_channels",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1262,7 +1262,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_published_total",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_published_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1293,7 +1293,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_process_open_fds",
+            "type": "workload.googleapis.com/rabbitmq_process_open_fds",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1323,7 +1323,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_process_open_tcp_sockets",
+            "type": "workload.googleapis.com/rabbitmq_process_open_tcp_sockets",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1353,7 +1353,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_process_resident_memory_bytes",
+            "type": "workload.googleapis.com/rabbitmq_process_resident_memory_bytes",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1383,7 +1383,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_disk_space_available_bytes",
+            "type": "workload.googleapis.com/rabbitmq_disk_space_available_bytes",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1413,7 +1413,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_processes_used",
+            "type": "workload.googleapis.com/rabbitmq_erlang_processes_used",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1443,7 +1443,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_gc_runs_total",
+            "type": "workload.googleapis.com/rabbitmq_erlang_gc_runs_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1474,7 +1474,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_gc_reclaimed_bytes_total",
+            "type": "workload.googleapis.com/rabbitmq_erlang_gc_reclaimed_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1505,7 +1505,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_scheduler_context_switches_total",
+            "type": "workload.googleapis.com/rabbitmq_erlang_scheduler_context_switches_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1536,7 +1536,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_process_max_fds",
+            "type": "workload.googleapis.com/rabbitmq_process_max_fds",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1566,7 +1566,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_process_max_tcp_sockets",
+            "type": "workload.googleapis.com/rabbitmq_process_max_tcp_sockets",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1596,7 +1596,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_resident_memory_limit_bytes",
+            "type": "workload.googleapis.com/rabbitmq_resident_memory_limit_bytes",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1626,7 +1626,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_disk_space_available_limit_bytes",
+            "type": "workload.googleapis.com/rabbitmq_disk_space_available_limit_bytes",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1656,7 +1656,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_processes_limit",
+            "type": "workload.googleapis.com/rabbitmq_erlang_processes_limit",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1686,7 +1686,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_scheduler_run_queue",
+            "type": "workload.googleapis.com/rabbitmq_erlang_scheduler_run_queue",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1716,7 +1716,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_net_ticktime_seconds",
+            "type": "workload.googleapis.com/rabbitmq_erlang_net_ticktime_seconds",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1746,7 +1746,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_uptime_seconds",
+            "type": "workload.googleapis.com/rabbitmq_erlang_uptime_seconds",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1776,7 +1776,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_read_ops_total",
+            "type": "workload.googleapis.com/rabbitmq_io_read_ops_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1807,7 +1807,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_read_bytes_total",
+            "type": "workload.googleapis.com/rabbitmq_io_read_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1838,7 +1838,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_write_ops_total",
+            "type": "workload.googleapis.com/rabbitmq_io_write_ops_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1869,7 +1869,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_write_bytes_total",
+            "type": "workload.googleapis.com/rabbitmq_io_write_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1900,7 +1900,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_sync_ops_total",
+            "type": "workload.googleapis.com/rabbitmq_io_sync_ops_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1931,7 +1931,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_seek_ops_total",
+            "type": "workload.googleapis.com/rabbitmq_io_seek_ops_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1962,7 +1962,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_open_attempt_ops_total",
+            "type": "workload.googleapis.com/rabbitmq_io_open_attempt_ops_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -1993,7 +1993,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_reopen_ops_total",
+            "type": "workload.googleapis.com/rabbitmq_io_reopen_ops_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2024,7 +2024,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_schema_db_ram_tx_total",
+            "type": "workload.googleapis.com/rabbitmq_schema_db_ram_tx_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2055,7 +2055,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_schema_db_disk_tx_total",
+            "type": "workload.googleapis.com/rabbitmq_schema_db_disk_tx_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2086,7 +2086,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_msg_store_read_total",
+            "type": "workload.googleapis.com/rabbitmq_msg_store_read_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2117,7 +2117,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_msg_store_write_total",
+            "type": "workload.googleapis.com/rabbitmq_msg_store_write_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2148,7 +2148,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_index_read_ops_total",
+            "type": "workload.googleapis.com/rabbitmq_queue_index_read_ops_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2179,7 +2179,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_index_write_ops_total",
+            "type": "workload.googleapis.com/rabbitmq_queue_index_write_ops_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2210,7 +2210,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_index_journal_write_ops_total",
+            "type": "workload.googleapis.com/rabbitmq_queue_index_journal_write_ops_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2241,7 +2241,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_read_time_seconds_total",
+            "type": "workload.googleapis.com/rabbitmq_io_read_time_seconds_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2272,7 +2272,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_write_time_seconds_total",
+            "type": "workload.googleapis.com/rabbitmq_io_write_time_seconds_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2303,7 +2303,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_sync_time_seconds_total",
+            "type": "workload.googleapis.com/rabbitmq_io_sync_time_seconds_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2334,7 +2334,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_seek_time_seconds_total",
+            "type": "workload.googleapis.com/rabbitmq_io_seek_time_seconds_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2365,7 +2365,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_io_open_attempt_time_seconds_total",
+            "type": "workload.googleapis.com/rabbitmq_io_open_attempt_time_seconds_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2396,7 +2396,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_raft_term_total",
+            "type": "workload.googleapis.com/rabbitmq_raft_term_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2427,7 +2427,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_raft_log_snapshot_index",
+            "type": "workload.googleapis.com/rabbitmq_raft_log_snapshot_index",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2457,7 +2457,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_raft_log_last_applied_index",
+            "type": "workload.googleapis.com/rabbitmq_raft_log_last_applied_index",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2487,7 +2487,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_raft_log_commit_index",
+            "type": "workload.googleapis.com/rabbitmq_raft_log_commit_index",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2517,7 +2517,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_raft_log_last_written_index",
+            "type": "workload.googleapis.com/rabbitmq_raft_log_last_written_index",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2547,7 +2547,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_raft_entry_commit_latency_seconds",
+            "type": "workload.googleapis.com/rabbitmq_raft_entry_commit_latency_seconds",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2577,7 +2577,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ready",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_ready",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2607,7 +2607,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_unacked",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_unacked",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2637,7 +2637,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2667,7 +2667,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_process_reductions_total",
+            "type": "workload.googleapis.com/rabbitmq_queue_process_reductions_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2698,7 +2698,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_consumers",
+            "type": "workload.googleapis.com/rabbitmq_queue_consumers",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2728,7 +2728,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_consumer_utilisation",
+            "type": "workload.googleapis.com/rabbitmq_queue_consumer_utilisation",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2758,7 +2758,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_process_memory_bytes",
+            "type": "workload.googleapis.com/rabbitmq_queue_process_memory_bytes",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2788,7 +2788,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ram",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_ram",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2818,7 +2818,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ram_bytes",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_ram_bytes",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2848,7 +2848,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ready_ram",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_ready_ram",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2878,7 +2878,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_unacked_ram",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_unacked_ram",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2908,7 +2908,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_persistent",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_persistent",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -2938,67 +2938,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_bytes",
-            "labels": {
-              "job": "default/rabbitmq/0"
-            }
-          },
-          "resource": {
-            "type": "k8s_container",
-            "labels": {
-              "cluster_name": "rabbitmq-test-dev",
-              "container_name": "rabbitmq",
-              "location": "us-central1-c",
-              "namespace_name": "default",
-              "pod_name": "rabbitmq-server-0"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 2772
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ready_bytes",
-            "labels": {
-              "job": "default/rabbitmq/0"
-            }
-          },
-          "resource": {
-            "type": "k8s_container",
-            "labels": {
-              "cluster_name": "rabbitmq-test-dev",
-              "container_name": "rabbitmq",
-              "location": "us-central1-c",
-              "namespace_name": "default",
-              "pod_name": "rabbitmq-server-0"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 0
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_unacked_bytes",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_bytes",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3028,7 +2968,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_paged_out",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_ready_bytes",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3058,7 +2998,37 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_paged_out_bytes",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_unacked_bytes",
+            "labels": {
+              "job": "default/rabbitmq/0"
+            }
+          },
+          "resource": {
+            "type": "k8s_container",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "container_name": "rabbitmq",
+              "location": "us-central1-c",
+              "namespace_name": "default",
+              "pod_name": "rabbitmq-server-0"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 2772
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_paged_out",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3088,7 +3058,37 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_disk_reads_total",
+            "type": "workload.googleapis.com/rabbitmq_queue_messages_paged_out_bytes",
+            "labels": {
+              "job": "default/rabbitmq/0"
+            }
+          },
+          "resource": {
+            "type": "k8s_container",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "container_name": "rabbitmq",
+              "location": "us-central1-c",
+              "namespace_name": "default",
+              "pod_name": "rabbitmq-server-0"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "workload.googleapis.com/rabbitmq_queue_disk_reads_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3119,7 +3119,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queue_disk_writes_total",
+            "type": "workload.googleapis.com/rabbitmq_queue_disk_writes_total",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3150,7 +3150,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_auth_attempts_total",
+            "type": "workload.googleapis.com/rabbitmq_auth_attempts_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "protocol": "amqp091"
@@ -3182,7 +3182,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_auth_attempts_succeeded_total",
+            "type": "workload.googleapis.com/rabbitmq_auth_attempts_succeeded_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "protocol": "amqp091"
@@ -3214,7 +3214,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_auth_attempts_failed_total",
+            "type": "workload.googleapis.com/rabbitmq_auth_attempts_failed_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "protocol": "amqp091"
@@ -3246,7 +3246,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_connections",
+            "type": "workload.googleapis.com/rabbitmq_connections",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3276,7 +3276,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_channels",
+            "type": "workload.googleapis.com/rabbitmq_channels",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3306,7 +3306,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_consumers",
+            "type": "workload.googleapis.com/rabbitmq_consumers",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3336,7 +3336,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_queues",
+            "type": "workload.googleapis.com/rabbitmq_queues",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3366,7 +3366,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_build_info",
+            "type": "workload.googleapis.com/rabbitmq_build_info",
             "labels": {
               "erlang_version": "24.0.5",
               "job": "default/rabbitmq/0",
@@ -3400,7 +3400,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/rabbitmq_identity_info",
+            "type": "workload.googleapis.com/rabbitmq_identity_info",
             "labels": {
               "job": "default/rabbitmq/0",
               "rabbitmq_cluster": "rabbitmq",
@@ -3432,7 +3432,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/telemetry_scrape_encoded_size_bytes_summary_sum",
+            "type": "workload.googleapis.com/telemetry_scrape_encoded_size_bytes_summary_sum",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "encoding": "gzip",
@@ -3466,7 +3466,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/telemetry_scrape_encoded_size_bytes_summary_count",
+            "type": "workload.googleapis.com/telemetry_scrape_encoded_size_bytes_summary_count",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "encoding": "gzip",
@@ -3500,7 +3500,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/telemetry_scrape_size_bytes_summary_sum",
+            "type": "workload.googleapis.com/telemetry_scrape_size_bytes_summary_sum",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",
@@ -3533,7 +3533,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/telemetry_scrape_size_bytes_summary_count",
+            "type": "workload.googleapis.com/telemetry_scrape_size_bytes_summary_count",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",
@@ -3566,7 +3566,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/telemetry_scrape_duration_seconds_summary_sum",
+            "type": "workload.googleapis.com/telemetry_scrape_duration_seconds_summary_sum",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",
@@ -3599,7 +3599,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/telemetry_scrape_duration_seconds_summary_count",
+            "type": "workload.googleapis.com/telemetry_scrape_duration_seconds_summary_count",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",
@@ -3632,7 +3632,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_atom_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_atom_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "usage": "used"
@@ -3663,7 +3663,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_atom_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_atom_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "usage": "free"
@@ -3694,7 +3694,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "kind": "system"
@@ -3725,7 +3725,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "kind": "processes"
@@ -3756,7 +3756,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_dets_tables",
+            "type": "workload.googleapis.com/erlang_vm_memory_dets_tables",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3786,7 +3786,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_ets_tables",
+            "type": "workload.googleapis.com/erlang_vm_memory_ets_tables",
             "labels": {
               "job": "default/rabbitmq/0"
             }
@@ -3816,7 +3816,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_processes_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_processes_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "usage": "used"
@@ -3847,7 +3847,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_processes_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_processes_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "usage": "free"
@@ -3878,7 +3878,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_system_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_system_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "usage": "atom"
@@ -3909,7 +3909,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_system_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_system_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "usage": "binary"
@@ -3940,7 +3940,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_system_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_system_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "usage": "code"
@@ -3971,7 +3971,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_system_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_system_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "usage": "ets"
@@ -4002,7 +4002,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_memory_system_bytes_total",
+            "type": "workload.googleapis.com/erlang_vm_memory_system_bytes_total",
             "labels": {
               "job": "default/rabbitmq/0",
               "usage": "other"
@@ -4033,7 +4033,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "3",
               "job": "default/rabbitmq/0",
@@ -4066,7 +4066,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "1",
               "job": "default/rabbitmq/0",
@@ -4099,7 +4099,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "0",
               "job": "default/rabbitmq/0",
@@ -4132,7 +4132,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "8",
               "job": "default/rabbitmq/0",
@@ -4165,7 +4165,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "10",
               "job": "default/rabbitmq/0",
@@ -4198,7 +4198,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "9",
               "job": "default/rabbitmq/0",
@@ -4231,7 +4231,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "8",
               "job": "default/rabbitmq/0",
@@ -4264,7 +4264,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "7",
               "job": "default/rabbitmq/0",
@@ -4297,7 +4297,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "6",
               "job": "default/rabbitmq/0",
@@ -4330,7 +4330,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "7",
               "job": "default/rabbitmq/0",
@@ -4363,7 +4363,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "4",
               "job": "default/rabbitmq/0",
@@ -4396,7 +4396,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "6",
               "job": "default/rabbitmq/0",
@@ -4429,7 +4429,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "5",
               "job": "default/rabbitmq/0",
@@ -4462,7 +4462,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "4",
               "job": "default/rabbitmq/0",
@@ -4495,7 +4495,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "3",
               "job": "default/rabbitmq/0",
@@ -4528,7 +4528,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "2",
               "job": "default/rabbitmq/0",
@@ -4561,7 +4561,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "1",
               "job": "default/rabbitmq/0",
@@ -4594,7 +4594,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "1",
               "job": "default/rabbitmq/0",
@@ -4627,7 +4627,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "8",
               "job": "default/rabbitmq/0",
@@ -4660,7 +4660,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "7",
               "job": "default/rabbitmq/0",
@@ -4693,7 +4693,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "6",
               "job": "default/rabbitmq/0",
@@ -4726,7 +4726,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "5",
               "job": "default/rabbitmq/0",
@@ -4759,7 +4759,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "4",
               "job": "default/rabbitmq/0",
@@ -4792,7 +4792,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "3",
               "job": "default/rabbitmq/0",
@@ -4825,7 +4825,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "2",
               "job": "default/rabbitmq/0",
@@ -4858,7 +4858,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "1",
               "job": "default/rabbitmq/0",
@@ -4891,7 +4891,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "0",
               "job": "default/rabbitmq/0",
@@ -4924,7 +4924,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "5",
               "job": "default/rabbitmq/0",
@@ -4957,7 +4957,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_aux_seconds_total",
             "labels": {
               "id": "2",
               "job": "default/rabbitmq/0",
@@ -4990,7 +4990,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "3",
               "job": "default/rabbitmq/0",
@@ -5023,7 +5023,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "1",
               "job": "default/rabbitmq/0",
@@ -5056,7 +5056,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "0",
               "job": "default/rabbitmq/0",
@@ -5089,7 +5089,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "8",
               "job": "default/rabbitmq/0",
@@ -5122,7 +5122,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "10",
               "job": "default/rabbitmq/0",
@@ -5155,7 +5155,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "9",
               "job": "default/rabbitmq/0",
@@ -5188,7 +5188,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "8",
               "job": "default/rabbitmq/0",
@@ -5221,7 +5221,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "7",
               "job": "default/rabbitmq/0",
@@ -5254,7 +5254,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "6",
               "job": "default/rabbitmq/0",
@@ -5287,7 +5287,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "7",
               "job": "default/rabbitmq/0",
@@ -5320,7 +5320,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "4",
               "job": "default/rabbitmq/0",
@@ -5353,7 +5353,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "6",
               "job": "default/rabbitmq/0",
@@ -5386,7 +5386,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "5",
               "job": "default/rabbitmq/0",
@@ -5419,7 +5419,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "4",
               "job": "default/rabbitmq/0",
@@ -5452,7 +5452,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "3",
               "job": "default/rabbitmq/0",
@@ -5485,7 +5485,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "2",
               "job": "default/rabbitmq/0",
@@ -5518,7 +5518,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "1",
               "job": "default/rabbitmq/0",
@@ -5551,7 +5551,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "1",
               "job": "default/rabbitmq/0",
@@ -5584,7 +5584,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "8",
               "job": "default/rabbitmq/0",
@@ -5617,7 +5617,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "7",
               "job": "default/rabbitmq/0",
@@ -5650,7 +5650,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "6",
               "job": "default/rabbitmq/0",
@@ -5683,7 +5683,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "5",
               "job": "default/rabbitmq/0",
@@ -5716,7 +5716,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "4",
               "job": "default/rabbitmq/0",
@@ -5749,7 +5749,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "3",
               "job": "default/rabbitmq/0",
@@ -5782,7 +5782,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "2",
               "job": "default/rabbitmq/0",
@@ -5815,7 +5815,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "1",
               "job": "default/rabbitmq/0",
@@ -5848,7 +5848,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "0",
               "job": "default/rabbitmq/0",
@@ -5881,7 +5881,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "5",
               "job": "default/rabbitmq/0",
@@ -5914,7 +5914,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_check_io_seconds_total",
             "labels": {
               "id": "2",
               "job": "default/rabbitmq/0",
@@ -5947,7 +5947,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "3",
               "job": "default/rabbitmq/0",
@@ -5980,7 +5980,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "1",
               "job": "default/rabbitmq/0",
@@ -6013,7 +6013,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "0",
               "job": "default/rabbitmq/0",
@@ -6046,7 +6046,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "8",
               "job": "default/rabbitmq/0",
@@ -6079,7 +6079,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "10",
               "job": "default/rabbitmq/0",
@@ -6112,7 +6112,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "9",
               "job": "default/rabbitmq/0",
@@ -6145,7 +6145,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "8",
               "job": "default/rabbitmq/0",
@@ -6178,7 +6178,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "7",
               "job": "default/rabbitmq/0",
@@ -6211,7 +6211,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "6",
               "job": "default/rabbitmq/0",
@@ -6244,7 +6244,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "7",
               "job": "default/rabbitmq/0",
@@ -6277,7 +6277,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "4",
               "job": "default/rabbitmq/0",
@@ -6314,7 +6314,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "6",
               "job": "default/rabbitmq/0",
@@ -6347,7 +6347,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "5",
               "job": "default/rabbitmq/0",
@@ -6380,7 +6380,7 @@
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
+            "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
             "labels": {
               "id": "4",
               "job": "default/rabbitmq/0",
@@ -6412,1904 +6412,6 @@
           ]
         }
       ]
-    }
-  ],
-  "createMetricDescriptorRequests": [
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_mnesia_held_locks",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Number of held locks.",
-        "displayName": "OpenCensus/erlang_mnesia_held_locks"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_mnesia_lock_queue",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Number of transactions waiting for a lock.",
-        "displayName": "OpenCensus/erlang_mnesia_lock_queue"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_mnesia_transaction_participants",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Number of participant transactions.",
-        "displayName": "OpenCensus/erlang_mnesia_transaction_participants"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_mnesia_transaction_coordinators",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Number of coordinator transactions.",
-        "displayName": "OpenCensus/erlang_mnesia_transaction_coordinators"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_mnesia_failed_transactions",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Number of failed (i.e. aborted) transactions.",
-        "displayName": "OpenCensus/erlang_mnesia_failed_transactions"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_mnesia_committed_transactions",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Number of committed transactions.",
-        "displayName": "OpenCensus/erlang_mnesia_committed_transactions"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_mnesia_logged_transactions",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Number of transactions logged.",
-        "displayName": "OpenCensus/erlang_mnesia_logged_transactions"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_mnesia_restarted_transactions",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of transaction restarts.",
-        "displayName": "OpenCensus/erlang_mnesia_restarted_transactions"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_consumers",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Consumers on a channel",
-        "displayName": "OpenCensus/rabbitmq_channel_consumers"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_unacked",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Delivered but not yet acknowledged messages",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_unacked"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_unconfirmed",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Published but not yet confirmed messages",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_unconfirmed"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_uncommitted",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Messages received in a transaction but not yet committed",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_uncommitted"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_acks_uncommitted",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Message acknowledgements in a transaction not yet committed",
-        "displayName": "OpenCensus/rabbitmq_channel_acks_uncommitted"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_consumer_prefetch",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Limit of unacknowledged messages for each consumer",
-        "displayName": "OpenCensus/rabbitmq_consumer_prefetch"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_prefetch",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Total limit of unacknowledged messages for all consumers on a channel",
-        "displayName": "OpenCensus/rabbitmq_channel_prefetch"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_published_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages published into an exchange on a channel",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_published_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_confirmed_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages published into an exchange and confirmed on the channel",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_confirmed_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_unroutable_returned_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages published as mandatory into an exchange and returned to the publisher as unroutable",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_unroutable_returned_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_unroutable_dropped_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages published as non-mandatory into an exchange and dropped as unroutable",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_unroutable_dropped_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_process_reductions_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of channel process reductions",
-        "displayName": "OpenCensus/rabbitmq_channel_process_reductions_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_get_ack_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages fetched with basic.get in manual acknowledgement mode",
-        "displayName": "OpenCensus/rabbitmq_channel_get_ack_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_get_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages fetched with basic.get in automatic acknowledgement mode",
-        "displayName": "OpenCensus/rabbitmq_channel_get_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_delivered_ack_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages delivered to consumers in manual acknowledgement mode",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_delivered_ack_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_delivered_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages delivered to consumers in automatic acknowledgement mode",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_delivered_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_redelivered_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages redelivered to consumers",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_redelivered_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_messages_acked_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages acknowledged by consumers",
-        "displayName": "OpenCensus/rabbitmq_channel_messages_acked_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channel_get_empty_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of times basic.get operations fetched no message",
-        "displayName": "OpenCensus/rabbitmq_channel_get_empty_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connections_opened_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of connections opened",
-        "displayName": "OpenCensus/rabbitmq_connections_opened_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connections_closed_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of connections closed or terminated",
-        "displayName": "OpenCensus/rabbitmq_connections_closed_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channels_opened_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of channels opened",
-        "displayName": "OpenCensus/rabbitmq_channels_opened_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channels_closed_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of channels closed",
-        "displayName": "OpenCensus/rabbitmq_channels_closed_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queues_declared_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of queues declared",
-        "displayName": "OpenCensus/rabbitmq_queues_declared_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queues_created_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of queues created",
-        "displayName": "OpenCensus/rabbitmq_queues_created_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queues_deleted_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of queues deleted",
-        "displayName": "OpenCensus/rabbitmq_queues_deleted_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connection_incoming_bytes_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of bytes received on a connection",
-        "displayName": "OpenCensus/rabbitmq_connection_incoming_bytes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connection_outgoing_bytes_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of bytes sent on a connection",
-        "displayName": "OpenCensus/rabbitmq_connection_outgoing_bytes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connection_process_reductions_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of connection process reductions",
-        "displayName": "OpenCensus/rabbitmq_connection_process_reductions_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connection_incoming_packets_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of packets received on a connection",
-        "displayName": "OpenCensus/rabbitmq_connection_incoming_packets_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connection_outgoing_packets_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of packets sent on a connection",
-        "displayName": "OpenCensus/rabbitmq_connection_outgoing_packets_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connection_pending_packets",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Number of packets waiting to be sent on a connection",
-        "displayName": "OpenCensus/rabbitmq_connection_pending_packets"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connection_channels",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Channels on a connection",
-        "displayName": "OpenCensus/rabbitmq_connection_channels"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_published_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of messages published to queues",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_published_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_process_open_fds",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Open file descriptors",
-        "displayName": "OpenCensus/rabbitmq_process_open_fds"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_process_open_tcp_sockets",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Open TCP sockets",
-        "displayName": "OpenCensus/rabbitmq_process_open_tcp_sockets"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_process_resident_memory_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Memory used in bytes",
-        "displayName": "OpenCensus/rabbitmq_process_resident_memory_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_disk_space_available_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Disk space available in bytes",
-        "displayName": "OpenCensus/rabbitmq_disk_space_available_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_processes_used",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Erlang processes used",
-        "displayName": "OpenCensus/rabbitmq_erlang_processes_used"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_gc_runs_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of Erlang garbage collector runs",
-        "displayName": "OpenCensus/rabbitmq_erlang_gc_runs_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_gc_reclaimed_bytes_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of bytes of memory reclaimed by Erlang garbage collector",
-        "displayName": "OpenCensus/rabbitmq_erlang_gc_reclaimed_bytes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_scheduler_context_switches_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of Erlang scheduler context switches",
-        "displayName": "OpenCensus/rabbitmq_erlang_scheduler_context_switches_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_process_max_fds",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Open file descriptors limit",
-        "displayName": "OpenCensus/rabbitmq_process_max_fds"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_process_max_tcp_sockets",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Open TCP sockets limit",
-        "displayName": "OpenCensus/rabbitmq_process_max_tcp_sockets"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_resident_memory_limit_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Memory high watermark in bytes",
-        "displayName": "OpenCensus/rabbitmq_resident_memory_limit_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_disk_space_available_limit_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Free disk space low watermark in bytes",
-        "displayName": "OpenCensus/rabbitmq_disk_space_available_limit_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_processes_limit",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Erlang processes limit",
-        "displayName": "OpenCensus/rabbitmq_erlang_processes_limit"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_scheduler_run_queue",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Erlang scheduler run queue",
-        "displayName": "OpenCensus/rabbitmq_erlang_scheduler_run_queue"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_net_ticktime_seconds",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "s",
-        "description": "Inter-node heartbeat interval",
-        "displayName": "OpenCensus/rabbitmq_erlang_net_ticktime_seconds"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_erlang_uptime_seconds",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "s",
-        "description": "Node uptime",
-        "displayName": "OpenCensus/rabbitmq_erlang_uptime_seconds"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_read_ops_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of I/O read operations",
-        "displayName": "OpenCensus/rabbitmq_io_read_ops_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_read_bytes_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of I/O bytes read",
-        "displayName": "OpenCensus/rabbitmq_io_read_bytes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_write_ops_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of I/O write operations",
-        "displayName": "OpenCensus/rabbitmq_io_write_ops_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_write_bytes_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of I/O bytes written",
-        "displayName": "OpenCensus/rabbitmq_io_write_bytes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_sync_ops_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of I/O sync operations",
-        "displayName": "OpenCensus/rabbitmq_io_sync_ops_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_seek_ops_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of I/O seek operations",
-        "displayName": "OpenCensus/rabbitmq_io_seek_ops_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_open_attempt_ops_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of file open attempts",
-        "displayName": "OpenCensus/rabbitmq_io_open_attempt_ops_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_reopen_ops_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of times files have been reopened",
-        "displayName": "OpenCensus/rabbitmq_io_reopen_ops_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_schema_db_ram_tx_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of Schema DB memory transactions",
-        "displayName": "OpenCensus/rabbitmq_schema_db_ram_tx_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_schema_db_disk_tx_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of Schema DB disk transactions",
-        "displayName": "OpenCensus/rabbitmq_schema_db_disk_tx_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_msg_store_read_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of Message Store read operations",
-        "displayName": "OpenCensus/rabbitmq_msg_store_read_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_msg_store_write_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of Message Store write operations",
-        "displayName": "OpenCensus/rabbitmq_msg_store_write_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_index_read_ops_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of Queue Index read operations",
-        "displayName": "OpenCensus/rabbitmq_queue_index_read_ops_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_index_write_ops_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of Queue Index write operations",
-        "displayName": "OpenCensus/rabbitmq_queue_index_write_ops_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_index_journal_write_ops_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of Queue Index Journal write operations",
-        "displayName": "OpenCensus/rabbitmq_queue_index_journal_write_ops_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_read_time_seconds_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total I/O read time",
-        "displayName": "OpenCensus/rabbitmq_io_read_time_seconds_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_write_time_seconds_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total I/O write time",
-        "displayName": "OpenCensus/rabbitmq_io_write_time_seconds_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_sync_time_seconds_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total I/O sync time",
-        "displayName": "OpenCensus/rabbitmq_io_sync_time_seconds_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_seek_time_seconds_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total I/O seek time",
-        "displayName": "OpenCensus/rabbitmq_io_seek_time_seconds_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_io_open_attempt_time_seconds_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total file open attempts time",
-        "displayName": "OpenCensus/rabbitmq_io_open_attempt_time_seconds_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_raft_term_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Current Raft term number",
-        "displayName": "OpenCensus/rabbitmq_raft_term_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_raft_log_snapshot_index",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Raft log snapshot index",
-        "displayName": "OpenCensus/rabbitmq_raft_log_snapshot_index"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_raft_log_last_applied_index",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Raft log last applied index",
-        "displayName": "OpenCensus/rabbitmq_raft_log_last_applied_index"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_raft_log_commit_index",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Raft log commit index",
-        "displayName": "OpenCensus/rabbitmq_raft_log_commit_index"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_raft_log_last_written_index",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Raft log last written index",
-        "displayName": "OpenCensus/rabbitmq_raft_log_last_written_index"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_raft_entry_commit_latency_seconds",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "s",
-        "description": "Time taken for an entry to be committed",
-        "displayName": "OpenCensus/rabbitmq_raft_entry_commit_latency_seconds"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ready",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Messages ready to be delivered to consumers",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_ready"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_unacked",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Messages delivered to consumers but not yet acknowledged",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_unacked"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Sum of ready and unacknowledged messages - total queue depth",
-        "displayName": "OpenCensus/rabbitmq_queue_messages"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_process_reductions_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of queue process reductions",
-        "displayName": "OpenCensus/rabbitmq_queue_process_reductions_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_consumers",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Consumers on a queue",
-        "displayName": "OpenCensus/rabbitmq_queue_consumers"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_consumer_utilisation",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Same as consumer capacity",
-        "displayName": "OpenCensus/rabbitmq_queue_consumer_utilisation"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_process_memory_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Memory in bytes used by the Erlang queue process",
-        "displayName": "OpenCensus/rabbitmq_queue_process_memory_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ram",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Ready and unacknowledged messages stored in memory",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_ram"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ram_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Size of ready and unacknowledged messages stored in memory",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_ram_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ready_ram",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Ready messages stored in memory",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_ready_ram"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_unacked_ram",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Unacknowledged messages stored in memory",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_unacked_ram"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_persistent",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Persistent messages",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_persistent"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Size in bytes of ready and unacknowledged messages",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_ready_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Size in bytes of ready messages",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_ready_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_unacked_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Size in bytes of all unacknowledged messages",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_unacked_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_paged_out",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Messages paged out to disk",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_paged_out"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_messages_paged_out_bytes",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Size in bytes of messages paged out to disk",
-        "displayName": "OpenCensus/rabbitmq_queue_messages_paged_out_bytes"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_disk_reads_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of times queue read messages from disk",
-        "displayName": "OpenCensus/rabbitmq_queue_disk_reads_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queue_disk_writes_total",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of times queue wrote messages to disk",
-        "displayName": "OpenCensus/rabbitmq_queue_disk_writes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_auth_attempts_total",
-        "labels": [
-          {
-            "key": "job"
-          },
-          {
-            "key": "protocol"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of authorization attempts",
-        "displayName": "OpenCensus/rabbitmq_auth_attempts_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_auth_attempts_succeeded_total",
-        "labels": [
-          {
-            "key": "job"
-          },
-          {
-            "key": "protocol"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of successful authentication attempts",
-        "displayName": "OpenCensus/rabbitmq_auth_attempts_succeeded_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_auth_attempts_failed_total",
-        "labels": [
-          {
-            "key": "job"
-          },
-          {
-            "key": "protocol"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total number of failed authentication attempts",
-        "displayName": "OpenCensus/rabbitmq_auth_attempts_failed_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_connections",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Connections currently open",
-        "displayName": "OpenCensus/rabbitmq_connections"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_channels",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Channels currently open",
-        "displayName": "OpenCensus/rabbitmq_channels"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_consumers",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Consumers currently connected",
-        "displayName": "OpenCensus/rabbitmq_consumers"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_queues",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Queues available",
-        "displayName": "OpenCensus/rabbitmq_queues"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_build_info",
-        "labels": [
-          {
-            "key": "erlang_version"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "prometheus_client_version"
-          },
-          {
-            "key": "prometheus_plugin_version"
-          },
-          {
-            "key": "rabbitmq_version"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "RabbitMQ & Erlang/OTP version info",
-        "displayName": "OpenCensus/rabbitmq_build_info"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/rabbitmq_identity_info",
-        "labels": [
-          {
-            "key": "job"
-          },
-          {
-            "key": "rabbitmq_cluster"
-          },
-          {
-            "key": "rabbitmq_node"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "RabbitMQ node & cluster identity info",
-        "displayName": "OpenCensus/rabbitmq_identity_info"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/telemetry_scrape_encoded_size_bytes_summary_sum",
-        "labels": [
-          {
-            "key": "content_type"
-          },
-          {
-            "key": "encoding"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "registry"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Scrape size, encoded",
-        "displayName": "OpenCensus/telemetry_scrape_encoded_size_bytes_summary_sum"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/telemetry_scrape_encoded_size_bytes_summary_count",
-        "labels": [
-          {
-            "key": "content_type"
-          },
-          {
-            "key": "encoding"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "registry"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "Scrape size, encoded",
-        "displayName": "OpenCensus/telemetry_scrape_encoded_size_bytes_summary_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/telemetry_scrape_size_bytes_summary_sum",
-        "labels": [
-          {
-            "key": "content_type"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "registry"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "unit": "By",
-        "description": "Scrape size, not encoded",
-        "displayName": "OpenCensus/telemetry_scrape_size_bytes_summary_sum"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/telemetry_scrape_size_bytes_summary_count",
-        "labels": [
-          {
-            "key": "content_type"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "registry"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "Scrape size, not encoded",
-        "displayName": "OpenCensus/telemetry_scrape_size_bytes_summary_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/telemetry_scrape_duration_seconds_summary_sum",
-        "labels": [
-          {
-            "key": "content_type"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "registry"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "unit": "s",
-        "description": "Scrape duration",
-        "displayName": "OpenCensus/telemetry_scrape_duration_seconds_summary_sum"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/telemetry_scrape_duration_seconds_summary_count",
-        "labels": [
-          {
-            "key": "content_type"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "registry"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "Scrape duration",
-        "displayName": "OpenCensus/telemetry_scrape_duration_seconds_summary_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_vm_memory_atom_bytes_total",
-        "labels": [
-          {
-            "key": "job"
-          },
-          {
-            "key": "usage"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The total amount of memory currently allocated for atoms. This memory is part of the memory presented as system memory.",
-        "displayName": "OpenCensus/erlang_vm_memory_atom_bytes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_vm_memory_bytes_total",
-        "labels": [
-          {
-            "key": "job"
-          },
-          {
-            "key": "kind"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The total amount of memory currently allocated. This is the same as the sum of the memory size for processes and system.",
-        "displayName": "OpenCensus/erlang_vm_memory_bytes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_vm_memory_dets_tables",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Erlang VM DETS Tables count.",
-        "displayName": "OpenCensus/erlang_vm_memory_dets_tables"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_vm_memory_ets_tables",
-        "labels": [
-          {
-            "key": "job"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "Erlang VM ETS Tables count.",
-        "displayName": "OpenCensus/erlang_vm_memory_ets_tables"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_vm_memory_processes_bytes_total",
-        "labels": [
-          {
-            "key": "job"
-          },
-          {
-            "key": "usage"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The total amount of memory currently allocated for the Erlang processes.",
-        "displayName": "OpenCensus/erlang_vm_memory_processes_bytes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_vm_memory_system_bytes_total",
-        "labels": [
-          {
-            "key": "job"
-          },
-          {
-            "key": "usage"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The total amount of memory currently allocated for the emulator that is not directly related to any Erlang process. Memory presented as processes is not included in this memory.",
-        "displayName": "OpenCensus/erlang_vm_memory_system_bytes_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_aux_seconds_total",
-        "labels": [
-          {
-            "key": "id"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "type"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total time in seconds spent handling auxiliary jobs.",
-        "displayName": "OpenCensus/erlang_vm_msacc_aux_seconds_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_check_io_seconds_total",
-        "labels": [
-          {
-            "key": "id"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "type"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total time in seconds spent checking for new I/O events.",
-        "displayName": "OpenCensus/erlang_vm_msacc_check_io_seconds_total"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/erlang_vm_msacc_emulator_seconds_total",
-        "labels": [
-          {
-            "key": "id"
-          },
-          {
-            "key": "job"
-          },
-          {
-            "key": "type"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DOUBLE",
-        "description": "Total time in seconds spent executing Erlang processes.",
-        "displayName": "OpenCensus/erlang_vm_msacc_emulator_seconds_total"
-      }
     }
   ],
   "selfObservabilityMetrics": [

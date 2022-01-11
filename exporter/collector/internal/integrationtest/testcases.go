@@ -68,6 +68,9 @@ var (
 			Name:                 "GKE Workload Metrics",
 			OTLPInputFixturePath: "testdata/fixtures/workload_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/workload_metrics_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.Prefix = "workload.googleapis.com/"
+			},
 		},
 		{
 			Name:                 "GKE Metrics Agent",
