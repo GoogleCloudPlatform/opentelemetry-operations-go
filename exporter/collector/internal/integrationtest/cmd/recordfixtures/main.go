@@ -67,6 +67,10 @@ func main() {
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 			testServerExporter := testServer.NewExporter(ctx, t, *test.CreateConfig())
+			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
+			require.NoError(t, err)
+			defer inMemoryOCExporter.Shutdown(ctx)
+
 			require.NoError(t, testServerExporter.ConsumeMetrics(ctx, metrics), "failed to export metrics to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
@@ -74,6 +78,7 @@ func main() {
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
+				SelfObservabilityMetrics:        inMemoryOCExporter.Proto(),
 			}
 			test.SaveRecordedFixtures(t, fixture)
 		}()

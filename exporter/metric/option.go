@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/sdkapi"
 
 	apioption "google.golang.org/api/option"
 )
@@ -61,7 +61,7 @@ type options struct {
 
 	// MetricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
 	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
-	MetricDescriptorTypeFormatter func(*metric.Descriptor) string
+	MetricDescriptorTypeFormatter func(*sdkapi.Descriptor) string
 
 	// onError is the hook to be called when there is an error uploading the metric data.
 	// If no custom hook is set, errors are logged. Optional.
@@ -103,7 +103,7 @@ func WithInterval(t time.Duration) func(o *options) {
 // Note that the format has to follow the convention defined in the official document.
 // The default is "custom.googleapis.com/[metric name]".
 // ref. https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom_metric_names
-func WithMetricDescriptorTypeFormatter(f func(*metric.Descriptor) string) func(o *options) {
+func WithMetricDescriptorTypeFormatter(f func(*sdkapi.Descriptor) string) func(o *options) {
 	return func(o *options) {
 		o.MetricDescriptorTypeFormatter = f
 	}
