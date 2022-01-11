@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"math"
 	"net/url"
 	"path"
@@ -32,6 +31,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
@@ -42,10 +42,17 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// self-observability reporting meters/tracers/loggers.
+type selfObservability struct {
+	// Logger to use for this exporter.
+	log *zap.Logger
+}
+
 // metricsExporter is the GCM exporter that uses pdata directly
 type metricsExporter struct {
 	cfg    *Config
 	client *monitoring.MetricClient
+	obs    selfObservability
 	mapper metricMapper
 	// A channel that receives metric descriptor and sends them to GCM once.
 	mds chan *metricpb.MetricDescriptor
@@ -76,9 +83,16 @@ func (me *metricsExporter) Shutdown(ctx context.Context) error {
 	select {
 	case <-me.mdsDone:
 	case <-ctx.Done():
-		log.Printf("%v waiting for async CreateMetricDescriptor calls to finish", ctx.Err())
+		me.obs.log.Error("Error waiting for async CreateMetricDescriptor calls to finish.", zap.Error(ctx.Err()))
 	}
 	return me.client.Close()
+}
+
+func obs(in component.TelemetrySettings) selfObservability {
+	return selfObservability{
+		log: in.Logger,
+		// TODO - use meter-provider for self-observability metrics.
+	}
 }
 
 func newGoogleCloudMetricsExporter(
@@ -114,6 +128,7 @@ func newGoogleCloudMetricsExporter(
 	mExp := &metricsExporter{
 		cfg:    cfg,
 		client: client,
+		obs:    obs(set.TelemetrySettings),
 		mapper: metricMapper{cfg},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asycnhronously sent and optimistic.
@@ -190,9 +205,8 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 		if mdCache[md.Type] == nil {
 			err := me.exportMetricDescriptor(context.TODO(), md)
 			// TODO: Log-once on error, per metric descriptor?
-			// TODO: Re-use passed-in logger to exporter.
 			if err != nil {
-				log.Printf("Unable to send metric descriptor: %s, %s", md, err)
+				me.obs.log.Error("Unable to send metric descriptor.", zap.Error(err), zap.Any("metric_descriptor", md))
 				continue
 			}
 			mdCache[md.Type] = md
