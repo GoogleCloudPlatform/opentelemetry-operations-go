@@ -4,13 +4,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"prometheus-to-sd-exporter"
                    }
@@ -28,9 +28,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -162,9 +162,9 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"k8s"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -174,7 +174,7 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
@@ -307,7 +307,7 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"deletiondefender"
                    }
@@ -325,9 +325,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -337,7 +337,7 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
@@ -481,9 +481,9 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"host"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -493,13 +493,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"host.name",
+                   "key":"k8s.node.name",
                    "value":{
                       "stringValue":"gke-rabbitmq-test-dev-default-pool-4ffbde79-wff6"
                    }
@@ -591,9 +591,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -603,13 +603,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"netd"
                    }
@@ -742,9 +742,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -754,13 +754,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"fluentbit"
                    }
@@ -875,9 +875,9 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -887,13 +887,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"fluentbit-gke"
                    }
@@ -1020,9 +1020,9 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -1032,13 +1032,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"csi-driver-registrar"
                    }
@@ -1165,9 +1165,9 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -1177,13 +1177,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"gce-pd-driver"
                    }
@@ -1310,13 +1310,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"gke-metrics-agent"
                    }
@@ -1334,9 +1334,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -1461,9 +1461,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -1473,13 +1473,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"collector"
                    }
@@ -1606,13 +1606,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"configmap-reloader"
                    }
@@ -1630,9 +1630,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 }
              ]
@@ -1745,13 +1745,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"autoscaler"
                    }
@@ -1769,9 +1769,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -1902,9 +1902,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -1914,13 +1914,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"recorder"
                    }
@@ -2035,13 +2035,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"prom-to-sd"
                    }
@@ -2059,9 +2059,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -2180,13 +2180,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"event-exporter"
                    }
@@ -2204,9 +2204,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -2331,13 +2331,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"prometheus-to-sd-exporter"
                    }
@@ -2355,9 +2355,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 }
              ]
@@ -2470,9 +2470,9 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -2482,13 +2482,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"webhook"
                    }
@@ -2621,9 +2621,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -2633,13 +2633,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"deletiondefender"
                    }
@@ -2760,9 +2760,9 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -2772,13 +2772,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"kube-proxy"
                    }
@@ -2911,9 +2911,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"container"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -2923,13 +2923,13 @@
                    }
                 },
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"container.name",
+                   "key":"k8s.container.name",
                    "value":{
                       "stringValue":"gke-metadata-server"
                    }

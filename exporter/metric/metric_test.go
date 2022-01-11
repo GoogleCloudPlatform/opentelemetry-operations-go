@@ -28,6 +28,7 @@ import (
 	"go.opentelemetry.io/otel/metric/number"
 	"go.opentelemetry.io/otel/metric/sdkapi"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
@@ -48,7 +49,7 @@ import (
 )
 
 var (
-	formatter = func(d *metric.Descriptor) string {
+	formatter = func(d *sdkapi.Descriptor) string {
 		return fmt.Sprintf("test.googleapis.com/%s", d.Name())
 	}
 )
@@ -61,7 +62,7 @@ func TestExportMetrics(t *testing.T) {
 	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 	res := &resource.Resource{}
 	aggSel := processortest.AggregatorSelector()
-	proc := processor.NewFactory(aggSel, export.CumulativeExportKindSelector())
+	proc := processor.NewFactory(aggSel, aggregation.CumulativeTemporalitySelector())
 
 	opts := []Option{
 		WithProjectID("PROJECT_ID_NOT_REAL"),
@@ -133,7 +134,7 @@ func TestDescToMetricType(t *testing.T) {
 		},
 	}
 
-	inDesc := []metric.Descriptor{
+	inDesc := []sdkapi.Descriptor{
 		metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind),
 		metrictest.NewDescriptor("test/of/path", sdkapi.HistogramInstrumentKind, number.Float64Kind),
 	}
@@ -215,7 +216,7 @@ func TestRecordToMpb(t *testing.T) {
 	require.NoError(t, pusher.Stop(ctx))
 
 	aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
-		return reader.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
+		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
 			out := me.recordToMpb(&r, library)
 			if !reflect.DeepEqual(want, out) {
 				return fmt.Errorf("expected: %v, actual: %v", want, out)
@@ -589,7 +590,7 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 	}
 	res := &resource.Resource{}
 	aggSel := processortest.AggregatorSelector()
-	proc := processor.NewFactory(aggSel, export.CumulativeExportKindSelector())
+	proc := processor.NewFactory(aggSel, aggregation.CumulativeTemporalitySelector())
 	ctx := context.Background()
 
 	opts := []Option{

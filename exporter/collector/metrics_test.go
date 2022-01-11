@@ -43,6 +43,10 @@ func TestMetrics(t *testing.T) {
 			go testServer.Serve()
 			defer testServer.Shutdown()
 			testServerExporter := testServer.NewExporter(ctx, t, *test.CreateConfig())
+			// For collecting self observability metrics
+			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
+			require.NoError(t, err)
+			defer inMemoryOCExporter.Shutdown(ctx)
 
 			require.NoError(
 				t,
@@ -51,9 +55,6 @@ func TestMetrics(t *testing.T) {
 			)
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
-			actualCreateMetricDescriptorReq := testServer.CreateMetricDescriptorRequests()
-			actualCreateTimeSeriesReq := testServer.CreateTimeSeriesRequests()
-			actualCreateServiceTimeSeriesReq := testServer.CreateServiceTimeSeriesRequests()
 			expectFixture := test.LoadExpectFixture(
 				t,
 				startTime,
@@ -61,9 +62,10 @@ func TestMetrics(t *testing.T) {
 			)
 			diff := integrationtest.DiffProtos(
 				&integrationtest.MetricExpectFixture{
-					CreateTimeSeriesRequests:        actualCreateTimeSeriesReq,
-					CreateMetricDescriptorRequests:  actualCreateMetricDescriptorReq,
-					CreateServiceTimeSeriesRequests: actualCreateServiceTimeSeriesReq,
+					CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
+					CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
+					CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
+					SelfObservabilityMetrics:        inMemoryOCExporter.Proto(),
 				},
 				expectFixture,
 			)

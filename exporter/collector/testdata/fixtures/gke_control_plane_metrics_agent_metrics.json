@@ -4,13 +4,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"host.name",
+                   "key":"k8s.node.name",
                    "value":{
                       "stringValue":"gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
                    }
@@ -34,9 +34,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"host"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -271,13 +271,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"host.name",
+                   "key":"k8s.node.name",
                    "value":{
                       "stringValue":"gke-rabbitmq-test-dev-default-pool-4ffbde79-wff6"
                    }
@@ -301,9 +301,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"host"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -538,13 +538,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"host.name",
+                   "key":"k8s.node.name",
                    "value":{
                       "stringValue":"gke-rabbitmq-test-dev-big-np-1556fa91-dlcx"
                    }
@@ -568,9 +568,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"host"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -805,13 +805,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"host.name",
+                   "key":"k8s.node.name",
                    "value":{
                       "stringValue":"gke-rabbitmq-test-dev-big-np-1556fa91-dj9w"
                    }
@@ -835,9 +835,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"host"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -1052,13 +1052,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"host.name",
+                   "key":"k8s.node.name",
                    "value":{
                       "stringValue":"gke-rabbitmq-test-dev-default-pool-4ffbde79-zn27"
                    }
@@ -1082,9 +1082,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"host"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
@@ -1319,13 +1319,13 @@
           "resource":{
              "attributes":[
                 {
-                   "key":"cloud.zone",
+                   "key":"cloud.availability_zone",
                    "value":{
                       "stringValue":"us-central1-c"
                    }
                 },
                 {
-                   "key":"host.name",
+                   "key":"k8s.node.name",
                    "value":{
                       "stringValue":"gke-rabbitmq-test-dev-big-np-1556fa91-c73m"
                    }
@@ -1349,9 +1349,9 @@
                    }
                 },
                 {
-                   "key":"opencensus.resourcetype",
+                   "key":"cloud.platform",
                    "value":{
-                      "stringValue":"host"
+                      "stringValue":"gcp_kubernetes_engine"
                    }
                 },
                 {
