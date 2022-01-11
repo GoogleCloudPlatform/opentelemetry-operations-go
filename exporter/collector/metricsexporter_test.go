@@ -864,6 +864,40 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Multiple points",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeGauge)
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				gauge := metric.Gauge()
+
+				for i := 0; i < 5; i++ {
+					point := gauge.DataPoints().AppendEmpty()
+					point.SetDoubleVal(10)
+					point.Attributes().InsertString("test_label", "test_value")
+				}
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
