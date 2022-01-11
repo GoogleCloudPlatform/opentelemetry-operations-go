@@ -4,15 +4,21 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/foobar.org/testcounter",
+            "type": "custom.googleapis.com/foobar.org/testcounter",
             "labels": {
               "foo": "bar"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "CUMULATIVE",
+          "unit": "1",
           "valueType": "INT64",
           "points": [
             {
@@ -32,7 +38,7 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/foobar.org/testcounter",
+        "type": "custom.googleapis.com/foobar.org/testcounter",
         "labels": [
           {
             "key": "foo"
@@ -42,7 +48,7 @@
         "valueType": "INT64",
         "unit": "1",
         "description": "This is a test counter",
-        "displayName": "OpenCensus/testcounter"
+        "displayName": "foobar.org/testcounter"
       }
     }
   ],
