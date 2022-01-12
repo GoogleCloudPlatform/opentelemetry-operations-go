@@ -15,24 +15,22 @@
 package collector
 
 import (
-	"go.opentelemetry.io/collector/config"
-	"go.opentelemetry.io/collector/exporter/exporterhelper"
+	"time"
+
 	"google.golang.org/api/option"
+)
+
+const (
+	DefaultTimeout = 12 * time.Second // Consistent with Cloud Monitoring's timeout
 )
 
 // Config defines configuration for Google Cloud exporter.
 type Config struct {
-	config.ExporterSettings `mapstructure:",squash"`
-	ProjectID               string `mapstructure:"project"`
-	UserAgent               string `mapstructure:"user_agent"`
-	Endpoint                string `mapstructure:"endpoint"`
+	ProjectID string `mapstructure:"project"`
+	UserAgent string `mapstructure:"user_agent"`
+	Endpoint  string `mapstructure:"endpoint"`
 	// Only has effect if Endpoint is not ""
 	UseInsecure bool `mapstructure:"use_insecure"`
-
-	// Timeout for all API calls. If not set, defaults to 12 seconds.
-	exporterhelper.TimeoutSettings `mapstructure:",squash"` // squash ensures fields are correctly decoded in embedded struct.
-	exporterhelper.QueueSettings   `mapstructure:"sending_queue"`
-	exporterhelper.RetrySettings   `mapstructure:"retry_on_failure"`
 
 	ResourceMappings []ResourceMapping `mapstructure:"resource_mappings"`
 	// GetClientOptions returns additional options to be passed
@@ -77,4 +75,19 @@ type LabelMapping struct {
 	// Optional flag signals whether we can proceed with transformation if a label is missing in the resource.
 	// When required label is missing, we fallback to default resource mapping.
 	Optional bool `mapstructure:"optional"`
+}
+
+// Known metric domains. Note: This is now configurable for advanced usages.
+var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
+
+// DefaultConfig creates the default configuration for exporter.
+func DefaultConfig() *Config {
+	return &Config{
+		UserAgent: "opentelemetry-collector-contrib {{version}}",
+		MetricConfig: MetricConfig{
+			KnownDomains:                     domains,
+			Prefix:                           "workload.googleapis.com",
+			CreateMetricDescriptorBufferSize: 10,
+		},
+	}
 }

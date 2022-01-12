@@ -24,9 +24,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/service/featuregate"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
 
@@ -48,7 +46,6 @@ func (t *FakeTesting) Name() string { return "record fixtures" }
 
 func main() {
 	t := &FakeTesting{}
-	featuregate.Apply(map[string]bool{collector.PdataExporterFeatureGate: true})
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
@@ -71,7 +68,7 @@ func main() {
 			require.NoError(t, err)
 			defer inMemoryOCExporter.Shutdown(ctx)
 
-			require.NoError(t, testServerExporter.ConsumeMetrics(ctx, metrics), "failed to export metrics to local test server")
+			require.NoError(t, testServerExporter.PushMetrics(ctx, metrics), "failed to export metrics to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
 			fixture := &integrationtest.MetricExpectFixture{

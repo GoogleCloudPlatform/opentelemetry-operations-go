@@ -26,11 +26,8 @@ import (
 	internaldata "github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
-	"go.opentelemetry.io/collector/config"
-	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.uber.org/zap"
 	"google.golang.org/api/option"
 	cloudmetricpb "google.golang.org/genproto/googleapis/api/metric"
 	cloudtracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
@@ -68,22 +65,9 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 		{
 			name: "Standard",
 			cfg: &Config{
-				ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
-				ProjectID:        "idk",
-				Endpoint:         "127.0.0.1:8080",
-				UseInsecure:      true,
-			},
-		},
-		{
-			name: "Standard_WithoutSendingQueue",
-			cfg: &Config{
-				ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
-				ProjectID:        "idk",
-				Endpoint:         "127.0.0.1:8080",
-				UseInsecure:      true,
-				QueueSettings: exporterhelper.QueueSettings{
-					Enabled: false,
-				},
+				ProjectID:   "idk",
+				Endpoint:    "127.0.0.1:8080",
+				UseInsecure: true,
 			},
 		},
 	}
@@ -99,8 +83,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			defer lis.Close()
 
 			go srv.Serve(lis)
-
-			sde, err := newGoogleCloudTracesExporter(test.cfg, componenttest.NewNopExporterCreateSettings())
+			sde, err := NewGoogleCloudTracesExporter(test.cfg, "latest", DefaultTimeout)
 			if test.expectedErr != "" {
 				assert.EqualError(t, err, test.expectedErr)
 				return
@@ -119,7 +102,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			span := ispans.Spans().AppendEmpty()
 			span.SetName(spanName)
 			span.SetStartTimestamp(pdata.NewTimestampFromTime(testTime))
-			err = sde.ConsumeTraces(context.Background(), traces)
+			err = sde.PushTraces(context.Background(), traces)
 			assert.NoError(t, err)
 
 			r := <-reqCh
@@ -187,21 +170,15 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 		option.WithTelemetryDisabled(),
 	}
 
-	creationParams := componenttest.NewNopExporterCreateSettings()
-	creationParams.BuildInfo = component.BuildInfo{
-		Version: "v0.0.1",
-	}
-
-	sde, err := newGoogleCloudMetricsExporter(context.Background(), &Config{
-		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
-		ProjectID:        "idk",
-		Endpoint:         "127.0.0.1:8080",
-		UserAgent:        "MyAgent {{version}}",
-		UseInsecure:      true,
+	sde, err := NewGoogleCloudMetricsExporter(context.Background(), &Config{
+		ProjectID:   "idk",
+		Endpoint:    "127.0.0.1:8080",
+		UserAgent:   "MyAgent {{version}}",
+		UseInsecure: true,
 		GetClientOptions: func() []option.ClientOption {
 			return clientOptions
 		},
-	}, creationParams)
+	}, zap.NewNop(), "v0.0.1", DefaultTimeout)
 	require.NoError(t, err)
 	defer func() { require.NoError(t, sde.Shutdown(context.Background())) }()
 
@@ -272,7 +249,7 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 		Type: "test",
 	}
 
-	assert.NoError(t, sde.ConsumeMetrics(context.Background(), internaldata.OCToMetrics(md.Node, md.Resource, md.Metrics)), err)
+	assert.NoError(t, sde.PushMetrics(context.Background(), internaldata.OCToMetrics(md.Node, md.Resource, md.Metrics)), err)
 
 	expectedNames := map[string]struct{}{
 		"projects/idk/metricDescriptors/custom.googleapis.com/opencensus/test_gauge1": {},

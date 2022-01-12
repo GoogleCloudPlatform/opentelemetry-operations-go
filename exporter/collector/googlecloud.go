@@ -20,9 +20,8 @@ import (
 	"context"
 	"fmt"
 	"strings"
+	"time"
 
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/api/option"
@@ -31,12 +30,12 @@ import (
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
 
-// traceExporter is a wrapper struct of OT cloud trace exporter
-type traceExporter struct {
+// TraceExporter is a wrapper struct of OT cloud trace exporter
+type TraceExporter struct {
 	texporter *cloudtrace.Exporter
 }
 
-func (te *traceExporter) Shutdown(ctx context.Context) error {
+func (te *TraceExporter) Shutdown(ctx context.Context) error {
 	return te.texporter.Shutdown(ctx)
 }
 
@@ -73,12 +72,12 @@ func generateClientOptions(cfg *Config) ([]option.ClientOption, error) {
 	return copts, nil
 }
 
-func newGoogleCloudTracesExporter(cfg *Config, set component.ExporterCreateSettings) (component.TracesExporter, error) {
-	setVersionInUserAgent(cfg, set.BuildInfo.Version)
+func NewGoogleCloudTracesExporter(cfg *Config, version string, timeout time.Duration) (*TraceExporter, error) {
+	setVersionInUserAgent(cfg, version)
 
 	topts := []cloudtrace.Option{
 		cloudtrace.WithProjectID(cfg.ProjectID),
-		cloudtrace.WithTimeout(cfg.Timeout),
+		cloudtrace.WithTimeout(timeout),
 	}
 
 	copts, err := generateClientOptions(cfg)
@@ -92,22 +91,11 @@ func newGoogleCloudTracesExporter(cfg *Config, set component.ExporterCreateSetti
 		return nil, fmt.Errorf("error creating GoogleCloud Trace exporter: %w", err)
 	}
 
-	tExp := &traceExporter{texporter: exp}
-
-	return exporterhelper.NewTracesExporter(
-		cfg,
-		set,
-		tExp.pushTraces,
-		exporterhelper.WithShutdown(tExp.Shutdown),
-		// Disable exporterhelper Timeout, since we are using a custom mechanism
-		// within exporter itself
-		exporterhelper.WithTimeout(exporterhelper.TimeoutSettings{Timeout: 0}),
-		exporterhelper.WithQueue(cfg.QueueSettings),
-		exporterhelper.WithRetry(cfg.RetrySettings))
+	return &TraceExporter{texporter: exp}, nil
 }
 
-// pushTraces calls texporter.ExportSpan for each span in the given traces
-func (te *traceExporter) pushTraces(ctx context.Context, td pdata.Traces) error {
+// PushTraces calls texporter.ExportSpan for each span in the given traces
+func (te *TraceExporter) PushTraces(ctx context.Context, td pdata.Traces) error {
 	resourceSpans := td.ResourceSpans()
 	spans := make([]sdktrace.ReadOnlySpan, 0, td.SpanCount())
 	for i := 0; i < resourceSpans.Len(); i++ {

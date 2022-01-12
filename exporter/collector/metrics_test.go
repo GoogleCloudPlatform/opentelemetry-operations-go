@@ -21,12 +21,10 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
 
 func TestMetrics(t *testing.T) {
-	defer collector.SetPdataFeatureGateForTest(true)()
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
@@ -50,7 +48,7 @@ func TestMetrics(t *testing.T) {
 
 			require.NoError(
 				t,
-				testServerExporter.ConsumeMetrics(ctx, metrics),
+				testServerExporter.PushMetrics(ctx, metrics),
 				"Failed to export metrics to local test server",
 			)
 			require.NoError(t, testServerExporter.Shutdown(ctx))

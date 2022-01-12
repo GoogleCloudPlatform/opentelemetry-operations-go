@@ -209,12 +209,9 @@ func (m *MetricsTestCase) SkipIfNeeded(t testing.TB) {
 }
 
 func (m *MetricsTestCase) CreateConfig() *collector.Config {
-	cfg := collector.NewFactory().CreateDefaultConfig().(*collector.Config)
+	cfg := collector.DefaultConfig()
 	// If not set it will use ADC
 	cfg.ProjectID = os.Getenv("PROJECT_ID")
-	// Disable queued retries as there is no way to flush them
-	cfg.RetrySettings.Enabled = false
-	cfg.QueueSettings.Enabled = false
 	// Set a big buffer to capture all CMD requests without dropping
 	cfg.MetricConfig.CreateMetricDescriptorBufferSize = 500
 	cfg.MetricConfig.InstrumentationLibraryLabels = false

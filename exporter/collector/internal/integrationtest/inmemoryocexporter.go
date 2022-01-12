@@ -23,7 +23,6 @@ import (
 	"go.opencensus.io/metric/metricdata"
 	"go.opencensus.io/metric/metricexport"
 	"go.opencensus.io/stats/view"
-	"go.opentelemetry.io/collector/obsreport/obsreporttest"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
@@ -32,9 +31,8 @@ var _ metricexport.Exporter = (*InMemoryOCExporter)(nil)
 
 // OC stats/metrics exporter used to capture self observability metrics
 type InMemoryOCExporter struct {
-	c             chan []*metricdata.Metric
-	reader        *metricexport.Reader
-	testTelemetry *obsreporttest.TestTelemetry
+	c      chan []*metricdata.Metric
+	reader *metricexport.Reader
 }
 
 func (i *InMemoryOCExporter) ExportMetrics(ctx context.Context, data []*metricdata.Metric) error {
@@ -80,25 +78,19 @@ func (i *InMemoryOCExporter) Proto() []*SelfObservabilityMetric {
 // Shutdown unregisters the global OpenCensus views to reset state for the next test
 func (i *InMemoryOCExporter) Shutdown(ctx context.Context) error {
 	view.Unregister(collector.MetricViews()...)
-	return i.testTelemetry.Shutdown(ctx)
+	return nil
 }
 
 // NewInMemoryOCViewExporter creates a new in memory OC exporter for testing. Be sure to defer
 // a call to Shutdown().
 func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
-	// For setup/teardown of other OTel collector views
-	testTelemetry, err := obsreporttest.SetupTelemetry()
-	if err != nil {
-		return nil, err
-	}
 	// Reset our views in case any tests ran before this
 	view.Unregister(collector.MetricViews()...)
 	view.Register(collector.MetricViews()...)
 
 	return &InMemoryOCExporter{
-			c:             make(chan []*metricdata.Metric, 1),
-			reader:        metricexport.NewReader(),
-			testTelemetry: &testTelemetry,
+			c:      make(chan []*metricdata.Metric, 1),
+			reader: metricexport.NewReader(),
 		},
 		nil
 }
