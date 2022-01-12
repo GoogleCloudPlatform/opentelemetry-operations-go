@@ -4,13 +4,18 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/system.memory.usage",
+            "type": "workload.googleapis.com/system.memory.usage",
             "labels": {
               "state": "used"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "GAUGE",
           "valueType": "INT64",
@@ -23,7 +28,8 @@
                 "int64Value": "6641752448"
               }
             }
-          ]
+          ],
+          "unit": "By"
         }
       ]
     }
@@ -31,7 +37,7 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/system.memory.usage",
+        "type": "workload.googleapis.com/system.memory.usage",
         "labels": [
           {
             "key": "state"
@@ -41,7 +47,51 @@
         "valueType": "INT64",
         "unit": "By",
         "description": "Bytes of memory in use.",
-        "displayName": "OpenCensus/system.memory.usage"
+        "displayName": "system.memory.usage"
+      }
+    }
+  ],
+  "selfObservabilityMetrics": [
+    {
+      "name": "exporter/enqueue_failed_log_records",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_spans",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/send_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/sent_metric_points",
+      "val": "1",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "googlecloudmonitoring/point_count",
+      "val": "1",
+      "labels": {
+        "status": "OK"
       }
     }
   ]

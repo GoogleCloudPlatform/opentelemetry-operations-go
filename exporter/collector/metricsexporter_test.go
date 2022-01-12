@@ -96,6 +96,7 @@ func TestMergeLabels(t *testing.T) {
 }
 
 func TestHistogramPointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	cfg := createDefaultConfig()
 	cfg.ProjectID = "myproject"
 	mapper := metricMapper{cfg: cfg}
@@ -160,6 +161,7 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	cfg := createDefaultConfig()
 	cfg.ProjectID = "myproject"
 	mapper := metricMapper{cfg: cfg}
@@ -283,6 +285,7 @@ func TestExemplarOnlyTraceId(t *testing.T) {
 }
 
 func TestSumPointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
@@ -391,6 +394,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 }
 
 func TestGaugePointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
@@ -447,6 +451,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 }
 
 func TestSummaryPointToTimeSeries(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	mapper := metricMapper{cfg: createDefaultConfig()}
 	mr := &monitoredrespb.MonitoredResource{}
 
@@ -463,7 +468,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	point.SetCount(count)
 	point.SetSum(sum)
 	quantile := point.QuantileValues().AppendEmpty()
-	quantile.SetQuantile(0.0)
+	quantile.SetQuantile(1.0)
 	quantile.SetValue(1.0)
 	end := start.Add(time.Hour)
 	point.SetTimestamp(pdata.NewTimestampFromTime(end))
@@ -508,18 +513,18 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Same(t, quantileResult.Resource, mr)
 	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary_summary_percentile")
 	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
-		"percentile": "0",
+		"percentile": "100.000000",
 	})
 	assert.Nil(t, quantileResult.Metadata)
 	assert.Len(t, quantileResult.Points, 1)
 	assert.Equal(t, quantileResult.Points[0].Interval, &monitoringpb.TimeInterval{
-		StartTime: timestamppb.New(start),
-		EndTime:   timestamppb.New(end),
+		EndTime: timestamppb.New(end),
 	})
 	assert.Equal(t, quantileResult.Points[0].Value.GetDoubleValue(), 1.0)
 }
 
 func TestMetricNameToType(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	mapper := metricMapper{cfg: createDefaultConfig()}
 	assert.Equal(
 		t,
@@ -612,6 +617,7 @@ type metricDescriptorTest struct {
 }
 
 func TestMetricDescriptorMapping(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	tests := []metricDescriptorTest{
 		{
 			name: "Gauge",
@@ -858,6 +864,40 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Multiple points",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeGauge)
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				gauge := metric.Gauge()
+
+				for i := 0; i < 5; i++ {
+					point := gauge.DataPoints().AppendEmpty()
+					point.SetDoubleVal(10)
+					point.Attributes().InsertString("test_label", "test_value")
+				}
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
@@ -876,6 +916,7 @@ type knownDomainsTest struct {
 }
 
 func TestKnownDomains(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	tests := []knownDomainsTest{
 		{
 			name:       "test",
@@ -965,25 +1006,58 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 }
 
 func TestCustomMetricNames(t *testing.T) {
-	tests := map[string]bool{
-		"":                                    false,
-		"_":                                   false,
-		"custom.googleapis.com":               false,
-		"custom.googleapis.com/":              true,
-		"custom.googleapis.com/example-bytes": true,
-		"workload.googleapis.com/":            true,
-		"workload.googleapis.com/example-out": true,
-	}
+	defer SetPdataFeatureGateForTest(true)()
 
-	for metricName, expected := range tests {
-		t.Run(fmt.Sprintf("shouldAddInstrumentationLibraryLabels(%q)", metricName), func(t *testing.T) {
+	tests := []struct {
+		metricName     string
+		expectedResult bool
+		expectError    bool
+	}{{
+		metricName:     "",
+		expectedResult: false,
+	}, {
+		metricName:     "_",
+		expectedResult: false,
+	}, {
+		metricName:     "custom.googleapis.com",
+		expectedResult: true,
+	}, {
+		metricName:     "foo.custom.googleapis.com",
+		expectedResult: false,
+	}, {
+		metricName:     "custom.googleapis.com/",
+		expectedResult: true,
+	}, {
+		metricName:     "custom.googleapis.com/example-bytes",
+		expectedResult: true,
+	}, {
+		metricName:     "custom.googleapis.com/example-bytes/",
+		expectedResult: true,
+	}, {
+		metricName:     "workload.googleapis.com/",
+		expectedResult: true,
+	}, {
+		metricName:     "workload.googleapis.com/example-out",
+		expectedResult: true,
+	}, {
+		metricName:  ":$?not.a.domain/path",
+		expectError: true,
+	}}
+
+	for _, test := range tests {
+		t.Run(fmt.Sprintf("shouldAddInstrumentationLibraryLabels(%q)", test.metricName), func(t *testing.T) {
 			metric := pdata.NewMetric()
-			metric.SetName(metricName)
+			metric.SetName(test.metricName)
 
 			config := createDefaultConfig()
 			m := metricMapper{cfg: config}
-			isCustom := m.shouldAddInstrumentationLibraryLabels(metric)
-			assert.Equalf(t, expected, isCustom, "expected isCustomMetric(%q) -> %t, want %t", metricName, isCustom, expected)
+			isCustom, err := m.shouldAddInstrumentationLibraryLabels(metric)
+			if test.expectError {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.Equalf(t, test.expectedResult, isCustom, "expected isCustomMetric(%q) -> %t, want %t", test.metricName, isCustom, test.expectedResult)
 		})
 	}
 }

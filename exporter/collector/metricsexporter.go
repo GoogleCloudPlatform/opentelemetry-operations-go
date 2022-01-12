@@ -21,7 +21,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"math"
 	"net/url"
 	"path"
@@ -32,6 +31,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter/exporterhelper"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
@@ -42,10 +42,17 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// self-observability reporting meters/tracers/loggers.
+type selfObservability struct {
+	// Logger to use for this exporter.
+	log *zap.Logger
+}
+
 // metricsExporter is the GCM exporter that uses pdata directly
 type metricsExporter struct {
 	cfg    *Config
 	client *monitoring.MetricClient
+	obs    selfObservability
 	mapper metricMapper
 	// A channel that receives metric descriptor and sends them to GCM once.
 	mds chan *metricpb.MetricDescriptor
@@ -62,6 +69,13 @@ type metricMapper struct {
 // Known metric domains. Note: This is now configurable for advanced usages.
 var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
 
+// Known custom metric domains. Note: This is now configurable for advanced usages.
+var defaultCustomMetricDomains = []string{
+	"custom.googleapis.com",
+	"external.googleapis.com",
+	"prometheus.googleapis.com",
+	"workload.googleapis.com"}
+
 // Constants we use when translating summary metrics into GCP.
 const (
 	SummaryCountPrefix      = "_summary_count"
@@ -76,9 +90,16 @@ func (me *metricsExporter) Shutdown(ctx context.Context) error {
 	select {
 	case <-me.mdsDone:
 	case <-ctx.Done():
-		log.Printf("%v waiting for async CreateMetricDescriptor calls to finish", ctx.Err())
+		me.obs.log.Error("Error waiting for async CreateMetricDescriptor calls to finish.", zap.Error(ctx.Err()))
 	}
 	return me.client.Close()
+}
+
+func obs(in component.TelemetrySettings) selfObservability {
+	return selfObservability{
+		log: in.Logger,
+		// TODO - use meter-provider for self-observability metrics.
+	}
 }
 
 func newGoogleCloudMetricsExporter(
@@ -114,6 +135,7 @@ func newGoogleCloudMetricsExporter(
 	mExp := &metricsExporter{
 		cfg:    cfg,
 		client: client,
+		obs:    obs(set.TelemetrySettings),
 		mapper: metricMapper{cfg},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asycnhronously sent and optimistic.
@@ -154,7 +176,9 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 				metric := mes.At(k)
 				metricLabels := extraResourceLabels
 
-				if me.mapper.shouldAddInstrumentationLibraryLabels(metric) {
+				if ok, err := me.mapper.shouldAddInstrumentationLibraryLabels(metric); err != nil {
+					me.obs.log.Error("Could not parse metric name", zap.Error(err))
+				} else if ok {
 					metricLabels = mergeLabels(nil, metricLabels, instrumentationLibraryLabels)
 				}
 
@@ -200,9 +224,8 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 		if mdCache[md.Type] == nil {
 			err := me.exportMetricDescriptor(context.TODO(), md)
 			// TODO: Log-once on error, per metric descriptor?
-			// TODO: Re-use passed-in logger to exporter.
 			if err != nil {
-				log.Printf("Unable to send metric descriptor: %s, %s", md, err)
+				me.obs.log.Error("Unable to send metric descriptor.", zap.Error(err), zap.Any("metric_descriptor", md))
 				continue
 			}
 			mdCache[md.Type] = md
@@ -371,7 +394,8 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	for i := 0; i < quantiles.Len(); i++ {
 		quantile := quantiles.At(i)
 		pLabel := labels{
-			"percentile": fmt.Sprintf("%v", quantile.Quantile()),
+			// Convert to percentile.
+			"percentile": fmt.Sprintf("%f", quantile.Quantile()*100),
 		}
 		result = append(result, &monitoringpb.TimeSeries{
 			Resource:   resource,
@@ -380,8 +404,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			ValueType:  metricpb.MetricDescriptor_DOUBLE,
 			Points: []*monitoringpb.Point{{
 				Interval: &monitoringpb.TimeInterval{
-					StartTime: startTime,
-					EndTime:   endTime,
+					EndTime: endTime,
 				},
 				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
 					DoubleValue: quantile.Value(),
@@ -740,26 +763,24 @@ func mergeLabels(mergeInto labels, others ...labels) labels {
 	return mergeInto
 }
 
-// only custom metrics let you add labels not in the metric descriptor and it is
-// only allowable to define a custom metric with these prefixes.
-var defaultInstrumentationLibraryPrefixes = []string{
-	"custom.googleapis.com/",
-	"external.googleapis.com/",
-	"prometheus.googleapis.com/",
-	"workload.googleapis.com/"}
-
-func (m *metricMapper) shouldAddInstrumentationLibraryLabels(pm pdata.Metric) bool {
+func (m *metricMapper) shouldAddInstrumentationLibraryLabels(pm pdata.Metric) (bool, error) {
 	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
-		return false
+		return false, nil
 	}
+	u, err := url.Parse(fmt.Sprintf("metrics://%s", pm.Name()))
+	if err != nil {
+		return false, err
+	}
+	domain := u.Hostname()
 
-	metricName := pm.Name()
-	for _, prefix := range m.cfg.MetricConfig.InstrumentationLibraryPrefixes {
-		if strings.HasPrefix(metricName, prefix) {
-			return true
+	// only custom metrics let you add labels not in the metric descriptor and it is
+	// only allowable to define a custom metric with these prefixes.
+	for _, c := range m.cfg.MetricConfig.CustomMetricDomains {
+		if c == domain {
+			return true, nil
 		}
 	}
-	return false
+	return false, nil
 }
 
 // Takes a GCM metric type, like (workload.googleapis.com/MyCoolMetric) and returns the display name.
@@ -777,11 +798,17 @@ func (m *metricMapper) metricTypeToDisplayName(mURL string) string {
 func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescriptor {
 	// TODO - allow customization of label descriptions.
 	result := []*label.LabelDescriptor{}
+	seenKeys := map[string]struct{}{}
 	addAttributes := func(attr pdata.AttributeMap) {
 		attr.Range(func(key string, _ pdata.AttributeValue) bool {
+			// Skip keys that have already been set
+			if _, ok := seenKeys[key]; ok {
+				return true
+			}
 			result = append(result, &label.LabelDescriptor{
 				Key: key,
 			})
+			seenKeys[key] = struct{}{}
 			return true
 		})
 	}

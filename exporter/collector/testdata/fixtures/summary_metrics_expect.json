@@ -4,13 +4,18 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/testsummary_summary_sum",
+            "type": "workload.googleapis.com/testsummary_summary_sum",
             "labels": {
               "foo": "bar"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "CUMULATIVE",
           "valueType": "DOUBLE",
@@ -24,17 +29,23 @@
                 "doubleValue": 123.4
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/testsummary_summary_count",
+            "type": "workload.googleapis.com/testsummary_summary_count",
             "labels": {
               "foo": "bar"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "CUMULATIVE",
           "valueType": "INT64",
@@ -48,18 +59,24 @@
                 "int64Value": "10"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/testsummary_summary_percentile",
+            "type": "workload.googleapis.com/testsummary_summary_percentile",
             "labels": {
               "foo": "bar",
               "percentile": "50.000000"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "GAUGE",
           "valueType": "DOUBLE",
@@ -72,18 +89,24 @@
                 "doubleValue": 10.2
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/testsummary_summary_percentile",
+            "type": "workload.googleapis.com/testsummary_summary_percentile",
             "labels": {
               "foo": "bar",
               "percentile": "75.000000"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "GAUGE",
           "valueType": "DOUBLE",
@@ -96,18 +119,24 @@
                 "doubleValue": 25.5
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/testsummary_summary_percentile",
+            "type": "workload.googleapis.com/testsummary_summary_percentile",
             "labels": {
               "foo": "bar",
               "percentile": "90.000000"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "GAUGE",
           "valueType": "DOUBLE",
@@ -120,7 +149,8 @@
                 "doubleValue": 100.2
               }
             }
-          ]
+          ],
+          "unit": "1"
         }
       ]
     }
@@ -128,7 +158,7 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/testsummary_summary_sum",
+        "type": "workload.googleapis.com/testsummary_summary_sum",
         "labels": [
           {
             "key": "foo"
@@ -138,12 +168,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "OpenCensus/testsummary_summary_sum"
+        "displayName": "testsummary_summary_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/testsummary_summary_count",
+        "type": "workload.googleapis.com/testsummary_summary_count",
         "labels": [
           {
             "key": "foo"
@@ -153,12 +183,12 @@
         "valueType": "INT64",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "OpenCensus/testsummary_summary_count"
+        "displayName": "testsummary_summary_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/testsummary_summary_percentile",
+        "type": "workload.googleapis.com/testsummary_summary_percentile",
         "labels": [
           {
             "key": "foo"
@@ -172,7 +202,51 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "OpenCensus/testsummary_summary_percentile"
+        "displayName": "testsummary_summary_percentile"
+      }
+    }
+  ],
+  "selfObservabilityMetrics": [
+    {
+      "name": "exporter/enqueue_failed_log_records",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_spans",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/send_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/sent_metric_points",
+      "val": "1",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "googlecloudmonitoring/point_count",
+      "val": "5",
+      "labels": {
+        "status": "OK"
       }
     }
   ]

@@ -18,18 +18,16 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"math"
 	"strings"
 	"time"
 
-	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/metric/number"
 	"go.opentelemetry.io/otel/metric/sdkapi"
 	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
-	"go.opentelemetry.io/otel/sdk/metric/aggregator/minmaxsumcount"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
@@ -47,16 +45,13 @@ const (
 	cloudMonitoringMetricDescriptorNameFormat = "custom.googleapis.com/opentelemetry/%s"
 )
 
-// TODO: Remove when Count aggregation is used in the implementation
-var _ = countToTypeValueAndTimestamp
-
 // key is used to judge the uniqueness of the record descriptor.
 type key struct {
 	name        string
 	libraryname string
 }
 
-func keyOf(descriptor *metric.Descriptor, library instrumentation.Library) key {
+func keyOf(descriptor *sdkapi.Descriptor, library instrumentation.Library) key {
 	return key{
 		name:        descriptor.Name(),
 		libraryname: library.Name,
@@ -201,7 +196,7 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resou
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
 	aggError := ilr.ForEach(func(library instrumentation.Library, reader export.Reader) error {
-		return reader.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
+		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
 			k := keyOf(r.Descriptor(), library)
 
 			if _, ok := me.mdCache[k]; ok {
@@ -264,7 +259,7 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 	tss := []*monitoringpb.TimeSeries{}
 
 	aggError := ilr.ForEach(func(library instrumentation.Library, reader export.Reader) error {
-		return reader.ForEach(export.CumulativeExportKindSelector(), func(r export.Record) error {
+		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
 			ts, err := me.recordToTspb(&r, res, library)
 			if err != nil {
 				return err
@@ -320,7 +315,7 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource,
 
 // descToMetricType converts descriptor to MetricType proto type.
 // Basically this returns default value ("custom.googleapis.com/opentelemetry/[metric type]")
-func (me *metricExporter) descToMetricType(desc *metric.Descriptor) string {
+func (me *metricExporter) descToMetricType(desc *sdkapi.Descriptor) string {
 	if formatter := me.o.MetricDescriptorTypeFormatter; formatter != nil {
 		return formatter(desc)
 	}
@@ -547,37 +542,6 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	}
 
 	return nil, nil, errUnexpectedInstrumentKind{kind: ikind}
-}
-
-func countToTypeValueAndTimestamp(count *minmaxsumcount.Aggregator, kind number.Kind, start, end time.Time) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
-	value, err := count.Count()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	t, err := toNonemptyTimeIntervalpb(start, end)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	switch kind {
-	case number.Int64Kind:
-		if value > math.MaxInt64 {
-			return nil, nil, fmt.Errorf("unable to convert uint64 to int64: uint64 %v exceeds the max for int64: %v", value, int64(math.MaxInt64))
-		}
-		return &monitoringpb.TypedValue{
-			Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: int64(value),
-			},
-		}, t, nil
-	case number.Float64Kind:
-		return &monitoringpb.TypedValue{
-			Value: &monitoringpb.TypedValue_DoubleValue{
-				DoubleValue: float64(value),
-			},
-		}, t, nil
-	}
-	return nil, nil, errUnexpectedNumberKind{kind: kind}
 }
 
 func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind number.Kind) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {

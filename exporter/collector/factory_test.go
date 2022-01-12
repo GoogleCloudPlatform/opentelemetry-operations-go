@@ -22,7 +22,18 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/config/configtest"
+	"go.opentelemetry.io/collector/service/featuregate"
 )
+
+// SetPdataFeatureGateForTest changes the pdata feature gate during a test.
+// usage: defer SetPdataFeatureGateForTest(true)()
+func SetPdataFeatureGateForTest(enabled bool) func() {
+	originalValue := featuregate.IsEnabled(PdataExporterFeatureGate)
+	featuregate.Apply(map[string]bool{PdataExporterFeatureGate: enabled})
+	return func() {
+		featuregate.Apply(map[string]bool{PdataExporterFeatureGate: originalValue})
+	}
+}
 
 func TestCreateDefaultConfig(t *testing.T) {
 	factory := NewFactory()

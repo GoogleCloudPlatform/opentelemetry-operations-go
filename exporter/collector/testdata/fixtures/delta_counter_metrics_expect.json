@@ -4,26 +4,33 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/opencensus/deltacounter",
+            "type": "workload.googleapis.com/deltacounter",
             "labels": {
               "foo": "bar"
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
-          "metricKind": "GAUGE",
+          "metricKind": "CUMULATIVE",
           "valueType": "INT64",
           "points": [
             {
               "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
                 "int64Value": "253"
               }
             }
-          ]
+          ],
+          "unit": "1"
         }
       ]
     }
@@ -31,17 +38,61 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "custom.googleapis.com/opencensus/deltacounter",
+        "type": "workload.googleapis.com/deltacounter",
         "labels": [
           {
             "key": "foo"
           }
         ],
-        "metricKind": "GAUGE",
+        "metricKind": "CUMULATIVE",
         "valueType": "INT64",
         "unit": "1",
         "description": "This is a test counter with delta temporality",
-        "displayName": "OpenCensus/deltacounter"
+        "displayName": "deltacounter"
+      }
+    }
+  ],
+  "selfObservabilityMetrics": [
+    {
+      "name": "exporter/enqueue_failed_log_records",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_spans",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/send_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/sent_metric_points",
+      "val": "1",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "googlecloudmonitoring/point_count",
+      "val": "1",
+      "labels": {
+        "status": "OK"
       }
     }
   ]

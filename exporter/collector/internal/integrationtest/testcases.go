@@ -22,16 +22,14 @@ var (
 			Name:                 "Basic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
-			Skip:                 true,
 		},
 		{
 			Name:                 "Modified prefix unknown domain",
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/unknown_domain_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
-				cfg.MetricConfig.Prefix = "foobar.org"
+				cfg.MetricConfig.Prefix = "custom.googleapis.com/foobar.org"
 			},
-			Skip: true,
 		},
 		{
 			Name:                 "Modified prefix workload.googleapis.com",
@@ -40,31 +38,26 @@ var (
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.Prefix = "workload.googleapis.com"
 			},
-			Skip: true,
 		},
 		{
 			Name:                 "Delta Counter",
 			OTLPInputFixturePath: "testdata/fixtures/delta_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/delta_counter_metrics_expect.json",
-			Skip:                 true,
 		},
 		{
 			Name:                 "Non-monotonic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/nonmonotonic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/nonmonotonic_counter_metrics_expect.json",
-			Skip:                 true,
 		},
 		{
 			Name:                 "Summary",
 			OTLPInputFixturePath: "testdata/fixtures/summary_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/summary_metrics_expect.json",
-			Skip:                 true,
 		},
 		{
 			Name:                 "Ops Agent Self-Reported metrics",
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_self_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_self_metrics_expect.json",
-			Skip:                 false,
 			Configure: func(cfg *collector.Config) {
 				// Previous exporter did NOT export metric descriptors.
 				// TODO: Add a new test that also checks metric descriptors.
@@ -75,25 +68,36 @@ var (
 			Name:                 "Ops Agent Host Metrics",
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_host_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_host_metrics_expect.json",
-			Skip:                 true,
+			Configure: func(cfg *collector.Config) {
+				// Previous exporter did NOT export metric descriptors.
+				// TODO: Add a new test that also checks metric descriptors.
+				cfg.MetricConfig.SkipCreateMetricDescriptor = true
+			},
 		},
 		{
 			Name:                 "GKE Workload Metrics",
 			OTLPInputFixturePath: "testdata/fixtures/workload_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/workload_metrics_expect.json",
 			Skip:                 true,
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.Prefix = "workload.googleapis.com/"
+			},
 		},
 		{
 			Name:                 "GKE Metrics Agent",
 			OTLPInputFixturePath: "testdata/fixtures/gke_metrics_agent_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/gke_metrics_agent_metrics_expect.json",
-			Skip:                 true,
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.CreateServiceTimeSeries = true
+			},
 		},
 		{
 			Name:                 "GKE Control Plane Metrics Agent",
 			OTLPInputFixturePath: "testdata/fixtures/gke_control_plane_metrics_agent_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/gke_control_plane_metrics_agent_metrics_expect.json",
-			Skip:                 true,
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.CreateServiceTimeSeries = true
+			},
 		},
 		{
 			Name:                 "Exponential Histogram",

@@ -1,36 +1,80 @@
 {
-    "createServiceTimeSeriesRequests": [
-      {
-        "timeSeries": [
-          {
-            "metric": {
-                "type": "kubernetes.io/internal/nodes/clustermetrics/node_network_availability_transition_time",
-                "labels": {
-                  "network_unavailable": "False"
-                }
-            },
-            "resource": {
-              "type": "k8s_node",
-              "labels": {
-                "cluster_name": "rabbitmq-test-dev",
-                "location": "us-central1-c",
-                "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
+  "createServiceTimeSeriesRequests": [
+    {
+      "timeSeries": [
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_network_availability_transition_time",
+            "labels": {
+              "network_unavailable": "False"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639069893"
               }
-            },
-            "metricKind": "GAUGE",
-            "valueType": "INT64",
-            "points": [
-              {
-                "interval": {
-                  "endTime": "1970-01-01T00:00:00Z"
-                },
-                "value": {
-                  "int64Value": "1639069893"
-                }
-              }
-            ]
-          }
-        ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "selfObservabilityMetrics": [
+    {
+      "name": "exporter/enqueue_failed_log_records",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
       }
-    ]
+    },
+    {
+      "name": "exporter/enqueue_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_spans",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/send_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/sent_metric_points",
+      "val": "1",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "googlecloudmonitoring/point_count",
+      "val": "1",
+      "labels": {
+        "status": "OK"
+      }
+    }
+  ]
 }

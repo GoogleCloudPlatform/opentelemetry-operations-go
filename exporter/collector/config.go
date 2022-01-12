@@ -54,11 +54,10 @@ type MetricConfig struct {
 	// labels. Defaults to true.
 	InstrumentationLibraryLabels bool `mapstructure:"instrumentation_library_labels"`
 
-	// Set of metric name prefixes to add instrumentation_source and
-	// instrumentation_version labels to. Defaults to custom metric domains:
-	// "custom.googleapis.com/", "external.googleapis.com/",
-	// "prometheus.googleapis.com/", "workload.googleapis.com/"
-	InstrumentationLibraryPrefixes []string `mapstructure:"instrumentation_library_domains"`
+	// Set of custom metric domains. Defaults to: "custom.googleapis.com",
+	// "external.googleapis.com", "prometheus.googleapis.com",
+	// "workload.googleapis.com"
+	CustomMetricDomains []string `mapstructure:"custom_metric_domains"`
 
 	// If true, this will send all timeseries using `CreateServiceTimeSeries`.
 	// Implicitly, this sets `SkipMetricDescriptor` to true.

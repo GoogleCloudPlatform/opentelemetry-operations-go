@@ -10,9 +10,15 @@
             }
           },
           "resource": {
-            "type": "global"
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
           },
           "metricKind": "CUMULATIVE",
+          "unit": "1",
           "valueType": "INT64",
           "points": [
             {
@@ -27,6 +33,64 @@
           ]
         }
       ]
+    }
+  ],
+  "createMetricDescriptorRequests": [
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testcounter",
+        "metricKind": "CUMULATIVE",
+        "valueType": "INT64",
+        "unit": "1",
+        "description": "This is a test counter",
+        "displayName": "testcounter",
+        "labels": [{
+          "key": "foo"
+        }]
+      }
+    }],
+  "selfObservabilityMetrics": [
+    {
+      "name": "exporter/enqueue_failed_log_records",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_spans",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/send_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/sent_metric_points",
+      "val": "1",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "googlecloudmonitoring/point_count",
+      "val": "1",
+      "labels": {
+        "status": "OK"
+      }
     }
   ]
 }

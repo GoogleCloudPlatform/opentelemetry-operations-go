@@ -28,6 +28,7 @@ import (
 )
 
 func TestLoadConfig(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	factories, err := componenttest.NopFactories()
 	assert.Nil(t, err)
 
@@ -94,11 +95,11 @@ func TestLoadConfig(t *testing.T) {
 					"googleapis.com", "kubernetes.io", "istio.io", "knative.dev",
 				},
 				InstrumentationLibraryLabels: true,
-				InstrumentationLibraryPrefixes: []string{
-					"custom.googleapis.com/",
-					"external.googleapis.com/",
-					"prometheus.googleapis.com/",
-					"workload.googleapis.com/",
+				CustomMetricDomains: []string{
+					"custom.googleapis.com",
+					"external.googleapis.com",
+					"prometheus.googleapis.com",
+					"workload.googleapis.com",
 				},
 				CreateMetricDescriptorBufferSize: 10,
 			},

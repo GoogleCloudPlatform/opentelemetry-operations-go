@@ -30,7 +30,8 @@
                 "int64Value": "1486848"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -60,7 +61,8 @@
                 "int64Value": "7438336"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -91,7 +93,8 @@
                 "int64Value": "3267"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -122,7 +125,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -149,7 +153,8 @@
                 "doubleValue": 88927.690019019
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -176,7 +181,8 @@
                 "int64Value": "36864"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -203,7 +209,8 @@
                 "int64Value": "79727067"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -230,7 +237,8 @@
                 "int64Value": "40220787"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -256,7 +264,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -282,7 +291,8 @@
                 "int64Value": "757760"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -311,7 +321,8 @@
                 "int64Value": "12288"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -340,7 +351,8 @@
                 "int64Value": "2064187392"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -368,7 +380,8 @@
                 "doubleValue": 1579.616987465
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -398,7 +411,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -428,7 +442,8 @@
                 "int64Value": "89272320"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -459,7 +474,8 @@
                 "int64Value": "36498"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -490,7 +506,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -517,7 +534,8 @@
                 "doubleValue": 88346.690040096
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
@@ -544,7 +562,8 @@
                 "int64Value": "753664"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -569,7 +588,8 @@
                 "doubleValue": 2
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -594,7 +614,8 @@
                 "doubleValue": 0.94
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -619,7 +640,8 @@
                 "int64Value": "4128378880"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -644,7 +666,8 @@
                 "int64Value": "2955022336"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -669,7 +692,8 @@
                 "int64Value": "47093746742"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -696,7 +720,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -723,7 +748,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -750,7 +776,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -777,7 +804,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -804,7 +832,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -831,7 +860,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -859,7 +889,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -886,7 +917,8 @@
                 "doubleValue": 0.05
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -913,7 +945,8 @@
                 "int64Value": "104857600"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -940,7 +973,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -967,7 +1001,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -994,7 +1029,8 @@
                 "int64Value": "262144000"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1021,7 +1057,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1049,7 +1086,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -1076,7 +1114,8 @@
                 "doubleValue": 0.05
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1103,7 +1142,8 @@
                 "int64Value": "104857600"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1130,7 +1170,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1157,7 +1198,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1184,7 +1226,8 @@
                 "int64Value": "262144000"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1211,7 +1254,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1239,7 +1283,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -1266,7 +1311,8 @@
                 "doubleValue": 0.005
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1293,7 +1339,8 @@
                 "int64Value": "10485760"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1320,7 +1367,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1347,7 +1395,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1374,7 +1423,8 @@
                 "int64Value": "52428800"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1401,7 +1451,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1429,7 +1480,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -1456,7 +1508,8 @@
                 "doubleValue": 0.005
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1483,7 +1536,8 @@
                 "int64Value": "10485760"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1510,7 +1564,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1537,7 +1592,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1564,7 +1620,8 @@
                 "int64Value": "52428800"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1591,7 +1648,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1619,7 +1677,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -1646,7 +1705,8 @@
                 "doubleValue": 0.003
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1673,7 +1733,8 @@
                 "int64Value": "52428800"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1700,7 +1761,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1727,7 +1789,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1754,7 +1817,8 @@
                 "int64Value": "52428800"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1781,7 +1845,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1809,7 +1874,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -1836,7 +1902,8 @@
                 "doubleValue": 0.01
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1863,7 +1930,8 @@
                 "int64Value": "62914560"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1890,7 +1958,8 @@
                 "int64Value": "52428800"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1917,7 +1986,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -1944,7 +2014,8 @@
                 "int64Value": "104857600"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1971,7 +2042,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -1999,7 +2071,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -2026,7 +2099,8 @@
                 "doubleValue": 0.001
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2053,7 +2127,8 @@
                 "int64Value": "10485760"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2080,7 +2155,8 @@
                 "int64Value": "26214400"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2107,7 +2183,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2134,7 +2211,8 @@
                 "int64Value": "41943040"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2161,7 +2239,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2189,7 +2268,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -2216,7 +2296,8 @@
                 "doubleValue": 0.02
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2243,7 +2324,8 @@
                 "int64Value": "10485760"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2270,7 +2352,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2297,7 +2380,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2324,7 +2408,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2351,7 +2436,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2379,7 +2465,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -2406,7 +2493,8 @@
                 "doubleValue": 0.02
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2433,7 +2521,8 @@
                 "int64Value": "67108864"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2460,7 +2549,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2487,7 +2577,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2514,7 +2605,8 @@
                 "int64Value": "67108864"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2541,7 +2633,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2569,7 +2662,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -2596,7 +2690,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2623,7 +2718,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2650,7 +2746,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2677,7 +2774,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2704,7 +2802,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2731,7 +2830,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2759,7 +2859,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -2786,7 +2887,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2813,7 +2915,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2840,7 +2943,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2867,7 +2971,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -2894,7 +2999,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2921,7 +3027,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -2949,7 +3056,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -2976,7 +3084,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3003,7 +3112,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3030,7 +3140,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3057,7 +3168,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3084,7 +3196,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3111,7 +3224,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3139,7 +3253,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -3166,7 +3281,8 @@
                 "doubleValue": 0.25
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3193,7 +3309,8 @@
                 "int64Value": "134217728"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3220,7 +3337,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3247,7 +3365,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3274,7 +3393,8 @@
                 "int64Value": "134217728"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3301,7 +3421,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3329,7 +3450,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -3356,7 +3478,8 @@
                 "doubleValue": 0.25
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3383,7 +3506,8 @@
                 "int64Value": "1073741824"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3410,7 +3534,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3437,7 +3562,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3464,7 +3590,8 @@
                 "int64Value": "1073741824"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3491,7 +3618,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3519,7 +3647,8 @@
                 "int64Value": "3"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -3546,7 +3675,8 @@
                 "doubleValue": 0.1
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3573,7 +3703,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3600,7 +3731,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3627,7 +3759,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3654,7 +3787,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3681,7 +3815,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3709,7 +3844,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         },
         {
           "metric": {
@@ -3736,7 +3872,8 @@
                 "doubleValue": 0.1
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3763,7 +3900,8 @@
                 "int64Value": "104857600"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3790,7 +3928,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3817,7 +3956,8 @@
                 "doubleValue": 0.1
               }
             }
-          ]
+          ],
+          "unit": "{cpu}"
         },
         {
           "metric": {
@@ -3844,7 +3984,8 @@
                 "int64Value": "104857600"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3871,7 +4012,8 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "By"
         },
         {
           "metric": {
@@ -3899,9 +4041,54 @@
                 "int64Value": "0"
               }
             }
-          ]
+          ],
+          "unit": "1"
         }
       ]
+    }
+  ],
+  "selfObservabilityMetrics": [
+    {
+      "name": "exporter/enqueue_failed_log_records",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_spans",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/send_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/sent_metric_points",
+      "val": "143",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "googlecloudmonitoring/point_count",
+      "val": "143",
+      "labels": {
+        "status": "OK"
+      }
     }
   ]
 }
