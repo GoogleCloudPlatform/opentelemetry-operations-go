@@ -4,7 +4,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/deltacounter",
+            "type": "workload.googleapis.com/testcounter",
             "labels": {
               "foo": "bar"
             }
@@ -38,7 +38,7 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/deltacounter",
+        "type": "workload.googleapis.com/testcounter",
         "labels": [
           {
             "key": "foo"
@@ -47,47 +47,12 @@
         "metricKind": "CUMULATIVE",
         "valueType": "INT64",
         "unit": "1",
-        "description": "This is a test counter with delta temporality",
-        "displayName": "deltacounter"
+        "description": "This is a test counter",
+        "displayName": "testcounter"
       }
     }
   ],
   "selfObservabilityMetrics": [
-    {
-      "name": "exporter/enqueue_failed_log_records",
-      "val": "0",
-      "labels": {
-        "exporter": "googlecloud"
-      }
-    },
-    {
-      "name": "exporter/enqueue_failed_metric_points",
-      "val": "0",
-      "labels": {
-        "exporter": "googlecloud"
-      }
-    },
-    {
-      "name": "exporter/enqueue_failed_spans",
-      "val": "0",
-      "labels": {
-        "exporter": "googlecloud"
-      }
-    },
-    {
-      "name": "exporter/send_failed_metric_points",
-      "val": "0",
-      "labels": {
-        "exporter": "googlecloud"
-      }
-    },
-    {
-      "name": "exporter/sent_metric_points",
-      "val": "1",
-      "labels": {
-        "exporter": "googlecloud"
-      }
-    },
     {
       "name": "googlecloudmonitoring/point_count",
       "val": "1",

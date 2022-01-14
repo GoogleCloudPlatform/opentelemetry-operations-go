@@ -15,7 +15,7 @@
 //go:build integrationtest
 // +build integrationtest
 
-package collector_test
+package integrationtest
 
 import (
 	"context"
@@ -23,38 +23,34 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
+	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
 
 func createMetricsExporter(
 	ctx context.Context,
 	t *testing.T,
-	test *integrationtest.MetricsTestCase,
-) component.MetricsExporter {
-	factory := collector.NewFactory()
-
-	exporter, err := factory.CreateMetricsExporter(
+	test *MetricsTestCase,
+) *collector.MetricsExporter {
+	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
-		componenttest.NewNopExporterCreateSettings(),
 		test.CreateConfig(),
+		zap.NewNop(),
+		"latest",
+		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
-	require.NoError(t, exporter.Start(ctx, componenttest.NewNopHost()))
 	t.Log("Collector metrics exporter started")
 	return exporter
 }
 
 func TestIntegrationMetrics(t *testing.T) {
-	defer collector.SetPdataFeatureGateForTest(true)()
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range integrationtest.TestCases {
+	for _, test := range TestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
@@ -65,7 +61,7 @@ func TestIntegrationMetrics(t *testing.T) {
 
 			require.NoError(
 				t,
-				exporter.ConsumeMetrics(ctx, metrics),
+				exporter.PushMetrics(ctx, metrics),
 				"Failed to export metrics",
 			)
 		})

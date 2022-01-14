@@ -25,11 +25,11 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 	"unicode"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/exporter/exporterhelper"
+	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.uber.org/zap"
 	"golang.org/x/oauth2/google"
@@ -48,9 +48,9 @@ type selfObservability struct {
 	log *zap.Logger
 }
 
-// metricsExporter is the GCM exporter that uses pdata directly
-type metricsExporter struct {
-	cfg    *Config
+// MetricsExporter is the GCM exporter that uses pdata directly
+type MetricsExporter struct {
+	cfg    Config
 	client *monitoring.MetricClient
 	obs    selfObservability
 	mapper metricMapper
@@ -60,14 +60,11 @@ type metricsExporter struct {
 	mdsDone chan struct{}
 }
 
-// metricMapper is the part that transforms metrics. Separate from metricsExporter since it has
+// metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	cfg *Config
+	cfg Config
 }
-
-// Known metric domains. Note: This is now configurable for advanced usages.
-var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
 
 // Constants we use when translating summary metrics into GCP.
 const (
@@ -78,7 +75,7 @@ const (
 
 type labels map[string]string
 
-func (me *metricsExporter) Shutdown(ctx context.Context) error {
+func (me *MetricsExporter) Shutdown(ctx context.Context) error {
 	close(me.mds)
 	select {
 	case <-me.mdsDone:
@@ -88,19 +85,15 @@ func (me *metricsExporter) Shutdown(ctx context.Context) error {
 	return me.client.Close()
 }
 
-func obs(in component.TelemetrySettings) selfObservability {
-	return selfObservability{
-		log: in.Logger,
-		// TODO - use meter-provider for self-observability metrics.
-	}
-}
-
-func newGoogleCloudMetricsExporter(
+func NewGoogleCloudMetricsExporter(
 	ctx context.Context,
-	cfg *Config,
-	set component.ExporterCreateSettings,
-) (component.MetricsExporter, error) {
-	setVersionInUserAgent(cfg, set.BuildInfo.Version)
+	cfg Config,
+	log *zap.Logger,
+	version string,
+	timeout time.Duration,
+) (*MetricsExporter, error) {
+	view.Register(MetricViews()...)
+	setVersionInUserAgent(&cfg, version)
 
 	// TODO - Share this lookup somewhere
 	if cfg.ProjectID == "" {
@@ -115,7 +108,7 @@ func newGoogleCloudMetricsExporter(
 		cfg.ProjectID = creds.ProjectID
 	}
 
-	clientOpts, err := generateClientOptions(cfg)
+	clientOpts, err := generateClientOptions(&cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -125,10 +118,10 @@ func newGoogleCloudMetricsExporter(
 		return nil, err
 	}
 
-	mExp := &metricsExporter{
+	mExp := &MetricsExporter{
 		cfg:    cfg,
 		client: client,
-		obs:    obs(set.TelemetrySettings),
+		obs:    selfObservability{log: log},
 		mapper: metricMapper{cfg},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asycnhronously sent and optimistic.
@@ -141,18 +134,11 @@ func newGoogleCloudMetricsExporter(
 	// Fire up the metric descriptor exporter.
 	go mExp.exportMetricDescriptorRunner()
 
-	return exporterhelper.NewMetricsExporter(
-		cfg,
-		set,
-		mExp.pushMetrics,
-		exporterhelper.WithShutdown(mExp.Shutdown),
-		exporterhelper.WithTimeout(exporterhelper.TimeoutSettings{Timeout: defaultTimeout}),
-		exporterhelper.WithQueue(cfg.QueueSettings),
-		exporterhelper.WithRetry(cfg.RetrySettings))
+	return mExp, nil
 }
 
-// pushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary
-func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) error {
+// PushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary
+func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) error {
 	timeSeries := make([]*monitoringpb.TimeSeries, 0, m.DataPointCount())
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
@@ -200,7 +186,7 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 }
 
 // Reads metric descriptors from the md channel, and reports them (once) to GCM.
-func (me *metricsExporter) exportMetricDescriptorRunner() {
+func (me *MetricsExporter) exportMetricDescriptorRunner() {
 	mdCache := make(map[string]*metricpb.MetricDescriptor)
 	// We iterate over all metric descritpors until the channel is closed.
 	// Note: if we get terminated, this will still attempt to export all descriptors
@@ -221,13 +207,13 @@ func (me *metricsExporter) exportMetricDescriptorRunner() {
 	close(me.mdsDone)
 }
 
-func (me *metricsExporter) projectName() string {
+func (me *MetricsExporter) projectName() string {
 	// TODO set Name field with project ID from config or ADC
 	return fmt.Sprintf("projects/%s", me.cfg.ProjectID)
 }
 
 // Helper method to send metric descriptors to GCM.
-func (me *metricsExporter) exportMetricDescriptor(ctx context.Context, md *metricpb.MetricDescriptor) error {
+func (me *MetricsExporter) exportMetricDescriptor(ctx context.Context, md *metricpb.MetricDescriptor) error {
 	// export
 	req := &monitoringpb.CreateMetricDescriptorRequest{
 		Name:             me.projectName(),
@@ -238,7 +224,7 @@ func (me *metricsExporter) exportMetricDescriptor(ctx context.Context, md *metri
 }
 
 // Sends a user-custom-metric timeseries.
-func (me *metricsExporter) createTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+func (me *MetricsExporter) createTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
 	return me.client.CreateTimeSeries(
 		ctx,
 		&monitoringpb.CreateTimeSeriesRequest{
@@ -249,7 +235,7 @@ func (me *metricsExporter) createTimeSeries(ctx context.Context, ts []*monitorin
 }
 
 // Sends a service timeseries.
-func (me *metricsExporter) createServiceTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
 	return me.client.CreateServiceTimeSeries(
 		ctx,
 		&monitoringpb.CreateTimeSeriesRequest{

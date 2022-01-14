@@ -21,8 +21,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
+	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/metric"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/grpc"
@@ -151,19 +150,19 @@ func (m *MetricsTestServer) NewExporter(
 	ctx context.Context,
 	t testing.TB,
 	cfg collector.Config,
-) component.MetricsExporter {
-	factory := collector.NewFactory()
+) *collector.MetricsExporter {
 	cfg.Endpoint = m.Endpoint
 	cfg.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
-	exporter, err := factory.CreateMetricsExporter(
+	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
-		componenttest.NewNopExporterCreateSettings(),
-		&cfg,
+		cfg,
+		zap.NewNop(),
+		"latest",
+		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
-	require.NoError(t, exporter.Start(ctx, componenttest.NewNopHost()))
 	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.Endpoint)
 	return exporter
 }
