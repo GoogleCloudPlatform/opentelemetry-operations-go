@@ -963,6 +963,7 @@ func TestKnownDomains(t *testing.T) {
 }
 
 func TestInstrumentationLibraryToLabels(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
 	newInstrumentationLibrary := func(name, version string) pdata.InstrumentationLibrary {
 		il := pdata.NewInstrumentationLibrary()
 		il.SetName("foo")
@@ -1001,63 +1002,6 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 			out := m.instrumentationLibraryToLabels(test.instrumentationLibrary)
 
 			assert.Equal(t, out, test.output)
-		})
-	}
-}
-
-func TestCustomMetricNames(t *testing.T) {
-	defer SetPdataFeatureGateForTest(true)()
-
-	tests := []struct {
-		metricName     string
-		expectedResult bool
-		expectError    bool
-	}{{
-		metricName:     "",
-		expectedResult: false,
-	}, {
-		metricName:     "_",
-		expectedResult: false,
-	}, {
-		metricName:     "custom.googleapis.com",
-		expectedResult: true,
-	}, {
-		metricName:     "foo.custom.googleapis.com",
-		expectedResult: false,
-	}, {
-		metricName:     "custom.googleapis.com/",
-		expectedResult: true,
-	}, {
-		metricName:     "custom.googleapis.com/example-bytes",
-		expectedResult: true,
-	}, {
-		metricName:     "custom.googleapis.com/example-bytes/",
-		expectedResult: true,
-	}, {
-		metricName:     "workload.googleapis.com/",
-		expectedResult: true,
-	}, {
-		metricName:     "workload.googleapis.com/example-out",
-		expectedResult: true,
-	}, {
-		metricName:  ":$?not.a.domain/path",
-		expectError: true,
-	}}
-
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("shouldAddInstrumentationLibraryLabels(%q)", test.metricName), func(t *testing.T) {
-			metric := pdata.NewMetric()
-			metric.SetName(test.metricName)
-
-			config := createDefaultConfig()
-			m := metricMapper{cfg: config}
-			isCustom, err := m.shouldAddInstrumentationLibraryLabels(metric)
-			if test.expectError {
-				assert.Error(t, err)
-				return
-			}
-			assert.NoError(t, err)
-			assert.Equalf(t, test.expectedResult, isCustom, "expected isCustomMetric(%q) -> %t, want %t", test.metricName, isCustom, test.expectedResult)
 		})
 	}
 }

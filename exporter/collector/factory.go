@@ -68,7 +68,6 @@ func createDefaultConfig() *Config {
 			Prefix:                           "workload.googleapis.com",
 			CreateMetricDescriptorBufferSize: 10,
 			InstrumentationLibraryLabels:     true,
-			CustomMetricDomains:              defaultCustomMetricDomains,
 		}
 	}
 	return cfg

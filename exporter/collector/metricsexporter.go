@@ -69,13 +69,6 @@ type metricMapper struct {
 // Known metric domains. Note: This is now configurable for advanced usages.
 var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
 
-// Known custom metric domains. Note: This is now configurable for advanced usages.
-var defaultCustomMetricDomains = []string{
-	"custom.googleapis.com",
-	"external.googleapis.com",
-	"prometheus.googleapis.com",
-	"workload.googleapis.com"}
-
 // Constants we use when translating summary metrics into GCP.
 const (
 	SummaryCountPrefix      = "_summary_count"
@@ -170,18 +163,11 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 			ilm := ilms.At(j)
 
 			instrumentationLibraryLabels := me.mapper.instrumentationLibraryToLabels(ilm.InstrumentationLibrary())
+			metricLabels := mergeLabels(nil, instrumentationLibraryLabels, extraResourceLabels)
 
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
-				metricLabels := extraResourceLabels
-
-				if ok, err := me.mapper.shouldAddInstrumentationLibraryLabels(metric); err != nil {
-					me.obs.log.Error("Could not parse metric name", zap.Error(err))
-				} else if ok {
-					metricLabels = mergeLabels(nil, metricLabels, instrumentationLibraryLabels)
-				}
-
 				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, metricLabels, metric)...)
 
 				// We only send metric descriptors if we're configured *and* we're not sending service timeseries.
@@ -761,26 +747,6 @@ func mergeLabels(mergeInto labels, others ...labels) labels {
 	}
 
 	return mergeInto
-}
-
-func (m *metricMapper) shouldAddInstrumentationLibraryLabels(pm pdata.Metric) (bool, error) {
-	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
-		return false, nil
-	}
-	u, err := url.Parse(fmt.Sprintf("metrics://%s", pm.Name()))
-	if err != nil {
-		return false, err
-	}
-	domain := u.Hostname()
-
-	// only custom metrics let you add labels not in the metric descriptor and it is
-	// only allowable to define a custom metric with these prefixes.
-	for _, c := range m.cfg.MetricConfig.CustomMetricDomains {
-		if c == domain {
-			return true, nil
-		}
-	}
-	return false, nil
 }
 
 // Takes a GCM metric type, like (workload.googleapis.com/MyCoolMetric) and returns the display name.

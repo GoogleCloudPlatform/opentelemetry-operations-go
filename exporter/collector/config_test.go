@@ -94,13 +94,7 @@ func TestLoadConfig(t *testing.T) {
 				KnownDomains: []string{
 					"googleapis.com", "kubernetes.io", "istio.io", "knative.dev",
 				},
-				InstrumentationLibraryLabels: true,
-				CustomMetricDomains: []string{
-					"custom.googleapis.com",
-					"external.googleapis.com",
-					"prometheus.googleapis.com",
-					"workload.googleapis.com",
-				},
+				InstrumentationLibraryLabels:     true,
 				CreateMetricDescriptorBufferSize: 10,
 			},
 		})
