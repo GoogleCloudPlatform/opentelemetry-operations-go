@@ -57,14 +57,14 @@ func (ts *testServer) CreateSpan(context.Context, *cloudtracepb.Span) (*cloudtra
 func TestGoogleCloudTraceExport(t *testing.T) {
 	type testCase struct {
 		name        string
-		cfg         *Config
+		cfg         Config
 		expectedErr string
 	}
 
 	testCases := []testCase{
 		{
 			name: "Standard",
-			cfg: &Config{
+			cfg: Config{
 				ProjectID:   "idk",
 				Endpoint:    "127.0.0.1:8080",
 				UseInsecure: true,
@@ -170,7 +170,7 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 		option.WithTelemetryDisabled(),
 	}
 
-	sde, err := NewGoogleCloudMetricsExporter(context.Background(), &Config{
+	sde, err := NewGoogleCloudMetricsExporter(context.Background(), Config{
 		ProjectID:   "idk",
 		Endpoint:    "127.0.0.1:8080",
 		UserAgent:   "MyAgent {{version}}",

@@ -208,7 +208,7 @@ func (m *MetricsTestCase) SkipIfNeeded(t testing.TB) {
 	}
 }
 
-func (m *MetricsTestCase) CreateConfig() *collector.Config {
+func (m *MetricsTestCase) CreateConfig() collector.Config {
 	cfg := collector.DefaultConfig()
 	// If not set it will use ADC
 	cfg.ProjectID = os.Getenv("PROJECT_ID")
@@ -217,7 +217,7 @@ func (m *MetricsTestCase) CreateConfig() *collector.Config {
 	cfg.MetricConfig.InstrumentationLibraryLabels = false
 
 	if m.Configure != nil {
-		m.Configure(cfg)
+		m.Configure(&cfg)
 	}
 
 	return cfg

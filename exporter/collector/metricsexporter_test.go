@@ -37,7 +37,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 	mr := &monitoredrespb.MonitoredResource{}
 
 	t.Run("Sum", func(t *testing.T) {
-		mapper := metricMapper{cfg: &Config{}}
+		mapper := metricMapper{cfg: Config{}}
 		metric := pdata.NewMetric()
 		metric.SetDataType(pdata.MetricDataTypeSum)
 		sum := metric.Sum()
@@ -58,7 +58,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 	})
 
 	t.Run("Gauge", func(t *testing.T) {
-		mapper := metricMapper{cfg: &Config{}}
+		mapper := metricMapper{cfg: Config{}}
 		metric := pdata.NewMetric()
 		metric.SetDataType(pdata.MetricDataTypeGauge)
 		gauge := metric.Gauge()
@@ -228,7 +228,7 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExemplarNoAttachements(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{}}
+	mapper := metricMapper{cfg: Config{}}
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -240,7 +240,7 @@ func TestExemplarNoAttachements(t *testing.T) {
 }
 
 func TestExemplarOnlyDroppedLabels(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{}}
+	mapper := metricMapper{cfg: Config{}}
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -258,7 +258,7 @@ func TestExemplarOnlyDroppedLabels(t *testing.T) {
 }
 
 func TestExemplarOnlyTraceId(t *testing.T) {
-	mapper := metricMapper{cfg: &Config{
+	mapper := metricMapper{cfg: Config{
 		ProjectID: "p",
 	}}
 	exemplar := pdata.NewExemplar()
@@ -955,7 +955,6 @@ func TestKnownDomains(t *testing.T) {
 }
 
 func TestInstrumentationLibraryToLabels(t *testing.T) {
-	defer SetPdataFeatureGateForTest(true)()
 	newInstrumentationLibrary := func(name, version string) pdata.InstrumentationLibrary {
 		il := pdata.NewInstrumentationLibrary()
 		il.SetName("foo")
@@ -987,7 +986,7 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			config := createDefaultConfig()
+			config := DefaultConfig()
 			config.MetricConfig = test.metricConfig
 			m := metricMapper{cfg: config}
 

@@ -157,7 +157,7 @@ func (m *MetricsTestServer) NewExporter(
 
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
-		&cfg,
+		cfg,
 		zap.NewNop(),
 		"latest",
 		collector.DefaultTimeout,

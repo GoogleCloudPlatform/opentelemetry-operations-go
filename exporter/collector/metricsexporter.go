@@ -50,7 +50,7 @@ type selfObservability struct {
 
 // MetricsExporter is the GCM exporter that uses pdata directly
 type MetricsExporter struct {
-	cfg    *Config
+	cfg    Config
 	client *monitoring.MetricClient
 	obs    selfObservability
 	mapper metricMapper
@@ -63,7 +63,7 @@ type MetricsExporter struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	cfg *Config
+	cfg Config
 }
 
 // Constants we use when translating summary metrics into GCP.
@@ -87,13 +87,13 @@ func (me *MetricsExporter) Shutdown(ctx context.Context) error {
 
 func NewGoogleCloudMetricsExporter(
 	ctx context.Context,
-	cfg *Config,
+	cfg Config,
 	log *zap.Logger,
 	version string,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
 	view.Register(MetricViews()...)
-	setVersionInUserAgent(cfg, version)
+	setVersionInUserAgent(&cfg, version)
 
 	// TODO - Share this lookup somewhere
 	if cfg.ProjectID == "" {
@@ -108,7 +108,7 @@ func NewGoogleCloudMetricsExporter(
 		cfg.ProjectID = creds.ProjectID
 	}
 
-	clientOpts, err := generateClientOptions(cfg)
+	clientOpts, err := generateClientOptions(&cfg)
 	if err != nil {
 		return nil, err
 	}

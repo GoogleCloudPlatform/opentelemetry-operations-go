@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package collector_test
+package integrationtest
 
 import (
 	"context"
@@ -20,8 +20,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
 
 func TestMetrics(t *testing.T) {
@@ -29,20 +27,20 @@ func TestMetrics(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range integrationtest.TestCases {
+	for _, test := range TestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeeded(t)
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 
-			testServer, err := integrationtest.NewMetricTestServer()
+			testServer, err := NewMetricTestServer()
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := testServer.NewExporter(ctx, t, *test.CreateConfig())
+			testServerExporter := testServer.NewExporter(ctx, t, test.CreateConfig())
 			// For collecting self observability metrics
-			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
+			inMemoryOCExporter, err := NewInMemoryOCViewExporter()
 			require.NoError(t, err)
 			defer inMemoryOCExporter.Shutdown(ctx)
 
@@ -58,8 +56,8 @@ func TestMetrics(t *testing.T) {
 				startTime,
 				endTime,
 			)
-			diff := integrationtest.DiffProtos(
-				&integrationtest.MetricExpectFixture{
+			diff := DiffProtos(
+				&MetricExpectFixture{
 					CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 					CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 					CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),

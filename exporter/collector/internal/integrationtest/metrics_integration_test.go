@@ -15,7 +15,7 @@
 //go:build integrationtest
 // +build integrationtest
 
-package collector_test
+package integrationtest
 
 import (
 	"context"
@@ -26,13 +26,12 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
 
 func createMetricsExporter(
 	ctx context.Context,
 	t *testing.T,
-	test *integrationtest.MetricsTestCase,
+	test *MetricsTestCase,
 ) *collector.MetricsExporter {
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
@@ -51,7 +50,7 @@ func TestIntegrationMetrics(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range integrationtest.TestCases {
+	for _, test := range TestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {

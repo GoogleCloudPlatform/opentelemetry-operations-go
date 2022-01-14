@@ -22,7 +22,6 @@ require (
 require (
 	cloud.google.com/go/monitoring v1.1.0
 	github.com/aws/aws-sdk-go v1.42.14 // indirect
-	github.com/google/go-cmp v0.5.6
 	go.uber.org/zap v1.19.1
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 )

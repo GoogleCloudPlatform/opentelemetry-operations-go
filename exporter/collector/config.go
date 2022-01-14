@@ -81,13 +81,14 @@ type LabelMapping struct {
 var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
 
 // DefaultConfig creates the default configuration for exporter.
-func DefaultConfig() *Config {
-	return &Config{
+func DefaultConfig() Config {
+	return Config{
 		UserAgent: "opentelemetry-collector-contrib {{version}}",
 		MetricConfig: MetricConfig{
 			KnownDomains:                     domains,
 			Prefix:                           "workload.googleapis.com",
 			CreateMetricDescriptorBufferSize: 10,
+			InstrumentationLibraryLabels:     true,
 		},
 	}
 }

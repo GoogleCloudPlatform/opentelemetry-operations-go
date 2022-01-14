@@ -72,15 +72,15 @@ func generateClientOptions(cfg *Config) ([]option.ClientOption, error) {
 	return copts, nil
 }
 
-func NewGoogleCloudTracesExporter(cfg *Config, version string, timeout time.Duration) (*TraceExporter, error) {
-	setVersionInUserAgent(cfg, version)
+func NewGoogleCloudTracesExporter(cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
+	setVersionInUserAgent(&cfg, version)
 
 	topts := []cloudtrace.Option{
 		cloudtrace.WithProjectID(cfg.ProjectID),
 		cloudtrace.WithTimeout(timeout),
 	}
 
-	copts, err := generateClientOptions(cfg)
+	copts, err := generateClientOptions(&cfg)
 	if err != nil {
 		return nil, err
 	}

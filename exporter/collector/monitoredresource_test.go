@@ -287,7 +287,7 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mapper := metricMapper{cfg: &Config{}}
+			mapper := metricMapper{cfg: Config{}}
 			r := pdata.NewResource()
 			for k, v := range test.resourceLabels {
 				r.Attributes().InsertString(k, v)
