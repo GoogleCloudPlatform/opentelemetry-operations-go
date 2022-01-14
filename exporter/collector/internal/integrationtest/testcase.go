@@ -217,6 +217,7 @@ func (m *MetricsTestCase) CreateConfig() *collector.Config {
 	cfg.QueueSettings.Enabled = false
 	// Set a big buffer to capture all CMD requests without dropping
 	cfg.MetricConfig.CreateMetricDescriptorBufferSize = 500
+	cfg.MetricConfig.InstrumentationLibraryLabels = false
 
 	if m.Configure != nil {
 		m.Configure(cfg)

@@ -79,7 +79,10 @@
             },
             "instrumentationLibraryMetrics": [
                 {
-                    "instrumentationLibrary": {},
+                    "instrumentationLibrary": {
+                        "name": "foo",
+                        "version": "1.2.3"
+                    },
                     "metrics": [
                         {
                             "name": "agent.googleapis.com/agent/memory_usage",

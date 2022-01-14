@@ -961,3 +961,47 @@ func TestKnownDomains(t *testing.T) {
 		})
 	}
 }
+
+func TestInstrumentationLibraryToLabels(t *testing.T) {
+	defer SetPdataFeatureGateForTest(true)()
+	newInstrumentationLibrary := func(name, version string) pdata.InstrumentationLibrary {
+		il := pdata.NewInstrumentationLibrary()
+		il.SetName("foo")
+		il.SetVersion("1.2.3")
+		return il
+	}
+
+	tests := []struct {
+		name                   string
+		instrumentationLibrary pdata.InstrumentationLibrary
+		metricConfig           MetricConfig
+		output                 labels
+	}{{
+		name:                   "fetchFromInstrumentationLibrary",
+		metricConfig:           MetricConfig{InstrumentationLibraryLabels: true},
+		instrumentationLibrary: newInstrumentationLibrary("foo", "1.2.3"),
+		output:                 labels{"instrumentation_source": "foo", "instrumentation_version": "1.2.3"},
+	}, {
+		name:                   "disabledInConfig",
+		metricConfig:           MetricConfig{InstrumentationLibraryLabels: false},
+		instrumentationLibrary: newInstrumentationLibrary("foo", "1.2.3"),
+		output:                 labels{},
+	}, {
+		name:                   "notSetInInstrumentationLibrary",
+		metricConfig:           MetricConfig{InstrumentationLibraryLabels: true},
+		instrumentationLibrary: pdata.NewInstrumentationLibrary(),
+		output:                 labels{"instrumentation_source": "", "instrumentation_version": ""},
+	}}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			config := createDefaultConfig()
+			config.MetricConfig = test.metricConfig
+			m := metricMapper{cfg: config}
+
+			out := m.instrumentationLibraryToLabels(test.instrumentationLibrary)
+
+			assert.Equal(t, out, test.output)
+		})
+	}
+}

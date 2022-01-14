@@ -50,6 +50,10 @@ type MetricConfig struct {
 	// If a metric belongs to one of these domains it does not get a prefix.
 	KnownDomains []string `mapstructure:"known_domains"`
 
+	// If true, set the instrumentation_source and instrumentation_version
+	// labels. Defaults to true.
+	InstrumentationLibraryLabels bool `mapstructure:"instrumentation_library_labels"`
+
 	// If true, this will send all timeseries using `CreateServiceTimeSeries`.
 	// Implicitly, this sets `SkipMetricDescriptor` to true.
 	CreateServiceTimeSeries bool `mapstructure:"create_service_timeseries"`

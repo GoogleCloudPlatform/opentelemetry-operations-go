@@ -69,12 +69,13 @@ func TestMetrics(t *testing.T) {
 				},
 				expectFixture,
 			)
-			require.Emptyf(
-				t,
-				diff,
-				"Expected requests fixture and actual GCM requests differ:\n%v",
-				diff,
-			)
+			if diff != "" {
+				require.Fail(
+					t,
+					"Expected requests fixture and actual GCM requests differ",
+					diff,
+				)
+			}
 		})
 	}
 }

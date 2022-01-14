@@ -162,23 +162,28 @@ func (me *metricsExporter) pushMetrics(ctx context.Context, m pdata.Metrics) err
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
 
-			extraLabels := mergeLabels(instrumentationLibraryToLabels(ilm.InstrumentationLibrary()), extraResourceLabels)
+			instrumentationLibraryLabels := me.mapper.instrumentationLibraryToLabels(ilm.InstrumentationLibrary())
+			metricLabels := mergeLabels(nil, instrumentationLibraryLabels, extraResourceLabels)
+
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
+				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, metricLabels, metric)...)
+
 				// We only send metric descriptors if we're configured *and* we're not sending service timeseries.
-				if !(me.cfg.MetricConfig.SkipCreateMetricDescriptor || me.cfg.MetricConfig.CreateServiceTimeSeries) {
-					for _, md := range me.mapper.metricDescriptor(metric) {
-						if md != nil {
-							select {
-							case me.mds <- md:
-							default:
-								// Ignore drops, we'll catch descriptor next time around.
-							}
+				if me.cfg.MetricConfig.SkipCreateMetricDescriptor || me.cfg.MetricConfig.CreateServiceTimeSeries {
+					continue
+				}
+
+				for _, md := range me.mapper.metricDescriptor(metric) {
+					if md != nil {
+						select {
+						case me.mds <- md:
+						default:
+							// Ignore drops, we'll catch descriptor next time around.
 						}
 					}
 				}
-				timeSeries = append(timeSeries, me.mapper.metricToTimeSeries(monitoredResource, extraLabels, metric)...)
 			}
 		}
 	}
@@ -254,9 +259,14 @@ func (me *metricsExporter) createServiceTimeSeries(ctx context.Context, ts []*mo
 	)
 }
 
-func instrumentationLibraryToLabels(il pdata.InstrumentationLibrary) labels {
-	// TODO
-	return nil
+func (m *metricMapper) instrumentationLibraryToLabels(il pdata.InstrumentationLibrary) labels {
+	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
+		return labels{}
+	}
+	return labels{
+		"instrumentation_source":  il.Name(),
+		"instrumentation_version": il.Version(),
+	}
 }
 
 func (m *metricMapper) metricToTimeSeries(
