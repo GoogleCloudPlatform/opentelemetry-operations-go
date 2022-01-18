@@ -86,7 +86,8 @@ To add a new test:
     that the exporter makes to GCP services:
 
     ```sh
-    go run internal/integrationtest/cmd/recordfixtures/main.go
+    cd internal/integrationtest
+    go run cmd/recordfixtures/main.go
     ```
 
     The generated file is a JSON encoded

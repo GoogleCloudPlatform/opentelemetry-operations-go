@@ -22,6 +22,7 @@ import (
 
 	"go.opencensus.io/metric/metricdata"
 	"go.opencensus.io/metric/metricexport"
+	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
@@ -78,6 +79,7 @@ func (i *InMemoryOCExporter) Proto() []*SelfObservabilityMetric {
 // Shutdown unregisters the global OpenCensus views to reset state for the next test
 func (i *InMemoryOCExporter) Shutdown(ctx context.Context) error {
 	view.Unregister(collector.MetricViews()...)
+	view.Unregister(ocgrpc.DefaultClientViews...)
 	return nil
 }
 
@@ -87,6 +89,8 @@ func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
 	// Reset our views in case any tests ran before this
 	view.Unregister(collector.MetricViews()...)
 	view.Register(collector.MetricViews()...)
+	view.Unregister(ocgrpc.DefaultClientViews...)
+	// TODO: Register ocgrpc.DefaultClientViews to test them
 
 	return &InMemoryOCExporter{
 			c:      make(chan []*metricdata.Metric, 1),
