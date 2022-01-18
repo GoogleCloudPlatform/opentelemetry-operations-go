@@ -22,6 +22,8 @@ import (
 	"strings"
 	"time"
 
+	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/model/pdata"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/api/option"
@@ -53,11 +55,14 @@ func generateClientOptions(cfg *Config) ([]option.ClientOption, error) {
 		if cfg.UseInsecure {
 			// option.WithGRPCConn option takes precedent over all other supplied options so the
 			// following user agent will be used by both exporters if we reach this branch
-			var dialOpts []grpc.DialOption
+			dialOpts := []grpc.DialOption{
+				grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
+				grpc.WithInsecure(),
+			}
 			if cfg.UserAgent != "" {
 				dialOpts = append(dialOpts, grpc.WithUserAgent(cfg.UserAgent))
 			}
-			conn, err := grpc.Dial(cfg.Endpoint, append(dialOpts, grpc.WithInsecure())...)
+			conn, err := grpc.Dial(cfg.Endpoint, dialOpts...)
 			if err != nil {
 				return nil, fmt.Errorf("cannot configure grpc conn: %w", err)
 			}
@@ -73,6 +78,7 @@ func generateClientOptions(cfg *Config) ([]option.ClientOption, error) {
 }
 
 func NewGoogleCloudTracesExporter(cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
+	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
 
 	topts := []cloudtrace.Option{

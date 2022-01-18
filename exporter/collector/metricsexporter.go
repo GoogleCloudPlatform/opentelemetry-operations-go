@@ -29,6 +29,7 @@ import (
 	"unicode"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.uber.org/zap"
@@ -93,6 +94,7 @@ func NewGoogleCloudMetricsExporter(
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
 	view.Register(MetricViews()...)
+	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
 
 	// TODO - Share this lookup somewhere
