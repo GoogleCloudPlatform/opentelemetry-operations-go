@@ -31,6 +31,17 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
+var (
+	// selfObsMetricsToNormalize is the set of self-observability metrics which may not record
+	// the same value every time due to side effects. The values of these metrics get cleared
+	// and are not checked in the fixture. Their labels and types are still checked.
+	selfObsMetricsToNormalize = map[string]struct{}{
+		"grpc.io/client/roundtrip_latency":      {},
+		"grpc.io/client/sent_bytes_per_rpc":     {},
+		"grpc.io/client/received_bytes_per_rpc": {},
+	}
+)
+
 type MetricsTestCase struct {
 	// Name of the test case
 	Name string
@@ -198,6 +209,27 @@ func normalizeFixture(fixture *MetricExpectFixture) {
 		req.Name = ""
 		if md := req.GetMetricDescriptor(); md != nil {
 			md.Name = ""
+		}
+	}
+
+	for _, som := range fixture.SelfObservabilityMetrics {
+		if _, ok := selfObsMetricsToNormalize[som.Name]; ok {
+			// zero out the specific value type
+			switch value := som.Value.(type) {
+			case *SelfObservabilityMetric_Int64Value:
+				value.Int64Value = 0
+			case *SelfObservabilityMetric_Float64Value:
+				value.Float64Value = 0
+			case *SelfObservabilityMetric_HistogramValue:
+				bucketCounts := value.HistogramValue.BucketCounts
+				for i := range bucketCounts {
+					bucketCounts[i] = 0
+				}
+				value.HistogramValue.Count = 0
+				value.HistogramValue.Sum = 0
+			default:
+				som.Value = nil
+			}
 		}
 	}
 }

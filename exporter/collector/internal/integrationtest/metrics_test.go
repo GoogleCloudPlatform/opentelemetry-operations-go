@@ -56,12 +56,15 @@ func TestMetrics(t *testing.T) {
 				startTime,
 				endTime,
 			)
+
+			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
+			require.NoError(t, err)
 			diff := DiffProtos(
 				&MetricExpectFixture{
 					CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 					CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 					CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
-					SelfObservabilityMetrics:        inMemoryOCExporter.Proto(),
+					SelfObservabilityMetrics:        selfObsMetrics,
 				},
 				expectFixture,
 			)

@@ -28,8 +28,31 @@ message MetricExpectFixture {
 message SelfObservabilityMetric {
   // metric name
   string name = 1;
-  // stringified value
-  string val = 2;
+
+  // Copied from
+  // https://github.com/googleapis/googleapis/blob/ab1bf9a5cef888843afb9ef3b70b79587d9a033b/google/api/metric.proto
+  enum MetricKind {
+    METRIC_KIND_UNSPECIFIED = 0;
+    GAUGE = 1;
+    DELTA = 2;
+    CUMULATIVE = 3;
+  }
+  // The GCM MetricKind that the metric would create
+  MetricKind metric_kind = 2;
+
+  // A slimmed down explicit bucketed histogram
+  message Histogram {
+    double sum = 1;
+    int64 count = 2;
+    repeated double bucket_bounds = 3;
+    repeated int64 bucket_counts = 4;
+  }
+
+  oneof value {
+    int64 int64_value = 5;
+    double float64_value = 6;
+    Histogram histogram_value = 7;
+  };
   // stringified labels
   map<string, string> labels = 3;
 }
