@@ -16,85 +16,108 @@ package integrationtest
 
 import (
 	"context"
-	"fmt"
-	"sort"
 	"time"
 
-	"go.opencensus.io/metric/metricdata"
+	"contrib.go.opencensus.io/exporter/stackdriver"
 	"go.opencensus.io/metric/metricexport"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
+	"google.golang.org/api/option"
+	"google.golang.org/grpc"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
-var _ metricexport.Exporter = (*InMemoryOCExporter)(nil)
-
 // OC stats/metrics exporter used to capture self observability metrics
 type InMemoryOCExporter struct {
-	c      chan []*metricdata.Metric
-	reader *metricexport.Reader
+	testServer          *MetricsTestServer
+	reader              *metricexport.Reader
+	stackdriverExporter *stackdriver.Exporter
 }
 
-func (i *InMemoryOCExporter) ExportMetrics(ctx context.Context, data []*metricdata.Metric) error {
-	i.c <- data
-	return nil
+func getViews() []*view.View {
+	views := []*view.View{}
+	views = append(views, collector.MetricViews()...)
+	// TODO: enable this
+	// views = append(views, ocgrpc.DefaultClientViews...)
+	return views
 }
 
-func (i *InMemoryOCExporter) Proto() []*SelfObservabilityMetric {
+func (i *InMemoryOCExporter) Proto(ctx context.Context) (*SelfObservabilityMetric, error) {
 	// Hack to flush stats, see https://tinyurl.com/5hfcxzk2
 	view.SetReportingPeriod(time.Minute)
-	i.reader.ReadAndExport(i)
-	var data []*metricdata.Metric
+	i.reader.ReadAndExport(i.stackdriverExporter)
+	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*500)
+	defer cancel()
+
+	done := make(chan struct{}, 1)
+	go func() {
+		i.stackdriverExporter.Flush()
+		close(done)
+	}()
 
 	select {
-	case <-time.NewTimer(time.Millisecond * 100).C:
-		return nil
-	case data = <-i.c:
+	case <-ctx.Done():
+		return nil, ctx.Err()
+	case <-done:
 	}
 
-	selfObsMetrics := []*SelfObservabilityMetric{}
-	for _, d := range data {
-		for _, ts := range d.TimeSeries {
-			labels := make(map[string]string, len(d.Descriptor.LabelKeys))
-			for i := 0; i < len(d.Descriptor.LabelKeys); i++ {
-				labels[d.Descriptor.LabelKeys[i].Key] = ts.LabelValues[i].Value
-			}
-
-			for _, p := range ts.Points {
-				selfObsMetrics = append(selfObsMetrics, &SelfObservabilityMetric{
-					Name:   d.Descriptor.Name,
-					Val:    fmt.Sprint(p.Value),
-					Labels: labels,
-				})
-			}
-		}
-	}
-	sort.Slice(selfObsMetrics, func(i, j int) bool {
-		return selfObsMetrics[i].Name < selfObsMetrics[j].Name
-	})
-	return selfObsMetrics
+	return &SelfObservabilityMetric{
+			CreateTimeSeriesRequests:       i.testServer.CreateTimeSeriesRequests(),
+			CreateMetricDescriptorRequests: i.testServer.CreateMetricDescriptorRequests(),
+		},
+		nil
 }
 
 // Shutdown unregisters the global OpenCensus views to reset state for the next test
 func (i *InMemoryOCExporter) Shutdown(ctx context.Context) error {
-	view.Unregister(collector.MetricViews()...)
+	i.stackdriverExporter.StopMetricsExporter()
+	err := i.stackdriverExporter.Close()
+	i.testServer.Shutdown()
+
+	view.Unregister(getViews()...)
+	// TODO: remove this special case
 	view.Unregister(ocgrpc.DefaultClientViews...)
-	return nil
+
+	return err
 }
 
 // NewInMemoryOCViewExporter creates a new in memory OC exporter for testing. Be sure to defer
 // a call to Shutdown().
 func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
 	// Reset our views in case any tests ran before this
-	view.Unregister(collector.MetricViews()...)
-	view.Register(collector.MetricViews()...)
+	views := getViews()
+	view.Unregister(views...)
+	view.Register(views...)
+
+	// TODO: remove this special case
 	view.Unregister(ocgrpc.DefaultClientViews...)
-	// TODO: Register ocgrpc.DefaultClientViews to test them
+
+	testServer, err := NewMetricTestServer()
+	if err != nil {
+		return nil, err
+	}
+	go testServer.Serve()
+	conn, err := grpc.Dial(testServer.Endpoint, grpc.WithInsecure())
+	if err != nil {
+		return nil, err
+	}
+	clientOpts := []option.ClientOption{option.WithGRPCConn(conn)}
+
+	stackdriverExporter, err := stackdriver.NewExporter(stackdriver.Options{
+		DefaultMonitoringLabels: &stackdriver.Labels{},
+		ProjectID:               "myproject",
+		MonitoringClientOptions: clientOpts,
+		TraceClientOptions:      clientOpts,
+	})
+	if err != nil {
+		return nil, err
+	}
 
 	return &InMemoryOCExporter{
-			c:      make(chan []*metricdata.Metric, 1),
-			reader: metricexport.NewReader(),
+			testServer:          testServer,
+			stackdriverExporter: stackdriverExporter,
+			reader:              metricexport.NewReader(),
 		},
 		nil
 }

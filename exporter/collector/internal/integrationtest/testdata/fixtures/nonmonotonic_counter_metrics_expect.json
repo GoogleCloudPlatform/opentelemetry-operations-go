@@ -51,13 +51,51 @@
       }
     }
   ],
-  "selfObservabilityMetrics": [
-    {
-      "name": "googlecloudmonitoring/point_count",
-      "val": "1",
-      "labels": {
-        "status": "OK"
+  "selfObservabilityMetrics": {
+    "createTimeSeriesRequests": [
+      {
+        "timeSeries": [
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+              "labels": {
+                "status": "OK"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "1"
+                }
+              }
+            ]
+          }
+        ]
       }
-    }
-  ]
+    ],
+    "createMetricDescriptorRequests": [
+      {
+        "metricDescriptor": {
+          "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+          "labels": [
+            {
+              "key": "status"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "unit": "1",
+          "description": "Count of metric points written to Cloud Monitoring.",
+          "displayName": "OpenCensus/googlecloudmonitoring/point_count"
+        }
+      }
+    ]
+  }
 }
