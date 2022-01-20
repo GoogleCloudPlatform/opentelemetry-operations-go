@@ -60,6 +60,7 @@ func TestMetrics(t *testing.T) {
 			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
 			require.NoError(t, err)
 			diff := DiffProtos(
+				t,
 				&MetricExpectFixture{
 					CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 					CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),

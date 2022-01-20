@@ -38,8 +38,7 @@ type InMemoryOCExporter struct {
 func getViews() []*view.View {
 	views := []*view.View{}
 	views = append(views, collector.MetricViews()...)
-	// TODO: enable this
-	// views = append(views, ocgrpc.DefaultClientViews...)
+	views = append(views, ocgrpc.DefaultClientViews...)
 	return views
 }
 
@@ -76,9 +75,6 @@ func (i *InMemoryOCExporter) Shutdown(ctx context.Context) error {
 	i.testServer.Shutdown()
 
 	view.Unregister(getViews()...)
-	// TODO: remove this special case
-	view.Unregister(ocgrpc.DefaultClientViews...)
-
 	return err
 }
 
@@ -89,9 +85,6 @@ func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
 	views := getViews()
 	view.Unregister(views...)
 	view.Register(views...)
-
-	// TODO: remove this special case
-	view.Unregister(ocgrpc.DefaultClientViews...)
 
 	testServer, err := NewMetricTestServer()
 	if err != nil {
