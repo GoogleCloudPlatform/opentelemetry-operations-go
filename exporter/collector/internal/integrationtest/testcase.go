@@ -174,6 +174,15 @@ func normalizeFixture(fixture *MetricExpectFixture) {
 		fixture.GetCreateTimeSeriesRequests(),
 		fixture.GetCreateServiceTimeSeriesRequests()...,
 	)
+	timeSeriesReqs = append(
+		timeSeriesReqs,
+		fixture.GetSelfObservabilityMetrics().GetCreateTimeSeriesRequests()...,
+	)
+	metricDescriptorReqs := append(
+		fixture.GetCreateMetricDescriptorRequests(),
+		fixture.GetSelfObservabilityMetrics().GetCreateMetricDescriptorRequests()...,
+	)
+
 	for _, req := range timeSeriesReqs {
 		// clear project ID
 		req.Name = ""
@@ -194,7 +203,7 @@ func normalizeFixture(fixture *MetricExpectFixture) {
 		}
 	}
 
-	for _, req := range fixture.GetCreateMetricDescriptorRequests() {
+	for _, req := range metricDescriptorReqs {
 		req.Name = ""
 		if md := req.GetMetricDescriptor(); md != nil {
 			md.Name = ""

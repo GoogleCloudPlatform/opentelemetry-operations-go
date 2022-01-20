@@ -22,14 +22,10 @@ message MetricExpectFixture {
   repeated google.monitoring.v3.CreateTimeSeriesRequest create_time_series_requests = 1;
   repeated google.monitoring.v3.CreateMetricDescriptorRequest create_metric_descriptor_requests = 2;
   repeated google.monitoring.v3.CreateTimeSeriesRequest create_service_time_series_requests = 3;
-  repeated SelfObservabilityMetric self_observability_metrics = 4;
+  SelfObservabilityMetric self_observability_metrics = 4;
 }
 
 message SelfObservabilityMetric {
-  // metric name
-  string name = 1;
-  // stringified value
-  string val = 2;
-  // stringified labels
-  map<string, string> labels = 3;
+  repeated google.monitoring.v3.CreateTimeSeriesRequest create_time_series_requests = 1;
+  repeated google.monitoring.v3.CreateMetricDescriptorRequest create_metric_descriptor_requests = 2;
 }
