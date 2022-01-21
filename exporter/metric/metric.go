@@ -194,6 +194,10 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resou
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
+	if me.o.SkipCreateMetricDescriptor {
+		return nil
+	}
+
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
 	aggError := ilr.ForEach(func(library instrumentation.Library, reader export.Reader) error {
 		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {

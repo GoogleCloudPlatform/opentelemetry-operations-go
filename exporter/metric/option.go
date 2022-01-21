@@ -63,6 +63,9 @@ type options struct {
 	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
 	MetricDescriptorTypeFormatter func(*sdkapi.Descriptor) string
 
+	// SkipCreateMetricDescriptor determines whether to skip exporting metric descriptors.
+	SkipCreateMetricDescriptor bool
+
 	// onError is the hook to be called when there is an error uploading the metric data.
 	// If no custom hook is set, errors are logged. Optional.
 	//
@@ -113,5 +116,12 @@ func WithMetricDescriptorTypeFormatter(f func(*sdkapi.Descriptor) string) func(o
 func WithOnError(f func(error)) func(o *options) {
 	return func(o *options) {
 		o.onError = f
+	}
+}
+
+// WithSkipCreateMetricDescriptor disables making CreateMetricDescriptor calls.
+func WithSkipCreateMetricDescriptor() func(o *options) {
+	return func(o *options) {
+		o.SkipCreateMetricDescriptor = true
 	}
 }
