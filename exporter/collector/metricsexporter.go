@@ -156,7 +156,7 @@ func NewGoogleCloudMetricsExporter(
 		cfg:    cfg,
 		client: client,
 		obs:    selfObservability{log: log},
-		mapper: metricMapper{cfg},
+		mapper: metricMapper{cfg: cfg},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok
@@ -183,7 +183,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
-		monitoredResource, extraResourceLabels := me.mapper.resourceMetricsToMonitoredResource(rm.Resource())
+		monitoredResource, extraResourceLabels := me.mapper.resourceToMonitoredResource(rm.Resource())
 		ilms := rm.InstrumentationLibraryMetrics()
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
@@ -203,7 +203,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 					continue
 				}
 
-				for _, md := range me.mapper.metricDescriptor(metric) {
+				for _, md := range me.mapper.metricDescriptor(metric, metricLabels) {
 					if md == nil {
 						continue
 					}
@@ -830,9 +830,18 @@ func (m *metricMapper) metricTypeToDisplayName(mURL string) string {
 }
 
 // Returns label descriptors for a metric.
-func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescriptor {
+func (m *metricMapper) labelDescriptors(
+	pm pdata.Metric,
+	extraLabels labels,
+) []*label.LabelDescriptor {
 	// TODO - allow customization of label descriptions.
 	result := []*label.LabelDescriptor{}
+	for key := range extraLabels {
+		result = append(result, &label.LabelDescriptor{
+			Key: key,
+		})
+	}
+
 	seenKeys := map[string]struct{}{}
 	addAttributes := func(attr pdata.AttributeMap) {
 		attr.Range(func(key string, _ pdata.AttributeValue) bool {
@@ -885,9 +894,12 @@ func summaryMetricNames(name string) (string, string, string) {
 	return sumName, countName, percentileName
 }
 
-func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.MetricDescriptor {
+func (m *metricMapper) summaryMetricDescriptors(
+	pm pdata.Metric,
+	extraLabels labels,
+) []*metricpb.MetricDescriptor {
 	sumName, countName, percentileName := summaryMetricNames(pm.Name())
-	labels := m.labelDescriptors(pm)
+	labels := m.labelDescriptors(pm, extraLabels)
 	return []*metricpb.MetricDescriptor{
 		{
 			Type:        m.metricNameToType(sumName),
@@ -925,13 +937,16 @@ func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.Met
 }
 
 // Extract the metric descriptor from a metric data point.
-func (m *metricMapper) metricDescriptor(pm pdata.Metric) []*metricpb.MetricDescriptor {
+func (m *metricMapper) metricDescriptor(
+	pm pdata.Metric,
+	extraLabels labels,
+) []*metricpb.MetricDescriptor {
 	if pm.DataType() == pdata.MetricDataTypeSummary {
-		return m.summaryMetricDescriptors(pm)
+		return m.summaryMetricDescriptors(pm, extraLabels)
 	}
 	kind, typ := mapMetricPointKind(pm)
 	metricType := m.metricNameToType(pm.Name())
-	labels := m.labelDescriptors(pm)
+	labels := m.labelDescriptors(pm, extraLabels)
 	// Return nil for unsupported types.
 	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
 		return nil

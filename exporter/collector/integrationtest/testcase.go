@@ -217,9 +217,14 @@ func normalizeTimeSeriesReqs(t testing.TB, reqs ...*monitoringpb.CreateTimeSerie
 func normalizeMetricDescriptorReqs(t testing.TB, reqs ...*monitoringpb.CreateMetricDescriptorRequest) {
 	for _, req := range reqs {
 		req.Name = ""
-		if req.MetricDescriptor != nil {
-			req.MetricDescriptor.Name = ""
+		if req.MetricDescriptor == nil {
+			continue
 		}
+		md := req.MetricDescriptor
+		md.Name = ""
+		sort.Slice(md.Labels, func(i, j int) bool {
+			return md.Labels[i].Key < md.Labels[j].Key
+		})
 	}
 }
 

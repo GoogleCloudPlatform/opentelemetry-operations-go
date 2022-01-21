@@ -15,6 +15,8 @@
 package collector
 
 import (
+	"strings"
+
 	"go.opentelemetry.io/collector/model/pdata"
 	semconv "go.opentelemetry.io/collector/model/semconv/v1.8.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -113,50 +115,51 @@ var (
 	}
 )
 
-// Transforms pdata Resource to a GCM Monitored Resource. Any resource attributes not accounted
-// for in the monitored resource which should be merged into metric labels are also returned.
-func (m *metricMapper) resourceMetricsToMonitoredResource(
+// Transforms pdata Resource to a GCM Monitored Resource. Any additional metric labels from the
+// resource are also returned.
+func (m *metricMapper) resourceToMonitoredResource(
 	resource pdata.Resource,
 ) (*monitoredrespb.MonitoredResource, labels) {
 	attrs := resource.Attributes()
 	cloudPlatform := getStringOrEmpty(attrs, semconv.AttributeCloudPlatform)
 
+	var mr *monitoredrespb.MonitoredResource
 	switch cloudPlatform {
 	case semconv.AttributeCloudPlatformGCPComputeEngine:
-		return createMonitoredResource(gceInstance, attrs)
+		mr = createMonitoredResource(gceInstance, attrs)
 	case semconv.AttributeCloudPlatformGCPKubernetesEngine:
 		// Try for most to least specific k8s_container, k8s_pod, etc
 		if _, ok := attrs.Get(semconv.AttributeK8SContainerName); ok {
-			return createMonitoredResource(k8sContainer, attrs)
+			mr = createMonitoredResource(k8sContainer, attrs)
 		} else if _, ok := attrs.Get(semconv.AttributeK8SPodName); ok {
-			return createMonitoredResource(k8sPod, attrs)
+			mr = createMonitoredResource(k8sPod, attrs)
 		} else if _, ok := attrs.Get(semconv.AttributeK8SNodeName); ok {
-			return createMonitoredResource(k8sNode, attrs)
+			mr = createMonitoredResource(k8sNode, attrs)
+		} else {
+			mr = createMonitoredResource(k8sCluster, attrs)
 		}
-		return createMonitoredResource(k8sCluster, attrs)
 	case semconv.AttributeCloudPlatformAWSEC2:
-		return createMonitoredResource(awsEc2Instance, attrs)
+		mr = createMonitoredResource(awsEc2Instance, attrs)
 	default:
 		// Fallback to generic_task
 		_, hasServiceName := attrs.Get(semconv.AttributeServiceName)
 		_, hasServiceInstanceID := attrs.Get(semconv.AttributeServiceInstanceID)
 		if hasServiceName && hasServiceInstanceID {
-			return createMonitoredResource(genericTask, attrs)
+			mr = createMonitoredResource(genericTask, attrs)
+		} else {
+			// If not possible, fallback to generic_node
+			mr = createMonitoredResource(genericNode, attrs)
 		}
-
-		// If not possible, fallback to generic_node
-		return createMonitoredResource(genericNode, attrs)
 	}
+	return mr, m.resourceToMetricLabels(resource)
 }
 
 func createMonitoredResource(
 	monitoredResourceType string,
 	resourceAttrs pdata.AttributeMap,
-) (*monitoredrespb.MonitoredResource, labels) {
+) *monitoredrespb.MonitoredResource {
 	mappings := monitoredResourceMappings[monitoredResourceType]
 	mrLabels := make(map[string]string, len(mappings))
-	// TODO handle extra labels
-	extraLabels := labels{}
 
 	for mrKey, mappingConfig := range mappings {
 		mrValue := ""
@@ -173,10 +176,37 @@ func createMonitoredResource(
 		mrLabels[mrKey] = mrValue
 	}
 	return &monitoredrespb.MonitoredResource{
-			Type:   monitoredResourceType,
-			Labels: mrLabels,
-		},
-		extraLabels
+		Type:   monitoredResourceType,
+		Labels: mrLabels,
+	}
+}
+
+// resourceToMetricLabels converts the Resource into metric labels needed to uniquely identify
+// the timeseries.
+func (m *metricMapper) resourceToMetricLabels(
+	resource pdata.Resource,
+) labels {
+	attrs := pdata.NewAttributeMap()
+	resource.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
+		// Is a service attribute and should be included
+		match := m.cfg.MetricConfig.ServiceResourceLabels &&
+			(k == semconv.AttributeServiceName ||
+				k == semconv.AttributeServiceNamespace ||
+				k == semconv.AttributeServiceInstanceID)
+		// Matches one of the resource filters
+		for _, resourceFilter := range m.cfg.MetricConfig.ResourceFilters {
+			if match {
+				break
+			}
+			match = strings.HasPrefix(k, resourceFilter.Prefix)
+		}
+
+		if match {
+			attrs.Insert(k, v)
+		}
+		return true
+	})
+	return attributesToLabels(attrs)
 }
 
 func getStringOrEmpty(attributes pdata.AttributeMap, key string) string {

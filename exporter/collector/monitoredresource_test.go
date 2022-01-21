@@ -28,6 +28,7 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 		resourceLabels    map[string]string
 		expectMr          *monitoredrespb.MonitoredResource
 		expectExtraLabels labels
+		updateMapper      func(mapper *metricMapper)
 	}{
 		{
 			name: "GCE instance",
@@ -41,6 +42,64 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 				Labels: map[string]string{"instance_id": "abc123", "zone": "us-central1"},
 			},
 			expectExtraLabels: labels{},
+		},
+		{
+			name: "GCE with OTel service attribs",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_compute_engine",
+				"cloud.availability_zone": "us-central1",
+				"host.id":                 "abc123",
+				"service.namespace":       "myservicenamespace",
+				"service.name":            "myservicename",
+				"service.instance.id":     "myserviceinstanceid",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type:   "gce_instance",
+				Labels: map[string]string{"instance_id": "abc123", "zone": "us-central1"},
+			},
+			expectExtraLabels: labels{
+				"service_namespace":   "myservicenamespace",
+				"service_name":        "myservicename",
+				"service_instance_id": "myserviceinstanceid",
+			},
+		},
+		{
+			name: "GCE disable OTel service attribs",
+			updateMapper: func(mapper *metricMapper) {
+				mapper.cfg.MetricConfig.ServiceResourceLabels = false
+			},
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_compute_engine",
+				"cloud.availability_zone": "us-central1",
+				"host.id":                 "abc123",
+				"service.namespace":       "myservicenamespace",
+				"service.name":            "myservicename",
+				"service.instance.id":     "myserviceinstanceid",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type:   "gce_instance",
+				Labels: map[string]string{"instance_id": "abc123", "zone": "us-central1"},
+			},
+			expectExtraLabels: labels{},
+		},
+		{
+			name: "GCE with resource filter config",
+			updateMapper: func(mapper *metricMapper) {
+				mapper.cfg.MetricConfig.ResourceFilters = []ResourceFilter{{Prefix: "cloud."}}
+			},
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_compute_engine",
+				"cloud.availability_zone": "us-central1",
+				"host.id":                 "abc123",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type:   "gce_instance",
+				Labels: map[string]string{"instance_id": "abc123", "zone": "us-central1"},
+			},
+			expectExtraLabels: labels{
+				"cloud_platform":          "gcp_compute_engine",
+				"cloud_availability_zone": "us-central1",
+			},
 		},
 		{
 			name: "K8s container",
@@ -154,7 +213,11 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 					"task_id":   "myserviceinstanceid",
 				},
 			},
-			expectExtraLabels: labels{},
+			expectExtraLabels: labels{
+				"service_namespace":   "myservicenamespace",
+				"service_name":        "myservicename",
+				"service_instance_id": "myserviceinstanceid",
+			},
 		},
 		{
 			name: "Generic task no location",
@@ -172,7 +235,11 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 					"task_id":   "myserviceinstanceid",
 				},
 			},
-			expectExtraLabels: labels{},
+			expectExtraLabels: labels{
+				"service_namespace":   "myservicenamespace",
+				"service_name":        "myservicename",
+				"service_instance_id": "myserviceinstanceid",
+			},
 		},
 		{
 			name: "Generic task unrecognized cloud.platform",
@@ -192,7 +259,11 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 					"task_id":   "myserviceinstanceid",
 				},
 			},
-			expectExtraLabels: labels{},
+			expectExtraLabels: labels{
+				"service_namespace":   "myservicenamespace",
+				"service_name":        "myservicename",
+				"service_instance_id": "myserviceinstanceid",
+			},
 		},
 		{
 			name: "Generic task without cloud.availability_zone region",
@@ -212,7 +283,11 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 					"task_id":   "myserviceinstanceid",
 				},
 			},
-			expectExtraLabels: labels{},
+			expectExtraLabels: labels{
+				"service_namespace":   "myservicenamespace",
+				"service_name":        "myservicename",
+				"service_instance_id": "myserviceinstanceid",
+			},
 		},
 		{
 			name: "Generic node",
@@ -233,7 +308,10 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 					"node_id":   "myhostid",
 				},
 			},
-			expectExtraLabels: labels{},
+			expectExtraLabels: labels{
+				"service_namespace": "myservicenamespace",
+				"service_name":      "myservicename",
+			},
 		},
 		{
 			name: "Generic node without cloud.availability_zone",
@@ -251,7 +329,9 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 					"node_id":   "myhostid",
 				},
 			},
-			expectExtraLabels: labels{},
+			expectExtraLabels: labels{
+				"service_namespace": "myservicenamespace",
+			},
 		},
 		{
 			name: "Generic node without host.id",
@@ -268,7 +348,9 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 					"node_id":   "myhostname",
 				},
 			},
-			expectExtraLabels: labels{},
+			expectExtraLabels: labels{
+				"service_namespace": "myservicenamespace",
+			},
 		},
 		{
 			name:           "Generic node with no labels",
@@ -287,12 +369,15 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mapper := metricMapper{cfg: Config{}}
+			mapper := metricMapper{cfg: DefaultConfig()}
+			if test.updateMapper != nil {
+				test.updateMapper(&mapper)
+			}
 			r := pdata.NewResource()
 			for k, v := range test.resourceLabels {
 				r.Attributes().InsertString(k, v)
 			}
-			mr, extraLabels := mapper.resourceMetricsToMonitoredResource(r)
+			mr, extraLabels := mapper.resourceToMonitoredResource(r)
 			assert.Equal(t, test.expectMr, mr)
 			assert.Equal(t, test.expectExtraLabels, extraLabels)
 		})
