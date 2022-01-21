@@ -62,6 +62,7 @@ var (
 				// Previous exporter did NOT export metric descriptors.
 				// TODO: Add a new test that also checks metric descriptors.
 				cfg.MetricConfig.SkipCreateMetricDescriptor = true
+				cfg.MetricConfig.IncludeServiceResourceAttributes = false
 			},
 		},
 		{
@@ -97,6 +98,7 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/gke_control_plane_metrics_agent_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.CreateServiceTimeSeries = true
+				cfg.MetricConfig.IncludeServiceResourceAttributes = false
 			},
 		},
 		{
@@ -110,6 +112,14 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/create_service_timeseries_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.CreateServiceTimeSeries = true
+			},
+		},
+		{
+			Name:                 "WithResourceFilter",
+			OTLPInputFixturePath: "testdata/fixtures/with_resource_filter_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/with_resource_filter_metrics_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.ResourceFilter = `telemetry\.sdk\..*`
 			},
 		},
 	}

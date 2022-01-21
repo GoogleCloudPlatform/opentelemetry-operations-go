@@ -59,6 +59,13 @@ The new code does not:
 - truncate label keys longer than 100 characters.
 - prepend `key` when the first character is `_`.
 
+In addition, the exporter will now copy OTel Resource attributes `service.name`,
+`service.namespace` and `service.instance.id` into metric labels `service_name`,
+`service_namespace`, and `service_instance_id` respectively. This avoids duplicate timeseries
+when multiple instances of a service are running on a single monitored resource, for example
+running multiple service processes on a single GCE VM.  This can be turned off with the
+`metric.include_service_resource_attributes` config option.
+
 ## OTLP Sum
 
 In the old exporter, delta sums were converted into GAUGE points ([see test

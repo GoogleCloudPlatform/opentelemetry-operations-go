@@ -24,6 +24,7 @@ import (
 	"math"
 	"net/url"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -64,7 +65,8 @@ type MetricsExporter struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	cfg Config
+	cfg            Config
+	resourceFilter *regexp.Regexp
 }
 
 // Constants we use when translating summary metrics into GCP.
@@ -120,11 +122,19 @@ func NewGoogleCloudMetricsExporter(
 		return nil, err
 	}
 
+	resourceFilter, err := regexp.Compile(cfg.MetricConfig.ResourceFilter)
+	if err != nil {
+		return nil, err
+	}
+
 	mExp := &MetricsExporter{
 		cfg:    cfg,
 		client: client,
 		obs:    selfObservability{log: log},
-		mapper: metricMapper{cfg},
+		mapper: metricMapper{
+			cfg:            cfg,
+			resourceFilter: resourceFilter,
+		},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asycnhronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok
@@ -145,7 +155,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
-		monitoredResource, extraResourceLabels := me.mapper.resourceMetricsToMonitoredResource(rm.Resource())
+		monitoredResource, extraResourceLabels := me.mapper.resourceToMonitoredResource(rm.Resource())
 		ilms := rm.InstrumentationLibraryMetrics()
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
