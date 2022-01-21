@@ -18,6 +18,6 @@ require (
 )
 
 replace (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector => ../../../collector
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../../../trace
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector => ../../collector
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../../trace
 )
