@@ -119,7 +119,9 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/with_resource_filter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/with_resource_filter_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
-				cfg.MetricConfig.ResourceFilter = `telemetry\.sdk\..*`
+				cfg.MetricConfig.ResourceFilters = []collector.ResourceFilter{
+					{Prefix: "telemetry.sdk."},
+				}
 			},
 		},
 	}

@@ -66,9 +66,13 @@ type MetricConfig struct {
 	// resource. Default is true.
 	IncludeServiceResourceAttributes bool `mapstructure:"include_service_resource_attributes"`
 
-	// If provided, resources attributes with keys matching this regex will be copied into
-	// metric labels.
-	ResourceFilter string `mapstructure:"resource_filter"`
+	// If provided, resources attributes matching any filter will be included in metric labels.
+	ResourceFilters []ResourceFilter `mapstructure:"resource_filter"`
+}
+
+type ResourceFilter struct {
+	// Match resource keys by prefix
+	Prefix string `mapstructure:"prefix"`
 }
 
 // ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).

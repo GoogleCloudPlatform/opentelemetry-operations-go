@@ -15,7 +15,6 @@
 package collector
 
 import (
-	"regexp"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -86,7 +85,7 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 		{
 			name: "GCE with resource filter config",
 			updateMapper: func(mapper *metricMapper) {
-				mapper.resourceFilter = regexp.MustCompile(`cloud\..*`)
+				mapper.cfg.MetricConfig.ResourceFilters = []ResourceFilter{{Prefix: "cloud."}}
 			},
 			resourceLabels: map[string]string{
 				"cloud.platform":          "gcp_compute_engine",
@@ -370,7 +369,7 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mapper := metricMapper{cfg: DefaultConfig(), resourceFilter: emptyRe}
+			mapper := metricMapper{cfg: DefaultConfig()}
 			if test.updateMapper != nil {
 				test.updateMapper(&mapper)
 			}

@@ -24,7 +24,6 @@ import (
 	"math"
 	"net/url"
 	"path"
-	"regexp"
 	"strings"
 	"time"
 	"unicode"
@@ -65,8 +64,7 @@ type MetricsExporter struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	cfg            Config
-	resourceFilter *regexp.Regexp
+	cfg Config
 }
 
 // Constants we use when translating summary metrics into GCP.
@@ -122,19 +120,11 @@ func NewGoogleCloudMetricsExporter(
 		return nil, err
 	}
 
-	resourceFilter, err := regexp.Compile(cfg.MetricConfig.ResourceFilter)
-	if err != nil {
-		return nil, err
-	}
-
 	mExp := &MetricsExporter{
 		cfg:    cfg,
 		client: client,
 		obs:    selfObservability{log: log},
-		mapper: metricMapper{
-			cfg:            cfg,
-			resourceFilter: resourceFilter,
-		},
+		mapper: metricMapper{cfg: cfg},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asycnhronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok

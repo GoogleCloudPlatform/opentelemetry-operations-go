@@ -15,6 +15,8 @@
 package collector
 
 import (
+	"strings"
+
 	"go.opentelemetry.io/collector/model/pdata"
 	semconv "go.opentelemetry.io/collector/model/semconv/v1.8.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -113,8 +115,8 @@ var (
 	}
 )
 
-// Transforms pdata Resource to a GCM Monitored Resource. Any resource attributes not accounted
-// for in the monitored resource which should be merged into metric labels are also returned.
+// Transforms pdata Resource to a GCM Monitored Resource. Any additional metric labels from the
+// resource are also returned.
 func (m *metricMapper) resourceToMonitoredResource(
 	resource pdata.Resource,
 ) (*monitoredrespb.MonitoredResource, labels) {
@@ -186,12 +188,20 @@ func (m *metricMapper) resourceToMetricLabels(
 ) labels {
 	attrs := pdata.NewAttributeMap()
 	resource.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
-		captureServiceAttr := m.cfg.MetricConfig.IncludeServiceResourceAttributes &&
+		// Is a service attribute and should be included
+		match := m.cfg.MetricConfig.IncludeServiceResourceAttributes &&
 			(k == semconv.AttributeServiceName ||
 				k == semconv.AttributeServiceNamespace ||
 				k == semconv.AttributeServiceInstanceID)
+		// Matches one of the resource filters
+		for _, resourceFilter := range m.cfg.MetricConfig.ResourceFilters {
+			if match {
+				break
+			}
+			match = strings.HasPrefix(k, resourceFilter.Prefix)
+		}
 
-		if captureServiceAttr || m.resourceFilter.FindString(k) != "" {
+		if match {
 			attrs.Insert(k, v)
 		}
 		return true
