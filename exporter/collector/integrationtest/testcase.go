@@ -17,10 +17,15 @@ package integrationtest
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"testing"
 	"time"
+
+	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
+	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/otlp"
@@ -29,6 +34,17 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+)
+
+var (
+	// selfObsMetricsToNormalize is the set of self-observability metrics which may not record
+	// the same value every time due to side effects. The values of these metrics get cleared
+	// and are not checked in the fixture. Their labels and types are still checked.
+	selfObsMetricsToNormalize = map[string]struct{}{
+		"custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency":      {},
+		"custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc":     {},
+		"custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc": {},
+	}
 )
 
 type MetricsTestCase struct {
@@ -156,7 +172,7 @@ func (m *MetricsTestCase) SaveRecordedFixtures(
 	t testing.TB,
 	fixture *MetricExpectFixture,
 ) {
-	normalizeFixture(fixture)
+	normalizeFixture(t, fixture)
 
 	jsonBytes, err := protojson.Marshal(fixture)
 	require.NoError(t, err)
@@ -169,17 +185,20 @@ func (m *MetricsTestCase) SaveRecordedFixtures(
 
 // Normalizes timestamps and removes project ID fields which create noise in the fixture
 // because they can vary each test run
-func normalizeFixture(fixture *MetricExpectFixture) {
-	timeSeriesReqs := append(
-		fixture.GetCreateTimeSeriesRequests(),
-		fixture.GetCreateServiceTimeSeriesRequests()...,
-	)
-	for _, req := range timeSeriesReqs {
+func normalizeFixture(t testing.TB, fixture *MetricExpectFixture) {
+	normalizeTimeSeriesReqs(t, fixture.CreateTimeSeriesRequests...)
+	normalizeTimeSeriesReqs(t, fixture.CreateServiceTimeSeriesRequests...)
+	normalizeMetricDescriptorReqs(t, fixture.CreateMetricDescriptorRequests...)
+	normalizeSelfObs(t, fixture.SelfObservabilityMetrics)
+}
+
+func normalizeTimeSeriesReqs(t testing.TB, reqs ...*monitoringpb.CreateTimeSeriesRequest) {
+	for _, req := range reqs {
 		// clear project ID
 		req.Name = ""
 
-		for _, ts := range req.GetTimeSeries() {
-			for _, p := range ts.GetPoints() {
+		for _, ts := range req.TimeSeries {
+			for _, p := range ts.Points {
 				// Normalize timestamps if they are set
 				if p.GetInterval().GetStartTime() != nil {
 					p.GetInterval().StartTime = &timestamppb.Timestamp{}
@@ -193,13 +212,61 @@ func normalizeFixture(fixture *MetricExpectFixture) {
 			delete(ts.GetResource().GetLabels(), "project_id")
 		}
 	}
+}
 
-	for _, req := range fixture.GetCreateMetricDescriptorRequests() {
+func normalizeMetricDescriptorReqs(t testing.TB, reqs ...*monitoringpb.CreateMetricDescriptorRequest) {
+	for _, req := range reqs {
 		req.Name = ""
-		if md := req.GetMetricDescriptor(); md != nil {
-			md.Name = ""
+		if req.MetricDescriptor != nil {
+			req.MetricDescriptor.Name = ""
 		}
 	}
+}
+
+func normalizeSelfObs(t testing.TB, selfObs *SelfObservabilityMetric) {
+	for _, req := range selfObs.CreateTimeSeriesRequests {
+		normalizeTimeSeriesReqs(t, req)
+		tss := req.TimeSeries
+		for _, ts := range tss {
+			if _, ok := selfObsMetricsToNormalize[ts.Metric.Type]; ok {
+				// zero out the specific value type
+				switch value := ts.Points[0].Value.Value.(type) {
+				case *monitoringpb.TypedValue_Int64Value:
+					value.Int64Value = 0
+				case *monitoringpb.TypedValue_DoubleValue:
+					value.DoubleValue = 0
+				case *monitoringpb.TypedValue_DistributionValue:
+					// Only preserve the bucket options and zeroed out counts
+					for i := range value.DistributionValue.BucketCounts {
+						value.DistributionValue.BucketCounts[i] = 0
+					}
+					value.DistributionValue = &distributionpb.Distribution{
+						BucketOptions: value.DistributionValue.BucketOptions,
+						BucketCounts:  value.DistributionValue.BucketCounts,
+					}
+				default:
+					t.Logf("Do not know how to normalize typed value type %T", value)
+				}
+			}
+		}
+		// sort time series by (type, labelset)
+		sort.Slice(tss, func(i, j int) bool {
+			iMetric := tss[i].Metric
+			jMetric := tss[j].Metric
+			if iMetric.Type == jMetric.Type {
+				// Doesn't need to sorted correctly, just consistently
+				return fmt.Sprint(iMetric.Labels) < fmt.Sprint(jMetric.Labels)
+			}
+			return iMetric.Type < jMetric.Type
+		})
+	}
+
+	normalizeMetricDescriptorReqs(t, selfObs.CreateMetricDescriptorRequests...)
+	// sort descriptors by type
+	sort.Slice(selfObs.CreateMetricDescriptorRequests, func(i, j int) bool {
+		return selfObs.CreateMetricDescriptorRequests[i].MetricDescriptor.Type <
+			selfObs.CreateMetricDescriptorRequests[j].MetricDescriptor.Type
+	})
 }
 
 func (m *MetricsTestCase) SkipIfNeeded(t testing.TB) {

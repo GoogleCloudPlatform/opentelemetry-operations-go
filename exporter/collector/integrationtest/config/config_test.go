@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package integrationtest
+package config
 
 import (
 	"path"
@@ -39,7 +39,7 @@ func TestLoadConfig(t *testing.T) {
 
 	factory := newFactory()
 	factories.Exporters[typeStr] = factory
-	cfg, err := configtest.LoadConfigAndValidate(path.Join(".", "testdata", "config.yaml"), factories)
+	cfg, err := configtest.LoadConfigAndValidate(path.Join("..", "testdata", "config.yaml"), factories)
 
 	require.NoError(t, err)
 	require.NotNil(t, cfg)

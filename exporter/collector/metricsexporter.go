@@ -1014,8 +1014,8 @@ func (me *MetricsExporter) exportTimeSeriesRunner() {
 				// We are shutting down. Publish all the pending
 				// items on the channel before we stop.
 				select {
-				case item := <-me.timeSeriesC:
-					me.processItem(item)
+				case ts := <-me.timeSeriesC:
+					me.processItem(ts)
 				default:
 					goto DONE
 				}
@@ -1026,8 +1026,8 @@ func (me *MetricsExporter) exportTimeSeriesRunner() {
 			}
 			// Return and continue graceful shutdown.
 			return
-		case item := <-me.timeSeriesC:
-			me.processItem(item)
+		case ts := <-me.timeSeriesC:
+			me.processItem(ts)
 		case <-me.batchTimeoutTimer.C:
 			me.batchTimeoutTimer.Reset(batchTimeout)
 			for len(me.pendingTimeSerieses) > 0 {

@@ -71,11 +71,13 @@ func main() {
 			require.NoError(t, testServerExporter.PushMetrics(ctx, metrics), "failed to export metrics to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
+			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
+			require.NoError(t, err)
 			fixture := &integrationtest.MetricExpectFixture{
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
-				SelfObservabilityMetrics:        inMemoryOCExporter.Proto(),
+				SelfObservabilityMetrics:        selfObsMetrics,
 			}
 			test.SaveRecordedFixtures(t, fixture)
 		}()
