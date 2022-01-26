@@ -290,7 +290,6 @@ func (me *MetricsExporter) exportMetricDescriptor(md *metricpb.MetricDescriptor)
 	if _, exists := me.mdCache[md.Type]; exists {
 		return
 	}
-	me.mdCache[md.Type] = md
 
 	req := &monitoringpb.CreateMetricDescriptorRequest{
 		Name:             me.projectName(),
@@ -300,7 +299,11 @@ func (me *MetricsExporter) exportMetricDescriptor(md *metricpb.MetricDescriptor)
 	if err != nil {
 		// TODO: Log-once on error, per metric descriptor?
 		me.obs.log.Error("Unable to send metric descriptor.", zap.Error(err), zap.Any("metric_descriptor", md))
+		return
 	}
+
+	// only cache if we are successful. We want to retry if there is an error
+	me.mdCache[md.Type] = md
 }
 
 // Sends a user-custom-metric timeseries.
