@@ -55,6 +55,11 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/summary_metrics_expect.json",
 		},
 		{
+			Name:                 "Batching",
+			OTLPInputFixturePath: "testdata/fixtures/batching_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/batching_metrics_expect.json",
+		},
+		{
 			Name:                 "Ops Agent Self-Reported metrics",
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_self_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_self_metrics_expect.json",
