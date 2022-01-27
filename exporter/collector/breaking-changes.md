@@ -13,6 +13,13 @@ Additionally, the previous exporter had a hardcoded list of known metric domains
 where this "prefix" would not be used. The new exporter allows full configuration
 of this list via the `metric.known_domains` property.
 
+The previous exporter would, by default, only call CreateMetricDescriptor for metrics with
+domain `custom.googleapis.com` or `external.googleapis.com`. The new exporter will try to call
+CreateMetricDescriptor regardless of domain, unless `metric.skip_create_descriptor` or
+`metric.create_service_timeseries` are true. The exporter now calls CreateMetricDescriptor as a
+best effort. It queues MetricDescriptors in a buffered channel, dropping them when the channel
+is full; the next time that metric is seen, it will be retried.
+
 Additionally, the DisplayName for a metric used to be exactly the
 `{metric_name}`. Now, the metric name is chosen as the full-path after the
 domain name of the metric type.  E.g. if a metric called
