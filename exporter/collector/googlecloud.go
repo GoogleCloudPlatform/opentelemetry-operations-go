@@ -45,11 +45,11 @@ func setVersionInUserAgent(cfg *Config, version string) {
 	cfg.UserAgent = strings.ReplaceAll(cfg.UserAgent, "{{version}}", version)
 }
 
-func generateClientOptions(cfg *Config) ([]option.ClientOption, error) {
+func generateClientOptions(cfg *ClientConfig, userAgent string) ([]option.ClientOption, error) {
 	var copts []option.ClientOption
 	// option.WithUserAgent is used by the Trace exporter, but not the Metric exporter (see comment below)
-	if cfg.UserAgent != "" {
-		copts = append(copts, option.WithUserAgent(cfg.UserAgent))
+	if userAgent != "" {
+		copts = append(copts, option.WithUserAgent(userAgent))
 	}
 	if cfg.Endpoint != "" {
 		if cfg.UseInsecure {
@@ -59,8 +59,8 @@ func generateClientOptions(cfg *Config) ([]option.ClientOption, error) {
 				grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
 				grpc.WithInsecure(),
 			}
-			if cfg.UserAgent != "" {
-				dialOpts = append(dialOpts, grpc.WithUserAgent(cfg.UserAgent))
+			if userAgent != "" {
+				dialOpts = append(dialOpts, grpc.WithUserAgent(userAgent))
 			}
 			conn, err := grpc.Dial(cfg.Endpoint, dialOpts...)
 			if err != nil {
@@ -86,7 +86,7 @@ func NewGoogleCloudTracesExporter(cfg Config, version string, timeout time.Durat
 		cloudtrace.WithTimeout(timeout),
 	}
 
-	copts, err := generateClientOptions(&cfg)
+	copts, err := generateClientOptions(&cfg.TraceConfig.ClientConfig, cfg.UserAgent)
 	if err != nil {
 		return nil, err
 	}

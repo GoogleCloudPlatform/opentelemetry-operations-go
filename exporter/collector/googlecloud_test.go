@@ -65,9 +65,13 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 		{
 			name: "Standard",
 			cfg: Config{
-				ProjectID:   "idk",
-				Endpoint:    "127.0.0.1:8080",
-				UseInsecure: true,
+				ProjectID: "idk",
+				TraceConfig: TraceConfig{
+					ClientConfig: ClientConfig{
+						Endpoint:    "127.0.0.1:8080",
+						UseInsecure: true,
+					},
+				},
 			},
 		},
 	}
@@ -171,12 +175,16 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 	}
 
 	sde, err := NewGoogleCloudMetricsExporter(context.Background(), Config{
-		ProjectID:   "idk",
-		Endpoint:    "127.0.0.1:8080",
-		UserAgent:   "MyAgent {{version}}",
-		UseInsecure: true,
-		GetClientOptions: func() []option.ClientOption {
-			return clientOptions
+		ProjectID: "idk",
+		UserAgent: "MyAgent {{version}}",
+		MetricConfig: MetricConfig{
+			ClientConfig: ClientConfig{
+				Endpoint:    "127.0.0.1:8080",
+				UseInsecure: true,
+				GetClientOptions: func() []option.ClientOption {
+					return clientOptions
+				},
+			},
 		},
 	}, zap.NewNop(), "v0.0.1", DefaultTimeout)
 	require.NoError(t, err)

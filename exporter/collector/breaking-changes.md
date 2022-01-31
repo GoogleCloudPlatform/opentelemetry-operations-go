@@ -3,6 +3,29 @@
 The new pdata based exporter has some breaking changes from the original OpenCensus (OC)
 stackdriver based `googlecloud` exporter:
 
+## Configuration
+
+Client-specific configuration, including `endpoint` and `use_insecure` are now separated per-signal.  `resource_mappings` is now nested under `metric`.  For example,
+
+```yaml
+googlecloud:
+  endpoint: test-endpoint
+  use_insecure: true
+  resource_mappings:
+```
+Is now:
+
+```yaml
+googlecloud:
+  trace:
+    endpoint: test-trace-endpoint
+    use_insecure: true
+  metric:
+    endpoint: test-metric-endpoint
+    use_insecure: true
+    resource_mappings:
+```
+
 ## Metric Names and Descriptors
 
 The previous collector exporter would default to sending metrics with the type:
