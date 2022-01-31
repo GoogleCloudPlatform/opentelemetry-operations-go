@@ -50,6 +50,16 @@ For now, it is not possible to customizate the mapping algorithm, beyond using t
 in the collector pipeline before the exporter. If you have a use case for customizing the
 behavior, please open an issue.
 
+## Time staggering
+
+The [OTel datamodel specification](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/datamodel.md#resets-and-gaps) an equal start and end time on a cumulative metric indicate a reset timeseries:
+
+```When StartTimeUnixNano equals TimeUnixNano, a new unbroken sequence of observations begins with a reset at an unknown start time. The initial observed value is recorded to indicate that an unbroken sequence of observations resumes. These points have zero duration, and indicate that nothing is known about previously-reported points and that data may have been lost.```
+
+The OpenCensus-based exporter took points with identical start and end times, and added a millisecond to the end time: https://github.com/census-ecosystem/opencensus-go-exporter-stackdriver/pull/287.  However, the resulting point makes little sense: It has a very small time period, and a normal cumulative value for an interval.  The result is that graphs display a very large rate over that millisecond, which is misleading.
+
+This exporter instead drops points with identical start and end times.  Resets are already indicated by a change in the start timestamp for the subsequent point.
+
 ## Labels
 
 Original label key mapping code is

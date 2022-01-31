@@ -350,7 +350,11 @@ func (m *metricMapper) metricToTimeSeries(
 		sum := metric.Sum()
 		points := sum.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
+			point := points.At(i)
+			if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
+				continue
+			}
+			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, point)
 			timeSeries = append(timeSeries, ts)
 		}
 	case pdata.MetricDataTypeGauge:
@@ -364,21 +368,33 @@ func (m *metricMapper) metricToTimeSeries(
 		summary := metric.Summary()
 		points := summary.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, points.At(i))
+			point := points.At(i)
+			if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
+				continue
+			}
+			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, point)
 			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeHistogram:
 		hist := metric.Histogram()
 		points := hist.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i))
+			point := points.At(i)
+			if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
+				continue
+			}
+			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, point)
 			timeSeries = append(timeSeries, ts)
 		}
 	case pdata.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, points.At(i))
+			point := points.At(i)
+			if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
+				continue
+			}
+			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, point)
 			timeSeries = append(timeSeries, ts)
 		}
 	// TODO: add cases for other metric data types
@@ -1049,4 +1065,11 @@ func (me *MetricsExporter) processItem(ts *monitoringpb.TimeSeries) {
 		me.batchTimeoutTimer.Reset(batchTimeout)
 		me.exportPendingTimeSerieses()
 	}
+}
+
+// The end time of a new interval must be at least a millisecond after the end time of the
+// previous interval, for all non-gauge types.
+// https://cloud.google.com/monitoring/api/ref_v3/rpc/google.monitoring.v3#timeinterval
+func intervalIsValid(start, end time.Time) bool {
+	return end.Sub(start).Milliseconds() > 1
 }

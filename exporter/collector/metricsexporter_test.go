@@ -43,10 +43,21 @@ func TestMetricToTimeSeries(t *testing.T) {
 		sum := metric.Sum()
 		sum.SetIsMonotonic(true)
 		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+		startTs := pdata.NewTimestampFromTime(start)
+		endTs := pdata.NewTimestampFromTime(start.Add(time.Hour))
 		// Add three points
-		sum.DataPoints().AppendEmpty().SetDoubleVal(10)
-		sum.DataPoints().AppendEmpty().SetDoubleVal(15)
-		sum.DataPoints().AppendEmpty().SetDoubleVal(16)
+		point := sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(10)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(15)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(16)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
 
 		ts := mapper.metricToTimeSeries(
 			mr,
@@ -467,6 +478,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	quantile.SetValue(1.0)
 	end := start.Add(time.Hour)
 	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
 	ts := mapper.metricToTimeSeries(mr, labels{}, metric)
 	assert.Len(t, ts, 3)
 	sumResult := ts[0]
