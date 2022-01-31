@@ -47,22 +47,22 @@
         "type": "workload.googleapis.com/testresourcefilter",
         "labels": [
           {
-            "key": "service_namespace"
+            "key": "foo"
           },
           {
             "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          },
+          {
+            "key": "service_namespace"
           },
           {
             "key": "telemetry_sdk_language"
           },
           {
             "key": "telemetry_sdk_version"
-          },
-          {
-            "key": "service_name"
-          },
-          {
-            "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
