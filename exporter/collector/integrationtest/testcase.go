@@ -220,9 +220,10 @@ func normalizeMetricDescriptorReqs(t testing.TB, reqs ...*monitoringpb.CreateMet
 		if req.MetricDescriptor == nil {
 			continue
 		}
-		req.MetricDescriptor.Name = ""
-		sort.Slice(req.MetricDescriptor.Labels, func(i, j int) bool {
-			return req.MetricDescriptor.Labels[i].Key < req.MetricDescriptor.Labels[j].Key
+		md := req.MetricDescriptor
+		md.Name = ""
+		sort.Slice(md.Labels, func(i, j int) bool {
+			return md.Labels[i].Key < md.Labels[j].Key
 		})
 	}
 }
