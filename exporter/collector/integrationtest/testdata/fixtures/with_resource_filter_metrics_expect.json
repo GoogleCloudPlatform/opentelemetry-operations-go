@@ -47,6 +47,21 @@
         "type": "workload.googleapis.com/testresourcefilter",
         "labels": [
           {
+            "key": "service_namespace"
+          },
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "telemetry_sdk_language"
+          },
+          {
+            "key": "telemetry_sdk_version"
+          },
+          {
+            "key": "service_name"
+          },
+          {
             "key": "foo"
           }
         ],

@@ -163,7 +163,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 					continue
 				}
 
-				for _, md := range me.mapper.metricDescriptor(metric) {
+				for _, md := range me.mapper.metricDescriptor(metric, metricLabels) {
 					if md != nil {
 						select {
 						case me.mds <- md:
@@ -749,9 +749,18 @@ func (m *metricMapper) metricTypeToDisplayName(mURL string) string {
 }
 
 // Returns label descriptors for a metric.
-func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescriptor {
+func (m *metricMapper) labelDescriptors(
+	pm pdata.Metric,
+	extraLabels labels,
+) []*label.LabelDescriptor {
 	// TODO - allow customization of label descriptions.
 	result := []*label.LabelDescriptor{}
+	for key := range extraLabels {
+		result = append(result, &label.LabelDescriptor{
+			Key: key,
+		})
+	}
+
 	seenKeys := map[string]struct{}{}
 	addAttributes := func(attr pdata.AttributeMap) {
 		attr.Range(func(key string, _ pdata.AttributeValue) bool {
@@ -804,9 +813,12 @@ func summaryMetricNames(name string) (string, string, string) {
 	return sumName, countName, percentileName
 }
 
-func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.MetricDescriptor {
+func (m *metricMapper) summaryMetricDescriptors(
+	pm pdata.Metric,
+	extraLabels labels,
+) []*metricpb.MetricDescriptor {
 	sumName, countName, percentileName := summaryMetricNames(pm.Name())
-	labels := m.labelDescriptors(pm)
+	labels := m.labelDescriptors(pm, extraLabels)
 	return []*metricpb.MetricDescriptor{
 		{
 			Type:        m.metricNameToType(sumName),
@@ -844,13 +856,16 @@ func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.Met
 }
 
 // Extract the metric descriptor from a metric data point.
-func (m *metricMapper) metricDescriptor(pm pdata.Metric) []*metricpb.MetricDescriptor {
+func (m *metricMapper) metricDescriptor(
+	pm pdata.Metric,
+	extraLabels labels,
+) []*metricpb.MetricDescriptor {
 	if pm.DataType() == pdata.MetricDataTypeSummary {
-		return m.summaryMetricDescriptors(pm)
+		return m.summaryMetricDescriptors(pm, extraLabels)
 	}
 	kind, typ := mapMetricPointKind(pm)
 	metricType := m.metricNameToType(pm.Name())
-	labels := m.labelDescriptors(pm)
+	labels := m.labelDescriptors(pm, extraLabels)
 	// Return nil for unsupported types.
 	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
 		return nil
