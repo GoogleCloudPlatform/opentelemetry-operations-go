@@ -3,7 +3,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/colle
 go 1.16
 
 require (
-	contrib.go.opencensus.io/exporter/stackdriver v0.13.10
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.0.0
 	github.com/census-instrumentation/opencensus-proto v0.3.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.40.0
@@ -21,7 +20,7 @@ require (
 
 require (
 	cloud.google.com/go/monitoring v1.1.0
-	github.com/aws/aws-sdk-go v1.42.14 // indirect
+	cloud.google.com/go/trace v1.0.0 // indirect
 	go.uber.org/zap v1.19.1
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 )
