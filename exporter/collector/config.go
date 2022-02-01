@@ -43,10 +43,11 @@ type Config struct {
 }
 
 type MetricConfig struct {
+	// Prefix is attached to all metrics sent by this exporter.
+	// Disable prefixes by setting it to "".
+	// Defaults to "workload.googleapis.com".
 	Prefix                     string `mapstructure:"prefix"`
 	SkipCreateMetricDescriptor bool   `mapstructure:"skip_create_descriptor"`
-	// If a metric belongs to one of these domains it does not get a prefix.
-	KnownDomains []string `mapstructure:"known_domains"`
 
 	// If true, set the instrumentation_source and instrumentation_version
 	// labels. Defaults to true.
@@ -77,15 +78,11 @@ type LabelMapping struct {
 	Optional bool `mapstructure:"optional"`
 }
 
-// Known metric domains. Note: This is now configurable for advanced usages.
-var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.dev"}
-
 // DefaultConfig creates the default configuration for exporter.
 func DefaultConfig() Config {
 	return Config{
 		UserAgent: "opentelemetry-collector-contrib {{version}}",
 		MetricConfig: MetricConfig{
-			KnownDomains:                     domains,
 			Prefix:                           "workload.googleapis.com",
 			CreateMetricDescriptorBufferSize: 10,
 			InstrumentationLibraryLabels:     true,

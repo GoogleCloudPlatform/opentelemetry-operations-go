@@ -740,19 +740,9 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	}
 }
 
-// Returns any configured prefix to add to unknown metric name.
-func (m *metricMapper) getMetricNamePrefix(name string) string {
-	for _, domain := range m.cfg.MetricConfig.KnownDomains {
-		if strings.Contains(name, domain) {
-			return ""
-		}
-	}
-	return m.cfg.MetricConfig.Prefix
-}
-
 // metricNameToType maps OTLP metric name to GCM metric type (aka name)
 func (m *metricMapper) metricNameToType(name string) string {
-	return path.Join(m.getMetricNamePrefix(name), name)
+	return path.Join(m.cfg.MetricConfig.Prefix, name)
 }
 
 func numberDataPointToValue(

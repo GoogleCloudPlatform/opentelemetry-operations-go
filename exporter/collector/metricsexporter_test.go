@@ -15,7 +15,6 @@
 package collector
 
 import (
-	"fmt"
 	"testing"
 	"time"
 
@@ -617,7 +616,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeGauge)
-				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetName("test.metric")
 				metric.SetDescription("Description")
 				metric.SetUnit("1")
 				gauge := metric.Gauge()
@@ -628,9 +627,9 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 			expected: []*metricpb.MetricDescriptor{
 				{
-					Name:        "custom.googleapis.com/test.metric",
+					Name:        "test.metric",
 					DisplayName: "test.metric",
-					Type:        "custom.googleapis.com/test.metric",
+					Type:        "workload.googleapis.com/test.metric",
 					MetricKind:  metricpb.MetricDescriptor_GAUGE,
 					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
@@ -648,7 +647,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeSum)
-				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetName("test.metric")
 				metric.SetDescription("Description")
 				metric.SetUnit("1")
 				sum := metric.Sum()
@@ -661,9 +660,9 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 			expected: []*metricpb.MetricDescriptor{
 				{
-					Name:        "custom.googleapis.com/test.metric",
+					Name:        "test.metric",
 					DisplayName: "test.metric",
-					Type:        "custom.googleapis.com/test.metric",
+					Type:        "workload.googleapis.com/test.metric",
 					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
 					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
@@ -862,7 +861,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeGauge)
-				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetName("test.metric")
 				metric.SetDescription("Description")
 				metric.SetUnit("1")
 				gauge := metric.Gauge()
@@ -876,9 +875,9 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 			expected: []*metricpb.MetricDescriptor{
 				{
-					Name:        "custom.googleapis.com/test.metric",
+					Name:        "test.metric",
 					DisplayName: "test.metric",
-					Type:        "custom.googleapis.com/test.metric",
+					Type:        "workload.googleapis.com/test.metric",
 					MetricKind:  metricpb.MetricDescriptor_GAUGE,
 					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
@@ -897,59 +896,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			mapper := metricMapper{cfg: DefaultConfig()}
 			metric := test.metricCreator()
 			md := mapper.metricDescriptor(metric)
-			assert.Equal(t, md, test.expected)
-		})
-	}
-}
-
-type knownDomainsTest struct {
-	name         string
-	metricType   string
-	knownDomains []string
-}
-
-func TestKnownDomains(t *testing.T) {
-	tests := []knownDomainsTest{
-		{
-			name:       "test",
-			metricType: "prefix/test",
-		},
-		{
-			name:       "googleapis.com/test",
-			metricType: "googleapis.com/test",
-		},
-		{
-			name:       "kubernetes.io/test",
-			metricType: "kubernetes.io/test",
-		},
-		{
-			name:       "istio.io/test",
-			metricType: "istio.io/test",
-		},
-		{
-			name:       "knative.dev/test",
-			metricType: "knative.dev/test",
-		},
-		{
-			name:         "knative.dev/test",
-			metricType:   "prefix/knative.dev/test",
-			knownDomains: []string{"example.com"},
-		},
-		{
-			name:         "example.com/test",
-			metricType:   "example.com/test",
-			knownDomains: []string{"example.com"},
-		},
-	}
-	for _, test := range tests {
-		t.Run(fmt.Sprintf("%v to %v", test.name, test.metricType), func(t *testing.T) {
-			config := DefaultConfig()
-			config.MetricConfig.Prefix = "prefix"
-			if len(test.knownDomains) > 0 {
-				config.MetricConfig.KnownDomains = test.knownDomains
-			}
-			mapper := metricMapper{cfg: config}
-			assert.Equal(t, test.metricType, mapper.metricNameToType(test.name))
+			assert.Equal(t, test.expected, md)
 		})
 	}
 }

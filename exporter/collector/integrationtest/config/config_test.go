@@ -81,11 +81,8 @@ func TestLoadConfig(t *testing.T) {
 					},
 				},
 				MetricConfig: collector.MetricConfig{
-					Prefix:                     "prefix",
-					SkipCreateMetricDescriptor: true,
-					KnownDomains: []string{
-						"googleapis.com", "kubernetes.io", "istio.io", "knative.dev",
-					},
+					Prefix:                           "prefix",
+					SkipCreateMetricDescriptor:       true,
 					InstrumentationLibraryLabels:     true,
 					CreateMetricDescriptorBufferSize: 10,
 				},

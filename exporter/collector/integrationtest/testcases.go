@@ -67,6 +67,7 @@ var (
 				// Previous exporter did NOT export metric descriptors.
 				// TODO: Add a new test that also checks metric descriptors.
 				cfg.MetricConfig.SkipCreateMetricDescriptor = true
+				cfg.MetricConfig.Prefix = ""
 			},
 		},
 		{
@@ -77,6 +78,7 @@ var (
 				// Previous exporter did NOT export metric descriptors.
 				// TODO: Add a new test that also checks metric descriptors.
 				cfg.MetricConfig.SkipCreateMetricDescriptor = true
+				cfg.MetricConfig.Prefix = ""
 			},
 		},
 		{
@@ -84,7 +86,6 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/workload_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/workload_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
-				cfg.MetricConfig.Prefix = "workload.googleapis.com/"
 				cfg.MetricConfig.SkipCreateMetricDescriptor = true
 			},
 		},
@@ -94,6 +95,7 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/gke_metrics_agent_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.CreateServiceTimeSeries = true
+				cfg.MetricConfig.Prefix = ""
 			},
 		},
 		{
@@ -102,6 +104,7 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/gke_control_plane_metrics_agent_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.CreateServiceTimeSeries = true
+				cfg.MetricConfig.Prefix = ""
 			},
 		},
 		{
@@ -115,6 +118,7 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/create_service_timeseries_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.CreateServiceTimeSeries = true
+				cfg.MetricConfig.Prefix = ""
 			},
 		},
 	}
