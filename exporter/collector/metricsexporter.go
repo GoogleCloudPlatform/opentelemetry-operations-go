@@ -83,9 +83,11 @@ type metricMapper struct {
 
 // Constants we use when translating summary metrics into GCP.
 const (
-	SummaryCountPrefix      = "_summary_count"
-	SummarySumSuffix        = "_summary_sum"
-	SummaryPercentileSuffix = "_summary_percentile"
+	SummaryCountPrefix            = "_count"
+	SummarySumSuffix              = "_sum"
+	LegacySummaryCountPrefix      = "_summary_count"
+	LegacySummarySumSuffix        = "_summary_sum"
+	LegacySummaryPercentileSuffix = "_summary_percentile"
 )
 
 const (
@@ -396,7 +398,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	sum pdata.Summary,
 	point pdata.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
-	sumName, countName, percentileName := summaryMetricNames(metric.Name())
+	sumName, countName, percentileName := m.summaryMetricNames(metric.Name())
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	result := []*monitoringpb.TimeSeries{
@@ -448,10 +450,6 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	quantiles := point.QuantileValues()
 	for i := 0; i < quantiles.Len(); i++ {
 		quantile := quantiles.At(i)
-		pLabel := labels{
-			// Convert to percentile.
-			"percentile": fmt.Sprintf("%f", quantile.Quantile()*100),
-		}
 		result = append(result, &monitoringpb.TimeSeries{
 			Resource:   resource,
 			Unit:       metric.Unit(),
@@ -470,12 +468,24 @@ func (m *metricMapper) summaryPointToTimeSeries(
 				Labels: mergeLabels(
 					attributesToLabels(point.Attributes()),
 					extraLabels,
-					pLabel,
+					m.quantileOrPercentileLabel(quantile),
 				),
 			},
 		})
 	}
 	return result
+}
+
+// quantileOrPercentileLabel returns the label and value for each quantile (or percentile) label
+func (m *metricMapper) quantileOrPercentileLabel(quantile pdata.ValueAtQuantile) labels {
+	if m.cfg.MetricConfig.SummaryPercentiles {
+		return labels{
+			"percentile": fmt.Sprintf("%f", quantile.Quantile()*100),
+		}
+	}
+	return labels{
+		"quantile": fmt.Sprintf("%f", quantile.Quantile()),
+	}
 }
 
 func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Exemplar {
@@ -878,16 +888,34 @@ func (m *metricMapper) labelDescriptors(pm pdata.Metric) []*label.LabelDescripto
 }
 
 // Returns (sum, count, percentile) metric names for a summary metric.
-func summaryMetricNames(name string) (string, string, string) {
+// TODO: consider returning a struct instead of multiple strings.
+func (m *metricMapper) summaryMetricNames(name string) (string, string, string) {
+	if m.cfg.MetricConfig.SummaryPercentiles {
+		sumName := fmt.Sprintf("%s%s", name, LegacySummarySumSuffix)
+		countName := fmt.Sprintf("%s%s", name, LegacySummaryCountPrefix)
+		percentileName := fmt.Sprintf("%s%s", name, LegacySummaryPercentileSuffix)
+		return sumName, countName, percentileName
+	}
 	sumName := fmt.Sprintf("%s%s", name, SummarySumSuffix)
 	countName := fmt.Sprintf("%s%s", name, SummaryCountPrefix)
-	percentileName := fmt.Sprintf("%s%s", name, SummaryPercentileSuffix)
-	return sumName, countName, percentileName
+	return sumName, countName, name
 }
 
 func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.MetricDescriptor {
-	sumName, countName, percentileName := summaryMetricNames(pm.Name())
+	sumName, countName, percentileName := m.summaryMetricNames(pm.Name())
 	labels := m.labelDescriptors(pm)
+	var quantileOrPercentileDescriptor *label.LabelDescriptor
+	if m.cfg.MetricConfig.SummaryPercentiles {
+		quantileOrPercentileDescriptor = &label.LabelDescriptor{
+			Key:         "percentile",
+			Description: "the value at a given percentile of a distribution",
+		}
+	} else {
+		quantileOrPercentileDescriptor = &label.LabelDescriptor{
+			Key:         "quantile",
+			Description: "the value at a given quantile of a distribution",
+		}
+	}
 	return []*metricpb.MetricDescriptor{
 		{
 			Type:        m.metricNameToType(sumName),
@@ -908,13 +936,8 @@ func (m *metricMapper) summaryMetricDescriptors(pm pdata.Metric) []*metricpb.Met
 			DisplayName: countName,
 		},
 		{
-			Type: m.metricNameToType(percentileName),
-			Labels: append(
-				labels,
-				&label.LabelDescriptor{
-					Key:         "percentile",
-					Description: "the value at a given percentile of a distribution",
-				}),
+			Type:        m.metricNameToType(percentileName),
+			Labels:      append(labels, quantileOrPercentileDescriptor),
 			MetricKind:  metricpb.MetricDescriptor_GAUGE,
 			ValueType:   metricpb.MetricDescriptor_DOUBLE,
 			Unit:        pm.Unit(),

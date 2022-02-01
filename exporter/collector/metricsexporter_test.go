@@ -478,7 +478,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, sumResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.Equal(t, sumResult.Unit, unit)
 	assert.Same(t, sumResult.Resource, mr)
-	assert.Equal(t, sumResult.Metric.Type, "workload.googleapis.com/mysummary_summary_sum")
+	assert.Equal(t, sumResult.Metric.Type, "workload.googleapis.com/mysummary_sum")
 	assert.Equal(t, sumResult.Metric.Labels, map[string]string{})
 	assert.Nil(t, sumResult.Metadata)
 	assert.Len(t, sumResult.Points, 1)
@@ -492,7 +492,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_INT64)
 	assert.Equal(t, countResult.Unit, unit)
 	assert.Same(t, countResult.Resource, mr)
-	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_summary_count")
+	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_count")
 	assert.Equal(t, countResult.Metric.Labels, map[string]string{})
 	assert.Nil(t, countResult.Metadata)
 	assert.Len(t, countResult.Points, 1)
@@ -506,9 +506,9 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, quantileResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.Equal(t, quantileResult.Unit, unit)
 	assert.Same(t, quantileResult.Resource, mr)
-	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary_summary_percentile")
+	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary")
 	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
-		"percentile": "100.000000",
+		"quantile": "1.000000",
 	})
 	assert.Nil(t, quantileResult.Metadata)
 	assert.Len(t, quantileResult.Points, 1)
@@ -606,14 +606,18 @@ func TestNumberDataPointToValue(t *testing.T) {
 
 type metricDescriptorTest struct {
 	name          string
+	config        Config
 	metricCreator func() pdata.Metric
 	expected      []*metricpb.MetricDescriptor
 }
 
 func TestMetricDescriptorMapping(t *testing.T) {
+	legacySummaryConfig := DefaultConfig()
+	legacySummaryConfig.MetricConfig.SummaryPercentiles = true
 	tests := []metricDescriptorTest{
 		{
-			name: "Gauge",
+			name:   "Gauge",
+			config: DefaultConfig(),
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeGauge)
@@ -644,7 +648,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 		},
 		{
-			name: "Cumulative Monotonic Sum",
+			name:   "Cumulative Monotonic Sum",
+			config: DefaultConfig(),
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeSum)
@@ -677,7 +682,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 		},
 		{
-			name: "Delta Monotonic Sum",
+			name:   "Delta Monotonic Sum",
+			config: DefaultConfig(),
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeSum)
@@ -710,7 +716,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 		},
 		{
-			name: "Non-Monotonic Sum",
+			name:   "Non-Monotonic Sum",
+			config: DefaultConfig(),
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeSum)
@@ -743,7 +750,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 		},
 		{
-			name: "Cumulative Histogram",
+			name:   "Cumulative Histogram",
+			config: DefaultConfig(),
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeHistogram)
@@ -774,7 +782,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 		},
 		{
-			name: "Cumulative Exponential Histogram",
+			name:   "Cumulative Exponential Histogram",
+			config: DefaultConfig(),
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeExponentialHistogram)
@@ -799,7 +808,68 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 		},
 		{
-			name: "Summary",
+			name:   "Summary",
+			config: DefaultConfig(),
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSummary)
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				summary := metric.Summary()
+				point := summary.DataPoints().AppendEmpty()
+				point.Attributes().InsertString("test_label", "value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					DisplayName: "test.metric_sum",
+					Type:        "workload.googleapis.com/test.metric_sum",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+				{
+					DisplayName: "test.metric_count",
+					Type:        "workload.googleapis.com/test.metric_count",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_INT64,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+				{
+					Type:        "workload.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+						{
+							Key:         "quantile",
+							Description: "the value at a given quantile of a distribution",
+						},
+					},
+				},
+			},
+		},
+		{
+			name:   "Legacy Summary",
+			config: legacySummaryConfig,
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeSummary)
@@ -858,7 +928,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 		},
 		{
-			name: "Multiple points",
+			name:   "Multiple points",
+			config: DefaultConfig(),
 			metricCreator: func() pdata.Metric {
 				metric := pdata.NewMetric()
 				metric.SetDataType(pdata.MetricDataTypeGauge)
@@ -894,7 +965,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mapper := metricMapper{cfg: DefaultConfig()}
+			mapper := metricMapper{cfg: test.config}
 			metric := test.metricCreator()
 			md := mapper.metricDescriptor(metric)
 			assert.Equal(t, md, test.expected)

@@ -59,6 +59,13 @@ type MetricConfig struct {
 	// Buffer size for the channel which asynchronously calls CreateMetricDescriptor. Default
 	// is 10.
 	CreateMetricDescriptorBufferSize int `mapstructure:"create_metric_descriptor_buffer_size"`
+
+	// If true, attach the label: "percentile" to summary metrics, with values in 0 < 100
+	// In this case, summary metrics are suffixed: _summary_sum, _summary_count, _summary_percentile
+	// Otherwise, attach the label: "quantile" to summary metrics, with values in 0 < 1
+	// In this case, summary metrics are suffixed: _sum, _count, <no suffix>
+	// Defaults to false.
+	SummaryPercentiles bool `mapstructure:"summary_percentiles"`
 }
 
 // ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).

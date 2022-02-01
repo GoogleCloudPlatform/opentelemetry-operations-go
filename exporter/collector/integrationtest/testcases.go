@@ -55,6 +55,14 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/summary_metrics_expect.json",
 		},
 		{
+			Name:                 "Summary Percentiles",
+			OTLPInputFixturePath: "testdata/fixtures/summary_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/summary_metrics_percentiles_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.SummaryPercentiles = true
+			},
+		},
+		{
 			Name:                 "Batching",
 			OTLPInputFixturePath: "testdata/fixtures/batching_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/batching_metrics_expect.json",
@@ -86,6 +94,7 @@ var (
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.Prefix = "workload.googleapis.com/"
 				cfg.MetricConfig.SkipCreateMetricDescriptor = true
+				cfg.MetricConfig.SummaryPercentiles = true
 			},
 		},
 		{
