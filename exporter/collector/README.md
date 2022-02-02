@@ -201,6 +201,7 @@ and [memory limiter](https://github.com/open-telemetry/opentelemetry-collector/t
 optimal network usage and avoiding memory overruns.  You may also want to run an additional
 [sampler](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/probabilisticsamplerprocessor), depending on your needs.
 
+
 ## Deprecatations
 
 The previous trace configuration (v0.21.0) has been deprecated in favor of the common configuration options available in OpenTelemetry. These will cause a failure to start

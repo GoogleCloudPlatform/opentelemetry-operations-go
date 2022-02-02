@@ -9,6 +9,7 @@ require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.40.0
 	github.com/stretchr/testify v1.7.0
 	go.opencensus.io v0.23.0
+	go.opentelemetry.io/collector v0.40.0
 	go.opentelemetry.io/collector/model v0.40.0
 	go.opentelemetry.io/otel v1.3.0
 	go.opentelemetry.io/otel/sdk v1.3.0
@@ -20,10 +21,8 @@ require (
 )
 
 require (
-	cloud.google.com/go/monitoring v1.1.0
 	github.com/aws/aws-sdk-go v1.42.14 // indirect
-	go.uber.org/zap v1.19.1
-	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
+	github.com/google/go-cmp v0.5.6
 )
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../trace
