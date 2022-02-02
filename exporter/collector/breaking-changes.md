@@ -66,6 +66,10 @@ The new code does not:
 - truncate label keys longer than 100 characters.
 - prepend `key` when the first character is `_`.
 
+## ResourceMappings
+
+In Resource Mappings, `source_type` and `optional` labels are no longer supported.
+
 ## OTLP Sum
 
 In the old exporter, delta sums were converted into GAUGE points ([see test

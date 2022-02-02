@@ -45,17 +45,24 @@ const (
 	zone           = "zone"
 )
 
+// mappingConfig maps from the required fields for one monitored resource to the OTel resource
+// attributes that can be used to populate it.
+type mappingConfig map[string]keyMatcher
+
+// keyMatcher determines how to select otel resource attribute keys
+type keyMatcher struct {
+	// OTel resource keys to try and populate the resource label from. For entries with
+	// multiple OTel resource keys, the keys' values will be coalesced in order until there
+	// is a non-empty value.
+	otelKeys []string
+	// If none of the otelKeys are present in the Resource, fallback to this literal value
+	fallbackLiteral string
+}
+
 var (
-	// monitoredResourceMappings contains mappings of GCM resource label keys onto mapping config from OTel
+	// baseMonitoredResourceMappings contains mappings of GCM resource label keys onto mapping config from OTel
 	// resource for a given monitored resource type.
-	monitoredResourceMappings = map[string]map[string]struct {
-		// OTel resource keys to try and populate the resource label from. For entries with
-		// multiple OTel resource keys, the keys' values will be coalesced in order until there
-		// is a non-empty value.
-		otelKeys []string
-		// If none of the otelKeys are present in the Resource, fallback to this literal value
-		fallbackLiteral string
-	}{
+	baseMonitoredResourceMappings = map[string]mappingConfig{
 		gceInstance: {
 			zone:       {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
 			instanceID: {otelKeys: []string{semconv.AttributeHostID}},
@@ -123,37 +130,37 @@ func (m *metricMapper) resourceMetricsToMonitoredResource(
 
 	switch cloudPlatform {
 	case semconv.AttributeCloudPlatformGCPComputeEngine:
-		return createMonitoredResource(gceInstance, attrs)
+		return m.createMonitoredResource(gceInstance, attrs)
 	case semconv.AttributeCloudPlatformGCPKubernetesEngine:
 		// Try for most to least specific k8s_container, k8s_pod, etc
 		if _, ok := attrs.Get(semconv.AttributeK8SContainerName); ok {
-			return createMonitoredResource(k8sContainer, attrs)
+			return m.createMonitoredResource(k8sContainer, attrs)
 		} else if _, ok := attrs.Get(semconv.AttributeK8SPodName); ok {
-			return createMonitoredResource(k8sPod, attrs)
+			return m.createMonitoredResource(k8sPod, attrs)
 		} else if _, ok := attrs.Get(semconv.AttributeK8SNodeName); ok {
-			return createMonitoredResource(k8sNode, attrs)
+			return m.createMonitoredResource(k8sNode, attrs)
 		}
-		return createMonitoredResource(k8sCluster, attrs)
+		return m.createMonitoredResource(k8sCluster, attrs)
 	case semconv.AttributeCloudPlatformAWSEC2:
-		return createMonitoredResource(awsEc2Instance, attrs)
+		return m.createMonitoredResource(awsEc2Instance, attrs)
 	default:
 		// Fallback to generic_task
 		_, hasServiceName := attrs.Get(semconv.AttributeServiceName)
 		_, hasServiceInstanceID := attrs.Get(semconv.AttributeServiceInstanceID)
 		if hasServiceName && hasServiceInstanceID {
-			return createMonitoredResource(genericTask, attrs)
+			return m.createMonitoredResource(genericTask, attrs)
 		}
 
 		// If not possible, fallback to generic_node
-		return createMonitoredResource(genericNode, attrs)
+		return m.createMonitoredResource(genericNode, attrs)
 	}
 }
 
-func createMonitoredResource(
+func (m *metricMapper) createMonitoredResource(
 	monitoredResourceType string,
 	resourceAttrs pdata.AttributeMap,
 ) (*monitoredrespb.MonitoredResource, labels) {
-	mappings := monitoredResourceMappings[monitoredResourceType]
+	mappings := m.monitoredResourceMappings[monitoredResourceType]
 	mrLabels := make(map[string]string, len(mappings))
 	// TODO handle extra labels
 	extraLabels := labels{}

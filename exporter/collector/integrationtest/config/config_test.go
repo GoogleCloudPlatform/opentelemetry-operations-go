@@ -60,23 +60,19 @@ func TestLoadConfig(t *testing.T) {
 				UseInsecure: true,
 				ResourceMappings: []collector.ResourceMapping{
 					{
-						SourceType: "source.resource1",
 						TargetType: "target-resource1",
 						LabelMappings: []collector.LabelMapping{
 							{
 								SourceKey: "contrib.opencensus.io/exporter/googlecloud/project_id",
 								TargetKey: "project_id",
-								Optional:  true,
 							},
 							{
 								SourceKey: "source.label1",
 								TargetKey: "target_label_1",
-								Optional:  false,
 							},
 						},
 					},
 					{
-						SourceType: "source.resource2",
 						TargetType: "target-resource2",
 					},
 				},

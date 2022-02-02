@@ -63,7 +63,6 @@ type MetricConfig struct {
 
 // ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).
 type ResourceMapping struct {
-	SourceType string `mapstructure:"source_type"`
 	TargetType string `mapstructure:"target_type"`
 
 	LabelMappings []LabelMapping `mapstructure:"label_mappings"`
@@ -72,9 +71,6 @@ type ResourceMapping struct {
 type LabelMapping struct {
 	SourceKey string `mapstructure:"source_key"`
 	TargetKey string `mapstructure:"target_key"`
-	// Optional flag signals whether we can proceed with transformation if a label is missing in the resource.
-	// When required label is missing, we fallback to default resource mapping.
-	Optional bool `mapstructure:"optional"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.
