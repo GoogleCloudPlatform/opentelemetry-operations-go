@@ -148,8 +148,6 @@ func (ms *mockMetricServer) CreateTimeSeries(ctx context.Context, req *cloudmoni
 }
 
 func TestGoogleCloudMetricExport(t *testing.T) {
-	// TODO
-	t.Skip("Skipping until metrics rewrite is finished")
 	srv := grpc.NewServer()
 
 	descriptorReqCh := make(chan *requestWithMetadata)
@@ -164,32 +162,31 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 
 	go srv.Serve(lis)
 
-	// Example with overridden client options
-	clientOptions := []option.ClientOption{
-		option.WithoutAuthentication(),
-		option.WithTelemetryDisabled(),
+	config := DefaultConfig()
+	config.ProjectID = "idk"
+	config.Endpoint = "127.0.0.1:8080"
+	config.UserAgent = "MyAgent {{version}}"
+	config.UseInsecure = true
+	config.MetricConfig.InstrumentationLibraryLabels = false
+	config.GetClientOptions = func() []option.ClientOption {
+		// Example with overridden client options
+		return []option.ClientOption{
+			option.WithoutAuthentication(),
+			option.WithTelemetryDisabled(),
+		}
 	}
 
-	sde, err := NewGoogleCloudMetricsExporter(context.Background(), Config{
-		ProjectID:   "idk",
-		Endpoint:    "127.0.0.1:8080",
-		UserAgent:   "MyAgent {{version}}",
-		UseInsecure: true,
-		GetClientOptions: func() []option.ClientOption {
-			return clientOptions
-		},
-	}, zap.NewNop(), "v0.0.1", DefaultTimeout)
+	sde, err := NewGoogleCloudMetricsExporter(context.Background(), config, zap.NewNop(), "v0.0.1", DefaultTimeout)
 	require.NoError(t, err)
 	defer func() { require.NoError(t, sde.Shutdown(context.Background())) }()
 
 	md := agentmetricspb.ExportMetricsServiceRequest{
 		Resource: &resourcepb.Resource{
-			Type: "host",
 			Labels: map[string]string{
+				"cloud.platform":          "gcp_kubernetes_engine",
 				"cloud.availability_zone": "us-central1",
-				"host.name":               "foo",
+				"k8s.node.name":           "foo",
 				"k8s.cluster.name":        "test",
-				"contrib.opencensus.io/exporter/stackdriver/project_id": "1234567",
 			},
 		},
 		Metrics: []*metricspb.Metric{
@@ -231,39 +228,31 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 		},
 	}
 	md.Metrics[2].Resource = &resourcepb.Resource{
-		Type: "host",
 		Labels: map[string]string{
+			"cloud.platform":          "gcp_kubernetes_engine",
 			"cloud.availability_zone": "us-central1",
-			"host.name":               "bar",
+			"k8s.node.name":           "bar",
 			"k8s.cluster.name":        "test",
-			"contrib.opencensus.io/exporter/stackdriver/project_id": "1234567",
 		},
 	}
-	md.Metrics[3].Resource = &resourcepb.Resource{
-		Type: "host",
-		Labels: map[string]string{
-			"contrib.opencensus.io/exporter/stackdriver/project_id": "1234567",
-		},
-	}
-	md.Metrics[4].Resource = &resourcepb.Resource{
-		Type: "test",
-	}
+	md.Metrics[3].Resource = &resourcepb.Resource{}
+	md.Metrics[4].Resource = &resourcepb.Resource{}
 
 	assert.NoError(t, sde.PushMetrics(context.Background(), internaldata.OCToMetrics(md.Node, md.Resource, md.Metrics)), err)
 
 	expectedNames := map[string]struct{}{
-		"projects/idk/metricDescriptors/custom.googleapis.com/opencensus/test_gauge1": {},
-		"projects/idk/metricDescriptors/custom.googleapis.com/opencensus/test_gauge2": {},
-		"projects/idk/metricDescriptors/custom.googleapis.com/opencensus/test_gauge3": {},
-		"projects/idk/metricDescriptors/custom.googleapis.com/opencensus/test_gauge4": {},
-		"projects/idk/metricDescriptors/custom.googleapis.com/opencensus/test_gauge5": {},
+		"workload.googleapis.com/test_gauge1": {},
+		"workload.googleapis.com/test_gauge2": {},
+		"workload.googleapis.com/test_gauge3": {},
+		"workload.googleapis.com/test_gauge4": {},
+		"workload.googleapis.com/test_gauge5": {},
 	}
 	for i := 0; i < 5; i++ {
 		drm := <-descriptorReqCh
 		assert.Regexp(t, "MyAgent v0\\.0\\.1", drm.metadata["user-agent"])
 		dr := drm.req.(*cloudmonitoringpb.CreateMetricDescriptorRequest)
-		assert.Contains(t, expectedNames, dr.MetricDescriptor.Name)
-		delete(expectedNames, dr.MetricDescriptor.Name)
+		assert.Contains(t, expectedNames, dr.MetricDescriptor.Type)
+		delete(expectedNames, dr.MetricDescriptor.Type)
 	}
 
 	trm := <-timeSeriesReqCh
@@ -275,18 +264,20 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 		"node_name":    "foo",
 		"cluster_name": "test",
 		"location":     "us-central1",
-		"project_id":   "1234567",
 	}
 
 	resourceBar := map[string]string{
 		"node_name":    "bar",
 		"cluster_name": "test",
 		"location":     "us-central1",
-		"project_id":   "1234567",
 	}
 
-	resourceProjectID := map[string]string{
-		"project_id": "1234567",
+	// We no longer map to global resource by default.
+	// Instead, we map to generic_node
+	resourceDefault := map[string]string{
+		"location":  "global",
+		"namespace": "",
+		"node_id":   "",
 	}
 
 	expectedTimeSeries := map[string]struct {
@@ -294,30 +285,30 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 		labels         map[string]string
 		resourceLabels map[string]string
 	}{
-		"custom.googleapis.com/opencensus/test_gauge1": {
+		"workload.googleapis.com/test_gauge1": {
 			value:          float64(1),
 			labels:         map[string]string{"k0": "v0"},
 			resourceLabels: resourceFoo,
 		},
-		"custom.googleapis.com/opencensus/test_gauge2": {
+		"workload.googleapis.com/test_gauge2": {
 			value:          float64(12),
 			labels:         map[string]string{"k0": "v0", "k1": "v1"},
 			resourceLabels: resourceFoo,
 		},
-		"custom.googleapis.com/opencensus/test_gauge3": {
+		"workload.googleapis.com/test_gauge3": {
 			value:          float64(123),
 			labels:         map[string]string{"k0": "v0", "k1": "v1", "k2": "v2"},
 			resourceLabels: resourceBar,
 		},
-		"custom.googleapis.com/opencensus/test_gauge4": {
+		"workload.googleapis.com/test_gauge4": {
 			value:          float64(1234),
 			labels:         map[string]string{"k0": "v0", "k1": "v1", "k2": "v2", "k3": "v3"},
-			resourceLabels: resourceProjectID,
+			resourceLabels: resourceDefault,
 		},
-		"custom.googleapis.com/opencensus/test_gauge5": {
+		"workload.googleapis.com/test_gauge5": {
 			value:          float64(34),
 			labels:         map[string]string{"k4": "v4", "k5": "v5"},
-			resourceLabels: nil,
+			resourceLabels: resourceDefault,
 		},
 	}
 	for i := 0; i < 5; i++ {
