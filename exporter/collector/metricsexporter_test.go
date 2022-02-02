@@ -132,7 +132,9 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pdata.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	ts := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Equal(t, 1, len(tsl))
+	ts := tsl[0]
 	// Verify aspects
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
@@ -198,7 +200,9 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pdata.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	ts := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Equal(t, 1, len(tsl))
+	ts := tsl[0]
 	// Verify aspects
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
@@ -318,7 +322,9 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
 		point.SetTimestamp(pdata.NewTimestampFromTime(end))
 
-		ts := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts := tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
 		assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_INT64)
 		assert.Equal(t, ts.Unit, unit)
@@ -338,7 +344,9 @@ func TestSumPointToTimeSeries(t *testing.T) {
 
 		// Test double as well
 		point.SetDoubleVal(float64(value))
-		ts = mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl = mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts = tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
 		assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_DOUBLE)
 		assert.Equal(t, ts.Points[0].Value.GetDoubleValue(), float64(value))
@@ -355,7 +363,9 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		point.SetTimestamp(pdata.NewTimestampFromTime(end))
 
 		// Should output a "pseudo-cumulative" with same interval as the delta
-		ts := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts := tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
 		assert.Equal(t, ts.Points[0].Interval, &monitoringpb.TimeInterval{
 			StartTime: timestamppb.New(start),
@@ -374,14 +384,18 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		point.SetTimestamp(pdata.NewTimestampFromTime(end))
 
 		// Should output a gauge regardless of temporality, only setting end time
-		ts := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts := tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 		assert.Equal(t, ts.Points[0].Interval, &monitoringpb.TimeInterval{
 			EndTime: timestamppb.New(end),
 		})
 
 		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityDelta)
-		ts = mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl = mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts = tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 		assert.Equal(t, ts.Points[0].Interval, &monitoringpb.TimeInterval{
 			EndTime: timestamppb.New(end),
@@ -390,13 +404,20 @@ func TestSumPointToTimeSeries(t *testing.T) {
 
 	t.Run("Add labels", func(t *testing.T) {
 		metric, sum, point := newCase()
+		end := start.Add(time.Hour)
+		point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+		point.SetTimestamp(pdata.NewTimestampFromTime(end))
 		extraLabels := map[string]string{"foo": "bar"}
-		ts := mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
+		tsl := mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts := tsl[0]
 		assert.Equal(t, ts.Metric.Labels, extraLabels)
 
 		// Full set of labels
 		point.Attributes().InsertString("baz", "bar")
-		ts = mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
+		tsl = mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts = tsl[0]
 		assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 	})
 }
@@ -422,7 +443,9 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	end := start.Add(time.Hour)
 	point.SetTimestamp(pdata.NewTimestampFromTime(end))
 
-	ts := mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	tsl := mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	assert.Equal(t, 1, len(tsl))
+	ts := tsl[0]
 	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_INT64)
 	assert.Equal(t, ts.Unit, unit)
@@ -441,19 +464,25 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 
 	// Test double as well
 	point.SetDoubleVal(float64(value))
-	ts = mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	tsl = mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	assert.Equal(t, 1, len(tsl))
+	ts = tsl[0]
 	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.Equal(t, ts.Points[0].Value.GetDoubleValue(), float64(value))
 
 	// Add extra labels
 	extraLabels := map[string]string{"foo": "bar"}
-	ts = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	tsl = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	assert.Equal(t, 1, len(tsl))
+	ts = tsl[0]
 	assert.Equal(t, ts.Metric.Labels, extraLabels)
 
 	// Full set of labels
 	point.Attributes().InsertString("baz", "bar")
-	ts = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	tsl = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	assert.Equal(t, 1, len(tsl))
+	ts = tsl[0]
 	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 }
 

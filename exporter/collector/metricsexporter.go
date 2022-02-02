@@ -350,52 +350,36 @@ func (m *metricMapper) metricToTimeSeries(
 		sum := metric.Sum()
 		points := sum.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			point := points.At(i)
-			if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
-				continue
-			}
-			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, point)
-			timeSeries = append(timeSeries, ts)
+			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
+			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeGauge:
 		gauge := metric.Gauge()
 		points := gauge.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
-			timeSeries = append(timeSeries, ts)
+			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeSummary:
 		summary := metric.Summary()
 		points := summary.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			point := points.At(i)
-			if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
-				continue
-			}
-			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, point)
+			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeHistogram:
 		hist := metric.Histogram()
 		points := hist.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			point := points.At(i)
-			if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
-				continue
-			}
-			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, point)
-			timeSeries = append(timeSeries, ts)
+			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i))
+			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			point := points.At(i)
-			if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
-				continue
-			}
-			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, point)
-			timeSeries = append(timeSeries, ts)
+			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, points.At(i))
+			timeSeries = append(timeSeries, ts...)
 		}
 	// TODO: add cases for other metric data types
 	default:
@@ -412,6 +396,9 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	sum pdata.Summary,
 	point pdata.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
+	if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
+		return nil
+	}
 	sumName, countName, percentileName := summaryMetricNames(metric.Name())
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
@@ -626,30 +613,35 @@ func (m *metricMapper) histogramToTimeSeries(
 	metric pdata.Metric,
 	_ pdata.Histogram,
 	point pdata.HistogramDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
+	if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
+		return nil
+	}
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.histogramPoint(point)
-	return &monitoringpb.TimeSeries{
-		Resource:   resource,
-		Unit:       metric.Unit(),
-		MetricKind: metricKind,
-		ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
-		Points: []*monitoringpb.Point{{
-			Interval: &monitoringpb.TimeInterval{
-				StartTime: startTime,
-				EndTime:   endTime,
+	return []*monitoringpb.TimeSeries{
+		{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricKind,
+			ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: startTime,
+					EndTime:   endTime,
+				},
+				Value: value,
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(metric.Name()),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+				),
 			},
-			Value: value,
-		}},
-		Metric: &metricpb.Metric{
-			Type: m.metricNameToType(metric.Name()),
-			Labels: mergeLabels(
-				attributesToLabels(point.Attributes()),
-				extraLabels,
-			),
 		},
 	}
 }
@@ -660,30 +652,35 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	metric pdata.Metric,
 	_ pdata.ExponentialHistogram,
 	point pdata.ExponentialHistogramDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
+	if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
+		return nil
+	}
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.exponentialHistogramPoint(point)
-	return &monitoringpb.TimeSeries{
-		Resource:   resource,
-		Unit:       metric.Unit(),
-		MetricKind: metricKind,
-		ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
-		Points: []*monitoringpb.Point{{
-			Interval: &monitoringpb.TimeInterval{
-				StartTime: startTime,
-				EndTime:   endTime,
+	return []*monitoringpb.TimeSeries{
+		{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricKind,
+			ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: startTime,
+					EndTime:   endTime,
+				},
+				Value: value,
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(metric.Name()),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+				),
 			},
-			Value: value,
-		}},
-		Metric: &metricpb.Metric{
-			Type: m.metricNameToType(metric.Name()),
-			Labels: mergeLabels(
-				attributesToLabels(point.Attributes()),
-				extraLabels,
-			),
 		},
 	}
 }
@@ -694,7 +691,10 @@ func (m *metricMapper) sumPointToTimeSeries(
 	metric pdata.Metric,
 	sum pdata.Sum,
 	point pdata.NumberDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
+	if !intervalIsValid(point.StartTimestamp().AsTime(), point.Timestamp().AsTime()) {
+		return nil
+	}
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	if !sum.IsMonotonic() {
@@ -703,24 +703,26 @@ func (m *metricMapper) sumPointToTimeSeries(
 	}
 	value, valueType := numberDataPointToValue(point)
 
-	return &monitoringpb.TimeSeries{
-		Resource:   resource,
-		Unit:       metric.Unit(),
-		MetricKind: metricKind,
-		ValueType:  valueType,
-		Points: []*monitoringpb.Point{{
-			Interval: &monitoringpb.TimeInterval{
-				StartTime: startTime,
-				EndTime:   timestamppb.New(point.Timestamp().AsTime()),
+	return []*monitoringpb.TimeSeries{
+		{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricKind,
+			ValueType:  valueType,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: startTime,
+					EndTime:   timestamppb.New(point.Timestamp().AsTime()),
+				},
+				Value: value,
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(metric.Name()),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+				),
 			},
-			Value: value,
-		}},
-		Metric: &metricpb.Metric{
-			Type: m.metricNameToType(metric.Name()),
-			Labels: mergeLabels(
-				attributesToLabels(point.Attributes()),
-				extraLabels,
-			),
 		},
 	}
 }
@@ -731,27 +733,29 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	metric pdata.Metric,
 	gauge pdata.Gauge,
 	point pdata.NumberDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_GAUGE
 	value, valueType := numberDataPointToValue(point)
 
-	return &monitoringpb.TimeSeries{
-		Resource:   resource,
-		Unit:       metric.Unit(),
-		MetricKind: metricKind,
-		ValueType:  valueType,
-		Points: []*monitoringpb.Point{{
-			Interval: &monitoringpb.TimeInterval{
-				EndTime: timestamppb.New(point.Timestamp().AsTime()),
+	return []*monitoringpb.TimeSeries{
+		{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricKind,
+			ValueType:  valueType,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					EndTime: timestamppb.New(point.Timestamp().AsTime()),
+				},
+				Value: value,
+			}},
+			Metric: &metricpb.Metric{
+				Type: m.metricNameToType(metric.Name()),
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+				),
 			},
-			Value: value,
-		}},
-		Metric: &metricpb.Metric{
-			Type: m.metricNameToType(metric.Name()),
-			Labels: mergeLabels(
-				attributesToLabels(point.Attributes()),
-				extraLabels,
-			),
 		},
 	}
 }
