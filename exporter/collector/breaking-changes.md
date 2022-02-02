@@ -58,7 +58,7 @@ According to the [OTel datamodel specification](https://github.com/open-telemetr
 
 The OpenCensus-based exporter took points with identical start and end times, and added a millisecond to the end time: https://github.com/census-ecosystem/opencensus-go-exporter-stackdriver/pull/287.  However, the resulting point makes little sense: It has a very small time period, and a normal cumulative value for an interval.  The result is that graphs display a very large rate over that millisecond, which is misleading.
 
-This exporter instead drops points with identical start and end times.  Resets are already indicated by a change in the start timestamp for the subsequent point.
+This exporter drops points with identical start and end times because they would be rejected by Cloud Monitoring.
 
 ## Labels
 
