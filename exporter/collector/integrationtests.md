@@ -6,7 +6,7 @@ and compare requests against recorded expectation fixtures. Currently, these tes
 metrics.
 
 The fixtures are located in the [`testdata/fixtures`][fixtures] directory and registered in
-[`integrationtest/testcases.go`][testcases].
+[`internal/integrationtest/testcases.go`][testcases].
 
 ## Running Tests
 
@@ -81,17 +81,16 @@ To add a new test:
 
     This is how the Ops Agent fixtures were generated.
 
-1. Add an entry in [`integrationtest/testcases.go`][testcases].
+1. Add an entry in [`internal/integrationtest/testcases.go`][testcases].
 1. Run the script to record the expectation fixture. This will contain the expected requests
     that the exporter makes to GCP services:
 
     ```sh
-    cd integrationtest
-    go run cmd/recordfixtures/main.go
+    go run internal/integrationtest/cmd/recordfixtures/main.go
     ```
 
     The generated file is a JSON encoded
-    [`MetricExpectFixture`](integrationtest/fixtures.proto#L21) protobuf message.
+    [`MetricExpectFixture`](internal/integrationtest/fixtures.proto#L21) protobuf message.
 
 See [#229](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/229) for an
 example PR.
@@ -107,4 +106,4 @@ If you need to see the build logs because tests are failing, just ask someone to
 with you.
 
 [fixtures]: testdata/fixtures
-[testcases]: integrationtest/testcases.go
+[testcases]: internal/integrationtest/testcases.go

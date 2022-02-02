@@ -1,0 +1,1110 @@
+{
+  "createServiceTimeSeriesRequests": [
+    {
+      "timeSeries": [
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_instance_id",
+            "labels": {
+              "instance_id": "3151962599208224506",
+              "node_id": "22564fa3-0359-418a-905f-0687f2a6ee4"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_metadata",
+            "labels": {
+              "container_runtime": "containerd://1.4.8",
+              "machine_type": "e2-medium",
+              "node_id": "22564fa3-0359-418a-905f-b0687f2a6ee4",
+              "node_pool": "default-pool",
+              "node_zone": "us-central1-c",
+              "os": "linux",
+              "version": "v1.21.5-gke.1302"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_network_availability_transition_time",
+            "labels": {
+              "network_unavailable": "False"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639069893"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_readiness_transition_time",
+            "labels": {
+              "readiness_status": "True"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639069910"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_memory_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1735528448"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_millicores_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-k6w0"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "107"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_instance_id",
+            "labels": {
+              "instance_id": "4066267729577871098",
+              "node_id": "4eba0b98-011f-4fa8-a4a2-6c3f5de745ac"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-wff6"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_metadata",
+            "labels": {
+              "container_runtime": "containerd://1.4.8",
+              "machine_type": "e2-medium",
+              "node_id": "4eba0b98-011f-4fa8-a4a2-6c3f5de745ac",
+              "node_pool": "default-pool",
+              "node_zone": "us-central1-c",
+              "os": "linux",
+              "version": "v1.21.5-gke.1302"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-wff6"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_network_availability_transition_time",
+            "labels": {
+              "network_unavailable": "False"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-wff6"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639069893"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_readiness_transition_time",
+            "labels": {
+              "readiness_status": "True"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-wff6"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639069900"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_memory_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-wff6"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1208094720"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_millicores_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-wff6"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "76"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_instance_id",
+            "labels": {
+              "instance_id": "4626755489917563222",
+              "node_id": "9af0db87-2920-4268-835a-76529da14376"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dlcx"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_metadata",
+            "labels": {
+              "container_runtime": "containerd://1.4.8",
+              "machine_type": "n1-standard-8",
+              "node_id": "9af0db87-2920-4268-835a-76529da14376",
+              "node_pool": "big-np",
+              "node_zone": "us-central1-c",
+              "os": "linux",
+              "version": "v1.21.5-gke.1302"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dlcx"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_network_availability_transition_time",
+            "labels": {
+              "network_unavailable": "False"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dlcx"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639075829"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_readiness_transition_time",
+            "labels": {
+              "readiness_status": "True"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dlcx"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639075839"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_memory_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dlcx"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "27345719296"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_millicores_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dlcx"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "7586"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_instance_id",
+            "labels": {
+              "instance_id": "5398040064756281686",
+              "node_id": "8cee59f3-ad25-4227-be2e-6efc1da4754c"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dj9w"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_metadata",
+            "labels": {
+              "container_runtime": "containerd://1.4.8",
+              "machine_type": "n1-standard-8",
+              "node_id": "8cee59f3-ad25-4227-be2e-6efc1da4754c",
+              "node_pool": "big-np",
+              "node_zone": "us-central1-c",
+              "os": "linux",
+              "version": "v1.21.5-gke.1302"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dj9w"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_readiness_transition_time",
+            "labels": {
+              "readiness_status": "True"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dj9w"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639075839"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_memory_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dj9w"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "25198235648"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_millicores_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-dj9w"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "6586"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_instance_id",
+            "labels": {
+              "instance_id": "5959772025581963002",
+              "node_id": "3bd2b66a-580f-4202-b7f3-8081dea2f48e"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-zn27"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_metadata",
+            "labels": {
+              "container_runtime": "containerd://1.4.8",
+              "machine_type": "e2-medium",
+              "node_id": "3bd2b66a-580f-4202-b7f3-8081dea2f48e",
+              "node_pool": "default-pool",
+              "node_zone": "us-central1-c",
+              "os": "linux",
+              "version": "v1.21.5-gke.1302"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-zn27"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_network_availability_transition_time",
+            "labels": {
+              "network_unavailable": "False"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-zn27"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639069893"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_readiness_transition_time",
+            "labels": {
+              "readiness_status": "True"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-zn27"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639069899"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_memory_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-zn27"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1707216896"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_millicores_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-default-pool-4ffbde79-zn27"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "6"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_instance_id",
+            "labels": {
+              "instance_id": "6963708115487289686",
+              "node_id": "e2629338-a899-4c9e-b587-c7009fe8bbf1"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-c73m"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_metadata",
+            "labels": {
+              "container_runtime": "containerd://1.4.8",
+              "machine_type": "n1-standard-8",
+              "node_id": "e2629338-a899-4c9e-b587-c7009fe8bbf1",
+              "node_pool": "big-np",
+              "node_zone": "us-central1-c",
+              "os": "linux",
+              "version": "v1.21.5-gke.1302"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-c73m"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_network_availability_transition_time",
+            "labels": {
+              "network_unavailable": "False"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-c73m"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639075829"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/node_readiness_transition_time",
+            "labels": {
+              "readiness_status": "True"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-c73m"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1639075839"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_memory_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-c73m"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "27345719296"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/internal/nodes/clustermetrics/unallocated_millicores_total",
+            "labels": {
+              "ca_enabled": "false",
+              "monitoring_enabled": "true",
+              "nap_enabled": "false",
+              "windows_node": "false"
+            }
+          },
+          "resource": {
+            "type": "k8s_node",
+            "labels": {
+              "cluster_name": "rabbitmq-test-dev",
+              "location": "us-central1-c",
+              "node_name": "gke-rabbitmq-test-dev-big-np-1556fa91-c73m"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "7586"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "selfObservabilityMetrics": [
+    {
+      "name": "exporter/enqueue_failed_log_records",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/enqueue_failed_spans",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/send_failed_metric_points",
+      "val": "0",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "exporter/sent_metric_points",
+      "val": "35",
+      "labels": {
+        "exporter": "googlecloud"
+      }
+    },
+    {
+      "name": "googlecloudmonitoring/point_count",
+      "val": "35",
+      "labels": {
+        "status": "OK"
+      }
+    }
+  ]
+}
