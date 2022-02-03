@@ -3445,7 +3445,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/telemetry_scrape_encoded_size_bytes_summary_sum",
+            "type": "workload.googleapis.com/telemetry_scrape_encoded_size_bytes_sum",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "encoding": "gzip",
@@ -3480,7 +3480,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/telemetry_scrape_encoded_size_bytes_summary_count",
+            "type": "workload.googleapis.com/telemetry_scrape_encoded_size_bytes_count",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "encoding": "gzip",
@@ -3515,7 +3515,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/telemetry_scrape_size_bytes_summary_sum",
+            "type": "workload.googleapis.com/telemetry_scrape_size_bytes_sum",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",
@@ -3549,7 +3549,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/telemetry_scrape_size_bytes_summary_count",
+            "type": "workload.googleapis.com/telemetry_scrape_size_bytes_count",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",
@@ -3583,7 +3583,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/telemetry_scrape_duration_seconds_summary_sum",
+            "type": "workload.googleapis.com/telemetry_scrape_duration_seconds_sum",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",
@@ -3617,7 +3617,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/telemetry_scrape_duration_seconds_summary_count",
+            "type": "workload.googleapis.com/telemetry_scrape_duration_seconds_count",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",
