@@ -142,7 +142,7 @@ func NewGoogleCloudMetricsExporter(
 		cfg.ProjectID = creds.ProjectID
 	}
 
-	clientOpts, err := generateClientOptions(&cfg)
+	clientOpts, err := generateClientOptions(&cfg.MetricConfig.ClientConfig, cfg.UserAgent)
 	if err != nil {
 		return nil, err
 	}

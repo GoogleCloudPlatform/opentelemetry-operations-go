@@ -65,9 +65,13 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 		{
 			name: "Standard",
 			cfg: Config{
-				ProjectID:   "idk",
-				Endpoint:    "127.0.0.1:8080",
-				UseInsecure: true,
+				ProjectID: "idk",
+				TraceConfig: TraceConfig{
+					ClientConfig: ClientConfig{
+						Endpoint:    "127.0.0.1:8080",
+						UseInsecure: true,
+					},
+				},
 			},
 		},
 	}
@@ -164,11 +168,11 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 
 	config := DefaultConfig()
 	config.ProjectID = "idk"
-	config.Endpoint = "127.0.0.1:8080"
+	config.MetricConfig.ClientConfig.Endpoint = "127.0.0.1:8080"
 	config.UserAgent = "MyAgent {{version}}"
-	config.UseInsecure = true
+	config.MetricConfig.ClientConfig.UseInsecure = true
 	config.MetricConfig.InstrumentationLibraryLabels = false
-	config.GetClientOptions = func() []option.ClientOption {
+	config.MetricConfig.ClientConfig.GetClientOptions = func() []option.ClientOption {
 		// Example with overridden client options
 		return []option.ClientOption{
 			option.WithoutAuthentication(),

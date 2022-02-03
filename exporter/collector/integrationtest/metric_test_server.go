@@ -151,8 +151,8 @@ func (m *MetricsTestServer) NewExporter(
 	t testing.TB,
 	cfg collector.Config,
 ) *collector.MetricsExporter {
-	cfg.Endpoint = m.Endpoint
-	cfg.UseInsecure = true
+	cfg.MetricConfig.ClientConfig.Endpoint = m.Endpoint
+	cfg.MetricConfig.ClientConfig.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
@@ -163,6 +163,6 @@ func (m *MetricsTestServer) NewExporter(
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
-	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.Endpoint)
+	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.MetricConfig.ClientConfig.Endpoint)
 	return exporter
 }
