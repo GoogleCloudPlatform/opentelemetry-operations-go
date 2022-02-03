@@ -44,7 +44,6 @@ These instructions are to get you up and running quickly with the GCP exporter i
     processors:
       memory_limiter:
       batch:
-        # Google Cloud Monitoring limits batches to 200 metric points.
         send_batch_max_size: 200
         send_batch_size: 200
     service:
@@ -55,7 +54,7 @@ These instructions are to get you up and running quickly with the GCP exporter i
           exporters: [googlecloud, logging]
         metrics:
           receivers: [otlp]
-          processors: [memory_limiter, batch]
+          processors: [memory_limiter]
           exporters: [googlecloud, logging]
     ```
 
