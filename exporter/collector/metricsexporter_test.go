@@ -39,7 +39,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 	mr := &monitoredrespb.MonitoredResource{}
 
 	t.Run("Sum", func(t *testing.T) {
-		mapper := metricMapper{cfg: Config{}}
+		mapper := newMetricMapper(Config{})
 		metric := pdata.NewMetric()
 		metric.SetDataType(pdata.MetricDataTypeSum)
 		sum := metric.Sum()
@@ -60,7 +60,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 	})
 
 	t.Run("Gauge", func(t *testing.T) {
-		mapper := metricMapper{cfg: Config{}}
+		mapper := newMetricMapper(Config{})
 		metric := pdata.NewMetric()
 		metric.SetDataType(pdata.MetricDataTypeGauge)
 		gauge := metric.Gauge()
@@ -100,7 +100,7 @@ func TestMergeLabels(t *testing.T) {
 func TestHistogramPointToTimeSeries(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.ProjectID = "myproject"
-	mapper := metricMapper{cfg: cfg}
+	mapper := newMetricMapper(cfg)
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pdata.NewMetric()
 	metric.SetName("myhist")
@@ -164,7 +164,7 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.ProjectID = "myproject"
-	mapper := metricMapper{cfg: cfg}
+	mapper := newMetricMapper(cfg)
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pdata.NewMetric()
 	metric.SetName("myexphist")
@@ -230,7 +230,7 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExemplarNoAttachements(t *testing.T) {
-	mapper := metricMapper{cfg: Config{}}
+	mapper := newMetricMapper(Config{})
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -242,7 +242,7 @@ func TestExemplarNoAttachements(t *testing.T) {
 }
 
 func TestExemplarOnlyDroppedLabels(t *testing.T) {
-	mapper := metricMapper{cfg: Config{}}
+	mapper := newMetricMapper(Config{})
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -260,9 +260,9 @@ func TestExemplarOnlyDroppedLabels(t *testing.T) {
 }
 
 func TestExemplarOnlyTraceId(t *testing.T) {
-	mapper := metricMapper{cfg: Config{
+	mapper := newMetricMapper(Config{
 		ProjectID: "p",
-	}}
+	})
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -285,7 +285,7 @@ func TestExemplarOnlyTraceId(t *testing.T) {
 }
 
 func TestSumPointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: DefaultConfig()}
+	mapper := newMetricMapper(DefaultConfig())
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Sum, pdata.NumberDataPoint) {
@@ -393,7 +393,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 }
 
 func TestGaugePointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: DefaultConfig()}
+	mapper := newMetricMapper(DefaultConfig())
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Gauge, pdata.NumberDataPoint) {
@@ -449,7 +449,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 }
 
 func TestSummaryPointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: DefaultConfig()}
+	mapper := newMetricMapper(DefaultConfig())
 	mr := &monitoredrespb.MonitoredResource{}
 
 	metric := pdata.NewMetric()
@@ -521,7 +521,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 }
 
 func TestMetricNameToType(t *testing.T) {
-	mapper := metricMapper{cfg: DefaultConfig()}
+	mapper := newMetricMapper(DefaultConfig())
 	assert.Equal(
 		t,
 		mapper.metricNameToType("foo"),
@@ -944,7 +944,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mapper := metricMapper{cfg: DefaultConfig()}
+			mapper := newMetricMapper(DefaultConfig())
 			metric := test.metricCreator()
 			md := mapper.metricDescriptor(metric, test.extraLabels)
 			diff := cmp.Diff(
@@ -1006,7 +1006,7 @@ func TestKnownDomains(t *testing.T) {
 			if len(test.knownDomains) > 0 {
 				config.MetricConfig.KnownDomains = test.knownDomains
 			}
-			mapper := metricMapper{cfg: config}
+			mapper := newMetricMapper(config)
 			assert.Equal(t, test.metricType, mapper.metricNameToType(test.name))
 		})
 	}
@@ -1046,11 +1046,69 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			config := DefaultConfig()
 			config.MetricConfig = test.metricConfig
-			m := metricMapper{cfg: config}
+			m := newMetricMapper(config)
 
 			out := m.instrumentationLibraryToLabels(test.instrumentationLibrary)
 
 			assert.Equal(t, out, test.output)
+		})
+	}
+}
+
+func TestNewMetricMapper(t *testing.T) {
+	withUserDefinedMappings := map[string]mappingConfig{}
+	for k, v := range baseMonitoredResourceMappings {
+		withUserDefinedMappings[k] = v
+	}
+	withUserDefinedMappings["k8s_new_type"] = mappingConfig{
+		"bar":   keyMatcher{otelKeys: []string{"foo"}},
+		"world": keyMatcher{otelKeys: []string{"hello"}},
+	}
+	overrideMappings := map[string]mappingConfig{}
+	for k, v := range baseMonitoredResourceMappings {
+		overrideMappings[k] = v
+	}
+	overrideMappings[gceInstance] = mappingConfig{}
+	for _, tc := range []struct {
+		desc             string
+		input            []ResourceMapping
+		expectedMappings map[string]mappingConfig
+	}{
+		{
+			desc:             "defaults",
+			expectedMappings: baseMonitoredResourceMappings,
+		},
+		{
+			desc: "with additional user-defined mappings",
+			input: []ResourceMapping{
+				{
+					TargetType: "k8s_new_type",
+					LabelMappings: []LabelMapping{{
+						SourceKey: "foo",
+						TargetKey: "bar",
+					}, {
+						SourceKey: "hello",
+						TargetKey: "world",
+					}},
+				},
+			},
+			expectedMappings: withUserDefinedMappings,
+		},
+		{
+			desc: "with user-defined mappings that override base mappings",
+			input: []ResourceMapping{
+				{
+					TargetType: gceInstance,
+				},
+			},
+			expectedMappings: overrideMappings,
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			cfg := DefaultConfig()
+			cfg.MetricConfig.ResourceMappings = tc.input
+			mapper := newMetricMapper(cfg)
+			assert.Equal(t, tc.expectedMappings, mapper.monitoredResourceMappings)
 		})
 	}
 }

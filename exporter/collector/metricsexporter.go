@@ -78,7 +78,24 @@ type MetricsExporter struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	cfg Config
+	cfg                       Config
+	monitoredResourceMappings map[string]mappingConfig
+}
+
+func newMetricMapper(cfg Config) metricMapper {
+	mappings := map[string]mappingConfig{}
+	// copy base mappings
+	for k, v := range baseMonitoredResourceMappings {
+		mappings[k] = v
+	}
+	for _, userMapping := range cfg.MetricConfig.ResourceMappings {
+		mappingCfg := mappingConfig{}
+		for _, labelMapping := range userMapping.LabelMappings {
+			mappingCfg[labelMapping.TargetKey] = keyMatcher{otelKeys: []string{labelMapping.SourceKey}}
+		}
+		mappings[userMapping.TargetType] = mappingCfg
+	}
+	return metricMapper{cfg, mappings}
 }
 
 // Constants we use when translating summary metrics into GCP.
@@ -155,7 +172,7 @@ func NewGoogleCloudMetricsExporter(
 		cfg:    cfg,
 		client: client,
 		obs:    selfObservability{log: log},
-		mapper: metricMapper{cfg},
+		mapper: newMetricMapper(cfg),
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok

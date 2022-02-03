@@ -104,6 +104,21 @@ var (
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.CreateServiceTimeSeries = true
 				cfg.MetricConfig.ServiceResourceLabels = false
+				cfg.MetricConfig.ResourceMappings = []collector.ResourceMapping{
+					{
+						TargetType: "internal_gke_master_container",
+						LabelMappings: []collector.LabelMapping{
+							{SourceKey: "cloud.zone", TargetKey: "location"},
+							{SourceKey: "k8s.cluster.name", TargetKey: "cluster_name"},
+							{SourceKey: "consumer_project_id", TargetKey: "consumer_project_id"},
+							{SourceKey: "cluster_hash", TargetKey: "cluster_hash"},
+							{SourceKey: "pod_name", TargetKey: "pod_name"},
+							{SourceKey: "namespace_name", TargetKey: "namespace_name"},
+							{SourceKey: "container_name", TargetKey: "container_name"},
+							{SourceKey: "instance_id", TargetKey: "instance_id"},
+						},
+					},
+				}
 			},
 		},
 		{

@@ -16,16 +16,13 @@ exporters:
       endpoint: test-metric-endpoint
       use_insecure: true
       resource_mappings:
-        - source_type: source.resource1
-          target_type: target-resource1
+        - target_type: target-resource1
           label_mappings:
             - source_key: contrib.opencensus.io/exporter/googlecloud/project_id
               target_key: project_id
-              optional: true
             - source_key: source.label1
               target_key: target_label_1
-        - source_type: source.resource2
-          target_type: target-resource2
+        - target_type: target-resource2
       prefix: prefix
       skip_create_descriptor: true
 

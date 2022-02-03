@@ -47,17 +47,24 @@ const (
 	zone           = "zone"
 )
 
+// mappingConfig maps from the required fields for one monitored resource to the OTel resource
+// attributes that can be used to populate it.
+type mappingConfig map[string]keyMatcher
+
+// keyMatcher determines how to select otel resource attribute keys
+type keyMatcher struct {
+	// OTel resource keys to try and populate the resource label from. For entries with
+	// multiple OTel resource keys, the keys' values will be coalesced in order until there
+	// is a non-empty value.
+	otelKeys []string
+	// If none of the otelKeys are present in the Resource, fallback to this literal value
+	fallbackLiteral string
+}
+
 var (
-	// monitoredResourceMappings contains mappings of GCM resource label keys onto mapping config from OTel
+	// baseMonitoredResourceMappings contains mappings of GCM resource label keys onto mapping config from OTel
 	// resource for a given monitored resource type.
-	monitoredResourceMappings = map[string]map[string]struct {
-		// OTel resource keys to try and populate the resource label from. For entries with
-		// multiple OTel resource keys, the keys' values will be coalesced in order until there
-		// is a non-empty value.
-		otelKeys []string
-		// If none of the otelKeys are present in the Resource, fallback to this literal value
-		fallbackLiteral string
-	}{
+	baseMonitoredResourceMappings = map[string]mappingConfig{
 		gceInstance: {
 			zone:       {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
 			instanceID: {otelKeys: []string{semconv.AttributeHostID}},
@@ -154,11 +161,11 @@ func (m *metricMapper) resourceToMonitoredResource(
 	return mr, m.resourceToMetricLabels(resource)
 }
 
-func createMonitoredResource(
+func (m *metricMapper) createMonitoredResource(
 	monitoredResourceType string,
 	resourceAttrs pdata.AttributeMap,
 ) *monitoredrespb.MonitoredResource {
-	mappings := monitoredResourceMappings[monitoredResourceType]
+	mappings := m.monitoredResourceMappings[monitoredResourceType]
 	mrLabels := make(map[string]string, len(mappings))
 
 	for mrKey, mappingConfig := range mappings {

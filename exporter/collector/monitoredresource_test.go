@@ -369,7 +369,7 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mapper := metricMapper{cfg: DefaultConfig()}
+			mapper := newMetricMapper(DefaultConfig())
 			if test.updateMapper != nil {
 				test.updateMapper(&mapper)
 			}

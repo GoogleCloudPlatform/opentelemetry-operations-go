@@ -100,6 +100,10 @@ when multiple instances of a service are running on a single monitored resource,
 running multiple service processes on a single GCE VM.  This can be turned off with the
 `metric.service_resource_labels` config option.
 
+## ResourceMappings
+
+In Resource Mappings, `source_type` and `optional` labels are no longer supported.
+
 ## OTLP Sum
 
 In the old exporter, delta sums were converted into GAUGE points ([see test
