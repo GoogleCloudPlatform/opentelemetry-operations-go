@@ -1,0 +1,128 @@
+{
+    "resourceMetrics": [
+        {
+            "resource": {
+                "attributes": [
+                    {
+                        "key": "service.name",
+                        "value": {
+                            "stringValue": "otel-collector"
+                        }
+                    },
+                    {
+                        "key": "host.name",
+                        "value": {
+                            "stringValue": "ops-agent-metrics.c.otel-opsagenttester.internal"
+                        }
+                    },
+                    {
+                        "key": "job",
+                        "value": {
+                            "stringValue": "otel-collector"
+                        }
+                    },
+                    {
+                        "key": "instance",
+                        "value": {
+                            "stringValue": "0.0.0.0:8888"
+                        }
+                    },
+                    {
+                        "key": "port",
+                        "value": {
+                            "stringValue": "8888"
+                        }
+                    },
+                    {
+                        "key": "scheme",
+                        "value": {
+                            "stringValue": "http"
+                        }
+                    },
+                    {
+                        "key": "cloud.provider",
+                        "value": {
+                            "stringValue": "gcp"
+                        }
+                    },
+                    {
+                        "key": "cloud.platform",
+                        "value": {
+                            "stringValue": "gcp_compute_engine"
+                        }
+                    },
+                    {
+                        "key": "cloud.account.id",
+                        "value": {
+                            "stringValue": "otel-opsagenttester"
+                        }
+                    },
+                    {
+                        "key": "cloud.availability_zone",
+                        "value": {
+                            "stringValue": "us-central1-a"
+                        }
+                    },
+                    {
+                        "key": "host.id",
+                        "value": {
+                            "stringValue": "1447596667076884700"
+                        }
+                    },
+                    {
+                        "key": "host.type",
+                        "value": {
+                            "stringValue": "projects/500000000000/machineTypes/e2-medium"
+                        }
+                    }
+                ]
+            },
+            "instrumentationLibraryMetrics": [
+                {
+                    "instrumentationLibrary": {
+                        "name": "foo",
+                        "version": "1.2.3"
+                    },
+                    "metrics": [
+                        {
+                            "name": "agent.googleapis.com/agent/memory_usage",
+                            "description": "Total physical memory (resident set size)",
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "timeUnixNano": "1636147063351000000",
+                                        "asDouble": 61992960
+                                    }
+                                ]
+                            }
+                        },
+                        {
+                            "name": "agent.googleapis.com/agent/uptime",
+                            "description": "Uptime of the process",
+                            "sum": {
+                                "dataPoints": [
+                                    {
+                                        "attributes": [
+                                            {
+                                                "key": "version",
+                                                "value": {
+                                                    "stringValue": "google-cloud-ops-agent-metrics/latest-build_distro"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1636147063351000000",
+                                        "timeUnixNano": "1636147063351000000",
+                                        "asInt": "25"
+                                    }
+                                ],
+                                "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                                "isMonotonic": true
+                            }
+                        }
+                    ]
+                }
+            ],
+            "schemaUrl": "https://opentelemetry.io/schemas/v1.5.0"
+        }
+    ]
+}

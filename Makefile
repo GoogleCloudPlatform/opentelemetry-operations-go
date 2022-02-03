@@ -16,7 +16,7 @@ ifeq ($(UNAME_S),Darwin)
 	endif
 endif
 
-GOTEST_MIN = go test -v -timeout 60s
+GOTEST_MIN = go test -v -timeout 70s
 GOTEST = $(GOTEST_MIN) -race
 GOTEST_WITH_COVERAGE = $(GOTEST) -coverprofile=coverage.txt -covermode=atomic
 

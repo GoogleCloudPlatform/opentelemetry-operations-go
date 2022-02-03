@@ -26,8 +26,9 @@ import (
 )
 
 var (
-	pointCount = stats.Int64("googlecloudmonitoring/point_count", "Count of metric points written to Cloud Monitoring.", "1")
-	statusKey  = tag.MustNewKey("status")
+	pointCount                  = stats.Int64("googlecloudmonitoring/point_count", "Count of metric points written to Cloud Monitoring.", "1")
+	exemplarAttachmentDropCount = stats.Int64("googlecloudmonitoring/exemplar_attachments_dropped", "Count of exemplar attachments dropped.", "{attachments}")
+	statusKey                   = tag.MustNewKey("status")
 )
 
 var viewPointCount = &view.View{
@@ -56,6 +57,10 @@ func recordPointCount(ctx context.Context, success, dropped int, grpcErr error) 
 		}
 		recordPointCountDataPoint(ctx, dropped, st)
 	}
+}
+
+func recordExemplarFailure(ctx context.Context, point int) {
+	stats.Record(ctx, exemplarAttachmentDropCount.M(int64(point)))
 }
 
 func recordPointCountDataPoint(ctx context.Context, points int, status string) {
