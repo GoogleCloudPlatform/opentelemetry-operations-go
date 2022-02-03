@@ -78,6 +78,7 @@ type MetricsExporter struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
+	obs selfObservability
 	cfg Config
 }
 
@@ -151,12 +152,12 @@ func NewGoogleCloudMetricsExporter(
 	if err != nil {
 		return nil, err
 	}
-
+	obs := selfObservability{log: log}
 	mExp := &MetricsExporter{
 		cfg:    cfg,
 		client: client,
-		obs:    selfObservability{log: log},
-		mapper: metricMapper{cfg},
+		obs:    obs,
+		mapper: metricMapper{obs, cfg},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok
@@ -383,7 +384,7 @@ func (m *metricMapper) metricToTimeSeries(
 		}
 	// TODO: add cases for other metric data types
 	default:
-		// TODO: log unsupported metric
+		m.obs.log.Error("Unsupported metric data type", zap.Any("data_type", metric.DataType()))
 	}
 
 	return timeSeries
