@@ -478,7 +478,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, sumResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.Equal(t, sumResult.Unit, unit)
 	assert.Same(t, sumResult.Resource, mr)
-	assert.Equal(t, sumResult.Metric.Type, "workload.googleapis.com/mysummary_summary_sum")
+	assert.Equal(t, sumResult.Metric.Type, "workload.googleapis.com/mysummary_sum")
 	assert.Equal(t, sumResult.Metric.Labels, map[string]string{})
 	assert.Nil(t, sumResult.Metadata)
 	assert.Len(t, sumResult.Points, 1)
@@ -492,7 +492,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_INT64)
 	assert.Equal(t, countResult.Unit, unit)
 	assert.Same(t, countResult.Resource, mr)
-	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_summary_count")
+	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_count")
 	assert.Equal(t, countResult.Metric.Labels, map[string]string{})
 	assert.Nil(t, countResult.Metadata)
 	assert.Len(t, countResult.Points, 1)
@@ -506,9 +506,9 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, quantileResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.Equal(t, quantileResult.Unit, unit)
 	assert.Same(t, quantileResult.Resource, mr)
-	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary_summary_percentile")
+	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary")
 	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
-		"percentile": "100.000000",
+		"quantile": "1.000000",
 	})
 	assert.Nil(t, quantileResult.Metadata)
 	assert.Len(t, quantileResult.Points, 1)
@@ -813,8 +813,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 			expected: []*metricpb.MetricDescriptor{
 				{
-					DisplayName: "test.metric_summary_sum",
-					Type:        "workload.googleapis.com/test.metric_summary_sum",
+					DisplayName: "test.metric_sum",
+					Type:        "workload.googleapis.com/test.metric_sum",
 					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
 					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
@@ -826,8 +826,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 					},
 				},
 				{
-					DisplayName: "test.metric_summary_count",
-					Type:        "workload.googleapis.com/test.metric_summary_count",
+					DisplayName: "test.metric_count",
+					Type:        "workload.googleapis.com/test.metric_count",
 					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
 					ValueType:   metricpb.MetricDescriptor_INT64,
 					Unit:        "1",
@@ -839,8 +839,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 					},
 				},
 				{
-					Type:        "workload.googleapis.com/test.metric_summary_percentile",
-					DisplayName: "test.metric_summary_percentile",
+					Type:        "workload.googleapis.com/test.metric",
+					DisplayName: "test.metric",
 					MetricKind:  metricpb.MetricDescriptor_GAUGE,
 					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
@@ -850,8 +850,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 							Key: "test_label",
 						},
 						{
-							Key:         "percentile",
-							Description: "the value at a given percentile of a distribution",
+							Key:         "quantile",
+							Description: "the value at a given quantile of a distribution",
 						},
 					},
 				},

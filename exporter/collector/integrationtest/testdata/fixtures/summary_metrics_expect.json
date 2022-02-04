@@ -4,7 +4,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary_summary_sum",
+            "type": "workload.googleapis.com/testsummary_sum",
             "labels": {
               "foo": "bar"
             }
@@ -34,7 +34,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary_summary_count",
+            "type": "workload.googleapis.com/testsummary_count",
             "labels": {
               "foo": "bar"
             }
@@ -64,10 +64,10 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary_summary_percentile",
+            "type": "workload.googleapis.com/testsummary",
             "labels": {
               "foo": "bar",
-              "percentile": "50.000000"
+              "quantile": "0.500000"
             }
           },
           "resource": {
@@ -94,10 +94,10 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary_summary_percentile",
+            "type": "workload.googleapis.com/testsummary",
             "labels": {
               "foo": "bar",
-              "percentile": "75.000000"
+              "quantile": "0.750000"
             }
           },
           "resource": {
@@ -124,10 +124,10 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary_summary_percentile",
+            "type": "workload.googleapis.com/testsummary",
             "labels": {
               "foo": "bar",
-              "percentile": "90.000000"
+              "quantile": "0.900000"
             }
           },
           "resource": {
@@ -158,7 +158,7 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary_summary_sum",
+        "type": "workload.googleapis.com/testsummary_sum",
         "labels": [
           {
             "key": "foo"
@@ -168,12 +168,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary_summary_sum"
+        "displayName": "testsummary_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary_summary_count",
+        "type": "workload.googleapis.com/testsummary_count",
         "labels": [
           {
             "key": "foo"
@@ -183,26 +183,26 @@
         "valueType": "INT64",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary_summary_count"
+        "displayName": "testsummary_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary_summary_percentile",
+        "type": "workload.googleapis.com/testsummary",
         "labels": [
           {
             "key": "foo"
           },
           {
-            "key": "percentile",
-            "description": "the value at a given percentile of a distribution"
+            "key": "quantile",
+            "description": "the value at a given quantile of a distribution"
           }
         ],
         "metricKind": "GAUGE",
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary_summary_percentile"
+        "displayName": "testsummary"
       }
     }
   ],
