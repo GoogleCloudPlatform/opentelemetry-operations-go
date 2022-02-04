@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/pdata"
@@ -26,6 +27,7 @@ import (
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -607,6 +609,7 @@ func TestNumberDataPointToValue(t *testing.T) {
 type metricDescriptorTest struct {
 	name          string
 	metricCreator func() pdata.Metric
+	extraLabels   labels
 	expected      []*metricpb.MetricDescriptor
 }
 
@@ -891,13 +894,68 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "with extraLabels from resource",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeSum)
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				sum := metric.Sum()
+				sum.SetIsMonotonic(true)
+				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+				point := sum.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test_label", "test_value")
+				return metric
+			},
+			extraLabels: labels{
+				"service_name":        "myservice",
+				"service_instance_id": "abcdef",
+				"service_namespace":   "myns",
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "service_name",
+						},
+						{
+							Key: "service_instance_id",
+						},
+						{
+							Key: "service_namespace",
+						},
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			mapper := metricMapper{cfg: DefaultConfig()}
 			metric := test.metricCreator()
-			md := mapper.metricDescriptor(metric)
-			assert.Equal(t, md, test.expected)
+			md := mapper.metricDescriptor(metric, test.extraLabels)
+			diff := cmp.Diff(
+				test.expected,
+				md,
+				protocmp.Transform(),
+				protocmp.SortRepeatedFields(&metricpb.MetricDescriptor{}, "labels"),
+			)
+			if diff != "" {
+				assert.Failf(t, "Actual and expected differ:", diff)
+			}
 		})
 	}
 }

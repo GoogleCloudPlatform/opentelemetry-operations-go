@@ -1,0 +1,77 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "foo-service"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "foo"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "abc123"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "java"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.1.1"
+            }
+          },
+          {
+            "key": "something.uninteresting",
+            "value": {
+              "stringValue": "baz"
+            }
+          }
+        ]
+      },
+      "instrumentationLibraryMetrics": [
+        {
+          "instrumentationLibrary": {},
+          "metrics": [
+            {
+              "name": "testresourcefilter",
+              "description": "This is a test counter",
+              "unit": "1",
+              "sum": {
+                "dataPoints": [
+                  {
+                    "attributes": [
+                      {
+                        "key": "foo",
+                        "value": {
+                          "stringValue": "bar"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1634322229906722370",
+                    "timeUnixNano": "1634322234906722370",
+                    "asInt": "253"
+                  }
+                ],
+                "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                "isMonotonic": true
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

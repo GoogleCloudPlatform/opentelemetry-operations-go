@@ -69,6 +69,23 @@ type MetricConfig struct {
 	// Buffer size for the channel which asynchronously calls CreateMetricDescriptor. Default
 	// is 10.
 	CreateMetricDescriptorBufferSize int `mapstructure:"create_metric_descriptor_buffer_size"`
+
+	// If true, the exporter will copy OTel's service.name, service.namespace, and
+	// service.instance.id resource attributes into the GCM timeseries metric labels. This
+	// option is recommended to avoid writing duplicate timeseries against the same monitored
+	// resource. Disabling this option does not prevent resource_filters from adding those
+	// labels. Default is true.
+	ServiceResourceLabels bool `mapstructure:"service_resource_labels"`
+
+	// If provided, resource attributes matching any filter will be included in metric labels.
+	// Defaults to empty, which won't include any additional resource labels. Note that the
+	// service_resource_labels option operates independently from resource_filters.
+	ResourceFilters []ResourceFilter `mapstructure:"resource_filters"`
+}
+
+type ResourceFilter struct {
+	// Match resource keys by prefix
+	Prefix string `mapstructure:"prefix"`
 }
 
 // ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).
@@ -99,6 +116,7 @@ func DefaultConfig() Config {
 			Prefix:                           "workload.googleapis.com",
 			CreateMetricDescriptorBufferSize: 10,
 			InstrumentationLibraryLabels:     true,
+			ServiceResourceLabels:            true,
 		},
 	}
 }
