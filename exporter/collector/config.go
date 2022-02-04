@@ -28,23 +28,33 @@ const (
 type Config struct {
 	ProjectID string `mapstructure:"project"`
 	UserAgent string `mapstructure:"user_agent"`
-	Endpoint  string `mapstructure:"endpoint"`
+
+	TraceConfig TraceConfig `mapstructure:"trace"`
+
+	MetricConfig MetricConfig `mapstructure:"metric"`
+}
+
+type ClientConfig struct {
+	Endpoint string `mapstructure:"endpoint"`
 	// Only has effect if Endpoint is not ""
 	UseInsecure bool `mapstructure:"use_insecure"`
 
-	ResourceMappings []ResourceMapping `mapstructure:"resource_mappings"`
 	// GetClientOptions returns additional options to be passed
 	// to the underlying Google Cloud API client.
 	// Must be set programmatically (no support via declarative config).
 	// Optional.
 	GetClientOptions func() []option.ClientOption
+}
 
-	MetricConfig MetricConfig `mapstructure:"metric"`
+type TraceConfig struct {
+	ClientConfig ClientConfig `mapstructure:",squash"`
 }
 
 type MetricConfig struct {
-	Prefix                     string `mapstructure:"prefix"`
-	SkipCreateMetricDescriptor bool   `mapstructure:"skip_create_descriptor"`
+	ClientConfig               ClientConfig      `mapstructure:",squash"`
+	Prefix                     string            `mapstructure:"prefix"`
+	ResourceMappings           []ResourceMapping `mapstructure:"resource_mappings"`
+	SkipCreateMetricDescriptor bool              `mapstructure:"skip_create_descriptor"`
 	// If a metric belongs to one of these domains it does not get a prefix.
 	KnownDomains []string `mapstructure:"known_domains"`
 

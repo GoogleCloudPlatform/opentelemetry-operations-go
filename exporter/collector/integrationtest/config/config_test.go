@@ -54,33 +54,19 @@ func TestLoadConfig(t *testing.T) {
 		&testExporterConfig{
 			ExporterSettings: config.NewExporterSettings(config.NewComponentIDWithName(typeStr, "customname")),
 			Config: collector.Config{
-				ProjectID:   "my-project",
-				UserAgent:   "opentelemetry-collector-contrib {{version}}",
-				Endpoint:    "test-endpoint",
-				UseInsecure: true,
-				ResourceMappings: []collector.ResourceMapping{
-					{
-						SourceType: "source.resource1",
-						TargetType: "target-resource1",
-						LabelMappings: []collector.LabelMapping{
-							{
-								SourceKey: "contrib.opencensus.io/exporter/googlecloud/project_id",
-								TargetKey: "project_id",
-								Optional:  true,
-							},
-							{
-								SourceKey: "source.label1",
-								TargetKey: "target_label_1",
-								Optional:  false,
-							},
-						},
-					},
-					{
-						SourceType: "source.resource2",
-						TargetType: "target-resource2",
+				ProjectID: "my-project",
+				UserAgent: "opentelemetry-collector-contrib {{version}}",
+				TraceConfig: collector.TraceConfig{
+					ClientConfig: collector.ClientConfig{
+						Endpoint:    "test-trace-endpoint",
+						UseInsecure: true,
 					},
 				},
 				MetricConfig: collector.MetricConfig{
+					ClientConfig: collector.ClientConfig{
+						Endpoint:    "test-metric-endpoint",
+						UseInsecure: true,
+					},
 					Prefix:                     "prefix",
 					SkipCreateMetricDescriptor: true,
 					KnownDomains: []string{
@@ -89,6 +75,28 @@ func TestLoadConfig(t *testing.T) {
 					InstrumentationLibraryLabels:     true,
 					CreateMetricDescriptorBufferSize: 10,
 					ServiceResourceLabels:            true,
+					ResourceMappings: []collector.ResourceMapping{
+						{
+							SourceType: "source.resource1",
+							TargetType: "target-resource1",
+							LabelMappings: []collector.LabelMapping{
+								{
+									SourceKey: "contrib.opencensus.io/exporter/googlecloud/project_id",
+									TargetKey: "project_id",
+									Optional:  true,
+								},
+								{
+									SourceKey: "source.label1",
+									TargetKey: "target_label_1",
+									Optional:  false,
+								},
+							},
+						},
+						{
+							SourceType: "source.resource2",
+							TargetType: "target-resource2",
+						},
+					},
 				},
 			},
 		})
