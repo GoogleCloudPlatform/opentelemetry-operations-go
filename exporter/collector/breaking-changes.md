@@ -26,6 +26,10 @@ domain name of the metric type.  E.g. if a metric called
 `workload.googleapis.com/nginx/latency` is created, the display name will
 be `nginx/latency` instead of `workload.googleapis.com/nginx/latency`.
 
+## Summaries
+
+The previous exporter would split summary metrics into `_summary_count`, `_summary_sum`, `_summary_percentile`, and the percentiles metric had the label `percentile` with values in 0 < 100. The new exporter splits summary metrics into `_count`, `_sum`, no suffix. The metric without a suffix has a `quantile`, with values in 0 < 1. This change was done to match the semantics of prometheus summary metrics, which users are more familiar with.
+
 ## Monitored Resources
 
 Mapping from OTel Resource to GCM monitored resource has been completely changed. The OC based

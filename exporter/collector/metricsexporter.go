@@ -83,9 +83,8 @@ type metricMapper struct {
 
 // Constants we use when translating summary metrics into GCP.
 const (
-	SummaryCountPrefix      = "_summary_count"
-	SummarySumSuffix        = "_summary_sum"
-	SummaryPercentileSuffix = "_summary_percentile"
+	SummaryCountPrefix = "_count"
+	SummarySumSuffix   = "_sum"
 )
 
 const (
@@ -396,7 +395,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	sum pdata.Summary,
 	point pdata.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
-	sumName, countName, percentileName := summaryMetricNames(metric.Name())
+	sumName, countName := summaryMetricNames(metric.Name())
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	result := []*monitoringpb.TimeSeries{
@@ -449,8 +448,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	for i := 0; i < quantiles.Len(); i++ {
 		quantile := quantiles.At(i)
 		pLabel := labels{
-			// Convert to percentile.
-			"percentile": fmt.Sprintf("%f", quantile.Quantile()*100),
+			"quantile": fmt.Sprintf("%f", quantile.Quantile()),
 		}
 		result = append(result, &monitoringpb.TimeSeries{
 			Resource:   resource,
@@ -466,7 +464,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 				}},
 			}},
 			Metric: &metricpb.Metric{
-				Type: m.metricNameToType(percentileName),
+				Type: m.metricNameToType(metric.Name()),
 				Labels: mergeLabels(
 					attributesToLabels(point.Attributes()),
 					extraLabels,
@@ -886,19 +884,18 @@ func (m *metricMapper) labelDescriptors(
 	return result
 }
 
-// Returns (sum, count, percentile) metric names for a summary metric.
-func summaryMetricNames(name string) (string, string, string) {
+// Returns (sum, count) metric names for a summary metric.
+func summaryMetricNames(name string) (string, string) {
 	sumName := fmt.Sprintf("%s%s", name, SummarySumSuffix)
 	countName := fmt.Sprintf("%s%s", name, SummaryCountPrefix)
-	percentileName := fmt.Sprintf("%s%s", name, SummaryPercentileSuffix)
-	return sumName, countName, percentileName
+	return sumName, countName
 }
 
 func (m *metricMapper) summaryMetricDescriptors(
 	pm pdata.Metric,
 	extraLabels labels,
 ) []*metricpb.MetricDescriptor {
-	sumName, countName, percentileName := summaryMetricNames(pm.Name())
+	sumName, countName := summaryMetricNames(pm.Name())
 	labels := m.labelDescriptors(pm, extraLabels)
 	return []*metricpb.MetricDescriptor{
 		{
@@ -920,18 +917,18 @@ func (m *metricMapper) summaryMetricDescriptors(
 			DisplayName: countName,
 		},
 		{
-			Type: m.metricNameToType(percentileName),
+			Type: m.metricNameToType(pm.Name()),
 			Labels: append(
 				labels,
 				&label.LabelDescriptor{
-					Key:         "percentile",
-					Description: "the value at a given percentile of a distribution",
+					Key:         "quantile",
+					Description: "the value at a given quantile of a distribution",
 				}),
 			MetricKind:  metricpb.MetricDescriptor_GAUGE,
 			ValueType:   metricpb.MetricDescriptor_DOUBLE,
 			Unit:        pm.Unit(),
 			Description: pm.Description(),
-			DisplayName: percentileName,
+			DisplayName: pm.Name(),
 		},
 	}
 }
