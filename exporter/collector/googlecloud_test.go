@@ -79,6 +79,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 
 	for _, test := range testCases {
 		t.Run(test.name, func(t *testing.T) {
+			ctx := context.Background()
 			srv := grpc.NewServer()
 			reqCh := make(chan *cloudtracepb.BatchWriteSpansRequest)
 			cloudtracepb.RegisterTraceServiceServer(srv, &testServer{reqCh: reqCh})
@@ -88,13 +89,13 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			defer lis.Close()
 
 			go srv.Serve(lis)
-			sde, err := NewGoogleCloudTracesExporter(test.cfg, "latest", DefaultTimeout)
+			sde, err := NewGoogleCloudTracesExporter(ctx, test.cfg, "latest", DefaultTimeout)
 			if test.expectedErr != "" {
 				assert.EqualError(t, err, test.expectedErr)
 				return
 			}
 			require.NoError(t, err)
-			defer func() { require.NoError(t, sde.Shutdown(context.Background())) }()
+			defer func() { require.NoError(t, sde.Shutdown(ctx)) }()
 
 			testTime := time.Now()
 			spanName := "foobar"
@@ -107,7 +108,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			span := ispans.Spans().AppendEmpty()
 			span.SetName(spanName)
 			span.SetStartTimestamp(pdata.NewTimestampFromTime(testTime))
-			err = sde.PushTraces(context.Background(), traces)
+			err = sde.PushTraces(ctx, traces)
 			assert.NoError(t, err)
 
 			r := <-reqCh

@@ -18,14 +18,17 @@ package collector
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
+	traceapi "cloud.google.com/go/trace/apiv2"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/model/pdata"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -44,6 +47,20 @@ func (te *TraceExporter) Shutdown(ctx context.Context) error {
 
 func setVersionInUserAgent(cfg *Config, version string) {
 	cfg.UserAgent = strings.ReplaceAll(cfg.UserAgent, "{{version}}", version)
+}
+
+func setProjectFromADC(ctx context.Context, cfg *Config, scopes []string) error {
+	if cfg.ProjectID == "" {
+		creds, err := google.FindDefaultCredentials(ctx, scopes...)
+		if err != nil {
+			return fmt.Errorf("error finding default application credentials: %v", err)
+		}
+		if creds.ProjectID == "" {
+			return errors.New("no project found with application default credentials")
+		}
+		cfg.ProjectID = creds.ProjectID
+	}
+	return nil
 }
 
 func generateClientOptions(cfg *ClientConfig, userAgent string) ([]option.ClientOption, error) {
@@ -78,9 +95,10 @@ func generateClientOptions(cfg *ClientConfig, userAgent string) ([]option.Client
 	return copts, nil
 }
 
-func NewGoogleCloudTracesExporter(cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
+func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
 	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
+	setProjectFromADC(ctx, &cfg, traceapi.DefaultAuthScopes())
 
 	topts := []cloudtrace.Option{
 		cloudtrace.WithProjectID(cfg.ProjectID),
