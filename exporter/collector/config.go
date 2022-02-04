@@ -63,7 +63,8 @@ type MetricConfig struct {
 	// If true, the exporter will copy OTel's service.name, service.namespace, and
 	// service.instance.id resource attributes into the GCM timeseries metric labels. This
 	// option is recommended to avoid writing duplicate timeseries against the same monitored
-	// resource. Default is true.
+	// resource. Disabling this option does not prevent resource_filters from adding those
+	// labels. Default is true.
 	ServiceResourceLabels bool `mapstructure:"service_resource_labels"`
 
 	// If provided, resource attributes matching any filter will be included in metric labels.
