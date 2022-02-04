@@ -1057,18 +1057,10 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 
 func TestNewMetricMapper(t *testing.T) {
 	withUserDefinedMappings := map[string]mappingConfig{}
-	for k, v := range baseMonitoredResourceMappings {
-		withUserDefinedMappings[k] = v
-	}
 	withUserDefinedMappings["k8s_new_type"] = mappingConfig{
 		"bar":   keyMatcher{otelKeys: []string{"foo"}},
 		"world": keyMatcher{otelKeys: []string{"hello"}},
 	}
-	overrideMappings := map[string]mappingConfig{}
-	for k, v := range baseMonitoredResourceMappings {
-		overrideMappings[k] = v
-	}
-	overrideMappings[gceInstance] = mappingConfig{}
 	for _, tc := range []struct {
 		desc             string
 		input            []ResourceMapping
@@ -1076,7 +1068,7 @@ func TestNewMetricMapper(t *testing.T) {
 	}{
 		{
 			desc:             "defaults",
-			expectedMappings: baseMonitoredResourceMappings,
+			expectedMappings: map[string]mappingConfig{},
 		},
 		{
 			desc: "with additional user-defined mappings",
@@ -1094,21 +1086,12 @@ func TestNewMetricMapper(t *testing.T) {
 			},
 			expectedMappings: withUserDefinedMappings,
 		},
-		{
-			desc: "with user-defined mappings that override base mappings",
-			input: []ResourceMapping{
-				{
-					TargetType: gceInstance,
-				},
-			},
-			expectedMappings: overrideMappings,
-		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			cfg := DefaultConfig()
 			cfg.MetricConfig.ResourceMappings = tc.input
 			mapper := newMetricMapper(cfg)
-			assert.Equal(t, tc.expectedMappings, mapper.monitoredResourceMappings)
+			assert.Equal(t, tc.expectedMappings, mapper.customResourceMappings)
 		})
 	}
 }

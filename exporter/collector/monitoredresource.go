@@ -62,9 +62,9 @@ type keyMatcher struct {
 }
 
 var (
-	// baseMonitoredResourceMappings contains mappings of GCM resource label keys onto mapping config from OTel
+	// monitoredResourceMappings contains mappings of GCM resource label keys onto mapping config from OTel
 	// resource for a given monitored resource type.
-	baseMonitoredResourceMappings = map[string]mappingConfig{
+	monitoredResourceMappings = map[string]mappingConfig{
 		gceInstance: {
 			zone:       {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
 			instanceID: {otelKeys: []string{semconv.AttributeHostID}},
@@ -132,6 +132,8 @@ func (m *metricMapper) resourceToMonitoredResource(
 
 	var mr *monitoredrespb.MonitoredResource
 	switch cloudPlatform {
+	case "gcp_custom":
+		mr = m.createCustomMonitoredResource(attrs)
 	case semconv.AttributeCloudPlatformGCPComputeEngine:
 		mr = createMonitoredResource(gceInstance, attrs)
 	case semconv.AttributeCloudPlatformGCPKubernetesEngine:
@@ -148,27 +150,53 @@ func (m *metricMapper) resourceToMonitoredResource(
 	case semconv.AttributeCloudPlatformAWSEC2:
 		mr = createMonitoredResource(awsEc2Instance, attrs)
 	default:
-		// Fallback to generic_task
-		_, hasServiceName := attrs.Get(semconv.AttributeServiceName)
-		_, hasServiceInstanceID := attrs.Get(semconv.AttributeServiceInstanceID)
-		if hasServiceName && hasServiceInstanceID {
-			mr = createMonitoredResource(genericTask, attrs)
-		} else {
-			// If not possible, fallback to generic_node
-			mr = createMonitoredResource(genericNode, attrs)
-		}
+		mr = fallbackMonitoredResource(attrs)
 	}
 	return mr, m.resourceToMetricLabels(resource)
 }
 
-func (m *metricMapper) createMonitoredResource(
+func fallbackMonitoredResource(resourceAttrs pdata.AttributeMap) *monitoredrespb.MonitoredResource {
+	// Fallback to generic_task
+	_, hasServiceName := resourceAttrs.Get(semconv.AttributeServiceName)
+	_, hasServiceInstanceID := resourceAttrs.Get(semconv.AttributeServiceInstanceID)
+	if hasServiceName && hasServiceInstanceID {
+		return createMonitoredResource(genericTask, resourceAttrs)
+	}
+	// If not possible, fallback to generic_node
+	return createMonitoredResource(genericNode, resourceAttrs)
+}
+
+func (m *metricMapper) createCustomMonitoredResource(
+	resourceAttrs pdata.AttributeMap,
+) *monitoredrespb.MonitoredResource {
+	for monitoredResourceType, mapping := range m.customResourceMappings {
+		mrLabels, foundAll := mrLabelsForMapping(mapping, resourceAttrs)
+		if foundAll {
+			return &monitoredrespb.MonitoredResource{
+				Type:   monitoredResourceType,
+				Labels: mrLabels,
+			}
+		}
+	}
+	return fallbackMonitoredResource(resourceAttrs)
+}
+
+func createMonitoredResource(
 	monitoredResourceType string,
 	resourceAttrs pdata.AttributeMap,
 ) *monitoredrespb.MonitoredResource {
-	mappings := m.monitoredResourceMappings[monitoredResourceType]
-	mrLabels := make(map[string]string, len(mappings))
+	mapping := monitoredResourceMappings[monitoredResourceType]
+	mrLabels, _ := mrLabelsForMapping(mapping, resourceAttrs)
+	return &monitoredrespb.MonitoredResource{
+		Type:   monitoredResourceType,
+		Labels: mrLabels,
+	}
+}
 
-	for mrKey, mappingConfig := range mappings {
+func mrLabelsForMapping(mapping mappingConfig, resourceAttrs pdata.AttributeMap) (map[string]string, bool) {
+	mrLabels := make(map[string]string, len(mapping))
+	foundAll := true
+	for mrKey, mappingConfig := range mapping {
 		mrValue := ""
 		// Coalesce the possible keys in order
 		for _, otelKey := range mappingConfig.otelKeys {
@@ -178,14 +206,12 @@ func (m *metricMapper) createMonitoredResource(
 			}
 		}
 		if mrValue == "" {
+			foundAll = false
 			mrValue = mappingConfig.fallbackLiteral
 		}
 		mrLabels[mrKey] = mrValue
 	}
-	return &monitoredrespb.MonitoredResource{
-		Type:   monitoredResourceType,
-		Labels: mrLabels,
-	}
+	return mrLabels, foundAll
 }
 
 // resourceToMetricLabels converts the Resource into metric labels needed to uniquely identify

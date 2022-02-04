@@ -78,16 +78,12 @@ type MetricsExporter struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	cfg                       Config
-	monitoredResourceMappings map[string]mappingConfig
+	cfg                    Config
+	customResourceMappings map[string]mappingConfig
 }
 
 func newMetricMapper(cfg Config) metricMapper {
 	mappings := map[string]mappingConfig{}
-	// copy base mappings
-	for k, v := range baseMonitoredResourceMappings {
-		mappings[k] = v
-	}
 	for _, userMapping := range cfg.MetricConfig.ResourceMappings {
 		mappingCfg := mappingConfig{}
 		for _, labelMapping := range userMapping.LabelMappings {

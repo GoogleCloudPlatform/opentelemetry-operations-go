@@ -89,6 +89,7 @@ type ResourceFilter struct {
 }
 
 // ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).
+// In order to use these resource mappings, the cloud.platform attribute must be set to gcp_custom.
 type ResourceMapping struct {
 	TargetType string `mapstructure:"target_type"`
 
