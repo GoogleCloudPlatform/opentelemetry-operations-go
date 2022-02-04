@@ -189,20 +189,19 @@ func (m *metricMapper) resourceToMetricLabels(
 	attrs := pdata.NewAttributeMap()
 	resource.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
 		// Is a service attribute and should be included
-		match := m.cfg.MetricConfig.ServiceResourceLabels &&
+		if m.cfg.MetricConfig.ServiceResourceLabels &&
 			(k == semconv.AttributeServiceName ||
 				k == semconv.AttributeServiceNamespace ||
-				k == semconv.AttributeServiceInstanceID)
+				k == semconv.AttributeServiceInstanceID) {
+			attrs.Insert(k, v)
+			return true
+		}
 		// Matches one of the resource filters
 		for _, resourceFilter := range m.cfg.MetricConfig.ResourceFilters {
-			if match {
-				break
+			if strings.HasPrefix(k, resourceFilter.Prefix) {
+				attrs.Insert(k, v)
+				return true
 			}
-			match = strings.HasPrefix(k, resourceFilter.Prefix)
-		}
-
-		if match {
-			attrs.Insert(k, v)
 		}
 		return true
 	})

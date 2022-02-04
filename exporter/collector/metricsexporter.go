@@ -156,7 +156,7 @@ func NewGoogleCloudMetricsExporter(
 		cfg:    cfg,
 		client: client,
 		obs:    selfObservability{log: log},
-		mapper: metricMapper{cfg: cfg},
+		mapper: metricMapper{cfg},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok

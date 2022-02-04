@@ -71,7 +71,7 @@ In addition, the exporter will now copy OTel Resource attributes `service.name`,
 `service_namespace`, and `service_instance_id` respectively. This avoids duplicate timeseries
 when multiple instances of a service are running on a single monitored resource, for example
 running multiple service processes on a single GCE VM.  This can be turned off with the
-`metric.include_service_resource_attributes` config option.
+`metric.service_resource_labels` config option.
 
 ## OTLP Sum
 
