@@ -30,6 +30,8 @@ import (
 	"unicode"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	"github.com/google/cel-go/cel"
+	"github.com/google/cel-go/checker/decls"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/model/pdata"
@@ -41,6 +43,7 @@ import (
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -78,7 +81,57 @@ type MetricsExporter struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	cfg Config
+	cfg                      Config
+	compiledResourceMappings []compiledMapping
+}
+type compiledMapping struct {
+	expression cel.Program
+	mapping    cel.Program
+}
+
+func newMetricMapper(cfg Config) metricMapper {
+	env, err := cel.NewEnv(
+		cel.Container("google.api"),
+		cel.Declarations(
+			decls.NewVar("resource", decls.NewMapType(decls.String, decls.Dyn)),
+		),
+		cel.Types(&monitoredrespb.MonitoredResource{}),
+	)
+	if err != nil {
+		panic(err)
+	}
+	compiledMappings := make([]compiledMapping, 0, len(cfg.MetricConfig.ResourceMappings))
+	for _, mapping := range cfg.MetricConfig.ResourceMappings {
+		exprAst, issues := env.Compile(mapping.Expression)
+		if issues != nil && issues.Err() != nil {
+			panic(fmt.Errorf("type-check error: %s", issues.Err()))
+		}
+		if !proto.Equal(exprAst.ResultType(), decls.Bool) {
+			panic(fmt.Errorf("incorrect result type of expression. expected bool, got %v", exprAst.ResultType()))
+		}
+		exprProgram, err := env.Program(exprAst)
+		if err != nil {
+			panic(err)
+		}
+
+		mappingAst, issues := env.Compile(mapping.Mapping)
+		if issues != nil && issues.Err() != nil {
+			panic(fmt.Errorf("type-check error: %s", issues.Err()))
+		}
+		if !proto.Equal(mappingAst.ResultType(), decls.NewObjectType("google.api.MonitoredResource")) {
+			panic(fmt.Errorf("incorrect result type of expression. Expected google.api.MonitoredResource, got %v", mappingAst.ResultType()))
+		}
+		mappingProgram, err := env.Program(mappingAst)
+		if err != nil {
+			panic(err)
+		}
+
+		compiledMappings = append(compiledMappings, compiledMapping{
+			expression: exprProgram,
+			mapping:    mappingProgram,
+		})
+	}
+	return metricMapper{cfg, compiledMappings}
 }
 
 // Constants we use when translating summary metrics into GCP.
@@ -155,7 +208,7 @@ func NewGoogleCloudMetricsExporter(
 		cfg:    cfg,
 		client: client,
 		obs:    selfObservability{log: log},
-		mapper: metricMapper{cfg},
+		mapper: newMetricMapper(cfg),
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok

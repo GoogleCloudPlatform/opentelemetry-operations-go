@@ -1059,6 +1059,39 @@
               }
             }
           ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/master/controller-manager/workqueue_depth",
+            "labels": {
+              "name": "fake"
+            }
+          },
+          "resource": {
+            "type": "internal_gke_master_container",
+            "labels": {
+              "cluster_hash": "764ecf8d7f18be1ff4c2b987280b5f67c01b5b22db31400f1bdec528a476ec90",
+              "cluster_name": "rabbitmq-test-dev",
+              "consumer_project_id": "854643195104",
+              "container_name": "fake-container",
+              "instance_id": "854643195104",
+              "location": "us-central1-c",
+              "namespace_name": "kube-system",
+              "pod_name": "fake-pod-382990"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
         }
       ]
     }
@@ -1084,7 +1117,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "35"
+                  "int64Value": "36"
                 }
               }
             ]

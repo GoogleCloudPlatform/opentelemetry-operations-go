@@ -15,6 +15,8 @@
 package collector
 
 import (
+	"log"
+	"reflect"
 	"strings"
 
 	"go.opentelemetry.io/collector/model/pdata"
@@ -122,8 +124,34 @@ func (m *metricMapper) resourceToMonitoredResource(
 ) (*monitoredrespb.MonitoredResource, labels) {
 	attrs := resource.Attributes()
 	cloudPlatform := getStringOrEmpty(attrs, semconv.AttributeCloudPlatform)
-
 	var mr *monitoredrespb.MonitoredResource
+
+	rawResourceAttribs := resource.Attributes().AsRaw()
+	for _, compiledMapping := range m.compiledResourceMappings {
+		vars := map[string]interface{}{"resource": rawResourceAttribs}
+		out, _, err := compiledMapping.expression.Eval(vars)
+		if err != nil {
+			log.Printf("Error evaluating expression: %v", err)
+			continue
+		}
+		if out.Value().(bool) {
+			out, _, err := compiledMapping.mapping.Eval(vars)
+			if err != nil {
+				log.Printf("Error evaluating expression: %v", err)
+				continue
+			}
+			mrVal, err := out.ConvertToNative(reflect.TypeOf(&monitoredrespb.MonitoredResource{}))
+			if err != nil {
+				continue
+			}
+			mr = mrVal.(*monitoredrespb.MonitoredResource)
+		}
+	}
+
+	if mr != nil {
+		return mr, m.resourceToMetricLabels(resource)
+	}
+
 	switch cloudPlatform {
 	case semconv.AttributeCloudPlatformGCPComputeEngine:
 		mr = createMonitoredResource(gceInstance, attrs)
