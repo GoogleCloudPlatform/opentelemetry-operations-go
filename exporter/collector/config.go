@@ -88,20 +88,20 @@ type ResourceFilter struct {
 	Prefix string `mapstructure:"prefix"`
 }
 
-// ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).
+// ResourceMapping defines mapping of resources from OpenTelemetry to target monitored resource (Google Cloud).
 type ResourceMapping struct {
-	SourceType string `mapstructure:"source_type"`
-	TargetType string `mapstructure:"target_type"`
-
-	LabelMappings []LabelMapping `mapstructure:"label_mappings"`
-}
-
-type LabelMapping struct {
-	SourceKey string `mapstructure:"source_key"`
-	TargetKey string `mapstructure:"target_key"`
-	// Optional flag signals whether we can proceed with transformation if a label is missing in the resource.
-	// When required label is missing, we fallback to default resource mapping.
-	Optional bool `mapstructure:"optional"`
+	// A CEL expression that determines if the mapping will be used to generate a monitored
+	// resource. Must have a boolean result. The OTel resource is available in the expression
+	// context as variable "resource". For example:
+	//
+	//  resource["cloud.platform"] == "gcp_compute_engine"
+	Expression string `mapstructure:"expression"`
+	// A CEL expression that maps the OTel resource to a MonitoredResource protobuf. Must have
+	// a MonitoredResource result. The OTel resource is available in the expression context as
+	// variable "resource". For example:
+	//
+	//  MonitoredResource{type: "foo", labels: {"location": resource["cloud.availability_zone"]}}
+	Mapping string `mapstructure:"mapping"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.

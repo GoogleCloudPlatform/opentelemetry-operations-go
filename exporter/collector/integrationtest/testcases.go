@@ -104,6 +104,32 @@ var (
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.CreateServiceTimeSeries = true
 				cfg.MetricConfig.ServiceResourceLabels = false
+				cfg.MetricConfig.ResourceMappings = []collector.ResourceMapping{
+					{
+						Expression: `
+						resource["cloud.platform"] == "gcp_kubernetes_engine" &&
+						[
+							"cloud.zone", "k8s.cluster.name", "consumer_project_id",
+							"cluster_hash", "pod_name", "namespace_name", "container_name",
+							"instance_id",
+						].all(x, x in resource)
+						`,
+						Mapping: `
+						MonitoredResource{
+							type: "internal_gke_master_container",
+							labels: {
+								"location": "cloud.zone",
+								"cluster_name": "k8s.cluster.name",
+								"consumer_project_id": "consumer_project_id",
+								"cluster_hash": "cluster_hash",
+								"pod_name": "pod_name",
+								"namespace_name": "namespace_name",
+								"container_name": "container_name",
+								"instance_id": "instance_id",
+							}	
+						}`,
+					},
+				}
 			},
 		},
 		{
