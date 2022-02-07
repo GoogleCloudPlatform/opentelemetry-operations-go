@@ -51,10 +51,9 @@ type TraceConfig struct {
 }
 
 type MetricConfig struct {
-	ClientConfig               ClientConfig      `mapstructure:",squash"`
-	Prefix                     string            `mapstructure:"prefix"`
-	ResourceMappings           []ResourceMapping `mapstructure:"resource_mappings"`
-	SkipCreateMetricDescriptor bool              `mapstructure:"skip_create_descriptor"`
+	ClientConfig               ClientConfig `mapstructure:",squash"`
+	Prefix                     string       `mapstructure:"prefix"`
+	SkipCreateMetricDescriptor bool         `mapstructure:"skip_create_descriptor"`
 	// If a metric belongs to one of these domains it does not get a prefix.
 	KnownDomains []string `mapstructure:"known_domains"`
 
@@ -86,22 +85,6 @@ type MetricConfig struct {
 type ResourceFilter struct {
 	// Match resource keys by prefix
 	Prefix string `mapstructure:"prefix"`
-}
-
-// ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).
-type ResourceMapping struct {
-	SourceType string `mapstructure:"source_type"`
-	TargetType string `mapstructure:"target_type"`
-
-	LabelMappings []LabelMapping `mapstructure:"label_mappings"`
-}
-
-type LabelMapping struct {
-	SourceKey string `mapstructure:"source_key"`
-	TargetKey string `mapstructure:"target_key"`
-	// Optional flag signals whether we can proceed with transformation if a label is missing in the resource.
-	// When required label is missing, we fallback to default resource mapping.
-	Optional bool `mapstructure:"optional"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.
