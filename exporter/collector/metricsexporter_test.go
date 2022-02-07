@@ -23,6 +23,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -35,11 +36,16 @@ var (
 	start = time.Unix(0, 0)
 )
 
+func newTestMetricMapper() metricMapper {
+	obs := selfObservability{log: zap.NewNop()}
+	return metricMapper{obs, DefaultConfig()}
+}
+
 func TestMetricToTimeSeries(t *testing.T) {
 	mr := &monitoredrespb.MonitoredResource{}
 
 	t.Run("Sum", func(t *testing.T) {
-		mapper := metricMapper{cfg: Config{}}
+		mapper := newTestMetricMapper()
 		metric := pdata.NewMetric()
 		metric.SetDataType(pdata.MetricDataTypeSum)
 		sum := metric.Sum()
@@ -60,7 +66,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 	})
 
 	t.Run("Gauge", func(t *testing.T) {
-		mapper := metricMapper{cfg: Config{}}
+		mapper := newTestMetricMapper()
 		metric := pdata.NewMetric()
 		metric.SetDataType(pdata.MetricDataTypeGauge)
 		gauge := metric.Gauge()
@@ -98,9 +104,8 @@ func TestMergeLabels(t *testing.T) {
 }
 
 func TestHistogramPointToTimeSeries(t *testing.T) {
-	cfg := DefaultConfig()
-	cfg.ProjectID = "myproject"
-	mapper := metricMapper{cfg: cfg}
+	mapper := newTestMetricMapper()
+	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pdata.NewMetric()
 	metric.SetName("myhist")
@@ -162,9 +167,8 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
-	cfg := DefaultConfig()
-	cfg.ProjectID = "myproject"
-	mapper := metricMapper{cfg: cfg}
+	mapper := newTestMetricMapper()
+	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pdata.NewMetric()
 	metric.SetName("myexphist")
@@ -230,7 +234,7 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExemplarNoAttachements(t *testing.T) {
-	mapper := metricMapper{cfg: Config{}}
+	mapper := newTestMetricMapper()
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -242,7 +246,7 @@ func TestExemplarNoAttachements(t *testing.T) {
 }
 
 func TestExemplarOnlyDroppedLabels(t *testing.T) {
-	mapper := metricMapper{cfg: Config{}}
+	mapper := newTestMetricMapper()
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -260,9 +264,8 @@ func TestExemplarOnlyDroppedLabels(t *testing.T) {
 }
 
 func TestExemplarOnlyTraceId(t *testing.T) {
-	mapper := metricMapper{cfg: Config{
-		ProjectID: "p",
-	}}
+	mapper := newTestMetricMapper()
+	mapper.cfg.ProjectID = "p"
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -285,7 +288,7 @@ func TestExemplarOnlyTraceId(t *testing.T) {
 }
 
 func TestSumPointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: DefaultConfig()}
+	mapper := newTestMetricMapper()
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Sum, pdata.NumberDataPoint) {
@@ -393,7 +396,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 }
 
 func TestGaugePointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: DefaultConfig()}
+	mapper := newTestMetricMapper()
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Gauge, pdata.NumberDataPoint) {
@@ -449,7 +452,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 }
 
 func TestSummaryPointToTimeSeries(t *testing.T) {
-	mapper := metricMapper{cfg: DefaultConfig()}
+	mapper := newTestMetricMapper()
 	mr := &monitoredrespb.MonitoredResource{}
 
 	metric := pdata.NewMetric()
@@ -521,7 +524,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 }
 
 func TestMetricNameToType(t *testing.T) {
-	mapper := metricMapper{cfg: DefaultConfig()}
+	mapper := newTestMetricMapper()
 	assert.Equal(
 		t,
 		mapper.metricNameToType("foo"),
@@ -944,7 +947,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mapper := metricMapper{cfg: DefaultConfig()}
+			mapper := newTestMetricMapper()
 			metric := test.metricCreator()
 			md := mapper.metricDescriptor(metric, test.extraLabels)
 			diff := cmp.Diff(
@@ -1001,12 +1004,11 @@ func TestKnownDomains(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(fmt.Sprintf("%v to %v", test.name, test.metricType), func(t *testing.T) {
-			config := DefaultConfig()
-			config.MetricConfig.Prefix = "prefix"
+			mapper := newTestMetricMapper()
 			if len(test.knownDomains) > 0 {
-				config.MetricConfig.KnownDomains = test.knownDomains
+				mapper.cfg.MetricConfig.KnownDomains = test.knownDomains
 			}
-			mapper := metricMapper{cfg: config}
+			mapper.cfg.MetricConfig.Prefix = "prefix"
 			assert.Equal(t, test.metricType, mapper.metricNameToType(test.name))
 		})
 	}
@@ -1044,9 +1046,8 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			config := DefaultConfig()
-			config.MetricConfig = test.metricConfig
-			m := metricMapper{cfg: config}
+			m := newTestMetricMapper()
+			m.cfg.MetricConfig = test.metricConfig
 
 			out := m.instrumentationLibraryToLabels(test.instrumentationLibrary)
 
