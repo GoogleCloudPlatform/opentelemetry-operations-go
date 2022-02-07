@@ -1059,6 +1059,39 @@
               }
             }
           ]
+        },
+        {
+          "metric": {
+            "type": "kubernetes.io/master/controller-manager/workqueue_depth",
+            "labels": {
+              "name": "fake"
+            }
+          },
+          "resource": {
+            "type": "internal_gke_master_container",
+            "labels": {
+              "cluster_hash": "cluster_hash",
+              "cluster_name": "k8s.cluster.name",
+              "consumer_project_id": "consumer_project_id",
+              "container_name": "container_name",
+              "instance_id": "instance_id",
+              "location": "cloud.zone",
+              "namespace_name": "namespace_name",
+              "pod_name": "pod_name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "0"
+              }
+            }
+          ]
         }
       ]
     }
@@ -1084,7 +1117,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "35"
+                  "int64Value": "36"
                 }
               }
             ]
