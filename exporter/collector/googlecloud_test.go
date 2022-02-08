@@ -17,6 +17,7 @@ package collector
 import (
 	"context"
 	"net"
+	"sync"
 	"testing"
 	"time"
 
@@ -181,8 +182,12 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 	}
 
 	sde, err := NewGoogleCloudMetricsExporter(context.Background(), config, zap.NewNop(), "v0.0.1", DefaultTimeout)
+	shutdownOnce := sync.Once{}
+	shutdown := func() {
+		require.NoError(t, sde.Shutdown(context.Background()))
+	}
 	require.NoError(t, err)
-	defer func() { require.NoError(t, sde.Shutdown(context.Background())) }()
+	defer shutdownOnce.Do(shutdown)
 
 	md := agentmetricspb.ExportMetricsServiceRequest{
 		Resource: &resourcepb.Resource{
@@ -243,6 +248,7 @@ func TestGoogleCloudMetricExport(t *testing.T) {
 	md.Metrics[4].Resource = &resourcepb.Resource{}
 
 	assert.NoError(t, sde.PushMetrics(context.Background(), internaldata.OCToMetrics(md.Node, md.Resource, md.Metrics)), err)
+	shutdownOnce.Do(shutdown)
 
 	expectedNames := map[string]struct{}{
 		"workload.googleapis.com/test_gauge1": {},
