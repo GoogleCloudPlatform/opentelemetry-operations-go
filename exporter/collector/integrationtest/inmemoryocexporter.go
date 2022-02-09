@@ -24,6 +24,7 @@ import (
 	"go.opencensus.io/stats/view"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
@@ -91,7 +92,7 @@ func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
 		return nil, err
 	}
 	go testServer.Serve()
-	conn, err := grpc.Dial(testServer.Endpoint, grpc.WithInsecure())
+	conn, err := grpc.Dial(testServer.Endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}

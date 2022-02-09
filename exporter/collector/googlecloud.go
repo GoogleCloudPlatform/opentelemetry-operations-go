@@ -28,6 +28,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -57,7 +58,7 @@ func generateClientOptions(cfg *ClientConfig, userAgent string) ([]option.Client
 			// following user agent will be used by both exporters if we reach this branch
 			dialOpts := []grpc.DialOption{
 				grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
-				grpc.WithInsecure(),
+				grpc.WithTransportCredentials(insecure.NewCredentials()),
 			}
 			if userAgent != "" {
 				dialOpts = append(dialOpts, grpc.WithUserAgent(userAgent))

@@ -44,6 +44,7 @@ import (
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -586,7 +587,7 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 	clientOpts := []option.ClientOption{
 		option.WithEndpoint(lis.Addr().String()),
 		option.WithoutAuthentication(),
-		option.WithGRPCDialOption(grpc.WithInsecure()),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	}
 	res := &resource.Resource{}
 	aggSel := processortest.AggregatorSelector()
