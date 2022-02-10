@@ -552,70 +552,89 @@ func (m *mock) CreateMetricDescriptor(ctx context.Context, req *monitoringpb.Cre
 }
 
 func TestExportMetricsWithUserAgent(t *testing.T) {
-	server := grpc.NewServer()
-	t.Cleanup(server.Stop)
-
-	// Channel to shove user agent strings from createTimeSeries
-	ch := make(chan []string, 1)
-
-	m := mock{
-		createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
-			md, _ := metadata.FromIncomingContext(ctx)
-			ch <- md.Get("User-Agent")
-			return &emptypb.Empty{}, nil
+	for _, tc := range []struct {
+		desc                   string
+		extraOpts              []option.ClientOption
+		expectedUserAgentRegex string
+	}{
+		{
+			desc:                   "default",
+			expectedUserAgentRegex: "opentelemetry-go .*; google-cloud-metric-exporter .*",
 		},
-		createMetricDescriptor: func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
-			md, _ := metadata.FromIncomingContext(ctx)
-			ch <- md.Get("User-Agent")
-			return req.MetricDescriptor, nil
+		{
+			desc:                   "override user agent",
+			extraOpts:              []option.ClientOption{option.WithUserAgent("test-user-agent")},
+			expectedUserAgentRegex: "test-user-agent",
 		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			server := grpc.NewServer()
+			t.Cleanup(server.Stop)
+
+			// Channel to shove user agent strings from createTimeSeries
+			ch := make(chan []string, 1)
+
+			m := mock{
+				createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
+					md, _ := metadata.FromIncomingContext(ctx)
+					ch <- md.Get("User-Agent")
+					return &emptypb.Empty{}, nil
+				},
+				createMetricDescriptor: func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
+					md, _ := metadata.FromIncomingContext(ctx)
+					ch <- md.Get("User-Agent")
+					return req.MetricDescriptor, nil
+				},
+			}
+			// Make sure all the calls have the right user agents.
+			// We have to run this in parallel because BOTH calls happen seamlessly when exporting metrics.
+			go func() {
+				for {
+					ua := <-ch
+					require.Regexp(t, tc.expectedUserAgentRegex, ua[0])
+				}
+			}()
+			monitoringpb.RegisterMetricServiceServer(server, &m)
+
+			lis, err := net.Listen("tcp", "127.0.0.1:0")
+			require.NoError(t, err)
+			go server.Serve(lis)
+
+			clientOpts := []option.ClientOption{
+				option.WithEndpoint(lis.Addr().String()),
+				option.WithoutAuthentication(),
+				option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+			}
+			clientOpts = append(clientOpts, tc.extraOpts...)
+			res := &resource.Resource{}
+			aggSel := processortest.AggregatorSelector()
+			proc := processor.NewFactory(aggSel, aggregation.CumulativeTemporalitySelector())
+			ctx := context.Background()
+
+			opts := []Option{
+				WithProjectID("PROJECT_ID_NOT_REAL"),
+				WithMonitoringClientOptions(clientOpts...),
+				WithMetricDescriptorTypeFormatter(formatter),
+			}
+
+			exporter, err := NewRawExporter(opts...)
+			if err != nil {
+				t.Errorf("Error occurred when creating exporter: %v", err)
+			}
+			cont := controller.New(proc,
+				controller.WithExporter(exporter),
+				controller.WithResource(res),
+			)
+
+			assert.NoError(t, cont.Start(ctx))
+			meter := cont.Meter("test")
+
+			counter := metric.Must(meter).NewInt64Counter("name.lastvalue")
+
+			counter.Add(ctx, 1)
+			require.NoError(t, cont.Stop(ctx))
+
+			// User agent checking happens above in parallel to this flow.
+		})
 	}
-	// Make sure all the calls have the right user agents.
-	// We have to run this in parallel because BOTH calls happen seamlessly when exporting metrics.
-	go func() {
-		for {
-			ua := <-ch
-			require.Regexp(t, "opentelemetry-go .*; google-cloud-metric-exporter .*", ua[0])
-		}
-	}()
-	monitoringpb.RegisterMetricServiceServer(server, &m)
-
-	lis, err := net.Listen("tcp", "127.0.0.1:0")
-	require.NoError(t, err)
-	go server.Serve(lis)
-
-	clientOpts := []option.ClientOption{
-		option.WithEndpoint(lis.Addr().String()),
-		option.WithoutAuthentication(),
-		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	}
-	res := &resource.Resource{}
-	aggSel := processortest.AggregatorSelector()
-	proc := processor.NewFactory(aggSel, aggregation.CumulativeTemporalitySelector())
-	ctx := context.Background()
-
-	opts := []Option{
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithMonitoringClientOptions(clientOpts...),
-		WithMetricDescriptorTypeFormatter(formatter),
-	}
-
-	exporter, err := NewRawExporter(opts...)
-	if err != nil {
-		t.Errorf("Error occurred when creating exporter: %v", err)
-	}
-	cont := controller.New(proc,
-		controller.WithExporter(exporter),
-		controller.WithResource(res),
-	)
-
-	assert.NoError(t, cont.Start(ctx))
-	meter := cont.Meter("test")
-
-	counter := metric.Must(meter).NewInt64Counter("name.lastvalue")
-
-	counter.Add(ctx, 1)
-	require.NoError(t, cont.Stop(ctx))
-
-	// User agent checking happens above in parallel to this flow.
 }
