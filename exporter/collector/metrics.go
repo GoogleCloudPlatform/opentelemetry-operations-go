@@ -42,6 +42,8 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/datapointstorage"
 )
 
 // self-observability reporting meters/tracers/loggers.
@@ -77,8 +79,9 @@ type MetricsExporter struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	obs selfObservability
-	cfg Config
+	obs      selfObservability
+	cfg      Config
+	sumCache datapointstorage.Cache
 }
 
 // Constants we use when translating summary metrics into GCP.
@@ -139,11 +142,16 @@ func NewGoogleCloudMetricsExporter(
 		return nil, err
 	}
 	obs := selfObservability{log: log}
+	shutdown := make(chan struct{})
 	mExp := &MetricsExporter{
 		cfg:    cfg,
 		client: client,
 		obs:    obs,
-		mapper: metricMapper{obs, cfg},
+		mapper: metricMapper{
+			obs,
+			cfg,
+			datapointstorage.NewCache(shutdown),
+		},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok
@@ -151,7 +159,7 @@ func NewGoogleCloudMetricsExporter(
 		metricDescriptorC: make(chan *metricpb.MetricDescriptor, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
 		mdCache:           make(map[string]*metricpb.MetricDescriptor),
 		timeSeriesC:       make(chan *monitoringpb.TimeSeries),
-		shutdownC:         make(chan struct{}),
+		shutdownC:         shutdown,
 	}
 
 	// Fire up the metric descriptor exporter.
@@ -334,7 +342,7 @@ func (m *metricMapper) metricToTimeSeries(
 		points := sum.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
-			timeSeries = append(timeSeries, ts)
+			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeGauge:
 		gauge := metric.Gauge()
@@ -659,16 +667,27 @@ func (m *metricMapper) sumPointToTimeSeries(
 	metric pdata.Metric,
 	sum pdata.Sum,
 	point pdata.NumberDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
-	if !sum.IsMonotonic() {
+	var normalizationPoint *pdata.NumberDataPoint
+	if sum.IsMonotonic() {
+		metricIdentifier := datapointstorage.Identifier(resource, metric, point.Attributes())
+		var keep bool
+		normalizationPoint, keep = m.normalizeMetric(point, metricIdentifier)
+		if !keep {
+			return nil
+		}
+		if normalizationPoint != nil {
+			startTime = timestamppb.New(normalizationPoint.StartTimestamp().AsTime())
+		}
+	} else {
 		metricKind = metricpb.MetricDescriptor_GAUGE
 		startTime = nil
 	}
-	value, valueType := numberDataPointToValue(point)
+	value, valueType := numberDataPointToValue(point, normalizationPoint)
 
-	return &monitoringpb.TimeSeries{
+	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
 		Unit:       metric.Unit(),
 		MetricKind: metricKind,
@@ -687,7 +706,36 @@ func (m *metricMapper) sumPointToTimeSeries(
 				extraLabels,
 			),
 		},
+	}}
+}
+
+// normalizeMetric returns the point that a metric should be normalized against,
+// and whether or not the point should be kept
+func (m *metricMapper) normalizeMetric(point pdata.NumberDataPoint, metricIdentifier string) (*pdata.NumberDataPoint, bool) {
+	var normalizationPoint *pdata.NumberDataPoint
+	start, ok := m.sumCache.Get(metricIdentifier)
+	if ok {
+		if !start.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+			// We found a cached start timestamp that wouldn't produce a valid point.
+			// Drop it and log.
+			m.obs.log.Info(
+				"data point being processed older than last recorded reset, will not be emitted",
+				zap.String("lastRecordedReset", start.Timestamp().String()),
+				zap.String("dataPoint", point.Timestamp().String()),
+			)
+			return nil, false
+		}
+		normalizationPoint = start
 	}
+	if (!ok && point.StartTimestamp().AsTime().IsZero()) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// This is the first time we've seen this metric, or we received
+		// an explicit reset point as described in
+		// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
+		// Record it in history and drop the point.
+		m.sumCache.Set(metricIdentifier, &point)
+		return nil, false
+	}
+	return normalizationPoint, true
 }
 
 func (m *metricMapper) gaugePointToTimeSeries(
@@ -698,7 +746,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	point pdata.NumberDataPoint,
 ) *monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_GAUGE
-	value, valueType := numberDataPointToValue(point)
+	value, valueType := numberDataPointToValue(point, nil)
 
 	return &monitoringpb.TimeSeries{
 		Resource:   resource,
@@ -738,15 +786,24 @@ func (m *metricMapper) metricNameToType(name string) string {
 
 func numberDataPointToValue(
 	point pdata.NumberDataPoint,
+	normalizationPoint *pdata.NumberDataPoint,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
 	if point.ValueType() == pdata.MetricValueTypeInt {
+		val := point.IntVal()
+		if normalizationPoint != nil {
+			val -= normalizationPoint.IntVal()
+		}
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: point.IntVal(),
+				Int64Value: val,
 			}},
 			metricpb.MetricDescriptor_INT64
 	}
+	val := point.DoubleVal()
+	if normalizationPoint != nil {
+		val -= normalizationPoint.DoubleVal()
+	}
 	return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
-			DoubleValue: point.DoubleVal(),
+			DoubleValue: val,
 		}},
 		metricpb.MetricDescriptor_DOUBLE
 }

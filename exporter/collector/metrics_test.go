@@ -30,31 +30,50 @@ import (
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/datapointstorage"
 )
 
 var (
 	start = time.Unix(0, 0)
 )
 
-func newTestMetricMapper() metricMapper {
+func newTestMetricMapper() (metricMapper, func()) {
 	obs := selfObservability{log: zap.NewNop()}
-	return metricMapper{obs, DefaultConfig()}
+	s := make(chan struct{})
+	return metricMapper{
+		obs,
+		DefaultConfig(),
+		datapointstorage.NewCache(s),
+	}, func() { close(s) }
 }
 
 func TestMetricToTimeSeries(t *testing.T) {
 	mr := &monitoredrespb.MonitoredResource{}
 
 	t.Run("Sum", func(t *testing.T) {
-		mapper := newTestMetricMapper()
+		mapper, shutdown := newTestMetricMapper()
+		defer shutdown()
 		metric := pdata.NewMetric()
 		metric.SetDataType(pdata.MetricDataTypeSum)
 		sum := metric.Sum()
 		sum.SetIsMonotonic(true)
 		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+		startTs := pdata.NewTimestampFromTime(start)
+		endTs := pdata.NewTimestampFromTime(start.Add(time.Hour))
 		// Add three points
-		sum.DataPoints().AppendEmpty().SetDoubleVal(10)
-		sum.DataPoints().AppendEmpty().SetDoubleVal(15)
-		sum.DataPoints().AppendEmpty().SetDoubleVal(16)
+		point := sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(10)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(15)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(16)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
 
 		ts := mapper.metricToTimeSeries(
 			mr,
@@ -65,8 +84,78 @@ func TestMetricToTimeSeries(t *testing.T) {
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
 	})
 
+	t.Run("Sum without timestamps", func(t *testing.T) {
+		mapper, shutdown := newTestMetricMapper()
+		defer shutdown()
+		metric := pdata.NewMetric()
+		metric.SetDataType(pdata.MetricDataTypeSum)
+		sum := metric.Sum()
+		sum.SetIsMonotonic(true)
+		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+		startTs := pdata.NewTimestampFromTime(start)
+		endTs := pdata.NewTimestampFromTime(start.Add(time.Hour))
+		// Add three points without start timestamps.
+		// The first one should be dropped to set the start timestamp for the rest
+		point := sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(10)
+		point.SetTimestamp(startTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(15)
+		point.SetTimestamp(endTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(16)
+		point.SetTimestamp(endTs)
+
+		ts := mapper.metricToTimeSeries(
+			mr,
+			labels{},
+			metric,
+		)
+		require.Len(t, ts, 2, "Should create one timeseries for each sum point")
+		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
+		require.Equal(t, ts[0].Points[0].Value.GetDoubleValue(), 5.0, "Should normalize the resulting sum")
+	})
+
+	t.Run("Sum with reset timestamp", func(t *testing.T) {
+		mapper, shutdown := newTestMetricMapper()
+		defer shutdown()
+		metric := pdata.NewMetric()
+		metric.SetDataType(pdata.MetricDataTypeSum)
+		sum := metric.Sum()
+		sum.SetIsMonotonic(true)
+		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+		startTs := pdata.NewTimestampFromTime(start)
+		middleTs := pdata.NewTimestampFromTime(start.Add(30 * time.Minute))
+		endTs := pdata.NewTimestampFromTime(start.Add(time.Hour))
+		// Add three points
+		point := sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(10)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(middleTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(15)
+		// identical start and end indicates a reset point
+		// this point is expected to be dropped, and to normalize subsequent points
+		point.SetStartTimestamp(middleTs)
+		point.SetTimestamp(middleTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(16)
+		point.SetStartTimestamp(middleTs)
+		point.SetTimestamp(endTs)
+
+		ts := mapper.metricToTimeSeries(
+			mr,
+			labels{},
+			metric,
+		)
+		require.Len(t, ts, 2, "Should create one timeseries for each sum point")
+		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
+		require.Equal(t, ts[1].Points[0].Value.GetDoubleValue(), 1.0, "Should normalize the point after the reset")
+	})
+
 	t.Run("Gauge", func(t *testing.T) {
-		mapper := newTestMetricMapper()
+		mapper, shutdown := newTestMetricMapper()
+		defer shutdown()
 		metric := pdata.NewMetric()
 		metric.SetDataType(pdata.MetricDataTypeGauge)
 		gauge := metric.Gauge()
@@ -104,7 +193,8 @@ func TestMergeLabels(t *testing.T) {
 }
 
 func TestHistogramPointToTimeSeries(t *testing.T) {
-	mapper := newTestMetricMapper()
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pdata.NewMetric()
@@ -167,7 +257,8 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
-	mapper := newTestMetricMapper()
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pdata.NewMetric()
@@ -234,7 +325,8 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExemplarNoAttachements(t *testing.T) {
-	mapper := newTestMetricMapper()
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -246,7 +338,8 @@ func TestExemplarNoAttachements(t *testing.T) {
 }
 
 func TestExemplarOnlyDroppedLabels(t *testing.T) {
-	mapper := newTestMetricMapper()
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
@@ -264,7 +357,8 @@ func TestExemplarOnlyDroppedLabels(t *testing.T) {
 }
 
 func TestExemplarOnlyTraceId(t *testing.T) {
-	mapper := newTestMetricMapper()
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	mapper.cfg.ProjectID = "p"
 	exemplar := pdata.NewExemplar()
 	exemplar.SetTimestamp(pdata.NewTimestampFromTime(start))
@@ -288,7 +382,8 @@ func TestExemplarOnlyTraceId(t *testing.T) {
 }
 
 func TestSumPointToTimeSeries(t *testing.T) {
-	mapper := newTestMetricMapper()
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Sum, pdata.NumberDataPoint) {
@@ -312,7 +407,9 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
 		point.SetTimestamp(pdata.NewTimestampFromTime(end))
 
-		ts := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts := tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
 		assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_INT64)
 		assert.Equal(t, ts.Unit, unit)
@@ -332,7 +429,9 @@ func TestSumPointToTimeSeries(t *testing.T) {
 
 		// Test double as well
 		point.SetDoubleVal(float64(value))
-		ts = mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl = mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts = tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
 		assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_DOUBLE)
 		assert.Equal(t, ts.Points[0].Value.GetDoubleValue(), float64(value))
@@ -349,7 +448,9 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		point.SetTimestamp(pdata.NewTimestampFromTime(end))
 
 		// Should output a "pseudo-cumulative" with same interval as the delta
-		ts := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts := tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
 		assert.Equal(t, ts.Points[0].Interval, &monitoringpb.TimeInterval{
 			StartTime: timestamppb.New(start),
@@ -368,14 +469,18 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		point.SetTimestamp(pdata.NewTimestampFromTime(end))
 
 		// Should output a gauge regardless of temporality, only setting end time
-		ts := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts := tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 		assert.Equal(t, ts.Points[0].Interval, &monitoringpb.TimeInterval{
 			EndTime: timestamppb.New(end),
 		})
 
 		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityDelta)
-		ts = mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		tsl = mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts = tsl[0]
 		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 		assert.Equal(t, ts.Points[0].Interval, &monitoringpb.TimeInterval{
 			EndTime: timestamppb.New(end),
@@ -384,19 +489,27 @@ func TestSumPointToTimeSeries(t *testing.T) {
 
 	t.Run("Add labels", func(t *testing.T) {
 		metric, sum, point := newCase()
+		end := start.Add(time.Hour)
+		point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+		point.SetTimestamp(pdata.NewTimestampFromTime(end))
 		extraLabels := map[string]string{"foo": "bar"}
-		ts := mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
+		tsl := mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts := tsl[0]
 		assert.Equal(t, ts.Metric.Labels, extraLabels)
 
 		// Full set of labels
 		point.Attributes().InsertString("baz", "bar")
-		ts = mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
+		tsl = mapper.sumPointToTimeSeries(mr, labels(extraLabels), metric, sum, point)
+		assert.Equal(t, 1, len(tsl))
+		ts = tsl[0]
 		assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 	})
 }
 
 func TestGaugePointToTimeSeries(t *testing.T) {
-	mapper := newTestMetricMapper()
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	mr := &monitoredrespb.MonitoredResource{}
 
 	newCase := func() (pdata.Metric, pdata.Gauge, pdata.NumberDataPoint) {
@@ -452,7 +565,8 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 }
 
 func TestSummaryPointToTimeSeries(t *testing.T) {
-	mapper := newTestMetricMapper()
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	mr := &monitoredrespb.MonitoredResource{}
 
 	metric := pdata.NewMetric()
@@ -524,7 +638,8 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 }
 
 func TestMetricNameToType(t *testing.T) {
-	mapper := newTestMetricMapper()
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	assert.Equal(
 		t,
 		mapper.metricNameToType("foo"),
@@ -599,14 +714,16 @@ func TestNumberDataPointToValue(t *testing.T) {
 	point := pdata.NewNumberDataPoint()
 
 	point.SetIntVal(12)
-	value, valueType := numberDataPointToValue(point)
+	value, valueType := numberDataPointToValue(point, nil)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_INT64)
 	assert.EqualValues(t, value.GetInt64Value(), 12)
 
 	point.SetDoubleVal(12.3)
-	value, valueType = numberDataPointToValue(point)
+	normalizationPoint := pdata.NewNumberDataPoint()
+	normalizationPoint.SetDoubleVal(1)
+	value, valueType = numberDataPointToValue(point, &normalizationPoint)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
+	assert.EqualValues(t, value.GetDoubleValue(), 11.3)
 }
 
 type metricDescriptorTest struct {
@@ -947,7 +1064,8 @@ func TestMetricDescriptorMapping(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			mapper := newTestMetricMapper()
+			mapper, shutdown := newTestMetricMapper()
+			defer shutdown()
 			metric := test.metricCreator()
 			md := mapper.metricDescriptor(metric, test.extraLabels)
 			diff := cmp.Diff(
@@ -1004,7 +1122,8 @@ func TestKnownDomains(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(fmt.Sprintf("%v to %v", test.name, test.metricType), func(t *testing.T) {
-			mapper := newTestMetricMapper()
+			mapper, shutdown := newTestMetricMapper()
+			defer shutdown()
 			if len(test.knownDomains) > 0 {
 				mapper.cfg.MetricConfig.KnownDomains = test.knownDomains
 			}
@@ -1046,7 +1165,8 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			m := newTestMetricMapper()
+			m, shutdown := newTestMetricMapper()
+			defer shutdown()
 			m.cfg.MetricConfig = test.metricConfig
 
 			out := m.instrumentationLibraryToLabels(test.instrumentationLibrary)
