@@ -83,6 +83,9 @@ type options struct {
 
 	// Timeout for all API calls. If not set, defaults to 5 seconds.
 	Timeout time.Duration
+
+	// mapAttributeKey maps otel attribute keys to cloud trace attribute keys
+	mapAttributeKey AttributeKeyMapping
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -127,6 +130,19 @@ func WithTimeout(t time.Duration) func(o *options) {
 	}
 }
 
+// AttributeKeyMapping determines how to map from OpenTelemetry span attribute keys to
+// cloud trace attribute keys.
+type AttributeKeyMapping func(attribute.Key) attribute.Key
+
+// WithAttributeKeyMapping configures how to map OpenTelemetry span attributes
+// to google cloud trace span attributes.  By default, it maps to attributes
+// that are used prominently in the trace UI.
+func WithAttributeKeyMapping(mapping AttributeKeyMapping) func(o *options) {
+	return func(o *options) {
+		o.mapAttributeKey = mapping
+	}
+}
+
 func (o *options) handleError(err error) {
 	if o.errorHandler != nil {
 		o.errorHandler.Handle(err)
@@ -148,7 +164,10 @@ type Exporter struct {
 
 // New creates a new Exporter thats implements trace.Exporter.
 func New(opts ...Option) (*Exporter, error) {
-	o := options{Context: context.Background()}
+	o := options{
+		Context:         context.Background(),
+		mapAttributeKey: defaultAttributeMapping,
+	}
 	for _, opt := range opts {
 		opt(&o)
 	}

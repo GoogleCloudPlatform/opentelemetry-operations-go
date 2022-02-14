@@ -65,7 +65,7 @@ func (e *traceExporter) ExportSpans(ctx context.Context, spanData []sdktrace.Rea
 
 // ConvertSpan converts a ReadOnlySpan to Stackdriver Trace.
 func (e *traceExporter) ConvertSpan(_ context.Context, sd sdktrace.ReadOnlySpan) *tracepb.Span {
-	return protoFromReadOnlySpan(sd, e.projectID)
+	return e.protoFromReadOnlySpan(sd, e.projectID)
 }
 
 func (e *traceExporter) Shutdown(ctx context.Context) error {

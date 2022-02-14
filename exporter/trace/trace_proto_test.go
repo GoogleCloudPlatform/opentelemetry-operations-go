@@ -25,6 +25,15 @@ import (
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 )
 
+func testExporter() *traceExporter {
+	return &traceExporter{
+		o: &options{
+			Context:         context.Background(),
+			mapAttributeKey: defaultAttributeMapping,
+		},
+	}
+}
+
 func genSpanContext() trace.SpanContext {
 	tracer := sdktrace.NewTracerProvider().Tracer("")
 	_, span := tracer.Start(context.Background(), "")
@@ -33,10 +42,12 @@ func genSpanContext() trace.SpanContext {
 
 func TestTraceProto_linksProtoFromLinks(t *testing.T) {
 	t.Run("Should be nil when no links", func(t *testing.T) {
-		assert.Nil(t, linksProtoFromLinks([]sdktrace.Link{}))
+		e := testExporter()
+		assert.Nil(t, e.linksProtoFromLinks([]sdktrace.Link{}))
 	})
 
 	t.Run("Can convert one link", func(t *testing.T) {
+		e := testExporter()
 		spanContext := genSpanContext()
 		link := sdktrace.Link{
 			SpanContext: spanContext,
@@ -44,7 +55,7 @@ func TestTraceProto_linksProtoFromLinks(t *testing.T) {
 				attribute.String("hello", "world"),
 			},
 		}
-		linksPb := linksProtoFromLinks([]sdktrace.Link{link})
+		linksPb := e.linksProtoFromLinks([]sdktrace.Link{link})
 
 		assert.NotNil(t, linksPb)
 		assert.EqualValues(t, linksPb.DroppedLinksCount, 0)
@@ -62,6 +73,7 @@ func TestTraceProto_linksProtoFromLinks(t *testing.T) {
 	})
 
 	t.Run("Drops links when there are more than 128", func(t *testing.T) {
+		e := testExporter()
 		var links []sdktrace.Link
 		for i := 0; i < 148; i++ {
 			links = append(
@@ -73,7 +85,7 @@ func TestTraceProto_linksProtoFromLinks(t *testing.T) {
 					},
 				})
 		}
-		linksPb := linksProtoFromLinks(links)
+		linksPb := e.linksProtoFromLinks(links)
 		assert.NotNil(t, linksPb)
 		assert.EqualValues(t, linksPb.DroppedLinksCount, 20)
 		assert.Len(t, linksPb.Link, maxNumLinks)
