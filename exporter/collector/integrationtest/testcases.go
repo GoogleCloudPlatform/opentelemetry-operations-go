@@ -64,8 +64,7 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_self_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_self_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
-				// Previous exporter did NOT export metric descriptors.
-				// TODO: Add a new test that also checks metric descriptors.
+				// Metric descriptors should not be created under agent.googleapis.com
 				cfg.MetricConfig.SkipCreateMetricDescriptor = true
 				cfg.MetricConfig.ServiceResourceLabels = false
 			},
@@ -75,8 +74,7 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/ops_agent_host_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/ops_agent_host_metrics_expect.json",
 			Configure: func(cfg *collector.Config) {
-				// Previous exporter did NOT export metric descriptors.
-				// TODO: Add a new test that also checks metric descriptors.
+				// Metric descriptors should not be created under agent.googleapis.com
 				cfg.MetricConfig.SkipCreateMetricDescriptor = true
 			},
 		},
@@ -129,5 +127,6 @@ var (
 				}
 			},
 		},
+		// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 	}
 )

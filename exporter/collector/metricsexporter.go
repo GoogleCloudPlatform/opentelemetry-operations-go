@@ -19,7 +19,6 @@ package collector
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"net/url"
@@ -34,7 +33,6 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.uber.org/zap"
-	"golang.org/x/oauth2/google"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
@@ -128,19 +126,7 @@ func NewGoogleCloudMetricsExporter(
 	view.Register(MetricViews()...)
 	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
-
-	// TODO - Share this lookup somewhere
-	if cfg.ProjectID == "" {
-		creds, err := google.FindDefaultCredentials(ctx, monitoring.DefaultAuthScopes()...)
-		// TODO- better error messages, this is copy-pasta from OpenCensus exporter.
-		if err != nil {
-			return nil, fmt.Errorf("google_cloud: %v", err)
-		}
-		if creds.ProjectID == "" {
-			return nil, errors.New("google_cloud: no project found with application default credentials")
-		}
-		cfg.ProjectID = creds.ProjectID
-	}
+	setProjectFromADC(ctx, &cfg, monitoring.DefaultAuthScopes())
 
 	clientOpts, err := generateClientOptions(&cfg.MetricConfig.ClientConfig, cfg.UserAgent)
 	if err != nil {
@@ -216,9 +202,6 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 			}
 		}
 	}
-
-	// TODO: self observability
-
 	return nil
 }
 
@@ -281,7 +264,6 @@ func (me *MetricsExporter) exportMetricDescriptorRunner() {
 }
 
 func (me *MetricsExporter) projectName() string {
-	// TODO set Name field with project ID from config or ADC
 	return fmt.Sprintf("projects/%s", me.cfg.ProjectID)
 }
 
@@ -381,7 +363,6 @@ func (m *metricMapper) metricToTimeSeries(
 			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, points.At(i))
 			timeSeries = append(timeSeries, ts)
 		}
-	// TODO: add cases for other metric data types
 	default:
 		m.obs.log.Error("Unsupported metric data type", zap.Any("data_type", metric.DataType()))
 	}
@@ -772,7 +753,6 @@ func numberDataPointToValue(
 func attributesToLabels(
 	attrs pdata.AttributeMap,
 ) labels {
-	// TODO
 	ls := make(labels, attrs.Len())
 	attrs.Range(func(k string, v pdata.AttributeValue) bool {
 		ls[sanitizeKey(k)] = v.AsString()
