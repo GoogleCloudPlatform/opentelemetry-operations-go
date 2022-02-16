@@ -13,3 +13,5 @@ require (
 )
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../exporter/trace
+
+retract v1.0.0-RC1

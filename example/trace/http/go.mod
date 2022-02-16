@@ -12,3 +12,9 @@ require (
 	go.opentelemetry.io/otel/sdk v1.3.0
 	go.opentelemetry.io/otel/trace v1.3.0
 )
+
+retract (
+	v1.0.0
+	v1.0.0-RC2
+	v1.0.0-RC1
+)
