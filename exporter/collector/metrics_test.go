@@ -513,7 +513,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Same(t, quantileResult.Resource, mr)
 	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary")
 	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
-		"quantile": "1.000000",
+		"quantile": "1",
 	})
 	assert.Nil(t, quantileResult.Metadata)
 	assert.Len(t, quantileResult.Points, 1)

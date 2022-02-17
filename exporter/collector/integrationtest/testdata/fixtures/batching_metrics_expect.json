@@ -67,7 +67,7 @@
             "type": "workload.googleapis.com/testsummary 1",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -97,7 +97,7 @@
             "type": "workload.googleapis.com/testsummary 1",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -127,7 +127,7 @@
             "type": "workload.googleapis.com/testsummary 1",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -217,7 +217,7 @@
             "type": "workload.googleapis.com/testsummary 2",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -247,7 +247,7 @@
             "type": "workload.googleapis.com/testsummary 2",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -277,7 +277,7 @@
             "type": "workload.googleapis.com/testsummary 2",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -367,7 +367,7 @@
             "type": "workload.googleapis.com/testsummary 3",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -397,7 +397,7 @@
             "type": "workload.googleapis.com/testsummary 3",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -427,7 +427,7 @@
             "type": "workload.googleapis.com/testsummary 3",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -517,7 +517,7 @@
             "type": "workload.googleapis.com/testsummary 4",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -547,7 +547,7 @@
             "type": "workload.googleapis.com/testsummary 4",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -577,7 +577,7 @@
             "type": "workload.googleapis.com/testsummary 4",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -667,7 +667,7 @@
             "type": "workload.googleapis.com/testsummary 5",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -697,7 +697,7 @@
             "type": "workload.googleapis.com/testsummary 5",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -727,7 +727,7 @@
             "type": "workload.googleapis.com/testsummary 5",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -817,7 +817,7 @@
             "type": "workload.googleapis.com/testsummary 6",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -847,7 +847,7 @@
             "type": "workload.googleapis.com/testsummary 6",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -877,7 +877,7 @@
             "type": "workload.googleapis.com/testsummary 6",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -967,7 +967,7 @@
             "type": "workload.googleapis.com/testsummary 7",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -997,7 +997,7 @@
             "type": "workload.googleapis.com/testsummary 7",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -1027,7 +1027,7 @@
             "type": "workload.googleapis.com/testsummary 7",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -1117,7 +1117,7 @@
             "type": "workload.googleapis.com/testsummary 8",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -1147,7 +1147,7 @@
             "type": "workload.googleapis.com/testsummary 8",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -1177,7 +1177,7 @@
             "type": "workload.googleapis.com/testsummary 8",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -1267,7 +1267,7 @@
             "type": "workload.googleapis.com/testsummary 9",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -1297,7 +1297,7 @@
             "type": "workload.googleapis.com/testsummary 9",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -1327,7 +1327,7 @@
             "type": "workload.googleapis.com/testsummary 9",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -1417,7 +1417,7 @@
             "type": "workload.googleapis.com/testsummary 10",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -1447,7 +1447,7 @@
             "type": "workload.googleapis.com/testsummary 10",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -1477,7 +1477,7 @@
             "type": "workload.googleapis.com/testsummary 10",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -1567,7 +1567,7 @@
             "type": "workload.googleapis.com/testsummary 11",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -1597,7 +1597,7 @@
             "type": "workload.googleapis.com/testsummary 11",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -1627,7 +1627,7 @@
             "type": "workload.googleapis.com/testsummary 11",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -1717,7 +1717,7 @@
             "type": "workload.googleapis.com/testsummary 12",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -1747,7 +1747,7 @@
             "type": "workload.googleapis.com/testsummary 12",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -1777,7 +1777,7 @@
             "type": "workload.googleapis.com/testsummary 12",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -1867,7 +1867,7 @@
             "type": "workload.googleapis.com/testsummary 13",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -1897,7 +1897,7 @@
             "type": "workload.googleapis.com/testsummary 13",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -1927,7 +1927,7 @@
             "type": "workload.googleapis.com/testsummary 13",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -2017,7 +2017,7 @@
             "type": "workload.googleapis.com/testsummary 14",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -2047,7 +2047,7 @@
             "type": "workload.googleapis.com/testsummary 14",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -2077,7 +2077,7 @@
             "type": "workload.googleapis.com/testsummary 14",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -2167,7 +2167,7 @@
             "type": "workload.googleapis.com/testsummary 15",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -2197,7 +2197,7 @@
             "type": "workload.googleapis.com/testsummary 15",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -2227,7 +2227,7 @@
             "type": "workload.googleapis.com/testsummary 15",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -2317,7 +2317,7 @@
             "type": "workload.googleapis.com/testsummary 16",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -2347,7 +2347,7 @@
             "type": "workload.googleapis.com/testsummary 16",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -2377,7 +2377,7 @@
             "type": "workload.googleapis.com/testsummary 16",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -2467,7 +2467,7 @@
             "type": "workload.googleapis.com/testsummary 17",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -2497,7 +2497,7 @@
             "type": "workload.googleapis.com/testsummary 17",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -2527,7 +2527,7 @@
             "type": "workload.googleapis.com/testsummary 17",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -2617,7 +2617,7 @@
             "type": "workload.googleapis.com/testsummary 18",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -2647,7 +2647,7 @@
             "type": "workload.googleapis.com/testsummary 18",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -2677,7 +2677,7 @@
             "type": "workload.googleapis.com/testsummary 18",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -2767,7 +2767,7 @@
             "type": "workload.googleapis.com/testsummary 19",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -2797,7 +2797,7 @@
             "type": "workload.googleapis.com/testsummary 19",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -2827,7 +2827,7 @@
             "type": "workload.googleapis.com/testsummary 19",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -2917,7 +2917,7 @@
             "type": "workload.googleapis.com/testsummary 20",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -2947,7 +2947,7 @@
             "type": "workload.googleapis.com/testsummary 20",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -2977,7 +2977,7 @@
             "type": "workload.googleapis.com/testsummary 20",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -3067,7 +3067,7 @@
             "type": "workload.googleapis.com/testsummary 21",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -3097,7 +3097,7 @@
             "type": "workload.googleapis.com/testsummary 21",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -3127,7 +3127,7 @@
             "type": "workload.googleapis.com/testsummary 21",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -3217,7 +3217,7 @@
             "type": "workload.googleapis.com/testsummary 22",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -3247,7 +3247,7 @@
             "type": "workload.googleapis.com/testsummary 22",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -3277,7 +3277,7 @@
             "type": "workload.googleapis.com/testsummary 22",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -3367,7 +3367,7 @@
             "type": "workload.googleapis.com/testsummary 23",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -3397,7 +3397,7 @@
             "type": "workload.googleapis.com/testsummary 23",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -3427,7 +3427,7 @@
             "type": "workload.googleapis.com/testsummary 23",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -3517,7 +3517,7 @@
             "type": "workload.googleapis.com/testsummary 24",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -3547,7 +3547,7 @@
             "type": "workload.googleapis.com/testsummary 24",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -3577,7 +3577,7 @@
             "type": "workload.googleapis.com/testsummary 24",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -3667,7 +3667,7 @@
             "type": "workload.googleapis.com/testsummary 25",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -3697,7 +3697,7 @@
             "type": "workload.googleapis.com/testsummary 25",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -3727,7 +3727,7 @@
             "type": "workload.googleapis.com/testsummary 25",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -3817,7 +3817,7 @@
             "type": "workload.googleapis.com/testsummary 26",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -3847,7 +3847,7 @@
             "type": "workload.googleapis.com/testsummary 26",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -3877,7 +3877,7 @@
             "type": "workload.googleapis.com/testsummary 26",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -3967,7 +3967,7 @@
             "type": "workload.googleapis.com/testsummary 27",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -3997,7 +3997,7 @@
             "type": "workload.googleapis.com/testsummary 27",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -4027,7 +4027,7 @@
             "type": "workload.googleapis.com/testsummary 27",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -4117,7 +4117,7 @@
             "type": "workload.googleapis.com/testsummary 28",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -4147,7 +4147,7 @@
             "type": "workload.googleapis.com/testsummary 28",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -4177,7 +4177,7 @@
             "type": "workload.googleapis.com/testsummary 28",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -4267,7 +4267,7 @@
             "type": "workload.googleapis.com/testsummary 29",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -4297,7 +4297,7 @@
             "type": "workload.googleapis.com/testsummary 29",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -4327,7 +4327,7 @@
             "type": "workload.googleapis.com/testsummary 29",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -4417,7 +4417,7 @@
             "type": "workload.googleapis.com/testsummary 30",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -4447,7 +4447,7 @@
             "type": "workload.googleapis.com/testsummary 30",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -4477,7 +4477,7 @@
             "type": "workload.googleapis.com/testsummary 30",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -4567,7 +4567,7 @@
             "type": "workload.googleapis.com/testsummary 31",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -4597,7 +4597,7 @@
             "type": "workload.googleapis.com/testsummary 31",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -4627,7 +4627,7 @@
             "type": "workload.googleapis.com/testsummary 31",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -4717,7 +4717,7 @@
             "type": "workload.googleapis.com/testsummary 32",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -4747,7 +4747,7 @@
             "type": "workload.googleapis.com/testsummary 32",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -4777,7 +4777,7 @@
             "type": "workload.googleapis.com/testsummary 32",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -4867,7 +4867,7 @@
             "type": "workload.googleapis.com/testsummary 33",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -4897,7 +4897,7 @@
             "type": "workload.googleapis.com/testsummary 33",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -4927,7 +4927,7 @@
             "type": "workload.googleapis.com/testsummary 33",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -5017,7 +5017,7 @@
             "type": "workload.googleapis.com/testsummary 34",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -5047,7 +5047,7 @@
             "type": "workload.googleapis.com/testsummary 34",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -5077,7 +5077,7 @@
             "type": "workload.googleapis.com/testsummary 34",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -5167,7 +5167,7 @@
             "type": "workload.googleapis.com/testsummary 35",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -5197,7 +5197,7 @@
             "type": "workload.googleapis.com/testsummary 35",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -5227,7 +5227,7 @@
             "type": "workload.googleapis.com/testsummary 35",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -5317,7 +5317,7 @@
             "type": "workload.googleapis.com/testsummary 36",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -5347,7 +5347,7 @@
             "type": "workload.googleapis.com/testsummary 36",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -5377,7 +5377,7 @@
             "type": "workload.googleapis.com/testsummary 36",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -5467,7 +5467,7 @@
             "type": "workload.googleapis.com/testsummary 37",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -5497,7 +5497,7 @@
             "type": "workload.googleapis.com/testsummary 37",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -5527,7 +5527,7 @@
             "type": "workload.googleapis.com/testsummary 37",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -5617,7 +5617,7 @@
             "type": "workload.googleapis.com/testsummary 38",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -5647,7 +5647,7 @@
             "type": "workload.googleapis.com/testsummary 38",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -5677,7 +5677,7 @@
             "type": "workload.googleapis.com/testsummary 38",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -5767,7 +5767,7 @@
             "type": "workload.googleapis.com/testsummary 39",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -5797,7 +5797,7 @@
             "type": "workload.googleapis.com/testsummary 39",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -5827,7 +5827,7 @@
             "type": "workload.googleapis.com/testsummary 39",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -5917,7 +5917,7 @@
             "type": "workload.googleapis.com/testsummary 40",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -5947,7 +5947,7 @@
             "type": "workload.googleapis.com/testsummary 40",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -5977,7 +5977,7 @@
             "type": "workload.googleapis.com/testsummary 40",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {
@@ -6071,7 +6071,7 @@
             "type": "workload.googleapis.com/testsummary 41",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -6101,7 +6101,7 @@
             "type": "workload.googleapis.com/testsummary 41",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -6131,7 +6131,7 @@
             "type": "workload.googleapis.com/testsummary 41",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {

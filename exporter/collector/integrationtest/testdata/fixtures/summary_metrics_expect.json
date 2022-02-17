@@ -67,7 +67,7 @@
             "type": "workload.googleapis.com/testsummary",
             "labels": {
               "foo": "bar",
-              "quantile": "0.500000"
+              "quantile": "0.5"
             }
           },
           "resource": {
@@ -97,7 +97,7 @@
             "type": "workload.googleapis.com/testsummary",
             "labels": {
               "foo": "bar",
-              "quantile": "0.750000"
+              "quantile": "0.75"
             }
           },
           "resource": {
@@ -127,7 +127,7 @@
             "type": "workload.googleapis.com/testsummary",
             "labels": {
               "foo": "bar",
-              "quantile": "0.900000"
+              "quantile": "0.9"
             }
           },
           "resource": {

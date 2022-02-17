@@ -23,6 +23,7 @@ import (
 	"math"
 	"net/url"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -430,7 +431,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	for i := 0; i < quantiles.Len(); i++ {
 		quantile := quantiles.At(i)
 		pLabel := labels{
-			"quantile": fmt.Sprintf("%f", quantile.Quantile()),
+			"quantile": strconv.FormatFloat(quantile.Quantile(), 'f', -1, 64),
 		}
 		result = append(result, &monitoringpb.TimeSeries{
 			Resource:   resource,
