@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Package spandata defines translators from Trace proto spans to OpenCensus Go spanData.
 package collector
 
 import (
