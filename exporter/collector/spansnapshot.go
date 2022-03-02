@@ -24,6 +24,9 @@ import (
 	apitrace "go.opentelemetry.io/otel/trace"
 )
 
+// spanSnapshot serves the same purpose as
+// https://github.com/open-telemetry/opentelemetry-go/blob/main/sdk/trace/snapshot.go#L28
+// It allows instantiating ReadOnlySpans.
 type spanSnapshot struct {
 	sdktrace.ReadOnlySpan                                                 // so we can inherit the "private" func
 	spanContext, parent                                                   apitrace.SpanContext
