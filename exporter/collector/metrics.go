@@ -739,7 +739,7 @@ func (m *metricMapper) metricNameToType(name string) string {
 func numberDataPointToValue(
 	point pdata.NumberDataPoint,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	if point.Type() == pdata.MetricValueTypeInt {
+	if point.ValueType() == pdata.MetricValueTypeInt {
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
 				Int64Value: point.IntVal(),
 			}},
@@ -962,7 +962,7 @@ func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, m
 	case pdata.MetricDataTypeGauge:
 		kind = metricpb.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
-			typ = metricPointValueType(m.Gauge().DataPoints().At(0).Type())
+			typ = metricPointValueType(m.Gauge().DataPoints().At(0).ValueType())
 		}
 	case pdata.MetricDataTypeSum:
 		if !m.Sum().IsMonotonic() {
@@ -974,7 +974,7 @@ func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, m
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
 		if m.Sum().DataPoints().Len() > 0 {
-			typ = metricPointValueType(m.Sum().DataPoints().At(0).Type())
+			typ = metricPointValueType(m.Sum().DataPoints().At(0).ValueType())
 		}
 	case pdata.MetricDataTypeSummary:
 		kind = metricpb.MetricDescriptor_GAUGE
