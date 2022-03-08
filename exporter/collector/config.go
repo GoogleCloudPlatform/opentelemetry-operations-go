@@ -48,6 +48,17 @@ type ClientConfig struct {
 
 type TraceConfig struct {
 	ClientConfig ClientConfig `mapstructure:",squash"`
+	// AttributeKeyMappings determines how to map from OpenTelemetry attribute keys to
+	// Google Cloud Trace keys.  By default, it changes keys so that they appear more
+	// prominently in the UI.
+	AttributeKeyMappings []AttributeKeyMapping `mapstructure:"attribute_mappings"`
+}
+
+type AttributeKeyMapping struct {
+	// Key is the OpenTelemetry attribute key
+	Key string `mapstructure:"key"`
+	// Replacement is the attribute sent to Google Cloud Trace
+	Replacement string `mapstructure:"replacement"`
 }
 
 type MetricConfig struct {

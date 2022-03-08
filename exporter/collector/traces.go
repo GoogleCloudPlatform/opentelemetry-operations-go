@@ -27,6 +27,7 @@ import (
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
@@ -104,6 +105,9 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 		cloudtrace.WithProjectID(cfg.ProjectID),
 		cloudtrace.WithTimeout(timeout),
 	}
+	if cfg.TraceConfig.AttributeKeyMappings != nil {
+		topts = append(topts, cloudtrace.WithAttributeKeyMapping(mappingFuncFromAKM(cfg.TraceConfig.AttributeKeyMappings)))
+	}
 
 	copts, err := generateClientOptions(&cfg.TraceConfig.ClientConfig, cfg.UserAgent)
 	if err != nil {
@@ -117,6 +121,22 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 	}
 
 	return &TraceExporter{texporter: exp}, nil
+}
+
+func mappingFuncFromAKM(akm []AttributeKeyMapping) func(attribute.Key) attribute.Key {
+	// convert list to map for easy lookups
+	mapFromConfig := map[string]string{}
+	for _, mapping := range akm {
+		mapFromConfig[mapping.Key] = mapping.Replacement
+	}
+	return func(input attribute.Key) attribute.Key {
+		// if a replacement was specified in the config, use it.
+		if replacement, ok := mapFromConfig[string(input)]; ok {
+			return attribute.Key(replacement)
+		}
+		// otherwise, leave the attribute as-is
+		return attribute.Key(input)
+	}
 }
 
 // PushTraces calls texporter.ExportSpan for each span in the given traces
