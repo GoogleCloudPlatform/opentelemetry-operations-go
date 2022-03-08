@@ -672,7 +672,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	var normalizationPoint *pdata.NumberDataPoint
 	if sum.IsMonotonic() {
-		metricIdentifier := datapointstorage.Identifier(resource, metric, point.Attributes())
+		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
 		var keep bool
 		normalizationPoint, keep = m.normalizeMetric(point, metricIdentifier)
 		if !keep {

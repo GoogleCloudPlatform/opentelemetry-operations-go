@@ -20,6 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/model/pdata"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 func TestSetAndGet(t *testing.T) {
@@ -112,4 +113,80 @@ func TestGetPreventsGC(t *testing.T) {
 	assert.True(t, cont)
 	_, found = c["bar"]
 	assert.True(t, found)
+}
+
+func TestIdentifier(t *testing.T) {
+	metricWithName := pdata.NewMetric()
+	metricWithName.SetName("custom.googleapis.com/test.metric")
+	dpWithAttributes := pdata.NewNumberDataPoint()
+	dpWithAttributes.Attributes().Insert("string", pdata.NewAttributeValueString("strval"))
+	dpWithAttributes.Attributes().Insert("bool", pdata.NewAttributeValueBool(true))
+	dpWithAttributes.Attributes().Insert("int", pdata.NewAttributeValueInt(123))
+	monitoredResource := &monitoredrespb.MonitoredResource{
+		Type: "generic_task",
+		Labels: map[string]string{
+			"location": "us-central1-b",
+			"project":  "project-foo",
+		},
+	}
+	extraLabels := map[string]string{
+		"foo":   "bar",
+		"hello": "world",
+	}
+	for _, tc := range []struct {
+		desc        string
+		want        string
+		resource    *monitoredrespb.MonitoredResource
+		extraLabels map[string]string
+		metric      pdata.Metric
+		labels      pdata.AttributeMap
+	}{
+		{
+			desc:   "empty",
+			want:   " - map[] -  -",
+			metric: pdata.NewMetric(),
+			labels: pdata.NewNumberDataPoint().Attributes(),
+		},
+		{
+			desc:   "with name",
+			want:   " - map[] - custom.googleapis.com/test.metric -",
+			metric: metricWithName,
+			labels: pdata.NewNumberDataPoint().Attributes(),
+		},
+		{
+			desc:   "with attributes",
+			want:   " - map[] -  - bool=true int=123 string=strval",
+			metric: pdata.NewMetric(),
+			labels: dpWithAttributes.Attributes(),
+		},
+		{
+			desc:     "with resource",
+			want:     "map[location:us-central1-b project:project-foo] - map[] -  -",
+			resource: monitoredResource,
+			metric:   pdata.NewMetric(),
+			labels:   pdata.NewNumberDataPoint().Attributes(),
+		},
+		{
+			desc:        "with extra labels",
+			want:        " - map[foo:bar hello:world] -  -",
+			metric:      pdata.NewMetric(),
+			labels:      pdata.NewNumberDataPoint().Attributes(),
+			extraLabels: extraLabels,
+		},
+		{
+			desc:        "with all",
+			want:        "map[location:us-central1-b project:project-foo] - map[foo:bar hello:world] - custom.googleapis.com/test.metric - bool=true int=123 string=strval",
+			metric:      metricWithName,
+			labels:      dpWithAttributes.Attributes(),
+			extraLabels: extraLabels,
+			resource:    monitoredResource,
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			got := Identifier(tc.resource, tc.extraLabels, tc.metric, tc.labels)
+			if tc.want != got {
+				t.Errorf("Identifier() = %q; want %q", got, tc.want)
+			}
+		})
+	}
 }

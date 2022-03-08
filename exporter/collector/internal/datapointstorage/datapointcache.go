@@ -81,14 +81,19 @@ func (c Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 }
 
 // Identifier returns the unique string identifier for a metric
-func Identifier(resource *monitoredrespb.MonitoredResource, metric pdata.Metric, labels pdata.AttributeMap) string {
+func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pdata.Metric, labels pdata.AttributeMap) string {
 	var b strings.Builder
 
 	// Resource identifiers
-	fmt.Fprintf(&b, "%v", resource.GetLabels())
+	if resource != nil {
+		fmt.Fprintf(&b, "%v", resource.GetLabels())
+	}
+
+	// Instrumentation library labels and additional resource labels
+	fmt.Fprintf(&b, " - %v", extraLabels)
 
 	// Metric identifiers
-	fmt.Fprintf(&b, " - %s", metric.Name())
+	fmt.Fprintf(&b, " - %s -", metric.Name())
 	labels.Sort().Range(func(k string, v pdata.AttributeValue) bool {
 		fmt.Fprintf(&b, " %s=%s", k, v.AsString())
 		return true
