@@ -28,8 +28,8 @@ import (
 func testExporter() *traceExporter {
 	return &traceExporter{
 		o: &options{
-			Context:         context.Background(),
-			mapAttributeKey: defaultAttributeMapping,
+			Context:      context.Background(),
+			mapAttribute: defaultAttributeMapping,
 		},
 	}
 }

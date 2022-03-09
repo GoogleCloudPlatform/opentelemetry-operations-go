@@ -105,8 +105,8 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 		cloudtrace.WithProjectID(cfg.ProjectID),
 		cloudtrace.WithTimeout(timeout),
 	}
-	if cfg.TraceConfig.AttributeKeyMappings != nil {
-		topts = append(topts, cloudtrace.WithAttributeKeyMapping(mappingFuncFromAKM(cfg.TraceConfig.AttributeKeyMappings)))
+	if cfg.TraceConfig.AttributeMappings != nil {
+		topts = append(topts, cloudtrace.WithAttributeMapping(mappingFuncFromAKM(cfg.TraceConfig.AttributeMappings)))
 	}
 
 	copts, err := generateClientOptions(&cfg.TraceConfig.ClientConfig, cfg.UserAgent)
@@ -123,7 +123,7 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 	return &TraceExporter{texporter: exp}, nil
 }
 
-func mappingFuncFromAKM(akm []AttributeKeyMapping) func(attribute.Key) attribute.Key {
+func mappingFuncFromAKM(akm []AttributeMapping) func(attribute.Key) attribute.Key {
 	// convert list to map for easy lookups
 	mapFromConfig := make(map[string]string, len(akm))
 	for _, mapping := range akm {

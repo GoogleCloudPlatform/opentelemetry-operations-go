@@ -15,6 +15,7 @@
 package collector
 
 import (
+	"fmt"
 	"time"
 
 	"google.golang.org/api/option"
@@ -48,13 +49,14 @@ type ClientConfig struct {
 
 type TraceConfig struct {
 	ClientConfig ClientConfig `mapstructure:",squash"`
-	// AttributeKeyMappings determines how to map from OpenTelemetry attribute keys to
-	// Google Cloud Trace keys.  By default, it changes keys so that they appear more
-	// prominently in the UI.
-	AttributeKeyMappings []AttributeKeyMapping `mapstructure:"attribute_mappings"`
+	// AttributeMappings determines how to map from OpenTelemetry attribute
+	// keys to Google Cloud Trace keys.  By default, it changes http and
+	// service keys so that they appear more prominently in the UI.
+	AttributeMappings []AttributeMapping `mapstructure:"attribute_mappings"`
 }
 
-type AttributeKeyMapping struct {
+// AttributeMapping maps from an OpenTelemetry key to a Google Cloud Trace key.
+type AttributeMapping struct {
 	// Key is the OpenTelemetry attribute key
 	Key string `mapstructure:"key"`
 	// Replacement is the attribute sent to Google Cloud Trace
@@ -113,4 +115,21 @@ func DefaultConfig() Config {
 			ServiceResourceLabels:            true,
 		},
 	}
+}
+
+// ValidateConfig returns an error if the provided configuration is invalid
+func ValidateConfig(cfg Config) error {
+	seenKeys := make(map[string]struct{}, len(cfg.TraceConfig.AttributeMappings))
+	seenReplacements := make(map[string]struct{}, len(cfg.TraceConfig.AttributeMappings))
+	for _, mapping := range cfg.TraceConfig.AttributeMappings {
+		if _, ok := seenKeys[mapping.Key]; ok {
+			return fmt.Errorf("duplicate key in traces.attribute_mappings: %q", mapping.Key)
+		}
+		seenKeys[mapping.Key] = struct{}{}
+		if _, ok := seenReplacements[mapping.Replacement]; ok {
+			return fmt.Errorf("duplicate replacement in traces.attribute_mappings: %q", mapping.Replacement)
+		}
+		seenReplacements[mapping.Replacement] = struct{}{}
+	}
+	return nil
 }

@@ -86,7 +86,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 						Endpoint:    "127.0.0.1:8080",
 						UseInsecure: true,
 					},
-					AttributeKeyMappings: []AttributeKeyMapping{},
+					AttributeMappings: []AttributeMapping{},
 				},
 			},
 			expectedServiceKey: "service.name",

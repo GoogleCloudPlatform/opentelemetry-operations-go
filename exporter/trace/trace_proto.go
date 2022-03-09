@@ -231,7 +231,7 @@ func (e *traceExporter) copyAttributes(out **tracepb.Span_Attributes, in []attri
 		if av == nil {
 			continue
 		}
-		key := e.o.mapAttributeKey(kv.Key)
+		key := e.o.mapAttribute(kv.Key)
 		if len(key) > 128 {
 			dropped++
 			continue
