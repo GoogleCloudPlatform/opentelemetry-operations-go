@@ -125,7 +125,7 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 
 func mappingFuncFromAKM(akm []AttributeKeyMapping) func(attribute.Key) attribute.Key {
 	// convert list to map for easy lookups
-	mapFromConfig := map[string]string{}
+	mapFromConfig := make(map[string]string, len(akm))
 	for _, mapping := range akm {
 		mapFromConfig[mapping.Key] = mapping.Replacement
 	}
@@ -135,7 +135,7 @@ func mappingFuncFromAKM(akm []AttributeKeyMapping) func(attribute.Key) attribute
 			return attribute.Key(replacement)
 		}
 		// otherwise, leave the attribute as-is
-		return attribute.Key(input)
+		return input
 	}
 }
 
