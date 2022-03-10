@@ -629,7 +629,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				gauge := metric.Gauge()
 				point := gauge.DataPoints().AppendEmpty()
 				point.SetDoubleVal(10)
-				point.Attributes().InsertString("test_label", "test_value")
+				point.Attributes().InsertString("test.label", "test_value")
 				return metric
 			},
 			expected: []*metricpb.MetricDescriptor{
@@ -662,7 +662,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
 				point := sum.DataPoints().AppendEmpty()
 				point.SetDoubleVal(10)
-				point.Attributes().InsertString("test_label", "test_value")
+				point.Attributes().InsertString("test.label", "test_value")
 				return metric
 			},
 			expected: []*metricpb.MetricDescriptor{
@@ -695,7 +695,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityDelta)
 				point := sum.DataPoints().AppendEmpty()
 				point.SetDoubleVal(10)
-				point.Attributes().InsertString("test_label", "test_value")
+				point.Attributes().InsertString("test.label", "test_value")
 				return metric
 			},
 			expected: []*metricpb.MetricDescriptor{
@@ -728,7 +728,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
 				point := sum.DataPoints().AppendEmpty()
 				point.SetDoubleVal(10)
-				point.Attributes().InsertString("test_label", "test_value")
+				point.Attributes().InsertString("test.label", "test_value")
 				return metric
 			},
 			expected: []*metricpb.MetricDescriptor{
@@ -759,7 +759,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				histogram := metric.Histogram()
 				histogram.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
 				point := histogram.DataPoints().AppendEmpty()
-				point.Attributes().InsertString("test_label", "test_value")
+				point.Attributes().InsertString("test.label", "test_value")
 				return metric
 			},
 			expected: []*metricpb.MetricDescriptor{
@@ -814,7 +814,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				metric.SetUnit("1")
 				summary := metric.Summary()
 				point := summary.DataPoints().AppendEmpty()
-				point.Attributes().InsertString("test_label", "value")
+				point.Attributes().InsertString("test.label", "value")
 				return metric
 			},
 			expected: []*metricpb.MetricDescriptor{
@@ -876,7 +876,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				for i := 0; i < 5; i++ {
 					point := gauge.DataPoints().AppendEmpty()
 					point.SetDoubleVal(10)
-					point.Attributes().InsertString("test_label", "test_value")
+					point.Attributes().InsertString("test.label", "test_value")
 				}
 				return metric
 			},
@@ -910,13 +910,13 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
 				point := sum.DataPoints().AppendEmpty()
 				point.SetDoubleVal(10)
-				point.Attributes().InsertString("test_label", "test_value")
+				point.Attributes().InsertString("test.label", "test_value")
 				return metric
 			},
 			extraLabels: labels{
-				"service_name":        "myservice",
-				"service_instance_id": "abcdef",
-				"service_namespace":   "myns",
+				"service.name":        "myservice",
+				"service.instance_id": "abcdef",
+				"service.namespace":   "myns",
 			},
 			expected: []*metricpb.MetricDescriptor{
 				{
@@ -938,6 +938,40 @@ func TestMetricDescriptorMapping(t *testing.T) {
 							Key: "service_namespace",
 						},
 						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Attributes that collide",
+			metricCreator: func() pdata.Metric {
+				metric := pdata.NewMetric()
+				metric.SetDataType(pdata.MetricDataTypeGauge)
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				gauge := metric.Gauge()
+				point := gauge.DataPoints().AppendEmpty()
+				point.SetDoubleVal(10)
+				point.Attributes().InsertString("test.label", "test_value")
+				point.Attributes().InsertString("test_label", "other_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
+					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							// even though we had two attributes originally,
+							// they are a single label after sanitization
 							Key: "test_label",
 						},
 					},
