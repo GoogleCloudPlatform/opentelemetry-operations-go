@@ -57,9 +57,10 @@ func (ts *testServer) CreateSpan(context.Context, *cloudtracepb.Span) (*cloudtra
 
 func TestGoogleCloudTraceExport(t *testing.T) {
 	type testCase struct {
-		name        string
-		cfg         Config
-		expectedErr string
+		name               string
+		cfg                Config
+		expectedErr        string
+		expectedServiceKey string
 	}
 
 	testCases := []testCase{
@@ -74,6 +75,21 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 					},
 				},
 			},
+			expectedServiceKey: "g.co/gae/app/module",
+		},
+		{
+			name: "With Empty Mapping",
+			cfg: Config{
+				ProjectID: "idk",
+				TraceConfig: TraceConfig{
+					ClientConfig: ClientConfig{
+						Endpoint:    "127.0.0.1:8080",
+						UseInsecure: true,
+					},
+					AttributeMappings: []AttributeMapping{},
+				},
+			},
+			expectedServiceKey: "service.name",
 		},
 	}
 
@@ -108,12 +124,15 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			span := ispans.Spans().AppendEmpty()
 			span.SetName(spanName)
 			span.SetStartTimestamp(pdata.NewTimestampFromTime(testTime))
+			span.Attributes().InsertString("service.name", "myservice")
 			err = sde.PushTraces(ctx, traces)
 			assert.NoError(t, err)
 
 			r := <-reqCh
 			assert.Len(t, r.Spans, 1)
 			assert.Equal(t, spanName, r.Spans[0].GetDisplayName().Value)
+			_, ok := r.Spans[0].GetAttributes().GetAttributeMap()[test.expectedServiceKey]
+			assert.True(t, ok)
 			assert.Equal(t, timestamppb.New(testTime), r.Spans[0].StartTime)
 		})
 	}
