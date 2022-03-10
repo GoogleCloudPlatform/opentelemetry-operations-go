@@ -818,7 +818,7 @@ func (m *metricMapper) labelDescriptors(
 	result := []*label.LabelDescriptor{}
 	for key := range extraLabels {
 		result = append(result, &label.LabelDescriptor{
-			Key: key,
+			Key: sanitizeKey(key),
 		})
 	}
 
@@ -826,13 +826,13 @@ func (m *metricMapper) labelDescriptors(
 	addAttributes := func(attr pdata.AttributeMap) {
 		attr.Range(func(key string, _ pdata.AttributeValue) bool {
 			// Skip keys that have already been set
-			if _, ok := seenKeys[key]; ok {
+			if _, ok := seenKeys[sanitizeKey(key)]; ok {
 				return true
 			}
 			result = append(result, &label.LabelDescriptor{
-				Key: key,
+				Key: sanitizeKey(key),
 			})
-			seenKeys[key] = struct{}{}
+			seenKeys[sanitizeKey(key)] = struct{}{}
 			return true
 		})
 	}
