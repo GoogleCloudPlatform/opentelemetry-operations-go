@@ -715,16 +715,14 @@ func TestNumberDataPointToValue(t *testing.T) {
 	point := pdata.NewNumberDataPoint()
 
 	point.SetIntVal(12)
-	value, valueType := numberDataPointToValue(point, nil)
+	value, valueType := numberDataPointToValue(point)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_INT64)
 	assert.EqualValues(t, value.GetInt64Value(), 12)
 
 	point.SetDoubleVal(12.3)
-	normalizationPoint := pdata.NewNumberDataPoint()
-	normalizationPoint.SetDoubleVal(1)
-	value, valueType = numberDataPointToValue(point, &normalizationPoint)
+	value, valueType = numberDataPointToValue(point)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.EqualValues(t, value.GetDoubleValue(), 11.3)
+	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
 }
 
 type metricDescriptorTest struct {

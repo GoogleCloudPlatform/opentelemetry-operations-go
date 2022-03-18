@@ -669,23 +669,20 @@ func (m *metricMapper) sumPointToTimeSeries(
 	point pdata.NumberDataPoint,
 ) []*monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
-	startTime := timestamppb.New(point.StartTimestamp().AsTime())
-	var normalizationPoint *pdata.NumberDataPoint
+	var startTime *timestamppb.Timestamp
 	if sum.IsMonotonic() {
 		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
-		var keep bool
-		normalizationPoint, keep = m.normalizeMetric(point, metricIdentifier)
-		if !keep {
+		normalizedPoint := m.normalizeNumberDataPoint(point, metricIdentifier)
+		if normalizedPoint == nil {
 			return nil
 		}
-		if normalizationPoint != nil {
-			startTime = timestamppb.New(normalizationPoint.StartTimestamp().AsTime())
-		}
+		point = *normalizedPoint
+		startTime = timestamppb.New(normalizedPoint.StartTimestamp().AsTime())
 	} else {
 		metricKind = metricpb.MetricDescriptor_GAUGE
 		startTime = nil
 	}
-	value, valueType := numberDataPointToValue(point, normalizationPoint)
+	value, valueType := numberDataPointToValue(point)
 
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
@@ -709,11 +706,12 @@ func (m *metricMapper) sumPointToTimeSeries(
 	}}
 }
 
-// normalizeMetric returns the point that a metric should be normalized against,
-// and whether or not the point should be kept
-func (m *metricMapper) normalizeMetric(point pdata.NumberDataPoint, metricIdentifier string) (*pdata.NumberDataPoint, bool) {
-	var normalizationPoint *pdata.NumberDataPoint
-	start, ok := m.sumCache.Get(metricIdentifier)
+// normalizeNumberDataPoint returns a point which has been normalized against an initial
+// start point, or nil if the point should be dropped.
+func (m *metricMapper) normalizeNumberDataPoint(point pdata.NumberDataPoint, identifier string) *pdata.NumberDataPoint {
+	// if the point doesn't need to be normalized, use original point
+	normalizedPoint := &point
+	start, ok := m.sumCache.Get(identifier)
 	if ok {
 		if !start.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 			// We found a cached start timestamp that wouldn't produce a valid point.
@@ -723,19 +721,31 @@ func (m *metricMapper) normalizeMetric(point pdata.NumberDataPoint, metricIdenti
 				zap.String("lastRecordedReset", start.Timestamp().String()),
 				zap.String("dataPoint", point.Timestamp().String()),
 			)
-			return nil, false
+			return nil
 		}
-		normalizationPoint = start
+		// Make a copy so we don't mutate underlying data
+		newPoint := pdata.NewNumberDataPoint()
+		point.CopyTo(newPoint)
+		// Use the start timestamp from the normalization point
+		newPoint.SetStartTimestamp(start.Timestamp())
+		// Adjust the value based on the start point's value
+		switch newPoint.ValueType() {
+		case pdata.MetricValueTypeInt:
+			newPoint.SetIntVal(point.IntVal() - start.IntVal())
+		case pdata.MetricValueTypeDouble:
+			newPoint.SetDoubleVal(point.DoubleVal() - start.DoubleVal())
+		}
+		normalizedPoint = &newPoint
 	}
 	if (!ok && point.StartTimestamp().AsTime().IsZero()) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// This is the first time we've seen this metric, or we received
 		// an explicit reset point as described in
 		// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
 		// Record it in history and drop the point.
-		m.sumCache.Set(metricIdentifier, &point)
-		return nil, false
+		m.sumCache.Set(identifier, &point)
+		return nil
 	}
-	return normalizationPoint, true
+	return normalizedPoint
 }
 
 func (m *metricMapper) gaugePointToTimeSeries(
@@ -746,7 +756,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	point pdata.NumberDataPoint,
 ) *monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_GAUGE
-	value, valueType := numberDataPointToValue(point, nil)
+	value, valueType := numberDataPointToValue(point)
 
 	return &monitoringpb.TimeSeries{
 		Resource:   resource,
@@ -786,24 +796,15 @@ func (m *metricMapper) metricNameToType(name string) string {
 
 func numberDataPointToValue(
 	point pdata.NumberDataPoint,
-	normalizationPoint *pdata.NumberDataPoint,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
 	if point.ValueType() == pdata.MetricValueTypeInt {
-		val := point.IntVal()
-		if normalizationPoint != nil {
-			val -= normalizationPoint.IntVal()
-		}
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: val,
+				Int64Value: point.IntVal(),
 			}},
 			metricpb.MetricDescriptor_INT64
 	}
-	val := point.DoubleVal()
-	if normalizationPoint != nil {
-		val -= normalizationPoint.DoubleVal()
-	}
 	return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
-			DoubleValue: val,
+			DoubleValue: point.DoubleVal(),
 		}},
 		metricpb.MetricDescriptor_DOUBLE
 }
