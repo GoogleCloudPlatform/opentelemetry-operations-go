@@ -114,6 +114,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 		require.Len(t, ts, 2, "Should create one timeseries for each sum point")
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
 		require.Equal(t, ts[0].Points[0].Value.GetDoubleValue(), 5.0, "Should normalize the resulting sum")
+		require.Equal(t, ts[0].Points[0].Interval.StartTime, timestamppb.New(start), "Should use the first timestamp as the start time for the rest of the points")
 	})
 
 	t.Run("Sum with reset timestamp", func(t *testing.T) {
