@@ -31,7 +31,7 @@ func NewGoogleCloudLogsExporter(ctx context.Context, cfg Config) (*LogsExporter,
 	if err != nil {
 		return nil, err
 	}
-	logger := client.Logger("my-log") // TODO(@damemi): detect log name
+	logger := client.Logger("my-log") // TODO(@damemi) detect log name
 	return &LogsExporter{
 		client: client,
 		logger: logger,
