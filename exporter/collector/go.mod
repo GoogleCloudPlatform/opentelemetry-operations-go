@@ -19,6 +19,7 @@ require (
 )
 
 require (
+	cloud.google.com/go/logging v1.4.2
 	cloud.google.com/go/monitoring v1.2.0
 	cloud.google.com/go/trace v1.0.0
 	github.com/benbjohnson/clock v1.3.0 // indirect
