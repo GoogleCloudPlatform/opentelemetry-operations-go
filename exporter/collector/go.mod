@@ -22,6 +22,7 @@ require (
 	cloud.google.com/go/monitoring v1.4.0
 	cloud.google.com/go/trace v1.2.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.0.0-00010101000000-000000000000
+ 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/google/go-cmp v0.5.7
 	go.opentelemetry.io/collector/pdata v0.49.0
 	go.uber.org/zap v1.21.0
