@@ -737,7 +737,7 @@ func (m *metricMapper) normalizeNumberDataPoint(point pdata.NumberDataPoint, ide
 		}
 		normalizedPoint = &newPoint
 	}
-	if (!ok && point.StartTimestamp().AsTime().IsZero()) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+	if (!ok && point.StartTimestamp() == 0) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// This is the first time we've seen this metric, or we received
 		// an explicit reset point as described in
 		// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps

@@ -35,7 +35,7 @@ import (
 )
 
 var (
-	start = time.Unix(0, 0)
+	start = time.Unix(1000, 1000)
 )
 
 func newTestMetricMapper() (metricMapper, func()) {
@@ -586,6 +586,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	quantile.SetQuantile(1.0)
 	quantile.SetValue(1.0)
 	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
 	point.SetTimestamp(pdata.NewTimestampFromTime(end))
 	ts := mapper.metricToTimeSeries(mr, labels{}, metric)
 	assert.Len(t, ts, 3)
