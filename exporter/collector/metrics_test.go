@@ -614,7 +614,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, sumResult.Points[0].Value.GetDoubleValue(), sum)
 	// Test count mapping
 	assert.Equal(t, countResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_INT64)
+	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.Equal(t, countResult.Unit, unit)
 	assert.Same(t, countResult.Resource, mr)
 	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_count")
@@ -625,7 +625,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 		StartTime: timestamppb.New(start),
 		EndTime:   timestamppb.New(end),
 	})
-	assert.Equal(t, countResult.Points[0].Value.GetInt64Value(), int64(count))
+	assert.Equal(t, countResult.Points[0].Value.GetDoubleValue(), float64(count))
 	// Test quantile mapping
 	assert.Equal(t, quantileResult.MetricKind, metricpb.MetricDescriptor_GAUGE)
 	assert.Equal(t, quantileResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
@@ -956,7 +956,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 					DisplayName: "test.metric_count",
 					Type:        "workload.googleapis.com/test.metric_count",
 					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-					ValueType:   metricpb.MetricDescriptor_INT64,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
 					Description: "Description",
 					Labels: []*label.LabelDescriptor{

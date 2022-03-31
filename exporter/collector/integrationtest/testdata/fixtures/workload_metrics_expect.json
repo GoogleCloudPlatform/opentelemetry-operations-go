@@ -3499,7 +3499,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3507,7 +3507,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -3567,7 +3567,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3575,7 +3575,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -3635,7 +3635,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3643,7 +3643,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
