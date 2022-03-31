@@ -523,7 +523,7 @@ func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitorin
 	}
 
 	mean := float64(0)
-	if point.Count() > 0 { // Avoid divide-by-zero
+	if !math.IsNaN(point.Sum()) && point.Count() > 0 { // Avoid divide-by-zero
 		mean = float64(point.Sum() / float64(point.Count()))
 	}
 
@@ -584,11 +584,16 @@ func (m *metricMapper) exponentialHistogramPoint(point pdata.ExponentialHistogra
 		}
 	}
 
+	mean := float64(0)
+	if !math.IsNaN(point.Sum()) && point.Count() > 0 { // Avoid divide-by-zero
+		mean = float64(point.Sum() / float64(point.Count()))
+	}
+
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distribution.Distribution{
 				Count:         int64(point.Count()),
-				Mean:          float64(point.Sum() / float64(point.Count())),
+				Mean:          mean,
 				BucketCounts:  counts,
 				BucketOptions: bucketOptions,
 				Exemplars:     m.exemplars(point.Exemplars()),

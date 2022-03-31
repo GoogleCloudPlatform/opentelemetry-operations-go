@@ -16,6 +16,7 @@ package collector
 
 import (
 	"fmt"
+	"math"
 	"testing"
 	"time"
 
@@ -319,6 +320,100 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
 }
 
+func TestEmptyHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myhist")
+	metric.SetDataType(pdata.MetricDataTypeHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.Histogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.SetBucketCounts([]uint64{0, 0, 0, 0, 0})
+	point.SetCount(0)
+	point.SetSum(0)
+	point.SetExplicitBounds([]float64{10, 20, 30, 40})
+
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
+	// Verify aspects
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
+
+	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	}, ts.Points[0].Interval)
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(0), hdp.Count)
+	assert.ElementsMatch(t, []int64{0, 0, 0, 0, 0}, hdp.BucketCounts)
+	// NaN sum produces a mean of 0
+	assert.Equal(t, float64(0), hdp.Mean)
+	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
+}
+
+func TestNaNSumHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myhist")
+	metric.SetDataType(pdata.MetricDataTypeHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.Histogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.SetBucketCounts([]uint64{1, 2, 3, 4, 5})
+	point.SetCount(15)
+	point.SetSum(math.NaN())
+	point.SetExplicitBounds([]float64{10, 20, 30, 40})
+
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
+	// Verify aspects
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
+
+	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	}, ts.Points[0].Interval)
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(15), hdp.Count)
+	assert.ElementsMatch(t, []int64{1, 2, 3, 4, 5}, hdp.BucketCounts)
+	// NaN sum produces a mean of 0
+	assert.Equal(t, float64(0), hdp.Mean)
+	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
+}
+
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
@@ -390,6 +485,106 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	err = ex.Attachments[1].UnmarshalTo(dropped)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
+}
+
+func TestNaNSumExponentialHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myexphist")
+	metric.SetDataType(pdata.MetricDataTypeExponentialHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.ExponentialHistogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.Positive().SetBucketCounts([]uint64{1, 2, 3})
+	point.Negative().SetBucketCounts([]uint64{4, 5})
+	point.SetZeroCount(6)
+	point.SetCount(21)
+	point.SetScale(-1)
+	point.SetSum(math.NaN())
+
+	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
+	// Verify aspects
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
+
+	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	}, ts.Points[0].Interval)
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(21), hdp.Count)
+	assert.ElementsMatch(t, []int64{15, 1, 2, 3, 0}, hdp.BucketCounts)
+	assert.Equal(t, float64(0), hdp.Mean)
+	assert.Equal(t, float64(4), hdp.BucketOptions.GetExponentialBuckets().GrowthFactor)
+	assert.Equal(t, float64(1), hdp.BucketOptions.GetExponentialBuckets().Scale)
+	assert.Equal(t, int32(3), hdp.BucketOptions.GetExponentialBuckets().NumFiniteBuckets)
+}
+
+func TestZeroCountExponentialHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myexphist")
+	metric.SetDataType(pdata.MetricDataTypeExponentialHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.ExponentialHistogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.Positive().SetBucketCounts([]uint64{0, 0, 0})
+	point.Negative().SetBucketCounts([]uint64{0, 0})
+	point.SetZeroCount(0)
+	point.SetCount(0)
+	point.SetScale(-1)
+	point.SetSum(0)
+
+	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
+	// Verify aspects
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
+
+	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	}, ts.Points[0].Interval)
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(0), hdp.Count)
+	assert.ElementsMatch(t, []int64{0, 0, 0, 0, 0}, hdp.BucketCounts)
+	assert.Equal(t, float64(0), hdp.Mean)
+	assert.Equal(t, float64(4), hdp.BucketOptions.GetExponentialBuckets().GrowthFactor)
+	assert.Equal(t, float64(1), hdp.BucketOptions.GetExponentialBuckets().Scale)
+	assert.Equal(t, int32(3), hdp.BucketOptions.GetExponentialBuckets().NumFiniteBuckets)
 }
 
 func TestExemplarNoAttachements(t *testing.T) {
