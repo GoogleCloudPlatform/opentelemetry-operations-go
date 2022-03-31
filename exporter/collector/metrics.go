@@ -349,7 +349,7 @@ func (m *metricMapper) metricToTimeSeries(
 		points := gauge.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
-			timeSeries = append(timeSeries, ts)
+			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeSummary:
 		summary := metric.Summary()
@@ -363,14 +363,14 @@ func (m *metricMapper) metricToTimeSeries(
 		points := hist.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i))
-			timeSeries = append(timeSeries, ts)
+			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, points.At(i))
-			timeSeries = append(timeSeries, ts)
+			timeSeries = append(timeSeries, ts...)
 		}
 	default:
 		m.obs.log.Error("Unsupported metric data type", zap.Any("data_type", metric.DataType()))
@@ -386,6 +386,10 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	sum pdata.Summary,
 	point pdata.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.
+		return nil
+	}
 	sumName, countName := summaryMetricNames(metric.Name())
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
@@ -599,13 +603,17 @@ func (m *metricMapper) histogramToTimeSeries(
 	metric pdata.Metric,
 	_ pdata.Histogram,
 	point pdata.HistogramDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.
+		return nil
+	}
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.histogramPoint(point)
-	return &monitoringpb.TimeSeries{
+	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
 		Unit:       metric.Unit(),
 		MetricKind: metricKind,
@@ -624,7 +632,7 @@ func (m *metricMapper) histogramToTimeSeries(
 				extraLabels,
 			),
 		},
-	}
+	}}
 }
 
 func (m *metricMapper) exponentialHistogramToTimeSeries(
@@ -633,13 +641,17 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	metric pdata.Metric,
 	_ pdata.ExponentialHistogram,
 	point pdata.ExponentialHistogramDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.
+		return nil
+	}
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.exponentialHistogramPoint(point)
-	return &monitoringpb.TimeSeries{
+	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
 		Unit:       metric.Unit(),
 		MetricKind: metricKind,
@@ -658,7 +670,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 				extraLabels,
 			),
 		},
-	}
+	}}
 }
 
 func (m *metricMapper) sumPointToTimeSeries(
@@ -670,6 +682,11 @@ func (m *metricMapper) sumPointToTimeSeries(
 ) []*monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	var startTime *timestamppb.Timestamp
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.  This may be a staleness marker from
+		// prometheus.
+		return nil
+	}
 	if sum.IsMonotonic() {
 		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
 		normalizedPoint := m.normalizeNumberDataPoint(point, metricIdentifier)
@@ -754,11 +771,15 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	metric pdata.Metric,
 	gauge pdata.Gauge,
 	point pdata.NumberDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.
+		return nil
+	}
 	metricKind := metricpb.MetricDescriptor_GAUGE
 	value, valueType := numberDataPointToValue(point)
 
-	return &monitoringpb.TimeSeries{
+	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
 		Unit:       metric.Unit(),
 		MetricKind: metricKind,
@@ -776,7 +797,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 				extraLabels,
 			),
 		},
-	}
+	}}
 }
 
 // Returns any configured prefix to add to unknown metric name.

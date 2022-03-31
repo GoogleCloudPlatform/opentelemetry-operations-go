@@ -332,7 +332,7 @@
                                   }
                                ],
                                "timeUnixNano":"1639079496964000000",
-                               "asDouble":0
+                               "flags":1
                             }
                          ]
                       }
