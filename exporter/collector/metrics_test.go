@@ -158,6 +158,38 @@ func TestMetricToTimeSeries(t *testing.T) {
 		require.Equal(t, ts[1].Points[0].Value.GetDoubleValue(), 1.0, "Should normalize the point after the reset")
 	})
 
+	t.Run("Sum with no value", func(t *testing.T) {
+		mapper, shutdown := newTestMetricMapper()
+		defer shutdown()
+		metric := pdata.NewMetric()
+		metric.SetDataType(pdata.MetricDataTypeSum)
+		sum := metric.Sum()
+		sum.SetIsMonotonic(true)
+		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+		startTs := pdata.NewTimestampFromTime(start)
+		endTs := pdata.NewTimestampFromTime(start.Add(time.Hour))
+		// Add three points
+		point := sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(10)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(15)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
+		// The last point has no value
+		point = sum.DataPoints().AppendEmpty()
+		point.SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
+		ts := mapper.metricToTimeSeries(
+			mr,
+			labels{},
+			metric,
+		)
+		require.Len(t, ts, 2, "Should create one timeseries for each sum point, but omit the stale point")
+		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
+	})
+
 	t.Run("Gauge", func(t *testing.T) {
 		mapper, shutdown := newTestMetricMapper()
 		defer shutdown()
@@ -175,6 +207,27 @@ func TestMetricToTimeSeries(t *testing.T) {
 			metric,
 		)
 		require.Len(t, ts, 3, "Should create one timeseries for each gauge point")
+		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
+	})
+
+	t.Run("Gauge with no value", func(t *testing.T) {
+		mapper, shutdown := newTestMetricMapper()
+		defer shutdown()
+		metric := pdata.NewMetric()
+		metric.SetDataType(pdata.MetricDataTypeGauge)
+		gauge := metric.Gauge()
+		// Add three points
+		gauge.DataPoints().AppendEmpty().SetIntVal(10)
+		gauge.DataPoints().AppendEmpty().SetIntVal(15)
+		// The last point has no value
+		gauge.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
+		ts := mapper.metricToTimeSeries(
+			mr,
+			labels{},
+			metric,
+		)
+		require.Len(t, ts, 2, "Should create one timeseries for each gauge point, except the point without a value")
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
 	})
 }
@@ -223,7 +276,12 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pdata.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	ts := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	// Add a second point with no value
+	hist.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
 	// Verify aspects
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
@@ -289,7 +347,12 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pdata.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	ts := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	// Add a second point with no value
+	hist.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
+	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
 	// Verify aspects
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
@@ -396,6 +459,8 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		metric.SetDataType(pdata.MetricDataTypeSum)
 		sum := metric.Sum()
 		point := sum.DataPoints().AppendEmpty()
+		// Add a second point with no value
+		sum.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
 		return metric, sum, point
 	}
 
@@ -522,6 +587,8 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 		metric.SetDataType(pdata.MetricDataTypeGauge)
 		gauge := metric.Gauge()
 		point := gauge.DataPoints().AppendEmpty()
+		// Add a second point with no value
+		gauge.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
 		return metric, gauge, point
 	}
 
@@ -534,7 +601,9 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	end := start.Add(time.Hour)
 	point.SetTimestamp(pdata.NewTimestampFromTime(end))
 
-	ts := mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	tsl := mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
 	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_INT64)
 	assert.Equal(t, ts.Unit, unit)
@@ -553,19 +622,25 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 
 	// Test double as well
 	point.SetDoubleVal(float64(value))
-	ts = mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	tsl = mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	assert.Len(t, tsl, 1)
+	ts = tsl[0]
 	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.Equal(t, ts.Points[0].Value.GetDoubleValue(), float64(value))
 
 	// Add extra labels
 	extraLabels := map[string]string{"foo": "bar"}
-	ts = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	tsl = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	assert.Len(t, tsl, 1)
+	ts = tsl[0]
 	assert.Equal(t, ts.Metric.Labels, extraLabels)
 
 	// Full set of labels
 	point.Attributes().InsertString("baz", "bar")
-	ts = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	tsl = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	assert.Len(t, tsl, 1)
+	ts = tsl[0]
 	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 }
 
@@ -592,6 +667,10 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	end := start.Add(time.Hour)
 	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
 	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+
+	// Add a second point with no value
+	summary.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
 	ts := mapper.metricToTimeSeries(mr, labels{}, metric)
 	assert.Len(t, ts, 3)
 	sumResult := ts[0]

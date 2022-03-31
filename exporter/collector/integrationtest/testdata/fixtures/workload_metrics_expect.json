@@ -368,36 +368,6 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/rabbitmq_channel_acks_uncommitted",
-            "labels": {
-              "job": "default/rabbitmq/0"
-            }
-          },
-          "resource": {
-            "type": "k8s_container",
-            "labels": {
-              "cluster_name": "rabbitmq-test-dev",
-              "container_name": "rabbitmq",
-              "location": "us-central1-c",
-              "namespace_name": "default",
-              "pod_name": "rabbitmq-server-0"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 0
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
             "type": "workload.googleapis.com/rabbitmq_consumer_prefetch",
             "labels": {
               "job": "default/rabbitmq/0"
@@ -6326,11 +6296,7 @@
               }
             }
           ]
-        }
-      ]
-    },
-    {
-      "timeSeries": [
+        },
         {
           "metric": {
             "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
@@ -6363,7 +6329,11 @@
               }
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "timeSeries": [
         {
           "metric": {
             "type": "workload.googleapis.com/erlang_vm_msacc_emulator_seconds_total",
@@ -6454,7 +6424,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "203"
+                  "int64Value": "202"
                 }
               }
             ]
