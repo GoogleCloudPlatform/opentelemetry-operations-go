@@ -416,14 +416,14 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			Resource:   resource,
 			Unit:       metric.Unit(),
 			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
-			ValueType:  metricpb.MetricDescriptor_INT64,
+			ValueType:  metricpb.MetricDescriptor_DOUBLE,
 			Points: []*monitoringpb.Point{{
 				Interval: &monitoringpb.TimeInterval{
 					StartTime: startTime,
 					EndTime:   endTime,
 				},
-				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
-					Int64Value: int64(point.Count()),
+				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+					DoubleValue: float64(point.Count()),
 				}},
 			}},
 			Metric: &metricpb.Metric{
@@ -951,7 +951,7 @@ func (m *metricMapper) summaryMetricDescriptors(
 			Type:        m.metricNameToType(countName),
 			Labels:      labels,
 			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-			ValueType:   metricpb.MetricDescriptor_INT64,
+			ValueType:   metricpb.MetricDescriptor_DOUBLE,
 			Unit:        pm.Unit(),
 			Description: pm.Description(),
 			DisplayName: countName,
