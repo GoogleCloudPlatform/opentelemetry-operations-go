@@ -500,25 +500,43 @@ func (m *metricMapper) exemplars(exs pdata.ExemplarSlice) []*distribution.Distri
 // histogramPoint maps a histogram data point into a GCM point.
 func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitoringpb.TypedValue {
 	counts := make([]int64, len(point.BucketCounts()))
+	var mean, deviation, prevBound float64
+
 	for i, v := range point.BucketCounts() {
 		counts[i] = int64(v)
 	}
 
-	mean := float64(0)
 	if !math.IsNaN(point.Sum()) && point.Count() > 0 { // Avoid divide-by-zero
 		mean = float64(point.Sum() / float64(point.Count()))
+	}
+
+	bounds := point.ExplicitBounds()
+	// Calculate the sum of squared deviation.
+	for i, bound := range bounds {
+		// Assume all points in the bucket occur at the middle of the bucket range
+		middleOfBucket := (prevBound + bound) / 2
+		deviation += float64(counts[i]) * (middleOfBucket - mean) * (middleOfBucket - mean)
+		prevBound = bound
+	}
+	// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
+	// Make sure we have a count for that bucket, just in-case.
+	if len(counts) == len(bounds)+1 {
+		// Assume points in the infinity bucket are at the top of the previous bucket
+		middleOfInfBucket := prevBound
+		deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
 	}
 
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distribution.Distribution{
-				Count:        int64(point.Count()),
-				Mean:         mean,
-				BucketCounts: counts,
+				Count:                 int64(point.Count()),
+				Mean:                  mean,
+				BucketCounts:          counts,
+				SumOfSquaredDeviation: deviation,
 				BucketOptions: &distribution.Distribution_BucketOptions{
 					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
 						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
-							Bounds: point.ExplicitBounds(),
+							Bounds: bounds,
 						},
 					},
 				},
