@@ -114,6 +114,114 @@ func TestValidTraceContextHeaderFormats(t *testing.T) {
 	}
 }
 
+func TestOneWayPropagatorExtract(t *testing.T) {
+	testCases := []struct {
+		key      string
+		traceID  string
+		spanID   string
+		flagPart string
+	}{
+		{
+			"X-Cloud-Trace-Context",
+			validTraceIDStr,
+			validSpanIDStr,
+			"1",
+		},
+		{
+			"X-Cloud-Trace-Context",
+			validTraceIDStr,
+			validSpanIDStr,
+			"0",
+		},
+		{
+			"x-cloud-trace-context",
+			validTraceIDStr,
+			validSpanIDStr,
+			"0",
+		},
+	}
+
+	for _, c := range testCases {
+		req := httptest.NewRequest("GET", "http://example.com", nil)
+		value := fmt.Sprintf("%s/%s;o=%s", c.traceID, c.spanID, c.flagPart)
+		req.Header.Set(c.key, value)
+
+		ctx := context.Background()
+		propagator := CloudTraceOneWayPropagator{}
+		ctx = propagator.Extract(ctx, propagation.HeaderCarrier(req.Header))
+
+		sc := trace.SpanContextFromContext(ctx)
+
+		sid, err := strconv.ParseUint(sc.SpanID().String(), 16, 64)
+		if err != nil {
+			t.Errorf("SpanID can't be convert to uint64: %v", err)
+		}
+		sidStr := fmt.Sprintf("%d", sid)
+
+		flag := fmt.Sprintf("%d", sc.TraceFlags())
+
+		if sc.TraceID().String() != c.traceID {
+			t.Errorf("TraceID unmatch: expected %v, but got %v", c.traceID, sc.TraceID())
+		}
+		if sidStr != c.spanID {
+			t.Errorf("SpanID unmatch: expected %v, but got %v", c.spanID, sidStr)
+		}
+		if flag != c.flagPart {
+			t.Errorf("FlagPart unmatch: expected %v, but got %v", c.flagPart, flag)
+		}
+	}
+}
+
+func TestOneWayPropagatorInject(t *testing.T) {
+	propagator := CloudTraceOneWayPropagator{}
+
+	testCases := []struct {
+		name        string
+		scc         trace.SpanContextConfig
+		wantHeaders map[string]string
+	}{
+		{
+			"valid TraceID and SpanID with sampled flag",
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: trace.FlagsSampled,
+			},
+			map[string]string{
+				TraceparentHeaderName: fmt.Sprintf("00-%s-%s-01", validTraceID.String(), validSpanID.String()),
+			},
+		},
+		{
+			"valid TraceID and SpanID without sampled flag",
+			trace.SpanContextConfig{
+				TraceID: validTraceID,
+				SpanID:  validSpanID,
+			},
+			map[string]string{
+				TraceparentHeaderName: fmt.Sprintf("00-%s-%s-00", validTraceID.String(), validSpanID.String()),
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			header := http.Header{}
+			ctx := trace.ContextWithSpanContext(
+				context.Background(),
+				trace.NewSpanContext(tc.scc),
+			)
+			propagator.Inject(ctx, propagation.HeaderCarrier(header))
+
+			for h, v := range tc.wantHeaders {
+				result, want := header.Get(h), v
+				if diff := cmp.Diff(want, result); diff != "" {
+					t.Errorf("%v, header: %s diff: %s", tc.name, h, diff)
+				}
+			}
+		})
+	}
+}
+
 func TestCloudTraceContextHeaderExtract(t *testing.T) {
 	testCases := []struct {
 		key      string
