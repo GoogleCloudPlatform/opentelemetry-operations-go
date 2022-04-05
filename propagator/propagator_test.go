@@ -188,7 +188,7 @@ func TestOneWayPropagatorInject(t *testing.T) {
 				TraceFlags: trace.FlagsSampled,
 			},
 			map[string]string{
-				TraceparentHeaderName: fmt.Sprintf("00-%s-%s-01", validTraceID.String(), validSpanID.String()),
+				traceparentHeaderName: fmt.Sprintf("00-%s-%s-01", validTraceID.String(), validSpanID.String()),
 			},
 		},
 		{
@@ -198,7 +198,7 @@ func TestOneWayPropagatorInject(t *testing.T) {
 				SpanID:  validSpanID,
 			},
 			map[string]string{
-				TraceparentHeaderName: fmt.Sprintf("00-%s-%s-00", validTraceID.String(), validSpanID.String()),
+				traceparentHeaderName: fmt.Sprintf("00-%s-%s-00", validTraceID.String(), validSpanID.String()),
 			},
 		},
 	}

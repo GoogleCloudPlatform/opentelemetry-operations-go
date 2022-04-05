@@ -42,9 +42,9 @@ var traceContextHeaderRe = regexp.MustCompile(traceContextHeaderFormat)
 // one element in the list.
 var cloudTraceContextHeaders = []string{TraceContextHeaderName}
 
-// TraceparentHeaderName is the HTTP header field for w3c standard trace information
+// traceparentHeaderName is the HTTP header field for w3c standard trace information
 // https://www.w3.org/TR/trace-context/
-const TraceparentHeaderName = "traceparent"
+const traceparentHeaderName = "traceparent"
 
 type errInvalidHeader struct {
 	header string
@@ -68,14 +68,14 @@ func (p CloudTraceOneWayPropagator) Extract(ctx context.Context, carrier propaga
 	}
 	sc, err := spanContextFromXCTCHeader(header)
 	if err != nil {
-		log.Printf("CloudTraceFormatPropagator: %v", err)
+		log.Printf("CloudTraceOneWayPropagator: %v", err)
 		return ctx
 	}
 	return trace.ContextWithRemoteSpanContext(ctx, sc)
 }
 
 func (p CloudTraceOneWayPropagator) Fields() []string {
-	return []string{TraceContextHeaderName, TraceparentHeaderName}
+	return []string{traceparentHeaderName}
 }
 
 var _ propagation.TextMapPropagator = CloudTraceOneWayPropagator{}
