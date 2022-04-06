@@ -28,12 +28,6 @@
                    }
                 },
                 {
-                   "key":"service.name",
-                   "value":{
-                      "stringValue":"default/rabbitmq/0"
-                   }
-                },
-                {
                    "key":"k8s.cluster.name",
                    "value":{
                       "stringValue":"rabbitmq-test-dev"
