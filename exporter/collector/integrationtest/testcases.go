@@ -85,6 +85,7 @@ var (
 			Configure: func(cfg *collector.Config) {
 				cfg.MetricConfig.Prefix = "workload.googleapis.com/"
 				cfg.MetricConfig.SkipCreateMetricDescriptor = true
+				cfg.MetricConfig.ServiceResourceLabels = false
 			},
 		},
 		{

@@ -22,15 +22,9 @@
                    }
                 },
                 {
-                   "key":"instance",
+                   "key":"service.instance.id",
                    "value":{
                       "stringValue":"10.92.5.2:15692"
-                   }
-                },
-                {
-                   "key":"job",
-                   "value":{
-                      "stringValue":"default/rabbitmq/0"
                    }
                 },
                 {

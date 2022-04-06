@@ -16,15 +16,9 @@
                    }
                 },
                 {
-                   "key":"instance",
+                   "key":"service.instance.id",
                    "value":{
                       "stringValue":"127.0.0.1:10254"
-                   }
-                },
-                {
-                   "key":"job",
-                   "value":{
-                      "stringValue":"clustermetrics-node"
                    }
                 },
                 {
@@ -40,13 +34,13 @@
                    }
                 },
                 {
-                   "key":"port",
+                   "key":"net.host.port",
                    "value":{
                       "stringValue":"10254"
                    }
                 },
                 {
-                   "key":"scheme",
+                   "key":"http.scheme",
                    "value":{
                       "stringValue":"http"
                    }
@@ -283,15 +277,9 @@
                    }
                 },
                 {
-                   "key":"instance",
+                   "key":"service.instance.id",
                    "value":{
                       "stringValue":"127.0.0.1:10254"
-                   }
-                },
-                {
-                   "key":"job",
-                   "value":{
-                      "stringValue":"clustermetrics-node"
                    }
                 },
                 {
@@ -307,13 +295,13 @@
                    }
                 },
                 {
-                   "key":"port",
+                   "key":"net.host.port",
                    "value":{
                       "stringValue":"10254"
                    }
                 },
                 {
-                   "key":"scheme",
+                   "key":"http.scheme",
                    "value":{
                       "stringValue":"http"
                    }
@@ -550,15 +538,9 @@
                    }
                 },
                 {
-                   "key":"instance",
+                   "key":"service.instance.id",
                    "value":{
                       "stringValue":"127.0.0.1:10254"
-                   }
-                },
-                {
-                   "key":"job",
-                   "value":{
-                      "stringValue":"clustermetrics-node"
                    }
                 },
                 {
@@ -574,13 +556,13 @@
                    }
                 },
                 {
-                   "key":"port",
+                   "key":"net.host.port",
                    "value":{
                       "stringValue":"10254"
                    }
                 },
                 {
-                   "key":"scheme",
+                   "key":"http.scheme",
                    "value":{
                       "stringValue":"http"
                    }
@@ -817,15 +799,9 @@
                    }
                 },
                 {
-                   "key":"instance",
+                   "key":"service.instance.id",
                    "value":{
                       "stringValue":"127.0.0.1:10254"
-                   }
-                },
-                {
-                   "key":"job",
-                   "value":{
-                      "stringValue":"clustermetrics-node"
                    }
                 },
                 {
@@ -841,13 +817,13 @@
                    }
                 },
                 {
-                   "key":"port",
+                   "key":"net.host.port",
                    "value":{
                       "stringValue":"10254"
                    }
                 },
                 {
-                   "key":"scheme",
+                   "key":"http.scheme",
                    "value":{
                       "stringValue":"http"
                    }
@@ -1064,15 +1040,9 @@
                    }
                 },
                 {
-                   "key":"instance",
+                   "key":"service.instance.id",
                    "value":{
                       "stringValue":"127.0.0.1:10254"
-                   }
-                },
-                {
-                   "key":"job",
-                   "value":{
-                      "stringValue":"clustermetrics-node"
                    }
                 },
                 {
@@ -1088,13 +1058,13 @@
                    }
                 },
                 {
-                   "key":"port",
+                   "key":"net.host.port",
                    "value":{
                       "stringValue":"10254"
                    }
                 },
                 {
-                   "key":"scheme",
+                   "key":"http.scheme",
                    "value":{
                       "stringValue":"http"
                    }
@@ -1331,15 +1301,9 @@
                    }
                 },
                 {
-                   "key":"instance",
+                   "key":"service.instance.id",
                    "value":{
                       "stringValue":"127.0.0.1:10254"
-                   }
-                },
-                {
-                   "key":"job",
-                   "value":{
-                      "stringValue":"clustermetrics-node"
                    }
                 },
                 {
@@ -1355,13 +1319,13 @@
                    }
                 },
                 {
-                   "key":"port",
+                   "key":"net.host.port",
                    "value":{
                       "stringValue":"10254"
                    }
                 },
                 {
-                   "key":"scheme",
+                   "key":"http.scheme",
                    "value":{
                       "stringValue":"http"
                    }
