@@ -179,12 +179,12 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		monitoredResource, extraResourceLabels := me.mapper.resourceToMonitoredResource(rm.Resource())
-		ilms := rm.InstrumentationLibraryMetrics()
+		ilms := rm.ScopeMetrics()
 		for j := 0; j < ilms.Len(); j++ {
 			ilm := ilms.At(j)
 
-			instrumentationLibraryLabels := me.mapper.instrumentationLibraryToLabels(ilm.InstrumentationLibrary())
-			metricLabels := mergeLabels(nil, instrumentationLibraryLabels, extraResourceLabels)
+			instrumentationScopeLabels := me.mapper.instrumentationScopeToLabels(ilm.Scope())
+			metricLabels := mergeLabels(nil, instrumentationScopeLabels, extraResourceLabels)
 
 			mes := ilm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
@@ -319,7 +319,7 @@ func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, ts []*mo
 	)
 }
 
-func (m *metricMapper) instrumentationLibraryToLabels(il pdata.InstrumentationLibrary) labels {
+func (m *metricMapper) instrumentationScopeToLabels(il pdata.InstrumentationScope) labels {
 	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
 		return labels{}
 	}
@@ -836,10 +836,10 @@ func numberDataPointToValue(
 }
 
 func attributesToLabels(
-	attrs pdata.AttributeMap,
+	attrs pdata.Map,
 ) labels {
 	ls := make(labels, attrs.Len())
-	attrs.Range(func(k string, v pdata.AttributeValue) bool {
+	attrs.Range(func(k string, v pdata.Value) bool {
 		ls[sanitizeKey(k)] = v.AsString()
 		return true
 	})
@@ -907,8 +907,8 @@ func (m *metricMapper) labelDescriptors(
 	}
 
 	seenKeys := map[string]struct{}{}
-	addAttributes := func(attr pdata.AttributeMap) {
-		attr.Range(func(key string, _ pdata.AttributeValue) bool {
+	addAttributes := func(attr pdata.Map) {
+		attr.Range(func(key string, _ pdata.Value) bool {
 			// Skip keys that have already been set
 			if _, ok := seenKeys[sanitizeKey(key)]; ok {
 				return true

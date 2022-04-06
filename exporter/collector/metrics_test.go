@@ -932,9 +932,9 @@ func TestAttributesToLabels(t *testing.T) {
 	// string to string
 	assert.Equal(
 		t,
-		attributesToLabels(pdata.NewAttributeMapFromMap(map[string]pdata.AttributeValue{
-			"foo": pdata.NewAttributeValueString("bar"),
-			"bar": pdata.NewAttributeValueString("baz"),
+		attributesToLabels(pdata.NewMapFromRaw(map[string]interface{}{
+			"foo": "bar",
+			"bar": "baz",
 		})),
 		labels{"foo": "bar", "bar": "baz"},
 	)
@@ -942,11 +942,11 @@ func TestAttributesToLabels(t *testing.T) {
 	// various key special cases
 	assert.Equal(
 		t,
-		attributesToLabels(pdata.NewAttributeMapFromMap(map[string]pdata.AttributeValue{
-			"foo.bar":   pdata.NewAttributeValueString("bar"),
-			"_foo":      pdata.NewAttributeValueString("bar"),
-			"123.hello": pdata.NewAttributeValueString("bar"),
-			"":          pdata.NewAttributeValueString("bar"),
+		attributesToLabels(pdata.NewMapFromRaw(map[string]interface{}{
+			"foo.bar":   "bar",
+			"_foo":      "bar",
+			"123.hello": "bar",
+			"":          "bar",
 		})),
 		labels{
 			"foo_bar":       "bar",
@@ -956,26 +956,18 @@ func TestAttributesToLabels(t *testing.T) {
 		},
 	)
 
-	attribSlice := pdata.NewAttributeValueArray()
-	attribSlice.SliceVal().AppendEmpty().SetStringVal("x")
-	attribSlice.SliceVal().AppendEmpty()
-	attribSlice.SliceVal().AppendEmpty().SetStringVal("y")
-
-	attribMap := pdata.NewAttributeValueMap()
-	attribMap.MapVal().InsertString("a", "b")
-
 	// value special cases
 	assert.Equal(
 		t,
-		attributesToLabels(pdata.NewAttributeMapFromMap(map[string]pdata.AttributeValue{
-			"a": pdata.NewAttributeValueBool(true),
-			"b": pdata.NewAttributeValueBool(false),
-			"c": pdata.NewAttributeValueInt(12),
-			"d": pdata.NewAttributeValueDouble(12.3),
-			"e": pdata.NewAttributeValueEmpty(),
-			"f": pdata.NewAttributeValueBytes([]byte{0xde, 0xad, 0xbe, 0xef}),
-			"g": attribSlice,
-			"h": attribMap,
+		attributesToLabels(pdata.NewMapFromRaw(map[string]interface{}{
+			"a": true,
+			"b": false,
+			"c": int64(12),
+			"d": float64(12.3),
+			"e": nil,
+			"f": []byte{0xde, 0xad, 0xbe, 0xef},
+			"g": []interface{}{"x", nil, "y"},
+			"h": map[string]interface{}{"a": "b"},
 		})),
 		labels{
 			"a": "true",
@@ -1445,34 +1437,34 @@ func TestKnownDomains(t *testing.T) {
 	}
 }
 
-func TestInstrumentationLibraryToLabels(t *testing.T) {
-	newInstrumentationLibrary := func(name, version string) pdata.InstrumentationLibrary {
-		il := pdata.NewInstrumentationLibrary()
+func TestInstrumentationScopeToLabels(t *testing.T) {
+	newInstrumentationScope := func(name, version string) pdata.InstrumentationScope {
+		il := pdata.NewInstrumentationScope()
 		il.SetName("foo")
 		il.SetVersion("1.2.3")
 		return il
 	}
 
 	tests := []struct {
-		name                   string
-		instrumentationLibrary pdata.InstrumentationLibrary
-		metricConfig           MetricConfig
-		output                 labels
+		name                 string
+		InstrumentationScope pdata.InstrumentationScope
+		metricConfig         MetricConfig
+		output               labels
 	}{{
-		name:                   "fetchFromInstrumentationLibrary",
-		metricConfig:           MetricConfig{InstrumentationLibraryLabels: true},
-		instrumentationLibrary: newInstrumentationLibrary("foo", "1.2.3"),
-		output:                 labels{"instrumentation_source": "foo", "instrumentation_version": "1.2.3"},
+		name:                 "fetchFromInstrumentationScope",
+		metricConfig:         MetricConfig{InstrumentationLibraryLabels: true},
+		InstrumentationScope: newInstrumentationScope("foo", "1.2.3"),
+		output:               labels{"instrumentation_source": "foo", "instrumentation_version": "1.2.3"},
 	}, {
-		name:                   "disabledInConfig",
-		metricConfig:           MetricConfig{InstrumentationLibraryLabels: false},
-		instrumentationLibrary: newInstrumentationLibrary("foo", "1.2.3"),
-		output:                 labels{},
+		name:                 "disabledInConfig",
+		metricConfig:         MetricConfig{InstrumentationLibraryLabels: false},
+		InstrumentationScope: newInstrumentationScope("foo", "1.2.3"),
+		output:               labels{},
 	}, {
-		name:                   "notSetInInstrumentationLibrary",
-		metricConfig:           MetricConfig{InstrumentationLibraryLabels: true},
-		instrumentationLibrary: pdata.NewInstrumentationLibrary(),
-		output:                 labels{"instrumentation_source": "", "instrumentation_version": ""},
+		name:                 "notSetInInstrumentationScope",
+		metricConfig:         MetricConfig{InstrumentationLibraryLabels: true},
+		InstrumentationScope: pdata.NewInstrumentationScope(),
+		output:               labels{"instrumentation_source": "", "instrumentation_version": ""},
 	}}
 
 	for _, test := range tests {
@@ -1481,7 +1473,7 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 			defer shutdown()
 			m.cfg.MetricConfig = test.metricConfig
 
-			out := m.instrumentationLibraryToLabels(test.instrumentationLibrary)
+			out := m.instrumentationScopeToLabels(test.InstrumentationScope)
 
 			assert.Equal(t, out, test.output)
 		})
