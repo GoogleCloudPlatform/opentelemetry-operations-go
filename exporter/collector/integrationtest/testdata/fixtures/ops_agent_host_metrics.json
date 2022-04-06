@@ -28,7 +28,7 @@
                         }
                     },
                     {
-                        "key": "host.name",
+                        "key": "net.host.name",
                         "value": {
                             "stringValue": "ops-agent-metrics.c.josh-opsagenttester.internal"
                         }
@@ -886,7 +886,7 @@
                         }
                     },
                     {
-                        "key": "host.name",
+                        "key": "net.host.name",
                         "value": {
                             "stringValue": "ops-agent-metrics.c.josh-opsagenttester.internal"
                         }
@@ -1080,7 +1080,7 @@
                         }
                     },
                     {
-                        "key": "host.name",
+                        "key": "net.host.name",
                         "value": {
                             "stringValue": "ops-agent-metrics.c.josh-opsagenttester.internal"
                         }
@@ -1175,7 +1175,7 @@
                         }
                     },
                     {
-                        "key": "host.name",
+                        "key": "net.host.name",
                         "value": {
                             "stringValue": "ops-agent-metrics.c.josh-opsagenttester.internal"
                         }
@@ -1866,7 +1866,7 @@
                         }
                     },
                     {
-                        "key": "host.name",
+                        "key": "net.host.name",
                         "value": {
                             "stringValue": "ops-agent-metrics.c.josh-opsagenttester.internal"
                         }
@@ -1928,7 +1928,7 @@
                         }
                     },
                     {
-                        "key": "host.name",
+                        "key": "net.host.name",
                         "value": {
                             "stringValue": "ops-agent-metrics.c.josh-opsagenttester.internal"
                         }
@@ -2470,7 +2470,7 @@
                         }
                     },
                     {
-                        "key": "host.name",
+                        "key": "net.host.name",
                         "value": {
                             "stringValue": "ops-agent-metrics.c.josh-opsagenttester.internal"
                         }
@@ -2760,7 +2760,7 @@
                         }
                     },
                     {
-                        "key": "host.name",
+                        "key": "net.host.name",
                         "value": {
                             "stringValue": "ops-agent-metrics.c.josh-opsagenttester.internal"
                         }
