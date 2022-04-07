@@ -133,9 +133,9 @@ lint: $(TOOLS_DIR)/golangci-lint $(TOOLS_DIR)/misspell
 	done
 	$(TOOLS_DIR)/misspell -w $(ALL_DOCS)
 	set -e; for dir in $(ALL_GO_MOD_DIRS) $(TOOLS_MOD_DIR); do \
-	  echo "go mod tidy in $${dir}"; \
+	  echo "go mod tidy -compat=1.17 in $${dir}"; \
 	  (cd "$${dir}" && \
-	    go mod tidy); \
+	    go mod tidy -compat=1.17); \
 	done
 
 generate: $(TOOLS_DIR)/stringer $(TOOLS_DIR)/protoc
@@ -152,7 +152,7 @@ for-all:
 
 .PHONY: gotidy
 gotidy:
-	$(MAKE) for-all CMD="go mod tidy"
+	$(MAKE) for-all CMD="go mod tidy -compat=1.17"
 
 .PHONY: update-dep
 update-dep:
