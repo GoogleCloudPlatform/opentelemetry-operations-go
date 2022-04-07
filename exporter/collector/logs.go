@@ -29,10 +29,17 @@ import (
 )
 
 type LogsExporter struct {
-	client           *logging.Client
-	logger           *logging.Logger
-	obs              selfObservability
-	parseHttpRequest bool
+	cfg    Config
+	obs    selfObservability
+	mapper logMapper
+
+	client *logging.Client
+	logger *logging.Logger
+}
+
+type logMapper struct {
+	obs selfObservability
+	cfg Config
 }
 
 func NewGoogleCloudLogsExporter(
@@ -45,15 +52,19 @@ func NewGoogleCloudLogsExporter(
 		return nil, err
 	}
 	logger := client.Logger("my-log") // TODO(@damemi) detect log name
+	obs := selfObservability{
+		log: log,
+	}
 	return &LogsExporter{
-		client: client,
-		logger: logger,
-
-		obs: selfObservability{
-			log: log,
+		cfg: cfg,
+		obs: obs,
+		mapper: logMapper{
+			obs: obs,
+			cfg: cfg,
 		},
 
-		parseHttpRequest: cfg.LoggingConfig.ParseHttpRequest,
+		client: client,
+		logger: logger,
 	}, nil
 }
 
@@ -71,7 +82,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 			ill := rl.InstrumentationLibraryLogs().At(j)
 			for k := 0; k < ill.LogRecords().Len(); k++ {
 				log := ill.LogRecords().At(k)
-				entry, err := l.logToEntry(log, make(map[string]interface{}), mr)
+				entry, err := l.mapper.logToEntry(log, mr)
 				if err != nil {
 					logPushErrors = append(logPushErrors, err)
 				} else {
@@ -86,22 +97,17 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 	return nil
 }
 
-func (l *LogsExporter) logToEntry(
+func (l *logMapper) logToEntry(
 	log pdata.LogRecord,
-	attributes map[string]interface{},
 	mr *monitoredres.MonitoredResource,
 ) (logging.Entry, error) {
 	entry := logging.Entry{
-		Timestamp: log.Timestamp().AsTime(),
-		Severity:  logging.Severity(log.SeverityNumber()),
-		Trace:     log.TraceID().HexString(),
-		SpanID:    log.SpanID().HexString(),
-		Resource:  mr,
+		Resource: mr,
 	}
 
 	logBody := log.Body().BytesVal()
 
-	if l.parseHttpRequest {
+	if l.cfg.LoggingConfig.ParseHttpRequest {
 		httpRequest, strippedLogBody, err := parseHttpRequest(logBody)
 		if err != nil {
 			l.obs.log.Debug("error parsing HTTPRequest", zap.Error(err))
@@ -112,11 +118,7 @@ func (l *LogsExporter) logToEntry(
 	}
 
 	if len(logBody) > 0 {
-		unmarshalledLogBody := make(map[string]interface{})
-		err := json.Unmarshal(logBody, &unmarshalledLogBody)
-		if err != nil {
-			entry.Payload = unmarshalledLogBody
-		}
+		entry.Payload = json.RawMessage(logBody)
 	}
 
 	return entry, nil
@@ -180,7 +182,7 @@ func parseHttpRequest(message []byte) (*logging.HTTPRequest, []byte, error) {
 func extractHttpRequestFromLog(message []byte) (*httpRequestLog, []byte, error) {
 	httpRequestKey := "httpRequest" // TODO(@braydonk) Should this come from the config?
 
-	unmarshalledMessage := make(map[string]interface{})
+	var unmarshalledMessage map[string]interface{}
 	if err := json.Unmarshal(message, &unmarshalledMessage); err != nil {
 		return nil, message, err
 	}

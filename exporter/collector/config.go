@@ -120,6 +120,7 @@ func DefaultConfig() Config {
 			InstrumentationLibraryLabels:     true,
 			ServiceResourceLabels:            true,
 		},
+		LoggingConfig: LoggingConfig{},
 	}
 }
 
