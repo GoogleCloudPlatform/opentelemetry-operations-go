@@ -1,3 +1,17 @@
+// Copyright 2022 Google LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package collector
 
 import (
@@ -59,7 +73,7 @@ func TestLogMapping(t *testing.T) {
 		{
 			name: "log with json and httpRequest, empty monitoredresource",
 			loggingConfig: LoggingConfig{
-				ParseHttpRequest: true,
+				ParseHTTPRequest: true,
 			},
 			log: func() pdata.LogRecord {
 				log := pdata.NewLogRecord()
@@ -89,7 +103,7 @@ func TestLogMapping(t *testing.T) {
 			expectedEntry: logging.Entry{
 				Payload: json.RawMessage(`{"message":"hello!"}`),
 				HTTPRequest: &logging.HTTPRequest{
-					Request:                        makeExpectedHttpReq("GET", "https://www.example.com", "https://www.example2.com", "test", nil),
+					Request:                        makeExpectedHTTPReq("GET", "https://www.example.com", "https://www.example2.com", "test", nil),
 					RequestSize:                    1,
 					Status:                         200,
 					ResponseSize:                   1,
@@ -119,7 +133,7 @@ func TestLogMapping(t *testing.T) {
 	}
 }
 
-func makeExpectedHttpReq(method, url, referer, userAgent string, body io.Reader) *http.Request {
+func makeExpectedHTTPReq(method, url, referer, userAgent string, body io.Reader) *http.Request {
 	req, _ := http.NewRequest(method, url, body)
 	req.Header.Set("Referer", referer)
 	req.Header.Set("User-Agent", userAgent)

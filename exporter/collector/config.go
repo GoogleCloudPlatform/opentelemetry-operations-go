@@ -58,7 +58,7 @@ type TraceConfig struct {
 }
 
 type LoggingConfig struct {
-	ParseHttpRequest bool `mapstructure:"parse_http_request"`
+	ParseHTTPRequest bool `mapstructure:"parse_http_request"`
 }
 
 // AttributeMapping maps from an OpenTelemetry key to a Google Cloud Trace key.

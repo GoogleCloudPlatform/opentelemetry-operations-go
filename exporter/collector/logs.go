@@ -107,8 +107,8 @@ func (l *logMapper) logToEntry(
 
 	logBody := log.Body().BytesVal()
 
-	if l.cfg.LoggingConfig.ParseHttpRequest {
-		httpRequest, strippedLogBody, err := parseHttpRequest(logBody)
+	if l.cfg.LoggingConfig.ParseHTTPRequest {
+		httpRequest, strippedLogBody, err := parseHTTPRequest(logBody)
 		if err != nil {
 			l.obs.log.Debug("error parsing HTTPRequest", zap.Error(err))
 		} else {
@@ -144,8 +144,8 @@ type httpRequestLog struct {
 	Protocol                       string `json:"protocol"`
 }
 
-func parseHttpRequest(message []byte) (*logging.HTTPRequest, []byte, error) {
-	parsedLog, strippedMessage, err := extractHttpRequestFromLog(message)
+func parseHTTPRequest(message []byte) (*logging.HTTPRequest, []byte, error) {
+	parsedLog, strippedMessage, err := extractHTTPRequestFromLog(message)
 	if err != nil {
 		return nil, message, err
 	}
@@ -179,7 +179,7 @@ func parseHttpRequest(message []byte) (*logging.HTTPRequest, []byte, error) {
 	return httpRequest, strippedMessage, nil
 }
 
-func extractHttpRequestFromLog(message []byte) (*httpRequestLog, []byte, error) {
+func extractHTTPRequestFromLog(message []byte) (*httpRequestLog, []byte, error) {
 	httpRequestKey := "httpRequest" // TODO(@braydonk) Should this come from the config?
 
 	var unmarshalledMessage map[string]interface{}
@@ -196,7 +196,7 @@ func extractHttpRequestFromLog(message []byte) (*httpRequestLog, []byte, error) 
 		return nil, message, err
 	}
 	var httpRequest *httpRequestLog
-	if err := json.Unmarshal(httpRequestBytes, &httpRequest); err != nil {
+	if err = json.Unmarshal(httpRequestBytes, &httpRequest); err != nil {
 		return nil, message, err
 	}
 
