@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/colle
 go 1.17
 
 require (
-	contrib.go.opencensus.io/exporter/stackdriver v0.13.10
+	contrib.go.opencensus.io/exporter/stackdriver v0.13.11
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.0.0-20220208161221-df653dc6cb10
 	github.com/aws/aws-sdk-go v1.42.49 // indirect
 	github.com/google/go-cmp v0.5.7
