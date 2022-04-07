@@ -19,8 +19,8 @@ require (
 )
 
 require (
-	cloud.google.com/go/monitoring v1.2.0
-	cloud.google.com/go/trace v1.0.0
+	cloud.google.com/go/monitoring v1.4.0
+	cloud.google.com/go/trace v1.2.0
 	github.com/google/go-cmp v0.5.7
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
