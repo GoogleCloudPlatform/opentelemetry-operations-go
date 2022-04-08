@@ -145,32 +145,32 @@ type httpRequestLog struct {
 }
 
 func (l logMapper) parseHTTPRequest(httpRequestAttr []byte) (*logging.HTTPRequest, error) {
-	var parsedHttpRequest httpRequestLog
-	if err := json.Unmarshal(httpRequestAttr, &parsedHttpRequest); err != nil {
+	var parsedHTTPRequest httpRequestLog
+	if err := json.Unmarshal(httpRequestAttr, &parsedHTTPRequest); err != nil {
 		return nil, err
 	}
 
-	req, err := http.NewRequest(parsedHttpRequest.RequestMethod, parsedHttpRequest.RequestURL, nil)
+	req, err := http.NewRequest(parsedHTTPRequest.RequestMethod, parsedHTTPRequest.RequestURL, nil)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Referer", parsedHttpRequest.Referer)
-	req.Header.Set("User-Agent", parsedHttpRequest.UserAgent)
+	req.Header.Set("Referer", parsedHTTPRequest.Referer)
+	req.Header.Set("User-Agent", parsedHTTPRequest.UserAgent)
 
 	httpRequest := &logging.HTTPRequest{
 		Request:                        req,
-		RequestSize:                    parsedHttpRequest.RequestSize,
-		Status:                         parsedHttpRequest.Status,
-		ResponseSize:                   parsedHttpRequest.ResponseSize,
-		LocalIP:                        parsedHttpRequest.ServerIP,
-		RemoteIP:                       parsedHttpRequest.RemoteIP,
-		CacheHit:                       parsedHttpRequest.CacheHit,
-		CacheValidatedWithOriginServer: parsedHttpRequest.CacheValidatedWithOriginServer,
-		CacheFillBytes:                 parsedHttpRequest.CacheFillBytes,
-		CacheLookup:                    parsedHttpRequest.CacheLookup,
+		RequestSize:                    parsedHTTPRequest.RequestSize,
+		Status:                         parsedHTTPRequest.Status,
+		ResponseSize:                   parsedHTTPRequest.ResponseSize,
+		LocalIP:                        parsedHTTPRequest.ServerIP,
+		RemoteIP:                       parsedHTTPRequest.RemoteIP,
+		CacheHit:                       parsedHTTPRequest.CacheHit,
+		CacheValidatedWithOriginServer: parsedHTTPRequest.CacheValidatedWithOriginServer,
+		CacheFillBytes:                 parsedHTTPRequest.CacheFillBytes,
+		CacheLookup:                    parsedHTTPRequest.CacheLookup,
 	}
-	if parsedHttpRequest.Latency != "" {
-		latency, err := time.ParseDuration(parsedHttpRequest.Latency)
+	if parsedHTTPRequest.Latency != "" {
+		latency, err := time.ParseDuration(parsedHTTPRequest.Latency)
 		if err == nil {
 			httpRequest.Latency = latency
 		}
