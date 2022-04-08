@@ -10,8 +10,12 @@ There are two available propagators in this package:
 
 ### `CloudTraceOneWayPropagator`
 
-The `CloudTraceOneWayPropagator` reads the `X-Cloud-Trace-Context` header for
-trace and span IDs, and writes this data into the `traceparent` header.
+The `CloudTraceOneWayPropagator` works like the standard `TraceContext`
+propagator if a `traceparent` header is present. If `traceparent` is not found,
+it reads the `X-Cloud-Trace-Context` header for trace and span IDs, and creates
+the corresponding `traceparent` header.
+
+This is useful for ensuring spans created in your code are attached to the traces that some Google Cloud services [automatically trace](https://cloud.google.com/trace/docs/overview#configurations_with_automatic_tracing).
 
 ### `CloudTraceFormatPropagator`
 

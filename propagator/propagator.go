@@ -54,14 +54,24 @@ func (e errInvalidHeader) Error() string {
 	return fmt.Sprintf("invalid header %s", e.header)
 }
 
-// CloudTraceOneWayPropagator will extract Trace IDs from the
-// x-cloud-trace-context header, and inject the w3c-standard 'traceparent'
-// header.
+// CloudTraceOneWayPropagator will propagate trace context from the w3c standard
+// headers (traceparent and tracestate). If traceparent is not present, it will
+// extract trace context from x-cloud-trace-context, and propagate that trace
+// context forward using the w3c standard headers.
 type CloudTraceOneWayPropagator struct {
 	propagation.TraceContext
 }
 
+// Extract reads tracecontext from the supplied carrier into the returned context.
+//
+// This method looks for the standard `traceparent` header, but if not present,
+// will also look for `x-cloud-trace-context`.
 func (p CloudTraceOneWayPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
+	// First, check for traceparent
+	tpctx := p.TraceContext.Extract(ctx, carrier)
+	if sc := trace.SpanContextFromContext(tpctx); sc.IsValid() {
+		return tpctx
+	}
 	header := carrier.Get(TraceContextHeaderName)
 	if header == "" {
 		return ctx

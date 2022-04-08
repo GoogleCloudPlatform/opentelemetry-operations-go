@@ -116,59 +116,92 @@ func TestValidTraceContextHeaderFormats(t *testing.T) {
 
 func TestOneWayPropagatorExtract(t *testing.T) {
 	testCases := []struct {
-		key      string
-		traceID  string
-		spanID   string
-		flagPart string
+		name    string
+		headers map[string]string
+		want    trace.SpanContextConfig
 	}{
 		{
-			"X-Cloud-Trace-Context",
-			validTraceIDStr,
-			validSpanIDStr,
-			"1",
+			"xctc without flag",
+			map[string]string{
+				"x-cloud-trace-context": fmt.Sprintf("%s/%s", validTraceIDStr, validSpanIDStr)},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 00,
+			},
 		},
 		{
-			"X-Cloud-Trace-Context",
-			validTraceIDStr,
-			validSpanIDStr,
-			"0",
+			"xctc with flag",
+			map[string]string{
+				"x-cloud-trace-context": fmt.Sprintf("%s/%s;o=1", validTraceIDStr, validSpanIDStr)},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 01,
+			},
 		},
 		{
-			"x-cloud-trace-context",
-			validTraceIDStr,
-			validSpanIDStr,
-			"0",
+			"traceparent only",
+			map[string]string{
+				"traceparent": fmt.Sprintf("00-%s-%s-00", validTraceIDStr, validSpanID)},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 00,
+			},
+		},
+		{
+			"xctc and traceparent",
+			map[string]string{
+				"x-cloud-trace-context": "4bf92f3577b34da6a3ce929d0e0e4736/333333333;o=1",
+				"traceparent":           fmt.Sprintf("00-%s-%s-00", validTraceIDStr, validSpanID)},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 00,
+			},
+		},
+		{
+			"xctc traceparent and tracestate",
+			map[string]string{
+				"x-cloud-trace-context": "4bf92f3577b34da6a3ce929d0e0e4736/333333333;o=1",
+				"traceparent":           fmt.Sprintf("00-%s-%s-00", validTraceIDStr, validSpanID),
+				"tracestate":            "google=an_opaque_string",
+			},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 00,
+			},
 		},
 	}
 
 	for _, c := range testCases {
-		req := httptest.NewRequest("GET", "http://example.com", nil)
-		value := fmt.Sprintf("%s/%s;o=%s", c.traceID, c.spanID, c.flagPart)
-		req.Header.Set(c.key, value)
+		t.Run(c.name, func(t *testing.T) {
+			req := httptest.NewRequest("GET", "http://example.com", nil)
+			for k, v := range c.headers {
+				req.Header.Set(k, v)
+			}
 
-		ctx := context.Background()
-		propagator := CloudTraceOneWayPropagator{}
-		ctx = propagator.Extract(ctx, propagation.HeaderCarrier(req.Header))
+			ctx := context.Background()
+			propagator := CloudTraceOneWayPropagator{}
+			ctx = propagator.Extract(ctx, propagation.HeaderCarrier(req.Header))
 
-		sc := trace.SpanContextFromContext(ctx)
+			sc := trace.SpanContextFromContext(ctx)
 
-		sid, err := strconv.ParseUint(sc.SpanID().String(), 16, 64)
-		if err != nil {
-			t.Errorf("SpanID can't be convert to uint64: %v", err)
-		}
-		sidStr := fmt.Sprintf("%d", sid)
-
-		flag := fmt.Sprintf("%d", sc.TraceFlags())
-
-		if sc.TraceID().String() != c.traceID {
-			t.Errorf("TraceID unmatch: expected %v, but got %v", c.traceID, sc.TraceID())
-		}
-		if sidStr != c.spanID {
-			t.Errorf("SpanID unmatch: expected %v, but got %v", c.spanID, sidStr)
-		}
-		if flag != c.flagPart {
-			t.Errorf("FlagPart unmatch: expected %v, but got %v", c.flagPart, flag)
-		}
+			if sc.TraceID() != c.want.TraceID {
+				t.Errorf("TraceID mismatch: expected %v, but got %v", c.want.TraceID, sc.TraceID())
+			}
+			if sc.SpanID() != c.want.SpanID {
+				t.Errorf("SpanID mismatch: expected %v, but got %v", c.want.SpanID, sc.SpanID())
+			}
+			if sc.TraceFlags() != c.want.TraceFlags {
+				t.Errorf("FlagPart mismatch: expected %v, but got %v", c.want.TraceFlags, sc.TraceFlags())
+			}
+			if sc.TraceState().String() != c.headers["tracestate"] {
+				t.Errorf("TraceState mismatch: expected %v, but got %v", c.headers["tracestate"], sc.TraceState().String())
+			}
+		})
 	}
 }
 
@@ -188,7 +221,7 @@ func TestOneWayPropagatorInject(t *testing.T) {
 				TraceFlags: trace.FlagsSampled,
 			},
 			map[string]string{
-				traceparentHeaderName: fmt.Sprintf("00-%s-%s-01", validTraceID.String(), validSpanID.String()),
+				traceparentHeaderName: fmt.Sprintf("00-%s-%s-01", validTraceID, validSpanID),
 			},
 		},
 		{
@@ -198,7 +231,7 @@ func TestOneWayPropagatorInject(t *testing.T) {
 				SpanID:  validSpanID,
 			},
 			map[string]string{
-				traceparentHeaderName: fmt.Sprintf("00-%s-%s-00", validTraceID.String(), validSpanID.String()),
+				traceparentHeaderName: fmt.Sprintf("00-%s-%s-00", validTraceID, validSpanID),
 			},
 		},
 	}
