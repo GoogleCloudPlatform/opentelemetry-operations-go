@@ -145,6 +145,9 @@ type httpRequestLog struct {
 }
 
 func (l logMapper) parseHTTPRequest(httpRequestAttr []byte) (*logging.HTTPRequest, error) {
+	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
+	// instead of a slice of bytes could do, but would need a lot of type casting and checking
+	// assertions with it.
 	var parsedHTTPRequest httpRequestLog
 	if err := json.Unmarshal(httpRequestAttr, &parsedHTTPRequest); err != nil {
 		return nil, err
