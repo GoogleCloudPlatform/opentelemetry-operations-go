@@ -114,6 +114,147 @@ func TestValidTraceContextHeaderFormats(t *testing.T) {
 	}
 }
 
+func TestOneWayPropagatorExtract(t *testing.T) {
+	testCases := []struct {
+		name    string
+		headers map[string]string
+		want    trace.SpanContextConfig
+	}{
+		{
+			"xctc without flag",
+			map[string]string{
+				"x-cloud-trace-context": fmt.Sprintf("%s/%s", validTraceIDStr, validSpanIDStr)},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 00,
+			},
+		},
+		{
+			"xctc with flag",
+			map[string]string{
+				"x-cloud-trace-context": fmt.Sprintf("%s/%s;o=1", validTraceIDStr, validSpanIDStr)},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 01,
+			},
+		},
+		{
+			"traceparent only",
+			map[string]string{
+				"traceparent": fmt.Sprintf("00-%s-%s-00", validTraceIDStr, validSpanID)},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 00,
+			},
+		},
+		{
+			"xctc and traceparent",
+			map[string]string{
+				"x-cloud-trace-context": "4bf92f3577b34da6a3ce929d0e0e4736/333333333;o=1",
+				"traceparent":           fmt.Sprintf("00-%s-%s-00", validTraceIDStr, validSpanID)},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 00,
+			},
+		},
+		{
+			"xctc traceparent and tracestate",
+			map[string]string{
+				"x-cloud-trace-context": "4bf92f3577b34da6a3ce929d0e0e4736/333333333;o=1",
+				"traceparent":           fmt.Sprintf("00-%s-%s-00", validTraceIDStr, validSpanID),
+				"tracestate":            "google=an_opaque_string",
+			},
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: 00,
+			},
+		},
+	}
+
+	for _, c := range testCases {
+		t.Run(c.name, func(t *testing.T) {
+			req := httptest.NewRequest("GET", "http://example.com", nil)
+			for k, v := range c.headers {
+				req.Header.Set(k, v)
+			}
+
+			ctx := context.Background()
+			propagator := CloudTraceOneWayPropagator{}
+			ctx = propagator.Extract(ctx, propagation.HeaderCarrier(req.Header))
+
+			sc := trace.SpanContextFromContext(ctx)
+
+			if sc.TraceID() != c.want.TraceID {
+				t.Errorf("TraceID mismatch: expected %v, but got %v", c.want.TraceID, sc.TraceID())
+			}
+			if sc.SpanID() != c.want.SpanID {
+				t.Errorf("SpanID mismatch: expected %v, but got %v", c.want.SpanID, sc.SpanID())
+			}
+			if sc.TraceFlags() != c.want.TraceFlags {
+				t.Errorf("FlagPart mismatch: expected %v, but got %v", c.want.TraceFlags, sc.TraceFlags())
+			}
+			if sc.TraceState().String() != c.headers["tracestate"] {
+				t.Errorf("TraceState mismatch: expected %v, but got %v", c.headers["tracestate"], sc.TraceState().String())
+			}
+		})
+	}
+}
+
+func TestOneWayPropagatorInject(t *testing.T) {
+	propagator := CloudTraceOneWayPropagator{}
+
+	testCases := []struct {
+		name        string
+		scc         trace.SpanContextConfig
+		wantHeaders map[string]string
+	}{
+		{
+			"valid TraceID and SpanID with sampled flag",
+			trace.SpanContextConfig{
+				TraceID:    validTraceID,
+				SpanID:     validSpanID,
+				TraceFlags: trace.FlagsSampled,
+			},
+			map[string]string{
+				traceparentHeaderName: fmt.Sprintf("00-%s-%s-01", validTraceID, validSpanID),
+			},
+		},
+		{
+			"valid TraceID and SpanID without sampled flag",
+			trace.SpanContextConfig{
+				TraceID: validTraceID,
+				SpanID:  validSpanID,
+			},
+			map[string]string{
+				traceparentHeaderName: fmt.Sprintf("00-%s-%s-00", validTraceID, validSpanID),
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			header := http.Header{}
+			ctx := trace.ContextWithSpanContext(
+				context.Background(),
+				trace.NewSpanContext(tc.scc),
+			)
+			propagator.Inject(ctx, propagation.HeaderCarrier(header))
+
+			for h, v := range tc.wantHeaders {
+				result, want := header.Get(h), v
+				if diff := cmp.Diff(want, result); diff != "" {
+					t.Errorf("%v, header: %s diff: %s", tc.name, h, diff)
+				}
+			}
+		})
+	}
+}
+
 func TestCloudTraceContextHeaderExtract(t *testing.T) {
 	testCases := []struct {
 		key      string
