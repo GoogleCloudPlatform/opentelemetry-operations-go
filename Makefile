@@ -159,8 +159,9 @@ gotidy:
 update-dep:
 	$(MAKE) for-all CMD="$(PWD)/internal/buildscripts/update-dep"
 
-STABLE_OTEL_VERSION=v1.6.1
+STABLE_OTEL_VERSION=v1.6.2
 UNSTABLE_OTEL_VERSION=v0.28.0
+UNSTABLE_CONTRIB_OTEL_VERSION=v0.31.0
 COLLECTOR_VERSION=v0.48.0
 COLLECTOR_CONTRIB_VERSION=v0.48.0
 
@@ -173,7 +174,7 @@ update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/export/metric VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/metric VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/trace VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector VERSION=$(COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/model VERSION=$(COLLECTOR_VERSION)  
 	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus VERSION=$(COLLECTOR_CONTRIB_VERSION)

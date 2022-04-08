@@ -4,8 +4,8 @@ go 1.17
 
 require (
 	github.com/google/go-cmp v0.5.7
-	go.opentelemetry.io/otel v1.6.1
-	go.opentelemetry.io/otel/trace v1.6.1
+	go.opentelemetry.io/otel v1.6.2
+	go.opentelemetry.io/otel/trace v1.6.2
 )
 
 require (
