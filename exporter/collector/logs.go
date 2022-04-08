@@ -16,23 +16,54 @@ package collector
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
+	"time"
 
 	"cloud.google.com/go/logging"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.uber.org/multierr"
+	"go.uber.org/zap"
+	"google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
+const HTTPRequestAttributeKey = "com.google.httpRequest"
+
 type LogsExporter struct {
+	cfg    Config
+	obs    selfObservability
+	mapper logMapper
+
 	client *logging.Client
 	logger *logging.Logger
 }
 
-func NewGoogleCloudLogsExporter(ctx context.Context, cfg Config) (*LogsExporter, error) {
+type logMapper struct {
+	obs selfObservability
+	cfg Config
+}
+
+func NewGoogleCloudLogsExporter(
+	ctx context.Context,
+	cfg Config,
+	log *zap.Logger,
+) (*LogsExporter, error) {
 	client, err := logging.NewClient(ctx, cfg.ProjectID)
 	if err != nil {
 		return nil, err
 	}
 	logger := client.Logger("my-log") // TODO(@damemi) detect log name
+	obs := selfObservability{
+		log: log,
+	}
 	return &LogsExporter{
+		cfg: cfg,
+		obs: obs,
+		mapper: logMapper{
+			obs: obs,
+			cfg: cfg,
+		},
+
 		client: client,
 		logger: logger,
 	}, nil
@@ -43,20 +74,110 @@ func (l *LogsExporter) Shutdown(ctx context.Context) error {
 }
 
 func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
+	mapper := &metricMapper{} // Refactor metricMapper to map MRs for logging?
+	logPushErrors := []error{}
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
-		mapper := &metricMapper{} // Refactor metricMapper to map MRs for logging?
 		mr, _ := mapper.resourceToMonitoredResource(rl.Resource())
 		for j := 0; j < rl.InstrumentationLibraryLogs().Len(); j++ {
 			ill := rl.InstrumentationLibraryLogs().At(j)
 			for k := 0; k < ill.LogRecords().Len(); k++ {
 				log := ill.LogRecords().At(k)
-				l.logger.Log(logging.Entry{
-					Resource: mr,
-					Payload:  log.Body().AsString(),
-				})
+
+				entry, err := l.mapper.logToEntry(log, mr)
+				if err != nil {
+					logPushErrors = append(logPushErrors, err)
+				} else {
+					l.logger.Log(entry)
+				}
 			}
 		}
 	}
+	if len(logPushErrors) > 0 {
+		return multierr.Combine(logPushErrors...)
+	}
 	return nil
+}
+
+func (l logMapper) logToEntry(
+	log pdata.LogRecord,
+	mr *monitoredres.MonitoredResource,
+) (logging.Entry, error) {
+	entry := logging.Entry{
+		Resource: mr,
+	}
+
+	logBody := log.Body().BytesVal()
+	if len(logBody) > 0 {
+		entry.Payload = json.RawMessage(logBody)
+	}
+
+	httpRequestAttr, ok := log.Attributes().Get(HTTPRequestAttributeKey)
+	if ok {
+		httpRequest, err := l.parseHTTPRequest(httpRequestAttr.BytesVal())
+		if err != nil {
+			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
+		}
+		entry.HTTPRequest = httpRequest
+	}
+
+	return entry, nil
+}
+
+// JSON keys derived from:
+// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#httprequest
+type httpRequestLog struct {
+	RequestMethod                  string `json:"requestMethod"`
+	RequestURL                     string `json:"requestUrl"`
+	RequestSize                    int64  `json:"requestSize,string"`
+	Status                         int    `json:"status,string"`
+	ResponseSize                   int64  `json:"responseSize,string"`
+	UserAgent                      string `json:"userAgent"`
+	RemoteIP                       string `json:"remoteIp"`
+	ServerIP                       string `json:"serverIp"`
+	Referer                        string `json:"referer"`
+	Latency                        string `json:"latency"`
+	CacheLookup                    bool   `json:"cacheLookup"`
+	CacheHit                       bool   `json:"cacheHit"`
+	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer"`
+	CacheFillBytes                 int64  `json:"cacheFillBytes,string"`
+	Protocol                       string `json:"protocol"`
+}
+
+func (l logMapper) parseHTTPRequest(httpRequestAttr []byte) (*logging.HTTPRequest, error) {
+	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
+	// instead of a slice of bytes could do, but would need a lot of type casting and checking
+	// assertions with it.
+	var parsedHTTPRequest httpRequestLog
+	if err := json.Unmarshal(httpRequestAttr, &parsedHTTPRequest); err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(parsedHTTPRequest.RequestMethod, parsedHTTPRequest.RequestURL, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Referer", parsedHTTPRequest.Referer)
+	req.Header.Set("User-Agent", parsedHTTPRequest.UserAgent)
+
+	httpRequest := &logging.HTTPRequest{
+		Request:                        req,
+		RequestSize:                    parsedHTTPRequest.RequestSize,
+		Status:                         parsedHTTPRequest.Status,
+		ResponseSize:                   parsedHTTPRequest.ResponseSize,
+		LocalIP:                        parsedHTTPRequest.ServerIP,
+		RemoteIP:                       parsedHTTPRequest.RemoteIP,
+		CacheHit:                       parsedHTTPRequest.CacheHit,
+		CacheValidatedWithOriginServer: parsedHTTPRequest.CacheValidatedWithOriginServer,
+		CacheFillBytes:                 parsedHTTPRequest.CacheFillBytes,
+		CacheLookup:                    parsedHTTPRequest.CacheLookup,
+	}
+	if parsedHTTPRequest.Latency != "" {
+		latency, err := time.ParseDuration(parsedHTTPRequest.Latency)
+		if err == nil {
+			httpRequest.Latency = latency
+		}
+	}
+
+	return httpRequest, nil
 }
