@@ -33,8 +33,6 @@ type Config struct {
 	TraceConfig TraceConfig `mapstructure:"trace"`
 
 	MetricConfig MetricConfig `mapstructure:"metric"`
-
-	LoggingConfig LoggingConfig `mapstructure:"logging"`
 }
 
 type ClientConfig struct {
@@ -55,10 +53,6 @@ type TraceConfig struct {
 	// keys to Google Cloud Trace keys.  By default, it changes http and
 	// service keys so that they appear more prominently in the UI.
 	AttributeMappings []AttributeMapping `mapstructure:"attribute_mappings"`
-}
-
-type LoggingConfig struct {
-	ParseHTTPRequest bool `mapstructure:"parse_http_request"`
 }
 
 // AttributeMapping maps from an OpenTelemetry key to a Google Cloud Trace key.
@@ -120,7 +114,6 @@ func DefaultConfig() Config {
 			InstrumentationLibraryLabels:     true,
 			ServiceResourceLabels:            true,
 		},
-		LoggingConfig: LoggingConfig{},
 	}
 }
 

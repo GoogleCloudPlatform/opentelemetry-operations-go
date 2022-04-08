@@ -17,7 +17,6 @@ package collector
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -27,6 +26,8 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
 )
+
+const HTTPRequestAttributeKey = "com.google.httpRequest"
 
 type LogsExporter struct {
 	cfg    Config
@@ -82,6 +83,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 			ill := rl.InstrumentationLibraryLogs().At(j)
 			for k := 0; k < ill.LogRecords().Len(); k++ {
 				log := ill.LogRecords().At(k)
+
 				entry, err := l.mapper.logToEntry(log, mr)
 				if err != nil {
 					logPushErrors = append(logPushErrors, err)
@@ -97,7 +99,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 	return nil
 }
 
-func (l *logMapper) logToEntry(
+func (l logMapper) logToEntry(
 	log pdata.LogRecord,
 	mr *monitoredres.MonitoredResource,
 ) (logging.Entry, error) {
@@ -106,19 +108,17 @@ func (l *logMapper) logToEntry(
 	}
 
 	logBody := log.Body().BytesVal()
-
-	if l.cfg.LoggingConfig.ParseHTTPRequest {
-		httpRequest, strippedLogBody, err := parseHTTPRequest(logBody)
-		if err != nil {
-			l.obs.log.Debug("error parsing HTTPRequest", zap.Error(err))
-		} else {
-			entry.HTTPRequest = httpRequest
-			logBody = strippedLogBody
-		}
-	}
-
 	if len(logBody) > 0 {
 		entry.Payload = json.RawMessage(logBody)
+	}
+
+	httpRequestAttr, ok := log.Attributes().Get(HTTPRequestAttributeKey)
+	if ok {
+		httpRequest, err := l.parseHTTPRequest(httpRequestAttr.BytesVal())
+		if err != nil {
+			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
+		}
+		entry.HTTPRequest = httpRequest
 	}
 
 	return entry, nil
@@ -144,69 +144,37 @@ type httpRequestLog struct {
 	Protocol                       string `json:"protocol"`
 }
 
-func parseHTTPRequest(message []byte) (*logging.HTTPRequest, []byte, error) {
-	parsedLog, strippedMessage, err := extractHTTPRequestFromLog(message)
-	if err != nil {
-		return nil, message, err
+func (l logMapper) parseHTTPRequest(httpRequestAttr []byte) (*logging.HTTPRequest, error) {
+	var parsedHttpRequest httpRequestLog
+	if err := json.Unmarshal(httpRequestAttr, &parsedHttpRequest); err != nil {
+		return nil, err
 	}
 
-	req, err := http.NewRequest(parsedLog.RequestMethod, parsedLog.RequestURL, nil)
+	req, err := http.NewRequest(parsedHttpRequest.RequestMethod, parsedHttpRequest.RequestURL, nil)
 	if err != nil {
-		return nil, message, err
+		return nil, err
 	}
-	req.Header.Set("Referer", parsedLog.Referer)
-	req.Header.Set("User-Agent", parsedLog.UserAgent)
+	req.Header.Set("Referer", parsedHttpRequest.Referer)
+	req.Header.Set("User-Agent", parsedHttpRequest.UserAgent)
 
 	httpRequest := &logging.HTTPRequest{
 		Request:                        req,
-		RequestSize:                    parsedLog.RequestSize,
-		Status:                         parsedLog.Status,
-		ResponseSize:                   parsedLog.ResponseSize,
-		LocalIP:                        parsedLog.ServerIP,
-		RemoteIP:                       parsedLog.RemoteIP,
-		CacheHit:                       parsedLog.CacheHit,
-		CacheValidatedWithOriginServer: parsedLog.CacheValidatedWithOriginServer,
-		CacheFillBytes:                 parsedLog.CacheFillBytes,
-		CacheLookup:                    parsedLog.CacheLookup,
+		RequestSize:                    parsedHttpRequest.RequestSize,
+		Status:                         parsedHttpRequest.Status,
+		ResponseSize:                   parsedHttpRequest.ResponseSize,
+		LocalIP:                        parsedHttpRequest.ServerIP,
+		RemoteIP:                       parsedHttpRequest.RemoteIP,
+		CacheHit:                       parsedHttpRequest.CacheHit,
+		CacheValidatedWithOriginServer: parsedHttpRequest.CacheValidatedWithOriginServer,
+		CacheFillBytes:                 parsedHttpRequest.CacheFillBytes,
+		CacheLookup:                    parsedHttpRequest.CacheLookup,
 	}
-	if parsedLog.Latency != "" {
-		latency, err := time.ParseDuration(parsedLog.Latency)
+	if parsedHttpRequest.Latency != "" {
+		latency, err := time.ParseDuration(parsedHttpRequest.Latency)
 		if err == nil {
 			httpRequest.Latency = latency
 		}
 	}
 
-	return httpRequest, strippedMessage, nil
-}
-
-func extractHTTPRequestFromLog(message []byte) (*httpRequestLog, []byte, error) {
-	httpRequestKey := "httpRequest" // TODO(@braydonk) Should this come from the config?
-
-	var unmarshalledMessage map[string]interface{}
-	if err := json.Unmarshal(message, &unmarshalledMessage); err != nil {
-		return nil, message, err
-	}
-
-	httpRequestMap, ok := unmarshalledMessage[httpRequestKey]
-	if !ok {
-		return nil, message, fmt.Errorf("message has no key %s", httpRequestKey)
-	}
-	httpRequestBytes, err := json.Marshal(httpRequestMap)
-	if err != nil {
-		return nil, message, err
-	}
-	var httpRequest *httpRequestLog
-	if err = json.Unmarshal(httpRequestBytes, &httpRequest); err != nil {
-		return nil, message, err
-	}
-
-	delete(unmarshalledMessage, httpRequestKey)
-	if len(unmarshalledMessage) == 0 {
-		return httpRequest, []byte{}, nil
-	}
-	strippedMessage, err := json.Marshal(unmarshalledMessage)
-	if err != nil {
-		return httpRequest, message, err
-	}
-	return httpRequest, strippedMessage, nil
+	return httpRequest, nil
 }

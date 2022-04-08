@@ -27,10 +27,9 @@ import (
 	"google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
-func newTestLogMapper(loggingConfig LoggingConfig) logMapper {
+func newTestLogMapper() logMapper {
 	obs := selfObservability{log: zap.NewNop()}
 	cfg := DefaultConfig()
-	cfg.LoggingConfig = loggingConfig
 	return logMapper{
 		cfg: cfg,
 		obs: obs,
@@ -39,7 +38,6 @@ func newTestLogMapper(loggingConfig LoggingConfig) logMapper {
 
 type baseTestCase struct {
 	name          string
-	loggingConfig LoggingConfig
 	log           func() pdata.LogRecord
 	mr            func() *monitoredres.MonitoredResource
 	expectError   bool
@@ -72,13 +70,10 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log with json and httpRequest, empty monitoredresource",
-			loggingConfig: LoggingConfig{
-				ParseHTTPRequest: true,
-			},
 			log: func() pdata.LogRecord {
 				log := pdata.NewLogRecord()
-				log.Body().SetBytesVal([]byte(`{
-					"httpRequest": {
+				log.Body().SetBytesVal([]byte(`{"message": "hello!"}`))
+				log.Attributes().Insert(HTTPRequestAttributeKey, pdata.NewAttributeValueBytes([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
 						"requestSize": "1",
@@ -92,16 +87,14 @@ func TestLogMapping(t *testing.T) {
 						"cacheValidatedWithOriginServer": false,
 						"cacheFillBytes": "1",
 						"protocol": "HTTP/2"
-					},
-					"message": "hello!"
-				}`))
+					}`)))
 				return log
 			},
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
 			expectedEntry: logging.Entry{
-				Payload: json.RawMessage(`{"message":"hello!"}`),
+				Payload: json.RawMessage(`{"message": "hello!"}`),
 				HTTPRequest: &logging.HTTPRequest{
 					Request:                        makeExpectedHTTPReq("GET", "https://www.example.com", "https://www.example2.com", "test", nil),
 					RequestSize:                    1,
@@ -122,7 +115,7 @@ func TestLogMapping(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			log := testCase.log()
 			mr := testCase.mr()
-			mapper := newTestLogMapper(testCase.loggingConfig)
+			mapper := newTestLogMapper()
 			entry, err := mapper.logToEntry(log, mr)
 			if testCase.expectError {
 				assert.NotNil(t, err)
