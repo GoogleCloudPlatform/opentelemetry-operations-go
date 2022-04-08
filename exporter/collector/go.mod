@@ -25,6 +25,8 @@ require (
  	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/google/go-cmp v0.5.7
 	go.opentelemetry.io/collector/pdata v0.49.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.29.0 // indirect
+	go.uber.org/multierr v1.7.0
 	go.uber.org/zap v1.21.0
 	golang.org/x/oauth2 v0.0.0-20220309155454-6242fa91716a
 )
