@@ -30,12 +30,12 @@ import (
 func pdataResourceSpansToOTSpanData(rs pdata.ResourceSpans) []sdktrace.ReadOnlySpan {
 	resource := rs.Resource()
 	var sds []sdktrace.ReadOnlySpan
-	ilss := rs.InstrumentationLibrarySpans()
+	ilss := rs.ScopeSpans()
 	for i := 0; i < ilss.Len(); i++ {
 		ils := ilss.At(i)
 		spans := ils.Spans()
 		for j := 0; j < spans.Len(); j++ {
-			sd := pdataSpanToOTSpanData(spans.At(j), resource, ils.InstrumentationLibrary())
+			sd := pdataSpanToOTSpanData(spans.At(j), resource, ils.Scope())
 			sds = append(sds, sd)
 		}
 	}
@@ -46,7 +46,7 @@ func pdataResourceSpansToOTSpanData(rs pdata.ResourceSpans) []sdktrace.ReadOnlyS
 func pdataSpanToOTSpanData(
 	span pdata.Span,
 	resource pdata.Resource,
-	il pdata.InstrumentationLibrary,
+	il pdata.InstrumentationScope,
 ) spanSnapshot {
 	sc := apitrace.SpanContextConfig{
 		TraceID: span.TraceID().Bytes(),
@@ -61,7 +61,7 @@ func pdataSpanToOTSpanData(
 	// TODO: Decide if ignoring the error is fine.
 	r, _ := sdkresource.New(
 		context.Background(),
-		sdkresource.WithAttributes(pdataAttributesToOTAttributes(pdata.NewAttributeMap(), resource)...),
+		sdkresource.WithAttributes(pdataAttributesToOTAttributes(pdata.NewMap(), resource)...),
 	)
 
 	status := span.Status()
@@ -120,18 +120,18 @@ func pdataStatusCodeToOTCode(c pdata.StatusCode) codes.Code {
 	}
 }
 
-func pdataAttributesToOTAttributes(attrs pdata.AttributeMap, resource pdata.Resource) []attribute.KeyValue {
+func pdataAttributesToOTAttributes(attrs pdata.Map, resource pdata.Resource) []attribute.KeyValue {
 	otAttrs := make([]attribute.KeyValue, 0, attrs.Len())
-	appendAttrs := func(m pdata.AttributeMap) {
-		m.Range(func(k string, v pdata.AttributeValue) bool {
+	appendAttrs := func(m pdata.Map) {
+		m.Range(func(k string, v pdata.Value) bool {
 			switch v.Type() {
-			case pdata.AttributeValueTypeString:
+			case pdata.ValueTypeString:
 				otAttrs = append(otAttrs, attribute.String(k, v.StringVal()))
-			case pdata.AttributeValueTypeBool:
+			case pdata.ValueTypeBool:
 				otAttrs = append(otAttrs, attribute.Bool(k, v.BoolVal()))
-			case pdata.AttributeValueTypeInt:
+			case pdata.ValueTypeInt:
 				otAttrs = append(otAttrs, attribute.Int64(k, v.IntVal()))
-			case pdata.AttributeValueTypeDouble:
+			case pdata.ValueTypeDouble:
 				otAttrs = append(otAttrs, attribute.Float64(k, v.DoubleVal()))
 			}
 			return true

@@ -20,7 +20,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/metric/sdkapi"
+	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
 
 	apioption "google.golang.org/api/option"
 )

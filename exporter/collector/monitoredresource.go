@@ -156,7 +156,7 @@ func (m *metricMapper) resourceToMonitoredResource(
 
 func createMonitoredResource(
 	monitoredResourceType string,
-	resourceAttrs pdata.AttributeMap,
+	resourceAttrs pdata.Map,
 ) *monitoredrespb.MonitoredResource {
 	mappings := monitoredResourceMappings[monitoredResourceType]
 	mrLabels := make(map[string]string, len(mappings))
@@ -186,8 +186,8 @@ func createMonitoredResource(
 func (m *metricMapper) resourceToMetricLabels(
 	resource pdata.Resource,
 ) labels {
-	attrs := pdata.NewAttributeMap()
-	resource.Attributes().Range(func(k string, v pdata.AttributeValue) bool {
+	attrs := pdata.NewMap()
+	resource.Attributes().Range(func(k string, v pdata.Value) bool {
 		// Is a service attribute and should be included
 		if m.cfg.MetricConfig.ServiceResourceLabels &&
 			(k == semconv.AttributeServiceName ||
@@ -208,7 +208,7 @@ func (m *metricMapper) resourceToMetricLabels(
 	return attributesToLabels(attrs)
 }
 
-func getStringOrEmpty(attributes pdata.AttributeMap, key string) string {
+func getStringOrEmpty(attributes pdata.Map, key string) string {
 	if val, ok := attributes.Get(key); ok {
 		return val.StringVal()
 	}
