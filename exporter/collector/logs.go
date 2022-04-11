@@ -122,6 +122,15 @@ func (l logMapper) logToEntry(
 	entry.Labels["instrumentation_source"] = instrumentationSource
 	entry.Labels["instrumentation_version"] = instrumentationVersion
 
+	// if timestamp has not been explicitly initialized, default to current time
+	// TODO: figure out how to fall back to observed_time_unix_nano as recommended
+	//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
+	timestamp := log.Timestamp().AsTime()
+	if timestamp.IsZero() {
+		timestamp = time.Now()
+	}
+	entry.Timestamp = timestamp
+
 	logBody := log.Body().BytesVal()
 	if len(logBody) > 0 {
 		entry.Payload = json.RawMessage(logBody)
