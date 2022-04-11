@@ -79,12 +79,20 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr, _ := mapper.resourceToMonitoredResource(rl.Resource())
+
 		for j := 0; j < rl.ScopeLogs().Len(); j++ {
 			sl := rl.ScopeLogs().At(j)
+			instrumentationSource := sl.Scope().Name()
+			instrumentationVersion := sl.Scope().Version()
+
 			for k := 0; k < sl.LogRecords().Len(); k++ {
 				log := sl.LogRecords().At(k)
 
-				entry, err := l.mapper.logToEntry(log, mr)
+				entry, err := l.mapper.logToEntry(
+					log,
+					mr,
+					instrumentationSource,
+					instrumentationVersion)
 				if err != nil {
 					logPushErrors = append(logPushErrors, err)
 				} else {
@@ -93,6 +101,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 			}
 		}
 	}
+
 	if len(logPushErrors) > 0 {
 		return multierr.Combine(logPushErrors...)
 	}
@@ -102,10 +111,16 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 func (l logMapper) logToEntry(
 	log pdata.LogRecord,
 	mr *monitoredres.MonitoredResource,
+	instrumentationSource string,
+	instrumentationVersion string,
 ) (logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
 	}
+
+	entry.Labels = make(map[string]string)
+	entry.Labels["instrumentation_source"] = instrumentationSource
+	entry.Labels["instrumentation_version"] = instrumentationVersion
 
 	logBody := log.Body().BytesVal()
 	if len(logBody) > 0 {
