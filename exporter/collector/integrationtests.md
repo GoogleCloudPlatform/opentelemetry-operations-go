@@ -5,14 +5,14 @@ can be written to the real GCP APIs. Separately, the tests also mock the real AP
 and compare requests against recorded expectation fixtures. Currently, these tests only support
 metrics.
 
-The fixtures are located in the [`testdata/fixtures`][fixtures] directory and registered in
+The fixtures are located in the [`integrationtest/testdata/fixtures`](integrationtest/testdata/fixtures) directory and registered in
 [`integrationtest/testcases.go`][testcases].
 
 ## Running Tests
 
-The actual Go test files are [`metrics_test.go`](metrics_test.go) (use a mocked server to
+The actual Go test files are [`metrics_test.go`](integrationtest/metrics_test.go) (use a mocked server to
 compare the GCP requests against recorded fixtures) and
-[`metrics_integration_test.go`](metrics_integration_test.go) (send the actual fixtures to GCP
+[`metrics_integration_test.go`](integrationtest/metrics_integration_test.go) (send the actual fixtures to GCP
 and expect OK responses).
 
 ### Expectation Only
@@ -58,9 +58,9 @@ To add a new test:
 1. Create an OTLP fixture. Currently, the tests only support metrics fixtures which should be
     JSON encoded OTLP
     [`ExportMetricsServiceRequest`](https://github.com/open-telemetry/opentelemetry-proto/blob/b43e9b18b76abf3ee040164b55b9c355217151f3/opentelemetry/proto/collector/metrics/v1/metrics_service.proto#L35)
-    message. Put the fixture in the [`testdata/fixtures`][fixtures] directory. As an example,
+    message. Put the fixture in the [`testdata/fixtures`](integrationtest/testdata/fixtures) directory. As an example,
     see
-    [`testdata/fixtures/basic_counter_metrics.json`](testdata/fixtures/basic_counter_metrics.json).
+    [`testdata/fixtures/basic_counter_metrics.json`](integrationtest/testdata/fixtures/basic_counter_metrics.json).
 
     One easy way to generate these fixtures is by using the collector's `file` exporter in a
     collector pipeline to dump OTLP. For example, update the collector config to:

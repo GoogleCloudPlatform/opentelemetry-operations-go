@@ -179,14 +179,14 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		monitoredResource, extraResourceLabels := me.mapper.resourceToMonitoredResource(rm.Resource())
-		ilms := rm.InstrumentationLibraryMetrics()
-		for j := 0; j < ilms.Len(); j++ {
-			ilm := ilms.At(j)
+		sms := rm.ScopeMetrics()
+		for j := 0; j < sms.Len(); j++ {
+			sm := sms.At(j)
 
-			instrumentationLibraryLabels := me.mapper.instrumentationLibraryToLabels(ilm.InstrumentationLibrary())
-			metricLabels := mergeLabels(nil, instrumentationLibraryLabels, extraResourceLabels)
+			instrumentationScopeLabels := me.mapper.instrumentationScopeToLabels(sm.Scope())
+			metricLabels := mergeLabels(nil, instrumentationScopeLabels, extraResourceLabels)
 
-			mes := ilm.Metrics()
+			mes := sm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
 				for _, ts := range me.mapper.metricToTimeSeries(monitoredResource, metricLabels, metric) {
@@ -319,13 +319,13 @@ func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, ts []*mo
 	)
 }
 
-func (m *metricMapper) instrumentationLibraryToLabels(il pdata.InstrumentationLibrary) labels {
+func (m *metricMapper) instrumentationScopeToLabels(is pdata.InstrumentationScope) labels {
 	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
 		return labels{}
 	}
 	return labels{
-		"instrumentation_source":  il.Name(),
-		"instrumentation_version": il.Version(),
+		"instrumentation_source":  is.Name(),
+		"instrumentation_version": is.Version(),
 	}
 }
 
@@ -349,7 +349,7 @@ func (m *metricMapper) metricToTimeSeries(
 		points := gauge.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
-			timeSeries = append(timeSeries, ts)
+			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeSummary:
 		summary := metric.Summary()
@@ -363,14 +363,14 @@ func (m *metricMapper) metricToTimeSeries(
 		points := hist.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i))
-			timeSeries = append(timeSeries, ts)
+			timeSeries = append(timeSeries, ts...)
 		}
 	case pdata.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, points.At(i))
-			timeSeries = append(timeSeries, ts)
+			timeSeries = append(timeSeries, ts...)
 		}
 	default:
 		m.obs.log.Error("Unsupported metric data type", zap.Any("data_type", metric.DataType()))
@@ -386,6 +386,10 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	sum pdata.Summary,
 	point pdata.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.
+		return nil
+	}
 	sumName, countName := summaryMetricNames(metric.Name())
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
@@ -416,14 +420,14 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			Resource:   resource,
 			Unit:       metric.Unit(),
 			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
-			ValueType:  metricpb.MetricDescriptor_INT64,
+			ValueType:  metricpb.MetricDescriptor_DOUBLE,
 			Points: []*monitoringpb.Point{{
 				Interval: &monitoringpb.TimeInterval{
 					StartTime: startTime,
 					EndTime:   endTime,
 				},
-				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
-					Int64Value: int64(point.Count()),
+				Value: &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+					DoubleValue: float64(point.Count()),
 				}},
 			}},
 			Metric: &metricpb.Metric{
@@ -519,7 +523,7 @@ func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitorin
 	}
 
 	mean := float64(0)
-	if point.Count() > 0 { // Avoid divide-by-zero
+	if !math.IsNaN(point.Sum()) && point.Count() > 0 { // Avoid divide-by-zero
 		mean = float64(point.Sum() / float64(point.Count()))
 	}
 
@@ -580,11 +584,16 @@ func (m *metricMapper) exponentialHistogramPoint(point pdata.ExponentialHistogra
 		}
 	}
 
+	mean := float64(0)
+	if !math.IsNaN(point.Sum()) && point.Count() > 0 { // Avoid divide-by-zero
+		mean = float64(point.Sum() / float64(point.Count()))
+	}
+
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distribution.Distribution{
 				Count:         int64(point.Count()),
-				Mean:          float64(point.Sum() / float64(point.Count())),
+				Mean:          mean,
 				BucketCounts:  counts,
 				BucketOptions: bucketOptions,
 				Exemplars:     m.exemplars(point.Exemplars()),
@@ -599,13 +608,17 @@ func (m *metricMapper) histogramToTimeSeries(
 	metric pdata.Metric,
 	_ pdata.Histogram,
 	point pdata.HistogramDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.
+		return nil
+	}
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.histogramPoint(point)
-	return &monitoringpb.TimeSeries{
+	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
 		Unit:       metric.Unit(),
 		MetricKind: metricKind,
@@ -624,7 +637,7 @@ func (m *metricMapper) histogramToTimeSeries(
 				extraLabels,
 			),
 		},
-	}
+	}}
 }
 
 func (m *metricMapper) exponentialHistogramToTimeSeries(
@@ -633,13 +646,17 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	metric pdata.Metric,
 	_ pdata.ExponentialHistogram,
 	point pdata.ExponentialHistogramDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.
+		return nil
+	}
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.exponentialHistogramPoint(point)
-	return &monitoringpb.TimeSeries{
+	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
 		Unit:       metric.Unit(),
 		MetricKind: metricKind,
@@ -658,7 +675,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 				extraLabels,
 			),
 		},
-	}
+	}}
 }
 
 func (m *metricMapper) sumPointToTimeSeries(
@@ -670,6 +687,11 @@ func (m *metricMapper) sumPointToTimeSeries(
 ) []*monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	var startTime *timestamppb.Timestamp
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.  This may be a staleness marker from
+		// prometheus.
+		return nil
+	}
 	if sum.IsMonotonic() {
 		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
 		normalizedPoint := m.normalizeNumberDataPoint(point, metricIdentifier)
@@ -737,7 +759,7 @@ func (m *metricMapper) normalizeNumberDataPoint(point pdata.NumberDataPoint, ide
 		}
 		normalizedPoint = &newPoint
 	}
-	if (!ok && point.StartTimestamp().AsTime().IsZero()) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+	if (!ok && point.StartTimestamp() == 0) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// This is the first time we've seen this metric, or we received
 		// an explicit reset point as described in
 		// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
@@ -754,11 +776,15 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	metric pdata.Metric,
 	gauge pdata.Gauge,
 	point pdata.NumberDataPoint,
-) *monitoringpb.TimeSeries {
+) []*monitoringpb.TimeSeries {
+	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+		// Drop points without a value.
+		return nil
+	}
 	metricKind := metricpb.MetricDescriptor_GAUGE
 	value, valueType := numberDataPointToValue(point)
 
-	return &monitoringpb.TimeSeries{
+	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
 		Unit:       metric.Unit(),
 		MetricKind: metricKind,
@@ -776,7 +802,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 				extraLabels,
 			),
 		},
-	}
+	}}
 }
 
 // Returns any configured prefix to add to unknown metric name.
@@ -810,10 +836,10 @@ func numberDataPointToValue(
 }
 
 func attributesToLabels(
-	attrs pdata.AttributeMap,
+	attrs pdata.Map,
 ) labels {
 	ls := make(labels, attrs.Len())
-	attrs.Range(func(k string, v pdata.AttributeValue) bool {
+	attrs.Range(func(k string, v pdata.Value) bool {
 		ls[sanitizeKey(k)] = v.AsString()
 		return true
 	})
@@ -881,8 +907,8 @@ func (m *metricMapper) labelDescriptors(
 	}
 
 	seenKeys := map[string]struct{}{}
-	addAttributes := func(attr pdata.AttributeMap) {
-		attr.Range(func(key string, _ pdata.AttributeValue) bool {
+	addAttributes := func(attr pdata.Map) {
+		attr.Range(func(key string, _ pdata.Value) bool {
 			// Skip keys that have already been set
 			if _, ok := seenKeys[sanitizeKey(key)]; ok {
 				return true
@@ -951,7 +977,7 @@ func (m *metricMapper) summaryMetricDescriptors(
 			Type:        m.metricNameToType(countName),
 			Labels:      labels,
 			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-			ValueType:   metricpb.MetricDescriptor_INT64,
+			ValueType:   metricpb.MetricDescriptor_DOUBLE,
 			Unit:        pm.Unit(),
 			Description: pm.Description(),
 			DisplayName: countName,

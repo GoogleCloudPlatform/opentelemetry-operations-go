@@ -15,10 +15,11 @@
 package metric
 
 import (
-	"go.opentelemetry.io/otel/metric/sdkapi"
-	export "go.opentelemetry.io/otel/sdk/export/metric"
+	"go.opentelemetry.io/otel/sdk/metric/aggregator"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
 	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
+	"go.opentelemetry.io/otel/sdk/metric/export"
+	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
 )
 
 type selectorCloudMonitoring struct{}
@@ -41,7 +42,7 @@ func NewWithCloudMonitoringDistribution() export.AggregatorSelector {
 	return selectorCloudMonitoring{}
 }
 
-func (selectorCloudMonitoring) AggregatorFor(descriptor *sdkapi.Descriptor, aggPtrs ...*export.Aggregator) {
+func (selectorCloudMonitoring) AggregatorFor(descriptor *sdkapi.Descriptor, aggPtrs ...*aggregator.Aggregator) {
 	switch descriptor.InstrumentKind() {
 	case sdkapi.GaugeObserverInstrumentKind, sdkapi.HistogramInstrumentKind:
 		aggs := lastvalue.New(len(aggPtrs))

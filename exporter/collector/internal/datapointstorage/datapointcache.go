@@ -81,7 +81,7 @@ func (c Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 }
 
 // Identifier returns the unique string identifier for a metric
-func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pdata.Metric, labels pdata.AttributeMap) string {
+func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pdata.Metric, attributes pdata.Map) string {
 	var b strings.Builder
 
 	// Resource identifiers
@@ -94,7 +94,7 @@ func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[stri
 
 	// Metric identifiers
 	fmt.Fprintf(&b, " - %s -", metric.Name())
-	labels.Sort().Range(func(k string, v pdata.AttributeValue) bool {
+	attributes.Sort().Range(func(k string, v pdata.Value) bool {
 		fmt.Fprintf(&b, " %s=%s", k, v.AsString())
 		return true
 	})

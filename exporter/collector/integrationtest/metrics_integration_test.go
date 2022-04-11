@@ -33,10 +33,11 @@ func createMetricsExporter(
 	t *testing.T,
 	test *MetricsTestCase,
 ) *collector.MetricsExporter {
+	logger, _ := zap.NewProduction()
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
 		test.CreateConfig(),
-		zap.NewNop(),
+		logger,
 		"latest",
 		collector.DefaultTimeout,
 	)

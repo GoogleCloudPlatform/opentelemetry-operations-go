@@ -120,7 +120,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			traces := pdata.NewTraces()
 			rspans := traces.ResourceSpans().AppendEmpty()
 			resource.CopyTo(rspans.Resource())
-			ispans := rspans.InstrumentationLibrarySpans().AppendEmpty()
+			ispans := rspans.ScopeSpans().AppendEmpty()
 			span := ispans.Spans().AppendEmpty()
 			span.SetName(spanName)
 			span.SetStartTimestamp(pdata.NewTimestampFromTime(testTime))

@@ -82,6 +82,7 @@ check-clean-work-tree:
 	  echo 'Working tree is not clean, did you forget to run "make precommit"?'; \
 	  echo; \
 	  git status; \
+	  git diff; \
 	  exit 1; \
 	fi
 
@@ -133,9 +134,9 @@ lint: $(TOOLS_DIR)/golangci-lint $(TOOLS_DIR)/misspell
 	done
 	$(TOOLS_DIR)/misspell -w $(ALL_DOCS)
 	set -e; for dir in $(ALL_GO_MOD_DIRS) $(TOOLS_MOD_DIR); do \
-	  echo "go mod tidy in $${dir}"; \
+	  echo "go mod tidy -compat=1.17 in $${dir}"; \
 	  (cd "$${dir}" && \
-	    go mod tidy); \
+	    go mod tidy -compat=1.17); \
 	done
 
 generate: $(TOOLS_DIR)/stringer $(TOOLS_DIR)/protoc
@@ -152,23 +153,30 @@ for-all:
 
 .PHONY: gotidy
 gotidy:
-	$(MAKE) for-all CMD="go mod tidy"
+	$(MAKE) for-all CMD="go mod tidy -compat=1.17"
 
 .PHONY: update-dep
 update-dep:
 	$(MAKE) for-all CMD="$(PWD)/internal/buildscripts/update-dep"
 
-STABLE_OTEL_VERSION=v1.3.0
-UNSTABLE_OTEL_VERSION=v0.26.0
+STABLE_OTEL_VERSION=v1.6.2
+UNSTABLE_OTEL_VERSION=v0.28.0
+UNSTABLE_CONTRIB_OTEL_VERSION=v0.31.0
+COLLECTOR_VERSION=v0.48.0
+COLLECTOR_CONTRIB_VERSION=v0.48.0
 
 .PHONY: update-otel
 update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel VERSION=$(STABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/metric VERSION=$(UNSTABLE_OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/metric/instrument VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk VERSION=$(STABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/export/metric VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/metric VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/trace VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_CONTRIB_OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector VERSION=$(COLLECTOR_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/model VERSION=$(COLLECTOR_VERSION)  
+	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus VERSION=$(COLLECTOR_CONTRIB_VERSION)
 	$(MAKE) build
 	$(MAKE) gotidy

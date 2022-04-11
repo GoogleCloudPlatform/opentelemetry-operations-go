@@ -16,6 +16,7 @@ package collector
 
 import (
 	"fmt"
+	"math"
 	"testing"
 	"time"
 
@@ -35,7 +36,7 @@ import (
 )
 
 var (
-	start = time.Unix(0, 0)
+	start = time.Unix(1000, 1000)
 )
 
 func newTestMetricMapper() (metricMapper, func()) {
@@ -92,18 +93,22 @@ func TestMetricToTimeSeries(t *testing.T) {
 		sum := metric.Sum()
 		sum.SetIsMonotonic(true)
 		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+		zeroTs := pdata.Timestamp(0)
 		startTs := pdata.NewTimestampFromTime(start)
 		endTs := pdata.NewTimestampFromTime(start.Add(time.Hour))
 		// Add three points without start timestamps.
 		// The first one should be dropped to set the start timestamp for the rest
 		point := sum.DataPoints().AppendEmpty()
 		point.SetDoubleVal(10)
+		point.SetStartTimestamp(zeroTs)
 		point.SetTimestamp(startTs)
 		point = sum.DataPoints().AppendEmpty()
 		point.SetDoubleVal(15)
+		point.SetStartTimestamp(zeroTs)
 		point.SetTimestamp(endTs)
 		point = sum.DataPoints().AppendEmpty()
 		point.SetDoubleVal(16)
+		point.SetStartTimestamp(zeroTs)
 		point.SetTimestamp(endTs)
 
 		ts := mapper.metricToTimeSeries(
@@ -154,6 +159,38 @@ func TestMetricToTimeSeries(t *testing.T) {
 		require.Equal(t, ts[1].Points[0].Value.GetDoubleValue(), 1.0, "Should normalize the point after the reset")
 	})
 
+	t.Run("Sum with no value", func(t *testing.T) {
+		mapper, shutdown := newTestMetricMapper()
+		defer shutdown()
+		metric := pdata.NewMetric()
+		metric.SetDataType(pdata.MetricDataTypeSum)
+		sum := metric.Sum()
+		sum.SetIsMonotonic(true)
+		sum.SetAggregationTemporality(pdata.MetricAggregationTemporalityCumulative)
+		startTs := pdata.NewTimestampFromTime(start)
+		endTs := pdata.NewTimestampFromTime(start.Add(time.Hour))
+		// Add three points
+		point := sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(10)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
+		point = sum.DataPoints().AppendEmpty()
+		point.SetDoubleVal(15)
+		point.SetStartTimestamp(startTs)
+		point.SetTimestamp(endTs)
+		// The last point has no value
+		point = sum.DataPoints().AppendEmpty()
+		point.SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
+		ts := mapper.metricToTimeSeries(
+			mr,
+			labels{},
+			metric,
+		)
+		require.Len(t, ts, 2, "Should create one timeseries for each sum point, but omit the stale point")
+		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
+	})
+
 	t.Run("Gauge", func(t *testing.T) {
 		mapper, shutdown := newTestMetricMapper()
 		defer shutdown()
@@ -171,6 +208,27 @@ func TestMetricToTimeSeries(t *testing.T) {
 			metric,
 		)
 		require.Len(t, ts, 3, "Should create one timeseries for each gauge point")
+		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
+	})
+
+	t.Run("Gauge with no value", func(t *testing.T) {
+		mapper, shutdown := newTestMetricMapper()
+		defer shutdown()
+		metric := pdata.NewMetric()
+		metric.SetDataType(pdata.MetricDataTypeGauge)
+		gauge := metric.Gauge()
+		// Add three points
+		gauge.DataPoints().AppendEmpty().SetIntVal(10)
+		gauge.DataPoints().AppendEmpty().SetIntVal(15)
+		// The last point has no value
+		gauge.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
+		ts := mapper.metricToTimeSeries(
+			mr,
+			labels{},
+			metric,
+		)
+		require.Len(t, ts, 2, "Should create one timeseries for each gauge point, except the point without a value")
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
 	})
 }
@@ -219,7 +277,12 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pdata.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	ts := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	// Add a second point with no value
+	hist.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
 	// Verify aspects
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
@@ -257,6 +320,100 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
 }
 
+func TestEmptyHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myhist")
+	metric.SetDataType(pdata.MetricDataTypeHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.Histogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.SetBucketCounts([]uint64{0, 0, 0, 0, 0})
+	point.SetCount(0)
+	point.SetSum(0)
+	point.SetExplicitBounds([]float64{10, 20, 30, 40})
+
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
+	// Verify aspects
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
+
+	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	}, ts.Points[0].Interval)
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(0), hdp.Count)
+	assert.ElementsMatch(t, []int64{0, 0, 0, 0, 0}, hdp.BucketCounts)
+	// NaN sum produces a mean of 0
+	assert.Equal(t, float64(0), hdp.Mean)
+	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
+}
+
+func TestNaNSumHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myhist")
+	metric.SetDataType(pdata.MetricDataTypeHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.Histogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.SetBucketCounts([]uint64{1, 2, 3, 4, 5})
+	point.SetCount(15)
+	point.SetSum(math.NaN())
+	point.SetExplicitBounds([]float64{10, 20, 30, 40})
+
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
+	// Verify aspects
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
+
+	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	}, ts.Points[0].Interval)
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(15), hdp.Count)
+	assert.ElementsMatch(t, []int64{1, 2, 3, 4, 5}, hdp.BucketCounts)
+	// NaN sum produces a mean of 0
+	assert.Equal(t, float64(0), hdp.Mean)
+	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
+}
+
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
@@ -285,7 +442,12 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pdata.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	ts := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	// Add a second point with no value
+	hist.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
+	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
 	// Verify aspects
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
@@ -323,6 +485,106 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	err = ex.Attachments[1].UnmarshalTo(dropped)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
+}
+
+func TestNaNSumExponentialHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myexphist")
+	metric.SetDataType(pdata.MetricDataTypeExponentialHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.ExponentialHistogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.Positive().SetBucketCounts([]uint64{1, 2, 3})
+	point.Negative().SetBucketCounts([]uint64{4, 5})
+	point.SetZeroCount(6)
+	point.SetCount(21)
+	point.SetScale(-1)
+	point.SetSum(math.NaN())
+
+	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
+	// Verify aspects
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
+
+	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	}, ts.Points[0].Interval)
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(21), hdp.Count)
+	assert.ElementsMatch(t, []int64{15, 1, 2, 3, 0}, hdp.BucketCounts)
+	assert.Equal(t, float64(0), hdp.Mean)
+	assert.Equal(t, float64(4), hdp.BucketOptions.GetExponentialBuckets().GrowthFactor)
+	assert.Equal(t, float64(1), hdp.BucketOptions.GetExponentialBuckets().Scale)
+	assert.Equal(t, int32(3), hdp.BucketOptions.GetExponentialBuckets().NumFiniteBuckets)
+}
+
+func TestZeroCountExponentialHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myexphist")
+	metric.SetDataType(pdata.MetricDataTypeExponentialHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.ExponentialHistogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.Positive().SetBucketCounts([]uint64{0, 0, 0})
+	point.Negative().SetBucketCounts([]uint64{0, 0})
+	point.SetZeroCount(0)
+	point.SetCount(0)
+	point.SetScale(-1)
+	point.SetSum(0)
+
+	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
+	// Verify aspects
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Same(t, mr, ts.Resource)
+
+	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
+	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
+
+	assert.Nil(t, ts.Metadata)
+
+	assert.Len(t, ts.Points, 1)
+	assert.Equal(t, &monitoringpb.TimeInterval{
+		StartTime: timestamppb.New(start),
+		EndTime:   timestamppb.New(end),
+	}, ts.Points[0].Interval)
+	hdp := ts.Points[0].Value.GetDistributionValue()
+	assert.Equal(t, int64(0), hdp.Count)
+	assert.ElementsMatch(t, []int64{0, 0, 0, 0, 0}, hdp.BucketCounts)
+	assert.Equal(t, float64(0), hdp.Mean)
+	assert.Equal(t, float64(4), hdp.BucketOptions.GetExponentialBuckets().GrowthFactor)
+	assert.Equal(t, float64(1), hdp.BucketOptions.GetExponentialBuckets().Scale)
+	assert.Equal(t, int32(3), hdp.BucketOptions.GetExponentialBuckets().NumFiniteBuckets)
 }
 
 func TestExemplarNoAttachements(t *testing.T) {
@@ -392,6 +654,8 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		metric.SetDataType(pdata.MetricDataTypeSum)
 		sum := metric.Sum()
 		point := sum.DataPoints().AppendEmpty()
+		// Add a second point with no value
+		sum.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
 		return metric, sum, point
 	}
 
@@ -518,6 +782,8 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 		metric.SetDataType(pdata.MetricDataTypeGauge)
 		gauge := metric.Gauge()
 		point := gauge.DataPoints().AppendEmpty()
+		// Add a second point with no value
+		gauge.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
 		return metric, gauge, point
 	}
 
@@ -530,7 +796,9 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	end := start.Add(time.Hour)
 	point.SetTimestamp(pdata.NewTimestampFromTime(end))
 
-	ts := mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	tsl := mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	assert.Len(t, tsl, 1)
+	ts := tsl[0]
 	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_INT64)
 	assert.Equal(t, ts.Unit, unit)
@@ -549,19 +817,25 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 
 	// Test double as well
 	point.SetDoubleVal(float64(value))
-	ts = mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	tsl = mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
+	assert.Len(t, tsl, 1)
+	ts = tsl[0]
 	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
 	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.Equal(t, ts.Points[0].Value.GetDoubleValue(), float64(value))
 
 	// Add extra labels
 	extraLabels := map[string]string{"foo": "bar"}
-	ts = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	tsl = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	assert.Len(t, tsl, 1)
+	ts = tsl[0]
 	assert.Equal(t, ts.Metric.Labels, extraLabels)
 
 	// Full set of labels
 	point.Attributes().InsertString("baz", "bar")
-	ts = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	tsl = mapper.gaugePointToTimeSeries(mr, labels(extraLabels), metric, gauge, point)
+	assert.Len(t, tsl, 1)
+	ts = tsl[0]
 	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 }
 
@@ -586,7 +860,12 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	quantile.SetQuantile(1.0)
 	quantile.SetValue(1.0)
 	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
 	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+
+	// Add a second point with no value
+	summary.DataPoints().AppendEmpty().SetFlags(pdata.MetricDataPointFlags(pdata.MetricDataPointFlagNoRecordedValue))
+
 	ts := mapper.metricToTimeSeries(mr, labels{}, metric)
 	assert.Len(t, ts, 3)
 	sumResult := ts[0]
@@ -609,7 +888,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, sumResult.Points[0].Value.GetDoubleValue(), sum)
 	// Test count mapping
 	assert.Equal(t, countResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_INT64)
+	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.Equal(t, countResult.Unit, unit)
 	assert.Same(t, countResult.Resource, mr)
 	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_count")
@@ -620,7 +899,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 		StartTime: timestamppb.New(start),
 		EndTime:   timestamppb.New(end),
 	})
-	assert.Equal(t, countResult.Points[0].Value.GetInt64Value(), int64(count))
+	assert.Equal(t, countResult.Points[0].Value.GetDoubleValue(), float64(count))
 	// Test quantile mapping
 	assert.Equal(t, quantileResult.MetricKind, metricpb.MetricDescriptor_GAUGE)
 	assert.Equal(t, quantileResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
@@ -653,9 +932,9 @@ func TestAttributesToLabels(t *testing.T) {
 	// string to string
 	assert.Equal(
 		t,
-		attributesToLabels(pdata.NewAttributeMapFromMap(map[string]pdata.AttributeValue{
-			"foo": pdata.NewAttributeValueString("bar"),
-			"bar": pdata.NewAttributeValueString("baz"),
+		attributesToLabels(pdata.NewMapFromRaw(map[string]interface{}{
+			"foo": "bar",
+			"bar": "baz",
 		})),
 		labels{"foo": "bar", "bar": "baz"},
 	)
@@ -663,11 +942,11 @@ func TestAttributesToLabels(t *testing.T) {
 	// various key special cases
 	assert.Equal(
 		t,
-		attributesToLabels(pdata.NewAttributeMapFromMap(map[string]pdata.AttributeValue{
-			"foo.bar":   pdata.NewAttributeValueString("bar"),
-			"_foo":      pdata.NewAttributeValueString("bar"),
-			"123.hello": pdata.NewAttributeValueString("bar"),
-			"":          pdata.NewAttributeValueString("bar"),
+		attributesToLabels(pdata.NewMapFromRaw(map[string]interface{}{
+			"foo.bar":   "bar",
+			"_foo":      "bar",
+			"123.hello": "bar",
+			"":          "bar",
 		})),
 		labels{
 			"foo_bar":       "bar",
@@ -677,26 +956,18 @@ func TestAttributesToLabels(t *testing.T) {
 		},
 	)
 
-	attribSlice := pdata.NewAttributeValueArray()
-	attribSlice.SliceVal().AppendEmpty().SetStringVal("x")
-	attribSlice.SliceVal().AppendEmpty()
-	attribSlice.SliceVal().AppendEmpty().SetStringVal("y")
-
-	attribMap := pdata.NewAttributeValueMap()
-	attribMap.MapVal().InsertString("a", "b")
-
 	// value special cases
 	assert.Equal(
 		t,
-		attributesToLabels(pdata.NewAttributeMapFromMap(map[string]pdata.AttributeValue{
-			"a": pdata.NewAttributeValueBool(true),
-			"b": pdata.NewAttributeValueBool(false),
-			"c": pdata.NewAttributeValueInt(12),
-			"d": pdata.NewAttributeValueDouble(12.3),
-			"e": pdata.NewAttributeValueEmpty(),
-			"f": pdata.NewAttributeValueBytes([]byte{0xde, 0xad, 0xbe, 0xef}),
-			"g": attribSlice,
-			"h": attribMap,
+		attributesToLabels(pdata.NewMapFromRaw(map[string]interface{}{
+			"a": true,
+			"b": false,
+			"c": int64(12),
+			"d": float64(12.3),
+			"e": nil,
+			"f": []byte{0xde, 0xad, 0xbe, 0xef},
+			"g": []interface{}{"x", nil, "y"},
+			"h": map[string]interface{}{"a": "b"},
 		})),
 		labels{
 			"a": "true",
@@ -951,7 +1222,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 					DisplayName: "test.metric_count",
 					Type:        "workload.googleapis.com/test.metric_count",
 					MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
-					ValueType:   metricpb.MetricDescriptor_INT64,
+					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
 					Description: "Description",
 					Labels: []*label.LabelDescriptor{
@@ -1166,34 +1437,34 @@ func TestKnownDomains(t *testing.T) {
 	}
 }
 
-func TestInstrumentationLibraryToLabels(t *testing.T) {
-	newInstrumentationLibrary := func(name, version string) pdata.InstrumentationLibrary {
-		il := pdata.NewInstrumentationLibrary()
-		il.SetName("foo")
-		il.SetVersion("1.2.3")
-		return il
+func TestInstrumentationScopeToLabels(t *testing.T) {
+	newInstrumentationScope := func(name, version string) pdata.InstrumentationScope {
+		is := pdata.NewInstrumentationScope()
+		is.SetName("foo")
+		is.SetVersion("1.2.3")
+		return is
 	}
 
 	tests := []struct {
-		name                   string
-		instrumentationLibrary pdata.InstrumentationLibrary
-		metricConfig           MetricConfig
-		output                 labels
+		name                 string
+		InstrumentationScope pdata.InstrumentationScope
+		metricConfig         MetricConfig
+		output               labels
 	}{{
-		name:                   "fetchFromInstrumentationLibrary",
-		metricConfig:           MetricConfig{InstrumentationLibraryLabels: true},
-		instrumentationLibrary: newInstrumentationLibrary("foo", "1.2.3"),
-		output:                 labels{"instrumentation_source": "foo", "instrumentation_version": "1.2.3"},
+		name:                 "fetchFromInstrumentationScope",
+		metricConfig:         MetricConfig{InstrumentationLibraryLabels: true},
+		InstrumentationScope: newInstrumentationScope("foo", "1.2.3"),
+		output:               labels{"instrumentation_source": "foo", "instrumentation_version": "1.2.3"},
 	}, {
-		name:                   "disabledInConfig",
-		metricConfig:           MetricConfig{InstrumentationLibraryLabels: false},
-		instrumentationLibrary: newInstrumentationLibrary("foo", "1.2.3"),
-		output:                 labels{},
+		name:                 "disabledInConfig",
+		metricConfig:         MetricConfig{InstrumentationLibraryLabels: false},
+		InstrumentationScope: newInstrumentationScope("foo", "1.2.3"),
+		output:               labels{},
 	}, {
-		name:                   "notSetInInstrumentationLibrary",
-		metricConfig:           MetricConfig{InstrumentationLibraryLabels: true},
-		instrumentationLibrary: pdata.NewInstrumentationLibrary(),
-		output:                 labels{"instrumentation_source": "", "instrumentation_version": ""},
+		name:                 "notSetInInstrumentationScope",
+		metricConfig:         MetricConfig{InstrumentationLibraryLabels: true},
+		InstrumentationScope: pdata.NewInstrumentationScope(),
+		output:               labels{"instrumentation_source": "", "instrumentation_version": ""},
 	}}
 
 	for _, test := range tests {
@@ -1202,7 +1473,7 @@ func TestInstrumentationLibraryToLabels(t *testing.T) {
 			defer shutdown()
 			m.cfg.MetricConfig = test.metricConfig
 
-			out := m.instrumentationLibraryToLabels(test.instrumentationLibrary)
+			out := m.instrumentationScopeToLabels(test.InstrumentationScope)
 
 			assert.Equal(t, out, test.output)
 		})
