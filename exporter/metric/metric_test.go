@@ -23,17 +23,16 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/metrictest"
-	"go.opentelemetry.io/otel/metric/number"
-	"go.opentelemetry.io/otel/metric/sdkapi"
-	export "go.opentelemetry.io/otel/sdk/export/metric"
-	"go.opentelemetry.io/otel/sdk/export/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
+	"go.opentelemetry.io/otel/sdk/metric/export"
+	"go.opentelemetry.io/otel/sdk/metric/export/aggregation"
+	"go.opentelemetry.io/otel/sdk/metric/metrictest"
+	"go.opentelemetry.io/otel/sdk/metric/number"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/processor/processortest"
+	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
@@ -82,7 +81,8 @@ func TestExportMetrics(t *testing.T) {
 
 	assert.NoError(t, cont.Start(ctx))
 	meter := cont.Meter("test")
-	counter := metric.Must(meter).NewInt64Counter("name.lastvalue")
+	counter, err := meter.SyncInt64().Counter("name.lastvalue")
+	require.NoError(t, err)
 
 	counter.Add(ctx, 1)
 	require.NoError(t, cont.Stop(ctx))
@@ -118,7 +118,8 @@ func TestExportCounter(t *testing.T) {
 	meter := pusher.Meter("cloudmonitoring/test")
 
 	// Register counter value
-	counter := metric.Must(meter).NewInt64Counter("counter-a")
+	counter, err := meter.SyncInt64().Counter("counter-a")
+	assert.NoError(t, err)
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
 	counter.Add(ctx, 100, clabels...)
 }
@@ -198,7 +199,8 @@ func TestRecordToMpb(t *testing.T) {
 		},
 	}
 	meter := pusher.Meter("custom.googleapis.com/opentelemetry")
-	counter := metric.Must(meter).NewInt64Counter(desc.Name())
+	counter, err := meter.SyncInt64().Counter(desc.Name())
+	require.NoError(t, err)
 	clabels := []attribute.KeyValue{
 		attribute.Key("a").String("A"),
 		attribute.Key("b_b").String("B"),
@@ -629,7 +631,8 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 			assert.NoError(t, cont.Start(ctx))
 			meter := cont.Meter("test")
 
-			counter := metric.Must(meter).NewInt64Counter("name.lastvalue")
+			counter, err := meter.SyncInt64().Counter("name.lastvalue")
+			require.NoError(t, err)
 
 			counter.Add(ctx, 1)
 			require.NoError(t, cont.Stop(ctx))

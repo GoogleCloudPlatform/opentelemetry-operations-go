@@ -79,10 +79,10 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr, _ := mapper.resourceToMonitoredResource(rl.Resource())
-		for j := 0; j < rl.InstrumentationLibraryLogs().Len(); j++ {
-			ill := rl.InstrumentationLibraryLogs().At(j)
-			for k := 0; k < ill.LogRecords().Len(); k++ {
-				log := ill.LogRecords().At(k)
+		for j := 0; j < rl.ScopeLogs().Len(); j++ {
+			sl := rl.ScopeLogs().At(j)
+			for k := 0; k < sl.LogRecords().Len(); k++ {
+				log := sl.LogRecords().At(k)
 
 				entry, err := l.mapper.logToEntry(log, mr)
 				if err != nil {

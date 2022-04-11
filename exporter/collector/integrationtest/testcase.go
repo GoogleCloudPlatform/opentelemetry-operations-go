@@ -95,10 +95,10 @@ func (m *MetricsTestCase) LoadOTLPMetricsInput(
 
 	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
 		rm := metrics.ResourceMetrics().At(i)
-		for i := 0; i < rm.InstrumentationLibraryMetrics().Len(); i++ {
-			rmi := rm.InstrumentationLibraryMetrics().At(i)
-			for i := 0; i < rmi.Metrics().Len(); i++ {
-				m := rmi.Metrics().At(i)
+		for i := 0; i < rm.ScopeMetrics().Len(); i++ {
+			sms := rm.ScopeMetrics().At(i)
+			for i := 0; i < sms.Metrics().Len(); i++ {
+				m := sms.Metrics().At(i)
 
 				switch m.DataType() {
 				case pdata.MetricDataTypeGauge:

@@ -7,7 +7,7 @@
           "instrumentationLibrary": {},
           "metrics": [
             {
-              "name": "testsummary 1",
+              "name": "testsummary_1",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -44,7 +44,7 @@
               }
             },
             {
-              "name": "testsummary 2",
+              "name": "testsummary_2",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -81,7 +81,7 @@
               }
             },
             {
-              "name": "testsummary 3",
+              "name": "testsummary_3",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -118,7 +118,7 @@
               }
             },
             {
-              "name": "testsummary 4",
+              "name": "testsummary_4",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -155,7 +155,7 @@
               }
             },
             {
-              "name": "testsummary 5",
+              "name": "testsummary_5",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -192,7 +192,7 @@
               }
             },
             {
-              "name": "testsummary 6",
+              "name": "testsummary_6",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -229,7 +229,7 @@
               }
             },
             {
-              "name": "testsummary 7",
+              "name": "testsummary_7",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -266,7 +266,7 @@
               }
             },
             {
-              "name": "testsummary 8",
+              "name": "testsummary_8",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -303,7 +303,7 @@
               }
             },
             {
-              "name": "testsummary 9",
+              "name": "testsummary_9",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -340,7 +340,7 @@
               }
             },
             {
-              "name": "testsummary 10",
+              "name": "testsummary_10",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -377,7 +377,7 @@
               }
             },
             {
-              "name": "testsummary 11",
+              "name": "testsummary_11",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -414,7 +414,7 @@
               }
             },
             {
-              "name": "testsummary 12",
+              "name": "testsummary_12",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -451,7 +451,7 @@
               }
             },
             {
-              "name": "testsummary 13",
+              "name": "testsummary_13",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -488,7 +488,7 @@
               }
             },
             {
-              "name": "testsummary 14",
+              "name": "testsummary_14",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -525,7 +525,7 @@
               }
             },
             {
-              "name": "testsummary 15",
+              "name": "testsummary_15",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -562,7 +562,7 @@
               }
             },
             {
-              "name": "testsummary 16",
+              "name": "testsummary_16",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -599,7 +599,7 @@
               }
             },
             {
-              "name": "testsummary 17",
+              "name": "testsummary_17",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -636,7 +636,7 @@
               }
             },
             {
-              "name": "testsummary 18",
+              "name": "testsummary_18",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -673,7 +673,7 @@
               }
             },
             {
-              "name": "testsummary 19",
+              "name": "testsummary_19",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -710,7 +710,7 @@
               }
             },
             {
-              "name": "testsummary 20",
+              "name": "testsummary_20",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -747,7 +747,7 @@
               }
             },
             {
-              "name": "testsummary 21",
+              "name": "testsummary_21",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -784,7 +784,7 @@
               }
             },
             {
-              "name": "testsummary 22",
+              "name": "testsummary_22",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -821,7 +821,7 @@
               }
             },
             {
-              "name": "testsummary 23",
+              "name": "testsummary_23",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -858,7 +858,7 @@
               }
             },
             {
-              "name": "testsummary 24",
+              "name": "testsummary_24",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -895,7 +895,7 @@
               }
             },
             {
-              "name": "testsummary 25",
+              "name": "testsummary_25",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -932,7 +932,7 @@
               }
             },
             {
-              "name": "testsummary 26",
+              "name": "testsummary_26",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -969,7 +969,7 @@
               }
             },
             {
-              "name": "testsummary 27",
+              "name": "testsummary_27",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1006,7 +1006,7 @@
               }
             },
             {
-              "name": "testsummary 28",
+              "name": "testsummary_28",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1043,7 +1043,7 @@
               }
             },
             {
-              "name": "testsummary 29",
+              "name": "testsummary_29",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1080,7 +1080,7 @@
               }
             },
             {
-              "name": "testsummary 30",
+              "name": "testsummary_30",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1117,7 +1117,7 @@
               }
             },
             {
-              "name": "testsummary 31",
+              "name": "testsummary_31",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1154,7 +1154,7 @@
               }
             },
             {
-              "name": "testsummary 32",
+              "name": "testsummary_32",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1191,7 +1191,7 @@
               }
             },
             {
-              "name": "testsummary 33",
+              "name": "testsummary_33",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1228,7 +1228,7 @@
               }
             },
             {
-              "name": "testsummary 34",
+              "name": "testsummary_34",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1265,7 +1265,7 @@
               }
             },
             {
-              "name": "testsummary 35",
+              "name": "testsummary_35",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1302,7 +1302,7 @@
               }
             },
             {
-              "name": "testsummary 36",
+              "name": "testsummary_36",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1339,7 +1339,7 @@
               }
             },
             {
-              "name": "testsummary 37",
+              "name": "testsummary_37",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1376,7 +1376,7 @@
               }
             },
             {
-              "name": "testsummary 38",
+              "name": "testsummary_38",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1413,7 +1413,7 @@
               }
             },
             {
-              "name": "testsummary 39",
+              "name": "testsummary_39",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1450,7 +1450,7 @@
               }
             },
             {
-              "name": "testsummary 40",
+              "name": "testsummary_40",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {
@@ -1487,7 +1487,7 @@
               }
             },
             {
-              "name": "testsummary 41",
+              "name": "testsummary_41",
               "description": "This is a test summary",
               "unit": "1",
               "summary": {

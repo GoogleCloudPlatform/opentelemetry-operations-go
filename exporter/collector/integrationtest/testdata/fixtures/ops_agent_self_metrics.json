@@ -10,31 +10,25 @@
                         }
                     },
                     {
-                        "key": "host.name",
+                        "key": "net.host.name",
                         "value": {
                             "stringValue": "ops-agent-metrics.c.otel-opsagenttester.internal"
                         }
                     },
                     {
-                        "key": "job",
-                        "value": {
-                            "stringValue": "otel-collector"
-                        }
-                    },
-                    {
-                        "key": "instance",
+                        "key": "service.instance.id",
                         "value": {
                             "stringValue": "0.0.0.0:8888"
                         }
                     },
                     {
-                        "key": "port",
+                        "key": "net.host.port",
                         "value": {
                             "stringValue": "8888"
                         }
                     },
                     {
-                        "key": "scheme",
+                        "key": "http.scheme",
                         "value": {
                             "stringValue": "http"
                         }

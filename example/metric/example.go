@@ -24,7 +24,7 @@ import (
 	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
@@ -79,7 +79,10 @@ func main() {
 	meter := pusher.Meter("cloudmonitoring/example")
 
 	// Register counter value
-	counter := metric.Must(meter).NewInt64Counter("counter-a")
+	counter, err := meter.SyncInt64().Counter("counter-a")
+	if err != nil {
+		log.Fatalf("Failed to create counter: %v", err)
+	}
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
 	counter.Add(ctx, 100, clabels...)
 
@@ -90,12 +93,14 @@ func main() {
 	}
 	of := newObservedFloat(12.34)
 
-	callback := func(_ context.Context, result metric.Float64ObserverResult) {
-		v := of.get()
-		result.Observe(v, olabels...)
+	gaugeObserver, err := meter.AsyncFloat64().Gauge("observer-a")
+	if err != nil {
+		log.Panicf("failed to initialize instrument: %v", err)
 	}
-
-	metric.Must(meter).NewFloat64GaugeObserver("observer-a", callback)
+	_ = meter.RegisterCallback([]instrument.Asynchronous{gaugeObserver}, func(ctx context.Context) {
+		v := of.get()
+		gaugeObserver.Observe(ctx, v, olabels...)
+	})
 
 	// Add measurement once an every 10 second.
 	timer := time.NewTicker(10 * time.Second)

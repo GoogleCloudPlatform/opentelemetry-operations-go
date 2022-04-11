@@ -4,7 +4,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 1_sum",
+            "type": "workload.googleapis.com/testsummary_1_sum",
             "labels": {
               "foo": "bar"
             }
@@ -34,7 +34,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 1_count",
+            "type": "workload.googleapis.com/testsummary_1_count",
             "labels": {
               "foo": "bar"
             }
@@ -48,7 +48,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -56,7 +56,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -64,7 +64,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 1",
+            "type": "workload.googleapis.com/testsummary_1",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -94,7 +94,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 1",
+            "type": "workload.googleapis.com/testsummary_1",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -124,7 +124,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 1",
+            "type": "workload.googleapis.com/testsummary_1",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -154,7 +154,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 2_sum",
+            "type": "workload.googleapis.com/testsummary_2_sum",
             "labels": {
               "foo": "bar"
             }
@@ -184,7 +184,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 2_count",
+            "type": "workload.googleapis.com/testsummary_2_count",
             "labels": {
               "foo": "bar"
             }
@@ -198,7 +198,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -206,7 +206,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -214,7 +214,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 2",
+            "type": "workload.googleapis.com/testsummary_2",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -244,7 +244,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 2",
+            "type": "workload.googleapis.com/testsummary_2",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -274,7 +274,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 2",
+            "type": "workload.googleapis.com/testsummary_2",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -304,7 +304,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 3_sum",
+            "type": "workload.googleapis.com/testsummary_3_sum",
             "labels": {
               "foo": "bar"
             }
@@ -334,7 +334,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 3_count",
+            "type": "workload.googleapis.com/testsummary_3_count",
             "labels": {
               "foo": "bar"
             }
@@ -348,7 +348,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -356,7 +356,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -364,7 +364,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 3",
+            "type": "workload.googleapis.com/testsummary_3",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -394,7 +394,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 3",
+            "type": "workload.googleapis.com/testsummary_3",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -424,7 +424,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 3",
+            "type": "workload.googleapis.com/testsummary_3",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -454,7 +454,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 4_sum",
+            "type": "workload.googleapis.com/testsummary_4_sum",
             "labels": {
               "foo": "bar"
             }
@@ -484,7 +484,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 4_count",
+            "type": "workload.googleapis.com/testsummary_4_count",
             "labels": {
               "foo": "bar"
             }
@@ -498,7 +498,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -506,7 +506,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -514,7 +514,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 4",
+            "type": "workload.googleapis.com/testsummary_4",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -544,7 +544,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 4",
+            "type": "workload.googleapis.com/testsummary_4",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -574,7 +574,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 4",
+            "type": "workload.googleapis.com/testsummary_4",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -604,7 +604,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 5_sum",
+            "type": "workload.googleapis.com/testsummary_5_sum",
             "labels": {
               "foo": "bar"
             }
@@ -634,7 +634,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 5_count",
+            "type": "workload.googleapis.com/testsummary_5_count",
             "labels": {
               "foo": "bar"
             }
@@ -648,7 +648,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -656,7 +656,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -664,7 +664,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 5",
+            "type": "workload.googleapis.com/testsummary_5",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -694,7 +694,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 5",
+            "type": "workload.googleapis.com/testsummary_5",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -724,7 +724,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 5",
+            "type": "workload.googleapis.com/testsummary_5",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -754,7 +754,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 6_sum",
+            "type": "workload.googleapis.com/testsummary_6_sum",
             "labels": {
               "foo": "bar"
             }
@@ -784,7 +784,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 6_count",
+            "type": "workload.googleapis.com/testsummary_6_count",
             "labels": {
               "foo": "bar"
             }
@@ -798,7 +798,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -806,7 +806,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -814,7 +814,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 6",
+            "type": "workload.googleapis.com/testsummary_6",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -844,7 +844,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 6",
+            "type": "workload.googleapis.com/testsummary_6",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -874,7 +874,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 6",
+            "type": "workload.googleapis.com/testsummary_6",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -904,7 +904,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 7_sum",
+            "type": "workload.googleapis.com/testsummary_7_sum",
             "labels": {
               "foo": "bar"
             }
@@ -934,7 +934,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 7_count",
+            "type": "workload.googleapis.com/testsummary_7_count",
             "labels": {
               "foo": "bar"
             }
@@ -948,7 +948,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -956,7 +956,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -964,7 +964,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 7",
+            "type": "workload.googleapis.com/testsummary_7",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -994,7 +994,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 7",
+            "type": "workload.googleapis.com/testsummary_7",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -1024,7 +1024,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 7",
+            "type": "workload.googleapis.com/testsummary_7",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -1054,7 +1054,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 8_sum",
+            "type": "workload.googleapis.com/testsummary_8_sum",
             "labels": {
               "foo": "bar"
             }
@@ -1084,7 +1084,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 8_count",
+            "type": "workload.googleapis.com/testsummary_8_count",
             "labels": {
               "foo": "bar"
             }
@@ -1098,7 +1098,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -1106,7 +1106,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -1114,7 +1114,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 8",
+            "type": "workload.googleapis.com/testsummary_8",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -1144,7 +1144,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 8",
+            "type": "workload.googleapis.com/testsummary_8",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -1174,7 +1174,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 8",
+            "type": "workload.googleapis.com/testsummary_8",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -1204,7 +1204,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 9_sum",
+            "type": "workload.googleapis.com/testsummary_9_sum",
             "labels": {
               "foo": "bar"
             }
@@ -1234,7 +1234,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 9_count",
+            "type": "workload.googleapis.com/testsummary_9_count",
             "labels": {
               "foo": "bar"
             }
@@ -1248,7 +1248,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -1256,7 +1256,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -1264,7 +1264,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 9",
+            "type": "workload.googleapis.com/testsummary_9",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -1294,7 +1294,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 9",
+            "type": "workload.googleapis.com/testsummary_9",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -1324,7 +1324,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 9",
+            "type": "workload.googleapis.com/testsummary_9",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -1354,7 +1354,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 10_sum",
+            "type": "workload.googleapis.com/testsummary_10_sum",
             "labels": {
               "foo": "bar"
             }
@@ -1384,7 +1384,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 10_count",
+            "type": "workload.googleapis.com/testsummary_10_count",
             "labels": {
               "foo": "bar"
             }
@@ -1398,7 +1398,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -1406,7 +1406,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -1414,7 +1414,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 10",
+            "type": "workload.googleapis.com/testsummary_10",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -1444,7 +1444,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 10",
+            "type": "workload.googleapis.com/testsummary_10",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -1474,7 +1474,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 10",
+            "type": "workload.googleapis.com/testsummary_10",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -1504,7 +1504,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 11_sum",
+            "type": "workload.googleapis.com/testsummary_11_sum",
             "labels": {
               "foo": "bar"
             }
@@ -1534,7 +1534,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 11_count",
+            "type": "workload.googleapis.com/testsummary_11_count",
             "labels": {
               "foo": "bar"
             }
@@ -1548,7 +1548,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -1556,7 +1556,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -1564,7 +1564,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 11",
+            "type": "workload.googleapis.com/testsummary_11",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -1594,7 +1594,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 11",
+            "type": "workload.googleapis.com/testsummary_11",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -1624,7 +1624,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 11",
+            "type": "workload.googleapis.com/testsummary_11",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -1654,7 +1654,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 12_sum",
+            "type": "workload.googleapis.com/testsummary_12_sum",
             "labels": {
               "foo": "bar"
             }
@@ -1684,7 +1684,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 12_count",
+            "type": "workload.googleapis.com/testsummary_12_count",
             "labels": {
               "foo": "bar"
             }
@@ -1698,7 +1698,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -1706,7 +1706,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -1714,7 +1714,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 12",
+            "type": "workload.googleapis.com/testsummary_12",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -1744,7 +1744,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 12",
+            "type": "workload.googleapis.com/testsummary_12",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -1774,7 +1774,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 12",
+            "type": "workload.googleapis.com/testsummary_12",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -1804,7 +1804,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 13_sum",
+            "type": "workload.googleapis.com/testsummary_13_sum",
             "labels": {
               "foo": "bar"
             }
@@ -1834,7 +1834,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 13_count",
+            "type": "workload.googleapis.com/testsummary_13_count",
             "labels": {
               "foo": "bar"
             }
@@ -1848,7 +1848,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -1856,7 +1856,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -1864,7 +1864,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 13",
+            "type": "workload.googleapis.com/testsummary_13",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -1894,7 +1894,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 13",
+            "type": "workload.googleapis.com/testsummary_13",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -1924,7 +1924,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 13",
+            "type": "workload.googleapis.com/testsummary_13",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -1954,7 +1954,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 14_sum",
+            "type": "workload.googleapis.com/testsummary_14_sum",
             "labels": {
               "foo": "bar"
             }
@@ -1984,7 +1984,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 14_count",
+            "type": "workload.googleapis.com/testsummary_14_count",
             "labels": {
               "foo": "bar"
             }
@@ -1998,7 +1998,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -2006,7 +2006,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -2014,7 +2014,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 14",
+            "type": "workload.googleapis.com/testsummary_14",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -2044,7 +2044,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 14",
+            "type": "workload.googleapis.com/testsummary_14",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -2074,7 +2074,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 14",
+            "type": "workload.googleapis.com/testsummary_14",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -2104,7 +2104,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 15_sum",
+            "type": "workload.googleapis.com/testsummary_15_sum",
             "labels": {
               "foo": "bar"
             }
@@ -2134,7 +2134,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 15_count",
+            "type": "workload.googleapis.com/testsummary_15_count",
             "labels": {
               "foo": "bar"
             }
@@ -2148,7 +2148,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -2156,7 +2156,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -2164,7 +2164,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 15",
+            "type": "workload.googleapis.com/testsummary_15",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -2194,7 +2194,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 15",
+            "type": "workload.googleapis.com/testsummary_15",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -2224,7 +2224,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 15",
+            "type": "workload.googleapis.com/testsummary_15",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -2254,7 +2254,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 16_sum",
+            "type": "workload.googleapis.com/testsummary_16_sum",
             "labels": {
               "foo": "bar"
             }
@@ -2284,7 +2284,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 16_count",
+            "type": "workload.googleapis.com/testsummary_16_count",
             "labels": {
               "foo": "bar"
             }
@@ -2298,7 +2298,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -2306,7 +2306,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -2314,7 +2314,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 16",
+            "type": "workload.googleapis.com/testsummary_16",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -2344,7 +2344,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 16",
+            "type": "workload.googleapis.com/testsummary_16",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -2374,7 +2374,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 16",
+            "type": "workload.googleapis.com/testsummary_16",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -2404,7 +2404,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 17_sum",
+            "type": "workload.googleapis.com/testsummary_17_sum",
             "labels": {
               "foo": "bar"
             }
@@ -2434,7 +2434,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 17_count",
+            "type": "workload.googleapis.com/testsummary_17_count",
             "labels": {
               "foo": "bar"
             }
@@ -2448,7 +2448,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -2456,7 +2456,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -2464,7 +2464,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 17",
+            "type": "workload.googleapis.com/testsummary_17",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -2494,7 +2494,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 17",
+            "type": "workload.googleapis.com/testsummary_17",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -2524,7 +2524,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 17",
+            "type": "workload.googleapis.com/testsummary_17",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -2554,7 +2554,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 18_sum",
+            "type": "workload.googleapis.com/testsummary_18_sum",
             "labels": {
               "foo": "bar"
             }
@@ -2584,7 +2584,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 18_count",
+            "type": "workload.googleapis.com/testsummary_18_count",
             "labels": {
               "foo": "bar"
             }
@@ -2598,7 +2598,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -2606,7 +2606,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -2614,7 +2614,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 18",
+            "type": "workload.googleapis.com/testsummary_18",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -2644,7 +2644,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 18",
+            "type": "workload.googleapis.com/testsummary_18",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -2674,7 +2674,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 18",
+            "type": "workload.googleapis.com/testsummary_18",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -2704,7 +2704,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 19_sum",
+            "type": "workload.googleapis.com/testsummary_19_sum",
             "labels": {
               "foo": "bar"
             }
@@ -2734,7 +2734,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 19_count",
+            "type": "workload.googleapis.com/testsummary_19_count",
             "labels": {
               "foo": "bar"
             }
@@ -2748,7 +2748,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -2756,7 +2756,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -2764,7 +2764,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 19",
+            "type": "workload.googleapis.com/testsummary_19",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -2794,7 +2794,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 19",
+            "type": "workload.googleapis.com/testsummary_19",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -2824,7 +2824,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 19",
+            "type": "workload.googleapis.com/testsummary_19",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -2854,7 +2854,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 20_sum",
+            "type": "workload.googleapis.com/testsummary_20_sum",
             "labels": {
               "foo": "bar"
             }
@@ -2884,7 +2884,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 20_count",
+            "type": "workload.googleapis.com/testsummary_20_count",
             "labels": {
               "foo": "bar"
             }
@@ -2898,7 +2898,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -2906,7 +2906,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -2914,7 +2914,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 20",
+            "type": "workload.googleapis.com/testsummary_20",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -2944,7 +2944,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 20",
+            "type": "workload.googleapis.com/testsummary_20",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -2974,7 +2974,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 20",
+            "type": "workload.googleapis.com/testsummary_20",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -3004,7 +3004,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 21_sum",
+            "type": "workload.googleapis.com/testsummary_21_sum",
             "labels": {
               "foo": "bar"
             }
@@ -3034,7 +3034,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 21_count",
+            "type": "workload.googleapis.com/testsummary_21_count",
             "labels": {
               "foo": "bar"
             }
@@ -3048,7 +3048,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3056,7 +3056,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -3064,7 +3064,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 21",
+            "type": "workload.googleapis.com/testsummary_21",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -3094,7 +3094,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 21",
+            "type": "workload.googleapis.com/testsummary_21",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -3124,7 +3124,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 21",
+            "type": "workload.googleapis.com/testsummary_21",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -3154,7 +3154,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 22_sum",
+            "type": "workload.googleapis.com/testsummary_22_sum",
             "labels": {
               "foo": "bar"
             }
@@ -3184,7 +3184,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 22_count",
+            "type": "workload.googleapis.com/testsummary_22_count",
             "labels": {
               "foo": "bar"
             }
@@ -3198,7 +3198,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3206,7 +3206,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -3214,7 +3214,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 22",
+            "type": "workload.googleapis.com/testsummary_22",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -3244,7 +3244,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 22",
+            "type": "workload.googleapis.com/testsummary_22",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -3274,7 +3274,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 22",
+            "type": "workload.googleapis.com/testsummary_22",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -3304,7 +3304,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 23_sum",
+            "type": "workload.googleapis.com/testsummary_23_sum",
             "labels": {
               "foo": "bar"
             }
@@ -3334,7 +3334,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 23_count",
+            "type": "workload.googleapis.com/testsummary_23_count",
             "labels": {
               "foo": "bar"
             }
@@ -3348,7 +3348,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3356,7 +3356,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -3364,7 +3364,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 23",
+            "type": "workload.googleapis.com/testsummary_23",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -3394,7 +3394,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 23",
+            "type": "workload.googleapis.com/testsummary_23",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -3424,7 +3424,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 23",
+            "type": "workload.googleapis.com/testsummary_23",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -3454,7 +3454,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 24_sum",
+            "type": "workload.googleapis.com/testsummary_24_sum",
             "labels": {
               "foo": "bar"
             }
@@ -3484,7 +3484,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 24_count",
+            "type": "workload.googleapis.com/testsummary_24_count",
             "labels": {
               "foo": "bar"
             }
@@ -3498,7 +3498,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3506,7 +3506,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -3514,7 +3514,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 24",
+            "type": "workload.googleapis.com/testsummary_24",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -3544,7 +3544,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 24",
+            "type": "workload.googleapis.com/testsummary_24",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -3574,7 +3574,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 24",
+            "type": "workload.googleapis.com/testsummary_24",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -3604,7 +3604,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 25_sum",
+            "type": "workload.googleapis.com/testsummary_25_sum",
             "labels": {
               "foo": "bar"
             }
@@ -3634,7 +3634,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 25_count",
+            "type": "workload.googleapis.com/testsummary_25_count",
             "labels": {
               "foo": "bar"
             }
@@ -3648,7 +3648,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3656,7 +3656,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -3664,7 +3664,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 25",
+            "type": "workload.googleapis.com/testsummary_25",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -3694,7 +3694,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 25",
+            "type": "workload.googleapis.com/testsummary_25",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -3724,7 +3724,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 25",
+            "type": "workload.googleapis.com/testsummary_25",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -3754,7 +3754,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 26_sum",
+            "type": "workload.googleapis.com/testsummary_26_sum",
             "labels": {
               "foo": "bar"
             }
@@ -3784,7 +3784,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 26_count",
+            "type": "workload.googleapis.com/testsummary_26_count",
             "labels": {
               "foo": "bar"
             }
@@ -3798,7 +3798,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3806,7 +3806,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -3814,7 +3814,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 26",
+            "type": "workload.googleapis.com/testsummary_26",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -3844,7 +3844,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 26",
+            "type": "workload.googleapis.com/testsummary_26",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -3874,7 +3874,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 26",
+            "type": "workload.googleapis.com/testsummary_26",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -3904,7 +3904,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 27_sum",
+            "type": "workload.googleapis.com/testsummary_27_sum",
             "labels": {
               "foo": "bar"
             }
@@ -3934,7 +3934,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 27_count",
+            "type": "workload.googleapis.com/testsummary_27_count",
             "labels": {
               "foo": "bar"
             }
@@ -3948,7 +3948,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -3956,7 +3956,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -3964,7 +3964,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 27",
+            "type": "workload.googleapis.com/testsummary_27",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -3994,7 +3994,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 27",
+            "type": "workload.googleapis.com/testsummary_27",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -4024,7 +4024,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 27",
+            "type": "workload.googleapis.com/testsummary_27",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -4054,7 +4054,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 28_sum",
+            "type": "workload.googleapis.com/testsummary_28_sum",
             "labels": {
               "foo": "bar"
             }
@@ -4084,7 +4084,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 28_count",
+            "type": "workload.googleapis.com/testsummary_28_count",
             "labels": {
               "foo": "bar"
             }
@@ -4098,7 +4098,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -4106,7 +4106,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -4114,7 +4114,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 28",
+            "type": "workload.googleapis.com/testsummary_28",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -4144,7 +4144,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 28",
+            "type": "workload.googleapis.com/testsummary_28",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -4174,7 +4174,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 28",
+            "type": "workload.googleapis.com/testsummary_28",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -4204,7 +4204,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 29_sum",
+            "type": "workload.googleapis.com/testsummary_29_sum",
             "labels": {
               "foo": "bar"
             }
@@ -4234,7 +4234,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 29_count",
+            "type": "workload.googleapis.com/testsummary_29_count",
             "labels": {
               "foo": "bar"
             }
@@ -4248,7 +4248,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -4256,7 +4256,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -4264,7 +4264,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 29",
+            "type": "workload.googleapis.com/testsummary_29",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -4294,7 +4294,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 29",
+            "type": "workload.googleapis.com/testsummary_29",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -4324,7 +4324,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 29",
+            "type": "workload.googleapis.com/testsummary_29",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -4354,7 +4354,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 30_sum",
+            "type": "workload.googleapis.com/testsummary_30_sum",
             "labels": {
               "foo": "bar"
             }
@@ -4384,7 +4384,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 30_count",
+            "type": "workload.googleapis.com/testsummary_30_count",
             "labels": {
               "foo": "bar"
             }
@@ -4398,7 +4398,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -4406,7 +4406,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -4414,7 +4414,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 30",
+            "type": "workload.googleapis.com/testsummary_30",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -4444,7 +4444,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 30",
+            "type": "workload.googleapis.com/testsummary_30",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -4474,7 +4474,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 30",
+            "type": "workload.googleapis.com/testsummary_30",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -4504,7 +4504,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 31_sum",
+            "type": "workload.googleapis.com/testsummary_31_sum",
             "labels": {
               "foo": "bar"
             }
@@ -4534,7 +4534,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 31_count",
+            "type": "workload.googleapis.com/testsummary_31_count",
             "labels": {
               "foo": "bar"
             }
@@ -4548,7 +4548,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -4556,7 +4556,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -4564,7 +4564,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 31",
+            "type": "workload.googleapis.com/testsummary_31",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -4594,7 +4594,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 31",
+            "type": "workload.googleapis.com/testsummary_31",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -4624,7 +4624,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 31",
+            "type": "workload.googleapis.com/testsummary_31",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -4654,7 +4654,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 32_sum",
+            "type": "workload.googleapis.com/testsummary_32_sum",
             "labels": {
               "foo": "bar"
             }
@@ -4684,7 +4684,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 32_count",
+            "type": "workload.googleapis.com/testsummary_32_count",
             "labels": {
               "foo": "bar"
             }
@@ -4698,7 +4698,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -4706,7 +4706,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -4714,7 +4714,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 32",
+            "type": "workload.googleapis.com/testsummary_32",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -4744,7 +4744,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 32",
+            "type": "workload.googleapis.com/testsummary_32",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -4774,7 +4774,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 32",
+            "type": "workload.googleapis.com/testsummary_32",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -4804,7 +4804,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 33_sum",
+            "type": "workload.googleapis.com/testsummary_33_sum",
             "labels": {
               "foo": "bar"
             }
@@ -4834,7 +4834,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 33_count",
+            "type": "workload.googleapis.com/testsummary_33_count",
             "labels": {
               "foo": "bar"
             }
@@ -4848,7 +4848,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -4856,7 +4856,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -4864,7 +4864,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 33",
+            "type": "workload.googleapis.com/testsummary_33",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -4894,7 +4894,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 33",
+            "type": "workload.googleapis.com/testsummary_33",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -4924,7 +4924,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 33",
+            "type": "workload.googleapis.com/testsummary_33",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -4954,7 +4954,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 34_sum",
+            "type": "workload.googleapis.com/testsummary_34_sum",
             "labels": {
               "foo": "bar"
             }
@@ -4984,7 +4984,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 34_count",
+            "type": "workload.googleapis.com/testsummary_34_count",
             "labels": {
               "foo": "bar"
             }
@@ -4998,7 +4998,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -5006,7 +5006,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -5014,7 +5014,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 34",
+            "type": "workload.googleapis.com/testsummary_34",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -5044,7 +5044,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 34",
+            "type": "workload.googleapis.com/testsummary_34",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -5074,7 +5074,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 34",
+            "type": "workload.googleapis.com/testsummary_34",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -5104,7 +5104,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 35_sum",
+            "type": "workload.googleapis.com/testsummary_35_sum",
             "labels": {
               "foo": "bar"
             }
@@ -5134,7 +5134,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 35_count",
+            "type": "workload.googleapis.com/testsummary_35_count",
             "labels": {
               "foo": "bar"
             }
@@ -5148,7 +5148,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -5156,7 +5156,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -5164,7 +5164,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 35",
+            "type": "workload.googleapis.com/testsummary_35",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -5194,7 +5194,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 35",
+            "type": "workload.googleapis.com/testsummary_35",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -5224,7 +5224,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 35",
+            "type": "workload.googleapis.com/testsummary_35",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -5254,7 +5254,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 36_sum",
+            "type": "workload.googleapis.com/testsummary_36_sum",
             "labels": {
               "foo": "bar"
             }
@@ -5284,7 +5284,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 36_count",
+            "type": "workload.googleapis.com/testsummary_36_count",
             "labels": {
               "foo": "bar"
             }
@@ -5298,7 +5298,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -5306,7 +5306,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -5314,7 +5314,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 36",
+            "type": "workload.googleapis.com/testsummary_36",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -5344,7 +5344,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 36",
+            "type": "workload.googleapis.com/testsummary_36",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -5374,7 +5374,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 36",
+            "type": "workload.googleapis.com/testsummary_36",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -5404,7 +5404,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 37_sum",
+            "type": "workload.googleapis.com/testsummary_37_sum",
             "labels": {
               "foo": "bar"
             }
@@ -5434,7 +5434,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 37_count",
+            "type": "workload.googleapis.com/testsummary_37_count",
             "labels": {
               "foo": "bar"
             }
@@ -5448,7 +5448,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -5456,7 +5456,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -5464,7 +5464,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 37",
+            "type": "workload.googleapis.com/testsummary_37",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -5494,7 +5494,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 37",
+            "type": "workload.googleapis.com/testsummary_37",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -5524,7 +5524,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 37",
+            "type": "workload.googleapis.com/testsummary_37",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -5554,7 +5554,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 38_sum",
+            "type": "workload.googleapis.com/testsummary_38_sum",
             "labels": {
               "foo": "bar"
             }
@@ -5584,7 +5584,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 38_count",
+            "type": "workload.googleapis.com/testsummary_38_count",
             "labels": {
               "foo": "bar"
             }
@@ -5598,7 +5598,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -5606,7 +5606,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -5614,7 +5614,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 38",
+            "type": "workload.googleapis.com/testsummary_38",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -5644,7 +5644,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 38",
+            "type": "workload.googleapis.com/testsummary_38",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -5674,7 +5674,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 38",
+            "type": "workload.googleapis.com/testsummary_38",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -5704,7 +5704,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 39_sum",
+            "type": "workload.googleapis.com/testsummary_39_sum",
             "labels": {
               "foo": "bar"
             }
@@ -5734,7 +5734,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 39_count",
+            "type": "workload.googleapis.com/testsummary_39_count",
             "labels": {
               "foo": "bar"
             }
@@ -5748,7 +5748,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -5756,7 +5756,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -5764,7 +5764,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 39",
+            "type": "workload.googleapis.com/testsummary_39",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -5794,7 +5794,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 39",
+            "type": "workload.googleapis.com/testsummary_39",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -5824,7 +5824,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 39",
+            "type": "workload.googleapis.com/testsummary_39",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -5854,7 +5854,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 40_sum",
+            "type": "workload.googleapis.com/testsummary_40_sum",
             "labels": {
               "foo": "bar"
             }
@@ -5884,7 +5884,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 40_count",
+            "type": "workload.googleapis.com/testsummary_40_count",
             "labels": {
               "foo": "bar"
             }
@@ -5898,7 +5898,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -5906,7 +5906,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -5914,7 +5914,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 40",
+            "type": "workload.googleapis.com/testsummary_40",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -5944,7 +5944,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 40",
+            "type": "workload.googleapis.com/testsummary_40",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -5974,7 +5974,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 40",
+            "type": "workload.googleapis.com/testsummary_40",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -6008,7 +6008,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 41_sum",
+            "type": "workload.googleapis.com/testsummary_41_sum",
             "labels": {
               "foo": "bar"
             }
@@ -6038,7 +6038,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 41_count",
+            "type": "workload.googleapis.com/testsummary_41_count",
             "labels": {
               "foo": "bar"
             }
@@ -6052,7 +6052,7 @@
             }
           },
           "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
+          "valueType": "DOUBLE",
           "points": [
             {
               "interval": {
@@ -6060,7 +6060,7 @@
                 "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "int64Value": "10"
+                "doubleValue": 10
               }
             }
           ],
@@ -6068,7 +6068,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 41",
+            "type": "workload.googleapis.com/testsummary_41",
             "labels": {
               "foo": "bar",
               "quantile": "0.5"
@@ -6098,7 +6098,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 41",
+            "type": "workload.googleapis.com/testsummary_41",
             "labels": {
               "foo": "bar",
               "quantile": "0.75"
@@ -6128,7 +6128,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary 41",
+            "type": "workload.googleapis.com/testsummary_41",
             "labels": {
               "foo": "bar",
               "quantile": "0.9"
@@ -6162,7 +6162,7 @@
   "createMetricDescriptorRequests": [
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 1_sum",
+        "type": "workload.googleapis.com/testsummary_1_sum",
         "labels": [
           {
             "key": "foo"
@@ -6172,46 +6172,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 1_sum"
+        "displayName": "testsummary_1_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 1_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 1_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 1",
-        "labels": [
-          {
-            "key": "foo"
-          },
-          {
-            "key": "quantile",
-            "description": "the value at a given quantile of a distribution"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 1"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 2_sum",
+        "type": "workload.googleapis.com/testsummary_1_count",
         "labels": [
           {
             "key": "foo"
@@ -6221,27 +6187,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 2_sum"
+        "displayName": "testsummary_1_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 2_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 2_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 2",
+        "type": "workload.googleapis.com/testsummary_1",
         "labels": [
           {
             "key": "foo"
@@ -6255,12 +6206,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 2"
+        "displayName": "testsummary_1"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 3_sum",
+        "type": "workload.googleapis.com/testsummary_2_sum",
         "labels": [
           {
             "key": "foo"
@@ -6270,46 +6221,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 3_sum"
+        "displayName": "testsummary_2_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 3_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 3_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 3",
-        "labels": [
-          {
-            "key": "foo"
-          },
-          {
-            "key": "quantile",
-            "description": "the value at a given quantile of a distribution"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 3"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 4_sum",
+        "type": "workload.googleapis.com/testsummary_2_count",
         "labels": [
           {
             "key": "foo"
@@ -6319,27 +6236,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 4_sum"
+        "displayName": "testsummary_2_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 4_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 4_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 4",
+        "type": "workload.googleapis.com/testsummary_2",
         "labels": [
           {
             "key": "foo"
@@ -6353,12 +6255,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 4"
+        "displayName": "testsummary_2"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 5_sum",
+        "type": "workload.googleapis.com/testsummary_3_sum",
         "labels": [
           {
             "key": "foo"
@@ -6368,46 +6270,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 5_sum"
+        "displayName": "testsummary_3_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 5_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 5_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 5",
-        "labels": [
-          {
-            "key": "foo"
-          },
-          {
-            "key": "quantile",
-            "description": "the value at a given quantile of a distribution"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 5"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 6_sum",
+        "type": "workload.googleapis.com/testsummary_3_count",
         "labels": [
           {
             "key": "foo"
@@ -6417,27 +6285,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 6_sum"
+        "displayName": "testsummary_3_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 6_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 6_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 6",
+        "type": "workload.googleapis.com/testsummary_3",
         "labels": [
           {
             "key": "foo"
@@ -6451,12 +6304,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 6"
+        "displayName": "testsummary_3"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 7_sum",
+        "type": "workload.googleapis.com/testsummary_4_sum",
         "labels": [
           {
             "key": "foo"
@@ -6466,46 +6319,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 7_sum"
+        "displayName": "testsummary_4_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 7_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 7_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 7",
-        "labels": [
-          {
-            "key": "foo"
-          },
-          {
-            "key": "quantile",
-            "description": "the value at a given quantile of a distribution"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 7"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 8_sum",
+        "type": "workload.googleapis.com/testsummary_4_count",
         "labels": [
           {
             "key": "foo"
@@ -6515,27 +6334,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 8_sum"
+        "displayName": "testsummary_4_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 8_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 8_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 8",
+        "type": "workload.googleapis.com/testsummary_4",
         "labels": [
           {
             "key": "foo"
@@ -6549,12 +6353,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 8"
+        "displayName": "testsummary_4"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 9_sum",
+        "type": "workload.googleapis.com/testsummary_5_sum",
         "labels": [
           {
             "key": "foo"
@@ -6564,46 +6368,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 9_sum"
+        "displayName": "testsummary_5_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 9_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 9_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 9",
-        "labels": [
-          {
-            "key": "foo"
-          },
-          {
-            "key": "quantile",
-            "description": "the value at a given quantile of a distribution"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 9"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 10_sum",
+        "type": "workload.googleapis.com/testsummary_5_count",
         "labels": [
           {
             "key": "foo"
@@ -6613,27 +6383,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 10_sum"
+        "displayName": "testsummary_5_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 10_count",
-        "labels": [
-          {
-            "key": "foo"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
-        "unit": "1",
-        "description": "This is a test summary",
-        "displayName": "testsummary 10_count"
-      }
-    },
-    {
-      "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 10",
+        "type": "workload.googleapis.com/testsummary_5",
         "labels": [
           {
             "key": "foo"
@@ -6647,12 +6402,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 10"
+        "displayName": "testsummary_5"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 11_sum",
+        "type": "workload.googleapis.com/testsummary_6_sum",
         "labels": [
           {
             "key": "foo"
@@ -6662,27 +6417,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 11_sum"
+        "displayName": "testsummary_6_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 11_count",
+        "type": "workload.googleapis.com/testsummary_6_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 11_count"
+        "displayName": "testsummary_6_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 11",
+        "type": "workload.googleapis.com/testsummary_6",
         "labels": [
           {
             "key": "foo"
@@ -6696,12 +6451,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 11"
+        "displayName": "testsummary_6"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 12_sum",
+        "type": "workload.googleapis.com/testsummary_7_sum",
         "labels": [
           {
             "key": "foo"
@@ -6711,27 +6466,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 12_sum"
+        "displayName": "testsummary_7_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 12_count",
+        "type": "workload.googleapis.com/testsummary_7_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 12_count"
+        "displayName": "testsummary_7_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 12",
+        "type": "workload.googleapis.com/testsummary_7",
         "labels": [
           {
             "key": "foo"
@@ -6745,12 +6500,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 12"
+        "displayName": "testsummary_7"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 13_sum",
+        "type": "workload.googleapis.com/testsummary_8_sum",
         "labels": [
           {
             "key": "foo"
@@ -6760,27 +6515,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 13_sum"
+        "displayName": "testsummary_8_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 13_count",
+        "type": "workload.googleapis.com/testsummary_8_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 13_count"
+        "displayName": "testsummary_8_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 13",
+        "type": "workload.googleapis.com/testsummary_8",
         "labels": [
           {
             "key": "foo"
@@ -6794,12 +6549,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 13"
+        "displayName": "testsummary_8"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 14_sum",
+        "type": "workload.googleapis.com/testsummary_9_sum",
         "labels": [
           {
             "key": "foo"
@@ -6809,27 +6564,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 14_sum"
+        "displayName": "testsummary_9_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 14_count",
+        "type": "workload.googleapis.com/testsummary_9_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 14_count"
+        "displayName": "testsummary_9_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 14",
+        "type": "workload.googleapis.com/testsummary_9",
         "labels": [
           {
             "key": "foo"
@@ -6843,12 +6598,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 14"
+        "displayName": "testsummary_9"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 15_sum",
+        "type": "workload.googleapis.com/testsummary_10_sum",
         "labels": [
           {
             "key": "foo"
@@ -6858,27 +6613,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 15_sum"
+        "displayName": "testsummary_10_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 15_count",
+        "type": "workload.googleapis.com/testsummary_10_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 15_count"
+        "displayName": "testsummary_10_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 15",
+        "type": "workload.googleapis.com/testsummary_10",
         "labels": [
           {
             "key": "foo"
@@ -6892,12 +6647,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 15"
+        "displayName": "testsummary_10"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 16_sum",
+        "type": "workload.googleapis.com/testsummary_11_sum",
         "labels": [
           {
             "key": "foo"
@@ -6907,27 +6662,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 16_sum"
+        "displayName": "testsummary_11_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 16_count",
+        "type": "workload.googleapis.com/testsummary_11_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 16_count"
+        "displayName": "testsummary_11_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 16",
+        "type": "workload.googleapis.com/testsummary_11",
         "labels": [
           {
             "key": "foo"
@@ -6941,12 +6696,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 16"
+        "displayName": "testsummary_11"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 17_sum",
+        "type": "workload.googleapis.com/testsummary_12_sum",
         "labels": [
           {
             "key": "foo"
@@ -6956,27 +6711,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 17_sum"
+        "displayName": "testsummary_12_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 17_count",
+        "type": "workload.googleapis.com/testsummary_12_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 17_count"
+        "displayName": "testsummary_12_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 17",
+        "type": "workload.googleapis.com/testsummary_12",
         "labels": [
           {
             "key": "foo"
@@ -6990,12 +6745,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 17"
+        "displayName": "testsummary_12"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 18_sum",
+        "type": "workload.googleapis.com/testsummary_13_sum",
         "labels": [
           {
             "key": "foo"
@@ -7005,27 +6760,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 18_sum"
+        "displayName": "testsummary_13_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 18_count",
+        "type": "workload.googleapis.com/testsummary_13_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 18_count"
+        "displayName": "testsummary_13_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 18",
+        "type": "workload.googleapis.com/testsummary_13",
         "labels": [
           {
             "key": "foo"
@@ -7039,12 +6794,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 18"
+        "displayName": "testsummary_13"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 19_sum",
+        "type": "workload.googleapis.com/testsummary_14_sum",
         "labels": [
           {
             "key": "foo"
@@ -7054,27 +6809,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 19_sum"
+        "displayName": "testsummary_14_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 19_count",
+        "type": "workload.googleapis.com/testsummary_14_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 19_count"
+        "displayName": "testsummary_14_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 19",
+        "type": "workload.googleapis.com/testsummary_14",
         "labels": [
           {
             "key": "foo"
@@ -7088,12 +6843,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 19"
+        "displayName": "testsummary_14"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 20_sum",
+        "type": "workload.googleapis.com/testsummary_15_sum",
         "labels": [
           {
             "key": "foo"
@@ -7103,27 +6858,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 20_sum"
+        "displayName": "testsummary_15_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 20_count",
+        "type": "workload.googleapis.com/testsummary_15_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 20_count"
+        "displayName": "testsummary_15_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 20",
+        "type": "workload.googleapis.com/testsummary_15",
         "labels": [
           {
             "key": "foo"
@@ -7137,12 +6892,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 20"
+        "displayName": "testsummary_15"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 21_sum",
+        "type": "workload.googleapis.com/testsummary_16_sum",
         "labels": [
           {
             "key": "foo"
@@ -7152,27 +6907,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 21_sum"
+        "displayName": "testsummary_16_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 21_count",
+        "type": "workload.googleapis.com/testsummary_16_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 21_count"
+        "displayName": "testsummary_16_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 21",
+        "type": "workload.googleapis.com/testsummary_16",
         "labels": [
           {
             "key": "foo"
@@ -7186,12 +6941,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 21"
+        "displayName": "testsummary_16"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 22_sum",
+        "type": "workload.googleapis.com/testsummary_17_sum",
         "labels": [
           {
             "key": "foo"
@@ -7201,27 +6956,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 22_sum"
+        "displayName": "testsummary_17_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 22_count",
+        "type": "workload.googleapis.com/testsummary_17_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 22_count"
+        "displayName": "testsummary_17_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 22",
+        "type": "workload.googleapis.com/testsummary_17",
         "labels": [
           {
             "key": "foo"
@@ -7235,12 +6990,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 22"
+        "displayName": "testsummary_17"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 23_sum",
+        "type": "workload.googleapis.com/testsummary_18_sum",
         "labels": [
           {
             "key": "foo"
@@ -7250,27 +7005,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 23_sum"
+        "displayName": "testsummary_18_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 23_count",
+        "type": "workload.googleapis.com/testsummary_18_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 23_count"
+        "displayName": "testsummary_18_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 23",
+        "type": "workload.googleapis.com/testsummary_18",
         "labels": [
           {
             "key": "foo"
@@ -7284,12 +7039,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 23"
+        "displayName": "testsummary_18"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 24_sum",
+        "type": "workload.googleapis.com/testsummary_19_sum",
         "labels": [
           {
             "key": "foo"
@@ -7299,27 +7054,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 24_sum"
+        "displayName": "testsummary_19_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 24_count",
+        "type": "workload.googleapis.com/testsummary_19_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 24_count"
+        "displayName": "testsummary_19_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 24",
+        "type": "workload.googleapis.com/testsummary_19",
         "labels": [
           {
             "key": "foo"
@@ -7333,12 +7088,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 24"
+        "displayName": "testsummary_19"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 25_sum",
+        "type": "workload.googleapis.com/testsummary_20_sum",
         "labels": [
           {
             "key": "foo"
@@ -7348,27 +7103,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 25_sum"
+        "displayName": "testsummary_20_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 25_count",
+        "type": "workload.googleapis.com/testsummary_20_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 25_count"
+        "displayName": "testsummary_20_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 25",
+        "type": "workload.googleapis.com/testsummary_20",
         "labels": [
           {
             "key": "foo"
@@ -7382,12 +7137,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 25"
+        "displayName": "testsummary_20"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 26_sum",
+        "type": "workload.googleapis.com/testsummary_21_sum",
         "labels": [
           {
             "key": "foo"
@@ -7397,27 +7152,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 26_sum"
+        "displayName": "testsummary_21_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 26_count",
+        "type": "workload.googleapis.com/testsummary_21_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 26_count"
+        "displayName": "testsummary_21_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 26",
+        "type": "workload.googleapis.com/testsummary_21",
         "labels": [
           {
             "key": "foo"
@@ -7431,12 +7186,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 26"
+        "displayName": "testsummary_21"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 27_sum",
+        "type": "workload.googleapis.com/testsummary_22_sum",
         "labels": [
           {
             "key": "foo"
@@ -7446,27 +7201,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 27_sum"
+        "displayName": "testsummary_22_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 27_count",
+        "type": "workload.googleapis.com/testsummary_22_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 27_count"
+        "displayName": "testsummary_22_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 27",
+        "type": "workload.googleapis.com/testsummary_22",
         "labels": [
           {
             "key": "foo"
@@ -7480,12 +7235,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 27"
+        "displayName": "testsummary_22"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 28_sum",
+        "type": "workload.googleapis.com/testsummary_23_sum",
         "labels": [
           {
             "key": "foo"
@@ -7495,27 +7250,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 28_sum"
+        "displayName": "testsummary_23_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 28_count",
+        "type": "workload.googleapis.com/testsummary_23_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 28_count"
+        "displayName": "testsummary_23_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 28",
+        "type": "workload.googleapis.com/testsummary_23",
         "labels": [
           {
             "key": "foo"
@@ -7529,12 +7284,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 28"
+        "displayName": "testsummary_23"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 29_sum",
+        "type": "workload.googleapis.com/testsummary_24_sum",
         "labels": [
           {
             "key": "foo"
@@ -7544,27 +7299,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 29_sum"
+        "displayName": "testsummary_24_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 29_count",
+        "type": "workload.googleapis.com/testsummary_24_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 29_count"
+        "displayName": "testsummary_24_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 29",
+        "type": "workload.googleapis.com/testsummary_24",
         "labels": [
           {
             "key": "foo"
@@ -7578,12 +7333,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 29"
+        "displayName": "testsummary_24"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 30_sum",
+        "type": "workload.googleapis.com/testsummary_25_sum",
         "labels": [
           {
             "key": "foo"
@@ -7593,27 +7348,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 30_sum"
+        "displayName": "testsummary_25_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 30_count",
+        "type": "workload.googleapis.com/testsummary_25_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 30_count"
+        "displayName": "testsummary_25_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 30",
+        "type": "workload.googleapis.com/testsummary_25",
         "labels": [
           {
             "key": "foo"
@@ -7627,12 +7382,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 30"
+        "displayName": "testsummary_25"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 31_sum",
+        "type": "workload.googleapis.com/testsummary_26_sum",
         "labels": [
           {
             "key": "foo"
@@ -7642,27 +7397,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 31_sum"
+        "displayName": "testsummary_26_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 31_count",
+        "type": "workload.googleapis.com/testsummary_26_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 31_count"
+        "displayName": "testsummary_26_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 31",
+        "type": "workload.googleapis.com/testsummary_26",
         "labels": [
           {
             "key": "foo"
@@ -7676,12 +7431,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 31"
+        "displayName": "testsummary_26"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 32_sum",
+        "type": "workload.googleapis.com/testsummary_27_sum",
         "labels": [
           {
             "key": "foo"
@@ -7691,27 +7446,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 32_sum"
+        "displayName": "testsummary_27_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 32_count",
+        "type": "workload.googleapis.com/testsummary_27_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 32_count"
+        "displayName": "testsummary_27_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 32",
+        "type": "workload.googleapis.com/testsummary_27",
         "labels": [
           {
             "key": "foo"
@@ -7725,12 +7480,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 32"
+        "displayName": "testsummary_27"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 33_sum",
+        "type": "workload.googleapis.com/testsummary_28_sum",
         "labels": [
           {
             "key": "foo"
@@ -7740,27 +7495,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 33_sum"
+        "displayName": "testsummary_28_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 33_count",
+        "type": "workload.googleapis.com/testsummary_28_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 33_count"
+        "displayName": "testsummary_28_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 33",
+        "type": "workload.googleapis.com/testsummary_28",
         "labels": [
           {
             "key": "foo"
@@ -7774,12 +7529,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 33"
+        "displayName": "testsummary_28"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 34_sum",
+        "type": "workload.googleapis.com/testsummary_29_sum",
         "labels": [
           {
             "key": "foo"
@@ -7789,27 +7544,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 34_sum"
+        "displayName": "testsummary_29_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 34_count",
+        "type": "workload.googleapis.com/testsummary_29_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 34_count"
+        "displayName": "testsummary_29_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 34",
+        "type": "workload.googleapis.com/testsummary_29",
         "labels": [
           {
             "key": "foo"
@@ -7823,12 +7578,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 34"
+        "displayName": "testsummary_29"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 35_sum",
+        "type": "workload.googleapis.com/testsummary_30_sum",
         "labels": [
           {
             "key": "foo"
@@ -7838,27 +7593,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 35_sum"
+        "displayName": "testsummary_30_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 35_count",
+        "type": "workload.googleapis.com/testsummary_30_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 35_count"
+        "displayName": "testsummary_30_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 35",
+        "type": "workload.googleapis.com/testsummary_30",
         "labels": [
           {
             "key": "foo"
@@ -7872,12 +7627,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 35"
+        "displayName": "testsummary_30"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 36_sum",
+        "type": "workload.googleapis.com/testsummary_31_sum",
         "labels": [
           {
             "key": "foo"
@@ -7887,27 +7642,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 36_sum"
+        "displayName": "testsummary_31_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 36_count",
+        "type": "workload.googleapis.com/testsummary_31_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 36_count"
+        "displayName": "testsummary_31_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 36",
+        "type": "workload.googleapis.com/testsummary_31",
         "labels": [
           {
             "key": "foo"
@@ -7921,12 +7676,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 36"
+        "displayName": "testsummary_31"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 37_sum",
+        "type": "workload.googleapis.com/testsummary_32_sum",
         "labels": [
           {
             "key": "foo"
@@ -7936,27 +7691,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 37_sum"
+        "displayName": "testsummary_32_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 37_count",
+        "type": "workload.googleapis.com/testsummary_32_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 37_count"
+        "displayName": "testsummary_32_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 37",
+        "type": "workload.googleapis.com/testsummary_32",
         "labels": [
           {
             "key": "foo"
@@ -7970,12 +7725,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 37"
+        "displayName": "testsummary_32"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 38_sum",
+        "type": "workload.googleapis.com/testsummary_33_sum",
         "labels": [
           {
             "key": "foo"
@@ -7985,27 +7740,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 38_sum"
+        "displayName": "testsummary_33_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 38_count",
+        "type": "workload.googleapis.com/testsummary_33_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 38_count"
+        "displayName": "testsummary_33_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 38",
+        "type": "workload.googleapis.com/testsummary_33",
         "labels": [
           {
             "key": "foo"
@@ -8019,12 +7774,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 38"
+        "displayName": "testsummary_33"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 39_sum",
+        "type": "workload.googleapis.com/testsummary_34_sum",
         "labels": [
           {
             "key": "foo"
@@ -8034,27 +7789,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 39_sum"
+        "displayName": "testsummary_34_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 39_count",
+        "type": "workload.googleapis.com/testsummary_34_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 39_count"
+        "displayName": "testsummary_34_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 39",
+        "type": "workload.googleapis.com/testsummary_34",
         "labels": [
           {
             "key": "foo"
@@ -8068,12 +7823,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 39"
+        "displayName": "testsummary_34"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 40_sum",
+        "type": "workload.googleapis.com/testsummary_35_sum",
         "labels": [
           {
             "key": "foo"
@@ -8083,27 +7838,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 40_sum"
+        "displayName": "testsummary_35_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 40_count",
+        "type": "workload.googleapis.com/testsummary_35_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 40_count"
+        "displayName": "testsummary_35_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 40",
+        "type": "workload.googleapis.com/testsummary_35",
         "labels": [
           {
             "key": "foo"
@@ -8117,12 +7872,12 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 40"
+        "displayName": "testsummary_35"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 41_sum",
+        "type": "workload.googleapis.com/testsummary_36_sum",
         "labels": [
           {
             "key": "foo"
@@ -8132,27 +7887,27 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 41_sum"
+        "displayName": "testsummary_36_sum"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 41_count",
+        "type": "workload.googleapis.com/testsummary_36_count",
         "labels": [
           {
             "key": "foo"
           }
         ],
         "metricKind": "CUMULATIVE",
-        "valueType": "INT64",
+        "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 41_count"
+        "displayName": "testsummary_36_count"
       }
     },
     {
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary 41",
+        "type": "workload.googleapis.com/testsummary_36",
         "labels": [
           {
             "key": "foo"
@@ -8166,7 +7921,252 @@
         "valueType": "DOUBLE",
         "unit": "1",
         "description": "This is a test summary",
-        "displayName": "testsummary 41"
+        "displayName": "testsummary_36"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_37_sum",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_37_sum"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_37_count",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_37_count"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_37",
+        "labels": [
+          {
+            "key": "foo"
+          },
+          {
+            "key": "quantile",
+            "description": "the value at a given quantile of a distribution"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_37"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_38_sum",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_38_sum"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_38_count",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_38_count"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_38",
+        "labels": [
+          {
+            "key": "foo"
+          },
+          {
+            "key": "quantile",
+            "description": "the value at a given quantile of a distribution"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_38"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_39_sum",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_39_sum"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_39_count",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_39_count"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_39",
+        "labels": [
+          {
+            "key": "foo"
+          },
+          {
+            "key": "quantile",
+            "description": "the value at a given quantile of a distribution"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_39"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_40_sum",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_40_sum"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_40_count",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_40_count"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_40",
+        "labels": [
+          {
+            "key": "foo"
+          },
+          {
+            "key": "quantile",
+            "description": "the value at a given quantile of a distribution"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_40"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_41_sum",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_41_sum"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_41_count",
+        "labels": [
+          {
+            "key": "foo"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_41_count"
+      }
+    },
+    {
+      "metricDescriptor": {
+        "type": "workload.googleapis.com/testsummary_41",
+        "labels": [
+          {
+            "key": "foo"
+          },
+          {
+            "key": "quantile",
+            "description": "the value at a given quantile of a distribution"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "unit": "1",
+        "description": "This is a test summary",
+        "displayName": "testsummary_41"
       }
     }
   ],
