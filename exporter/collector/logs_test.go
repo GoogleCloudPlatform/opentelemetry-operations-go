@@ -73,7 +73,7 @@ func TestLogMapping(t *testing.T) {
 			log: func() pdata.LogRecord {
 				log := pdata.NewLogRecord()
 				log.Body().SetBytesVal([]byte(`{"message": "hello!"}`))
-				log.Attributes().Insert(HTTPRequestAttributeKey, pdata.NewAttributeValueBytes([]byte(`{
+				log.Attributes().Insert(HTTPRequestAttributeKey, pdata.NewValueBytes([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
 						"requestSize": "1",
