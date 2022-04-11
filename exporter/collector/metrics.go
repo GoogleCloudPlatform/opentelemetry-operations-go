@@ -179,14 +179,14 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		monitoredResource, extraResourceLabels := me.mapper.resourceToMonitoredResource(rm.Resource())
-		ilms := rm.ScopeMetrics()
-		for j := 0; j < ilms.Len(); j++ {
-			ilm := ilms.At(j)
+		sms := rm.ScopeMetrics()
+		for j := 0; j < sms.Len(); j++ {
+			sm := sms.At(j)
 
-			instrumentationScopeLabels := me.mapper.instrumentationScopeToLabels(ilm.Scope())
+			instrumentationScopeLabels := me.mapper.instrumentationScopeToLabels(sm.Scope())
 			metricLabels := mergeLabels(nil, instrumentationScopeLabels, extraResourceLabels)
 
-			mes := ilm.Metrics()
+			mes := sm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
 				for _, ts := range me.mapper.metricToTimeSeries(monitoredResource, metricLabels, metric) {
@@ -319,13 +319,13 @@ func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, ts []*mo
 	)
 }
 
-func (m *metricMapper) instrumentationScopeToLabels(il pdata.InstrumentationScope) labels {
+func (m *metricMapper) instrumentationScopeToLabels(is pdata.InstrumentationScope) labels {
 	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
 		return labels{}
 	}
 	return labels{
-		"instrumentation_source":  il.Name(),
-		"instrumentation_version": il.Version(),
+		"instrumentation_source":  is.Name(),
+		"instrumentation_version": is.Version(),
 	}
 }
 

@@ -1439,10 +1439,10 @@ func TestKnownDomains(t *testing.T) {
 
 func TestInstrumentationScopeToLabels(t *testing.T) {
 	newInstrumentationScope := func(name, version string) pdata.InstrumentationScope {
-		il := pdata.NewInstrumentationScope()
-		il.SetName("foo")
-		il.SetVersion("1.2.3")
-		return il
+		is := pdata.NewInstrumentationScope()
+		is.SetName("foo")
+		is.SetVersion("1.2.3")
+		return is
 	}
 
 	tests := []struct {
