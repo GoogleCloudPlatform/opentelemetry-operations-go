@@ -190,7 +190,6 @@ func parseEntryPayload(logBody pdata.Value) (interface{}, error) {
 	default:
 		return nil, fmt.Errorf("unknown log body value %v", logBody.Type().String())
 	}
-	return nil, nil
 }
 
 // JSON keys derived from:

@@ -48,10 +48,10 @@ type baseTestCase struct {
 func TestLogMapping(t *testing.T) {
 	testObservedTime, _ := time.Parse("2006-01-02", "2022-04-12")
 	testSampleTime, _ := time.Parse("2006-01-02", "2021-07-10")
-	testTraceId := pdata.NewTraceID([16]byte{
+	testTraceID := pdata.NewTraceID([16]byte{
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	})
-	testSpanId := pdata.NewSpanID([8]byte{
+	testSpanID := pdata.NewSpanID([8]byte{
 		0, 0, 0, 0, 0, 0, 0, 1,
 	})
 
@@ -184,13 +184,13 @@ func TestLogMapping(t *testing.T) {
 			},
 			log: func() pdata.LogRecord {
 				log := pdata.NewLogRecord()
-				log.SetTraceID(testTraceId)
-				log.SetSpanID(testSpanId)
+				log.SetTraceID(testTraceID)
+				log.SetSpanID(testSpanID)
 				return log
 			},
 			expectedEntry: logging.Entry{
-				Trace:     testTraceId.HexString(),
-				SpanID:    testSpanId.HexString(),
+				Trace:     testTraceID.HexString(),
+				SpanID:    testSpanID.HexString(),
 				Timestamp: testObservedTime,
 			},
 		},
