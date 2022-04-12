@@ -25,6 +25,7 @@ import (
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
+	logpb "google.golang.org/genproto/googleapis/logging/v2"
 )
 
 func newTestLogMapper() logMapper {
@@ -47,6 +48,13 @@ type baseTestCase struct {
 func TestLogMapping(t *testing.T) {
 	testObservedTime, _ := time.Parse("2006-01-02", "2022-04-12")
 	testSampleTime, _ := time.Parse("2006-01-02", "2021-07-10")
+	testTraceId := pdata.NewTraceID([16]byte{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	})
+	testSpanId := pdata.NewSpanID([8]byte{
+		0, 0, 0, 0, 0, 0, 0, 1,
+	})
+
 	testCases := []baseTestCase{
 		{
 			name: "empty log, empty monitoredresource",
@@ -143,6 +151,46 @@ func TestLogMapping(t *testing.T) {
 			},
 			expectedEntry: logging.Entry{
 				Payload:   `{"message": "hello!"}`,
+				Timestamp: testObservedTime,
+			},
+		},
+		{
+			// TODO(damemi): parse/test sourceLocation from more than just bytes values
+			name: "log with sourceLocation (bytes)",
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			log: func() pdata.LogRecord {
+				log := pdata.NewLogRecord()
+				log.Attributes().Insert(
+					"com.google.sourceLocation",
+					pdata.NewValueBytes([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`)),
+				)
+				return log
+			},
+			expectedEntry: logging.Entry{
+				SourceLocation: &logpb.LogEntrySourceLocation{
+					File:     "test.php",
+					Line:     100,
+					Function: "helloWorld",
+				},
+				Timestamp: testObservedTime,
+			},
+		},
+		{
+			name: "log with trace and span id",
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			log: func() pdata.LogRecord {
+				log := pdata.NewLogRecord()
+				log.SetTraceID(testTraceId)
+				log.SetSpanID(testSpanId)
+				return log
+			},
+			expectedEntry: logging.Entry{
+				Trace:     testTraceId.HexString(),
+				SpanID:    testSpanId.HexString(),
 				Timestamp: testObservedTime,
 			},
 		},

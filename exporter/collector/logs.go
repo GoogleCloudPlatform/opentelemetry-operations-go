@@ -141,12 +141,12 @@ func (l logMapper) logToEntry(
 	// parse LogEntrySourceLocation struct from OTel attribute
 	sourceLocation, ok := log.Attributes().Get("com.google.sourceLocation")
 	if ok {
-		var logEntrySourceLocation *logpb.LogEntrySourceLocation
-		err := json.Unmarshal(sourceLocation.BytesVal(), logEntrySourceLocation)
+		var logEntrySourceLocation logpb.LogEntrySourceLocation
+		err := json.Unmarshal(sourceLocation.BytesVal(), &logEntrySourceLocation)
 		if err != nil {
 			return entry, err
 		}
-		entry.SourceLocation = logEntrySourceLocation
+		entry.SourceLocation = &logEntrySourceLocation
 	}
 
 	// parse TraceID and SpanID, if present
