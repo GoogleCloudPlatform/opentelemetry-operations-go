@@ -45,9 +45,9 @@ type logMapper struct {
 }
 
 func NewGoogleCloudLogsExporter(
-		ctx context.Context,
-		cfg Config,
-		log *zap.Logger,
+	ctx context.Context,
+	cfg Config,
+	log *zap.Logger,
 ) (*LogsExporter, error) {
 	client, err := logging.NewClient(ctx, cfg.ProjectID)
 	if err != nil {
@@ -110,18 +110,22 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 }
 
 func (l logMapper) logToEntry(
-		log pdata.LogRecord,
-		mr *monitoredres.MonitoredResource,
-		instrumentationSource string,
-		instrumentationVersion string,
+	log pdata.LogRecord,
+	mr *monitoredres.MonitoredResource,
+	instrumentationSource string,
+	instrumentationVersion string,
 ) (logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
 	}
 
 	entry.Labels = make(map[string]string)
-	entry.Labels["instrumentation_source"] = instrumentationSource
-	entry.Labels["instrumentation_version"] = instrumentationVersion
+	if len(instrumentationSource) > 0 {
+		entry.Labels["instrumentation_source"] = instrumentationSource
+	}
+	if len(instrumentationVersion) > 0 {
+		entry.Labels["instrumentation_version"] = instrumentationVersion
+	}
 
 	// if timestamp has not been explicitly initialized, default to current time
 	// TODO: figure out how to fall back to observed_time_unix_nano as recommended
@@ -151,11 +155,6 @@ func (l logMapper) logToEntry(
 		entry.SpanID = log.SpanID().HexString()
 	}
 
-	logBody := log.Body().BytesVal()
-	if len(logBody) > 0 {
-		entry.Payload = json.RawMessage(logBody)
-	}
-
 	httpRequestAttr, ok := log.Attributes().Get(HTTPRequestAttributeKey)
 	if ok {
 		httpRequest, err := l.parseHTTPRequest(httpRequestAttr.BytesVal())
@@ -165,6 +164,7 @@ func (l logMapper) logToEntry(
 		entry.HTTPRequest = httpRequest
 	}
 
+	entry.Payload = log.Body()
 	return entry, nil
 }
 
