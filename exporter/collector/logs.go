@@ -25,6 +25,7 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
+	logpb "google.golang.org/genproto/googleapis/logging/v2"
 )
 
 const HTTPRequestAttributeKey = "com.google.httpRequest"
@@ -130,6 +131,17 @@ func (l logMapper) logToEntry(
 		timestamp = time.Now()
 	}
 	entry.Timestamp = timestamp
+
+	// parse LogEntrySourceLocation struct from OTel attribute
+	sourceLocation, ok := log.Attributes().Get("com.google.sourceLocation")
+	if ok {
+		var logEntrySourceLocation *logpb.LogEntrySourceLocation
+		err := json.Unmarshal(sourceLocation.BytesVal(), logEntrySourceLocation)
+		if err != nil {
+			return entry, err
+		}
+		entry.SourceLocation = logEntrySourceLocation
+	}
 
 	logBody := log.Body().BytesVal()
 	if len(logBody) > 0 {
