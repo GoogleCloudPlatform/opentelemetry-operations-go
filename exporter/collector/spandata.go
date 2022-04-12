@@ -30,12 +30,12 @@ import (
 func pdataResourceSpansToOTSpanData(rs pdata.ResourceSpans) []sdktrace.ReadOnlySpan {
 	resource := rs.Resource()
 	var sds []sdktrace.ReadOnlySpan
-	ilss := rs.ScopeSpans()
-	for i := 0; i < ilss.Len(); i++ {
-		ils := ilss.At(i)
-		spans := ils.Spans()
+	ss := rs.ScopeSpans()
+	for i := 0; i < ss.Len(); i++ {
+		s := ss.At(i)
+		spans := s.Spans()
 		for j := 0; j < spans.Len(); j++ {
-			sd := pdataSpanToOTSpanData(spans.At(j), resource, ils.Scope())
+			sd := pdataSpanToOTSpanData(spans.At(j), resource, s.Scope())
 			sds = append(sds, sd)
 		}
 	}
@@ -46,7 +46,7 @@ func pdataResourceSpansToOTSpanData(rs pdata.ResourceSpans) []sdktrace.ReadOnlyS
 func pdataSpanToOTSpanData(
 	span pdata.Span,
 	resource pdata.Resource,
-	il pdata.InstrumentationScope,
+	is pdata.InstrumentationScope,
 ) spanSnapshot {
 	sc := apitrace.SpanContextConfig{
 		TraceID: span.TraceID().Bytes(),
@@ -80,8 +80,8 @@ func pdataSpanToOTSpanData(
 		droppedLinks:         int(span.DroppedLinksCount()),
 		resource:             r,
 		instrumentationLibrary: instrumentation.Library{
-			Name:    il.Name(),
-			Version: il.Version(),
+			Name:    is.Name(),
+			Version: is.Version(),
 		},
 		status: sdktrace.Status{
 			Code:        pdataStatusCodeToOTCode(status.Code()),
