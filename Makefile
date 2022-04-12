@@ -180,3 +180,12 @@ update-otel:
 	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus VERSION=$(COLLECTOR_CONTRIB_VERSION)
 	$(MAKE) build
 	$(MAKE) gotidy
+
+.PHONY: prepare-release
+prepare-release:
+	echo "make sure tools/release.go is updated to your desired stable and unstable versions"
+	go run tools/release.go prepare
+
+.PHONY: release
+release: prepare-release check-clean-work-tree
+	go run tools/release.go tag
