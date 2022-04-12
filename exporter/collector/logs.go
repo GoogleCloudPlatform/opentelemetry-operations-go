@@ -45,9 +45,9 @@ type logMapper struct {
 }
 
 func NewGoogleCloudLogsExporter(
-	ctx context.Context,
-	cfg Config,
-	log *zap.Logger,
+		ctx context.Context,
+		cfg Config,
+		log *zap.Logger,
 ) (*LogsExporter, error) {
 	client, err := logging.NewClient(ctx, cfg.ProjectID)
 	if err != nil {
@@ -110,10 +110,10 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 }
 
 func (l logMapper) logToEntry(
-	log pdata.LogRecord,
-	mr *monitoredres.MonitoredResource,
-	instrumentationSource string,
-	instrumentationVersion string,
+		log pdata.LogRecord,
+		mr *monitoredres.MonitoredResource,
+		instrumentationSource string,
+		instrumentationVersion string,
 ) (logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
@@ -141,6 +141,14 @@ func (l logMapper) logToEntry(
 			return entry, err
 		}
 		entry.SourceLocation = logEntrySourceLocation
+	}
+
+	// parse TraceID and SpanID, if present
+	if emptyTraceID := log.TraceID().IsEmpty(); !emptyTraceID {
+		entry.Trace = log.TraceID().HexString()
+	}
+	if emptySpanID := log.SpanID().IsEmpty(); !emptySpanID {
+		entry.SpanID = log.SpanID().HexString()
 	}
 
 	logBody := log.Body().BytesVal()
