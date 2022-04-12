@@ -17,6 +17,7 @@ package collector
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -93,7 +94,8 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 					log,
 					mr,
 					instrumentationSource,
-					instrumentationVersion)
+					instrumentationVersion,
+					time.Now())
 				if err != nil {
 					logPushErrors = append(logPushErrors, err)
 				} else {
@@ -114,12 +116,13 @@ func (l logMapper) logToEntry(
 	mr *monitoredres.MonitoredResource,
 	instrumentationSource string,
 	instrumentationVersion string,
+	processTime time.Time,
 ) (logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
 	}
 
-	entry.Labels = make(map[string]string)
+	// TODO(damemi): Make overwriting these labels (if they already exist) configurable
 	if len(instrumentationSource) > 0 {
 		entry.Labels["instrumentation_source"] = instrumentationSource
 	}
@@ -130,11 +133,10 @@ func (l logMapper) logToEntry(
 	// if timestamp has not been explicitly initialized, default to current time
 	// TODO: figure out how to fall back to observed_time_unix_nano as recommended
 	//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
-	timestamp := log.Timestamp().AsTime()
-	if timestamp.IsZero() {
-		timestamp = time.Now()
+	entry.Timestamp = log.Timestamp().AsTime()
+	if log.Timestamp() == 0 {
+		entry.Timestamp = processTime
 	}
-	entry.Timestamp = timestamp
 
 	// parse LogEntrySourceLocation struct from OTel attribute
 	sourceLocation, ok := log.Attributes().Get("com.google.sourceLocation")
@@ -148,10 +150,10 @@ func (l logMapper) logToEntry(
 	}
 
 	// parse TraceID and SpanID, if present
-	if emptyTraceID := log.TraceID().IsEmpty(); !emptyTraceID {
+	if !log.TraceID().IsEmpty() {
 		entry.Trace = log.TraceID().HexString()
 	}
-	if emptySpanID := log.SpanID().IsEmpty(); !emptySpanID {
+	if !log.SpanID().IsEmpty() {
 		entry.SpanID = log.SpanID().HexString()
 	}
 
@@ -164,8 +166,31 @@ func (l logMapper) logToEntry(
 		entry.HTTPRequest = httpRequest
 	}
 
-	entry.Payload = log.Body()
+	payload, err := parseEntryPayload(log.Body())
+	if err != nil {
+		return entry, nil
+	}
+	entry.Payload = payload
+
 	return entry, nil
+}
+
+func parseEntryPayload(logBody pdata.Value) (interface{}, error) {
+	if len(logBody.AsString()) == 0 {
+		return nil, nil
+	}
+	switch logBody.Type() {
+	case pdata.ValueTypeBytes:
+		return logBody.BytesVal(), nil
+	case pdata.ValueTypeString:
+		return logBody.AsString(), nil
+	case pdata.ValueTypeMap:
+		return logBody.MapVal().AsRaw(), nil
+
+	default:
+		return nil, fmt.Errorf("unknown log body value %v", logBody.Type().String())
+	}
+	return nil, nil
 }
 
 // JSON keys derived from:
