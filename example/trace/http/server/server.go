@@ -42,7 +42,7 @@ func initTracer() func() {
 	}
 	tp := sdktrace.NewTracerProvider(
 		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
-		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
+		// In a production application, use sdktrace.TraceIDRatioBased with a desired probability.
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithBatcher(exporter))
 
