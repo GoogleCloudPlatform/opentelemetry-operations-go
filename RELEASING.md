@@ -6,7 +6,7 @@
 $ git fetch
 $ git checkout origin/main -b pre-release
 $ # ensure that version numbers in tools/release.go are what you want
-$ go run tools/release.go prepare
+$ make prepare-release
 $ git commit -a
 $ git push -u origin HEAD
 $ # create a PR with a link to draft release notes
@@ -19,7 +19,7 @@ $ # get the PR reviewed and merged
 $ # do this after the pre-release PR is merged
 $ git fetch
 $ git checkout origin/main
-$ go run tools/release.go tag
+$ make release
 $ # make sure you don't have any stray tags lying around
 $ git push --tags
 ```
