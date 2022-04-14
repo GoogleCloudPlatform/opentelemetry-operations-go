@@ -610,8 +610,8 @@ func (m *metricMapper) histogramToTimeSeries(
 	_ pdata.Histogram,
 	point pdata.HistogramDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
-		// Drop points without a value.
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) || !point.HasSum() {
+		// Drop points without a value or without a sum
 		return nil
 	}
 	// We treat deltas as cumulatives w/ resets.

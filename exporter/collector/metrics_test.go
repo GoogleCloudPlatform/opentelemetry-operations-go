@@ -279,9 +279,6 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pdata.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	// Add a second point with no value
-	hist.DataPoints().AppendEmpty().SetFlags(pmetric.MetricDataPointFlags(pmetric.MetricDataPointFlagNoRecordedValue))
-
 	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
@@ -320,6 +317,57 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	err = ex.Attachments[1].UnmarshalTo(dropped)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
+}
+
+func TestNoValueHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myhist")
+	metric.SetDataType(pmetric.MetricDataTypeHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.Histogram()
+	point := hist.DataPoints().AppendEmpty()
+	point.SetFlags(pmetric.MetricDataPointFlags(pmetric.MetricDataPointFlagNoRecordedValue))
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.SetBucketCounts([]uint64{1, 2, 3, 4, 5})
+	point.SetCount(15)
+	point.SetSum(42)
+	point.SetExplicitBounds([]float64{10, 20, 30, 40})
+
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	// Points without a value are dropped
+	assert.Len(t, tsl, 0)
+}
+
+func TestNoSumHistogramPointToTimeSeries(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	mapper.cfg.ProjectID = "myproject"
+	mr := &monitoredrespb.MonitoredResource{}
+	metric := pdata.NewMetric()
+	metric.SetName("myhist")
+	metric.SetDataType(pmetric.MetricDataTypeHistogram)
+	unit := "1"
+	metric.SetUnit(unit)
+	hist := metric.Histogram()
+	point := hist.DataPoints().AppendEmpty()
+	end := start.Add(time.Hour)
+	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
+	point.SetTimestamp(pdata.NewTimestampFromTime(end))
+	point.SetBucketCounts([]uint64{1, 2, 3, 4, 5})
+	point.SetCount(15)
+	// Leave the sum unset
+	point.SetExplicitBounds([]float64{10, 20, 30, 40})
+
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	// Points without a sum are dropped
+	assert.Len(t, tsl, 0)
 }
 
 func TestEmptyHistogramPointToTimeSeries(t *testing.T) {
