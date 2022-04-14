@@ -15,16 +15,17 @@
 package collector
 
 import (
-	"encoding/json"
 	"io"
 	"net/http"
 	"testing"
+	"time"
 
 	"cloud.google.com/go/logging"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
+	logpb "google.golang.org/genproto/googleapis/logging/v2"
 )
 
 func newTestLogMapper() logMapper {
@@ -45,6 +46,15 @@ type baseTestCase struct {
 }
 
 func TestLogMapping(t *testing.T) {
+	testObservedTime, _ := time.Parse("2006-01-02", "2022-04-12")
+	testSampleTime, _ := time.Parse("2006-01-02", "2021-07-10")
+	testTraceID := pdata.NewTraceID([16]byte{
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	})
+	testSpanID := pdata.NewSpanID([8]byte{
+		0, 0, 0, 0, 0, 0, 0, 1,
+	})
+
 	testCases := []baseTestCase{
 		{
 			name: "empty log, empty monitoredresource",
@@ -54,7 +64,9 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			expectedEntry: logging.Entry{},
+			expectedEntry: logging.Entry{
+				Timestamp: testObservedTime,
+			},
 		},
 		{
 			name: "log with json, empty monitoredresource",
@@ -66,7 +78,10 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			expectedEntry: logging.Entry{Payload: json.RawMessage(`{"this": "is json"}`)},
+			expectedEntry: logging.Entry{
+				Payload:   []byte(`{"this": "is json"}`),
+				Timestamp: testObservedTime,
+			},
 		},
 		{
 			name: "log with json and httpRequest, empty monitoredresource",
@@ -94,7 +109,8 @@ func TestLogMapping(t *testing.T) {
 				return nil
 			},
 			expectedEntry: logging.Entry{
-				Payload: json.RawMessage(`{"message": "hello!"}`),
+				Payload:   []byte(`{"message": "hello!"}`),
+				Timestamp: testObservedTime,
 				HTTPRequest: &logging.HTTPRequest{
 					Request:                        makeExpectedHTTPReq("GET", "https://www.example.com", "https://www.example2.com", "test", nil),
 					RequestSize:                    1,
@@ -109,6 +125,75 @@ func TestLogMapping(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "log with timestamp",
+			log: func() pdata.LogRecord {
+				log := pdata.NewLogRecord()
+				log.SetTimestamp(pdata.NewTimestampFromTime(testSampleTime))
+				return log
+			},
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			expectedEntry: logging.Entry{
+				Timestamp: testSampleTime,
+			},
+		},
+		{
+			name: "log body with string value",
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			log: func() pdata.LogRecord {
+				log := pdata.NewLogRecord()
+				log.Body().SetStringVal("{\"message\": \"hello!\"}")
+				return log
+			},
+			expectedEntry: logging.Entry{
+				Payload:   `{"message": "hello!"}`,
+				Timestamp: testObservedTime,
+			},
+		},
+		{
+			// TODO(damemi): parse/test sourceLocation from more than just bytes values
+			name: "log with sourceLocation (bytes)",
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			log: func() pdata.LogRecord {
+				log := pdata.NewLogRecord()
+				log.Attributes().Insert(
+					"com.google.sourceLocation",
+					pdata.NewValueBytes([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`)),
+				)
+				return log
+			},
+			expectedEntry: logging.Entry{
+				SourceLocation: &logpb.LogEntrySourceLocation{
+					File:     "test.php",
+					Line:     100,
+					Function: "helloWorld",
+				},
+				Timestamp: testObservedTime,
+			},
+		},
+		{
+			name: "log with trace and span id",
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			log: func() pdata.LogRecord {
+				log := pdata.NewLogRecord()
+				log.SetTraceID(testTraceID)
+				log.SetSpanID(testSpanID)
+				return log
+			},
+			expectedEntry: logging.Entry{
+				Trace:     testTraceID.HexString(),
+				SpanID:    testSpanID.HexString(),
+				Timestamp: testObservedTime,
+			},
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -116,7 +201,12 @@ func TestLogMapping(t *testing.T) {
 			log := testCase.log()
 			mr := testCase.mr()
 			mapper := newTestLogMapper()
-			entry, err := mapper.logToEntry(log, mr)
+			entry, err := mapper.logToEntry(
+				log,
+				mr,
+				"",
+				"",
+				testObservedTime)
 			if testCase.expectError {
 				assert.NotNil(t, err)
 			} else {
