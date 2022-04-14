@@ -54,7 +54,7 @@ These instructions are to get you up and running quickly with the GCP exporter i
           exporters: [googlecloud, logging]
         metrics:
           receivers: [otlp]
-          processors: [memory_limiter]
+          processors: [memory_limiter, batch]
           exporters: [googlecloud, logging]
     ```
 
