@@ -17,6 +17,7 @@ package collector
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -25,6 +26,7 @@ import (
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
+	logpb "google.golang.org/genproto/googleapis/logging/v2"
 )
 
 const HTTPRequestAttributeKey = "com.google.httpRequest"
@@ -79,12 +81,21 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr, _ := mapper.resourceToMonitoredResource(rl.Resource())
+
 		for j := 0; j < rl.ScopeLogs().Len(); j++ {
 			sl := rl.ScopeLogs().At(j)
+			instrumentationSource := sl.Scope().Name()
+			instrumentationVersion := sl.Scope().Version()
+
 			for k := 0; k < sl.LogRecords().Len(); k++ {
 				log := sl.LogRecords().At(k)
 
-				entry, err := l.mapper.logToEntry(log, mr)
+				entry, err := l.mapper.logToEntry(
+					log,
+					mr,
+					instrumentationSource,
+					instrumentationVersion,
+					time.Now())
 				if err != nil {
 					logPushErrors = append(logPushErrors, err)
 				} else {
@@ -93,6 +104,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 			}
 		}
 	}
+
 	if len(logPushErrors) > 0 {
 		return multierr.Combine(logPushErrors...)
 	}
@@ -102,14 +114,47 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 func (l logMapper) logToEntry(
 	log pdata.LogRecord,
 	mr *monitoredres.MonitoredResource,
+	instrumentationSource string,
+	instrumentationVersion string,
+	processTime time.Time,
 ) (logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
 	}
 
-	logBody := log.Body().BytesVal()
-	if len(logBody) > 0 {
-		entry.Payload = json.RawMessage(logBody)
+	// TODO(damemi): Make overwriting these labels (if they already exist) configurable
+	if len(instrumentationSource) > 0 {
+		entry.Labels["instrumentation_source"] = instrumentationSource
+	}
+	if len(instrumentationVersion) > 0 {
+		entry.Labels["instrumentation_version"] = instrumentationVersion
+	}
+
+	// if timestamp has not been explicitly initialized, default to current time
+	// TODO: figure out how to fall back to observed_time_unix_nano as recommended
+	//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
+	entry.Timestamp = log.Timestamp().AsTime()
+	if log.Timestamp() == 0 {
+		entry.Timestamp = processTime
+	}
+
+	// parse LogEntrySourceLocation struct from OTel attribute
+	sourceLocation, ok := log.Attributes().Get("com.google.sourceLocation")
+	if ok {
+		var logEntrySourceLocation logpb.LogEntrySourceLocation
+		err := json.Unmarshal(sourceLocation.BytesVal(), &logEntrySourceLocation)
+		if err != nil {
+			return entry, err
+		}
+		entry.SourceLocation = &logEntrySourceLocation
+	}
+
+	// parse TraceID and SpanID, if present
+	if !log.TraceID().IsEmpty() {
+		entry.Trace = log.TraceID().HexString()
+	}
+	if !log.SpanID().IsEmpty() {
+		entry.SpanID = log.SpanID().HexString()
 	}
 
 	httpRequestAttr, ok := log.Attributes().Get(HTTPRequestAttributeKey)
@@ -121,7 +166,30 @@ func (l logMapper) logToEntry(
 		entry.HTTPRequest = httpRequest
 	}
 
+	payload, err := parseEntryPayload(log.Body())
+	if err != nil {
+		return entry, nil
+	}
+	entry.Payload = payload
+
 	return entry, nil
+}
+
+func parseEntryPayload(logBody pdata.Value) (interface{}, error) {
+	if len(logBody.AsString()) == 0 {
+		return nil, nil
+	}
+	switch logBody.Type() {
+	case pdata.ValueTypeBytes:
+		return logBody.BytesVal(), nil
+	case pdata.ValueTypeString:
+		return logBody.AsString(), nil
+	case pdata.ValueTypeMap:
+		return logBody.MapVal().AsRaw(), nil
+
+	default:
+		return nil, fmt.Errorf("unknown log body value %v", logBody.Type().String())
+	}
 }
 
 // JSON keys derived from:
