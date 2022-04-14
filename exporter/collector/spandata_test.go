@@ -20,6 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
@@ -51,12 +52,12 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 	span.SetSpanID(spanID)
 	span.SetParentSpanID(parentSpanID)
 	span.SetName("End-To-End Here")
-	span.SetKind(pdata.SpanKindServer)
+	span.SetKind(ptrace.SpanKindServer)
 	span.SetStartTimestamp(pdataStartTime)
 	span.SetEndTimestamp(pdataEndTime)
 
 	status := span.Status()
-	status.SetCode(pdata.StatusCodeError)
+	status.SetCode(ptrace.StatusCodeError)
 	status.SetMessage("This is not a drill!")
 
 	events := span.Events()
