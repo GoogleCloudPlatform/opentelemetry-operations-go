@@ -31,6 +31,36 @@ import (
 
 const HTTPRequestAttributeKey = "com.google.httpRequest"
 
+// severityMapping maps the integer severity level values from OTel [0-24]
+// to matching Cloud Logging severity levels
+var severityMapping = []logging.Severity{
+	logging.Default,   // Default, 0
+	logging.Debug,     //
+	logging.Debug,     //
+	logging.Debug,     //
+	logging.Debug,     //
+	logging.Debug,     //
+	logging.Debug,     //
+	logging.Debug,     //
+	logging.Debug,     // 1-8 -> Debug
+	logging.Info,      //
+	logging.Info,      // 9-10 -> Info
+	logging.Notice,    //
+	logging.Notice,    // 11-12 -> Notice
+	logging.Warning,   //
+	logging.Warning,   //
+	logging.Warning,   //
+	logging.Warning,   // 13-16 -> Warning
+	logging.Error,     //
+	logging.Error,     //
+	logging.Error,     //
+	logging.Error,     // 17-20 -> Error
+	logging.Critical,  //
+	logging.Critical,  // 21-22 -> Critical
+	logging.Alert,     // 23 -> Alert
+	logging.Emergency, // 24 -> Emergency
+}
+
 type LogsExporter struct {
 	cfg    Config
 	obs    selfObservability
@@ -165,6 +195,11 @@ func (l logMapper) logToEntry(
 		}
 		entry.HTTPRequest = httpRequest
 	}
+
+	if log.SeverityNumber() < 0 || int(log.SeverityNumber()) > len(severityMapping)-1 {
+		return entry, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
+	}
+	entry.Severity = severityMapping[log.SeverityNumber()]
 
 	payload, err := parseEntryPayload(log.Body())
 	if err != nil {

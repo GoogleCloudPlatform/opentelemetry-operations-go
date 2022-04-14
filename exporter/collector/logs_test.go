@@ -194,6 +194,33 @@ func TestLogMapping(t *testing.T) {
 				Timestamp: testObservedTime,
 			},
 		},
+		{
+			name: "log with severity number",
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			log: func() pdata.LogRecord {
+				log := pdata.NewLogRecord()
+				log.SetSeverityNumber(pdata.SeverityNumberFATAL)
+				return log
+			},
+			expectedEntry: logging.Entry{
+				Timestamp: testObservedTime,
+				Severity:  logging.Critical,
+			},
+		},
+		{
+			name: "log with invalid severity number",
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			log: func() pdata.LogRecord {
+				log := pdata.NewLogRecord()
+				log.SetSeverityNumber(pdata.SeverityNumber(100))
+				return log
+			},
+			expectError: true,
+		},
 	}
 
 	for _, testCase := range testCases {
