@@ -32,18 +32,11 @@ import (
 func newTestLogMapper() logMapper {
 	obs := selfObservability{log: zap.NewNop()}
 	cfg := DefaultConfig()
+	cfg.LogConfig.DefaultLogName = "default-log"
 	return logMapper{
 		cfg: cfg,
 		obs: obs,
 	}
-}
-
-type baseTestCase struct {
-	name          string
-	log           func() plog.LogRecord
-	mr            func() *monitoredres.MonitoredResource
-	expectError   bool
-	expectedEntry logging.Entry
 }
 
 func TestLogMapping(t *testing.T) {
@@ -56,7 +49,13 @@ func TestLogMapping(t *testing.T) {
 		0, 0, 0, 0, 0, 0, 0, 1,
 	})
 
-	testCases := []baseTestCase{
+	testCases := []struct {
+		name          string
+		log           func() plog.LogRecord
+		mr            func() *monitoredres.MonitoredResource
+		expectError   bool
+		expectedEntry logging.Entry
+	}{
 		{
 			name: "empty log, empty monitoredresource",
 			log: func() plog.LogRecord {
@@ -239,6 +238,46 @@ func TestLogMapping(t *testing.T) {
 				assert.NotNil(t, err)
 			} else {
 				assert.Equal(t, testCase.expectedEntry, entry)
+			}
+		})
+	}
+}
+
+func TestGetLogName(t *testing.T) {
+	testCases := []struct {
+		name         string
+		log          func() plog.LogRecord
+		expectError  bool
+		expectedName string
+	}{
+		{
+			name: "log with name attribute",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().Insert("com.google.logName", pcommon.NewValueString("foo-log"))
+				return log
+			},
+			expectedName: "foo-log",
+		},
+		{
+			name: "log with no name attribute",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				return log
+			},
+			expectedName: "default-log",
+		},
+	}
+
+	for _, testCase := range testCases {
+		t.Run(testCase.name, func(t *testing.T) {
+			log := testCase.log()
+			mapper := newTestLogMapper()
+			name, err := mapper.getLogName(log)
+			if testCase.expectError {
+				assert.NotNil(t, err)
+			} else {
+				assert.Equal(t, testCase.expectedName, name)
 			}
 		})
 	}

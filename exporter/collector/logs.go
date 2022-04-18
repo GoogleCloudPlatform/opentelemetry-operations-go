@@ -136,7 +136,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 					if err != nil {
 						return err
 					}
-					logName, err := l.getLogName(log)
+					logName, err := l.mapper.getLogName(log)
 					if err != nil {
 						return err
 					}
@@ -147,7 +147,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 						Resource: mr,
 						Entries:  []*logpb.LogEntry{internalLogEntry},
 					}
-					// TODO(damemi): handle response code
+					// TODO(damemi): handle response code and batching for multiple requests
 					_, err = l.loggingClient.WriteLogEntries(ctx, request)
 					if err != nil {
 						return err
@@ -163,7 +163,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 	return nil
 }
 
-func (l *LogsExporter) getLogName(log pdata.LogRecord) (string, error) {
+func (l logMapper) getLogName(log pdata.LogRecord) (string, error) {
 	logNameAttr, exists := log.Attributes().Get("com.google.logName")
 	if exists {
 		return logNameAttr.AsString(), nil
