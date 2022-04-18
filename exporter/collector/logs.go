@@ -19,9 +19,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
 	"cloud.google.com/go/logging"
+	loggingv2 "cloud.google.com/go/logging/apiv2"
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -68,8 +70,7 @@ type LogsExporter struct {
 	obs    selfObservability
 	mapper logMapper
 
-	client *logging.Client
-	logger *logging.Logger
+	loggingClient *loggingv2.Client
 }
 
 type logMapper struct {
@@ -82,14 +83,15 @@ func NewGoogleCloudLogsExporter(
 	cfg Config,
 	log *zap.Logger,
 ) (*LogsExporter, error) {
-	client, err := logging.NewClient(ctx, cfg.ProjectID)
+	loggingClient, err := loggingv2.NewClient(ctx)
 	if err != nil {
 		return nil, err
 	}
-	logger := client.Logger("my-log") // TODO(@damemi) detect log name
+
 	obs := selfObservability{
 		log: log,
 	}
+
 	return &LogsExporter{
 		cfg: cfg,
 		obs: obs,
@@ -98,13 +100,12 @@ func NewGoogleCloudLogsExporter(
 			cfg: cfg,
 		},
 
-		client: client,
-		logger: logger,
+		loggingClient: loggingClient,
 	}, nil
 }
 
 func (l *LogsExporter) Shutdown(ctx context.Context) error {
-	return l.client.Close()
+	return l.loggingClient.Close()
 }
 
 func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
@@ -131,7 +132,26 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 				if err != nil {
 					logPushErrors = append(logPushErrors, err)
 				} else {
-					l.logger.Log(entry)
+					internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", l.cfg.ProjectID))
+					if err != nil {
+						return err
+					}
+					logName, err := l.getLogName(log)
+					if err != nil {
+						return err
+					}
+					request := &logpb.WriteLogEntriesRequest{
+						LogName: fmt.Sprintf("projects/%s/logs/%s",
+							l.cfg.ProjectID,
+							url.PathEscape(logName)),
+						Resource: mr,
+						Entries:  []*logpb.LogEntry{internalLogEntry},
+					}
+					// TODO(damemi): handle response code
+					_, err = l.loggingClient.WriteLogEntries(ctx, request)
+					if err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -141,6 +161,17 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 		return multierr.Combine(logPushErrors...)
 	}
 	return nil
+}
+
+func (l *LogsExporter) getLogName(log pdata.LogRecord) (string, error) {
+	logNameAttr, exists := log.Attributes().Get("com.google.logName")
+	if exists {
+		return logNameAttr.AsString(), nil
+	}
+	if len(l.cfg.LogConfig.DefaultLogName) > 0 {
+		return l.cfg.LogConfig.DefaultLogName, nil
+	}
+	return "", fmt.Errorf("no log name provided.  Set the 'default_log_name' option, or add the 'com.google.logName' attribute to set a log name")
 }
 
 func (l logMapper) logToEntry(
