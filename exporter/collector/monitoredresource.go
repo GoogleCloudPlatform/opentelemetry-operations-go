@@ -19,6 +19,7 @@ import (
 
 	"go.opentelemetry.io/collector/model/pdata"
 	semconv "go.opentelemetry.io/collector/model/semconv/v1.8.0"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -186,7 +187,7 @@ func createMonitoredResource(
 func (m *metricMapper) resourceToMetricLabels(
 	resource pdata.Resource,
 ) labels {
-	attrs := pdata.NewMap()
+	attrs := pcommon.NewMap()
 	resource.Attributes().Range(func(k string, v pdata.Value) bool {
 		// Is a service attribute and should be included
 		if m.cfg.MetricConfig.ServiceResourceLabels &&

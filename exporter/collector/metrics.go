@@ -33,6 +33,7 @@ import (
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
@@ -318,35 +319,35 @@ func (m *metricMapper) metricToTimeSeries(
 	timeSeries := []*monitoringpb.TimeSeries{}
 
 	switch metric.DataType() {
-	case pdata.MetricDataTypeSum:
+	case pmetric.MetricDataTypeSum:
 		sum := metric.Sum()
 		points := sum.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pdata.MetricDataTypeGauge:
+	case pmetric.MetricDataTypeGauge:
 		gauge := metric.Gauge()
 		points := gauge.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pdata.MetricDataTypeSummary:
+	case pmetric.MetricDataTypeSummary:
 		summary := metric.Summary()
 		points := summary.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pdata.MetricDataTypeHistogram:
+	case pmetric.MetricDataTypeHistogram:
 		hist := metric.Histogram()
 		points := hist.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pdata.MetricDataTypeExponentialHistogram:
+	case pmetric.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
 		for i := 0; i < points.Len(); i++ {
@@ -367,7 +368,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	sum pdata.Summary,
 	point pdata.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
 		return nil
 	}
@@ -590,8 +591,8 @@ func (m *metricMapper) histogramToTimeSeries(
 	_ pdata.Histogram,
 	point pdata.HistogramDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
-		// Drop points without a value.
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) || !point.HasSum() {
+		// Drop points without a value or without a sum
 		return nil
 	}
 	// We treat deltas as cumulatives w/ resets.
@@ -628,7 +629,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	_ pdata.ExponentialHistogram,
 	point pdata.ExponentialHistogramDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
 		return nil
 	}
@@ -668,7 +669,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 ) []*monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	var startTime *timestamppb.Timestamp
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.  This may be a staleness marker from
 		// prometheus.
 		return nil
@@ -733,9 +734,9 @@ func (m *metricMapper) normalizeNumberDataPoint(point pdata.NumberDataPoint, ide
 		newPoint.SetStartTimestamp(start.Timestamp())
 		// Adjust the value based on the start point's value
 		switch newPoint.ValueType() {
-		case pdata.MetricValueTypeInt:
+		case pmetric.MetricValueTypeInt:
 			newPoint.SetIntVal(point.IntVal() - start.IntVal())
-		case pdata.MetricValueTypeDouble:
+		case pmetric.MetricValueTypeDouble:
 			newPoint.SetDoubleVal(point.DoubleVal() - start.DoubleVal())
 		}
 		normalizedPoint = &newPoint
@@ -758,7 +759,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	gauge pdata.Gauge,
 	point pdata.NumberDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
 		return nil
 	}
@@ -804,7 +805,7 @@ func (m *metricMapper) metricNameToType(name string) string {
 func numberDataPointToValue(
 	point pdata.NumberDataPoint,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	if point.ValueType() == pdata.MetricValueTypeInt {
+	if point.ValueType() == pmetric.MetricValueTypeInt {
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
 				Int64Value: point.IntVal(),
 			}},
@@ -902,27 +903,27 @@ func (m *metricMapper) labelDescriptors(
 		})
 	}
 	switch pm.DataType() {
-	case pdata.MetricDataTypeGauge:
+	case pmetric.MetricDataTypeGauge:
 		points := pm.Gauge().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pdata.MetricDataTypeSum:
+	case pmetric.MetricDataTypeSum:
 		points := pm.Sum().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pdata.MetricDataTypeSummary:
+	case pmetric.MetricDataTypeSummary:
 		points := pm.Summary().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pdata.MetricDataTypeHistogram:
+	case pmetric.MetricDataTypeHistogram:
 		points := pm.Histogram().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pdata.MetricDataTypeExponentialHistogram:
+	case pmetric.MetricDataTypeExponentialHistogram:
 		points := pm.ExponentialHistogram().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
@@ -985,7 +986,7 @@ func (m *metricMapper) metricDescriptor(
 	pm pdata.Metric,
 	extraLabels labels,
 ) []*metricpb.MetricDescriptor {
-	if pm.DataType() == pdata.MetricDataTypeSummary {
+	if pm.DataType() == pmetric.MetricDataTypeSummary {
 		return m.summaryMetricDescriptors(pm, extraLabels)
 	}
 	kind, typ := mapMetricPointKind(pm)
@@ -1009,11 +1010,11 @@ func (m *metricMapper) metricDescriptor(
 	}
 }
 
-func metricPointValueType(pt pdata.MetricValueType) metricpb.MetricDescriptor_ValueType {
+func metricPointValueType(pt pmetric.MetricValueType) metricpb.MetricDescriptor_ValueType {
 	switch pt {
-	case pdata.MetricValueTypeInt:
+	case pmetric.MetricValueTypeInt:
 		return metricpb.MetricDescriptor_INT64
-	case pdata.MetricValueTypeDouble:
+	case pmetric.MetricValueTypeDouble:
 		return metricpb.MetricDescriptor_DOUBLE
 	default:
 		return metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
@@ -1024,15 +1025,15 @@ func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, m
 	var kind metricpb.MetricDescriptor_MetricKind
 	var typ metricpb.MetricDescriptor_ValueType
 	switch m.DataType() {
-	case pdata.MetricDataTypeGauge:
+	case pmetric.MetricDataTypeGauge:
 		kind = metricpb.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
 			typ = metricPointValueType(m.Gauge().DataPoints().At(0).ValueType())
 		}
-	case pdata.MetricDataTypeSum:
+	case pmetric.MetricDataTypeSum:
 		if !m.Sum().IsMonotonic() {
 			kind = metricpb.MetricDescriptor_GAUGE
-		} else if m.Sum().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+		} else if m.Sum().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
@@ -1041,19 +1042,19 @@ func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, m
 		if m.Sum().DataPoints().Len() > 0 {
 			typ = metricPointValueType(m.Sum().DataPoints().At(0).ValueType())
 		}
-	case pdata.MetricDataTypeSummary:
+	case pmetric.MetricDataTypeSummary:
 		kind = metricpb.MetricDescriptor_GAUGE
-	case pdata.MetricDataTypeHistogram:
+	case pmetric.MetricDataTypeHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.Histogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+		if m.Histogram().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
-	case pdata.MetricDataTypeExponentialHistogram:
+	case pmetric.MetricDataTypeExponentialHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.ExponentialHistogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+		if m.ExponentialHistogram().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
