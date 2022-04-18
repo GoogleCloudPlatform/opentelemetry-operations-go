@@ -74,9 +74,9 @@ type MetricsExporter struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	obs      selfObservability
-	cfg      Config
-	sumCache datapointstorage.Cache
+	obs                selfObservability
+	cfg                Config
+	normalizationCache datapointstorage.Cache
 }
 
 // Constants we use when translating summary metrics into GCP.
@@ -372,6 +372,13 @@ func (m *metricMapper) summaryPointToTimeSeries(
 		// Drop points without a value.
 		return nil
 	}
+	// Normalize the summary point.
+	metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+	normalizedPoint := m.normalizeSummaryDataPoint(point, metricIdentifier)
+	if normalizedPoint == nil {
+		return nil
+	}
+	point = *normalizedPoint
 	sumName, countName := summaryMetricNames(metric.Name())
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
@@ -612,6 +619,14 @@ func (m *metricMapper) histogramToTimeSeries(
 		// Drop points without a value or without a sum
 		return nil
 	}
+	// Normalize the histogram point.
+	metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+	normalizedPoint := m.normalizeHistogramDataPoint(point, metricIdentifier)
+	if normalizedPoint == nil {
+		return nil
+	}
+	point = *normalizedPoint
+
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
@@ -650,6 +665,13 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 		// Drop points without a value.
 		return nil
 	}
+	// Normalize the histogram point.
+	metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+	normalizedPoint := m.normalizeExponentialHistogramDataPoint(point, metricIdentifier)
+	if normalizedPoint == nil {
+		return nil
+	}
+	point = *normalizedPoint
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
@@ -732,7 +754,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 func (m *metricMapper) normalizeNumberDataPoint(point pdata.NumberDataPoint, identifier string) *pdata.NumberDataPoint {
 	// if the point doesn't need to be normalized, use original point
 	normalizedPoint := &point
-	start, ok := m.sumCache.Get(identifier)
+	start, ok := m.normalizationCache.GetNumberDataPoint(identifier)
 	if ok {
 		if !start.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 			// We found a cached start timestamp that wouldn't produce a valid point.
@@ -763,10 +785,164 @@ func (m *metricMapper) normalizeNumberDataPoint(point pdata.NumberDataPoint, ide
 		// an explicit reset point as described in
 		// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
 		// Record it in history and drop the point.
-		m.sumCache.Set(identifier, &point)
+		m.normalizationCache.SetNumberDataPoint(identifier, &point)
 		return nil
 	}
 	return normalizedPoint
+}
+
+// normalizeSummaryDataPoint returns a point which has been normalized against an initial
+// start point, or nil if the point should be dropped.
+func (m *metricMapper) normalizeSummaryDataPoint(point pdata.SummaryDataPoint, identifier string) *pdata.SummaryDataPoint {
+	// if the point doesn't need to be normalized, use original point
+	normalizedPoint := &point
+	start, ok := m.normalizationCache.GetSummaryDataPoint(identifier)
+	if ok {
+		if !start.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+			// We found a cached start timestamp that wouldn't produce a valid point.
+			// Drop it and log.
+			m.obs.log.Info(
+				"data point being processed older than last recorded reset, will not be emitted",
+				zap.String("lastRecordedReset", start.Timestamp().String()),
+				zap.String("dataPoint", point.Timestamp().String()),
+			)
+			return nil
+		}
+		// Make a copy so we don't mutate underlying data
+		newPoint := pdata.NewSummaryDataPoint()
+		point.CopyTo(newPoint)
+		// Use the start timestamp from the normalization point
+		newPoint.SetStartTimestamp(start.Timestamp())
+		// Adjust the value based on the start point's value
+		newPoint.SetCount(point.Count() - start.Count())
+		// We drop points without a sum, so no need to check here.
+		newPoint.SetSum(point.Sum() - start.Sum())
+		normalizedPoint = &newPoint
+	}
+	if (!ok && point.StartTimestamp() == 0) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// This is the first time we've seen this metric, or we received
+		// an explicit reset point as described in
+		// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
+		// Record it in history and drop the point.
+		m.normalizationCache.SetSummaryDataPoint(identifier, &point)
+		return nil
+	}
+	return normalizedPoint
+}
+
+// normalizeHistogramDataPoint returns a point which has been normalized against an initial
+// start point, or nil if the point should be dropped.
+func (m *metricMapper) normalizeHistogramDataPoint(point pdata.HistogramDataPoint, identifier string) *pdata.HistogramDataPoint {
+	// if the point doesn't need to be normalized, use original point
+	normalizedPoint := &point
+	start, ok := m.normalizationCache.GetHistogramDataPoint(identifier)
+	if ok {
+		if !start.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+			// We found a cached start timestamp that wouldn't produce a valid point.
+			// Drop it and log.
+			m.obs.log.Info(
+				"data point being processed older than last recorded reset, will not be emitted",
+				zap.String("lastRecordedReset", start.Timestamp().String()),
+				zap.String("dataPoint", point.Timestamp().String()),
+			)
+			return nil
+		}
+		// Make a copy so we don't mutate underlying data
+		newPoint := pdata.NewHistogramDataPoint()
+		point.CopyTo(newPoint)
+		// Use the start timestamp from the normalization point
+		newPoint.SetStartTimestamp(start.Timestamp())
+		// Adjust the value based on the start point's value
+		newPoint.SetCount(point.Count() - start.Count())
+		// We drop points without a sum, so no need to check here.
+		newPoint.SetSum(point.Sum() - start.Sum())
+		pointBuckets := point.BucketCounts()
+		startBuckets := start.BucketCounts()
+		if len(pointBuckets) != len(startBuckets) {
+			// The number of buckets changed, so we can't normalize points anymore.
+			// Log a message, and record this point so we can normalize against
+			// it for subsequent points.
+			m.obs.log.Info(
+				"number of histogram buckets changed, dropping point",
+				zap.String("dataPoint", point.Timestamp().String()),
+			)
+			m.normalizationCache.SetHistogramDataPoint(identifier, &point)
+			return nil
+		}
+		newBuckets := make([]uint64, len(pointBuckets))
+		for i := range pointBuckets {
+			newBuckets[i] = pointBuckets[i] - startBuckets[i]
+		}
+		newPoint.SetBucketCounts(newBuckets)
+		normalizedPoint = &newPoint
+	}
+	if (!ok && point.StartTimestamp() == 0) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// This is the first time we've seen this metric, or we received
+		// an explicit reset point as described in
+		// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
+		// Record it in history and drop the point.
+		m.normalizationCache.SetHistogramDataPoint(identifier, &point)
+		return nil
+	}
+	return normalizedPoint
+}
+
+// normalizeExponentialHistogramDataPoint returns a point which has been normalized against an initial
+// start point, or nil if the point should be dropped.
+func (m *metricMapper) normalizeExponentialHistogramDataPoint(point pdata.ExponentialHistogramDataPoint, identifier string) *pdata.ExponentialHistogramDataPoint {
+	// if the point doesn't need to be normalized, use original point
+	normalizedPoint := &point
+	start, ok := m.normalizationCache.GetExponentialHistogramDataPoint(identifier)
+	if ok {
+		if !start.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+			// We found a cached start timestamp that wouldn't produce a valid point.
+			// Drop it and log.
+			m.obs.log.Info(
+				"data point being processed older than last recorded reset, will not be emitted",
+				zap.String("lastRecordedReset", start.Timestamp().String()),
+				zap.String("dataPoint", point.Timestamp().String()),
+			)
+			return nil
+		}
+		// Make a copy so we don't mutate underlying data
+		newPoint := pdata.NewExponentialHistogramDataPoint()
+		point.CopyTo(newPoint)
+		// Use the start timestamp from the normalization point
+		newPoint.SetStartTimestamp(start.Timestamp())
+		// Adjust the value based on the start point's value
+		newPoint.SetCount(point.Count() - start.Count())
+		// We drop points without a sum, so no need to check here.
+		newPoint.SetSum(point.Sum() - start.Sum())
+		newPoint.SetZeroCount(point.ZeroCount() - start.ZeroCount())
+		normalizeExponentialBuckets(newPoint.Positive(), start.Positive())
+		normalizeExponentialBuckets(newPoint.Negative(), start.Negative())
+		normalizedPoint = &newPoint
+	}
+	if (!ok && point.StartTimestamp() == 0) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// This is the first time we've seen this metric, or we received
+		// an explicit reset point as described in
+		// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
+		// Record it in history and drop the point.
+		m.normalizationCache.SetExponentialHistogramDataPoint(identifier, &point)
+		return nil
+	}
+	return normalizedPoint
+}
+
+func normalizeExponentialBuckets(pointBuckets, startBuckets pdata.Buckets) {
+	newBuckets := make([]uint64, len(pointBuckets.BucketCounts()))
+	offsetDiff := int(pointBuckets.Offset() - startBuckets.Offset())
+	for i := range pointBuckets.BucketCounts() {
+		startOffset := i + offsetDiff
+		// if there is no corresponding bucket for the starting bucketcounts, don't normalize
+		if startOffset < 0 || startOffset >= len(startBuckets.BucketCounts()) {
+			newBuckets[i] = pointBuckets.BucketCounts()[i]
+		} else {
+			newBuckets[i] = pointBuckets.BucketCounts()[i] - startBuckets.BucketCounts()[startOffset]
+		}
+	}
+	pointBuckets.SetOffset(pointBuckets.Offset())
+	pointBuckets.SetBucketCounts(newBuckets)
 }
 
 func (m *metricMapper) gaugePointToTimeSeries(
