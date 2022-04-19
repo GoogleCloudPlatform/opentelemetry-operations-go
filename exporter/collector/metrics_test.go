@@ -333,6 +333,7 @@ func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
 	unit := "1"
 	metric.SetUnit(unit)
 	hist := metric.Histogram()
+	hist.SetAggregationTemporality(pmetric.MetricAggregationTemporalityCumulative)
 	point := hist.DataPoints().AppendEmpty()
 	// leave start time unset with the intended start time
 	point.SetTimestamp(pdata.NewTimestampFromTime(start))
@@ -687,6 +688,7 @@ func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	unit := "1"
 	metric.SetUnit(unit)
 	hist := metric.ExponentialHistogram()
+	hist.SetAggregationTemporality(pmetric.MetricAggregationTemporalityCumulative)
 
 	// First point will be dropped, since it has no start time.
 	point := hist.DataPoints().AppendEmpty()
