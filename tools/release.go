@@ -41,7 +41,8 @@ var versions = map[string]string{
 	"exporter/metric/": unstable,
 	"example/metric/":  unstable,
 
-	"exporter/collector/": unstable,
+	"exporter/collector/":                        unstable,
+	"exporter/collector/googlemanagedprometheus": unstable,
 
 	"internal/resourcemapping/": unstable,
 }
