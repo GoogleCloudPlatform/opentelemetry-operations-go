@@ -511,17 +511,19 @@ func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitorin
 	}
 
 	bounds := point.ExplicitBounds()
-	// Calculate the sum of squared deviation.
-	for i, bound := range bounds {
-		// Assume all points in the bucket occur at the middle of the bucket range
-		middleOfBucket := (prevBound + bound) / 2
-		deviation += float64(counts[i]) * (middleOfBucket - mean) * (middleOfBucket - mean)
-		prevBound = bound
+	if m.cfg.MetricConfig.EnableSumOfSquaredDeviation {
+		// Calculate the sum of squared deviation.
+		for i, bound := range bounds {
+			// Assume all points in the bucket occur at the middle of the bucket range
+			middleOfBucket := (prevBound + bound) / 2
+			deviation += float64(counts[i]) * (middleOfBucket - mean) * (middleOfBucket - mean)
+			prevBound = bound
+		}
+		// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
+		// Assume points in the infinity bucket are at the top of the previous bucket
+		middleOfInfBucket := prevBound
+		deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
 	}
-	// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
-	// Assume points in the infinity bucket are at the top of the previous bucket
-	middleOfInfBucket := prevBound
-	deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
 
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{

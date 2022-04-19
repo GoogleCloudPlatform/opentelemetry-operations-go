@@ -44,9 +44,11 @@ var (
 func newTestMetricMapper() (metricMapper, func()) {
 	obs := selfObservability{log: zap.NewNop()}
 	s := make(chan struct{})
+	cfg := DefaultConfig()
+	cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 	return metricMapper{
 		obs,
-		DefaultConfig(),
+		cfg,
 		datapointstorage.NewCache(s),
 	}, func() { close(s) }
 }
