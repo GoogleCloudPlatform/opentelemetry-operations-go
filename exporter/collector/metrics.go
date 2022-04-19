@@ -519,12 +519,9 @@ func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitorin
 		prevBound = bound
 	}
 	// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
-	// Make sure we have a count for that bucket, just in-case.
-	if len(counts) == len(bounds)+1 {
-		// Assume points in the infinity bucket are at the top of the previous bucket
-		middleOfInfBucket := prevBound
-		deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
-	}
+	// Assume points in the infinity bucket are at the top of the previous bucket
+	middleOfInfBucket := prevBound
+	deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
 
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
