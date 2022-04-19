@@ -107,10 +107,7 @@ type MetricConfig struct {
 	// This enables calculation of an estimated sum of squared deviation.  It isn't correct,
 	// so we don't send it by default, and don't expose it to users. For some uses, it is
 	// expected, however.
-<<<<<<< HEAD
 	EnableSumOfSquaredDeviation bool `mapstructure:"sum_of_squared_deviation"`
-=======
-	EnableSumOfSquaredDeviation bool
 
 	// GetMetricName is not settable in config files, but can be used by other
 	// exporters which extend the functionality of this exporter. It allows
@@ -123,7 +120,6 @@ type MetricConfig struct {
 	// exporter. It allows overriding the function used to map otel resource to
 	// monitored resource.
 	MapMonitoredResource func(pdata.Resource) *monitoredrespb.MonitoredResource
->>>>>>> 8f76841 (allow substituting resource mapping and naming functions)
 }
 
 type ResourceFilter struct {

@@ -5,6 +5,7 @@ go 1.17
 require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.11
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.29.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.0.0-00010101000000-000000000000
 	github.com/google/go-cmp v0.5.7
 	github.com/stretchr/testify v1.7.1
 	go.opencensus.io v0.23.0
@@ -27,6 +28,7 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.5.1 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.29.1 // indirect
 	github.com/aws/aws-sdk-go v1.42.49 // indirect
+	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
@@ -60,6 +62,7 @@ require (
 
 replace (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector => ../../collector
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus => ../../collector/googlemanagedprometheus
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../../trace
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../../internal/resourcemapping
 )
