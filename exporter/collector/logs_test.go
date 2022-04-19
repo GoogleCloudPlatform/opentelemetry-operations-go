@@ -22,7 +22,8 @@ import (
 
 	"cloud.google.com/go/logging"
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
 	logpb "google.golang.org/genproto/googleapis/logging/v2"
@@ -39,7 +40,7 @@ func newTestLogMapper() logMapper {
 
 type baseTestCase struct {
 	name          string
-	log           func() pdata.LogRecord
+	log           func() plog.LogRecord
 	mr            func() *monitoredres.MonitoredResource
 	expectError   bool
 	expectedEntry logging.Entry
@@ -48,18 +49,18 @@ type baseTestCase struct {
 func TestLogMapping(t *testing.T) {
 	testObservedTime, _ := time.Parse("2006-01-02", "2022-04-12")
 	testSampleTime, _ := time.Parse("2006-01-02", "2021-07-10")
-	testTraceID := pdata.NewTraceID([16]byte{
+	testTraceID := pcommon.NewTraceID([16]byte{
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	})
-	testSpanID := pdata.NewSpanID([8]byte{
+	testSpanID := pcommon.NewSpanID([8]byte{
 		0, 0, 0, 0, 0, 0, 0, 1,
 	})
 
 	testCases := []baseTestCase{
 		{
 			name: "empty log, empty monitoredresource",
-			log: func() pdata.LogRecord {
-				return pdata.NewLogRecord()
+			log: func() plog.LogRecord {
+				return plog.NewLogRecord()
 			},
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
@@ -70,8 +71,8 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log with json, empty monitoredresource",
-			log: func() pdata.LogRecord {
-				log := pdata.NewLogRecord()
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
 				log.Body().SetBytesVal([]byte(`{"this": "is json"}`))
 				return log
 			},
@@ -85,10 +86,10 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log with json and httpRequest, empty monitoredresource",
-			log: func() pdata.LogRecord {
-				log := pdata.NewLogRecord()
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
 				log.Body().SetBytesVal([]byte(`{"message": "hello!"}`))
-				log.Attributes().Insert(HTTPRequestAttributeKey, pdata.NewValueBytes([]byte(`{
+				log.Attributes().Insert(HTTPRequestAttributeKey, pcommon.NewValueBytes([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
 						"requestSize": "1",
@@ -127,9 +128,9 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log with timestamp",
-			log: func() pdata.LogRecord {
-				log := pdata.NewLogRecord()
-				log.SetTimestamp(pdata.NewTimestampFromTime(testSampleTime))
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetTimestamp(pcommon.NewTimestampFromTime(testSampleTime))
 				return log
 			},
 			mr: func() *monitoredres.MonitoredResource {
@@ -144,8 +145,8 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			log: func() pdata.LogRecord {
-				log := pdata.NewLogRecord()
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
 				log.Body().SetStringVal("{\"message\": \"hello!\"}")
 				return log
 			},
@@ -160,11 +161,11 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			log: func() pdata.LogRecord {
-				log := pdata.NewLogRecord()
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
 				log.Attributes().Insert(
 					"com.google.sourceLocation",
-					pdata.NewValueBytes([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`)),
+					pcommon.NewValueBytes([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`)),
 				)
 				return log
 			},
@@ -182,8 +183,8 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			log: func() pdata.LogRecord {
-				log := pdata.NewLogRecord()
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
 				log.SetTraceID(testTraceID)
 				log.SetSpanID(testSpanID)
 				return log
@@ -199,9 +200,9 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			log: func() pdata.LogRecord {
-				log := pdata.NewLogRecord()
-				log.SetSeverityNumber(pdata.SeverityNumberFATAL)
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityNumber(plog.SeverityNumberFATAL)
 				return log
 			},
 			expectedEntry: logging.Entry{
@@ -214,9 +215,9 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			log: func() pdata.LogRecord {
-				log := pdata.NewLogRecord()
-				log.SetSeverityNumber(pdata.SeverityNumber(100))
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityNumber(plog.SeverityNumber(100))
 				return log
 			},
 			expectError: true,
