@@ -1408,9 +1408,10 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 func TestMetricNameToType(t *testing.T) {
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
+	metric := pdata.NewMetric()
 	assert.Equal(
 		t,
-		mapper.metricNameToType("foo"),
+		mapper.metricNameToType("foo", metric),
 		"workload.googleapis.com/foo",
 		"Should use workload metric domain with default config",
 	)
@@ -1915,12 +1916,13 @@ func TestKnownDomains(t *testing.T) {
 	for _, test := range tests {
 		t.Run(fmt.Sprintf("%v to %v", test.name, test.metricType), func(t *testing.T) {
 			mapper, shutdown := newTestMetricMapper()
+			metric := pdata.NewMetric()
 			defer shutdown()
 			if len(test.knownDomains) > 0 {
 				mapper.cfg.MetricConfig.KnownDomains = test.knownDomains
 			}
 			mapper.cfg.MetricConfig.Prefix = "prefix"
-			assert.Equal(t, test.metricType, mapper.metricNameToType(test.name))
+			assert.Equal(t, test.metricType, mapper.metricNameToType(test.name, metric))
 		})
 	}
 }

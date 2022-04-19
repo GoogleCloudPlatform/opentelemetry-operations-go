@@ -45,11 +45,12 @@ func TestLoadConfig(t *testing.T) {
 
 	assert.Equal(t, len(cfg.Exporters), 2)
 
-	r0 := cfg.Exporters[config.NewComponentID(typeStr)]
-	assert.Equal(t, r0, factory.CreateDefaultConfig())
+	r0 := cfg.Exporters[config.NewComponentID(typeStr)].(*testExporterConfig)
+	defaultConfig := factory.CreateDefaultConfig().(*testExporterConfig)
+	assert.Equal(t, sanitize(r0), sanitize(defaultConfig))
 
 	r1 := cfg.Exporters[config.NewComponentIDWithName(typeStr, "customname")].(*testExporterConfig)
-	assert.Equal(t, r1,
+	assert.Equal(t, sanitize(r1),
 		&testExporterConfig{
 			ExporterSettings: config.NewExporterSettings(config.NewComponentIDWithName(typeStr, "customname")),
 			Config: collector.Config{
@@ -78,6 +79,12 @@ func TestLoadConfig(t *testing.T) {
 				},
 			},
 		})
+}
+
+func sanitize(cfg *testExporterConfig) *testExporterConfig {
+	cfg.Config.MetricConfig.MapMonitoredResource = nil
+	cfg.Config.MetricConfig.GetMetricName = nil
+	return cfg
 }
 
 func newFactory() component.ExporterFactory {

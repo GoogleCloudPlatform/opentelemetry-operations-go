@@ -18,7 +18,9 @@ import (
 	"fmt"
 	"time"
 
+	"go.opentelemetry.io/collector/model/pdata"
 	"google.golang.org/api/option"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 const (
@@ -105,7 +107,23 @@ type MetricConfig struct {
 	// This enables calculation of an estimated sum of squared deviation.  It isn't correct,
 	// so we don't send it by default, and don't expose it to users. For some uses, it is
 	// expected, however.
+<<<<<<< HEAD
 	EnableSumOfSquaredDeviation bool `mapstructure:"sum_of_squared_deviation"`
+=======
+	EnableSumOfSquaredDeviation bool
+
+	// GetMetricName is not settable in config files, but can be used by other
+	// exporters which extend the functionality of this exporter. It allows
+	// customizing the naming of metrics. baseName already includes type
+	// suffixes for summary metrics, but does not (yet) include the domain prefix
+	GetMetricName func(baseName string, metric pdata.Metric) string
+
+	// MapMonitoredResource is not exposed as an option in the configuration, but
+	// can be used by other exporters to extend the functionality of this
+	// exporter. It allows overriding the function used to map otel resource to
+	// monitored resource.
+	MapMonitoredResource func(pdata.Resource) *monitoredrespb.MonitoredResource
+>>>>>>> 8f76841 (allow substituting resource mapping and naming functions)
 }
 
 type ResourceFilter struct {
@@ -135,6 +153,8 @@ func DefaultConfig() Config {
 			InstrumentationLibraryLabels:     true,
 			ServiceResourceLabels:            true,
 			CumulativeNormalization:          true,
+			GetMetricName:                    defaultGetMetricName,
+			MapMonitoredResource:             defaultResourceToMonitoredResource,
 		},
 	}
 }

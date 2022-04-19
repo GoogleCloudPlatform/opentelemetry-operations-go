@@ -172,7 +172,8 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
-		monitoredResource, extraResourceLabels := me.mapper.resourceToMonitoredResource(rm.Resource())
+		monitoredResource := me.cfg.MetricConfig.MapMonitoredResource(rm.Resource())
+		extraResourceLabels := me.mapper.resourceToMetricLabels(rm.Resource())
 		sms := rm.ScopeMetrics()
 		for j := 0; j < sms.Len(); j++ {
 			sm := sms.At(j)
@@ -412,7 +413,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 				}},
 			}},
 			Metric: &metricpb.Metric{
-				Type: m.metricNameToType(sumName),
+				Type: m.metricNameToType(sumName, metric),
 				Labels: mergeLabels(
 					attributesToLabels(point.Attributes()),
 					extraLabels,
@@ -434,7 +435,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 				}},
 			}},
 			Metric: &metricpb.Metric{
-				Type: m.metricNameToType(countName),
+				Type: m.metricNameToType(countName, metric),
 				Labels: mergeLabels(
 					attributesToLabels(point.Attributes()),
 					extraLabels,
@@ -462,7 +463,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 				}},
 			}},
 			Metric: &metricpb.Metric{
-				Type: m.metricNameToType(metric.Name()),
+				Type: m.metricNameToType(metric.Name(), metric),
 				Labels: mergeLabels(
 					attributesToLabels(point.Attributes()),
 					extraLabels,
@@ -661,7 +662,7 @@ func (m *metricMapper) histogramToTimeSeries(
 			Value: value,
 		}},
 		Metric: &metricpb.Metric{
-			Type: m.metricNameToType(metric.Name()),
+			Type: m.metricNameToType(metric.Name(), metric),
 			Labels: mergeLabels(
 				attributesToLabels(point.Attributes()),
 				extraLabels,
@@ -708,7 +709,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 			Value: value,
 		}},
 		Metric: &metricpb.Metric{
-			Type: m.metricNameToType(metric.Name()),
+			Type: m.metricNameToType(metric.Name(), metric),
 			Labels: mergeLabels(
 				attributesToLabels(point.Attributes()),
 				extraLabels,
@@ -760,7 +761,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 			Value: value,
 		}},
 		Metric: &metricpb.Metric{
-			Type: m.metricNameToType(metric.Name()),
+			Type: m.metricNameToType(metric.Name(), metric),
 			Labels: mergeLabels(
 				attributesToLabels(point.Attributes()),
 				extraLabels,
@@ -795,7 +796,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 			Value: value,
 		}},
 		Metric: &metricpb.Metric{
-			Type: m.metricNameToType(metric.Name()),
+			Type: m.metricNameToType(metric.Name(), metric),
 			Labels: mergeLabels(
 				attributesToLabels(point.Attributes()),
 				extraLabels,
@@ -815,8 +816,13 @@ func (m *metricMapper) getMetricNamePrefix(name string) string {
 }
 
 // metricNameToType maps OTLP metric name to GCM metric type (aka name)
-func (m *metricMapper) metricNameToType(name string) string {
-	return path.Join(m.getMetricNamePrefix(name), name)
+func (m *metricMapper) metricNameToType(name string, metric pdata.Metric) string {
+	return path.Join(m.getMetricNamePrefix(name), m.cfg.MetricConfig.GetMetricName(name, metric))
+}
+
+// defaultGetMetricName does not (further) customize the baseName
+func defaultGetMetricName(baseName string, _ pdata.Metric) string {
+	return baseName
 }
 
 func numberDataPointToValue(
@@ -964,7 +970,7 @@ func (m *metricMapper) summaryMetricDescriptors(
 	labels := m.labelDescriptors(pm, extraLabels)
 	return []*metricpb.MetricDescriptor{
 		{
-			Type:        m.metricNameToType(sumName),
+			Type:        m.metricNameToType(sumName, pm),
 			Labels:      labels,
 			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
 			ValueType:   metricpb.MetricDescriptor_DOUBLE,
@@ -973,7 +979,7 @@ func (m *metricMapper) summaryMetricDescriptors(
 			DisplayName: sumName,
 		},
 		{
-			Type:        m.metricNameToType(countName),
+			Type:        m.metricNameToType(countName, pm),
 			Labels:      labels,
 			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
 			ValueType:   metricpb.MetricDescriptor_DOUBLE,
@@ -982,7 +988,7 @@ func (m *metricMapper) summaryMetricDescriptors(
 			DisplayName: countName,
 		},
 		{
-			Type: m.metricNameToType(pm.Name()),
+			Type: m.metricNameToType(pm.Name(), pm),
 			Labels: append(
 				labels,
 				&label.LabelDescriptor{
@@ -1007,7 +1013,7 @@ func (m *metricMapper) metricDescriptor(
 		return m.summaryMetricDescriptors(pm, extraLabels)
 	}
 	kind, typ := mapMetricPointKind(pm)
-	metricType := m.metricNameToType(pm.Name())
+	metricType := m.metricNameToType(pm.Name(), pm)
 	labels := m.labelDescriptors(pm, extraLabels)
 	// Return nil for unsupported types.
 	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
