@@ -19,6 +19,8 @@ import (
 	"time"
 
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
@@ -30,12 +32,12 @@ import (
 func pdataResourceSpansToOTSpanData(rs pdata.ResourceSpans) []sdktrace.ReadOnlySpan {
 	resource := rs.Resource()
 	var sds []sdktrace.ReadOnlySpan
-	ilss := rs.ScopeSpans()
-	for i := 0; i < ilss.Len(); i++ {
-		ils := ilss.At(i)
-		spans := ils.Spans()
+	ss := rs.ScopeSpans()
+	for i := 0; i < ss.Len(); i++ {
+		s := ss.At(i)
+		spans := s.Spans()
 		for j := 0; j < spans.Len(); j++ {
-			sd := pdataSpanToOTSpanData(spans.At(j), resource, ils.Scope())
+			sd := pdataSpanToOTSpanData(spans.At(j), resource, s.Scope())
 			sds = append(sds, sd)
 		}
 	}
@@ -46,7 +48,7 @@ func pdataResourceSpansToOTSpanData(rs pdata.ResourceSpans) []sdktrace.ReadOnlyS
 func pdataSpanToOTSpanData(
 	span pdata.Span,
 	resource pdata.Resource,
-	il pdata.InstrumentationScope,
+	is pdata.InstrumentationScope,
 ) spanSnapshot {
 	sc := apitrace.SpanContextConfig{
 		TraceID: span.TraceID().Bytes(),
@@ -61,7 +63,7 @@ func pdataSpanToOTSpanData(
 	// TODO: Decide if ignoring the error is fine.
 	r, _ := sdkresource.New(
 		context.Background(),
-		sdkresource.WithAttributes(pdataAttributesToOTAttributes(pdata.NewMap(), resource)...),
+		sdkresource.WithAttributes(pdataAttributesToOTAttributes(pcommon.NewMap(), resource)...),
 	)
 
 	status := span.Status()
@@ -80,8 +82,8 @@ func pdataSpanToOTSpanData(
 		droppedLinks:         int(span.DroppedLinksCount()),
 		resource:             r,
 		instrumentationLibrary: instrumentation.Library{
-			Name:    il.Name(),
-			Version: il.Version(),
+			Name:    is.Name(),
+			Version: is.Version(),
 		},
 		status: sdktrace.Status{
 			Code:        pdataStatusCodeToOTCode(status.Code()),
@@ -90,30 +92,30 @@ func pdataSpanToOTSpanData(
 	}
 }
 
-func pdataSpanKindToOTSpanKind(k pdata.SpanKind) apitrace.SpanKind {
+func pdataSpanKindToOTSpanKind(k ptrace.SpanKind) apitrace.SpanKind {
 	switch k {
-	case pdata.SpanKindUnspecified:
+	case ptrace.SpanKindUnspecified:
 		return apitrace.SpanKindInternal
-	case pdata.SpanKindInternal:
+	case ptrace.SpanKindInternal:
 		return apitrace.SpanKindInternal
-	case pdata.SpanKindServer:
+	case ptrace.SpanKindServer:
 		return apitrace.SpanKindServer
-	case pdata.SpanKindClient:
+	case ptrace.SpanKindClient:
 		return apitrace.SpanKindClient
-	case pdata.SpanKindProducer:
+	case ptrace.SpanKindProducer:
 		return apitrace.SpanKindProducer
-	case pdata.SpanKindConsumer:
+	case ptrace.SpanKindConsumer:
 		return apitrace.SpanKindConsumer
 	default:
 		return apitrace.SpanKindUnspecified
 	}
 }
 
-func pdataStatusCodeToOTCode(c pdata.StatusCode) codes.Code {
+func pdataStatusCodeToOTCode(c ptrace.StatusCode) codes.Code {
 	switch c {
-	case pdata.StatusCodeOk:
+	case ptrace.StatusCodeOk:
 		return codes.Ok
-	case pdata.StatusCodeError:
+	case ptrace.StatusCodeError:
 		return codes.Error
 	default:
 		return codes.Unset
@@ -125,13 +127,13 @@ func pdataAttributesToOTAttributes(attrs pdata.Map, resource pdata.Resource) []a
 	appendAttrs := func(m pdata.Map) {
 		m.Range(func(k string, v pdata.Value) bool {
 			switch v.Type() {
-			case pdata.ValueTypeString:
+			case pcommon.ValueTypeString:
 				otAttrs = append(otAttrs, attribute.String(k, v.StringVal()))
-			case pdata.ValueTypeBool:
+			case pcommon.ValueTypeBool:
 				otAttrs = append(otAttrs, attribute.Bool(k, v.BoolVal()))
-			case pdata.ValueTypeInt:
+			case pcommon.ValueTypeInt:
 				otAttrs = append(otAttrs, attribute.Int64(k, v.IntVal()))
-			case pdata.ValueTypeDouble:
+			case pcommon.ValueTypeDouble:
 				otAttrs = append(otAttrs, attribute.Float64(k, v.DoubleVal()))
 			}
 			return true

@@ -162,8 +162,8 @@ update-dep:
 STABLE_OTEL_VERSION=v1.6.2
 UNSTABLE_OTEL_VERSION=v0.28.0
 UNSTABLE_CONTRIB_OTEL_VERSION=v0.31.0
-COLLECTOR_VERSION=v0.48.0
-COLLECTOR_CONTRIB_VERSION=v0.48.0
+COLLECTOR_VERSION=v0.49.0
+COLLECTOR_CONTRIB_VERSION=v0.49.0
 
 .PHONY: update-otel
 update-otel:
@@ -180,3 +180,12 @@ update-otel:
 	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus VERSION=$(COLLECTOR_CONTRIB_VERSION)
 	$(MAKE) build
 	$(MAKE) gotidy
+
+.PHONY: prepare-release
+prepare-release:
+	echo "make sure tools/release.go is updated to your desired stable and unstable versions"
+	go run tools/release.go prepare
+
+.PHONY: release
+release: prepare-release check-clean-work-tree
+	go run tools/release.go tag

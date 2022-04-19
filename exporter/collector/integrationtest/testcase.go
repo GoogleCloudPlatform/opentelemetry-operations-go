@@ -30,6 +30,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/otlp"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -101,23 +102,23 @@ func (m *MetricsTestCase) LoadOTLPMetricsInput(
 				m := sms.Metrics().At(i)
 
 				switch m.DataType() {
-				case pdata.MetricDataTypeGauge:
+				case pmetric.MetricDataTypeGauge:
 					for i := 0; i < m.Gauge().DataPoints().Len(); i++ {
 						updatePoint(m.Gauge().DataPoints().At(i))
 					}
-				case pdata.MetricDataTypeSum:
+				case pmetric.MetricDataTypeSum:
 					for i := 0; i < m.Sum().DataPoints().Len(); i++ {
 						updatePoint(m.Sum().DataPoints().At(i))
 					}
-				case pdata.MetricDataTypeHistogram:
+				case pmetric.MetricDataTypeHistogram:
 					for i := 0; i < m.Histogram().DataPoints().Len(); i++ {
 						updatePoint(m.Histogram().DataPoints().At(i))
 					}
-				case pdata.MetricDataTypeSummary:
+				case pmetric.MetricDataTypeSummary:
 					for i := 0; i < m.Summary().DataPoints().Len(); i++ {
 						updatePoint(m.Summary().DataPoints().At(i))
 					}
-				case pdata.MetricDataTypeExponentialHistogram:
+				case pmetric.MetricDataTypeExponentialHistogram:
 					for i := 0; i < m.ExponentialHistogram().DataPoints().Len(); i++ {
 						updatePoint(m.ExponentialHistogram().DataPoints().At(i))
 					}

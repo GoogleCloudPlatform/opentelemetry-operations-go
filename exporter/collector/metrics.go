@@ -33,6 +33,7 @@ import (
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
@@ -68,12 +69,6 @@ type MetricsExporter struct {
 	metricDescriptorC chan *metricpb.MetricDescriptor
 	// Tracks the metric descriptors that have already been sent to GCM
 	mdCache map[string]*metricpb.MetricDescriptor
-
-	// A channel that receives timeserieses and exports them to GCM in batches
-	timeSeriesC chan *monitoringpb.TimeSeries
-	// stores the currently pending batch of timeserieses
-	pendingTimeSerieses []*monitoringpb.TimeSeries
-	batchTimeoutTimer   *time.Timer
 }
 
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
@@ -91,11 +86,6 @@ const (
 )
 
 const (
-	// batchTimeout is how long to wait to build a full batch before sending
-	// off what we already have. We set it to 10 seconds because GCM
-	// throttles us to this anyway.
-	batchTimeout = 10 * time.Second
-
 	// The number of timeserieses to send to GCM in a single request. This
 	// is a hard limit in the GCM API, so we never want to exceed 200.
 	sendBatchSize = 200
@@ -158,7 +148,6 @@ func NewGoogleCloudMetricsExporter(
 		// to drop / conserve resources for sending timeseries.
 		metricDescriptorC: make(chan *metricpb.MetricDescriptor, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
 		mdCache:           make(map[string]*metricpb.MetricDescriptor),
-		timeSeriesC:       make(chan *monitoringpb.TimeSeries),
 		shutdownC:         shutdown,
 	}
 
@@ -166,15 +155,12 @@ func NewGoogleCloudMetricsExporter(
 	mExp.goroutines.Add(1)
 	go mExp.exportMetricDescriptorRunner()
 
-	// Fire up the time series exporter.
-	mExp.goroutines.Add(1)
-	go mExp.exportTimeSeriesRunner()
-
 	return mExp, nil
 }
 
 // PushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary
 func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) error {
+	pendingTimeSeries := []*monitoringpb.TimeSeries{}
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
@@ -189,9 +175,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 			mes := sm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
-				for _, ts := range me.mapper.metricToTimeSeries(monitoredResource, metricLabels, metric) {
-					me.timeSeriesC <- ts
-				}
+				pendingTimeSeries = append(pendingTimeSeries, me.mapper.metricToTimeSeries(monitoredResource, metricLabels, metric)...)
 
 				// We only send metric descriptors if we're configured *and* we're not sending service timeseries.
 				if me.cfg.MetricConfig.SkipCreateMetricDescriptor || me.cfg.MetricConfig.CreateServiceTimeSeries {
@@ -211,37 +195,35 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) err
 			}
 		}
 	}
+	// Batch and export
+	for len(pendingTimeSeries) > 0 {
+		var sendSize int
+		if len(pendingTimeSeries) < sendBatchSize {
+			sendSize = len(pendingTimeSeries)
+		} else {
+			sendSize = sendBatchSize
+		}
+
+		var ts []*monitoringpb.TimeSeries
+		ts, pendingTimeSeries = pendingTimeSeries[:sendSize], pendingTimeSeries[sendSize:]
+
+		var err error
+		if me.cfg.MetricConfig.CreateServiceTimeSeries {
+			err = me.createServiceTimeSeries(ctx, ts)
+		} else {
+			err = me.createTimeSeries(ctx, ts)
+		}
+
+		var st string
+		s, _ := status.FromError(err)
+		st = statusCodeToString(s)
+
+		recordPointCountDataPoint(ctx, len(ts), st)
+		if err != nil {
+			return fmt.Errorf("failed to export time series to GCM: %v", err)
+		}
+	}
 	return nil
-}
-
-func (me *MetricsExporter) exportPendingTimeSerieses() {
-	ctx := context.Background()
-
-	var sendSize int
-	if len(me.pendingTimeSerieses) < sendBatchSize {
-		sendSize = len(me.pendingTimeSerieses)
-	} else {
-		sendSize = sendBatchSize
-	}
-
-	var ts []*monitoringpb.TimeSeries
-	ts, me.pendingTimeSerieses = me.pendingTimeSerieses, me.pendingTimeSerieses[sendSize:]
-
-	var err error
-	if me.cfg.MetricConfig.CreateServiceTimeSeries {
-		err = me.createServiceTimeSeries(ctx, ts)
-	} else {
-		err = me.createTimeSeries(ctx, ts)
-	}
-
-	var st string
-	s, _ := status.FromError(err)
-	st = statusCodeToString(s)
-
-	recordPointCountDataPoint(ctx, len(ts), st)
-	if err != nil {
-		me.obs.log.Error("could not export time series to GCM", zap.Error(err))
-	}
 }
 
 // Reads metric descriptors from the md channel, and reports them (once) to GCM.
@@ -337,35 +319,35 @@ func (m *metricMapper) metricToTimeSeries(
 	timeSeries := []*monitoringpb.TimeSeries{}
 
 	switch metric.DataType() {
-	case pdata.MetricDataTypeSum:
+	case pmetric.MetricDataTypeSum:
 		sum := metric.Sum()
 		points := sum.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pdata.MetricDataTypeGauge:
+	case pmetric.MetricDataTypeGauge:
 		gauge := metric.Gauge()
 		points := gauge.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pdata.MetricDataTypeSummary:
+	case pmetric.MetricDataTypeSummary:
 		summary := metric.Summary()
 		points := summary.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pdata.MetricDataTypeHistogram:
+	case pmetric.MetricDataTypeHistogram:
 		hist := metric.Histogram()
 		points := hist.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pdata.MetricDataTypeExponentialHistogram:
+	case pmetric.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
 		for i := 0; i < points.Len(); i++ {
@@ -386,7 +368,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	sum pdata.Summary,
 	point pdata.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
 		return nil
 	}
@@ -609,8 +591,8 @@ func (m *metricMapper) histogramToTimeSeries(
 	_ pdata.Histogram,
 	point pdata.HistogramDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
-		// Drop points without a value.
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) || !point.HasSum() {
+		// Drop points without a value or without a sum
 		return nil
 	}
 	// We treat deltas as cumulatives w/ resets.
@@ -647,7 +629,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	_ pdata.ExponentialHistogram,
 	point pdata.ExponentialHistogramDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
 		return nil
 	}
@@ -687,7 +669,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 ) []*monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	var startTime *timestamppb.Timestamp
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.  This may be a staleness marker from
 		// prometheus.
 		return nil
@@ -752,9 +734,9 @@ func (m *metricMapper) normalizeNumberDataPoint(point pdata.NumberDataPoint, ide
 		newPoint.SetStartTimestamp(start.Timestamp())
 		// Adjust the value based on the start point's value
 		switch newPoint.ValueType() {
-		case pdata.MetricValueTypeInt:
+		case pmetric.MetricValueTypeInt:
 			newPoint.SetIntVal(point.IntVal() - start.IntVal())
-		case pdata.MetricValueTypeDouble:
+		case pmetric.MetricValueTypeDouble:
 			newPoint.SetDoubleVal(point.DoubleVal() - start.DoubleVal())
 		}
 		normalizedPoint = &newPoint
@@ -777,7 +759,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	gauge pdata.Gauge,
 	point pdata.NumberDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().HasFlag(pdata.MetricDataPointFlagNoRecordedValue) {
+	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
 		return nil
 	}
@@ -823,7 +805,7 @@ func (m *metricMapper) metricNameToType(name string) string {
 func numberDataPointToValue(
 	point pdata.NumberDataPoint,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	if point.ValueType() == pdata.MetricValueTypeInt {
+	if point.ValueType() == pmetric.MetricValueTypeInt {
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
 				Int64Value: point.IntVal(),
 			}},
@@ -921,27 +903,27 @@ func (m *metricMapper) labelDescriptors(
 		})
 	}
 	switch pm.DataType() {
-	case pdata.MetricDataTypeGauge:
+	case pmetric.MetricDataTypeGauge:
 		points := pm.Gauge().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pdata.MetricDataTypeSum:
+	case pmetric.MetricDataTypeSum:
 		points := pm.Sum().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pdata.MetricDataTypeSummary:
+	case pmetric.MetricDataTypeSummary:
 		points := pm.Summary().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pdata.MetricDataTypeHistogram:
+	case pmetric.MetricDataTypeHistogram:
 		points := pm.Histogram().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pdata.MetricDataTypeExponentialHistogram:
+	case pmetric.MetricDataTypeExponentialHistogram:
 		points := pm.ExponentialHistogram().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
@@ -1004,7 +986,7 @@ func (m *metricMapper) metricDescriptor(
 	pm pdata.Metric,
 	extraLabels labels,
 ) []*metricpb.MetricDescriptor {
-	if pm.DataType() == pdata.MetricDataTypeSummary {
+	if pm.DataType() == pmetric.MetricDataTypeSummary {
 		return m.summaryMetricDescriptors(pm, extraLabels)
 	}
 	kind, typ := mapMetricPointKind(pm)
@@ -1028,11 +1010,11 @@ func (m *metricMapper) metricDescriptor(
 	}
 }
 
-func metricPointValueType(pt pdata.MetricValueType) metricpb.MetricDescriptor_ValueType {
+func metricPointValueType(pt pmetric.MetricValueType) metricpb.MetricDescriptor_ValueType {
 	switch pt {
-	case pdata.MetricValueTypeInt:
+	case pmetric.MetricValueTypeInt:
 		return metricpb.MetricDescriptor_INT64
-	case pdata.MetricValueTypeDouble:
+	case pmetric.MetricValueTypeDouble:
 		return metricpb.MetricDescriptor_DOUBLE
 	default:
 		return metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
@@ -1043,15 +1025,15 @@ func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, m
 	var kind metricpb.MetricDescriptor_MetricKind
 	var typ metricpb.MetricDescriptor_ValueType
 	switch m.DataType() {
-	case pdata.MetricDataTypeGauge:
+	case pmetric.MetricDataTypeGauge:
 		kind = metricpb.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
 			typ = metricPointValueType(m.Gauge().DataPoints().At(0).ValueType())
 		}
-	case pdata.MetricDataTypeSum:
+	case pmetric.MetricDataTypeSum:
 		if !m.Sum().IsMonotonic() {
 			kind = metricpb.MetricDescriptor_GAUGE
-		} else if m.Sum().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+		} else if m.Sum().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
@@ -1060,19 +1042,19 @@ func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, m
 		if m.Sum().DataPoints().Len() > 0 {
 			typ = metricPointValueType(m.Sum().DataPoints().At(0).ValueType())
 		}
-	case pdata.MetricDataTypeSummary:
+	case pmetric.MetricDataTypeSummary:
 		kind = metricpb.MetricDescriptor_GAUGE
-	case pdata.MetricDataTypeHistogram:
+	case pmetric.MetricDataTypeHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.Histogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+		if m.Histogram().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
-	case pdata.MetricDataTypeExponentialHistogram:
+	case pmetric.MetricDataTypeExponentialHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.ExponentialHistogram().AggregationTemporality() == pdata.MetricAggregationTemporalityDelta {
+		if m.ExponentialHistogram().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
@@ -1085,46 +1067,5 @@ func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, m
 	return kind, typ
 }
 
-func (me *MetricsExporter) exportTimeSeriesRunner() {
-	defer me.goroutines.Done()
-	me.batchTimeoutTimer = time.NewTimer(batchTimeout)
-	for {
-		select {
-		case <-me.shutdownC:
-			for {
-				// We are shutting down. Publish all the pending
-				// items on the channel before we stop.
-				select {
-				case ts := <-me.timeSeriesC:
-					me.processItem(ts)
-				default:
-					goto DONE
-				}
-			}
-		DONE:
-			for len(me.pendingTimeSerieses) > 0 {
-				me.exportPendingTimeSerieses()
-			}
-			// Return and continue graceful shutdown.
-			return
-		case ts := <-me.timeSeriesC:
-			me.processItem(ts)
-		case <-me.batchTimeoutTimer.C:
-			me.batchTimeoutTimer.Reset(batchTimeout)
-			for len(me.pendingTimeSerieses) > 0 {
-				me.exportPendingTimeSerieses()
-			}
-		}
-	}
-}
-
 func (me *MetricsExporter) processItem(ts *monitoringpb.TimeSeries) {
-	me.pendingTimeSerieses = append(me.pendingTimeSerieses, ts)
-	if len(me.pendingTimeSerieses) >= sendBatchSize {
-		if !me.batchTimeoutTimer.Stop() {
-			<-me.batchTimeoutTimer.C
-		}
-		me.batchTimeoutTimer.Reset(batchTimeout)
-		me.exportPendingTimeSerieses()
-	}
 }
