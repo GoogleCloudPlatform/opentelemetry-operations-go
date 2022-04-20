@@ -864,14 +864,9 @@ func (m *metricMapper) normalizeHistogramDataPoint(point pdata.HistogramDataPoin
 		newPoint.SetSum(point.Sum() - start.Sum())
 		pointBuckets := point.BucketCounts()
 		startBuckets := start.BucketCounts()
-		if len(pointBuckets) != len(startBuckets) {
+		if !bucketBoundariesEqual(point.ExplicitBounds(), start.ExplicitBounds()) {
 			// The number of buckets changed, so we can't normalize points anymore.
-			// Log a message, and record this point so we can normalize against
-			// it for subsequent points.
-			m.obs.log.Info(
-				"number of histogram buckets changed, dropping point",
-				zap.String("dataPoint", point.Timestamp().String()),
-			)
+			// Treat this as a reset by recording and dropping this point.
 			m.normalizationCache.SetHistogramDataPoint(identifier, &point)
 			return nil
 		}
@@ -893,6 +888,18 @@ func (m *metricMapper) normalizeHistogramDataPoint(point pdata.HistogramDataPoin
 	return normalizedPoint
 }
 
+func bucketBoundariesEqual(a, b []float64) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // normalizeExponentialHistogramDataPoint returns a point which has been normalized against an initial
 // start point, or nil if the point should be dropped.
 func (m *metricMapper) normalizeExponentialHistogramDataPoint(point pdata.ExponentialHistogramDataPoint, identifier string) *pdata.ExponentialHistogramDataPoint {
@@ -908,6 +915,13 @@ func (m *metricMapper) normalizeExponentialHistogramDataPoint(point pdata.Expone
 				zap.String("lastRecordedReset", start.Timestamp().String()),
 				zap.String("dataPoint", point.Timestamp().String()),
 			)
+			return nil
+		}
+		if point.Scale() != start.Scale() {
+			// TODO: It is possible, but difficult to compare exponential
+			// histograms with different scales. For now, treat a change in
+			// scale as a reset.
+			m.normalizationCache.SetExponentialHistogramDataPoint(identifier, &point)
 			return nil
 		}
 		// Make a copy so we don't mutate underlying data
