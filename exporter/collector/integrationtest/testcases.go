@@ -120,6 +120,7 @@ var (
 				cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
 				cfg.MetricConfig.InstrumentationLibraryLabels = false
 				cfg.MetricConfig.ServiceResourceLabels = false
+				cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 			},
 		},
 		{

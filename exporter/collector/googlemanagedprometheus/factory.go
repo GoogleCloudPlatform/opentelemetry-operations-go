@@ -85,6 +85,7 @@ func (c *GMPConfig) toCollectorConfig() collector.Config {
 	cfg.MetricConfig.ServiceResourceLabels = false
 	cfg.MetricConfig.GetMetricName = GetMetricName
 	cfg.MetricConfig.MapMonitoredResource = MapToPrometheusTarget
+	cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 	// map the GMP config's fields to the collector config
 	cfg.ProjectID = c.ProjectID
 	cfg.UserAgent = c.UserAgent
