@@ -137,6 +137,24 @@
                             {
                                "attributes":[
                                   {
+                                    "key":"A",
+                                    "value":{
+                                       "stringValue":"1"
+                                    }
+                                  },
+                                  {
+                                    "key":"B",
+                                    "value":{
+                                       "stringValue":"2"
+                                    }
+                                  },
+                                  {
+                                    "key":"C",
+                                    "value":{
+                                       "stringValue":"3"
+                                    }
+                                  },
+                                  {
                                      "key":"ex_com_lemons",
                                      "value":{
                                         "stringValue":"13"

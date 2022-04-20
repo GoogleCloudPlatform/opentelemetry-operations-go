@@ -93,6 +93,11 @@ type MetricConfig struct {
 	// Defaults to empty, which won't include any additional resource labels. Note that the
 	// service_resource_labels option operates independently from resource_filters.
 	ResourceFilters []ResourceFilter `mapstructure:"resource_filters"`
+
+	// This enables calculation of an estimated sum of squared deviation.  It isn't correct,
+	// so we don't send it by default, and don't expose it to users. For some uses, it is
+	// expected, however.
+	EnableSumOfSquaredDeviation bool
 }
 
 type ResourceFilter struct {

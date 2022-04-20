@@ -44,9 +44,11 @@ var (
 func newTestMetricMapper() (metricMapper, func()) {
 	obs := selfObservability{log: zap.NewNop()}
 	s := make(chan struct{})
+	cfg := DefaultConfig()
+	cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 	return metricMapper{
 		obs,
-		DefaultConfig(),
+		cfg,
 		datapointstorage.NewCache(s),
 	}, func() { close(s) }
 }
@@ -301,6 +303,7 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	hdp := ts.Points[0].Value.GetDistributionValue()
 	assert.Equal(t, int64(15), hdp.Count)
 	assert.ElementsMatch(t, []int64{1, 2, 3, 4, 5}, hdp.BucketCounts)
+	assert.Equal(t, float64(12847.600000000002), hdp.SumOfSquaredDeviation)
 	assert.Equal(t, float64(2.8), hdp.Mean)
 	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
 	assert.Len(t, hdp.Exemplars, 1)
