@@ -31,9 +31,15 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
 	logpb "google.golang.org/genproto/googleapis/logging/v2"
+	"google.golang.org/protobuf/proto"
 )
 
-const HTTPRequestAttributeKey = "com.google.httpRequest"
+const (
+	HTTPRequestAttributeKey = "com.google.httpRequest"
+
+	defaultMaxEntrySize   = 256000   // 256 KB
+	defaultMaxRequestSize = 10000000 // 10 MB
+)
 
 // severityMapping maps the integer severity level values from OTel [0-24]
 // to matching Cloud Logging severity levels
@@ -109,8 +115,39 @@ func (l *LogsExporter) Shutdown(ctx context.Context) error {
 }
 
 func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
+	batches, err := l.mapper.createBatches(ld)
+	if err != nil {
+		return err
+	}
+
+	// write batches
+	errors := []error{}
+	for _, batch := range batches {
+		_, err := l.writeLogEntries(ctx, batch)
+		if err != nil {
+			errors = append(errors, err)
+		}
+	}
+
+	if len(errors) > 0 {
+		return multierr.Combine(errors...)
+	}
+	return nil
+}
+
+func (l logMapper) createBatches(ld plog.Logs) ([][]*logpb.LogEntry, error) {
+	errors := []error{}
 	mapper := &metricMapper{} // Refactor metricMapper to map MRs for logging?
-	logPushErrors := []error{}
+	currentBatch := make([]*logpb.LogEntry, 0, 0)
+	currentBatchSize := 0
+	batches := make([][]*logpb.LogEntry, 0, 0)
+
+	maxBatchSize := defaultMaxRequestSize
+	// if the configured MaxBatchSize != 0 (non-default), set it
+	if l.cfg.LogConfig.MaxBatchSize != 0 {
+		maxBatchSize = l.cfg.LogConfig.MaxBatchSize
+	}
+
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr, _ := mapper.resourceToMonitoredResource(rl.Resource())
@@ -123,47 +160,62 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 			for k := 0; k < sl.LogRecords().Len(); k++ {
 				log := sl.LogRecords().At(k)
 
-				entry, err := l.mapper.logToEntry(
+				entry, err := l.logToEntry(
 					log,
 					mr,
 					instrumentationSource,
 					instrumentationVersion,
 					time.Now())
 				if err != nil {
-					logPushErrors = append(logPushErrors, err)
-				} else {
-					internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", l.cfg.ProjectID))
-					if err != nil {
-						return err
-					}
-					logName, err := l.mapper.getLogName(log)
-					if err != nil {
-						return err
-					}
-					request := &logpb.WriteLogEntriesRequest{
-						LogName: fmt.Sprintf("projects/%s/logs/%s",
-							l.cfg.ProjectID,
-							url.PathEscape(logName)),
-						Resource: mr,
-						Entries:  []*logpb.LogEntry{internalLogEntry},
-					}
-					// TODO(damemi): handle response code and batching for multiple requests
-					_, err = l.loggingClient.WriteLogEntries(ctx, request)
-					if err != nil {
-						return err
-					}
+					errors = append(errors, err)
+					continue
 				}
+
+				internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", l.cfg.ProjectID))
+				if err != nil {
+					errors = append(errors, err)
+					continue
+				}
+				logName, err := l.getLogName(log)
+				if err != nil {
+					errors = append(errors, err)
+					continue
+				}
+				internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", l.cfg.ProjectID, url.PathEscape(logName))
+				internalLogEntry.Resource = mr
+
+				if currentBatchSize+proto.Size(internalLogEntry) > maxBatchSize && currentBatchSize > 0 {
+					batches = append(batches, currentBatch)
+					currentBatch = []*logpb.LogEntry{internalLogEntry}
+					currentBatchSize = proto.Size(internalLogEntry)
+					continue
+				}
+
+				currentBatch = append(currentBatch, internalLogEntry)
+				currentBatchSize = currentBatchSize + proto.Size(internalLogEntry)
 			}
 		}
 	}
+	batches = append(batches, currentBatch)
 
-	if len(logPushErrors) > 0 {
-		return multierr.Combine(logPushErrors...)
-	}
-	return nil
+	return batches, multierr.Combine(errors...)
 }
 
-func (l logMapper) getLogName(log pdata.LogRecord) (string, error) {
+func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEntry) (*logpb.WriteLogEntriesResponse, error) {
+	request := &logpb.WriteLogEntriesRequest{
+		PartialSuccess: true,
+		Entries:        batch,
+	}
+
+	// TODO(damemi): handle response code
+	resp, err := l.loggingClient.WriteLogEntries(ctx, request)
+	if err != nil {
+		return resp, err
+	}
+	return resp, nil
+}
+
+func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
 	logNameAttr, exists := log.Attributes().Get("com.google.logName")
 	if exists {
 		return logNameAttr.AsString(), nil
