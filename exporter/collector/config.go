@@ -33,6 +33,8 @@ type Config struct {
 	TraceConfig TraceConfig `mapstructure:"trace"`
 
 	MetricConfig MetricConfig `mapstructure:"metric"`
+
+	LogConfig LogConfig `mapstructure:"log"`
 }
 
 type ClientConfig struct {
@@ -109,6 +111,10 @@ type MetricConfig struct {
 type ResourceFilter struct {
 	// Match resource keys by prefix
 	Prefix string `mapstructure:"prefix"`
+}
+
+type LogConfig struct {
+	DefaultLogName string `mapstructure:"default_log_name"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.
