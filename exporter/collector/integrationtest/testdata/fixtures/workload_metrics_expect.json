@@ -3553,7 +3553,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/telemetry_scrape_duration_seconds_sum",
+            "type": "workload.googleapis.com/other_telemetry_scrape_duration_seconds_sum",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",
@@ -3587,7 +3587,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/telemetry_scrape_duration_seconds_count",
+            "type": "workload.googleapis.com/other_telemetry_scrape_duration_seconds_count",
             "labels": {
               "content_type": "text/plain; version=0.0.4",
               "job": "default/rabbitmq/0",

@@ -24,6 +24,11 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
 		},
 		{
+			Name:                 "Basic Prometheus metrics",
+			OTLPInputFixturePath: "testdata/fixtures/basic_prometheus_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/basic_prometheus_metrics_expect.json",
+		},
+		{
 			Name:                 "Modified prefix unknown domain",
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/unknown_domain_metrics_expect.json",

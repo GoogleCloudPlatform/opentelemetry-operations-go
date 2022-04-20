@@ -23,6 +23,8 @@ import (
 
 	"cloud.google.com/go/logging"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
@@ -105,7 +107,7 @@ func (l *LogsExporter) Shutdown(ctx context.Context) error {
 	return l.client.Close()
 }
 
-func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
+func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 	mapper := &metricMapper{} // Refactor metricMapper to map MRs for logging?
 	logPushErrors := []error{}
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
@@ -142,7 +144,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld pdata.Logs) error {
 }
 
 func (l logMapper) logToEntry(
-	log pdata.LogRecord,
+	log plog.LogRecord,
 	mr *monitoredres.MonitoredResource,
 	instrumentationSource string,
 	instrumentationVersion string,
@@ -215,11 +217,11 @@ func parseEntryPayload(logBody pdata.Value) (interface{}, error) {
 		return nil, nil
 	}
 	switch logBody.Type() {
-	case pdata.ValueTypeBytes:
+	case pcommon.ValueTypeBytes:
 		return logBody.BytesVal(), nil
-	case pdata.ValueTypeString:
+	case pcommon.ValueTypeString:
 		return logBody.AsString(), nil
-	case pdata.ValueTypeMap:
+	case pcommon.ValueTypeMap:
 		return logBody.MapVal().AsRaw(), nil
 
 	default:

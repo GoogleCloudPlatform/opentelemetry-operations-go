@@ -2620,7 +2620,7 @@
                       }
                    },
                    {
-                      "name":"telemetry_scrape_duration_seconds",
+                      "name":"other_telemetry_scrape_duration_seconds",
                       "description":"Scrape duration",
                       "unit":"s",
                       "summary":{

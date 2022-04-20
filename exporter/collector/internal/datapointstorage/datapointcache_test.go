@@ -20,6 +20,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -119,9 +120,9 @@ func TestIdentifier(t *testing.T) {
 	metricWithName := pdata.NewMetric()
 	metricWithName.SetName("custom.googleapis.com/test.metric")
 	dpWithAttributes := pdata.NewNumberDataPoint()
-	dpWithAttributes.Attributes().Insert("string", pdata.NewValueString("strval"))
-	dpWithAttributes.Attributes().Insert("bool", pdata.NewValueBool(true))
-	dpWithAttributes.Attributes().Insert("int", pdata.NewValueInt(123))
+	dpWithAttributes.Attributes().Insert("string", pcommon.NewValueString("strval"))
+	dpWithAttributes.Attributes().Insert("bool", pcommon.NewValueBool(true))
+	dpWithAttributes.Attributes().Insert("int", pcommon.NewValueInt(123))
 	monitoredResource := &monitoredrespb.MonitoredResource{
 		Type: "generic_task",
 		Labels: map[string]string{
