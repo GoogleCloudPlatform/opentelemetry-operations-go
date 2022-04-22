@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -61,6 +62,9 @@ const (
 	// This is prefixed for google app engine, but translates to the service
 	// in the trace UI
 	labelService = `g.co/gae/app/module`
+
+	instrumentationScopeNameAttribute    = "otel.scope.name"
+	instrumentationScopeVersionAttribute = "otel.scope.version"
 )
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
@@ -73,9 +77,11 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 		return attributes
 	}
 	uniqueAttrs := make(map[attribute.Key]bool, len(sd.Attributes()))
+	// Span Attributes take precedence
 	for _, attr := range sd.Attributes() {
 		uniqueAttrs[attr.Key] = true
 	}
+	// Raw resource attributes are next.
 	for _, attr := range sd.Resource().Attributes() {
 		if uniqueAttrs[attr.Key] {
 			continue // skip resource attributes which conflict with span attributes
@@ -83,6 +89,19 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 		uniqueAttrs[attr.Key] = true
 		attributes = append(attributes, attr)
 	}
+	// Instrumentation Scope attributes come next.
+	if !uniqueAttrs[instrumentationScopeNameAttribute] {
+		uniqueAttrs[instrumentationScopeNameAttribute] = true
+		scopeNameAttrs := attribute.String(instrumentationScopeNameAttribute, sd.InstrumentationLibrary().Name)
+		attributes = append(attributes, scopeNameAttrs)
+	}
+	if !uniqueAttrs[instrumentationScopeVersionAttribute] && strings.Compare("", sd.InstrumentationLibrary().Version) != 0 {
+		uniqueAttrs[instrumentationScopeVersionAttribute] = true
+		scopeVersionAttrs := attribute.String(instrumentationScopeVersionAttribute, sd.InstrumentationLibrary().Version)
+		attributes = append(attributes, scopeVersionAttrs)
+	}
+
+	// TODO - Monitored resource attributes (`g.co/r/{resource_type}/{resource_label}`) come next.
 
 	return attributes
 }
