@@ -67,12 +67,14 @@ func TestTraceProto_attributesFromSpans(t *testing.T) {
 			},
 			Attributes: []attribute.KeyValue{
 				attribute.Int64("timeout_ns", 12e9),
+				attribute.Bool("conflict", true),
 			},
 			Resource: resource.NewWithAttributes(
 				"http://example.com/custom-resource-schema",
 				attribute.String("rk1", "rv1"),
 				attribute.Int64("rk2", 5),
 				attribute.StringSlice("rk3", []string{"sv1", "sv2"}),
+				attribute.Bool("conflict", false),
 			),
 			InstrumentationLibrary: instrumentation.Library{
 				Name:    "lib-name",
@@ -82,6 +84,9 @@ func TestTraceProto_attributesFromSpans(t *testing.T) {
 		span := e.ConvertSpan(context.Background(), rawSpan.Snapshot())
 		assert.NotNil(t, span)
 
+		// Ensure agent key is created.
+		assert.Contains(t, span.Attributes.AttributeMap, "g.co/agent")
+
 		// Ensure resource keys are copied.
 		assert.Contains(t, span.Attributes.AttributeMap, "rk1")
 		assert.Contains(t, span.Attributes.AttributeMap, "rk2")
@@ -90,8 +95,13 @@ func TestTraceProto_attributesFromSpans(t *testing.T) {
 
 		// Ensure instrumentation library values are copied.
 		assert.Contains(t, span.Attributes.AttributeMap, "otel.scope.name")
+		assert.Equal(t, span.Attributes.AttributeMap["otel.scope.name"].GetStringValue().Value, "lib-name")
 		assert.Contains(t, span.Attributes.AttributeMap, "otel.scope.version")
 		// TODO - ensure monitored resource labels are created.
+
+		// Ensure span attribute "wins" over resource attribute.
+		assert.Contains(t, span.Attributes.AttributeMap, "conflict")
+		assert.Equal(t, span.Attributes.AttributeMap["conflict"].GetBoolValue(), true)
 	})
 }
 
