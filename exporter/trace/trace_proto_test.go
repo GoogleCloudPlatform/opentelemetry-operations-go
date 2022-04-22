@@ -97,7 +97,10 @@ func TestTraceProto_attributesFromSpans(t *testing.T) {
 		assert.Contains(t, span.Attributes.AttributeMap, "otel.scope.name")
 		assert.Equal(t, span.Attributes.AttributeMap["otel.scope.name"].GetStringValue().Value, "lib-name")
 		assert.Contains(t, span.Attributes.AttributeMap, "otel.scope.version")
-		// TODO - ensure monitored resource labels are created.
+
+		// Ensure monitored resource labels are created.
+		assert.Contains(t, span.Attributes.AttributeMap, "g.co/r/generic_node/location")
+		assert.Equal(t, span.Attributes.AttributeMap["g.co/r/generic_node/location"].GetStringValue().Value, "global")
 
 		// Ensure span attribute "wins" over resource attribute.
 		assert.Contains(t, span.Attributes.AttributeMap, "conflict")

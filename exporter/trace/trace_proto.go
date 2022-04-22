@@ -29,6 +29,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
 	wrapperspb "github.com/golang/protobuf/ptypes/wrappers"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
@@ -69,6 +70,20 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
 
+// Adapters for using resourcemapping library
+type attrs struct {
+	Attrs []attribute.KeyValue
+}
+
+func (a *attrs) GetString(key string) (string, bool) {
+	for _, kv := range a.Attrs {
+		if kv.Key == attribute.Key(key) {
+			return kv.Value.AsString(), true
+		}
+	}
+	return "", false
+}
+
 // If there are duplicate keys present in the list of attributes,
 // then the first value found for the key is preserved.
 func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyValue {
@@ -101,8 +116,14 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 		attributes = append(attributes, scopeVersionAttrs)
 	}
 
-	// TODO - Monitored resource attributes (`g.co/r/{resource_type}/{resource_label}`) come next.
-
+	// Monitored resource attributes (`g.co/r/{resource_type}/{resource_label}`) come next.
+	gceResource := resourcemapping.ResourceAttributesToMonitoredResource(&attrs{
+		Attrs: sd.Resource().Attributes(),
+	})
+	for key, value := range gceResource.Labels {
+		name := fmt.Sprintf("g.co/r/%v/%v", gceResource.Type, key)
+		attributes = append(attributes, attribute.String(name, value))
+	}
 	return attributes
 }
 
