@@ -17,10 +17,15 @@ package trace
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/sdk/instrumentation"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 )
@@ -38,6 +43,56 @@ func genSpanContext() trace.SpanContext {
 	tracer := sdktrace.NewTracerProvider().Tracer("")
 	_, span := tracer.Start(context.Background(), "")
 	return span.SpanContext()
+}
+
+func TestTraceProto_attributesFromSpans(t *testing.T) {
+	t.Run("Should include instrumentation library", func(t *testing.T) {
+		e := testExporter()
+		startTime := time.Unix(1585674086, 1234)
+		endTime := startTime.Add(10 * time.Second)
+		traceState, _ := trace.ParseTraceState("key1=val1,key2=val2")
+		rawSpan := tracetest.SpanStub{
+			SpanContext: trace.NewSpanContext(trace.SpanContextConfig{
+				TraceID:    trace.TraceID{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F},
+				SpanID:     trace.SpanID{0xFF, 0xFE, 0xFD, 0xFC, 0xFB, 0xFA, 0xF9, 0xF8},
+				TraceState: traceState,
+			}),
+			SpanKind:  trace.SpanKindServer,
+			Name:      "span data to span data",
+			StartTime: startTime,
+			EndTime:   endTime,
+			Status: sdktrace.Status{
+				Code:        codes.Error,
+				Description: "utterly unrecognized",
+			},
+			Attributes: []attribute.KeyValue{
+				attribute.Int64("timeout_ns", 12e9),
+			},
+			Resource: resource.NewWithAttributes(
+				"http://example.com/custom-resource-schema",
+				attribute.String("rk1", "rv1"),
+				attribute.Int64("rk2", 5),
+				attribute.StringSlice("rk3", []string{"sv1", "sv2"}),
+			),
+			InstrumentationLibrary: instrumentation.Library{
+				Name:    "lib-name",
+				Version: "v0.0.1",
+			},
+		}
+		span := e.ConvertSpan(context.Background(), rawSpan.Snapshot())
+		assert.NotNil(t, span)
+
+		// Ensure resource keys are copied.
+		assert.Contains(t, span.Attributes.AttributeMap, "rk1")
+		assert.Contains(t, span.Attributes.AttributeMap, "rk2")
+		// TODO - Support JSON rendering of list-attributes.
+		// assert.Contains(t, span.Attributes.AttributeMap, "rk3")
+
+		// Ensure instrumentation library values are copied.
+		assert.Contains(t, span.Attributes.AttributeMap, "otel.scope.name")
+		assert.Contains(t, span.Attributes.AttributeMap, "otel.scope.version")
+		// TODO - ensure monitored resource labels are created.
+	})
 }
 
 func TestTraceProto_linksProtoFromLinks(t *testing.T) {
