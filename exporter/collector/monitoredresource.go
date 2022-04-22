@@ -17,11 +17,12 @@ package collector
 import (
 	"strings"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 	"go.opentelemetry.io/collector/model/pdata"
 	semconv "go.opentelemetry.io/collector/model/semconv/v1.8.0"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 )
 
 type attributes struct {

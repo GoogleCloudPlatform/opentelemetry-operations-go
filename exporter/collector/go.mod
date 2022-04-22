@@ -21,6 +21,7 @@ require (
 require (
 	cloud.google.com/go/monitoring v1.4.0
 	cloud.google.com/go/trace v1.2.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.0.0-00010101000000-000000000000
 	github.com/google/go-cmp v0.5.7
 	go.opentelemetry.io/collector/pdata v0.49.0
 	go.uber.org/zap v1.21.0
@@ -29,7 +30,6 @@ require (
 
 require (
 	cloud.google.com/go/compute v1.5.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.0.0-00010101000000-000000000000 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

@@ -21,9 +21,10 @@ require (
 	google.golang.org/protobuf v1.28.0
 )
 
+require github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.0.0-00010101000000-000000000000
+
 require (
 	cloud.google.com/go/compute v1.5.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.0.0-00010101000000-000000000000 // indirect
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/felixge/httpsnoop v1.0.2 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
