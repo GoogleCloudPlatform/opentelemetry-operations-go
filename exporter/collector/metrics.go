@@ -814,8 +814,11 @@ func (m *metricMapper) normalizeSummaryDataPoint(point pdata.SummaryDataPoint, i
 			)
 			return nil
 		}
-		// Make a copy so we don't mutate underlying data
+		// Make a copy so we don't mutate underlying data.
 		newPoint := pdata.NewSummaryDataPoint()
+		// Quantile values are copied, and are not modified. Quantiles are
+		// computed over the same time period as sum and count, but it isn't
+		// possible to normalize them.
 		point.CopyTo(newPoint)
 		// Use the start timestamp from the normalization point
 		newPoint.SetStartTimestamp(start.Timestamp())
@@ -918,7 +921,7 @@ func (m *metricMapper) normalizeExponentialHistogramDataPoint(point pdata.Expone
 			return nil
 		}
 		if point.Scale() != start.Scale() {
-			// TODO: It is possible, but difficult to compare exponential
+			// TODO(#366): It is possible, but difficult to compare exponential
 			// histograms with different scales. For now, treat a change in
 			// scale as a reset.
 			m.normalizationCache.SetExponentialHistogramDataPoint(identifier, &point)
