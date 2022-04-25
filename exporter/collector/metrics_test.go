@@ -34,7 +34,7 @@ import (
 	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/datapointstorage"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/normalization"
 )
 
 var (
@@ -49,7 +49,7 @@ func newTestMetricMapper() (metricMapper, func()) {
 	return metricMapper{
 		obs,
 		cfg,
-		datapointstorage.NewCache(s),
+		normalization.NewStandardNormalizer(s, zap.NewNop()),
 	}, func() { close(s) }
 }
 
