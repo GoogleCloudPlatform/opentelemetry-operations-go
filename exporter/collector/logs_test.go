@@ -237,6 +237,7 @@ func TestLogMapping(t *testing.T) {
 			if testCase.expectError {
 				assert.NotNil(t, err)
 			} else {
+				assert.Nil(t, err)
 				assert.Equal(t, testCase.expectedEntry, entry)
 			}
 		})
@@ -277,6 +278,7 @@ func TestGetLogName(t *testing.T) {
 			if testCase.expectError {
 				assert.NotNil(t, err)
 			} else {
+				assert.Nil(t, err)
 				assert.Equal(t, testCase.expectedName, name)
 			}
 		})
