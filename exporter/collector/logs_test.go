@@ -285,55 +285,6 @@ func TestGetLogName(t *testing.T) {
 	}
 }
 
-func TestCreateBatches(t *testing.T) {
-	testCases := []struct {
-		name          string
-		logs          func() plog.Logs
-		expectError   bool
-		expectedCount int
-	}{
-		{
-			name: "test batching requests",
-			logs: func() plog.Logs {
-				logs := plog.NewLogs()
-				rl := plog.NewResourceLogsSlice()
-				resourceLogs := rl.AppendEmpty()
-				sl := plog.NewScopeLogsSlice()
-				scopeLogs := sl.AppendEmpty()
-				lr := plog.NewLogRecordSlice()
-
-				logRecordOne := lr.AppendEmpty()
-				logRecordOne.Body().SetStringVal("foo")
-				logRecordTwo := lr.AppendEmpty()
-				logRecordTwo.Body().SetStringVal("bar")
-				logRecordThree := lr.AppendEmpty()
-				logRecordThree.Body().SetStringVal("baz")
-
-				lr.CopyTo(scopeLogs.LogRecords())
-				sl.CopyTo(resourceLogs.ScopeLogs())
-				rl.CopyTo(logs.ResourceLogs())
-				return logs
-			},
-			expectedCount: 3,
-		},
-	}
-
-	for _, testCase := range testCases {
-		t.Run(testCase.name, func(t *testing.T) {
-			le := newTestLogMapper()
-			le.cfg.LogConfig.MaxBatchSize = 1
-
-			batches, err := le.createBatches(testCase.logs())
-			if testCase.expectError {
-				assert.NotNil(t, err)
-			} else {
-				assert.NoErrorf(t, err, "error")
-				assert.Equal(t, testCase.expectedCount, len(batches))
-			}
-		})
-	}
-}
-
 func makeExpectedHTTPReq(method, url, referer, userAgent string, body io.Reader) *http.Request {
 	req, _ := http.NewRequest(method, url, body)
 	req.Header.Set("Referer", referer)

@@ -115,18 +115,42 @@ func (l *LogsExporter) Shutdown(ctx context.Context) error {
 }
 
 func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
-	batches, err := l.mapper.createBatches(ld)
+	entries, err := l.mapper.createEntries(ld)
 	if err != nil {
 		return err
 	}
 
-	// write batches
 	errors := []error{}
-	for _, batch := range batches {
-		_, err := l.writeLogEntries(ctx, batch)
+	entry := 0
+	currentBatchSize := 0
+	// Send entries in WriteRequest chunks
+	// TODO(damemi): Add integration test for batch request processing
+	for len(entries) > 0 {
+		// default to max int so that when we are at index=len we skip the size check to avoid panic
+		// (index=len is the break condition when we reassign entries=entries[len:])
+		entrySize := defaultMaxRequestSize
+		if entry < len(entries) {
+			entrySize = proto.Size(entries[entry])
+		}
+
+		// this block gets skipped if we are out of entries to check
+		if currentBatchSize+entrySize < defaultMaxRequestSize {
+			// if adding the current entry to the current batch doesn't go over the request size,
+			// increase the index and account for the new request size, then continue
+			currentBatchSize += entrySize
+			entry++
+			continue
+		}
+
+		// if the current entry goes over the request size (or we have gone over every entry, i.e. index=len),
+		// write the list up to but not including the current entry's index
+		_, err := l.writeLogEntries(ctx, entries[:entry])
 		if err != nil {
 			errors = append(errors, err)
 		}
+
+		entries = entries[entry:]
+		entry = 0
 	}
 
 	if len(errors) > 0 {
@@ -135,19 +159,11 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 	return nil
 }
 
-func (l logMapper) createBatches(ld plog.Logs) ([][]*logpb.LogEntry, error) {
+func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 	errors := []error{}
 	mapper := &metricMapper{} // Refactor metricMapper to map MRs for logging?
-	currentBatch := make([]*logpb.LogEntry, 0, 0)
-	currentBatchSize := 0
-	batches := make([][]*logpb.LogEntry, 0, 0)
 
-	maxBatchSize := defaultMaxRequestSize
-	// if the configured MaxBatchSize != 0 (non-default), set it
-	if l.cfg.LogConfig.MaxBatchSize != 0 {
-		maxBatchSize = l.cfg.LogConfig.MaxBatchSize
-	}
-
+	entries := make([]*logpb.LogEntry, 0, 0)
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr, _ := mapper.resourceToMonitoredResource(rl.Resource())
@@ -184,21 +200,12 @@ func (l logMapper) createBatches(ld plog.Logs) ([][]*logpb.LogEntry, error) {
 				internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", l.cfg.ProjectID, url.PathEscape(logName))
 				internalLogEntry.Resource = mr
 
-				if currentBatchSize+proto.Size(internalLogEntry) > maxBatchSize && currentBatchSize > 0 {
-					batches = append(batches, currentBatch)
-					currentBatch = []*logpb.LogEntry{internalLogEntry}
-					currentBatchSize = proto.Size(internalLogEntry)
-					continue
-				}
-
-				currentBatch = append(currentBatch, internalLogEntry)
-				currentBatchSize = currentBatchSize + proto.Size(internalLogEntry)
+				entries = append(entries, internalLogEntry)
 			}
 		}
 	}
-	batches = append(batches, currentBatch)
 
-	return batches, multierr.Combine(errors...)
+	return entries, multierr.Combine(errors...)
 }
 
 func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEntry) (*logpb.WriteLogEntriesResponse, error) {
@@ -208,11 +215,7 @@ func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEn
 	}
 
 	// TODO(damemi): handle response code
-	resp, err := l.loggingClient.WriteLogEntries(ctx, request)
-	if err != nil {
-		return resp, err
-	}
-	return resp, nil
+	return l.loggingClient.WriteLogEntries(ctx, request)
 }
 
 func (l logMapper) getLogName(log plog.LogRecord) (string, error) {

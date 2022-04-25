@@ -104,13 +104,6 @@ type ResourceFilter struct {
 
 type LogConfig struct {
 	DefaultLogName string `mapstructure:"default_log_name"`
-
-	// MaxBatchSize defines the maximum size in bytes for a batched request of log entries
-	// 0 defaults to the Cloud Logging API's maximum request size (10 MB)
-	MaxBatchSize int `mapstructure:"max_batch_size"`
-	// MaxEntrySize defines the maximum size in bytes for an individual log entry.
-	// 0 uses the default as defined by the Cloud Logging API (256 KB)
-	MaxEntrySize int `mapstructure:"max_entry_size"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.
