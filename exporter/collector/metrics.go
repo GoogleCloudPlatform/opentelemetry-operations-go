@@ -134,6 +134,10 @@ func NewGoogleCloudMetricsExporter(
 	}
 	obs := selfObservability{log: log}
 	shutdown := make(chan struct{})
+	normalizer := normalization.NewDisabledNormalizer()
+	if cfg.MetricConfig.CumulativeNormalization {
+		normalizer = normalization.NewStandardNormalizer(shutdown, log)
+	}
 	mExp := &MetricsExporter{
 		cfg:    cfg,
 		client: client,
@@ -141,7 +145,7 @@ func NewGoogleCloudMetricsExporter(
 		mapper: metricMapper{
 			obs,
 			cfg,
-			normalization.NewStandardNormalizer(shutdown, log),
+			normalizer,
 		},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
