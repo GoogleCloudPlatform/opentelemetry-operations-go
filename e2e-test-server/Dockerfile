@@ -18,6 +18,7 @@ WORKDIR /workspace/e2e-test-server/
 
 # In-repo dependencies
 COPY exporter/trace/ ../exporter/trace/
+COPY internal/resourcemapping/ ../internal/resourcemapping
 
 # cache deps before copying source so that source changes don't invalidate our
 # downloaded layer and we don't need to re-download as much.

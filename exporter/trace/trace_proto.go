@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -33,6 +34,8 @@ import (
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	codepb "google.golang.org/genproto/googleapis/rpc/code"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 )
 
 const (
@@ -61,9 +64,26 @@ const (
 	// This is prefixed for google app engine, but translates to the service
 	// in the trace UI
 	labelService = `g.co/gae/app/module`
+
+	instrumentationScopeNameAttribute    = "otel.scope.name"
+	instrumentationScopeVersionAttribute = "otel.scope.version"
 )
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
+
+// Adapters for using resourcemapping library
+type attrs struct {
+	Attrs []attribute.KeyValue
+}
+
+func (a *attrs) GetString(key string) (string, bool) {
+	for _, kv := range a.Attrs {
+		if kv.Key == attribute.Key(key) {
+			return kv.Value.AsString(), true
+		}
+	}
+	return "", false
+}
 
 // If there are duplicate keys present in the list of attributes,
 // then the first value found for the key is preserved.
@@ -73,9 +93,11 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 		return attributes
 	}
 	uniqueAttrs := make(map[attribute.Key]bool, len(sd.Attributes()))
+	// Span Attributes take precedence
 	for _, attr := range sd.Attributes() {
 		uniqueAttrs[attr.Key] = true
 	}
+	// Raw resource attributes are next.
 	for _, attr := range sd.Resource().Attributes() {
 		if uniqueAttrs[attr.Key] {
 			continue // skip resource attributes which conflict with span attributes
@@ -83,7 +105,26 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 		uniqueAttrs[attr.Key] = true
 		attributes = append(attributes, attr)
 	}
+	// Instrumentation Scope attributes come next.
+	if !uniqueAttrs[instrumentationScopeNameAttribute] {
+		uniqueAttrs[instrumentationScopeNameAttribute] = true
+		scopeNameAttrs := attribute.String(instrumentationScopeNameAttribute, sd.InstrumentationLibrary().Name)
+		attributes = append(attributes, scopeNameAttrs)
+	}
+	if !uniqueAttrs[instrumentationScopeVersionAttribute] && strings.Compare("", sd.InstrumentationLibrary().Version) != 0 {
+		uniqueAttrs[instrumentationScopeVersionAttribute] = true
+		scopeVersionAttrs := attribute.String(instrumentationScopeVersionAttribute, sd.InstrumentationLibrary().Version)
+		attributes = append(attributes, scopeVersionAttrs)
+	}
 
+	// Monitored resource attributes (`g.co/r/{resource_type}/{resource_label}`) come next.
+	gceResource := resourcemapping.ResourceAttributesToMonitoredResource(&attrs{
+		Attrs: sd.Resource().Attributes(),
+	})
+	for key, value := range gceResource.Labels {
+		name := fmt.Sprintf("g.co/r/%v/%v", gceResource.Type, key)
+		attributes = append(attributes, attribute.String(name, value))
+	}
 	return attributes
 }
 
