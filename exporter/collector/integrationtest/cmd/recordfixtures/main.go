@@ -57,7 +57,7 @@ func main() {
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
-	for _, test := range integrationtest.TestCases {
+	for _, test := range integrationtest.MetricsTestCases {
 		if test.Skip {
 			continue
 		}

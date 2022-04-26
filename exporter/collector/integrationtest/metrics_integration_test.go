@@ -51,7 +51,7 @@ func TestIntegrationMetrics(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range TestCases {
+	for _, test := range MetricsTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {

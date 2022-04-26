@@ -17,7 +17,7 @@ package integrationtest
 import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 
 var (
-	TestCases = []MetricsTestCase{
+	MetricsTestCases = []MetricsTestCase{
 		{
 			Name:                 "Basic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
