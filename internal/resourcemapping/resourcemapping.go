@@ -15,7 +15,7 @@
 package resourcemapping
 
 import (
-	semconv "go.opentelemetry.io/collector/model/semconv/v1.5.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 )
 
 const (
@@ -55,58 +55,58 @@ var (
 		fallbackLiteral string
 	}{
 		gceInstance: {
-			zone:       {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
-			instanceID: {otelKeys: []string{semconv.AttributeHostID}},
+			zone:       {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
 		},
 		k8sContainer: {
-			location:      {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
-			clusterName:   {otelKeys: []string{semconv.AttributeK8SClusterName}},
-			namespaceName: {otelKeys: []string{semconv.AttributeK8SNamespaceName}},
-			podName:       {otelKeys: []string{semconv.AttributeK8SPodName}},
-			containerName: {otelKeys: []string{semconv.AttributeK8SContainerName}},
+			location:      {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			clusterName:   {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
+			namespaceName: {otelKeys: []string{string(semconv.K8SNamespaceNameKey)}},
+			podName:       {otelKeys: []string{string(semconv.K8SPodNameKey)}},
+			containerName: {otelKeys: []string{string(semconv.K8SContainerNameKey)}},
 		},
 		k8sPod: {
-			location:      {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
-			clusterName:   {otelKeys: []string{semconv.AttributeK8SClusterName}},
-			namespaceName: {otelKeys: []string{semconv.AttributeK8SNamespaceName}},
-			podName:       {otelKeys: []string{semconv.AttributeK8SPodName}},
+			location:      {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			clusterName:   {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
+			namespaceName: {otelKeys: []string{string(semconv.K8SNamespaceNameKey)}},
+			podName:       {otelKeys: []string{string(semconv.K8SPodNameKey)}},
 		},
 		k8sNode: {
-			location:    {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
-			clusterName: {otelKeys: []string{semconv.AttributeK8SClusterName}},
-			nodeName:    {otelKeys: []string{semconv.AttributeK8SNodeName}},
+			location:    {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			clusterName: {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
+			nodeName:    {otelKeys: []string{string(semconv.K8SNodeNameKey)}},
 		},
 		k8sCluster: {
-			location:    {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
-			clusterName: {otelKeys: []string{semconv.AttributeK8SClusterName}},
+			location:    {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			clusterName: {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
 		},
 		awsEc2Instance: {
-			instanceID: {otelKeys: []string{semconv.AttributeHostID}},
-			region:     {otelKeys: []string{semconv.AttributeCloudAvailabilityZone}},
-			awsAccount: {otelKeys: []string{semconv.AttributeCloudAccountID}},
+			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
+			region:     {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			awsAccount: {otelKeys: []string{string(semconv.CloudAccountIDKey)}},
 		},
 		genericTask: {
 			location: {
 				otelKeys: []string{
-					semconv.AttributeCloudAvailabilityZone,
-					semconv.AttributeCloudRegion,
+					string(semconv.CloudAvailabilityZoneKey),
+					string(semconv.CloudRegionKey),
 				},
 				fallbackLiteral: "global",
 			},
-			namespace: {otelKeys: []string{semconv.AttributeServiceNamespace}},
-			job:       {otelKeys: []string{semconv.AttributeServiceName}},
-			taskID:    {otelKeys: []string{semconv.AttributeServiceInstanceID}},
+			namespace: {otelKeys: []string{string(semconv.ServiceNamespaceKey)}},
+			job:       {otelKeys: []string{string(semconv.ServiceNameKey)}},
+			taskID:    {otelKeys: []string{string(semconv.ServiceInstanceIDKey)}},
 		},
 		genericNode: {
 			location: {
 				otelKeys: []string{
-					semconv.AttributeCloudAvailabilityZone,
-					semconv.AttributeCloudRegion,
+					string(semconv.CloudAvailabilityZoneKey),
+					string(semconv.CloudRegionKey),
 				},
 				fallbackLiteral: "global",
 			},
-			namespace: {otelKeys: []string{semconv.AttributeServiceNamespace}},
-			nodeID:    {otelKeys: []string{semconv.AttributeHostID, semconv.AttributeHostName}},
+			namespace: {otelKeys: []string{string(semconv.ServiceNamespaceKey)}},
+			nodeID:    {otelKeys: []string{string(semconv.HostIDKey), string(semconv.HostNameKey)}},
 		},
 	}
 )
@@ -125,28 +125,28 @@ type ReadOnlyAttributes interface {
 // E.g.
 // This may output `gce_instance` type with appropriate labels.
 func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResource {
-	cloudPlatform, _ := attrs.GetString(semconv.AttributeCloudPlatform)
+	cloudPlatform, _ := attrs.GetString(string(semconv.CloudPlatformKey))
 	var mr *GceResource
 	switch cloudPlatform {
-	case semconv.AttributeCloudPlatformGCPComputeEngine:
+	case semconv.CloudPlatformGCPComputeEngine.Value.AsString():
 		mr = createMonitoredResource(gceInstance, attrs)
-	case semconv.AttributeCloudPlatformGCPKubernetesEngine:
+	case semconv.CloudPlatformGCPKubernetesEngine.Value.AsString():
 		// Try for most to least specific k8s_container, k8s_pod, etc
-		if _, ok := attrs.GetString(semconv.AttributeK8SContainerName); ok {
+		if _, ok := attrs.GetString(string(semconv.K8SContainerNameKey)); ok {
 			mr = createMonitoredResource(k8sContainer, attrs)
-		} else if _, ok := attrs.GetString(semconv.AttributeK8SPodName); ok {
+		} else if _, ok := attrs.GetString(string(semconv.K8SPodNameKey)); ok {
 			mr = createMonitoredResource(k8sPod, attrs)
-		} else if _, ok := attrs.GetString(semconv.AttributeK8SNodeName); ok {
+		} else if _, ok := attrs.GetString(string(semconv.K8SNodeNameKey)); ok {
 			mr = createMonitoredResource(k8sNode, attrs)
 		} else {
 			mr = createMonitoredResource(k8sCluster, attrs)
 		}
-	case semconv.AttributeCloudPlatformAWSEC2:
+	case semconv.CloudPlatformAWSEC2.Value.AsString():
 		mr = createMonitoredResource(awsEc2Instance, attrs)
 	default:
 		// Fallback to generic_task
-		_, hasServiceName := attrs.GetString(semconv.AttributeServiceName)
-		_, hasServiceInstanceID := attrs.GetString(semconv.AttributeServiceInstanceID)
+		_, hasServiceName := attrs.GetString(string(semconv.ServiceNameKey))
+		_, hasServiceInstanceID := attrs.GetString(string(semconv.ServiceInstanceIDKey))
 		if hasServiceName && hasServiceInstanceID {
 			mr = createMonitoredResource(genericTask, attrs)
 		} else {
