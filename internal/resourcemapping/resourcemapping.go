@@ -116,11 +116,12 @@ type GceResource struct {
 	Labels map[string]string
 }
 
+// ReadOnlyAttributes is an interface to abstract between pulling attributes from PData library or OTEL SDK.
 type ReadOnlyAttributes interface {
 	GetString(string) (string, bool)
 }
 
-// Converts from a set of OTEL resource attributes into a
+// ResourceAttributesToMonitoredResource converts from a set of OTEL resource attributes into a
 // GCP monitored resource type and label set.
 // E.g.
 // This may output `gce_instance` type with appropriate labels.
