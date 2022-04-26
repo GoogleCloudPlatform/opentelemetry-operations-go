@@ -1,0 +1,1672 @@
+{
+  "resourceLogs": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "cloud.platform",
+            "value": {
+              "stringValue": "gcp_compute_engine"
+            }
+          }
+        ]
+      },
+      "scopeLogs": [
+        {
+          "scope": {},
+          "logRecords": [
+            {
+              "timeUnixNano": "1650994483968433711",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:36 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:36 +0800"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968470678",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /lamp.png HTTP/1.1\" 200 51164"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:37 +0800"
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/lamp.png"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "51164"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968481764",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /favicon.ico HTTP/1.1\" 200 3990"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "3990"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/favicon.ico"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:37 +0800"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968490059",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:51 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:51 +0800"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968496637",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:52 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:52 +0800"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968517647",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:53 +0800"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968525857",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:53 +0800"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968532546",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:53 +0800"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968539797",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:53 +0800"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968548970",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:54 +0800"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968557408",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:54 +0800"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968564828",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:54 +0800"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968571303",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:54 +0800"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968578924",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:54 +0800"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968584858",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "1247"
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:53:54 +0800"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968591035",
+              "body": {
+                "stringValue": "127.0.0.2 - - [26/Apr/2022:22:54:38 +0800] \"GET / HTTP/1.1\" 200 4429"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:54:38 +0800"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": "/"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "200"
+                          }
+                        },
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": "HTTP/1.1"
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "GET"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "4429"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.2"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650994483968597344",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:54:43 +0800] \"-\" 408 -"
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.httpRequest",
+                  "value": {
+                    "kvlistValue": {
+                      "values": [
+                        {
+                          "key": "userAgent",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "remoteIp",
+                          "value": {
+                            "stringValue": "127.0.0.1"
+                          }
+                        },
+                        {
+                          "key": "requestUrl",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "host",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "user",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "responseSize",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "requestMethod",
+                          "value": {
+                            "stringValue": "-"
+                          }
+                        },
+                        {
+                          "key": "protocol",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "408"
+                          }
+                        },
+                        {
+                          "key": "referer",
+                          "value": {
+                            "stringValue": ""
+                          }
+                        },
+                        {
+                          "key": "time",
+                          "value": {
+                            "stringValue": "26/Apr/2022:22:54:43 +0800"
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

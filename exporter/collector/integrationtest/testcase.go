@@ -30,6 +30,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/otlp"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -47,6 +49,60 @@ var (
 		"custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc": {},
 	}
 )
+
+type LogsTestCase struct {
+	// Name of the test case
+	Name string
+
+	// Path to the JSON encoded OTLP ExportMetricsServiceRequest input metrics fixture.
+	OTLPInputFixturePath string
+
+	// Path to the JSON encoded MetricExpectFixture (see fixtures.proto) that contains request
+	// messages the exporter is expected to send.
+	ExpectFixturePath string
+
+	// Whether to skip this test case
+	Skip bool
+
+	// Configure will be called to modify the default configuration for this test case. Optional.
+	Configure func(cfg *collector.Config)
+}
+
+func (l *LogsTestCase) LoadOTLPLogsInput(
+	t testing.TB,
+	startTime time.Time,
+) plog.Logs {
+	bytes, err := ioutil.ReadFile(l.OTLPInputFixturePath)
+	require.NoError(t, err)
+	logs, err := plog.NewJSONUnmarshaler().UnmarshalLogs(bytes)
+	require.NoError(t, err)
+
+	for i := 0; i < logs.ResourceLogs().Len(); i++ {
+		rl := logs.ResourceLogs().At(i)
+		for j := 0; j < rl.ScopeLogs().Len(); j++ {
+			sls := rl.ScopeLogs().At(j)
+			for k := 0; k < sls.LogRecords().Len(); k++ {
+				log := sls.LogRecords().At(k)
+				if log.Timestamp() != 0 {
+					log.SetTimestamp(pcommon.NewTimestampFromTime(startTime))
+				}
+			}
+		}
+	}
+	return logs
+}
+
+func (m *LogsTestCase) CreateConfig() collector.Config {
+	cfg := collector.DefaultConfig()
+	// If not set it will use ADC
+	cfg.ProjectID = os.Getenv("PROJECT_ID")
+
+	if m.Configure != nil {
+		m.Configure(&cfg)
+	}
+
+	return cfg
+}
 
 type MetricsTestCase struct {
 	// Name of the test case
