@@ -70,6 +70,8 @@ type MetricsExporter struct {
 	metricDescriptorC chan *metricpb.MetricDescriptor
 	// Tracks the metric descriptors that have already been sent to GCM
 	mdCache map[string]*metricpb.MetricDescriptor
+
+	timeout time.Duration
 }
 
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
@@ -154,6 +156,7 @@ func NewGoogleCloudMetricsExporter(
 		metricDescriptorC: make(chan *metricpb.MetricDescriptor, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
 		mdCache:           make(map[string]*metricpb.MetricDescriptor),
 		shutdownC:         shutdown,
+		timeout:           timeout,
 	}
 
 	// Fire up the metric descriptor exporter.
@@ -273,7 +276,9 @@ func (me *MetricsExporter) exportMetricDescriptor(md *metricpb.MetricDescriptor)
 		Name:             me.projectName(),
 		MetricDescriptor: md,
 	}
-	_, err := me.client.CreateMetricDescriptor(context.Background(), req)
+	ctx, cancel := context.WithTimeout(context.Background(), me.timeout)
+	defer cancel()
+	_, err := me.client.CreateMetricDescriptor(ctx, req)
 	if err != nil {
 		// TODO: Log-once on error, per metric descriptor?
 		me.obs.log.Error("Unable to send metric descriptor.", zap.Error(err), zap.Any("metric_descriptor", md))
@@ -286,6 +291,8 @@ func (me *MetricsExporter) exportMetricDescriptor(md *metricpb.MetricDescriptor)
 
 // Sends a user-custom-metric timeseries.
 func (me *MetricsExporter) createTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+	ctx, cancel := context.WithTimeout(ctx, me.timeout)
+	defer cancel()
 	return me.client.CreateTimeSeries(
 		ctx,
 		&monitoringpb.CreateTimeSeriesRequest{
@@ -297,6 +304,8 @@ func (me *MetricsExporter) createTimeSeries(ctx context.Context, ts []*monitorin
 
 // Sends a service timeseries.
 func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+	ctx, cancel := context.WithTimeout(ctx, me.timeout)
+	defer cancel()
 	return me.client.CreateServiceTimeSeries(
 		ctx,
 		&monitoringpb.CreateTimeSeriesRequest{
