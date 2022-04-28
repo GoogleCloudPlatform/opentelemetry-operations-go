@@ -89,7 +89,12 @@ func NewGoogleCloudLogsExporter(
 	cfg Config,
 	log *zap.Logger,
 ) (*LogsExporter, error) {
-	loggingClient, err := loggingv2.NewClient(ctx)
+	clientOpts, err := generateClientOptions(&cfg.LogConfig.ClientConfig, cfg.UserAgent)
+	if err != nil {
+		return nil, err
+	}
+
+	loggingClient, err := loggingv2.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}

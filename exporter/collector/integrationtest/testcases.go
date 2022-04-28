@@ -23,6 +23,11 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/logs_apache_access.json",
 			ExpectFixturePath:    "testdata/fixtures/logs_apache_access_expected.json",
 		},
+		{
+			Name:                 "Apache error log with severity",
+			OTLPInputFixturePath: "testdata/fixtures/logs_apache_error.json",
+			ExpectFixturePath:    "testdata/fixtures/logs_apache_error_expected.json",
+		},
 	}
 
 	MetricsTestCases = []MetricsTestCase{

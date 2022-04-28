@@ -70,7 +70,7 @@ type LogsTestCase struct {
 
 func (l *LogsTestCase) LoadOTLPLogsInput(
 	t testing.TB,
-	startTime time.Time,
+	timestamp time.Time,
 ) plog.Logs {
 	bytes, err := ioutil.ReadFile(l.OTLPInputFixturePath)
 	require.NoError(t, err)
@@ -84,7 +84,7 @@ func (l *LogsTestCase) LoadOTLPLogsInput(
 			for k := 0; k < sls.LogRecords().Len(); k++ {
 				log := sls.LogRecords().At(k)
 				if log.Timestamp() != 0 {
-					log.SetTimestamp(pcommon.NewTimestampFromTime(startTime))
+					log.SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 				}
 			}
 		}
@@ -92,16 +92,48 @@ func (l *LogsTestCase) LoadOTLPLogsInput(
 	return logs
 }
 
-func (m *LogsTestCase) CreateConfig() collector.Config {
+func (l *LogsTestCase) CreateConfig() collector.Config {
 	cfg := collector.DefaultConfig()
 	// If not set it will use ADC
 	cfg.ProjectID = os.Getenv("PROJECT_ID")
 
-	if m.Configure != nil {
-		m.Configure(&cfg)
+	if l.Configure != nil {
+		l.Configure(&cfg)
 	}
 
 	return cfg
+}
+
+func (l *LogsTestCase) LoadLogExpectFixture(
+	t testing.TB,
+	timestamp time.Time,
+) *LogExpectFixture {
+	bytes, err := ioutil.ReadFile(l.ExpectFixturePath)
+	require.NoError(t, err)
+	fixture := &LogExpectFixture{}
+	require.NoError(t, protojson.Unmarshal(bytes, fixture))
+
+	for _, request := range fixture.WriteLogEntriesRequests {
+		for _, entry := range request.Entries {
+			entry.Timestamp = timestamppb.New(timestamp)
+		}
+	}
+
+	return fixture
+}
+
+func (m *LogsTestCase) SaveRecordedFixtures(
+	t testing.TB,
+	fixture *LogExpectFixture,
+) {
+
+	jsonBytes, err := protojson.Marshal(fixture)
+	require.NoError(t, err)
+	formatted := bytes.Buffer{}
+	require.NoError(t, json.Indent(&formatted, jsonBytes, "", "  "))
+	formatted.WriteString("\n")
+	require.NoError(t, ioutil.WriteFile(m.ExpectFixturePath, formatted.Bytes(), 0640))
+	t.Logf("Updated fixture %v", m.ExpectFixturePath)
 }
 
 type MetricsTestCase struct {
@@ -186,7 +218,7 @@ func (m *MetricsTestCase) LoadOTLPMetricsInput(
 	return metrics
 }
 
-func (m *MetricsTestCase) LoadExpectFixture(
+func (m *MetricsTestCase) LoadMetricExpectFixture(
 	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
@@ -195,12 +227,12 @@ func (m *MetricsTestCase) LoadExpectFixture(
 	require.NoError(t, err)
 	fixture := &MetricExpectFixture{}
 	require.NoError(t, protojson.Unmarshal(bytes, fixture))
-	m.updateExpectFixture(t, startTime, endTime, fixture)
+	m.updateMetricExpectFixture(t, startTime, endTime, fixture)
 
 	return fixture
 }
 
-func (m *MetricsTestCase) updateExpectFixture(
+func (m *MetricsTestCase) updateMetricExpectFixture(
 	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,

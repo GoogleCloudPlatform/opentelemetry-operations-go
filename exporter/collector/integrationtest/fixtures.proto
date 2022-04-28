@@ -17,6 +17,7 @@ package fixtures;
 option go_package = "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest";
 
 import "metric_service.proto";
+import "logging_service.proto";
 
 message MetricExpectFixture {
   repeated google.monitoring.v3.CreateTimeSeriesRequest create_time_series_requests = 1;
@@ -28,4 +29,8 @@ message MetricExpectFixture {
 message SelfObservabilityMetric {
   repeated google.monitoring.v3.CreateTimeSeriesRequest create_time_series_requests = 1;
   repeated google.monitoring.v3.CreateMetricDescriptorRequest create_metric_descriptor_requests = 2;
+}
+
+message LogExpectFixture {
+  repeated google.logging.v2.WriteLogEntriesRequest write_log_entries_requests = 1;
 }

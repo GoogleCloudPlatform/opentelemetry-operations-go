@@ -51,7 +51,7 @@ func TestMetrics(t *testing.T) {
 			)
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
-			expectFixture := test.LoadExpectFixture(
+			expectFixture := test.LoadMetricExpectFixture(
 				t,
 				startTime,
 				endTime,
@@ -59,7 +59,7 @@ func TestMetrics(t *testing.T) {
 
 			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
 			require.NoError(t, err)
-			diff := DiffProtos(
+			diff := DiffMetricProtos(
 				t,
 				&MetricExpectFixture{
 					CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),

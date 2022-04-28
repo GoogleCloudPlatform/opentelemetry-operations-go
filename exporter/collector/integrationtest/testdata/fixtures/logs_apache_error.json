@@ -1,0 +1,405 @@
+{
+  "resourceLogs": [
+    {
+      "resource": {},
+      "scopeLogs": [
+        {
+          "scope": {},
+          "logRecords": [
+            {
+              "timeUnixNano": "1650933981412645000",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 00:46:21.412645 2022"
+                      }
+                    },
+                    {
+                      "key": "severity",
+                      "value": {
+                        "stringValue": "notice"
+                      }
+                    },
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 417652:tid 139808755448704] AH01232: suEXEC mechanism enabled (wrapper: /usr/local/apache/bin/suexec)"
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "apache-error-fixture"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650933981457314000",
+              "severityNumber": "SEVERITY_NUMBER_WARN",
+              "severityText": "Warn",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "severity",
+                      "value": {
+                        "stringValue": "warn"
+                      }
+                    },
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 417653:tid 139808755448704] AH01873: Init: Session Cache is not configured [hint: SSLSessionCache]"
+                      }
+                    },
+                    {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 00:46:21.457314 2022"
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "apache-error-fixture"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650933981502940000",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 00:46:21.502940 2022"
+                      }
+                    },
+                    {
+                      "key": "severity",
+                      "value": {
+                        "stringValue": "notice"
+                      }
+                    },
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 417653:tid 139808755448704] AH00489: Apache/2.4.46 (Unix) OpenSSL/1.1.1g mod_wsgi/4.7.1 Python/3.6 configured -- resuming normal operations"
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "apache-error-fixture"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650933981503003000",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "severity",
+                      "value": {
+                        "stringValue": "notice"
+                      }
+                    },
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 417653:tid 139808755448704] AH00094: Command line: '/usr/local/apache/bin/httpd'"
+                      }
+                    },
+                    {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 00:46:21.503003 2022"
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "apache-error-fixture"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1650933998988423000",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 417653:tid 139808755448704] AH00491: caught SIGTERM, shutting down"
+                      }
+                    },
+                    {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 00:46:38.988423 2022"
+                      }
+                    },
+                    {
+                      "key": "severity",
+                      "value": {
+                        "stringValue": "notice"
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "apache-error-fixture"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1651013314466058000",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 22:48:34.466058 2022"
+                      }
+                    },
+                    {
+                      "key": "severity",
+                      "value": {
+                        "stringValue": "notice"
+                      }
+                    },
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 712:tid 140159306111872] AH01232: suEXEC mechanism enabled (wrapper: /usr/local/apache/bin/suexec)"
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "apache-error-fixture"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1651013314740290000",
+              "severityNumber": "SEVERITY_NUMBER_WARN",
+              "severityText": "Warn",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 22:48:34.740290 2022"
+                      }
+                    },
+                    {
+                      "key": "severity",
+                      "value": {
+                        "stringValue": "warn"
+                      }
+                    },
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 769:tid 140159306111872] AH01873: Init: Session Cache is not configured [hint: SSLSessionCache]"
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "apache-error-fixture"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1651013315606223000",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "severity",
+                      "value": {
+                        "stringValue": "notice"
+                      }
+                    },
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 769:tid 140159306111872] AH00489: Apache/2.4.46 (Unix) OpenSSL/1.1.1g mod_wsgi/4.7.1 Python/3.6 configured -- resuming normal operations"
+                      }
+                    },
+                    {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 22:48:35.606223 2022"
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "apache-error-fixture"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "timeUnixNano": "1651013315606298000",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "severity",
+                      "value": {
+                        "stringValue": "notice"
+                      }
+                    },
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 769:tid 140159306111872] AH00094: Command line: '/usr/local/apache/bin/httpd'"
+                      }
+                    },
+                    {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 22:48:35.606298 2022"
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "log.file.name",
+                  "value": {
+                    "stringValue": "test.log"
+                  }
+                },
+                {
+                  "key": "com.google.logName",
+                  "value": {
+                    "stringValue": "apache-error-fixture"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
