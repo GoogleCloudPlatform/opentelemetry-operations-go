@@ -24,7 +24,6 @@ import (
 
 	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
-	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/multierr"
@@ -85,9 +84,9 @@ type logMapper struct {
 }
 
 func NewGoogleCloudLogsExporter(
-		ctx context.Context,
-		cfg Config,
-		log *zap.Logger,
+	ctx context.Context,
+	cfg Config,
+	log *zap.Logger,
 ) (*LogsExporter, error) {
 	clientOpts, err := generateClientOptions(&cfg.LogConfig.ClientConfig, cfg.UserAgent)
 	if err != nil {
@@ -235,11 +234,11 @@ func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
 }
 
 func (l logMapper) logToEntry(
-		log plog.LogRecord,
-		mr *monitoredres.MonitoredResource,
-		instrumentationSource string,
-		instrumentationVersion string,
-		processTime time.Time,
+	log plog.LogRecord,
+	mr *monitoredres.MonitoredResource,
+	instrumentationSource string,
+	instrumentationVersion string,
+	processTime time.Time,
 ) (logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
@@ -303,7 +302,7 @@ func (l logMapper) logToEntry(
 	return entry, nil
 }
 
-func parseEntryPayload(logBody pdata.Value) (interface{}, error) {
+func parseEntryPayload(logBody pcommon.Value) (interface{}, error) {
 	if len(logBody.AsString()) == 0 {
 		return nil, nil
 	}
