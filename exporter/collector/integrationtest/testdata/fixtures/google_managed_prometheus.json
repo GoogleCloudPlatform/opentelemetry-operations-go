@@ -104,24 +104,6 @@
                                     "value":{
                                        "stringValue":"13"
                                     }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_language",
-                                    "value":{
-                                       "stringValue":"go"
-                                    }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_name",
-                                    "value":{
-                                       "stringValue":"opentelemetry"
-                                    }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_version",
-                                    "value":{
-                                       "stringValue":"1.6.2"
-                                    }
                                  }
                               ],
                               "timeUnixNano":"1649443516286000000",
@@ -152,24 +134,6 @@
                                     "value":{
                                        "stringValue":"10"
                                     }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_language",
-                                    "value":{
-                                       "stringValue":"go"
-                                    }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_name",
-                                    "value":{
-                                       "stringValue":"opentelemetry"
-                                    }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_version",
-                                    "value":{
-                                       "stringValue":"1.6.2"
-                                    }
                                  }
                               ],
                               "timeUnixNano":"1649443516286000000",
@@ -188,24 +152,6 @@
                                     "key":"ex_com_lemons",
                                     "value":{
                                        "stringValue":"13"
-                                    }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_language",
-                                    "value":{
-                                       "stringValue":"go"
-                                    }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_name",
-                                    "value":{
-                                       "stringValue":"opentelemetry"
-                                    }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_version",
-                                    "value":{
-                                       "stringValue":"1.6.2"
                                     }
                                  }
                               ],
@@ -256,24 +202,6 @@
                                     "value":{
                                        "stringValue":"10"
                                     }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_language",
-                                    "value":{
-                                       "stringValue":"go"
-                                    }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_name",
-                                    "value":{
-                                       "stringValue":"opentelemetry"
-                                    }
-                                 },
-                                 {
-                                    "key":"telemetry_sdk_version",
-                                    "value":{
-                                       "stringValue":"1.6.2"
-                                    }
                                  }
                               ],
                               "startTimeUnixNano":"1649443516286000000",
@@ -300,6 +228,87 @@
                            }
                         ],
                         "aggregationTemporality":"AGGREGATION_TEMPORALITY_CUMULATIVE"
+                     }
+                  },
+                  {
+                     "name":"ex_com_three",
+                     "summary":{
+                        "dataPoints":[
+                           {
+                              "attributes":[
+                                 {
+                                    "key":"ex_com_lemons",
+                                    "value":{
+                                       "stringValue":"13"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano":"1649443516286000000",
+                              "timeUnixNano":"1649443516286000000",
+                              "count":"1",
+                              "sum":2,
+                              "quantile_values": [
+                                {
+                                  "quantile": 0.5,
+                                  "value": 10.2
+                                },
+                                {
+                                  "quantile": 0.75,
+                                  "value": 25.5
+                                },
+                                {
+                                  "quantile": 0.9,
+                                  "value": 100.2
+                                }
+                              ]
+                           },
+                           {
+                              "attributes":[
+                                 {
+                                    "key":"A",
+                                    "value":{
+                                       "stringValue":"1"
+                                    }
+                                 },
+                                 {
+                                    "key":"B",
+                                    "value":{
+                                       "stringValue":"2"
+                                    }
+                                 },
+                                 {
+                                    "key":"C",
+                                    "value":{
+                                       "stringValue":"3"
+                                    }
+                                 },
+                                 {
+                                    "key":"ex_com_lemons",
+                                    "value":{
+                                       "stringValue":"10"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano":"1649443516286000000",
+                              "timeUnixNano":"1649443516286000000",
+                              "count":"2",
+                              "sum":14,
+                              "quantile_values": [
+                                {
+                                  "quantile": 0.5,
+                                  "value": 9.3
+                                },
+                                {
+                                  "quantile": 0.75,
+                                  "value": 12.4
+                                },
+                                {
+                                  "quantile": 0.9,
+                                  "value": 300.2
+                                }
+                              ]
+                           }
+                        ]
                      }
                   },
                   {
