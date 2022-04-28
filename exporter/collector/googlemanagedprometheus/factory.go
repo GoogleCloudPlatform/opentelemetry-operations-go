@@ -48,7 +48,7 @@ func createDefaultConfig() config.Exporter {
 		RetrySettings:    exporterhelper.NewDefaultRetrySettings(),
 		QueueSettings:    exporterhelper.NewDefaultQueueSettings(),
 		GMPConfig: GMPConfig{
-			UserAgent: "opentelemetry-collector-contrib {{version}}",
+			UserAgent: "opentelemetry-collector-contrib/{{version}}",
 		},
 	}
 }
@@ -83,7 +83,9 @@ func (c *GMPConfig) toCollectorConfig() collector.Config {
 	cfg.MetricConfig.SkipCreateMetricDescriptor = true
 	cfg.MetricConfig.InstrumentationLibraryLabels = false
 	cfg.MetricConfig.ServiceResourceLabels = false
+	// Update metric naming to match GMP conventions
 	cfg.MetricConfig.GetMetricName = GetMetricName
+	// Map to the prometheus_target monitored resource
 	cfg.MetricConfig.MapMonitoredResource = MapToPrometheusTarget
 	cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 	// TODO: Change to GMP's method of reset handling.

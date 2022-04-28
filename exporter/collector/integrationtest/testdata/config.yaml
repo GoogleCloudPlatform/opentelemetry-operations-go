@@ -24,4 +24,8 @@ service:
         receivers: [nop]
         processors: [nop]
         exporters: [googlecloud]
+    metrics:
+        receivers: [nop]
+        processors: [nop]
+        exporters: [googlecloud]
 

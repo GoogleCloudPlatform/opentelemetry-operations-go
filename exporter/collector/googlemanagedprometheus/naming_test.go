@@ -51,7 +51,7 @@ func TestGetMetricName(t *testing.T) {
 		{
 			desc:     "other",
 			datatype: pmetric.MetricDataTypeExponentialHistogram,
-			expected: baseName,
+			expected: baseName + "/exponentialhistogram",
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {

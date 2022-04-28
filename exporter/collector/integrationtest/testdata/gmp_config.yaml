@@ -14,7 +14,7 @@ exporters:
 
 service:
   pipelines:
-    traces:
+    metrics:
         receivers: [nop]
         processors: [nop]
         exporters: [googlemanagedprometheus]
