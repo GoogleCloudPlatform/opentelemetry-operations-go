@@ -62,7 +62,7 @@ func main() {
 		}
 		func() {
 			logs := test.LoadOTLPLogsInput(t, startTime)
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateConfig())
+			testServerExporter := testServer.NewExporter(ctx, t, test.CreateLogConfig())
 
 			require.NoError(t, testServerExporter.PushLogs(ctx, logs), "failed to export metrics to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
@@ -71,7 +71,7 @@ func main() {
 			fixture := &integrationtest.LogExpectFixture{
 				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
 			}
-			test.SaveRecordedFixtures(t, fixture)
+			test.SaveRecordedLogFixtures(t, fixture)
 		}()
 	}
 }

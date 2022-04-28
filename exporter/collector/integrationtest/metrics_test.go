@@ -38,7 +38,7 @@ func TestMetrics(t *testing.T) {
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateConfig())
+			testServerExporter := testServer.NewExporter(ctx, t, test.CreateMetricConfig())
 			// For collecting self observability metrics
 			inMemoryOCExporter, err := NewInMemoryOCViewExporter()
 			require.NoError(t, err)

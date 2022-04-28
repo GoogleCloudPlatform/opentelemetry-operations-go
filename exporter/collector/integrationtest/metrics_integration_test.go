@@ -31,12 +31,12 @@ import (
 func createMetricsExporter(
 	ctx context.Context,
 	t *testing.T,
-	test *MetricsTestCase,
+	test *TestCase,
 ) *collector.MetricsExporter {
 	logger, _ := zap.NewProduction()
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
-		test.CreateConfig(),
+		test.CreateMetricConfig(),
 		logger,
 		"latest",
 		collector.DefaultTimeout,

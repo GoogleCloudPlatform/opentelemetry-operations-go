@@ -31,12 +31,12 @@ import (
 func createLogsExporter(
 	ctx context.Context,
 	t *testing.T,
-	test *LogsTestCase,
+	test *TestCase,
 ) *collector.LogsExporter {
 	logger, _ := zap.NewProduction()
 	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
-		test.CreateConfig(),
+		test.CreateLogConfig(),
 		logger,
 	)
 	require.NoError(t, err)

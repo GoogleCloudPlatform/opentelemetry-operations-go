@@ -63,7 +63,7 @@ func main() {
 		}
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateConfig())
+			testServerExporter := testServer.NewExporter(ctx, t, test.CreateMetricConfig())
 			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
 			require.NoError(t, err)
 			defer inMemoryOCExporter.Shutdown(ctx)
@@ -79,7 +79,7 @@ func main() {
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
 				SelfObservabilityMetrics:        selfObsMetrics,
 			}
-			test.SaveRecordedFixtures(t, fixture)
+			test.SaveRecordedMetricFixtures(t, fixture)
 		}()
 	}
 }

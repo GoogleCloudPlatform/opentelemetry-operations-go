@@ -17,7 +17,7 @@ package integrationtest
 import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 
 var (
-	LogsTestCases = []LogsTestCase{
+	LogsTestCases = []TestCase{
 		{
 			Name:                 "Apache access log with HTTPRequest",
 			OTLPInputFixturePath: "testdata/fixtures/logs_apache_access.json",
@@ -30,7 +30,7 @@ var (
 		},
 	}
 
-	MetricsTestCases = []MetricsTestCase{
+	MetricsTestCases = []TestCase{
 		{
 			Name:                 "Basic Counter",
 			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",

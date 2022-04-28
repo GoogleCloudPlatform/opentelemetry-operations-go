@@ -38,7 +38,7 @@ func TestLogs(t *testing.T) {
 			go testServer.Serve()
 			defer testServer.Shutdown()
 
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateConfig())
+			testServerExporter := testServer.NewExporter(ctx, t, test.CreateLogConfig())
 
 			require.NoError(
 				t,
