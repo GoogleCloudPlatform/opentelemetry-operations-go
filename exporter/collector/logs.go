@@ -85,9 +85,9 @@ type logMapper struct {
 }
 
 func NewGoogleCloudLogsExporter(
-	ctx context.Context,
-	cfg Config,
-	log *zap.Logger,
+		ctx context.Context,
+		cfg Config,
+		log *zap.Logger,
 ) (*LogsExporter, error) {
 	clientOpts, err := generateClientOptions(&cfg.LogConfig.ClientConfig, cfg.UserAgent)
 	if err != nil {
@@ -235,11 +235,11 @@ func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
 }
 
 func (l logMapper) logToEntry(
-	log plog.LogRecord,
-	mr *monitoredres.MonitoredResource,
-	instrumentationSource string,
-	instrumentationVersion string,
-	processTime time.Time,
+		log plog.LogRecord,
+		mr *monitoredres.MonitoredResource,
+		instrumentationSource string,
+		instrumentationVersion string,
+		processTime time.Time,
 ) (logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
@@ -282,7 +282,7 @@ func (l logMapper) logToEntry(
 
 	httpRequestAttr, ok := log.Attributes().Get(HTTPRequestAttributeKey)
 	if ok {
-		httpRequest, err := l.parseHTTPRequest(httpRequestAttr.BytesVal())
+		httpRequest, err := l.parseHTTPRequest(httpRequestAttr)
 		if err != nil {
 			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
 		}
@@ -340,12 +340,20 @@ type httpRequestLog struct {
 	Protocol                       string `json:"protocol"`
 }
 
-func (l logMapper) parseHTTPRequest(httpRequestAttr []byte) (*logging.HTTPRequest, error) {
+func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTTPRequest, error) {
+	var bytes []byte
+	switch httpRequestAttr.Type() {
+	case pcommon.ValueTypeBytes:
+		bytes = httpRequestAttr.BytesVal()
+	case pcommon.ValueTypeString, pcommon.ValueTypeMap:
+		bytes = []byte(httpRequestAttr.AsString())
+	}
+
 	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
 	// instead of a slice of bytes could do, but would need a lot of type casting and checking
 	// assertions with it.
 	var parsedHTTPRequest httpRequestLog
-	if err := json.Unmarshal(httpRequestAttr, &parsedHTTPRequest); err != nil {
+	if err := json.Unmarshal(bytes, &parsedHTTPRequest); err != nil {
 		return nil, err
 	}
 
