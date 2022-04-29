@@ -9,9 +9,9 @@ require (
 	github.com/stretchr/testify v1.7.1
 	go.opencensus.io v0.23.0
 	go.opentelemetry.io/collector/model v0.49.0
-	go.opentelemetry.io/otel v1.6.2
+	go.opentelemetry.io/otel v1.6.3
 	go.opentelemetry.io/otel/sdk v1.6.2
-	go.opentelemetry.io/otel/trace v1.6.2
+	go.opentelemetry.io/otel/trace v1.6.3
 	google.golang.org/api v0.74.0
 	google.golang.org/genproto v0.0.0-20220405205423-9d709892a2bf
 	google.golang.org/grpc v1.45.0
@@ -22,6 +22,7 @@ require (
 	cloud.google.com/go/logging v1.4.2
 	cloud.google.com/go/monitoring v1.4.0
 	cloud.google.com/go/trace v1.2.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.0.0-00010101000000-000000000000
 	github.com/google/go-cmp v0.5.7
 	go.opentelemetry.io/collector/pdata v0.49.0
 	go.uber.org/multierr v1.8.0
@@ -53,3 +54,5 @@ require (
 )
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../trace
+
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../internal/resourcemapping

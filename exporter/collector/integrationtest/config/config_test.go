@@ -74,6 +74,7 @@ func TestLoadConfig(t *testing.T) {
 					InstrumentationLibraryLabels:     true,
 					CreateMetricDescriptorBufferSize: 10,
 					ServiceResourceLabels:            true,
+					CumulativeNormalization:          true,
 				},
 			},
 		})

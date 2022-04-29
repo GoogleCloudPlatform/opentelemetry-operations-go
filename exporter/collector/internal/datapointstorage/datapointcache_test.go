@@ -25,27 +25,34 @@ import (
 )
 
 func TestSetAndGet(t *testing.T) {
-	c := make(Cache)
-	c.Set("foo", nil)
-	point, found := c.Get("foo")
+	c := Cache{
+		numberCache:               make(map[string]usedNumberPoint),
+		summaryCache:              make(map[string]usedSummaryPoint),
+		histogramCache:            make(map[string]usedHistogramPoint),
+		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+	}
+	c.SetNumberDataPoint("foo", nil)
+	point, found := c.GetNumberDataPoint("foo")
 	assert.Nil(t, point)
 	assert.True(t, found)
-
-	point, found = c.Get("bar")
+	point, found = c.GetNumberDataPoint("bar")
 	assert.Nil(t, point)
 	assert.False(t, found)
-
 	setPoint := pdata.NewNumberDataPoint()
-	c.Set("bar", &setPoint)
-
-	point, found = c.Get("bar")
+	c.SetNumberDataPoint("bar", &setPoint)
+	point, found = c.GetNumberDataPoint("bar")
 	assert.Equal(t, point, &setPoint)
 	assert.True(t, found)
 }
 
 func TestShutdown(t *testing.T) {
 	shutdown := make(chan struct{})
-	c := make(Cache)
+	c := Cache{
+		numberCache:               make(map[string]usedNumberPoint),
+		summaryCache:              make(map[string]usedSummaryPoint),
+		histogramCache:            make(map[string]usedHistogramPoint),
+		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+	}
 	close(shutdown)
 	// gc should return after shutdown is closed
 	cont := c.gc(shutdown, make(chan time.Time))
@@ -54,13 +61,18 @@ func TestShutdown(t *testing.T) {
 
 func TestGC(t *testing.T) {
 	shutdown := make(chan struct{})
-	c := make(Cache)
+	c := Cache{
+		numberCache:               make(map[string]usedNumberPoint),
+		summaryCache:              make(map[string]usedSummaryPoint),
+		histogramCache:            make(map[string]usedHistogramPoint),
+		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+	}
 	fakeTicker := make(chan time.Time)
 
-	c.Set("bar", nil)
+	c.SetNumberDataPoint("bar", nil)
 
 	// bar exists since we just set it
-	usedPoint, found := c["bar"]
+	usedPoint, found := c.numberCache["bar"]
 	assert.True(t, usedPoint.used)
 	assert.True(t, found)
 
@@ -70,7 +82,7 @@ func TestGC(t *testing.T) {
 	}()
 	cont := c.gc(shutdown, fakeTicker)
 	assert.True(t, cont)
-	usedPoint, found = c["bar"]
+	usedPoint, found = c.numberCache["bar"]
 	assert.False(t, usedPoint.used)
 	assert.True(t, found)
 
@@ -80,22 +92,25 @@ func TestGC(t *testing.T) {
 	}()
 	cont = c.gc(shutdown, fakeTicker)
 	assert.True(t, cont)
-	_, found = c["bar"]
+	_, found = c.numberCache["bar"]
 	assert.False(t, found)
 }
 
 func TestGetPreventsGC(t *testing.T) {
 	shutdown := make(chan struct{})
-	c := make(Cache)
+	c := Cache{
+		numberCache:               make(map[string]usedNumberPoint),
+		summaryCache:              make(map[string]usedSummaryPoint),
+		histogramCache:            make(map[string]usedHistogramPoint),
+		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+	}
 	fakeTicker := make(chan time.Time)
 
 	setPoint := pdata.NewNumberDataPoint()
-	c.Set("bar", &setPoint)
-
+	c.SetNumberDataPoint("bar", &setPoint)
 	// bar exists since we just set it
-	_, found := c["bar"]
+	_, found := c.numberCache["bar"]
 	assert.True(t, found)
-
 	// first gc tick marks bar stale
 	go func() {
 		fakeTicker <- time.Now()
@@ -103,16 +118,15 @@ func TestGetPreventsGC(t *testing.T) {
 	cont := c.gc(shutdown, fakeTicker)
 	assert.True(t, cont)
 	// calling Get() marks it fresh again.
-	_, found = c.Get("bar")
+	_, found = c.GetNumberDataPoint("bar")
 	assert.True(t, found)
-
 	// second gc tick does not remove bar
 	go func() {
 		fakeTicker <- time.Now()
 	}()
 	cont = c.gc(shutdown, fakeTicker)
 	assert.True(t, cont)
-	_, found = c["bar"]
+	_, found = c.numberCache["bar"]
 	assert.True(t, found)
 }
 
