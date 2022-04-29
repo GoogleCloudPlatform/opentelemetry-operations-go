@@ -103,10 +103,13 @@ func (l *LogsTestServer) NewExporter(
 	cfg.LogConfig.ClientConfig.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+
 	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
 		cfg,
-		zap.NewNop(),
+		logger,
 	)
 	require.NoError(t, err)
 	t.Logf("Collector LogsTestServer exporter started, pointing at %v", cfg.LogConfig.ClientConfig.Endpoint)
