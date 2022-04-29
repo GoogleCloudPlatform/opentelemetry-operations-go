@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"testing"
 	"time"
 
@@ -51,19 +50,12 @@ func main() {
 	startTime := endTime.Add(-time.Second)
 	t := &FakeTesting{}
 
-	for _, arg := range os.Args[1:] {
-		switch arg {
-		case "logs":
-			logs(ctx, t, endTime)
-		case "metrics":
-			metrics(ctx, t, startTime, endTime)
-		default:
-			fmt.Printf("unknown fixture type: %s\n", arg)
-		}
-	}
+	recordLogs(ctx, t, endTime)
+	recordMetrics(ctx, t, startTime, endTime)
+
 }
 
-func logs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
+func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
 	testServer, err := integrationtest.NewLoggingTestServer()
 	if err != nil {
 		panic(err)
@@ -91,7 +83,7 @@ func logs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
 	}
 }
 
-func metrics(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
+func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
 	testServer, err := integrationtest.NewMetricTestServer()
 	if err != nil {
 		panic(err)
