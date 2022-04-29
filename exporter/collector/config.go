@@ -95,6 +95,17 @@ type MetricConfig struct {
 	// Defaults to empty, which won't include any additional resource labels. Note that the
 	// service_resource_labels option operates independently from resource_filters.
 	ResourceFilters []ResourceFilter `mapstructure:"resource_filters"`
+
+	// CumulativeNormalization normalizes cumulative metrics without start times or with
+	// explicit reset points by subtracting subsequent points from the initial point.
+	// It is enabled by default. Since it caches starting points, it may result in
+	// increased memory usage.
+	CumulativeNormalization bool `mapstructure:"cumulative_normalization"`
+
+	// This enables calculation of an estimated sum of squared deviation.  It isn't correct,
+	// so we don't send it by default, and don't expose it to users. For some uses, it is
+	// expected, however.
+	EnableSumOfSquaredDeviation bool
 }
 
 type ResourceFilter struct {
@@ -123,6 +134,7 @@ func DefaultConfig() Config {
 			CreateMetricDescriptorBufferSize: 10,
 			InstrumentationLibraryLabels:     true,
 			ServiceResourceLabels:            true,
+			CumulativeNormalization:          true,
 		},
 	}
 }

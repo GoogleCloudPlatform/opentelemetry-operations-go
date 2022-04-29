@@ -45,6 +45,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/datapointstorage"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/normalization"
 )
 
 // self-observability reporting meters/tracers/loggers.
@@ -69,14 +70,16 @@ type MetricsExporter struct {
 	metricDescriptorC chan *metricpb.MetricDescriptor
 	// Tracks the metric descriptors that have already been sent to GCM
 	mdCache map[string]*metricpb.MetricDescriptor
+
+	timeout time.Duration
 }
 
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	obs      selfObservability
-	cfg      Config
-	sumCache datapointstorage.Cache
+	obs        selfObservability
+	cfg        Config
+	normalizer normalization.Normalizer
 }
 
 // Constants we use when translating summary metrics into GCP.
@@ -133,6 +136,10 @@ func NewGoogleCloudMetricsExporter(
 	}
 	obs := selfObservability{log: log}
 	shutdown := make(chan struct{})
+	normalizer := normalization.NewDisabledNormalizer()
+	if cfg.MetricConfig.CumulativeNormalization {
+		normalizer = normalization.NewStandardNormalizer(shutdown, log)
+	}
 	mExp := &MetricsExporter{
 		cfg:    cfg,
 		client: client,
@@ -140,7 +147,7 @@ func NewGoogleCloudMetricsExporter(
 		mapper: metricMapper{
 			obs,
 			cfg,
-			datapointstorage.NewCache(shutdown),
+			normalizer,
 		},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
@@ -149,6 +156,7 @@ func NewGoogleCloudMetricsExporter(
 		metricDescriptorC: make(chan *metricpb.MetricDescriptor, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
 		mdCache:           make(map[string]*metricpb.MetricDescriptor),
 		shutdownC:         shutdown,
+		timeout:           timeout,
 	}
 
 	// Fire up the metric descriptor exporter.
@@ -268,7 +276,9 @@ func (me *MetricsExporter) exportMetricDescriptor(md *metricpb.MetricDescriptor)
 		Name:             me.projectName(),
 		MetricDescriptor: md,
 	}
-	_, err := me.client.CreateMetricDescriptor(context.Background(), req)
+	ctx, cancel := context.WithTimeout(context.Background(), me.timeout)
+	defer cancel()
+	_, err := me.client.CreateMetricDescriptor(ctx, req)
 	if err != nil {
 		// TODO: Log-once on error, per metric descriptor?
 		me.obs.log.Error("Unable to send metric descriptor.", zap.Error(err), zap.Any("metric_descriptor", md))
@@ -281,6 +291,8 @@ func (me *MetricsExporter) exportMetricDescriptor(md *metricpb.MetricDescriptor)
 
 // Sends a user-custom-metric timeseries.
 func (me *MetricsExporter) createTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+	ctx, cancel := context.WithTimeout(ctx, me.timeout)
+	defer cancel()
 	return me.client.CreateTimeSeries(
 		ctx,
 		&monitoringpb.CreateTimeSeriesRequest{
@@ -292,6 +304,8 @@ func (me *MetricsExporter) createTimeSeries(ctx context.Context, ts []*monitorin
 
 // Sends a service timeseries.
 func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+	ctx, cancel := context.WithTimeout(ctx, me.timeout)
+	defer cancel()
 	return me.client.CreateServiceTimeSeries(
 		ctx,
 		&monitoringpb.CreateTimeSeriesRequest{
@@ -372,6 +386,13 @@ func (m *metricMapper) summaryPointToTimeSeries(
 		// Drop points without a value.
 		return nil
 	}
+	// Normalize the summary point.
+	metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+	normalizedPoint := m.normalizer.NormalizeSummaryDataPoint(point, metricIdentifier)
+	if normalizedPoint == nil {
+		return nil
+	}
+	point = *normalizedPoint
 	sumName, countName := summaryMetricNames(metric.Name())
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
@@ -500,25 +521,42 @@ func (m *metricMapper) exemplars(exs pdata.ExemplarSlice) []*distribution.Distri
 // histogramPoint maps a histogram data point into a GCM point.
 func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitoringpb.TypedValue {
 	counts := make([]int64, len(point.BucketCounts()))
+	var mean, deviation, prevBound float64
+
 	for i, v := range point.BucketCounts() {
 		counts[i] = int64(v)
 	}
 
-	mean := float64(0)
 	if !math.IsNaN(point.Sum()) && point.Count() > 0 { // Avoid divide-by-zero
 		mean = float64(point.Sum() / float64(point.Count()))
+	}
+
+	bounds := point.ExplicitBounds()
+	if m.cfg.MetricConfig.EnableSumOfSquaredDeviation {
+		// Calculate the sum of squared deviation.
+		for i, bound := range bounds {
+			// Assume all points in the bucket occur at the middle of the bucket range
+			middleOfBucket := (prevBound + bound) / 2
+			deviation += float64(counts[i]) * (middleOfBucket - mean) * (middleOfBucket - mean)
+			prevBound = bound
+		}
+		// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
+		// Assume points in the infinity bucket are at the top of the previous bucket
+		middleOfInfBucket := prevBound
+		deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
 	}
 
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distribution.Distribution{
-				Count:        int64(point.Count()),
-				Mean:         mean,
-				BucketCounts: counts,
+				Count:                 int64(point.Count()),
+				Mean:                  mean,
+				BucketCounts:          counts,
+				SumOfSquaredDeviation: deviation,
 				BucketOptions: &distribution.Distribution_BucketOptions{
 					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
 						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
-							Bounds: point.ExplicitBounds(),
+							Bounds: bounds,
 						},
 					},
 				},
@@ -588,13 +626,23 @@ func (m *metricMapper) histogramToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
 	metric pdata.Metric,
-	_ pdata.Histogram,
+	hist pdata.Histogram,
 	point pdata.HistogramDataPoint,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) || !point.HasSum() {
 		// Drop points without a value or without a sum
 		return nil
 	}
+	if hist.AggregationTemporality() == pmetric.MetricAggregationTemporalityCumulative {
+		// Normalize cumulative histogram points.
+		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+		normalizedPoint := m.normalizer.NormalizeHistogramDataPoint(point, metricIdentifier)
+		if normalizedPoint == nil {
+			return nil
+		}
+		point = *normalizedPoint
+	}
+
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
@@ -626,12 +674,21 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
 	metric pdata.Metric,
-	_ pdata.ExponentialHistogram,
+	exponentialHist pdata.ExponentialHistogram,
 	point pdata.ExponentialHistogramDataPoint,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
 		return nil
+	}
+	if exponentialHist.AggregationTemporality() == pmetric.MetricAggregationTemporalityCumulative {
+		// Normalize the histogram point.
+		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+		normalizedPoint := m.normalizer.NormalizeExponentialHistogramDataPoint(point, metricIdentifier)
+		if normalizedPoint == nil {
+			return nil
+		}
+		point = *normalizedPoint
 	}
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
@@ -675,13 +732,15 @@ func (m *metricMapper) sumPointToTimeSeries(
 		return nil
 	}
 	if sum.IsMonotonic() {
-		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
-		normalizedPoint := m.normalizeNumberDataPoint(point, metricIdentifier)
-		if normalizedPoint == nil {
-			return nil
+		if sum.AggregationTemporality() == pmetric.MetricAggregationTemporalityCumulative {
+			metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+			normalizedPoint := m.normalizer.NormalizeNumberDataPoint(point, metricIdentifier)
+			if normalizedPoint == nil {
+				return nil
+			}
+			point = *normalizedPoint
 		}
-		point = *normalizedPoint
-		startTime = timestamppb.New(normalizedPoint.StartTimestamp().AsTime())
+		startTime = timestamppb.New(point.StartTimestamp().AsTime())
 	} else {
 		metricKind = metricpb.MetricDescriptor_GAUGE
 		startTime = nil
@@ -708,48 +767,6 @@ func (m *metricMapper) sumPointToTimeSeries(
 			),
 		},
 	}}
-}
-
-// normalizeNumberDataPoint returns a point which has been normalized against an initial
-// start point, or nil if the point should be dropped.
-func (m *metricMapper) normalizeNumberDataPoint(point pdata.NumberDataPoint, identifier string) *pdata.NumberDataPoint {
-	// if the point doesn't need to be normalized, use original point
-	normalizedPoint := &point
-	start, ok := m.sumCache.Get(identifier)
-	if ok {
-		if !start.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
-			// We found a cached start timestamp that wouldn't produce a valid point.
-			// Drop it and log.
-			m.obs.log.Info(
-				"data point being processed older than last recorded reset, will not be emitted",
-				zap.String("lastRecordedReset", start.Timestamp().String()),
-				zap.String("dataPoint", point.Timestamp().String()),
-			)
-			return nil
-		}
-		// Make a copy so we don't mutate underlying data
-		newPoint := pdata.NewNumberDataPoint()
-		point.CopyTo(newPoint)
-		// Use the start timestamp from the normalization point
-		newPoint.SetStartTimestamp(start.Timestamp())
-		// Adjust the value based on the start point's value
-		switch newPoint.ValueType() {
-		case pmetric.MetricValueTypeInt:
-			newPoint.SetIntVal(point.IntVal() - start.IntVal())
-		case pmetric.MetricValueTypeDouble:
-			newPoint.SetDoubleVal(point.DoubleVal() - start.DoubleVal())
-		}
-		normalizedPoint = &newPoint
-	}
-	if (!ok && point.StartTimestamp() == 0) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
-		// This is the first time we've seen this metric, or we received
-		// an explicit reset point as described in
-		// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
-		// Record it in history and drop the point.
-		m.sumCache.Set(identifier, &point)
-		return nil
-	}
-	return normalizedPoint
 }
 
 func (m *metricMapper) gaugePointToTimeSeries(
