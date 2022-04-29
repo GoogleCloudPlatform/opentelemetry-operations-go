@@ -67,8 +67,8 @@ type fakeLoggingServiceServer struct {
 }
 
 func (f *fakeLoggingServiceServer) WriteLogEntries(
-		ctx context.Context,
-		request *logpb.WriteLogEntriesRequest,
+	ctx context.Context,
+	request *logpb.WriteLogEntriesRequest,
 ) (*logpb.WriteLogEntriesResponse, error) {
 	f.logsTestServer.appendWriteLogEntriesRequest(request)
 	return &logpb.WriteLogEntriesResponse{}, nil
@@ -94,9 +94,9 @@ func NewLoggingTestServer() (*LogsTestServer, error) {
 }
 
 func (l *LogsTestServer) NewExporter(
-		ctx context.Context,
-		t testing.TB,
-		cfg collector.Config,
+	ctx context.Context,
+	t testing.TB,
+	cfg collector.Config,
 ) *collector.LogsExporter {
 
 	cfg.LogConfig.ClientConfig.Endpoint = l.Endpoint
