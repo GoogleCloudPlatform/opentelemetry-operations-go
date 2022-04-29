@@ -87,7 +87,7 @@ To add a new test:
 
     ```sh
     cd integrationtest
-    go run cmd/recordfixtures/main.go
+    go run cmd/recordfixtures/main.go metrics logs
     ```
 
     The generated file is a JSON encoded

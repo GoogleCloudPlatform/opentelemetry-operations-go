@@ -24,7 +24,6 @@ import (
 
 	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
-	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/multierr"
@@ -89,7 +88,14 @@ func NewGoogleCloudLogsExporter(
 	cfg Config,
 	log *zap.Logger,
 ) (*LogsExporter, error) {
-	loggingClient, err := loggingv2.NewClient(ctx)
+	setProjectFromADC(ctx, &cfg, loggingv2.DefaultAuthScopes())
+
+	clientOpts, err := generateClientOptions(&cfg.LogConfig.ClientConfig, cfg.UserAgent)
+	if err != nil {
+		return nil, err
+	}
+
+	loggingClient, err := loggingv2.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -277,7 +283,7 @@ func (l logMapper) logToEntry(
 
 	httpRequestAttr, ok := log.Attributes().Get(HTTPRequestAttributeKey)
 	if ok {
-		httpRequest, err := l.parseHTTPRequest(httpRequestAttr.BytesVal())
+		httpRequest, err := l.parseHTTPRequest(httpRequestAttr)
 		if err != nil {
 			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
 		}
@@ -298,7 +304,7 @@ func (l logMapper) logToEntry(
 	return entry, nil
 }
 
-func parseEntryPayload(logBody pdata.Value) (interface{}, error) {
+func parseEntryPayload(logBody pcommon.Value) (interface{}, error) {
 	if len(logBody.AsString()) == 0 {
 		return nil, nil
 	}
@@ -335,12 +341,20 @@ type httpRequestLog struct {
 	Protocol                       string `json:"protocol"`
 }
 
-func (l logMapper) parseHTTPRequest(httpRequestAttr []byte) (*logging.HTTPRequest, error) {
+func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTTPRequest, error) {
+	var bytes []byte
+	switch httpRequestAttr.Type() {
+	case pcommon.ValueTypeBytes:
+		bytes = httpRequestAttr.BytesVal()
+	case pcommon.ValueTypeString, pcommon.ValueTypeMap:
+		bytes = []byte(httpRequestAttr.AsString())
+	}
+
 	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
 	// instead of a slice of bytes could do, but would need a lot of type casting and checking
 	// assertions with it.
 	var parsedHTTPRequest httpRequestLog
-	if err := json.Unmarshal(httpRequestAttr, &parsedHTTPRequest); err != nil {
+	if err := json.Unmarshal(bytes, &parsedHTTPRequest); err != nil {
 		return nil, err
 	}
 

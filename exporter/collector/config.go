@@ -103,6 +103,10 @@ type ResourceFilter struct {
 }
 
 type LogConfig struct {
+	ClientConfig ClientConfig `mapstructure:",squash"`
+
+	// DefaultLogLanme sets the fallback log name to use when one isn't explicitly set
+	// for a log entry. If unset, logs without a log name will raise an error.
 	DefaultLogName string `mapstructure:"default_log_name"`
 }
 

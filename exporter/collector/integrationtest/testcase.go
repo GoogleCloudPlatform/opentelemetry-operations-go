@@ -30,6 +30,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/model/otlp"
 	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -48,7 +50,7 @@ var (
 	}
 )
 
-type MetricsTestCase struct {
+type TestCase struct {
 	// Name of the test case
 	Name string
 
@@ -66,14 +68,82 @@ type MetricsTestCase struct {
 	Configure func(cfg *collector.Config)
 }
 
+func (tc *TestCase) LoadOTLPLogsInput(
+	t testing.TB,
+	timestamp time.Time,
+) plog.Logs {
+	bytes, err := ioutil.ReadFile(tc.OTLPInputFixturePath)
+	require.NoError(t, err)
+	logs, err := plog.NewJSONUnmarshaler().UnmarshalLogs(bytes)
+	require.NoError(t, err)
+
+	for i := 0; i < logs.ResourceLogs().Len(); i++ {
+		rl := logs.ResourceLogs().At(i)
+		for j := 0; j < rl.ScopeLogs().Len(); j++ {
+			sls := rl.ScopeLogs().At(j)
+			for k := 0; k < sls.LogRecords().Len(); k++ {
+				log := sls.LogRecords().At(k)
+				if log.Timestamp() != 0 {
+					log.SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+				}
+			}
+		}
+	}
+	return logs
+}
+
+func (tc *TestCase) CreateLogConfig() collector.Config {
+	cfg := collector.DefaultConfig()
+	// If not set it will use ADC
+	cfg.ProjectID = os.Getenv("PROJECT_ID")
+
+	if tc.Configure != nil {
+		tc.Configure(&cfg)
+	}
+
+	return cfg
+}
+
+func (tc *TestCase) LoadLogExpectFixture(
+	t testing.TB,
+	timestamp time.Time,
+) *LogExpectFixture {
+	bytes, err := ioutil.ReadFile(tc.ExpectFixturePath)
+	require.NoError(t, err)
+	fixture := &LogExpectFixture{}
+	require.NoError(t, protojson.Unmarshal(bytes, fixture))
+
+	for _, request := range fixture.WriteLogEntriesRequests {
+		for _, entry := range request.Entries {
+			entry.Timestamp = timestamppb.New(timestamp)
+		}
+	}
+
+	return fixture
+}
+
+func (tc *TestCase) SaveRecordedLogFixtures(
+	t testing.TB,
+	fixture *LogExpectFixture,
+) {
+
+	jsonBytes, err := protojson.Marshal(fixture)
+	require.NoError(t, err)
+	formatted := bytes.Buffer{}
+	require.NoError(t, json.Indent(&formatted, jsonBytes, "", "  "))
+	formatted.WriteString("\n")
+	require.NoError(t, ioutil.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
+	t.Logf("Updated fixture %v", tc.ExpectFixturePath)
+}
+
 // Load OTLP metric fixture, test expectation fixtures and modify them so they're suitable for
 // testing. Currently, this just updates the timestamps.
-func (m *MetricsTestCase) LoadOTLPMetricsInput(
+func (tc *TestCase) LoadOTLPMetricsInput(
 	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
 ) pdata.Metrics {
-	bytes, err := ioutil.ReadFile(m.OTLPInputFixturePath)
+	bytes, err := ioutil.ReadFile(tc.OTLPInputFixturePath)
 	require.NoError(t, err)
 	metrics, err := otlp.NewJSONMetricsUnmarshaler().UnmarshalMetrics(bytes)
 	require.NoError(t, err)
@@ -130,21 +200,21 @@ func (m *MetricsTestCase) LoadOTLPMetricsInput(
 	return metrics
 }
 
-func (m *MetricsTestCase) LoadExpectFixture(
+func (tc *TestCase) LoadMetricExpectFixture(
 	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
 ) *MetricExpectFixture {
-	bytes, err := ioutil.ReadFile(m.ExpectFixturePath)
+	bytes, err := ioutil.ReadFile(tc.ExpectFixturePath)
 	require.NoError(t, err)
 	fixture := &MetricExpectFixture{}
 	require.NoError(t, protojson.Unmarshal(bytes, fixture))
-	m.updateExpectFixture(t, startTime, endTime, fixture)
+	tc.updateMetricExpectFixture(t, startTime, endTime, fixture)
 
 	return fixture
 }
 
-func (m *MetricsTestCase) updateExpectFixture(
+func (tc *TestCase) updateMetricExpectFixture(
 	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
@@ -169,7 +239,7 @@ func (m *MetricsTestCase) updateExpectFixture(
 	}
 }
 
-func (m *MetricsTestCase) SaveRecordedFixtures(
+func (tc *TestCase) SaveRecordedMetricFixtures(
 	t testing.TB,
 	fixture *MetricExpectFixture,
 ) {
@@ -180,8 +250,8 @@ func (m *MetricsTestCase) SaveRecordedFixtures(
 	formatted := bytes.Buffer{}
 	require.NoError(t, json.Indent(&formatted, jsonBytes, "", "  "))
 	formatted.WriteString("\n")
-	require.NoError(t, ioutil.WriteFile(m.ExpectFixturePath, formatted.Bytes(), 0640))
-	t.Logf("Updated fixture %v", m.ExpectFixturePath)
+	require.NoError(t, ioutil.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
+	t.Logf("Updated fixture %v", tc.ExpectFixturePath)
 }
 
 // Normalizes timestamps and removes project ID fields which create noise in the fixture
@@ -275,13 +345,13 @@ func normalizeSelfObs(t testing.TB, selfObs *SelfObservabilityMetric) {
 	})
 }
 
-func (m *MetricsTestCase) SkipIfNeeded(t testing.TB) {
-	if m.Skip {
+func (tc *TestCase) SkipIfNeeded(t testing.TB) {
+	if tc.Skip {
 		t.Skip("Test case is marked to skip in internal/integrationtest/testcases.go")
 	}
 }
 
-func (m *MetricsTestCase) CreateConfig() collector.Config {
+func (tc *TestCase) CreateMetricConfig() collector.Config {
 	cfg := collector.DefaultConfig()
 	// If not set it will use ADC
 	cfg.ProjectID = os.Getenv("PROJECT_ID")
@@ -289,8 +359,8 @@ func (m *MetricsTestCase) CreateConfig() collector.Config {
 	cfg.MetricConfig.CreateMetricDescriptorBufferSize = 500
 	cfg.MetricConfig.InstrumentationLibraryLabels = false
 
-	if m.Configure != nil {
-		m.Configure(&cfg)
+	if tc.Configure != nil {
+		tc.Configure(&cfg)
 	}
 
 	return cfg
