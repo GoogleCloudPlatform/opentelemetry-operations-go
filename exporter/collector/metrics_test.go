@@ -284,8 +284,6 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
-<<<<<<< HEAD
-=======
 	// Verify aspects
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
@@ -386,7 +384,6 @@ func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
 	// the first point should be dropped, so we expect 2 points
 	assert.Len(t, tsl, 2)
 	ts := tsl[0]
->>>>>>> upstream/main
 	// Verify aspects
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
@@ -607,151 +604,6 @@ func TestNaNSumHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
 }
 
-func TestNoValueHistogramPointToTimeSeries(t *testing.T) {
-	mapper, shutdown := newTestMetricMapper()
-	defer shutdown()
-	mapper.cfg.ProjectID = "myproject"
-	mr := &monitoredrespb.MonitoredResource{}
-	metric := pdata.NewMetric()
-	metric.SetName("myhist")
-	metric.SetDataType(pmetric.MetricDataTypeHistogram)
-	unit := "1"
-	metric.SetUnit(unit)
-	hist := metric.Histogram()
-	point := hist.DataPoints().AppendEmpty()
-	point.SetFlags(pmetric.MetricDataPointFlags(pmetric.MetricDataPointFlagNoRecordedValue))
-	end := start.Add(time.Hour)
-	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
-	point.SetTimestamp(pdata.NewTimestampFromTime(end))
-	point.SetBucketCounts([]uint64{1, 2, 3, 4, 5})
-	point.SetCount(15)
-	point.SetSum(42)
-	point.SetExplicitBounds([]float64{10, 20, 30, 40})
-
-	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
-	// Points without a value are dropped
-	assert.Len(t, tsl, 0)
-}
-
-func TestNoSumHistogramPointToTimeSeries(t *testing.T) {
-	mapper, shutdown := newTestMetricMapper()
-	defer shutdown()
-	mapper.cfg.ProjectID = "myproject"
-	mr := &monitoredrespb.MonitoredResource{}
-	metric := pdata.NewMetric()
-	metric.SetName("myhist")
-	metric.SetDataType(pmetric.MetricDataTypeHistogram)
-	unit := "1"
-	metric.SetUnit(unit)
-	hist := metric.Histogram()
-	point := hist.DataPoints().AppendEmpty()
-	end := start.Add(time.Hour)
-	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
-	point.SetTimestamp(pdata.NewTimestampFromTime(end))
-	point.SetBucketCounts([]uint64{1, 2, 3, 4, 5})
-	point.SetCount(15)
-	// Leave the sum unset
-	point.SetExplicitBounds([]float64{10, 20, 30, 40})
-
-	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
-	// Points without a sum are dropped
-	assert.Len(t, tsl, 0)
-}
-
-func TestEmptyHistogramPointToTimeSeries(t *testing.T) {
-	mapper, shutdown := newTestMetricMapper()
-	defer shutdown()
-	mapper.cfg.ProjectID = "myproject"
-	mr := &monitoredrespb.MonitoredResource{}
-	metric := pdata.NewMetric()
-	metric.SetName("myhist")
-	metric.SetDataType(pmetric.MetricDataTypeHistogram)
-	unit := "1"
-	metric.SetUnit(unit)
-	hist := metric.Histogram()
-	point := hist.DataPoints().AppendEmpty()
-	end := start.Add(time.Hour)
-	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
-	point.SetTimestamp(pdata.NewTimestampFromTime(end))
-	point.SetBucketCounts([]uint64{0, 0, 0, 0, 0})
-	point.SetCount(0)
-	point.SetSum(0)
-	point.SetExplicitBounds([]float64{10, 20, 30, 40})
-
-	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
-	assert.Len(t, tsl, 1)
-	ts := tsl[0]
-	// Verify aspects
-	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
-	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
-	assert.Equal(t, unit, ts.Unit)
-	assert.Same(t, mr, ts.Resource)
-
-	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
-	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
-
-	assert.Nil(t, ts.Metadata)
-
-	assert.Len(t, ts.Points, 1)
-	assert.Equal(t, &monitoringpb.TimeInterval{
-		StartTime: timestamppb.New(start),
-		EndTime:   timestamppb.New(end),
-	}, ts.Points[0].Interval)
-	hdp := ts.Points[0].Value.GetDistributionValue()
-	assert.Equal(t, int64(0), hdp.Count)
-	assert.ElementsMatch(t, []int64{0, 0, 0, 0, 0}, hdp.BucketCounts)
-	// NaN sum produces a mean of 0
-	assert.Equal(t, float64(0), hdp.Mean)
-	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
-}
-
-func TestNaNSumHistogramPointToTimeSeries(t *testing.T) {
-	mapper, shutdown := newTestMetricMapper()
-	defer shutdown()
-	mapper.cfg.ProjectID = "myproject"
-	mr := &monitoredrespb.MonitoredResource{}
-	metric := pdata.NewMetric()
-	metric.SetName("myhist")
-	metric.SetDataType(pmetric.MetricDataTypeHistogram)
-	unit := "1"
-	metric.SetUnit(unit)
-	hist := metric.Histogram()
-	point := hist.DataPoints().AppendEmpty()
-	end := start.Add(time.Hour)
-	point.SetStartTimestamp(pdata.NewTimestampFromTime(start))
-	point.SetTimestamp(pdata.NewTimestampFromTime(end))
-	point.SetBucketCounts([]uint64{1, 2, 3, 4, 5})
-	point.SetCount(15)
-	point.SetSum(math.NaN())
-	point.SetExplicitBounds([]float64{10, 20, 30, 40})
-
-	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
-	assert.Len(t, tsl, 1)
-	ts := tsl[0]
-	// Verify aspects
-	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
-	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
-	assert.Equal(t, unit, ts.Unit)
-	assert.Same(t, mr, ts.Resource)
-
-	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
-	assert.Equal(t, map[string]string{}, ts.Metric.Labels)
-
-	assert.Nil(t, ts.Metadata)
-
-	assert.Len(t, ts.Points, 1)
-	assert.Equal(t, &monitoringpb.TimeInterval{
-		StartTime: timestamppb.New(start),
-		EndTime:   timestamppb.New(end),
-	}, ts.Points[0].Interval)
-	hdp := ts.Points[0].Value.GetDistributionValue()
-	assert.Equal(t, int64(15), hdp.Count)
-	assert.ElementsMatch(t, []int64{1, 2, 3, 4, 5}, hdp.BucketCounts)
-	// NaN sum produces a mean of 0
-	assert.Equal(t, float64(0), hdp.Mean)
-	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
-}
-
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
@@ -783,11 +635,7 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	// Add a second point with no value
 	hist.DataPoints().AppendEmpty().SetFlags(pmetric.MetricDataPointFlags(pmetric.MetricDataPointFlagNoRecordedValue))
 
-<<<<<<< HEAD
-	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
-=======
 	tsl := mapper.metricToTimeSeries(mr, labels{}, metric)
->>>>>>> upstream/main
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
 	// Verify aspects
@@ -829,8 +677,6 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
 }
 
-<<<<<<< HEAD
-=======
 func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
@@ -986,7 +832,6 @@ func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
 }
 
->>>>>>> upstream/main
 func TestNaNSumExponentialHistogramPointToTimeSeries(t *testing.T) {
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()

@@ -36,11 +36,7 @@ func createMetricsExporter(
 	logger, _ := zap.NewProduction()
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
-<<<<<<< HEAD
 		test.CreateMetricConfig(),
-=======
-		test.CreateConfig(),
->>>>>>> upstream/main
 		logger,
 		"latest",
 		collector.DefaultTimeout,
