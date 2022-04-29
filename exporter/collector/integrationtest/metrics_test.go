@@ -27,7 +27,7 @@ func TestMetrics(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range TestCases {
+	for _, test := range MetricsTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
@@ -38,7 +38,7 @@ func TestMetrics(t *testing.T) {
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateConfig())
+			testServerExporter := testServer.NewExporter(ctx, t, test.CreateMetricConfig())
 			// For collecting self observability metrics
 			inMemoryOCExporter, err := NewInMemoryOCViewExporter()
 			require.NoError(t, err)
@@ -51,7 +51,7 @@ func TestMetrics(t *testing.T) {
 			)
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
-			expectFixture := test.LoadExpectFixture(
+			expectFixture := test.LoadMetricExpectFixture(
 				t,
 				startTime,
 				endTime,
@@ -59,7 +59,7 @@ func TestMetrics(t *testing.T) {
 
 			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
 			require.NoError(t, err)
-			diff := DiffProtos(
+			diff := DiffMetricProtos(
 				t,
 				&MetricExpectFixture{
 					CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
