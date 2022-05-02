@@ -45,11 +45,45 @@ func (t *FakeTesting) Helper()      {}
 func (t *FakeTesting) Name() string { return "record fixtures" }
 
 func main() {
-	t := &FakeTesting{}
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
+	t := &FakeTesting{}
 
+	recordLogs(ctx, t, endTime)
+	recordMetrics(ctx, t, startTime, endTime)
+
+}
+
+func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
+	testServer, err := integrationtest.NewLoggingTestServer()
+	if err != nil {
+		panic(err)
+	}
+	go testServer.Serve()
+	defer testServer.Shutdown()
+
+	for _, test := range integrationtest.LogsTestCases {
+		if test.Skip {
+			continue
+		}
+		func() {
+			logs := test.LoadOTLPLogsInput(t, timestamp)
+			testServerExporter := testServer.NewExporter(ctx, t, test.CreateLogConfig())
+
+			require.NoError(t, testServerExporter.PushLogs(ctx, logs), "failed to export logs to local test server")
+			require.NoError(t, testServerExporter.Shutdown(ctx))
+
+			require.NoError(t, err)
+			fixture := &integrationtest.LogExpectFixture{
+				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
+			}
+			test.SaveRecordedLogFixtures(t, fixture)
+		}()
+	}
+}
+
+func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
 	testServer, err := integrationtest.NewMetricTestServer()
 	if err != nil {
 		panic(err)
@@ -57,13 +91,13 @@ func main() {
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
-	for _, test := range integrationtest.TestCases {
+	for _, test := range integrationtest.MetricsTestCases {
 		if test.Skip {
 			continue
 		}
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateConfig())
+			testServerExporter := testServer.NewExporter(ctx, t, test.CreateMetricConfig())
 			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
 			require.NoError(t, err)
 			defer inMemoryOCExporter.Shutdown(ctx)
@@ -79,7 +113,7 @@ func main() {
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
 				SelfObservabilityMetrics:        selfObsMetrics,
 			}
-			test.SaveRecordedFixtures(t, fixture)
+			test.SaveRecordedMetricFixtures(t, fixture)
 		}()
 	}
 }

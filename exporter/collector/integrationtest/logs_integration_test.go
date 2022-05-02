@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,42 +28,39 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
-func createMetricsExporter(
+func createLogsExporter(
 	ctx context.Context,
 	t *testing.T,
 	test *TestCase,
-) *collector.MetricsExporter {
+) *collector.LogsExporter {
 	logger, _ := zap.NewProduction()
-	exporter, err := collector.NewGoogleCloudMetricsExporter(
+	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
-		test.CreateMetricConfig(),
+		test.CreateLogConfig(),
 		logger,
-		"latest",
-		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
-	t.Log("Collector metrics exporter started")
+	t.Log("Collector logs exporter started")
 	return exporter
 }
 
-func TestIntegrationMetrics(t *testing.T) {
+func TestIntegrationLogs(t *testing.T) {
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range MetricsTestCases {
+	for _, test := range LogsTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
-			test.SkipIfNeeded(t)
-			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			exporter := createMetricsExporter(ctx, t, &test)
+			logs := test.LoadOTLPLogsInput(t, startTime)
+			exporter := createLogsExporter(ctx, t, &test)
 			defer func() { require.NoError(t, exporter.Shutdown(ctx)) }()
 
 			require.NoError(
 				t,
-				exporter.PushMetrics(ctx, metrics),
-				"Failed to export metrics",
+				exporter.PushLogs(ctx, logs),
+				"Failed to export logs",
 			)
 		})
 	}

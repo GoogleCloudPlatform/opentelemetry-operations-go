@@ -33,6 +33,8 @@ type Config struct {
 	TraceConfig TraceConfig `mapstructure:"trace"`
 
 	MetricConfig MetricConfig `mapstructure:"metric"`
+
+	LogConfig LogConfig `mapstructure:"log"`
 }
 
 type ClientConfig struct {
@@ -109,6 +111,14 @@ type MetricConfig struct {
 type ResourceFilter struct {
 	// Match resource keys by prefix
 	Prefix string `mapstructure:"prefix"`
+}
+
+type LogConfig struct {
+	ClientConfig ClientConfig `mapstructure:",squash"`
+
+	// DefaultLogLanme sets the fallback log name to use when one isn't explicitly set
+	// for a log entry. If unset, logs without a log name will raise an error.
+	DefaultLogName string `mapstructure:"default_log_name"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.
