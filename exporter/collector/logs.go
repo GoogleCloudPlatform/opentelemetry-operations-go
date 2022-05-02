@@ -169,12 +169,10 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 
 func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 	errors := []error{}
-	mapper := &metricMapper{} // Refactor metricMapper to map MRs for logging?
-
 	entries := make([]*logpb.LogEntry, 0, 0)
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
-		mr, _ := mapper.resourceToMonitoredResource(rl.Resource())
+		mr := defaultResourceToMonitoredResource(rl.Resource())
 
 		for j := 0; j < rl.ScopeLogs().Len(); j++ {
 			sl := rl.ScopeLogs().At(j)
