@@ -233,34 +233,29 @@ receivers:
 exporters:
   googlecloud:
     project: my-gcp-project
-    retry_on_failure:
-      enabled: true
     log:
-      default_log_name: apache-access-log
+      default_log_name: opentelemetry.io/collector-exported-log
 
 processors:
   memory_limiter:
       check_interval: 1s
       limit_mib: 4000
       spike_limit_mib: 800
-  batch:
-    send_batch_max_size: 200
-    send_batch_size: 200
-  resource:
-    attributes:
-      - key: cloud.platform
-        action: insert
-        value: gcp_compute_engine
+  resourcedetection:
+    detectors: [gce, gke]
+    timeout: 10s
   attributes:
+    # Override the default log name.  `gcp.log_name` takes precedence
+    # over the `default_log_name` specified in the exporter.
     actions:
       - key: gcp.log_name
         action: insert
-        value: my-log-name-foo
+        value: apache-access-log
 
 service:
     logs:
       receivers: [filelog]
-      processors: [memory_limiter, batch, resource, attributes]
+      processors: [memory_limiter, resourcedetection, attributes]
       exporters: [googlecloud]
 
 ```
@@ -275,7 +270,7 @@ To the following GCP entry structure:
 
 ```
         {
-          "logName": "projects/my-gcp-project/logs/my-log-name-foo",
+          "logName": "projects/my-gcp-project/logs/apache-access-log",
           "resource": {
             "type": "gce_instance",
             "labels": {
