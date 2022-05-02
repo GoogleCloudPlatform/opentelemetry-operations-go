@@ -29,10 +29,15 @@ func MapToPrometheusTarget(res pdata.Resource) *monitoredrespb.MonitoredResource
 	if serviceNamespace != "" {
 		job = serviceNamespace + "/" + job
 	}
+	location := getStringOrEmpty(attrs, semconv.AttributeCloudAvailabilityZone)
+	if location == "" {
+		// fall back to region if we don't have a zone.
+		location = getStringOrEmpty(attrs, semconv.AttributeCloudRegion)
+	}
 	return &monitoredrespb.MonitoredResource{
 		Type: "prometheus_target",
 		Labels: map[string]string{
-			"location":  getStringOrEmpty(attrs, semconv.AttributeCloudAvailabilityZone),
+			"location":  location,
 			"cluster":   getStringOrEmpty(attrs, semconv.AttributeK8SClusterName),
 			"namespace": getStringOrEmpty(attrs, semconv.AttributeK8SNamespaceName),
 			"job":       job,

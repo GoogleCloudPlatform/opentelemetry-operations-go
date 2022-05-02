@@ -46,7 +46,7 @@ func TestMapToPrometheusTarget(t *testing.T) {
 			desc: "with gke container attributes",
 			resourceLabels: map[string]string{
 				"cloud.platform":          "gcp_kubernetes_engine",
-				"cloud.availability_zone": "us-central1",
+				"cloud.availability_zone": "us-central1-c",
 				"k8s.cluster.name":        "mycluster",
 				"k8s.namespace.name":      "mynamespace",
 				"k8s.pod.name":            "mypod",
@@ -57,7 +57,7 @@ func TestMapToPrometheusTarget(t *testing.T) {
 			expected: &monitoredrespb.MonitoredResource{
 				Type: "prometheus_target",
 				Labels: map[string]string{
-					"location":  "us-central1",
+					"location":  "us-central1-c",
 					"cluster":   "mycluster",
 					"namespace": "mynamespace",
 					"job":       "myservicename",
@@ -68,9 +68,27 @@ func TestMapToPrometheusTarget(t *testing.T) {
 		{
 			desc: "Attributes from prometheus receiver, and zone",
 			resourceLabels: map[string]string{
-				"cloud.availability_zone": "us-central1",
+				"cloud.availability_zone": "us-central1-c",
 				"service.name":            "myservicename",
 				"service.instance.id":     "myserviceinstanceid",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1-c",
+					"cluster":   "",
+					"namespace": "",
+					"job":       "myservicename",
+					"instance":  "myserviceinstanceid",
+				},
+			},
+		},
+		{
+			desc: "Attributes from prometheus receiver, and region",
+			resourceLabels: map[string]string{
+				"cloud.region":        "us-central1",
+				"service.name":        "myservicename",
+				"service.instance.id": "myserviceinstanceid",
 			},
 			expected: &monitoredrespb.MonitoredResource{
 				Type: "prometheus_target",
@@ -86,7 +104,7 @@ func TestMapToPrometheusTarget(t *testing.T) {
 		{
 			desc: "Attributes service from opentelemetry sdk and zone",
 			resourceLabels: map[string]string{
-				"cloud.availability_zone": "us-central1",
+				"cloud.availability_zone": "us-central1-c",
 				"service.name":            "myservicename",
 				"service.namespace":       "myservicenamespace",
 				"service.instance.id":     "myserviceinstanceid",
@@ -94,7 +112,7 @@ func TestMapToPrometheusTarget(t *testing.T) {
 			expected: &monitoredrespb.MonitoredResource{
 				Type: "prometheus_target",
 				Labels: map[string]string{
-					"location":  "us-central1",
+					"location":  "us-central1-c",
 					"cluster":   "",
 					"namespace": "",
 					"job":       "myservicenamespace/myservicename",
