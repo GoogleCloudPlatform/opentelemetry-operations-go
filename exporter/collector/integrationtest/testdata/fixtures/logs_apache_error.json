@@ -1,7 +1,16 @@
 {
   "resourceLogs": [
     {
-      "resource": {},
+      "resource": {
+        "attributes": [
+          {
+            "key": "cloud.platform",
+            "value": {
+              "stringValue": "gcp_compute_engine"
+            }
+          }
+        ]
+      },
       "scopeLogs": [
         {
           "scope": {},
@@ -12,6 +21,12 @@
                 "kvlistValue": {
                   "values": [
                     {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 417652:tid 139808755448704] AH01232: suEXEC mechanism enabled (wrapper: /usr/local/apache/bin/suexec)"
+                      }
+                    },
+                    {
                       "key": "time",
                       "value": {
                         "stringValue": "Tue Apr 26 00:46:21.412645 2022"
@@ -21,12 +36,6 @@
                       "key": "severity",
                       "value": {
                         "stringValue": "notice"
-                      }
-                    },
-                    {
-                      "key": "message",
-                      "value": {
-                        "stringValue": "[pid 417652:tid 139808755448704] AH01232: suEXEC mechanism enabled (wrapper: /usr/local/apache/bin/suexec)"
                       }
                     }
                   ]
@@ -40,7 +49,7 @@
                   }
                 },
                 {
-                  "key": "com.google.logName",
+                  "key": "gcp.log_name",
                   "value": {
                     "stringValue": "apache-error-fixture"
                   }
@@ -85,7 +94,7 @@
                   }
                 },
                 {
-                  "key": "com.google.logName",
+                  "key": "gcp.log_name",
                   "value": {
                     "stringValue": "apache-error-fixture"
                   }
@@ -128,7 +137,7 @@
                   }
                 },
                 {
-                  "key": "com.google.logName",
+                  "key": "gcp.log_name",
                   "value": {
                     "stringValue": "apache-error-fixture"
                   }
@@ -143,6 +152,12 @@
                 "kvlistValue": {
                   "values": [
                     {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 00:46:21.503003 2022"
+                      }
+                    },
+                    {
                       "key": "severity",
                       "value": {
                         "stringValue": "notice"
@@ -152,12 +167,6 @@
                       "key": "message",
                       "value": {
                         "stringValue": "[pid 417653:tid 139808755448704] AH00094: Command line: '/usr/local/apache/bin/httpd'"
-                      }
-                    },
-                    {
-                      "key": "time",
-                      "value": {
-                        "stringValue": "Tue Apr 26 00:46:21.503003 2022"
                       }
                     }
                   ]
@@ -171,7 +180,7 @@
                   }
                 },
                 {
-                  "key": "com.google.logName",
+                  "key": "gcp.log_name",
                   "value": {
                     "stringValue": "apache-error-fixture"
                   }
@@ -186,12 +195,6 @@
                 "kvlistValue": {
                   "values": [
                     {
-                      "key": "message",
-                      "value": {
-                        "stringValue": "[pid 417653:tid 139808755448704] AH00491: caught SIGTERM, shutting down"
-                      }
-                    },
-                    {
                       "key": "time",
                       "value": {
                         "stringValue": "Tue Apr 26 00:46:38.988423 2022"
@@ -201,6 +204,12 @@
                       "key": "severity",
                       "value": {
                         "stringValue": "notice"
+                      }
+                    },
+                    {
+                      "key": "message",
+                      "value": {
+                        "stringValue": "[pid 417653:tid 139808755448704] AH00491: caught SIGTERM, shutting down"
                       }
                     }
                   ]
@@ -214,7 +223,7 @@
                   }
                 },
                 {
-                  "key": "com.google.logName",
+                  "key": "gcp.log_name",
                   "value": {
                     "stringValue": "apache-error-fixture"
                   }
@@ -257,7 +266,7 @@
                   }
                 },
                 {
-                  "key": "com.google.logName",
+                  "key": "gcp.log_name",
                   "value": {
                     "stringValue": "apache-error-fixture"
                   }
@@ -302,7 +311,7 @@
                   }
                 },
                 {
-                  "key": "com.google.logName",
+                  "key": "gcp.log_name",
                   "value": {
                     "stringValue": "apache-error-fixture"
                   }
@@ -317,6 +326,12 @@
                 "kvlistValue": {
                   "values": [
                     {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 22:48:35.606223 2022"
+                      }
+                    },
+                    {
                       "key": "severity",
                       "value": {
                         "stringValue": "notice"
@@ -326,12 +341,6 @@
                       "key": "message",
                       "value": {
                         "stringValue": "[pid 769:tid 140159306111872] AH00489: Apache/2.4.46 (Unix) OpenSSL/1.1.1g mod_wsgi/4.7.1 Python/3.6 configured -- resuming normal operations"
-                      }
-                    },
-                    {
-                      "key": "time",
-                      "value": {
-                        "stringValue": "Tue Apr 26 22:48:35.606223 2022"
                       }
                     }
                   ]
@@ -345,7 +354,7 @@
                   }
                 },
                 {
-                  "key": "com.google.logName",
+                  "key": "gcp.log_name",
                   "value": {
                     "stringValue": "apache-error-fixture"
                   }
@@ -360,6 +369,12 @@
                 "kvlistValue": {
                   "values": [
                     {
+                      "key": "time",
+                      "value": {
+                        "stringValue": "Tue Apr 26 22:48:35.606298 2022"
+                      }
+                    },
+                    {
                       "key": "severity",
                       "value": {
                         "stringValue": "notice"
@@ -369,12 +384,6 @@
                       "key": "message",
                       "value": {
                         "stringValue": "[pid 769:tid 140159306111872] AH00094: Command line: '/usr/local/apache/bin/httpd'"
-                      }
-                    },
-                    {
-                      "key": "time",
-                      "value": {
-                        "stringValue": "Tue Apr 26 22:48:35.606298 2022"
                       }
                     }
                   ]
@@ -388,7 +397,7 @@
                   }
                 },
                 {
-                  "key": "com.google.logName",
+                  "key": "gcp.log_name",
                   "value": {
                     "stringValue": "apache-error-fixture"
                   }

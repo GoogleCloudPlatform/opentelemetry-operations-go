@@ -5,11 +5,10 @@
         {
           "logName": "projects/fakeprojectid/logs/apache-error-fixture",
           "resource": {
-            "type": "generic_node",
+            "type": "gce_instance",
             "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
+              "instance_id": "",
+              "zone": ""
             }
           },
           "jsonPayload": {
@@ -17,16 +16,15 @@
             "severity": "notice",
             "time": "Tue Apr 26 00:46:21.412645 2022"
           },
-          "timestamp": "2022-04-28T17:26:45.136110082Z"
+          "timestamp": "2022-05-02T12:16:14.574548493Z"
         },
         {
           "logName": "projects/fakeprojectid/logs/apache-error-fixture",
           "resource": {
-            "type": "generic_node",
+            "type": "gce_instance",
             "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
+              "instance_id": "",
+              "zone": ""
             }
           },
           "jsonPayload": {
@@ -34,17 +32,16 @@
             "severity": "warn",
             "time": "Tue Apr 26 00:46:21.457314 2022"
           },
-          "timestamp": "2022-04-28T17:26:45.136110082Z",
+          "timestamp": "2022-05-02T12:16:14.574548493Z",
           "severity": "WARNING"
         },
         {
           "logName": "projects/fakeprojectid/logs/apache-error-fixture",
           "resource": {
-            "type": "generic_node",
+            "type": "gce_instance",
             "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
+              "instance_id": "",
+              "zone": ""
             }
           },
           "jsonPayload": {
@@ -52,16 +49,15 @@
             "severity": "notice",
             "time": "Tue Apr 26 00:46:21.502940 2022"
           },
-          "timestamp": "2022-04-28T17:26:45.136110082Z"
+          "timestamp": "2022-05-02T12:16:14.574548493Z"
         },
         {
           "logName": "projects/fakeprojectid/logs/apache-error-fixture",
           "resource": {
-            "type": "generic_node",
+            "type": "gce_instance",
             "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
+              "instance_id": "",
+              "zone": ""
             }
           },
           "jsonPayload": {
@@ -69,16 +65,15 @@
             "severity": "notice",
             "time": "Tue Apr 26 00:46:21.503003 2022"
           },
-          "timestamp": "2022-04-28T17:26:45.136110082Z"
+          "timestamp": "2022-05-02T12:16:14.574548493Z"
         },
         {
           "logName": "projects/fakeprojectid/logs/apache-error-fixture",
           "resource": {
-            "type": "generic_node",
+            "type": "gce_instance",
             "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
+              "instance_id": "",
+              "zone": ""
             }
           },
           "jsonPayload": {
@@ -86,16 +81,15 @@
             "severity": "notice",
             "time": "Tue Apr 26 00:46:38.988423 2022"
           },
-          "timestamp": "2022-04-28T17:26:45.136110082Z"
+          "timestamp": "2022-05-02T12:16:14.574548493Z"
         },
         {
           "logName": "projects/fakeprojectid/logs/apache-error-fixture",
           "resource": {
-            "type": "generic_node",
+            "type": "gce_instance",
             "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
+              "instance_id": "",
+              "zone": ""
             }
           },
           "jsonPayload": {
@@ -103,16 +97,15 @@
             "severity": "notice",
             "time": "Tue Apr 26 22:48:34.466058 2022"
           },
-          "timestamp": "2022-04-28T17:26:45.136110082Z"
+          "timestamp": "2022-05-02T12:16:14.574548493Z"
         },
         {
           "logName": "projects/fakeprojectid/logs/apache-error-fixture",
           "resource": {
-            "type": "generic_node",
+            "type": "gce_instance",
             "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
+              "instance_id": "",
+              "zone": ""
             }
           },
           "jsonPayload": {
@@ -120,17 +113,16 @@
             "severity": "warn",
             "time": "Tue Apr 26 22:48:34.740290 2022"
           },
-          "timestamp": "2022-04-28T17:26:45.136110082Z",
+          "timestamp": "2022-05-02T12:16:14.574548493Z",
           "severity": "WARNING"
         },
         {
           "logName": "projects/fakeprojectid/logs/apache-error-fixture",
           "resource": {
-            "type": "generic_node",
+            "type": "gce_instance",
             "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
+              "instance_id": "",
+              "zone": ""
             }
           },
           "jsonPayload": {
@@ -138,16 +130,15 @@
             "severity": "notice",
             "time": "Tue Apr 26 22:48:35.606223 2022"
           },
-          "timestamp": "2022-04-28T17:26:45.136110082Z"
+          "timestamp": "2022-05-02T12:16:14.574548493Z"
         },
         {
           "logName": "projects/fakeprojectid/logs/apache-error-fixture",
           "resource": {
-            "type": "generic_node",
+            "type": "gce_instance",
             "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
+              "instance_id": "",
+              "zone": ""
             }
           },
           "jsonPayload": {
@@ -155,7 +146,7 @@
             "severity": "notice",
             "time": "Tue Apr 26 22:48:35.606298 2022"
           },
-          "timestamp": "2022-04-28T17:26:45.136110082Z"
+          "timestamp": "2022-05-02T12:16:14.574548493Z"
         }
       ],
       "partialSuccess": true
