@@ -163,7 +163,7 @@ func TestLogMapping(t *testing.T) {
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				log.Attributes().Insert(
-					"com.google.sourceLocation",
+					SourceLocationAttributeKey,
 					pcommon.NewValueBytes([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`)),
 				)
 				return log
@@ -255,7 +255,7 @@ func TestGetLogName(t *testing.T) {
 			name: "log with name attribute",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Attributes().Insert("com.google.logName", pcommon.NewValueString("foo-log"))
+				log.Attributes().Insert(LogNameAttributeKey, pcommon.NewValueString("foo-log"))
 				return log
 			},
 			expectedName: "foo-log",

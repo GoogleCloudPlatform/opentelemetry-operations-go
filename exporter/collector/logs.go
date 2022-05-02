@@ -34,10 +34,12 @@ import (
 )
 
 const (
-	HTTPRequestAttributeKey = "com.google.httpRequest"
-
 	defaultMaxEntrySize   = 256000   // 256 KB
 	defaultMaxRequestSize = 10000000 // 10 MB
+
+	HTTPRequestAttributeKey    = "gcp.http_request"
+	LogNameAttributeKey        = "gcp.log_name"
+	SourceLocationAttributeKey = "gcp.source_location"
 )
 
 // severityMapping maps the integer severity level values from OTel [0-24]
@@ -225,14 +227,14 @@ func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEn
 }
 
 func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
-	logNameAttr, exists := log.Attributes().Get("com.google.logName")
+	logNameAttr, exists := log.Attributes().Get(LogNameAttributeKey)
 	if exists {
 		return logNameAttr.AsString(), nil
 	}
 	if len(l.cfg.LogConfig.DefaultLogName) > 0 {
 		return l.cfg.LogConfig.DefaultLogName, nil
 	}
-	return "", fmt.Errorf("no log name provided.  Set the 'default_log_name' option, or add the 'com.google.logName' attribute to set a log name")
+	return "", fmt.Errorf("no log name provided.  Set the 'default_log_name' option, or add the 'gcp.log_name' attribute to set a log name")
 }
 
 func (l logMapper) logToEntry(
@@ -263,7 +265,7 @@ func (l logMapper) logToEntry(
 	}
 
 	// parse LogEntrySourceLocation struct from OTel attribute
-	sourceLocation, ok := log.Attributes().Get("com.google.sourceLocation")
+	sourceLocation, ok := log.Attributes().Get(SourceLocationAttributeKey)
 	if ok {
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
 		err := json.Unmarshal(sourceLocation.BytesVal(), &logEntrySourceLocation)
