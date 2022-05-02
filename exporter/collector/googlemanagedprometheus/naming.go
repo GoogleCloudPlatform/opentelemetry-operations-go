@@ -38,8 +38,6 @@ func GetMetricName(baseName string, metric pdata.Metric) string {
 		return baseName + "/summary"
 	case pmetric.MetricDataTypeHistogram:
 		return baseName + "/histogram"
-	case pmetric.MetricDataTypeExponentialHistogram:
-		return baseName + "/exponentialhistogram"
 	default:
 		// This should never happen, as we have already dropped other data
 		// types at this point.
