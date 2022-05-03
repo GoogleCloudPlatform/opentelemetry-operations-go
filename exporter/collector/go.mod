@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	cloud.google.com/go/logging v1.4.2
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.5.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.5.1
 	github.com/census-instrumentation/opencensus-proto v0.3.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus v0.49.0
 	github.com/stretchr/testify v1.7.1
@@ -22,7 +22,7 @@ require (
 require (
 	cloud.google.com/go/monitoring v1.4.0
 	cloud.google.com/go/trace v1.2.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.29.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.29.1
 	github.com/benbjohnson/clock v1.3.0 // indirect
 	github.com/google/go-cmp v0.5.7
 	go.opentelemetry.io/collector/pdata v0.49.0
