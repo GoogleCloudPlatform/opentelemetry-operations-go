@@ -105,7 +105,7 @@ type MetricConfig struct {
 	// This enables calculation of an estimated sum of squared deviation.  It isn't correct,
 	// so we don't send it by default, and don't expose it to users. For some uses, it is
 	// expected, however.
-	EnableSumOfSquaredDeviation bool
+	EnableSumOfSquaredDeviation bool `mapstructure:"sum_of_squared_deviation"`
 }
 
 type ResourceFilter struct {
