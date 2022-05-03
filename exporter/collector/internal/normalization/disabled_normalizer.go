@@ -14,11 +14,18 @@
 
 package normalization
 
-import "go.opentelemetry.io/collector/model/pdata"
+import (
+	"time"
+
+	"go.opentelemetry.io/collector/model/pdata"
+)
 
 // NewDisabledNormalizer returns a Normalizer which does not perform any
 // normalization. This may be useful if standard normalization consumes too
-// much memory.
+// much memory. For explicit reset points described in
+// https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
+// it adjusts the end time to be after the start time to make the points valid
+// without changing the start time (which causes the point to reset).
 func NewDisabledNormalizer() Normalizer {
 	return &disabledNormalizer{}
 }
@@ -27,20 +34,56 @@ type disabledNormalizer struct{}
 
 // NormalizeExponentialHistogramDataPoint returns the point without normalizing.
 func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pdata.ExponentialHistogramDataPoint, _ string) *pdata.ExponentialHistogramDataPoint {
+	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// Handle explicit reset points.
+		// Make a copy so we don't mutate underlying data.
+		newPoint := pdata.NewExponentialHistogramDataPoint()
+		point.CopyTo(newPoint)
+		// StartTime = Timestamp - 1 ms
+		newPoint.SetStartTimestamp(pdata.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
+		return &newPoint
+	}
 	return &point
 }
 
 // NormalizeHistogramDataPoint returns the point without normalizing.
 func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pdata.HistogramDataPoint, _ string) *pdata.HistogramDataPoint {
+	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// Handle explicit reset points.
+		// Make a copy so we don't mutate underlying data.
+		newPoint := pdata.NewHistogramDataPoint()
+		point.CopyTo(newPoint)
+		// StartTime = Timestamp - 1 ms
+		newPoint.SetStartTimestamp(pdata.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
+		return &newPoint
+	}
 	return &point
 }
 
 // NormalizeNumberDataPoint returns the point without normalizing.
 func (d *disabledNormalizer) NormalizeNumberDataPoint(point pdata.NumberDataPoint, _ string) *pdata.NumberDataPoint {
+	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// Handle explicit reset points.
+		// Make a copy so we don't mutate underlying data.
+		newPoint := pdata.NewNumberDataPoint()
+		point.CopyTo(newPoint)
+		// StartTime = Timestamp - 1 ms
+		newPoint.SetStartTimestamp(pdata.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
+		return &newPoint
+	}
 	return &point
 }
 
 // NormalizeSummaryDataPoint returns the point without normalizing.
 func (d *disabledNormalizer) NormalizeSummaryDataPoint(point pdata.SummaryDataPoint, _ string) *pdata.SummaryDataPoint {
+	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// Handle explicit reset points.
+		// Make a copy so we don't mutate underlying data.
+		newPoint := pdata.NewSummaryDataPoint()
+		point.CopyTo(newPoint)
+		// StartTime = Timestamp - 1 ms
+		newPoint.SetStartTimestamp(pdata.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
+		return &newPoint
+	}
 	return &point
 }
