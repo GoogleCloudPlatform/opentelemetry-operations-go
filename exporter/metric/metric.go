@@ -254,7 +254,7 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 	return err
 }
 
-// exportTimeSeriees create TimeSeries from the records in cps.
+// exportTimeSeries create TimeSeries from the records in cps.
 // res should be the common resource among all TimeSeries, such as instance id, application name and so on.
 func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
 	tss := []*monitoringpb.TimeSeries{}
@@ -386,7 +386,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	monitoredRes := &monitoredrespb.MonitoredResource{
 		Type: "global",
 		Labels: map[string]string{
-			"project_id": me.o.ProjectID,
+			"project_id": me.maybeSanitizeUTF8(me.o.ProjectID),
 		},
 	}
 
@@ -397,7 +397,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 		return monitoredRes
 	}
 
-	resLabelMap := generateResLabelMap(res)
+	resLabelMap := me.generateResLabelMap(res)
 
 	resTypeStr := "global"
 	match := map[string]string{}
@@ -420,15 +420,15 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	}
 
 	monitoredRes.Type = resTypeStr
-	monitoredRes.Labels["project_id"] = me.o.ProjectID
+	monitoredRes.Labels["project_id"] = me.maybeSanitizeUTF8(me.o.ProjectID)
 
 	return monitoredRes
 }
 
-func generateResLabelMap(res *resource.Resource) map[string]string {
+func (me *metricExporter) generateResLabelMap(res *resource.Resource) map[string]string {
 	resLabelMap := make(map[string]string)
 	for _, label := range res.Attributes() {
-		resLabelMap[string(label.Key)] = label.Value.Emit()
+		resLabelMap[string(label.Key)] = me.maybeSanitizeUTF8(label.Value.Emit())
 	}
 	return resLabelMap
 }
@@ -494,7 +494,7 @@ func (me *metricExporter) recordToMpb(r *export.Record, library instrumentation.
 	iter := r.Labels().Iter()
 	for iter.Next() {
 		kv := iter.Label()
-		labels[normalizeLabelKey(string(kv.Key))] = kv.Value.Emit()
+		labels[normalizeLabelKey(string(kv.Key))] = me.maybeSanitizeUTF8(kv.Value.Emit())
 	}
 
 	return &googlemetricpb.Metric{
@@ -543,6 +543,14 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	}
 
 	return nil, nil, errUnexpectedInstrumentKind{kind: ikind}
+}
+
+// maybeSanitizeUTF8 converts strings to valid UTF-8 if requested in the options.
+func (me *metricExporter) maybeSanitizeUTF8(s string) string {
+	if me.o.EnforceUTF8 != nil && !*me.o.EnforceUTF8 {
+		return s
+	}
+	return strings.ToValidUTF8(s, "�")
 }
 
 func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind number.Kind) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {

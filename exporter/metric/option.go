@@ -59,6 +59,10 @@ type options struct {
 	// If it is set to zero then default value is used.
 	ReportingInterval time.Duration
 
+	// EnforceUTF8 causes all metric and resource label values to be converted to valid UTF-8.
+	// If it is unset then default value (true) is used.
+	EnforceUTF8 *bool
+
 	// MetricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
 	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
 	MetricDescriptorTypeFormatter func(*sdkapi.Descriptor) string
@@ -96,6 +100,13 @@ func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options
 func WithInterval(t time.Duration) func(o *options) {
 	return func(o *options) {
 		o.ReportingInterval = t
+	}
+}
+
+// WithEnforceUTF8 sets the preference for UTF-8 enforcement for metric exporter.
+func WithEnforceUTF8(b bool) func(o *options) {
+	return func(o *options) {
+		o.EnforceUTF8 = &b
 	}
 }
 
