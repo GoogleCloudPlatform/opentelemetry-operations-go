@@ -1417,10 +1417,12 @@ func TestMetricNameToType(t *testing.T) {
 }
 
 func TestAttributesToLabels(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	// string to string
 	assert.Equal(
 		t,
-		attributesToLabels(pcommon.NewMapFromRaw(map[string]interface{}{
+		mapper.attributesToLabels(pcommon.NewMapFromRaw(map[string]interface{}{
 			"foo": "bar",
 			"bar": "baz",
 		})),
@@ -1430,7 +1432,7 @@ func TestAttributesToLabels(t *testing.T) {
 	// various key special cases
 	assert.Equal(
 		t,
-		attributesToLabels(pcommon.NewMapFromRaw(map[string]interface{}{
+		mapper.attributesToLabels(pcommon.NewMapFromRaw(map[string]interface{}{
 			"foo.bar":   "bar",
 			"_foo":      "bar",
 			"123.hello": "bar",
@@ -1447,7 +1449,7 @@ func TestAttributesToLabels(t *testing.T) {
 	// value special cases
 	assert.Equal(
 		t,
-		attributesToLabels(pcommon.NewMapFromRaw(map[string]interface{}{
+		mapper.attributesToLabels(pcommon.NewMapFromRaw(map[string]interface{}{
 			"a": true,
 			"b": false,
 			"c": int64(12),
@@ -1928,8 +1930,8 @@ func TestKnownDomains(t *testing.T) {
 func TestInstrumentationScopeToLabels(t *testing.T) {
 	newInstrumentationScope := func(name, version string) pdata.InstrumentationScope {
 		is := pdata.NewInstrumentationScope()
-		is.SetName("foo")
-		is.SetVersion("1.2.3")
+		is.SetName(name)
+		is.SetVersion(version)
 		return is
 	}
 
@@ -1964,6 +1966,156 @@ func TestInstrumentationScopeToLabels(t *testing.T) {
 			out := m.instrumentationScopeToLabels(test.InstrumentationScope)
 
 			assert.Equal(t, out, test.output)
+		})
+	}
+}
+
+var (
+	invalidUtf8TwoOctet   = string([]byte{0xc3, 0x28}) // Invalid 2-octet sequence
+	invalidUtf8SequenceID = string([]byte{0xa0, 0xa1}) // Invalid sequence identifier
+	bTrue                 = true
+	bFalse                = false
+)
+
+func TestAttributesToLabelsUTF8(t *testing.T) {
+	tests := []struct {
+		name         string
+		enforceUTF8  *bool
+		attributes   map[string]interface{}
+		expectLabels labels
+	}{
+		{
+			name:        "UTF-8 sanitization enabled",
+			enforceUTF8: &bTrue,
+			attributes: map[string]interface{}{
+				"valid_ascii":         "abcdefg",
+				"valid_utf8":          "שלום",
+				"invalid_two_octet":   invalidUtf8TwoOctet,
+				"invalid_sequence_id": invalidUtf8SequenceID,
+			},
+			expectLabels: labels{
+				"valid_ascii":         "abcdefg",
+				"valid_utf8":          "שלום",
+				"invalid_two_octet":   "�(",
+				"invalid_sequence_id": "�",
+			},
+		},
+		{
+			name:        "UTF-8 sanitization disabled",
+			enforceUTF8: &bFalse,
+			attributes: map[string]interface{}{
+				"valid_ascii":         "abcdefg",
+				"valid_utf8":          "שלום",
+				"invalid_two_octet":   invalidUtf8TwoOctet,
+				"invalid_sequence_id": invalidUtf8SequenceID,
+			},
+			expectLabels: labels{
+				"valid_ascii":         "abcdefg",
+				"valid_utf8":          "שלום",
+				"invalid_two_octet":   invalidUtf8TwoOctet,
+				"invalid_sequence_id": invalidUtf8SequenceID,
+			},
+		},
+		{
+			name:        "UTF-8 sanitization default",
+			enforceUTF8: nil,
+			attributes: map[string]interface{}{
+				"valid_ascii":         "abcdefg",
+				"valid_utf8":          "שלום",
+				"invalid_two_octet":   invalidUtf8TwoOctet,
+				"invalid_sequence_id": invalidUtf8SequenceID,
+			},
+			expectLabels: labels{
+				"valid_ascii":         "abcdefg",
+				"valid_utf8":          "שלום",
+				"invalid_two_octet":   "�(",
+				"invalid_sequence_id": "�",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mapper, shutdown := newTestMetricMapper()
+			mapper.cfg.MetricConfig.EnforceUTF8 = test.enforceUTF8
+			defer shutdown()
+
+			assert.Equal(
+				t,
+				mapper.attributesToLabels(pcommon.NewMapFromRaw(test.attributes)),
+				test.expectLabels,
+			)
+		})
+	}
+}
+
+func TestInstrumentationScopeToLabelsUTF8(t *testing.T) {
+	newInstrumentationScope := func(name, version string) pdata.InstrumentationScope {
+		is := pdata.NewInstrumentationScope()
+		is.SetName(name)
+		is.SetVersion(version)
+		return is
+	}
+
+	type subTestStruct struct {
+		name                 string
+		InstrumentationScope pdata.InstrumentationScope
+		output               labels
+	}
+	tests := []struct {
+		name        string
+		enforceUTF8 *bool
+		subTests    []subTestStruct
+	}{{
+		name:        "UTF-8 sanitization enabled",
+		enforceUTF8: &bTrue,
+		subTests: []subTestStruct{{
+			name:                 "valid",
+			InstrumentationScope: newInstrumentationScope("abcdefg", "שלום"),
+			output:               labels{"instrumentation_source": "abcdefg", "instrumentation_version": "שלום"},
+		}, {
+			name:                 "invalid",
+			InstrumentationScope: newInstrumentationScope(invalidUtf8TwoOctet, invalidUtf8SequenceID),
+			output:               labels{"instrumentation_source": "�(", "instrumentation_version": "�"},
+		}},
+	}, {
+		name:        "UTF-8 sanitization disabled",
+		enforceUTF8: &bFalse,
+		subTests: []subTestStruct{{
+			name:                 "valid",
+			InstrumentationScope: newInstrumentationScope("abcdefg", "שלום"),
+			output:               labels{"instrumentation_source": "abcdefg", "instrumentation_version": "שלום"},
+		}, {
+			name:                 "invalid",
+			InstrumentationScope: newInstrumentationScope(invalidUtf8TwoOctet, invalidUtf8SequenceID),
+			output:               labels{"instrumentation_source": invalidUtf8TwoOctet, "instrumentation_version": invalidUtf8SequenceID},
+		}},
+	}, {
+		name:        "UTF-8 sanitization default",
+		enforceUTF8: nil,
+		subTests: []subTestStruct{{
+			name:                 "valid",
+			InstrumentationScope: newInstrumentationScope("abcdefg", "שלום"),
+			output:               labels{"instrumentation_source": "abcdefg", "instrumentation_version": "שלום"},
+		}, {
+			name:                 "invalid",
+			InstrumentationScope: newInstrumentationScope(invalidUtf8TwoOctet, invalidUtf8SequenceID),
+			output:               labels{"instrumentation_source": "�(", "instrumentation_version": "�"},
+		}},
+	}}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			m, shutdown := newTestMetricMapper()
+			defer shutdown()
+			m.cfg.MetricConfig.EnforceUTF8 = test.enforceUTF8
+
+			for _, subTest := range test.subTests {
+				t.Run(subTest.name, func(t *testing.T) {
+					out := m.instrumentationScopeToLabels(subTest.InstrumentationScope)
+					assert.Equal(t, out, subTest.output)
+				})
+			}
 		})
 	}
 }

@@ -106,6 +106,9 @@ type MetricConfig struct {
 	// so we don't send it by default, and don't expose it to users. For some uses, it is
 	// expected, however.
 	EnableSumOfSquaredDeviation bool `mapstructure:"sum_of_squared_deviation"`
+
+	// This enables sanitization of UTF-8 characters in labels.
+	EnforceUTF8 *bool `mapstructure:"enforce_utf8"`
 }
 
 type ResourceFilter struct {
