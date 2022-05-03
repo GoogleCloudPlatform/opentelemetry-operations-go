@@ -15,32 +15,31 @@
 package googlemanagedprometheus
 
 import (
+	"fmt"
 	"strings"
 
 	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-func GetMetricName(baseName string, metric pdata.Metric) string {
+func GetMetricName(baseName string, metric pdata.Metric) (string, error) {
 	switch metric.DataType() {
 	case pmetric.MetricDataTypeSum:
-		return baseName + "/counter"
+		return baseName + "/counter", nil
 	case pmetric.MetricDataTypeGauge:
-		return baseName + "/gauge"
+		return baseName + "/gauge", nil
 	case pmetric.MetricDataTypeSummary:
 		// summaries are sent as the following series:
 		// * Sum: prometheus.googleapis.com/<baseName>_sum/summary:counter
 		// * Count: prometheus.googleapis.com/<baseName>_count/summary
 		// * Quantiles: prometheus.googleapis.com/<baseName>/summary
 		if strings.HasSuffix(baseName, "_sum") {
-			return baseName + "/summary:counter"
+			return baseName + "/summary:counter", nil
 		}
-		return baseName + "/summary"
+		return baseName + "/summary", nil
 	case pmetric.MetricDataTypeHistogram:
-		return baseName + "/histogram"
+		return baseName + "/histogram", nil
 	default:
-		// This should never happen, as we have already dropped other data
-		// types at this point.
-		return ""
+		return "", fmt.Errorf("unsupported metric datatype: %v", metric.DataType())
 	}
 }

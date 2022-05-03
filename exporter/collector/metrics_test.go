@@ -1409,9 +1409,11 @@ func TestMetricNameToType(t *testing.T) {
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	metric := pdata.NewMetric()
+	got, err := mapper.metricNameToType("foo", metric)
+	assert.NoError(t, err)
 	assert.Equal(
 		t,
-		mapper.metricNameToType("foo", metric),
+		got,
 		"workload.googleapis.com/foo",
 		"Should use workload metric domain with default config",
 	)
@@ -1922,7 +1924,9 @@ func TestKnownDomains(t *testing.T) {
 				mapper.cfg.MetricConfig.KnownDomains = test.knownDomains
 			}
 			mapper.cfg.MetricConfig.Prefix = "prefix"
-			assert.Equal(t, test.metricType, mapper.metricNameToType(test.name, metric))
+			metricType, err := mapper.metricNameToType(test.name, metric)
+			assert.NoError(t, err)
+			assert.Equal(t, test.metricType, metricType)
 		})
 	}
 }

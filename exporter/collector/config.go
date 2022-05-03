@@ -113,7 +113,7 @@ type MetricConfig struct {
 	// exporters which extend the functionality of this exporter. It allows
 	// customizing the naming of metrics. baseName already includes type
 	// suffixes for summary metrics, but does not (yet) include the domain prefix
-	GetMetricName func(baseName string, metric pdata.Metric) string
+	GetMetricName func(baseName string, metric pdata.Metric) (string, error)
 
 	// MapMonitoredResource is not exposed as an option in the configuration, but
 	// can be used by other exporters to extend the functionality of this
