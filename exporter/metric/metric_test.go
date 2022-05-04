@@ -495,7 +495,7 @@ func TestGenerateResLabelMap(t *testing.T) {
 }
 
 var (
-	invalidUtf8TwoOctet = string([]byte{0xc3, 0x28})   // Invalid 2-octet sequence
+	invalidUtf8TwoOctet   = string([]byte{0xc3, 0x28}) // Invalid 2-octet sequence
 	invalidUtf8SequenceID = string([]byte{0xa0, 0xa1}) // Invalid sequence identifier
 )
 
@@ -506,12 +506,11 @@ func TestGenerateResLabelMapUTF8(t *testing.T) {
 		attribute.String("valid_utf8", "שלום"),
 		attribute.String("invalid_two_octet", invalidUtf8TwoOctet),
 		attribute.String("invalid_sequence_id", invalidUtf8SequenceID),
-
 	)
 	expectedLabels := map[string]string{
-		"valid_ascii": "abcdefg",
-		"valid_utf8": "שלום",
-		"invalid_two_octet": "�(",
+		"valid_ascii":         "abcdefg",
+		"valid_utf8":          "שלום",
+		"invalid_two_octet":   "�(",
 		"invalid_sequence_id": "�",
 	}
 
@@ -560,9 +559,9 @@ func TestRecordToMpbUTF8(t *testing.T) {
 	}
 
 	expectedLabels := map[string]string{
-		"valid_ascii": "abcdefg",
-		"valid_utf8": "שלום",
-		"invalid_two_octet": "�(",
+		"valid_ascii":         "abcdefg",
+		"valid_utf8":          "שלום",
+		"invalid_two_octet":   "�(",
 		"invalid_sequence_id": "�",
 	}
 
@@ -595,7 +594,7 @@ func TestRecordToMpbUTF8(t *testing.T) {
 	require.NoError(t, pusher.Stop(ctx))
 
 	want := &googlemetricpb.Metric{
-		Type: md.Type,
+		Type:   md.Type,
 		Labels: expectedLabels,
 	}
 	aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
