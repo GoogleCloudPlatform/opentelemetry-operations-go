@@ -494,6 +494,123 @@ func TestGenerateResLabelMap(t *testing.T) {
 	}
 }
 
+var (
+	invalidUtf8TwoOctet   = string([]byte{0xc3, 0x28}) // Invalid 2-octet sequence
+	invalidUtf8SequenceID = string([]byte{0xa0, 0xa1}) // Invalid sequence identifier
+)
+
+func TestGenerateResLabelMapUTF8(t *testing.T) {
+	monResource := resource.NewWithAttributes(
+		semconv.SchemaURL,
+		attribute.String("valid_ascii", "abcdefg"),
+		attribute.String("valid_utf8", "שלום"),
+		attribute.String("invalid_two_octet", invalidUtf8TwoOctet),
+		attribute.String("invalid_sequence_id", invalidUtf8SequenceID),
+	)
+	expectedLabels := map[string]string{
+		"valid_ascii":         "abcdefg",
+		"valid_utf8":          "שלום",
+		"invalid_two_octet":   "�(",
+		"invalid_sequence_id": "�",
+	}
+
+	got := generateResLabelMap(monResource)
+	if !reflect.DeepEqual(got, expectedLabels) {
+		t.Errorf("expected: %v, actual: %v", expectedLabels, got)
+	}
+}
+
+func TestResourceToMonitoredResourcepbProjectIDUTF8(t *testing.T) {
+	expectedProjectID := "�"
+
+	me := &metricExporter{
+		o: &options{
+			ProjectID: invalidUtf8SequenceID,
+		},
+	}
+
+	got := me.resourceToMonitoredResourcepb(nil)
+	if got.Labels["project_id"] != expectedProjectID {
+		t.Errorf("expected: %v, actual: %v", expectedProjectID, got.Labels["project_id"])
+	}
+}
+
+func TestRecordToMpbUTF8(t *testing.T) {
+	desc := metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind)
+
+	md := &googlemetricpb.MetricDescriptor{
+		Name:        desc.Name(),
+		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
+		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
+		Description: "test",
+	}
+
+	mdkey := key{
+		name:        md.Name,
+		libraryname: "",
+	}
+
+	metricLabels := []attribute.KeyValue{
+		attribute.Key("valid_ascii").String("abcdefg"),
+		attribute.Key("valid_utf8").String("שלום"),
+		attribute.Key("invalid_two_octet").String(invalidUtf8TwoOctet),
+		attribute.Key("invalid_sequence_id").String(invalidUtf8SequenceID),
+	}
+
+	expectedLabels := map[string]string{
+		"valid_ascii":         "abcdefg",
+		"valid_utf8":          "שלום",
+		"invalid_two_octet":   "�(",
+		"invalid_sequence_id": "�",
+	}
+
+	ctx := context.Background()
+	cloudMock := cloudmock.NewCloudMock()
+	defer cloudMock.Shutdown()
+
+	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+
+	pusher, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithMonitoringClientOptions(clientOpt),
+			WithMetricDescriptorTypeFormatter(formatter),
+		},
+	)
+	assert.NoError(t, err)
+
+	me := &metricExporter{
+		o: &options{},
+		mdCache: map[key]*googlemetricpb.MetricDescriptor{
+			mdkey: md,
+		},
+	}
+	meter := pusher.Meter("custom.googleapis.com/opentelemetry")
+	counter, err := meter.SyncInt64().Counter(desc.Name())
+	require.NoError(t, err)
+	counter.Add(ctx, 100, metricLabels...)
+
+	require.NoError(t, pusher.Stop(ctx))
+
+	want := &googlemetricpb.Metric{
+		Type:   md.Type,
+		Labels: expectedLabels,
+	}
+	aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
+		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
+			out := me.recordToMpb(&r, library)
+			if !reflect.DeepEqual(want, out) {
+				return fmt.Errorf("expected: %v, actual: %v", want, out)
+			}
+			return nil
+		})
+	})
+	if aggError != nil {
+		t.Errorf("%v", aggError)
+	}
+}
+
 func TestTimeIntervalStaggering(t *testing.T) {
 	var tm time.Time
 
