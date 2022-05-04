@@ -48,7 +48,7 @@ func (m *metricMapper) resourceToMonitoredResource(
 	})
 	newLabels := make(labels, len(gmr.Labels))
 	for k, v := range gmr.Labels {
-		newLabels[k] = m.maybeSanitizeUTF8(v)
+		newLabels[k] = sanitizeUTF8(v)
 	}
 	mr := &monitoredrespb.MonitoredResource{
 		Type:   gmr.Type,
@@ -81,5 +81,5 @@ func (m *metricMapper) resourceToMetricLabels(
 		}
 		return true
 	})
-	return m.attributesToLabels(attrs)
+	return attributesToLabels(attrs)
 }

@@ -320,8 +320,8 @@ func (m *metricMapper) instrumentationScopeToLabels(is pdata.InstrumentationScop
 		return labels{}
 	}
 	return labels{
-		"instrumentation_source":  m.maybeSanitizeUTF8(is.Name()),
-		"instrumentation_version": m.maybeSanitizeUTF8(is.Version()),
+		"instrumentation_source":  sanitizeUTF8(is.Name()),
+		"instrumentation_version": sanitizeUTF8(is.Version()),
 	}
 }
 
@@ -414,7 +414,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			Metric: &metricpb.Metric{
 				Type: m.metricNameToType(sumName),
 				Labels: mergeLabels(
-					m.attributesToLabels(point.Attributes()),
+					attributesToLabels(point.Attributes()),
 					extraLabels,
 				),
 			},
@@ -436,7 +436,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			Metric: &metricpb.Metric{
 				Type: m.metricNameToType(countName),
 				Labels: mergeLabels(
-					m.attributesToLabels(point.Attributes()),
+					attributesToLabels(point.Attributes()),
 					extraLabels,
 				),
 			},
@@ -464,7 +464,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			Metric: &metricpb.Metric{
 				Type: m.metricNameToType(metric.Name()),
 				Labels: mergeLabels(
-					m.attributesToLabels(point.Attributes()),
+					attributesToLabels(point.Attributes()),
 					extraLabels,
 					pLabel,
 				),
@@ -493,7 +493,7 @@ func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Ex
 	}
 	if ex.FilteredAttributes().Len() > 0 {
 		attr, err := anypb.New(&monitoringpb.DroppedLabels{
-			Label: m.attributesToLabels(ex.FilteredAttributes()),
+			Label: attributesToLabels(ex.FilteredAttributes()),
 		})
 		if err == nil {
 			attachments = append(attachments, attr)
@@ -663,7 +663,7 @@ func (m *metricMapper) histogramToTimeSeries(
 		Metric: &metricpb.Metric{
 			Type: m.metricNameToType(metric.Name()),
 			Labels: mergeLabels(
-				m.attributesToLabels(point.Attributes()),
+				attributesToLabels(point.Attributes()),
 				extraLabels,
 			),
 		},
@@ -710,7 +710,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 		Metric: &metricpb.Metric{
 			Type: m.metricNameToType(metric.Name()),
 			Labels: mergeLabels(
-				m.attributesToLabels(point.Attributes()),
+				attributesToLabels(point.Attributes()),
 				extraLabels,
 			),
 		},
@@ -762,7 +762,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 		Metric: &metricpb.Metric{
 			Type: m.metricNameToType(metric.Name()),
 			Labels: mergeLabels(
-				m.attributesToLabels(point.Attributes()),
+				attributesToLabels(point.Attributes()),
 				extraLabels,
 			),
 		},
@@ -797,7 +797,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 		Metric: &metricpb.Metric{
 			Type: m.metricNameToType(metric.Name()),
 			Labels: mergeLabels(
-				m.attributesToLabels(point.Attributes()),
+				attributesToLabels(point.Attributes()),
 				extraLabels,
 			),
 		},
@@ -819,24 +819,6 @@ func (m *metricMapper) metricNameToType(name string) string {
 	return path.Join(m.getMetricNamePrefix(name), name)
 }
 
-func (m *metricMapper) attributesToLabels(attrs pdata.Map) labels {
-	ls := make(labels, attrs.Len())
-	attrs.Range(func(k string, v pdata.Value) bool {
-		ls[sanitizeKey(k)] = m.maybeSanitizeUTF8(v.AsString())
-		return true
-	})
-	return ls
-}
-
-func (m *metricMapper) maybeSanitizeUTF8(s string) string {
-	// Defaults to true if unset
-	enforceUTF8 := m.cfg.MetricConfig.EnforceUTF8
-	if enforceUTF8 != nil && !*enforceUTF8 {
-		return s
-	}
-	return strings.ToValidUTF8(s, "�")
-}
-
 func numberDataPointToValue(
 	point pdata.NumberDataPoint,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
@@ -850,6 +832,19 @@ func numberDataPointToValue(
 			DoubleValue: point.DoubleVal(),
 		}},
 		metricpb.MetricDescriptor_DOUBLE
+}
+
+func attributesToLabels(attrs pdata.Map) labels {
+	ls := make(labels, attrs.Len())
+	attrs.Range(func(k string, v pdata.Value) bool {
+		ls[sanitizeKey(k)] = sanitizeUTF8(v.AsString())
+		return true
+	})
+	return ls
+}
+
+func sanitizeUTF8(s string) string {
+	return strings.ToValidUTF8(s, "�")
 }
 
 // Replaces non-alphanumeric characters to underscores. Note, this does not truncate label keys
