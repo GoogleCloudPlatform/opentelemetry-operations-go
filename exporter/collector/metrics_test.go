@@ -1974,18 +1974,18 @@ var (
 )
 
 func TestAttributesToLabelsUTF8(t *testing.T) {
-		attributes := map[string]interface{}{
-			"valid_ascii":         "abcdefg",
-			"valid_utf8":          "שלום",
-			"invalid_two_octet":   invalidUtf8TwoOctet,
-			"invalid_sequence_id": invalidUtf8SequenceID,
-		}
-		expectLabels := labels{
-			"valid_ascii":         "abcdefg",
-			"valid_utf8":          "שלום",
-			"invalid_two_octet":   "�(",
-			"invalid_sequence_id": "�",
-		}
+	attributes := map[string]interface{}{
+		"valid_ascii":         "abcdefg",
+		"valid_utf8":          "שלום",
+		"invalid_two_octet":   invalidUtf8TwoOctet,
+		"invalid_sequence_id": invalidUtf8SequenceID,
+	}
+	expectLabels := labels{
+		"valid_ascii":         "abcdefg",
+		"valid_utf8":          "שלום",
+		"invalid_two_octet":   "�(",
+		"invalid_sequence_id": "�",
+	}
 
 	assert.Equal(
 		t,
