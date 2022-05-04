@@ -72,10 +72,6 @@ func NewRawExporter(opts ...Option) (*Exporter, error) {
 	if o.ReportingInterval < minimumReportingDuration {
 		return nil, errReportingIntervalTooLow
 	}
-	if o.EnforceUTF8 == nil {
-		b := true
-		o.EnforceUTF8 = &b
-	}
 
 	me, err := newMetricExporter(&o)
 	if err != nil {

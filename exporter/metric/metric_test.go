@@ -484,13 +484,9 @@ func TestGenerateResLabelMap(t *testing.T) {
 		},
 	}
 
-	me := &metricExporter{
-		o: &options{},
-	}
-
 	for _, test := range testCases {
 		t.Run(test.resource.String(), func(t *testing.T) {
-			got := me.generateResLabelMap(test.resource)
+			got := generateResLabelMap(test.resource)
 			if !reflect.DeepEqual(got, test.expectedLabels) {
 				t.Errorf("expected: %v, actual: %v", test.expectedLabels, got)
 			}
@@ -501,8 +497,6 @@ func TestGenerateResLabelMap(t *testing.T) {
 var (
 	invalidUtf8TwoOctet = string([]byte{0xc3, 0x28})   // Invalid 2-octet sequence
 	invalidUtf8SequenceID = string([]byte{0xa0, 0xa1}) // Invalid sequence identifier
-	bTrue = true
-	bFalse = false
 )
 
 func TestGenerateResLabelMapUTF8(t *testing.T) {
@@ -514,98 +508,31 @@ func TestGenerateResLabelMapUTF8(t *testing.T) {
 		attribute.String("invalid_sequence_id", invalidUtf8SequenceID),
 
 	)
-	testCases := []struct {
-		testName       string
-		enforceUTF8    *bool
-		expectedLabels map[string]string
-	}{
-		{
-
-			"UTF-8 sanitization enabled",
-			&bTrue,
-			map[string]string{
-				"valid_ascii": "abcdefg",
-				"valid_utf8": "שלום",
-				"invalid_two_octet": "�(",
-				"invalid_sequence_id": "�",
-			},
-		},
-		{
-			"UTF-8 sanitization disabled",
-			&bFalse,
-			map[string]string{
-				"valid_ascii": "abcdefg",
-				"valid_utf8": "שלום",
-				"invalid_two_octet": invalidUtf8TwoOctet,
-				"invalid_sequence_id": invalidUtf8SequenceID,
-			},
-		},
-		{
-			"UTF-8 sanitization default",
-			nil,
-			map[string]string{
-				"valid_ascii": "abcdefg",
-				"valid_utf8": "שלום",
-				"invalid_two_octet": "�(",
-				"invalid_sequence_id": "�",
-			},
-		},
+	expectedLabels := map[string]string{
+		"valid_ascii": "abcdefg",
+		"valid_utf8": "שלום",
+		"invalid_two_octet": "�(",
+		"invalid_sequence_id": "�",
 	}
 
-	for _, test := range testCases {
-		me := &metricExporter{
-			o: &options{
-				EnforceUTF8: test.enforceUTF8,
-			},
-		}
-
-		t.Run(test.testName, func(t *testing.T) {
-			got := me.generateResLabelMap(monResource)
-			if !reflect.DeepEqual(got, test.expectedLabels) {
-				t.Errorf("expected: %v, actual: %v", test.expectedLabels, got)
-			}
-		})
+	got := generateResLabelMap(monResource)
+	if !reflect.DeepEqual(got, expectedLabels) {
+		t.Errorf("expected: %v, actual: %v", expectedLabels, got)
 	}
 }
 
 func TestResourceToMonitoredResourcepbProjectIDUTF8(t *testing.T) {
-	testCases := []struct {
-		testName          string
-		enforceUTF8       *bool
-		expectedProjectID string
-	}{
-		{
+	expectedProjectID := "�"
 
-			"UTF-8 sanitization enabled",
-			&bTrue,
-			"�",
-		},
-		{
-			"UTF-8 sanitization disabled",
-			&bFalse,
-			invalidUtf8SequenceID,
-		},
-		{
-			"UTF-8 sanitization default",
-			nil,
-			"�",
+	me := &metricExporter{
+		o: &options{
+			ProjectID: invalidUtf8SequenceID,
 		},
 	}
 
-	for _, test := range testCases {
-		me := &metricExporter{
-			o: &options{
-				EnforceUTF8: test.enforceUTF8,
-				ProjectID: invalidUtf8SequenceID,
-			},
-		}
-
-		t.Run(test.testName, func(t *testing.T) {
-			got := me.resourceToMonitoredResourcepb(nil)
-			if got.Labels["project_id"] != test.expectedProjectID {
-				t.Errorf("expected: %v, actual: %v", test.expectedProjectID, got.Labels["project_id"])
-			}
-		})
+	got := me.resourceToMonitoredResourcepb(nil)
+	if got.Labels["project_id"] != expectedProjectID {
+		t.Errorf("expected: %v, actual: %v", expectedProjectID, got.Labels["project_id"])
 	}
 }
 
@@ -632,91 +559,56 @@ func TestRecordToMpbUTF8(t *testing.T) {
 		attribute.Key("invalid_sequence_id").String(invalidUtf8SequenceID),
 	}
 
-	testCases := []struct {
-		testName       string
-		enforceUTF8    *bool
-		expectedLabels map[string]string
-	}{
-		{
-
-			"UTF-8 sanitization enabled",
-			&bTrue,
-			map[string]string{
-				"valid_ascii": "abcdefg",
-				"valid_utf8": "שלום",
-				"invalid_two_octet": "�(",
-				"invalid_sequence_id": "�",
-			},
-		},
-		{
-			"UTF-8 sanitization disabled",
-			&bFalse,
-			map[string]string{
-				"valid_ascii": "abcdefg",
-				"valid_utf8": "שלום",
-				"invalid_two_octet": invalidUtf8TwoOctet,
-				"invalid_sequence_id": invalidUtf8SequenceID,
-			},
-		},
-		{
-			"UTF-8 sanitization default",
-			nil,
-			map[string]string{
-				"valid_ascii": "abcdefg",
-				"valid_utf8": "שלום",
-				"invalid_two_octet": "�(",
-				"invalid_sequence_id": "�",
-			},
-		},
+	expectedLabels := map[string]string{
+		"valid_ascii": "abcdefg",
+		"valid_utf8": "שלום",
+		"invalid_two_octet": "�(",
+		"invalid_sequence_id": "�",
 	}
 
-	for _, test := range testCases {
-		ctx := context.Background()
-		cloudMock := cloudmock.NewCloudMock()
-		defer cloudMock.Shutdown()
+	ctx := context.Background()
+	cloudMock := cloudmock.NewCloudMock()
+	defer cloudMock.Shutdown()
 
-		clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 
-		pusher, err := InstallNewPipeline(
-			[]Option{
-				WithProjectID("PROJECT_ID_NOT_REAL"),
-				WithMonitoringClientOptions(clientOpt),
-				WithMetricDescriptorTypeFormatter(formatter),
-			},
-		)
-		assert.NoError(t, err)
+	pusher, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithMonitoringClientOptions(clientOpt),
+			WithMetricDescriptorTypeFormatter(formatter),
+		},
+	)
+	assert.NoError(t, err)
 
-		me := &metricExporter{
-			o: &options{
-				EnforceUTF8: test.enforceUTF8,
-			},
-			mdCache: map[key]*googlemetricpb.MetricDescriptor{
-				mdkey: md,
-			},
-		}
-		meter := pusher.Meter("custom.googleapis.com/opentelemetry")
-		counter, err := meter.SyncInt64().Counter(desc.Name())
-		require.NoError(t, err)
-		counter.Add(ctx, 100, metricLabels...)
+	me := &metricExporter{
+		o: &options{},
+		mdCache: map[key]*googlemetricpb.MetricDescriptor{
+			mdkey: md,
+		},
+	}
+	meter := pusher.Meter("custom.googleapis.com/opentelemetry")
+	counter, err := meter.SyncInt64().Counter(desc.Name())
+	require.NoError(t, err)
+	counter.Add(ctx, 100, metricLabels...)
 
-		require.NoError(t, pusher.Stop(ctx))
+	require.NoError(t, pusher.Stop(ctx))
 
-		want := &googlemetricpb.Metric{
-			Type: md.Type,
-			Labels: test.expectedLabels,
-		}
-		aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
-			return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
-				out := me.recordToMpb(&r, library)
-				if !reflect.DeepEqual(want, out) {
-					return fmt.Errorf("expected: %v, actual: %v", want, out)
-				}
-				return nil
-			})
+	want := &googlemetricpb.Metric{
+		Type: md.Type,
+		Labels: expectedLabels,
+	}
+	aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
+		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
+			out := me.recordToMpb(&r, library)
+			if !reflect.DeepEqual(want, out) {
+				return fmt.Errorf("expected: %v, actual: %v", want, out)
+			}
+			return nil
 		})
-		if aggError != nil {
-			t.Errorf("%v", aggError)
-		}
+	})
+	if aggError != nil {
+		t.Errorf("%v", aggError)
 	}
 }
 
