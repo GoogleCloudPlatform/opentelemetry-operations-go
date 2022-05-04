@@ -383,3 +383,48 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 		})
 	}
 }
+
+func TestResourceMetricsToMonitoredResourceUTF8(t *testing.T) {
+	invalidUtf8TwoOctet := string([]byte{0xc3, 0x28})   // Invalid 2-octet sequence
+	invalidUtf8SequenceID := string([]byte{0xa0, 0xa1}) // Invalid sequence identifier
+
+	resourceLabels := map[string]string{
+		"cloud.platform":          "gcp_kubernetes_engine",
+		"cloud.availability_zone": "abcdefg", // valid ascii
+		"k8s.cluster.name":        "שלום",    // valid utf8
+		"k8s.namespace.name":      invalidUtf8TwoOctet,
+		"k8s.pod.name":            invalidUtf8SequenceID,
+		"valid_ascii":             "abcdefg",
+		"valid_utf8":              "שלום",
+		"invalid_two_octet":       invalidUtf8TwoOctet,
+		"invalid_sequence_id":     invalidUtf8SequenceID,
+	}
+	expectMr := &monitoredrespb.MonitoredResource{
+		Type: "k8s_pod",
+		Labels: map[string]string{
+			"cluster_name":   "שלום",
+			"location":       "abcdefg",
+			"namespace_name": "�(",
+			"pod_name":       "�",
+		},
+	}
+	expectExtraLabels := labels{
+		"valid_ascii":         "abcdefg",
+		"valid_utf8":          "שלום",
+		"invalid_two_octet":   "�(",
+		"invalid_sequence_id": "�",
+	}
+
+	mapper := metricMapper{cfg: DefaultConfig()}
+	mapper.cfg.MetricConfig.ResourceFilters = []ResourceFilter{
+		{Prefix: "valid_"},
+		{Prefix: "invalid_"},
+	}
+	r := pdata.NewResource()
+	for k, v := range resourceLabels {
+		r.Attributes().InsertString(k, v)
+	}
+	mr, extraLabels := mapper.resourceToMonitoredResource(r)
+	assert.Equal(t, expectMr, mr)
+	assert.Equal(t, expectExtraLabels, extraLabels)
+}

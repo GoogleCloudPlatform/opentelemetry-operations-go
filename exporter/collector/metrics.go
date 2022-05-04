@@ -320,8 +320,8 @@ func (m *metricMapper) instrumentationScopeToLabels(is pdata.InstrumentationScop
 		return labels{}
 	}
 	return labels{
-		"instrumentation_source":  is.Name(),
-		"instrumentation_version": is.Version(),
+		"instrumentation_source":  sanitizeUTF8(is.Name()),
+		"instrumentation_version": sanitizeUTF8(is.Version()),
 	}
 }
 
@@ -834,15 +834,17 @@ func numberDataPointToValue(
 		metricpb.MetricDescriptor_DOUBLE
 }
 
-func attributesToLabels(
-	attrs pdata.Map,
-) labels {
+func attributesToLabels(attrs pdata.Map) labels {
 	ls := make(labels, attrs.Len())
 	attrs.Range(func(k string, v pdata.Value) bool {
-		ls[sanitizeKey(k)] = v.AsString()
+		ls[sanitizeKey(k)] = sanitizeUTF8(v.AsString())
 		return true
 	})
 	return ls
+}
+
+func sanitizeUTF8(s string) string {
+	return strings.ToValidUTF8(s, "�")
 }
 
 // Replaces non-alphanumeric characters to underscores. Note, this does not truncate label keys

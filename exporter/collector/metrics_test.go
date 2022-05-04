@@ -1928,8 +1928,8 @@ func TestKnownDomains(t *testing.T) {
 func TestInstrumentationScopeToLabels(t *testing.T) {
 	newInstrumentationScope := func(name, version string) pdata.InstrumentationScope {
 		is := pdata.NewInstrumentationScope()
-		is.SetName("foo")
-		is.SetVersion("1.2.3")
+		is.SetName(name)
+		is.SetVersion(version)
 		return is
 	}
 
@@ -1963,6 +1963,65 @@ func TestInstrumentationScopeToLabels(t *testing.T) {
 
 			out := m.instrumentationScopeToLabels(test.InstrumentationScope)
 
+			assert.Equal(t, out, test.output)
+		})
+	}
+}
+
+var (
+	invalidUtf8TwoOctet   = string([]byte{0xc3, 0x28}) // Invalid 2-octet sequence
+	invalidUtf8SequenceID = string([]byte{0xa0, 0xa1}) // Invalid sequence identifier
+)
+
+func TestAttributesToLabelsUTF8(t *testing.T) {
+	attributes := map[string]interface{}{
+		"valid_ascii":         "abcdefg",
+		"valid_utf8":          "שלום",
+		"invalid_two_octet":   invalidUtf8TwoOctet,
+		"invalid_sequence_id": invalidUtf8SequenceID,
+	}
+	expectLabels := labels{
+		"valid_ascii":         "abcdefg",
+		"valid_utf8":          "שלום",
+		"invalid_two_octet":   "�(",
+		"invalid_sequence_id": "�",
+	}
+
+	assert.Equal(
+		t,
+		attributesToLabels(pcommon.NewMapFromRaw(attributes)),
+		expectLabels,
+	)
+}
+
+func TestInstrumentationScopeToLabelsUTF8(t *testing.T) {
+	newInstrumentationScope := func(name, version string) pdata.InstrumentationScope {
+		is := pdata.NewInstrumentationScope()
+		is.SetName(name)
+		is.SetVersion(version)
+		return is
+	}
+
+	m, shutdown := newTestMetricMapper()
+	defer shutdown()
+
+	tests := []struct {
+		name                 string
+		InstrumentationScope pdata.InstrumentationScope
+		output               labels
+	}{{
+		name:                 "valid",
+		InstrumentationScope: newInstrumentationScope("abcdefg", "שלום"),
+		output:               labels{"instrumentation_source": "abcdefg", "instrumentation_version": "שלום"},
+	}, {
+		name:                 "invalid",
+		InstrumentationScope: newInstrumentationScope(invalidUtf8TwoOctet, invalidUtf8SequenceID),
+		output:               labels{"instrumentation_source": "�(", "instrumentation_version": "�"},
+	}}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			out := m.instrumentationScopeToLabels(test.InstrumentationScope)
 			assert.Equal(t, out, test.output)
 		})
 	}
