@@ -514,7 +514,8 @@ func TestResourceMetricsToMonitoredResourceUTF8(t *testing.T) {
 	for k, v := range resourceLabels {
 		r.Attributes().InsertString(k, v)
 	}
-	mr, extraLabels := mapper.resourceToMonitoredResource(r)
+	mr := defaultResourceToMonitoredResource(r)
 	assert.Equal(t, expectMr, mr)
+	extraLabels := mapper.resourceToMetricLabels(r)
 	assert.Equal(t, expectExtraLabels, extraLabels)
 }
