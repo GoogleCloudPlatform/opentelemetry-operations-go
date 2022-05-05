@@ -394,9 +394,9 @@ func (m *metricMapper) summaryPointToTimeSeries(
 		return nil
 	}
 	point = *normalizedPoint
-	sumName, countName, quantileName, err := m.summaryMetricNames(metric)
+	sumType, countType, quantileType, err := m.summaryMetricTypes(metric)
 	if err != nil {
-		m.obs.log.Debug("Failed to get metric name for summary metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
+		m.obs.log.Debug("Failed to get metric type (i.e. name) for summary metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
 		return nil
 	}
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
@@ -417,7 +417,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 				}},
 			}},
 			Metric: &metricpb.Metric{
-				Type: sumName,
+				Type: sumType,
 				Labels: mergeLabels(
 					attributesToLabels(point.Attributes()),
 					extraLabels,
@@ -439,7 +439,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 				}},
 			}},
 			Metric: &metricpb.Metric{
-				Type: countName,
+				Type: countType,
 				Labels: mergeLabels(
 					attributesToLabels(point.Attributes()),
 					extraLabels,
@@ -467,7 +467,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 				}},
 			}},
 			Metric: &metricpb.Metric{
-				Type: quantileName,
+				Type: quantileType,
 				Labels: mergeLabels(
 					attributesToLabels(point.Attributes()),
 					extraLabels,
@@ -638,9 +638,9 @@ func (m *metricMapper) histogramToTimeSeries(
 		// Drop points without a value or without a sum
 		return nil
 	}
-	name, err := m.metricNameToType(metric.Name(), metric)
+	t, err := m.metricNameToType(metric.Name(), metric)
 	if err != nil {
-		m.obs.log.Debug("Failed to get metric name for histogram metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
+		m.obs.log.Debug("Failed to get metric type (i.e. name) for histogram metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
 		return nil
 	}
 	if hist.AggregationTemporality() == pmetric.MetricAggregationTemporalityCumulative {
@@ -671,7 +671,7 @@ func (m *metricMapper) histogramToTimeSeries(
 			Value: value,
 		}},
 		Metric: &metricpb.Metric{
-			Type: name,
+			Type: t,
 			Labels: mergeLabels(
 				attributesToLabels(point.Attributes()),
 				extraLabels,
@@ -691,9 +691,9 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 		// Drop points without a value.
 		return nil
 	}
-	name, err := m.metricNameToType(metric.Name(), metric)
+	t, err := m.metricNameToType(metric.Name(), metric)
 	if err != nil {
-		m.obs.log.Debug("Failed to get metric name for exponential histogram metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
+		m.obs.log.Debug("Failed to get metric type (i.e. name) for exponential histogram metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
 		return nil
 	}
 	if exponentialHist.AggregationTemporality() == pmetric.MetricAggregationTemporalityCumulative {
@@ -723,7 +723,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 			Value: value,
 		}},
 		Metric: &metricpb.Metric{
-			Type: name,
+			Type: t,
 			Labels: mergeLabels(
 				attributesToLabels(point.Attributes()),
 				extraLabels,
@@ -746,9 +746,9 @@ func (m *metricMapper) sumPointToTimeSeries(
 		// prometheus.
 		return nil
 	}
-	name, err := m.metricNameToType(metric.Name(), metric)
+	t, err := m.metricNameToType(metric.Name(), metric)
 	if err != nil {
-		m.obs.log.Debug("Failed to get metric name for sum metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
+		m.obs.log.Debug("Failed to get metric type (i.e. name) for sum metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
 		return nil
 	}
 	if sum.IsMonotonic() {
@@ -780,7 +780,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 			Value: value,
 		}},
 		Metric: &metricpb.Metric{
-			Type: name,
+			Type: t,
 			Labels: mergeLabels(
 				attributesToLabels(point.Attributes()),
 				extraLabels,
@@ -800,9 +800,9 @@ func (m *metricMapper) gaugePointToTimeSeries(
 		// Drop points without a value.
 		return nil
 	}
-	name, err := m.metricNameToType(metric.Name(), metric)
+	t, err := m.metricNameToType(metric.Name(), metric)
 	if err != nil {
-		m.obs.log.Debug("Unable to get metric name for gauge metric.", zap.Error(err), zap.Any("metric", metric))
+		m.obs.log.Debug("Unable to get metric type (i.e. name) for gauge metric.", zap.Error(err), zap.Any("metric", metric))
 		return nil
 	}
 	metricKind := metricpb.MetricDescriptor_GAUGE
@@ -820,7 +820,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 			Value: value,
 		}},
 		Metric: &metricpb.Metric{
-			Type: name,
+			Type: t,
 			Labels: mergeLabels(
 				attributesToLabels(point.Attributes()),
 				extraLabels,
@@ -983,36 +983,36 @@ func (m *metricMapper) labelDescriptors(
 	return result
 }
 
-// Returns (sum, count, quantile) metric names for a summary metric.
-func (m *metricMapper) summaryMetricNames(pm pdata.Metric) (string, string, string, error) {
-	sumName, err := m.metricNameToType(pm.Name()+SummarySumSuffix, pm)
+// Returns (sum, count, quantile) metric types (i.e. names) for a summary metric.
+func (m *metricMapper) summaryMetricTypes(pm pdata.Metric) (string, string, string, error) {
+	sumType, err := m.metricNameToType(pm.Name()+SummarySumSuffix, pm)
 	if err != nil {
 		return "", "", "", err
 	}
-	countName, err := m.metricNameToType(pm.Name()+SummaryCountPrefix, pm)
+	countType, err := m.metricNameToType(pm.Name()+SummaryCountPrefix, pm)
 	if err != nil {
 		return "", "", "", err
 	}
-	quantileName, err := m.metricNameToType(pm.Name(), pm)
+	quantileType, err := m.metricNameToType(pm.Name(), pm)
 	if err != nil {
 		return "", "", "", err
 	}
-	return sumName, countName, quantileName, nil
+	return sumType, countType, quantileType, nil
 }
 
 func (m *metricMapper) summaryMetricDescriptors(
 	pm pdata.Metric,
 	extraLabels labels,
 ) []*metricpb.MetricDescriptor {
-	sumName, countName, quantileName, err := m.summaryMetricNames(pm)
+	sumType, countType, quantileType, err := m.summaryMetricTypes(pm)
 	if err != nil {
-		m.obs.log.Debug("Failed to get metric name for metric. Dropping the metric.", zap.Error(err), zap.Any("metric", pm))
+		m.obs.log.Debug("Failed to get metric types (i.e. names) for summary metric. Dropping the metric.", zap.Error(err), zap.Any("metric", pm))
 		return nil
 	}
 	labels := m.labelDescriptors(pm, extraLabels)
 	return []*metricpb.MetricDescriptor{
 		{
-			Type:        sumName,
+			Type:        sumType,
 			Labels:      labels,
 			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
 			ValueType:   metricpb.MetricDescriptor_DOUBLE,
@@ -1021,7 +1021,7 @@ func (m *metricMapper) summaryMetricDescriptors(
 			DisplayName: pm.Name() + SummarySumSuffix,
 		},
 		{
-			Type:        countName,
+			Type:        countType,
 			Labels:      labels,
 			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
 			ValueType:   metricpb.MetricDescriptor_DOUBLE,
@@ -1030,7 +1030,7 @@ func (m *metricMapper) summaryMetricDescriptors(
 			DisplayName: pm.Name() + SummaryCountPrefix,
 		},
 		{
-			Type: quantileName,
+			Type: quantileType,
 			Labels: append(
 				labels,
 				&label.LabelDescriptor{
@@ -1057,7 +1057,7 @@ func (m *metricMapper) metricDescriptor(
 	kind, typ := mapMetricPointKind(pm)
 	metricType, err := m.metricNameToType(pm.Name(), pm)
 	if err != nil {
-		m.obs.log.Debug("Failed to get metric name for metric. Dropping the metric descriptor.", zap.Error(err), zap.Any("metric", pm))
+		m.obs.log.Debug("Failed to get metric type (i.e. name) for metric descriptor. Dropping the metric descriptor.", zap.Error(err), zap.Any("metric", pm))
 		return nil
 	}
 	labels := m.labelDescriptors(pm, extraLabels)
