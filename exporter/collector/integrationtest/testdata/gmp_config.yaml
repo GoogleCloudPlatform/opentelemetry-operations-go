@@ -1,0 +1,20 @@
+receivers:
+  nop:
+
+processors:
+  nop:
+
+exporters:
+  googlemanagedprometheus:
+  googlemanagedprometheus/customname:
+    project: my-project
+    user_agent: opentelemetry-collector-contrib {{version}}
+    endpoint: test-metric-endpoint
+    use_insecure: true
+
+service:
+  pipelines:
+    metrics:
+        receivers: [nop]
+        processors: [nop]
+        exporters: [googlemanagedprometheus]

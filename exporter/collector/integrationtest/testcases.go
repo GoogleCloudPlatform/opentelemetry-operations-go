@@ -14,7 +14,10 @@
 
 package integrationtest
 
-import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+import (
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus"
+)
 
 var (
 	LogsTestCases = []TestCase{
@@ -104,6 +107,20 @@ var (
 				cfg.MetricConfig.Prefix = "workload.googleapis.com/"
 				cfg.MetricConfig.SkipCreateMetricDescriptor = true
 				cfg.MetricConfig.ServiceResourceLabels = false
+			},
+		},
+		{
+			Name:                 "Google Managed Prometheus",
+			OTLPInputFixturePath: "testdata/fixtures/google_managed_prometheus.json",
+			ExpectFixturePath:    "testdata/fixtures/google_managed_prometheus_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.MetricConfig.Prefix = "prometheus.googleapis.com/"
+				cfg.MetricConfig.SkipCreateMetricDescriptor = true
+				cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName
+				cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
+				cfg.MetricConfig.InstrumentationLibraryLabels = false
+				cfg.MetricConfig.ServiceResourceLabels = false
+				cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 			},
 		},
 		{

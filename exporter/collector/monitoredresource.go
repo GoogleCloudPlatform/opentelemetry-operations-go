@@ -37,11 +37,8 @@ func (attrs *attributes) GetString(key string) (string, bool) {
 	return "", false
 }
 
-// Transforms pdata Resource to a GCM Monitored Resource. Any additional metric labels from the
-// resource are also returned.
-func (m *metricMapper) resourceToMonitoredResource(
-	resource pdata.Resource,
-) (*monitoredrespb.MonitoredResource, labels) {
+// defaultResourceToMonitoredResource pdata Resource to a GCM Monitored Resource.
+func defaultResourceToMonitoredResource(resource pdata.Resource) *monitoredrespb.MonitoredResource {
 	attrs := resource.Attributes()
 	gmr := resourcemapping.ResourceAttributesToMonitoredResource(&attributes{
 		Attrs: &attrs,
@@ -54,7 +51,7 @@ func (m *metricMapper) resourceToMonitoredResource(
 		Type:   gmr.Type,
 		Labels: newLabels,
 	}
-	return mr, m.resourceToMetricLabels(resource)
+	return mr
 }
 
 // resourceToMetricLabels converts the Resource into metric labels needed to uniquely identify
