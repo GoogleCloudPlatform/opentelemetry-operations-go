@@ -5,7 +5,7 @@
 In your own fork of [open-telemetry/opentelemetry-collector-releases](https://github.com/open-telemetry/opentelemetry-collector-releases), add your own "distribution" directory within the distributions directory, based on either the otelcol or otelcol-contrib distributions. In the `exporters` list in `manifest.yaml`, add:
 ```yaml
 exporters:
-  - gomod: "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.29.0"
+  - gomod: "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v1.5.2-0.20220505183817-6276707ec8c0"
 ```
 
 The syntax of `manifest.yaml` is described in the [Collector Builder documentation](https://github.com/open-telemetry/opentelemetry-collector/blob/54f271b7d473f36b4ecbc21994d59359dbd263f6/cmd/builder/README.md#opentelemetry-collector-builder).
