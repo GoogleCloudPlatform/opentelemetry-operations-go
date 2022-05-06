@@ -21,7 +21,7 @@ require (
 	google.golang.org/protobuf v1.28.0
 )
 
-require github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.30.0
+require github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.30.1
 
 require (
 	cloud.google.com/go/compute v1.5.0 // indirect
