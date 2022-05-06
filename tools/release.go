@@ -29,20 +29,20 @@ import (
 const (
 	prefix = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
 
-	stable   = "1.5.1"
-	unstable = "0.29.1"
+	stable   = "1.6.0"
+	unstable = "0.30.0"
 )
 
 var versions = map[string]string{
-	"":                    stable,
+	"":                    unstable,
 	"exporter/trace/":     stable,
 	"example/trace/http/": unstable,
 
 	"exporter/metric/": unstable,
 	"example/metric/":  unstable,
 
-	"exporter/collector/":                        unstable,
-	"exporter/collector/googlemanagedprometheus": unstable,
+	"exporter/collector/":                         unstable,
+	"exporter/collector/googlemanagedprometheus/": unstable,
 
 	"internal/resourcemapping/": unstable,
 }
