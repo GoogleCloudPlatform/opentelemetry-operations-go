@@ -1,4 +1,4 @@
-module github.com/dashpole/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus
+module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus
 
 go 1.17
 
