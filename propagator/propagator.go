@@ -56,6 +56,10 @@ func (e errInvalidHeader) Error() string {
 // headers (traceparent and tracestate). If traceparent is not present, it will
 // extract trace context from x-cloud-trace-context, and propagate that trace
 // context forward using the w3c standard headers.
+//
+// This is the preferred mechanism of propagation as X-Cloud-Trace-Context sampling flag
+// behaves subtly different from expectations in both w3c traceparent *and* opentelemetry
+// propagation.
 type CloudTraceOneWayPropagator struct {
 	CloudTraceFormatPropagator
 }
