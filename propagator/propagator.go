@@ -42,9 +42,7 @@ var traceContextHeaderRe = regexp.MustCompile(traceContextHeaderFormat)
 // one element in the list.
 var cloudTraceContextHeaders = []string{TraceContextHeaderName}
 
-// traceparentHeaderName is the HTTP header field for w3c standard trace information
-// https://www.w3.org/TR/trace-context/
-const traceparentHeaderName = "traceparent"
+var oneWayContextHeaders = []string{}
 
 type errInvalidHeader struct {
 	header string
@@ -59,33 +57,16 @@ func (e errInvalidHeader) Error() string {
 // extract trace context from x-cloud-trace-context, and propagate that trace
 // context forward using the w3c standard headers.
 type CloudTraceOneWayPropagator struct {
-	propagation.TraceContext
+	CloudTraceFormatPropagator
 }
 
-// Extract reads tracecontext from the supplied carrier into the returned context.
-//
-// This method looks for the standard `traceparent` header, but if not present,
-// will also look for `x-cloud-trace-context`.
-func (p CloudTraceOneWayPropagator) Extract(ctx context.Context, carrier propagation.TextMapCarrier) context.Context {
-	// First, check for traceparent
-	tpctx := p.TraceContext.Extract(ctx, carrier)
-	if sc := trace.SpanContextFromContext(tpctx); sc.IsValid() {
-		return tpctx
-	}
-	header := carrier.Get(TraceContextHeaderName)
-	if header == "" {
-		return ctx
-	}
-	sc, err := spanContextFromXCTCHeader(header)
-	if err != nil {
-		log.Printf("CloudTraceOneWayPropagator: %v", err)
-		return ctx
-	}
-	return trace.ContextWithRemoteSpanContext(ctx, sc)
-}
+// Inject does not inject anything for the oneway propagator
+func (p CloudTraceOneWayPropagator) Inject(ctx context.Context, carrier propagation.TextMapCarrier) {}
 
+// Fields returns an empty list of fields, since the one way propagator does
+// not inject any fields
 func (p CloudTraceOneWayPropagator) Fields() []string {
-	return []string{traceparentHeaderName}
+	return oneWayContextHeaders
 }
 
 var _ propagation.TextMapPropagator = CloudTraceOneWayPropagator{}
@@ -93,11 +74,6 @@ var _ propagation.TextMapPropagator = CloudTraceOneWayPropagator{}
 // CloudTraceFormatPropagator is a TextMapPropagator that injects/extracts a context to/from the carrier
 // following Google Cloud Trace format.
 type CloudTraceFormatPropagator struct{}
-
-// New returns a new CloudTraceFormatPropagator.
-func New() CloudTraceFormatPropagator {
-	return CloudTraceFormatPropagator{}
-}
 
 func (p CloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCarrier) string {
 	return carrier.Get(TraceContextHeaderName)
@@ -186,7 +162,7 @@ func spanContextFromXCTCHeader(header string) (trace.SpanContext, error) {
 
 // SpanContextFromRequest extracts a trace.SpanContext from the HTTP request req.
 // In this method, SpanID is expected to be stored in big endian.
-func (p CloudTraceFormatPropagator) SpanContextFromRequest(req *http.Request) (trace.SpanContext, error) {
+func SpanContextFromRequest(req *http.Request) (trace.SpanContext, error) {
 	h := req.Header.Get(TraceContextHeaderName)
 	return spanContextFromXCTCHeader(h)
 }

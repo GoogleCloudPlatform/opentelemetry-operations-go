@@ -8,18 +8,61 @@ Trace](https://cloud.google.com/trace) that make it compatible with
 
 There are two available propagators in this package:
 
-### `CloudTraceOneWayPropagator`
+### `CloudTraceOneWayPropagator` (Recommended)
 
-The `CloudTraceOneWayPropagator` works like the standard `TraceContext`
-propagator if a `traceparent` header is present. If `traceparent` is not found,
-it reads the `X-Cloud-Trace-Context` header for trace and span IDs, and creates
-the corresponding `traceparent` header.
+The `CloudTraceOneWayPropagator` reads the `X-Cloud-Trace-Context` header for trace and
+span IDs, but does not write the `X-Cloud-Trace-Context` header into outgoing
+requests.
 
-This is useful for ensuring spans created in your code are attached to the traces that some Google Cloud services [automatically trace](https://cloud.google.com/trace/docs/overview#configurations_with_automatic_tracing).
+This is useful for ensuring spans created in your code are attached to the
+traces that some Google Cloud services [automatically trace](https://cloud.google.com/trace/docs/overview#configurations_with_automatic_tracing).
+
+#### Usage
+
+```golang
+import (
+    "go.opentelemetry.io/otel/propagation"
+    gcppropagator "github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator"
+)
+
+func installPropagators() {
+    otel.SetTextMapPropagator(
+        propagation.NewCompositeTextMapPropagator(
+            // Putting the CloudTraceOneWayPropagator first means the TraceContext propagator 
+            // takes precedence if both the traceparent and the XCTC headers exist.
+            gcppropagator.CloudTraceOneWayPropagator{},
+            propagation.TraceContext{},
+            propagation.Baggage{},
+        ))
+}
+```
 
 ### `CloudTraceFormatPropagator`
 
-The `CloudTraceFormatPropagator` reads and writes the `X-Cloud-Trace-Context` header only.
+The standard propagator reads and writes the `X-Cloud-Trace-Context` header.
+Note that because of differences between the meaning of the `sampled` flag
+(described below), this can result in 100% tracing when the parent context
+has a deferred tracing decision.
+
+#### Usage
+
+```golang
+import (
+    "go.opentelemetry.io/otel/propagation"
+    gcppropagator "github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator"
+)
+
+func installPropagators() {
+    otel.SetTextMapPropagator(
+        propagation.NewCompositeTextMapPropagator(
+            // Putting the CloudTraceFormatPropagator first means the TraceContext propagator 
+            // takes precedence if both the traceparent and the XCTC headers exist.
+            gcppropagator.CloudTraceFormatPropagator{},
+            propagation.TraceContext{},
+            propagation.Baggage{},
+        ))
+}
+```
 
 ## Differences between Google Cloud Trace and W3C Trace Context
 
