@@ -27,11 +27,13 @@ import (
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/baggage"
 	"go.opentelemetry.io/otel/codes"
+	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 	"go.opentelemetry.io/otel/trace"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	gcppropagator "github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator"
 )
 
 func initTracer() func() {
@@ -53,7 +55,19 @@ func initTracer() func() {
 	return func() { tp.Shutdown(context.Background()) }
 }
 
+func installPropagators() {
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(
+			// Putting the CloudTraceOneWayPropagator first means the TraceContext propagator
+			// takes precedence if both the traceparent and the XCTC headers exist.
+			gcppropagator.CloudTraceOneWayPropagator{},
+			propagation.TraceContext{},
+			propagation.Baggage{},
+		))
+}
+
 func main() {
+	installPropagators()
 	shutdown := initTracer()
 	defer shutdown()
 	tr := otel.Tracer("cloudtrace/example/client")

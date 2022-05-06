@@ -7,8 +7,8 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trac
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../../internal/resourcemapping
 
 require (
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go v1.5.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.6.1
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.31.0
 	go.opentelemetry.io/otel v1.6.3
 	go.opentelemetry.io/otel/sdk v1.6.2
