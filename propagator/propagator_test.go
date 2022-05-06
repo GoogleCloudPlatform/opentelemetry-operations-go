@@ -115,6 +115,7 @@ func TestValidTraceContextHeaderFormats(t *testing.T) {
 }
 
 func TestOneWayPropagatorExtract(t *testing.T) {
+	propagator := CloudTraceOneWayPropagator{}
 	testCases := []struct {
 		name    string
 		headers map[string]string
@@ -140,40 +141,6 @@ func TestOneWayPropagatorExtract(t *testing.T) {
 				TraceFlags: 01,
 			},
 		},
-		{
-			"traceparent only",
-			map[string]string{
-				"traceparent": fmt.Sprintf("00-%s-%s-00", validTraceIDStr, validSpanID)},
-			trace.SpanContextConfig{
-				TraceID:    validTraceID,
-				SpanID:     validSpanID,
-				TraceFlags: 00,
-			},
-		},
-		{
-			"xctc and traceparent",
-			map[string]string{
-				"x-cloud-trace-context": "4bf92f3577b34da6a3ce929d0e0e4736/333333333;o=1",
-				"traceparent":           fmt.Sprintf("00-%s-%s-00", validTraceIDStr, validSpanID)},
-			trace.SpanContextConfig{
-				TraceID:    validTraceID,
-				SpanID:     validSpanID,
-				TraceFlags: 00,
-			},
-		},
-		{
-			"xctc traceparent and tracestate",
-			map[string]string{
-				"x-cloud-trace-context": "4bf92f3577b34da6a3ce929d0e0e4736/333333333;o=1",
-				"traceparent":           fmt.Sprintf("00-%s-%s-00", validTraceIDStr, validSpanID),
-				"tracestate":            "google=an_opaque_string",
-			},
-			trace.SpanContextConfig{
-				TraceID:    validTraceID,
-				SpanID:     validSpanID,
-				TraceFlags: 00,
-			},
-		},
 	}
 
 	for _, c := range testCases {
@@ -184,7 +151,6 @@ func TestOneWayPropagatorExtract(t *testing.T) {
 			}
 
 			ctx := context.Background()
-			propagator := CloudTraceOneWayPropagator{}
 			ctx = propagator.Extract(ctx, propagation.HeaderCarrier(req.Header))
 
 			sc := trace.SpanContextFromContext(ctx)
@@ -214,25 +180,13 @@ func TestOneWayPropagatorInject(t *testing.T) {
 		wantHeaders map[string]string
 	}{
 		{
-			"valid TraceID and SpanID with sampled flag",
+			"valid TraceID and SpanID with sampled flag doean't inject",
 			trace.SpanContextConfig{
 				TraceID:    validTraceID,
 				SpanID:     validSpanID,
 				TraceFlags: trace.FlagsSampled,
 			},
-			map[string]string{
-				traceparentHeaderName: fmt.Sprintf("00-%s-%s-01", validTraceID, validSpanID),
-			},
-		},
-		{
-			"valid TraceID and SpanID without sampled flag",
-			trace.SpanContextConfig{
-				TraceID: validTraceID,
-				SpanID:  validSpanID,
-			},
-			map[string]string{
-				traceparentHeaderName: fmt.Sprintf("00-%s-%s-00", validTraceID, validSpanID),
-			},
+			map[string]string{},
 		},
 	}
 
@@ -288,7 +242,7 @@ func TestCloudTraceContextHeaderExtract(t *testing.T) {
 		req.Header.Set(c.key, value)
 
 		ctx := context.Background()
-		propagator := New()
+		propagator := CloudTraceFormatPropagator{}
 		ctx = propagator.Extract(ctx, propagation.HeaderCarrier(req.Header))
 
 		sc := trace.SpanContextFromContext(ctx)
@@ -314,7 +268,7 @@ func TestCloudTraceContextHeaderExtract(t *testing.T) {
 }
 
 func TestCloudTraceContextHeaderInject(t *testing.T) {
-	propagator := New()
+	propagator := CloudTraceFormatPropagator{}
 
 	testCases := []struct {
 		name        string
@@ -374,9 +328,7 @@ func TestCloudTraceContextHeaderInject(t *testing.T) {
 	}
 }
 
-func TestSpanContextFromRequest(t *testing.T) {
-	propagator := New()
-
+func TestCloudTraceFormatPropagator(t *testing.T) {
 	testCases := []struct {
 		name     string
 		key      string
@@ -430,13 +382,13 @@ func TestSpanContextFromRequest(t *testing.T) {
 			req := httptest.NewRequest("GET", "http://example.com", nil)
 			req.Header.Set(tc.key, fmt.Sprintf("%s/%s%s", tc.traceID, tc.spanID, tc.flagPart))
 
-			sc, err := propagator.SpanContextFromRequest(req)
+			sc, err := SpanContextFromRequest(req)
 			if err != nil {
-				t.Errorf("%v: SpanContextFromRequest returned non nil: %v", tc.name, err)
+				t.Errorf("%v: CloudTraceFormatPropagator returned non nil: %v", tc.name, err)
 			}
 			want := trace.NewSpanContext(tc.scc)
 			if diff := cmp.Diff(want, sc); diff != "" {
-				t.Errorf("%v: SpanContextFromRequest returned diff: %v", tc.name, diff)
+				t.Errorf("%v: CloudTraceFormatPropagator returned diff: %v", tc.name, diff)
 			}
 		})
 	}
