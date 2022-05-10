@@ -29,13 +29,14 @@ import (
 	logpb "google.golang.org/genproto/googleapis/logging/v2"
 )
 
-func newTestLogMapper() logMapper {
+func newTestLogMapper(entrySize int) logMapper {
 	obs := selfObservability{log: zap.NewNop()}
 	cfg := DefaultConfig()
 	cfg.LogConfig.DefaultLogName = "default-log"
 	return logMapper{
-		cfg: cfg,
-		obs: obs,
+		cfg:          cfg,
+		obs:          obs,
+		maxEntrySize: entrySize,
 	}
 }
 
@@ -50,12 +51,35 @@ func TestLogMapping(t *testing.T) {
 	})
 
 	testCases := []struct {
-		name          string
-		log           func() plog.LogRecord
-		mr            func() *monitoredres.MonitoredResource
-		expectError   bool
-		expectedEntry logging.Entry
+		name            string
+		log             func() plog.LogRecord
+		mr              func() *monitoredres.MonitoredResource
+		expectError     bool
+		expectedEntries []logging.Entry
+		maxEntrySize    int
 	}{
+		{
+			name:         "split entry size",
+			maxEntrySize: 3,
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetStringVal("abcxyz")
+				return log
+			},
+			expectedEntries: []logging.Entry{
+				{
+					Payload:   "abc",
+					Timestamp: testObservedTime,
+				},
+				{
+					Payload:   "xyz",
+					Timestamp: testObservedTime,
+				},
+			},
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+		},
 		{
 			name: "empty log, empty monitoredresource",
 			log: func() plog.LogRecord {
@@ -64,9 +88,10 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			expectedEntry: logging.Entry{
+			expectedEntries: []logging.Entry{{
 				Timestamp: testObservedTime,
-			},
+			}},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			name: "log with json, empty monitoredresource",
@@ -78,10 +103,13 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			expectedEntry: logging.Entry{
-				Payload:   []byte(`{"this": "is json"}`),
-				Timestamp: testObservedTime,
+			expectedEntries: []logging.Entry{
+				{
+					Payload:   []byte(`{"this": "is json"}`),
+					Timestamp: testObservedTime,
+				},
 			},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			name: "log with json and httpRequest, empty monitoredresource",
@@ -108,22 +136,25 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			expectedEntry: logging.Entry{
-				Payload:   []byte(`{"message": "hello!"}`),
-				Timestamp: testObservedTime,
-				HTTPRequest: &logging.HTTPRequest{
-					Request:                        makeExpectedHTTPReq("GET", "https://www.example.com", "https://www.example2.com", "test", nil),
-					RequestSize:                    1,
-					Status:                         200,
-					ResponseSize:                   1,
-					LocalIP:                        "192.168.0.2",
-					RemoteIP:                       "192.168.0.1",
-					CacheHit:                       false,
-					CacheValidatedWithOriginServer: false,
-					CacheFillBytes:                 1,
-					CacheLookup:                    false,
+			expectedEntries: []logging.Entry{
+				{
+					Payload:   []byte(`{"message": "hello!"}`),
+					Timestamp: testObservedTime,
+					HTTPRequest: &logging.HTTPRequest{
+						Request:                        makeExpectedHTTPReq("GET", "https://www.example.com", "https://www.example2.com", "test", nil),
+						RequestSize:                    1,
+						Status:                         200,
+						ResponseSize:                   1,
+						LocalIP:                        "192.168.0.2",
+						RemoteIP:                       "192.168.0.1",
+						CacheHit:                       false,
+						CacheValidatedWithOriginServer: false,
+						CacheFillBytes:                 1,
+						CacheLookup:                    false,
+					},
 				},
 			},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			name: "log with timestamp",
@@ -135,9 +166,12 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredres.MonitoredResource {
 				return nil
 			},
-			expectedEntry: logging.Entry{
-				Timestamp: testSampleTime,
+			expectedEntries: []logging.Entry{
+				{
+					Timestamp: testSampleTime,
+				},
 			},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			name: "log body with string value",
@@ -149,10 +183,13 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStringVal("{\"message\": \"hello!\"}")
 				return log
 			},
-			expectedEntry: logging.Entry{
-				Payload:   `{"message": "hello!"}`,
-				Timestamp: testObservedTime,
+			expectedEntries: []logging.Entry{
+				{
+					Payload:   `{"message": "hello!"}`,
+					Timestamp: testObservedTime,
+				},
 			},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			// TODO(damemi): parse/test sourceLocation from more than just bytes values
@@ -168,14 +205,17 @@ func TestLogMapping(t *testing.T) {
 				)
 				return log
 			},
-			expectedEntry: logging.Entry{
-				SourceLocation: &logpb.LogEntrySourceLocation{
-					File:     "test.php",
-					Line:     100,
-					Function: "helloWorld",
+			expectedEntries: []logging.Entry{
+				{
+					SourceLocation: &logpb.LogEntrySourceLocation{
+						File:     "test.php",
+						Line:     100,
+						Function: "helloWorld",
+					},
+					Timestamp: testObservedTime,
 				},
-				Timestamp: testObservedTime,
 			},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			name: "log with trace and span id",
@@ -188,11 +228,14 @@ func TestLogMapping(t *testing.T) {
 				log.SetSpanID(testSpanID)
 				return log
 			},
-			expectedEntry: logging.Entry{
-				Trace:     testTraceID.HexString(),
-				SpanID:    testSpanID.HexString(),
-				Timestamp: testObservedTime,
+			expectedEntries: []logging.Entry{
+				{
+					Trace:     testTraceID.HexString(),
+					SpanID:    testSpanID.HexString(),
+					Timestamp: testObservedTime,
+				},
 			},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			name: "log with severity number",
@@ -204,10 +247,13 @@ func TestLogMapping(t *testing.T) {
 				log.SetSeverityNumber(plog.SeverityNumberFATAL)
 				return log
 			},
-			expectedEntry: logging.Entry{
-				Timestamp: testObservedTime,
-				Severity:  logging.Critical,
+			expectedEntries: []logging.Entry{
+				{
+					Timestamp: testObservedTime,
+					Severity:  logging.Critical,
+				},
 			},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			name: "log with invalid severity number",
@@ -219,7 +265,8 @@ func TestLogMapping(t *testing.T) {
 				log.SetSeverityNumber(plog.SeverityNumber(100))
 				return log
 			},
-			expectError: true,
+			maxEntrySize: defaultMaxEntrySize,
+			expectError:  true,
 		},
 	}
 
@@ -227,18 +274,19 @@ func TestLogMapping(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			log := testCase.log()
 			mr := testCase.mr()
-			mapper := newTestLogMapper()
-			entry, err := mapper.logToEntry(
+			mapper := newTestLogMapper(testCase.maxEntrySize)
+			entries, err := mapper.logToSplitEntries(
 				log,
 				mr,
 				"",
 				"",
 				testObservedTime)
+
 			if testCase.expectError {
 				assert.NotNil(t, err)
 			} else {
 				assert.Nil(t, err)
-				assert.Equal(t, testCase.expectedEntry, entry)
+				assert.Equal(t, testCase.expectedEntries, entries)
 			}
 		})
 	}
@@ -273,7 +321,7 @@ func TestGetLogName(t *testing.T) {
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
 			log := testCase.log()
-			mapper := newTestLogMapper()
+			mapper := newTestLogMapper(defaultMaxEntrySize)
 			name, err := mapper.getLogName(log)
 			if testCase.expectError {
 				assert.NotNil(t, err)

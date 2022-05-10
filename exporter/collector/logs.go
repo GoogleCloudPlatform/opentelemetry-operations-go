@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"net/http"
 	"net/url"
 	"time"
@@ -81,8 +82,9 @@ type LogsExporter struct {
 }
 
 type logMapper struct {
-	obs selfObservability
-	cfg Config
+	obs          selfObservability
+	cfg          Config
+	maxEntrySize int
 }
 
 func NewGoogleCloudLogsExporter(
@@ -110,8 +112,9 @@ func NewGoogleCloudLogsExporter(
 		cfg: cfg,
 		obs: obs,
 		mapper: logMapper{
-			obs: obs,
-			cfg: cfg,
+			obs:          obs,
+			cfg:          cfg,
+			maxEntrySize: defaultMaxEntrySize,
 		},
 
 		loggingClient: loggingClient,
@@ -182,31 +185,41 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 			for k := 0; k < sl.LogRecords().Len(); k++ {
 				log := sl.LogRecords().At(k)
 
-				entry, err := l.logToEntry(
+				timestamp := time.Now()
+				splitEntries, err := l.logToSplitEntries(
 					log,
 					mr,
 					instrumentationSource,
 					instrumentationVersion,
-					time.Now())
+					timestamp)
 				if err != nil {
 					errors = append(errors, err)
 					continue
 				}
 
-				internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", l.cfg.ProjectID))
-				if err != nil {
-					errors = append(errors, err)
-					continue
-				}
-				logName, err := l.getLogName(log)
-				if err != nil {
-					errors = append(errors, err)
-					continue
-				}
-				internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", l.cfg.ProjectID, url.PathEscape(logName))
-				internalLogEntry.Resource = mr
+				for splitIndex, entry := range splitEntries {
+					internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", l.cfg.ProjectID))
+					if err != nil {
+						errors = append(errors, err)
+						continue
+					}
+					logName, err := l.getLogName(log)
+					if err != nil {
+						errors = append(errors, err)
+						continue
+					}
+					internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", l.cfg.ProjectID, url.PathEscape(logName))
+					internalLogEntry.Resource = mr
+					if len(splitEntries) > 1 {
+						internalLogEntry.Split = &logpb.LogSplit{
+							Uid:         timestamp.String(),
+							Index:       int32(splitIndex),
+							TotalSplits: int32(len(splitEntries)),
+						}
+					}
 
-				entries = append(entries, internalLogEntry)
+					entries = append(entries, internalLogEntry)
+				}
 			}
 		}
 	}
@@ -235,13 +248,13 @@ func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
 	return "", fmt.Errorf("no log name provided.  Set the 'default_log_name' option, or add the 'gcp.log_name' attribute to set a log name")
 }
 
-func (l logMapper) logToEntry(
+func (l logMapper) logToSplitEntries(
 	log plog.LogRecord,
 	mr *monitoredres.MonitoredResource,
 	instrumentationSource string,
 	instrumentationVersion string,
 	processTime time.Time,
-) (logging.Entry, error) {
+) ([]logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
 	}
@@ -268,7 +281,7 @@ func (l logMapper) logToEntry(
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
 		err := json.Unmarshal(sourceLocation.MBytesVal(), &logEntrySourceLocation)
 		if err != nil {
-			return entry, err
+			return []logging.Entry{entry}, err
 		}
 		entry.SourceLocation = &logEntrySourceLocation
 	}
@@ -291,33 +304,61 @@ func (l logMapper) logToEntry(
 	}
 
 	if log.SeverityNumber() < 0 || int(log.SeverityNumber()) > len(severityMapping)-1 {
-		return entry, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
+		return []logging.Entry{entry}, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
 	}
 	entry.Severity = severityMapping[log.SeverityNumber()]
 
-	payload, err := parseEntryPayload(log.Body())
+	payload, splits, err := parseEntryPayload(log.Body(), l.maxEntrySize)
 	if err != nil {
-		return entry, nil
+		return []logging.Entry{entry}, nil
 	}
-	entry.Payload = payload
 
-	return entry, nil
+	// Split log entries with a string payload into fewer entries
+	if splits > 1 {
+		entries := make([]logging.Entry, int(splits))
+		payloadString := payload.(string)
+
+		// Start by assuming all splits will be even (this may not be the case)
+		startIndex := 0
+		endIndex := int(math.Floor((1.0 / splits) * float64(len(payloadString))))
+		for i := 1; i <= int(splits); i++ {
+			currentSplit := payloadString[startIndex:endIndex]
+
+			// If the current split is larger than the entry size, iterate until it is within the max
+			// (This may happen since not all characters are exactly 1 byte)
+			for len([]byte(currentSplit)) > l.maxEntrySize {
+				endIndex--
+				currentSplit = payloadString[startIndex:endIndex]
+			}
+			entries[i-1] = entry
+			entries[i-1].Payload = currentSplit
+
+			// Update slice indices to the next chunk
+			startIndex = endIndex
+			endIndex = int(math.Floor((float64(i+1) / splits) * float64(len(payloadString))))
+		}
+		return entries, nil
+	} else {
+		entry.Payload = payload
+	}
+
+	return []logging.Entry{entry}, nil
 }
 
-func parseEntryPayload(logBody pcommon.Value) (interface{}, error) {
+func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, float64, error) {
 	if len(logBody.AsString()) == 0 {
-		return nil, nil
+		return nil, 0, nil
 	}
 	switch logBody.Type() {
 	case pcommon.ValueTypeBytes:
-		return logBody.MBytesVal(), nil
+		return logBody.MBytesVal(), 1, nil
 	case pcommon.ValueTypeString:
-		return logBody.AsString(), nil
+		return logBody.AsString(), math.Ceil(float64(len([]byte(logBody.AsString()))) / float64(maxEntrySize)), nil
 	case pcommon.ValueTypeMap:
-		return logBody.MapVal().AsRaw(), nil
+		return logBody.MapVal().AsRaw(), 1, nil
 
 	default:
-		return nil, fmt.Errorf("unknown log body value %v", logBody.Type().String())
+		return nil, 0, fmt.Errorf("unknown log body value %v", logBody.Type().String())
 	}
 }
 
