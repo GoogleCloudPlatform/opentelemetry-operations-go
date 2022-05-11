@@ -190,12 +190,22 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 			for k := 0; k < sl.LogRecords().Len(); k++ {
 				log := sl.LogRecords().At(k)
 
+				// We can't just set logName on these entries otherwise the conversion to internal will fail
+				// We also need the logName here to be able to accurately calculate the overhead of entry
+				// metadata in case the payload needs to be split between multiple entries.
+				logName, err := l.getLogName(log)
+				if err != nil {
+					errors = append(errors, err)
+					continue
+				}
+
 				splitEntries, logName, err := l.logToSplitEntries(
 					log,
 					mr,
 					instrumentationSource,
 					instrumentationVersion,
-					time.Now())
+					time.Now(),
+					logName)
 				if err != nil {
 					errors = append(errors, err)
 					continue
@@ -268,17 +278,10 @@ func (l logMapper) logToSplitEntries(
 	instrumentationSource string,
 	instrumentationVersion string,
 	processTime time.Time,
+	logName string,
 ) ([]logging.Entry, string, error) {
 	entry := logging.Entry{
 		Resource: mr,
-	}
-
-	// We can't just set logName on these entries otherwise the conversion to internal will fail
-	// We also need the logName here to be able to accurately calculate the overhead of entry
-	// metadata in case the payload needs to be split between multiple entries.
-	logName, err := l.getLogName(log)
-	if err != nil {
-		return []logging.Entry{entry}, logName, err
 	}
 
 	// TODO(damemi): Make overwriting these labels (if they already exist) configurable
@@ -319,7 +322,7 @@ func (l logMapper) logToSplitEntries(
 	httpRequestAttr, ok := log.Attributes().Get(HTTPRequestAttributeKey)
 	if ok {
 		var httpRequest *logging.HTTPRequest
-		httpRequest, err = l.parseHTTPRequest(httpRequestAttr)
+		httpRequest, err := l.parseHTTPRequest(httpRequestAttr)
 		if err != nil {
 			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
 		}
@@ -349,13 +352,13 @@ func (l logMapper) logToSplitEntries(
 
 	// Split log entries with a string payload into fewer entries
 	if splits > 1 {
-		entries := make([]logging.Entry, int(splits))
+		entries := make([]logging.Entry, splits)
 		payloadString := payload.(string)
 
 		// Start by assuming all splits will be even (this may not be the case)
 		startIndex := 0
-		endIndex := int(math.Floor((1.0 / splits) * float64(len(payloadString))))
-		for i := 1; i <= int(splits); i++ {
+		endIndex := int(math.Floor((1.0 / float64(splits)) * float64(len(payloadString))))
+		for i := 1; i <= splits; i++ {
 			currentSplit := payloadString[startIndex:endIndex]
 
 			// If the current split is larger than the entry size, iterate until it is within the max
@@ -369,7 +372,7 @@ func (l logMapper) logToSplitEntries(
 
 			// Update slice indices to the next chunk
 			startIndex = endIndex
-			endIndex = int(math.Floor((float64(i+1) / splits) * float64(len(payloadString))))
+			endIndex = int(math.Floor((float64(i+1) / float64(splits)) * float64(len(payloadString))))
 		}
 		return entries, logName, nil
 	}
@@ -378,7 +381,7 @@ func (l logMapper) logToSplitEntries(
 	return []logging.Entry{entry}, logName, nil
 }
 
-func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, float64, error) {
+func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, int, error) {
 	if len(logBody.AsString()) == 0 {
 		return nil, 0, nil
 	}
@@ -386,7 +389,7 @@ func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, fl
 	case pcommon.ValueTypeBytes:
 		return logBody.MBytesVal(), 1, nil
 	case pcommon.ValueTypeString:
-		return logBody.AsString(), math.Ceil(float64(len([]byte(logBody.AsString()))) / float64(maxEntrySize)), nil
+		return logBody.AsString(), int(math.Ceil(float64(len([]byte(logBody.AsString()))) / float64(maxEntrySize))), nil
 	case pcommon.ValueTypeMap:
 		return logBody.MapVal().AsRaw(), 1, nil
 

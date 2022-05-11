@@ -275,12 +275,15 @@ func TestLogMapping(t *testing.T) {
 			log := testCase.log()
 			mr := testCase.mr()
 			mapper := newTestLogMapper(testCase.maxEntrySize)
+			logName, _ := mapper.getLogName(log)
 			entries, _, err := mapper.logToSplitEntries(
 				log,
 				mr,
 				"",
 				"",
-				testObservedTime)
+				testObservedTime,
+				logName,
+			)
 
 			if testCase.expectError {
 				assert.NotNil(t, err)
