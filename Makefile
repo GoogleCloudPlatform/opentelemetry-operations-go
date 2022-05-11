@@ -177,7 +177,6 @@ update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector VERSION=$(COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/model VERSION=$(COLLECTOR_VERSION)  
-	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/opencensus VERSION=$(COLLECTOR_CONTRIB_VERSION)
 	$(MAKE) build
 	$(MAKE) gotidy
 
