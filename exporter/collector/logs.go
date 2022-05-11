@@ -25,13 +25,15 @@ import (
 
 	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
+	"google.golang.org/genproto/googleapis/api/monitoredres"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+	logpb "google.golang.org/genproto/googleapis/logging/v2"
+	"google.golang.org/protobuf/proto"
+
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
-	"google.golang.org/genproto/googleapis/api/monitoredres"
-	logpb "google.golang.org/genproto/googleapis/logging/v2"
-	"google.golang.org/protobuf/proto"
 )
 
 const (
@@ -92,7 +94,10 @@ func NewGoogleCloudLogsExporter(
 	cfg Config,
 	log *zap.Logger,
 ) (*LogsExporter, error) {
-	setProjectFromADC(ctx, &cfg, loggingv2.DefaultAuthScopes())
+	err := setProjectFromADC(ctx, &cfg, loggingv2.DefaultAuthScopes())
+	if err != nil {
+		return nil, err
+	}
 
 	clientOpts, err := generateClientOptions(&cfg.LogConfig.ClientConfig, cfg.UserAgent)
 	if err != nil {
@@ -185,39 +190,23 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 			for k := 0; k < sl.LogRecords().Len(); k++ {
 				log := sl.LogRecords().At(k)
 
-				timestamp := time.Now()
-				splitEntries, err := l.logToSplitEntries(
+				splitEntries, logName, err := l.logToSplitEntries(
 					log,
 					mr,
 					instrumentationSource,
 					instrumentationVersion,
-					timestamp)
+					time.Now())
 				if err != nil {
 					errors = append(errors, err)
 					continue
 				}
 
 				for splitIndex, entry := range splitEntries {
-					internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", l.cfg.ProjectID))
+					internalLogEntry, err := l.logEntryToInternal(entry, logName, mr, len(splitEntries), splitIndex)
 					if err != nil {
 						errors = append(errors, err)
 						continue
 					}
-					logName, err := l.getLogName(log)
-					if err != nil {
-						errors = append(errors, err)
-						continue
-					}
-					internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", l.cfg.ProjectID, url.PathEscape(logName))
-					internalLogEntry.Resource = mr
-					if len(splitEntries) > 1 {
-						internalLogEntry.Split = &logpb.LogSplit{
-							Uid:         timestamp.String(),
-							Index:       int32(splitIndex),
-							TotalSplits: int32(len(splitEntries)),
-						}
-					}
-
 					entries = append(entries, internalLogEntry)
 				}
 			}
@@ -225,6 +214,31 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 	}
 
 	return entries, multierr.Combine(errors...)
+}
+
+func (l logMapper) logEntryToInternal(
+	entry logging.Entry,
+	logName string,
+	mr *monitoredrespb.MonitoredResource,
+	splits int,
+	splitIndex int,
+) (*logpb.LogEntry, error) {
+
+	internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", l.cfg.ProjectID))
+	if err != nil {
+		return nil, err
+	}
+
+	internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", l.cfg.ProjectID, url.PathEscape(logName))
+	internalLogEntry.Resource = mr
+	if splits > 1 {
+		internalLogEntry.Split = &logpb.LogSplit{
+			Uid:         entry.Timestamp.String(),
+			Index:       int32(splitIndex),
+			TotalSplits: int32(splits),
+		}
+	}
+	return internalLogEntry, nil
 }
 
 func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEntry) (*logpb.WriteLogEntriesResponse, error) {
@@ -254,9 +268,17 @@ func (l logMapper) logToSplitEntries(
 	instrumentationSource string,
 	instrumentationVersion string,
 	processTime time.Time,
-) ([]logging.Entry, error) {
+) ([]logging.Entry, string, error) {
 	entry := logging.Entry{
 		Resource: mr,
+	}
+
+	// We can't just set logName on these entries otherwise the conversion to internal will fail
+	// We also need the logName here to be able to accurately calculate the overhead of entry
+	// metadata in case the payload needs to be split between multiple entries.
+	logName, err := l.getLogName(log)
+	if err != nil {
+		return []logging.Entry{entry}, logName, err
 	}
 
 	// TODO(damemi): Make overwriting these labels (if they already exist) configurable
@@ -281,7 +303,7 @@ func (l logMapper) logToSplitEntries(
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
 		err := json.Unmarshal(sourceLocation.MBytesVal(), &logEntrySourceLocation)
 		if err != nil {
-			return []logging.Entry{entry}, err
+			return []logging.Entry{entry}, logName, err
 		}
 		entry.SourceLocation = &logEntrySourceLocation
 	}
@@ -304,13 +326,24 @@ func (l logMapper) logToSplitEntries(
 	}
 
 	if log.SeverityNumber() < 0 || int(log.SeverityNumber()) > len(severityMapping)-1 {
-		return []logging.Entry{entry}, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
+		return []logging.Entry{entry}, logName, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
 	}
 	entry.Severity = severityMapping[log.SeverityNumber()]
 
-	payload, splits, err := parseEntryPayload(log.Body(), l.maxEntrySize)
+	// Calculate the size of the internal log entry so this overhead can be accounted
+	// for when determining the need to split based on payload size
+	// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
+	logOverhead, err := l.logEntryToInternal(entry, logName, mr, 0, 0)
 	if err != nil {
-		return []logging.Entry{entry}, nil
+		return []logging.Entry{entry}, logName, err
+	}
+	// make a copy so the proto initialization doesn't modify the original entry
+	overheadClone := proto.Clone(logOverhead)
+	overheadBytes := proto.Size(overheadClone)
+
+	payload, splits, err := parseEntryPayload(log.Body(), l.maxEntrySize-overheadBytes)
+	if err != nil {
+		return []logging.Entry{entry}, logName, err
 	}
 
 	// Split log entries with a string payload into fewer entries
@@ -337,12 +370,12 @@ func (l logMapper) logToSplitEntries(
 			startIndex = endIndex
 			endIndex = int(math.Floor((float64(i+1) / splits) * float64(len(payloadString))))
 		}
-		return entries, nil
+		return entries, logName, nil
 	} else {
 		entry.Payload = payload
 	}
 
-	return []logging.Entry{entry}, nil
+	return []logging.Entry{entry}, logName, nil
 }
 
 func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, float64, error) {

@@ -60,7 +60,7 @@ func TestLogMapping(t *testing.T) {
 	}{
 		{
 			name:         "split entry size",
-			maxEntrySize: 3,
+			maxEntrySize: 3 + 38, // 3 bytes for payload + 38 for overhead
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				log.Body().SetStringVal("abcxyz")
@@ -275,7 +275,7 @@ func TestLogMapping(t *testing.T) {
 			log := testCase.log()
 			mr := testCase.mr()
 			mapper := newTestLogMapper(testCase.maxEntrySize)
-			entries, err := mapper.logToSplitEntries(
+			entries, _, err := mapper.logToSplitEntries(
 				log,
 				mr,
 				"",
