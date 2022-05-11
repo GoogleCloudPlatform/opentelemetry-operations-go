@@ -318,7 +318,8 @@ func (l logMapper) logToSplitEntries(
 
 	httpRequestAttr, ok := log.Attributes().Get(HTTPRequestAttributeKey)
 	if ok {
-		httpRequest, err := l.parseHTTPRequest(httpRequestAttr)
+		var httpRequest *logging.HTTPRequest
+		httpRequest, err = l.parseHTTPRequest(httpRequestAttr)
 		if err != nil {
 			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
 		}
@@ -371,10 +372,9 @@ func (l logMapper) logToSplitEntries(
 			endIndex = int(math.Floor((float64(i+1) / splits) * float64(len(payloadString))))
 		}
 		return entries, logName, nil
-	} else {
-		entry.Payload = payload
 	}
 
+	entry.Payload = payload
 	return []logging.Entry{entry}, logName, nil
 }
 
