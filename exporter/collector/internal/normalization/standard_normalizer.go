@@ -86,19 +86,19 @@ func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetri
 }
 
 func normalizeExponentialBuckets(pointBuckets, startBuckets pmetric.Buckets) {
-	newBuckets := make([]uint64, len(pointBuckets.BucketCounts()))
+	newBuckets := make([]uint64, len(pointBuckets.MBucketCounts()))
 	offsetDiff := int(pointBuckets.Offset() - startBuckets.Offset())
-	for i := range pointBuckets.BucketCounts() {
+	for i := range pointBuckets.MBucketCounts() {
 		startOffset := i + offsetDiff
-		// if there is no corresponding bucket for the starting bucketcounts, don't normalize
-		if startOffset < 0 || startOffset >= len(startBuckets.BucketCounts()) {
-			newBuckets[i] = pointBuckets.BucketCounts()[i]
+		// if there is no corresponding bucket for the starting MBucketCounts, don't normalize
+		if startOffset < 0 || startOffset >= len(startBuckets.MBucketCounts()) {
+			newBuckets[i] = pointBuckets.MBucketCounts()[i]
 		} else {
-			newBuckets[i] = pointBuckets.BucketCounts()[i] - startBuckets.BucketCounts()[startOffset]
+			newBuckets[i] = pointBuckets.MBucketCounts()[i] - startBuckets.MBucketCounts()[startOffset]
 		}
 	}
 	pointBuckets.SetOffset(pointBuckets.Offset())
-	pointBuckets.SetBucketCounts(newBuckets)
+	pointBuckets.SetMBucketCounts(newBuckets)
 }
 
 func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) *pmetric.HistogramDataPoint {
@@ -125,9 +125,9 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 		newPoint.SetCount(point.Count() - start.Count())
 		// We drop points without a sum, so no need to check here.
 		newPoint.SetSum(point.Sum() - start.Sum())
-		pointBuckets := point.BucketCounts()
-		startBuckets := start.BucketCounts()
-		if !bucketBoundariesEqual(point.ExplicitBounds(), start.ExplicitBounds()) {
+		pointBuckets := point.MBucketCounts()
+		startBuckets := start.MBucketCounts()
+		if !bucketBoundariesEqual(point.MExplicitBounds(), start.MExplicitBounds()) {
 			// The number of buckets changed, so we can't normalize points anymore.
 			// Treat this as a reset by recording and dropping this point.
 			s.cache.SetHistogramDataPoint(identifier, &point)
@@ -137,7 +137,7 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 		for i := range pointBuckets {
 			newBuckets[i] = pointBuckets[i] - startBuckets[i]
 		}
-		newPoint.SetBucketCounts(newBuckets)
+		newPoint.SetMBucketCounts(newBuckets)
 		normalizedPoint = &newPoint
 	}
 	if (!ok && point.StartTimestamp() == 0) || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
@@ -187,9 +187,9 @@ func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPo
 		newPoint.SetStartTimestamp(start.Timestamp())
 		// Adjust the value based on the start point's value
 		switch newPoint.ValueType() {
-		case pmetric.MetricValueTypeInt:
+		case pmetric.NumberDataPointValueTypeInt:
 			newPoint.SetIntVal(point.IntVal() - start.IntVal())
-		case pmetric.MetricValueTypeDouble:
+		case pmetric.NumberDataPointValueTypeDouble:
 			newPoint.SetDoubleVal(point.DoubleVal() - start.DoubleVal())
 		}
 		normalizedPoint = &newPoint
