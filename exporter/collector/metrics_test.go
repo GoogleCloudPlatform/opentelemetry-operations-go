@@ -46,9 +46,9 @@ func newTestMetricMapper() (metricMapper, func()) {
 	cfg := DefaultConfig()
 	cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 	return metricMapper{
-		obs,
-		cfg,
-		normalization.NewStandardNormalizer(s, zap.NewNop()),
+		obs:        obs,
+		cfg:        cfg,
+		normalizer: normalization.NewStandardNormalizer(s, zap.NewNop()),
 	}, func() { close(s) }
 }
 
@@ -1197,7 +1197,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	unit := "1"
 	metric.SetUnit(unit)
 	var count uint64 = 10
-	var sum float64 = 100.0
+	var sum = 100.0
 	point.SetCount(count)
 	point.SetSum(sum)
 	quantile := point.QuantileValues().AppendEmpty()
@@ -1939,10 +1939,10 @@ func TestInstrumentationScopeToLabels(t *testing.T) {
 	}
 
 	tests := []struct {
-		name                 string
 		InstrumentationScope pcommon.InstrumentationScope
-		metricConfig         MetricConfig
 		output               labels
+		name                 string
+		metricConfig         MetricConfig
 	}{{
 		name:                 "fetchFromInstrumentationScope",
 		metricConfig:         MetricConfig{InstrumentationLibraryLabels: true},
@@ -2011,9 +2011,9 @@ func TestInstrumentationScopeToLabelsUTF8(t *testing.T) {
 	defer shutdown()
 
 	tests := []struct {
-		name                 string
 		InstrumentationScope pcommon.InstrumentationScope
 		output               labels
+		name                 string
 	}{{
 		name:                 "valid",
 		InstrumentationScope: newInstrumentationScope("abcdefg", "שלום"),

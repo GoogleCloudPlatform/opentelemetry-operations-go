@@ -47,12 +47,12 @@ var (
 	// monitoredResourceMappings contains mappings of GCM resource label keys onto mapping config from OTel
 	// resource for a given monitored resource type.
 	monitoredResourceMappings = map[string]map[string]struct {
+		// If none of the otelKeys are present in the Resource, fallback to this literal value
+		fallbackLiteral string
 		// OTel resource keys to try and populate the resource label from. For entries with
 		// multiple OTel resource keys, the keys' values will be coalesced in order until there
 		// is a non-empty value.
 		otelKeys []string
-		// If none of the otelKeys are present in the Resource, fallback to this literal value
-		fallbackLiteral string
 	}{
 		gceInstance: {
 			zone:       {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
@@ -112,8 +112,8 @@ var (
 )
 
 type GceResource struct {
-	Type   string
 	Labels map[string]string
+	Type   string
 }
 
 // ReadOnlyAttributes is an interface to abstract between pulling attributes from PData library or OTEL SDK.

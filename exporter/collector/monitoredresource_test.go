@@ -24,9 +24,9 @@ import (
 
 func TestResourceMetricsToMonitoredResource(t *testing.T) {
 	tests := []struct {
-		name           string
 		resourceLabels map[string]string
 		expectMr       *monitoredrespb.MonitoredResource
+		name           string
 	}{
 		{
 			name: "GCE instance",
@@ -299,10 +299,10 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 
 func TestResourceToMetricLabels(t *testing.T) {
 	tests := []struct {
-		name              string
 		resourceLabels    map[string]string
 		expectExtraLabels labels
 		updateMapper      func(mapper *metricMapper)
+		name              string
 	}{
 		{
 			name: "No Extra labels",

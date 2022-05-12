@@ -29,14 +29,12 @@ import (
 )
 
 type LogsTestServer struct {
-	// Address where the gRPC server is listening
-	Endpoint string
-
-	writeLogEntriesRequests []*logpb.WriteLogEntriesRequest
-
 	lis net.Listener
 	srv *grpc.Server
-	mu  sync.Mutex
+	// Endpoint where the gRPC server is listening
+	Endpoint                string
+	writeLogEntriesRequests []*logpb.WriteLogEntriesRequest
+	mu                      sync.Mutex
 }
 
 func (l *LogsTestServer) Shutdown() {

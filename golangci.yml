@@ -112,11 +112,11 @@ linters:
   enable:
     - gofmt
     - goimports
-    - golint
+    - revive
     - govet
     - staticcheck
     - misspell
-    - scopelint
+    - exportloopref
 
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
@@ -124,4 +124,8 @@ issues:
     # Exclude some linters from running on tests files.
     - path: _test\.go
       linters:
-        - scopelint
+        - exportloopref
+    # Exclude some linters from running on tests files.
+    - path: \.pb\.go
+      linters:
+        - govet

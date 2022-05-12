@@ -124,12 +124,12 @@ var cloudRunResourceMap = map[string]string{
 
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
 func newMetricExporter(o *options) (*metricExporter, error) {
-	if strings.TrimSpace(o.ProjectID) == "" {
+	if strings.TrimSpace(o.projectID) == "" {
 		return nil, errBlankProjectID
 	}
 
-	clientOpts := append([]apioption.ClientOption{option.WithUserAgent(userAgent)}, o.MonitoringClientOptions...)
-	ctx := o.Context
+	clientOpts := append([]apioption.ClientOption{option.WithUserAgent(userAgent)}, o.monitoringClientOptions...)
+	ctx := o.context
 	if ctx == nil {
 		ctx = context.Background()
 	}
@@ -166,7 +166,7 @@ func NewExportPipeline(opts []Option, popts ...controller.Option) (*controller.C
 	if err != nil {
 		return nil, err
 	}
-	period := exporter.metricExporter.o.ReportingInterval
+	period := exporter.metricExporter.o.reportingInterval
 	checkpointer := processor.NewFactory(selector, exporter)
 
 	pusher := controller.New(
@@ -236,7 +236,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, res *resou
 
 func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md *googlemetricpb.MetricDescriptor) error {
 	mdReq := &monitoringpb.GetMetricDescriptorRequest{
-		Name: fmt.Sprintf("projects/%s/metricDescriptors/%s", me.o.ProjectID, md.Type),
+		Name: fmt.Sprintf("projects/%s/metricDescriptors/%s", me.o.projectID, md.Type),
 	}
 	_, err := me.client.GetMetricDescriptor(ctx, mdReq)
 	if err == nil {
@@ -247,7 +247,7 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 		return nil
 	}
 	req := &monitoringpb.CreateMetricDescriptorRequest{
-		Name:             fmt.Sprintf("projects/%s", me.o.ProjectID),
+		Name:             fmt.Sprintf("projects/%s", me.o.projectID),
 		MetricDescriptor: md,
 	}
 	_, err = me.client.CreateMetricDescriptor(ctx, req)
@@ -283,7 +283,7 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 	}
 
 	req := &monitoringpb.CreateTimeSeriesRequest{
-		Name:       fmt.Sprintf("projects/%s", me.o.ProjectID),
+		Name:       fmt.Sprintf("projects/%s", me.o.projectID),
 		TimeSeries: tss,
 	}
 
@@ -317,7 +317,7 @@ func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource,
 // descToMetricType converts descriptor to MetricType proto type.
 // Basically this returns default value ("custom.googleapis.com/opentelemetry/[metric type]")
 func (me *metricExporter) descToMetricType(desc *sdkapi.Descriptor) string {
-	if formatter := me.o.MetricDescriptorTypeFormatter; formatter != nil {
+	if formatter := me.o.metricDescriptorTypeFormatter; formatter != nil {
 		return formatter(desc)
 	}
 	return fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name())
@@ -386,7 +386,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	monitoredRes := &monitoredrespb.MonitoredResource{
 		Type: "global",
 		Labels: map[string]string{
-			"project_id": sanitizeUTF8(me.o.ProjectID),
+			"project_id": sanitizeUTF8(me.o.projectID),
 		},
 	}
 
@@ -420,7 +420,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	}
 
 	monitoredRes.Type = resTypeStr
-	monitoredRes.Labels["project_id"] = sanitizeUTF8(me.o.ProjectID)
+	monitoredRes.Labels["project_id"] = sanitizeUTF8(me.o.projectID)
 
 	return monitoredRes
 }
@@ -493,7 +493,7 @@ func (me *metricExporter) recordToMpb(r *export.Record, library instrumentation.
 	labels := make(map[string]string)
 	iter := r.Labels().Iter()
 	for iter.Next() {
-		kv := iter.Label()
+		kv := iter.Attribute()
 		labels[normalizeLabelKey(string(kv.Key))] = sanitizeUTF8(kv.Value.Emit())
 	}
 

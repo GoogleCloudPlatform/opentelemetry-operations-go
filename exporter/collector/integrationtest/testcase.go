@@ -49,21 +49,18 @@ var (
 )
 
 type TestCase struct {
-	// Name of the test case
-	Name string
-
-	// Path to the JSON encoded OTLP ExportMetricsServiceRequest input metrics fixture.
-	OTLPInputFixturePath string
-
-	// Path to the JSON encoded MetricExpectFixture (see fixtures.proto) that contains request
-	// messages the exporter is expected to send.
-	ExpectFixturePath string
-
-	// Whether to skip this test case
-	Skip bool
-
 	// Configure will be called to modify the default configuration for this test case. Optional.
 	Configure func(cfg *collector.Config)
+	// Name of the test case
+	Name string
+	// OTLPInputFixturePath is the path to the JSON encoded OTLP
+	// ExportMetricsServiceRequest input metrics fixture.
+	OTLPInputFixturePath string
+	// ExpectFixturePath is the path to the JSON encoded MetricExpectFixture
+	// (see fixtures.proto) that contains request messages the exporter is expected to send.
+	ExpectFixturePath string
+	// Skip, if true, skips this test case
+	Skip bool
 }
 
 func (tc *TestCase) LoadOTLPLogsInput(

@@ -33,7 +33,7 @@ import (
 func testExporter() *traceExporter {
 	return &traceExporter{
 		o: &options{
-			Context:      context.Background(),
+			context:      context.Background(),
 			mapAttribute: defaultAttributeMapping,
 		},
 	}

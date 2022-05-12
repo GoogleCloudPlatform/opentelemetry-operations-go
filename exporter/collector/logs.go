@@ -76,11 +76,10 @@ var severityMapping = []logging.Severity{
 }
 
 type LogsExporter struct {
-	cfg    Config
-	obs    selfObservability
-	mapper logMapper
-
+	obs           selfObservability
 	loggingClient *loggingv2.Client
+	cfg           Config
+	mapper        logMapper
 }
 
 type logMapper struct {
@@ -401,21 +400,21 @@ func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, in
 // JSON keys derived from:
 // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#httprequest
 type httpRequestLog struct {
-	RequestMethod                  string `json:"requestMethod"`
-	RequestURL                     string `json:"requestUrl"`
-	RequestSize                    int64  `json:"requestSize,string"`
-	Status                         int    `json:"status,string"`
-	ResponseSize                   int64  `json:"responseSize,string"`
-	UserAgent                      string `json:"userAgent"`
 	RemoteIP                       string `json:"remoteIp"`
-	ServerIP                       string `json:"serverIp"`
-	Referer                        string `json:"referer"`
+	RequestURL                     string `json:"requestUrl"`
 	Latency                        string `json:"latency"`
+	Referer                        string `json:"referer"`
+	ServerIP                       string `json:"serverIp"`
+	UserAgent                      string `json:"userAgent"`
+	RequestMethod                  string `json:"requestMethod"`
+	Protocol                       string `json:"protocol"`
+	ResponseSize                   int64  `json:"responseSize,string"`
+	RequestSize                    int64  `json:"requestSize,string"`
+	CacheFillBytes                 int64  `json:"cacheFillBytes,string"`
+	Status                         int    `json:"status,string"`
 	CacheLookup                    bool   `json:"cacheLookup"`
 	CacheHit                       bool   `json:"cacheHit"`
 	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer"`
-	CacheFillBytes                 int64  `json:"cacheFillBytes,string"`
-	Protocol                       string `json:"protocol"`
 }
 
 func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTTPRequest, error) {

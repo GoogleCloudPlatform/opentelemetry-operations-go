@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// +build tools
+//go:build tools
 
 package tools
 
@@ -21,5 +21,6 @@ import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "github.com/itchyny/gojq/cmd/gojq"
 	_ "golang.org/x/tools/cmd/stringer"
+	_ "golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment"
 	_ "google.golang.org/protobuf/cmd/protoc-gen-go"
 )

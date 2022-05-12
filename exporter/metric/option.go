@@ -32,7 +32,23 @@ type Option func(*options)
 
 // options is the struct to hold options for metricExporter and its client instance.
 type options struct {
-	// ProjectID is the identifier of the Cloud Monitoring
+	// context allows you to provide a custom context for API calls.
+	//
+	// This context will be used several times: first, to create Cloud Monitoring
+	// clients, and then every time a new batch of metrics needs to be uploaded.
+	//
+	// If unset, context.Background() will be used.
+	context context.Context
+	// metricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
+	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
+	metricDescriptorTypeFormatter func(*sdkapi.Descriptor) string
+	// onError is the hook to be called when there is an error uploading the metric data.
+	// If no custom hook is set, errors are logged. Optional.
+	//
+	// TODO: This option should be replaced with OTel defining error handler.
+	// c.f. https://pkg.go.dev/go.opentelemetry.io/otel@v0.6.0/sdk/metric/controller/push?tab=doc#Config
+	onError func(error)
+	// projectID is the identifier of the Cloud Monitoring
 	// project the user is uploading the stats data to.
 	// If not set, this will default to your "Application Default Credentials".
 	// For details see: https://developers.google.com/accounts/docs/application-default-credentials.
@@ -40,35 +56,14 @@ type options struct {
 	// It will be used in the project_id label of a Google Cloud Monitoring monitored
 	// resource if the resource does not inherently belong to a specific
 	// project, e.g. on-premise resource like k8s_container or generic_task.
-	ProjectID string
-
-	// MonitoringClientOptions are additional options to be passed
+	projectID string
+	// monitoringClientOptions are additional options to be passed
 	// to the underlying Stackdriver Monitoring API client.
 	// Optional.
-	MonitoringClientOptions []apioption.ClientOption
-
-	// Context allows you to provide a custom context for API calls.
-	//
-	// This context will be used several times: first, to create Cloud Monitoring
-	// clients, and then every time a new batch of metrics needs to be uploaded.
-	//
-	// If unset, context.Background() will be used.
-	Context context.Context
-
-	// ReportingInterval sets the interval between reporting metrics.
+	monitoringClientOptions []apioption.ClientOption
+	// reportingInterval sets the interval between reporting metrics.
 	// If it is set to zero then default value is used.
-	ReportingInterval time.Duration
-
-	// MetricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
-	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
-	MetricDescriptorTypeFormatter func(*sdkapi.Descriptor) string
-
-	// onError is the hook to be called when there is an error uploading the metric data.
-	// If no custom hook is set, errors are logged. Optional.
-	//
-	// TODO: This option should be replaced with OTel defining error handler.
-	// c.f. https://pkg.go.dev/go.opentelemetry.io/otel@v0.6.0/sdk/metric/controller/push?tab=doc#Config
-	onError func(error)
+	reportingInterval time.Duration
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -78,7 +73,7 @@ type options struct {
 // https://godoc.org/golang.org/x/oauth2/google#FindDefaultCredentials
 func WithProjectID(id string) func(o *options) {
 	return func(o *options) {
-		o.ProjectID = id
+		o.projectID = id
 	}
 }
 
@@ -86,7 +81,7 @@ func WithProjectID(id string) func(o *options) {
 // Available options are defined in
 func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options) {
 	return func(o *options) {
-		o.MonitoringClientOptions = append(o.MonitoringClientOptions, opts...)
+		o.monitoringClientOptions = append(o.monitoringClientOptions, opts...)
 	}
 }
 
@@ -95,7 +90,7 @@ func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options
 // c.f. https://cloud.google.com/monitoring/docs/release-notes#March_30_2020
 func WithInterval(t time.Duration) func(o *options) {
 	return func(o *options) {
-		o.ReportingInterval = t
+		o.reportingInterval = t
 	}
 }
 
@@ -105,7 +100,7 @@ func WithInterval(t time.Duration) func(o *options) {
 // ref. https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom_metric_names
 func WithMetricDescriptorTypeFormatter(f func(*sdkapi.Descriptor) string) func(o *options) {
 	return func(o *options) {
-		o.MetricDescriptorTypeFormatter = f
+		o.metricDescriptorTypeFormatter = f
 	}
 }
 

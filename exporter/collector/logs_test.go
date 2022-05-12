@@ -51,12 +51,12 @@ func TestLogMapping(t *testing.T) {
 	})
 
 	testCases := []struct {
-		name            string
 		log             func() plog.LogRecord
 		mr              func() *monitoredres.MonitoredResource
-		expectError     bool
+		name            string
 		expectedEntries []logging.Entry
 		maxEntrySize    int
+		expectError     bool
 	}{
 		{
 			name:         "split entry size",
@@ -297,10 +297,10 @@ func TestLogMapping(t *testing.T) {
 
 func TestGetLogName(t *testing.T) {
 	testCases := []struct {
-		name         string
 		log          func() plog.LogRecord
-		expectError  bool
+		name         string
 		expectedName string
+		expectError  bool
 	}{
 		{
 			name: "log with name attribute",

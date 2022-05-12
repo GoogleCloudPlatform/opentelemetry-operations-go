@@ -47,9 +47,9 @@ func (ts *testServer) CreateSpan(context.Context, *cloudtracepb.Span) (*cloudtra
 func TestGoogleCloudTraceExport(t *testing.T) {
 	type testCase struct {
 		name               string
-		cfg                Config
 		expectedErr        string
 		expectedServiceKey string
+		cfg                Config
 	}
 
 	testCases := []testCase{

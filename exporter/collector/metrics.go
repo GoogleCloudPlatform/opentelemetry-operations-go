@@ -56,30 +56,27 @@ type selfObservability struct {
 
 // MetricsExporter is the GCM exporter that uses pdata directly
 type MetricsExporter struct {
-	cfg    Config
-	client *monitoring.MetricClient
-	obs    selfObservability
 	mapper metricMapper
-
-	// tracks the currently running child tasks
-	goroutines sync.WaitGroup
-	// channel for signaling a graceful shutdown
-	shutdownC chan struct{}
-
 	// A channel that receives metric descriptor and sends them to GCM once
 	metricDescriptorC chan *metricpb.MetricDescriptor
-	// Tracks the metric descriptors that have already been sent to GCM
+	client            *monitoring.MetricClient
+	obs               selfObservability
+	// shutdownC is a channel for signaling a graceful shutdown
+	shutdownC chan struct{}
+	// mdCache tracks the metric descriptors that have already been sent to GCM
 	mdCache map[string]*metricpb.MetricDescriptor
-
-	timeout time.Duration
+	cfg     Config
+	// goroutines tracks the currently running child tasks
+	goroutines sync.WaitGroup
+	timeout    time.Duration
 }
 
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
+	normalizer normalization.Normalizer
 	obs        selfObservability
 	cfg        Config
-	normalizer normalization.Normalizer
 }
 
 // Constants we use when translating summary metrics into GCP.
@@ -145,9 +142,9 @@ func NewGoogleCloudMetricsExporter(
 		client: client,
 		obs:    obs,
 		mapper: metricMapper{
-			obs,
-			cfg,
-			normalizer,
+			obs:        obs,
+			cfg:        cfg,
+			normalizer: normalizer,
 		},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
