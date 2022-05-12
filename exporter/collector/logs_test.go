@@ -72,7 +72,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetBytesVal([]byte(`{"this": "is json"}`))
+				log.Body().SetMBytesVal([]byte(`{"this": "is json"}`))
 				return log
 			},
 			mr: func() *monitoredres.MonitoredResource {
@@ -87,7 +87,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json and httpRequest, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetBytesVal([]byte(`{"message": "hello!"}`))
+				log.Body().SetMBytesVal([]byte(`{"message": "hello!"}`))
 				log.Attributes().Insert(HTTPRequestAttributeKey, pcommon.NewValueBytes([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 

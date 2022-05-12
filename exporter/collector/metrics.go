@@ -525,10 +525,10 @@ func (m *metricMapper) exemplars(exs pmetric.ExemplarSlice) []*distribution.Dist
 
 // histogramPoint maps a histogram data point into a GCM point.
 func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint) *monitoringpb.TypedValue {
-	counts := make([]int64, len(point.BucketCounts()))
+	counts := make([]int64, len(point.MBucketCounts()))
 	var mean, deviation, prevBound float64
 
-	for i, v := range point.BucketCounts() {
+	for i, v := range point.MBucketCounts() {
 		counts[i] = int64(v)
 	}
 
@@ -536,7 +536,7 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint) *monitor
 		mean = float64(point.Sum() / float64(point.Count()))
 	}
 
-	bounds := point.ExplicitBounds()
+	bounds := point.MExplicitBounds()
 	if m.cfg.MetricConfig.EnableSumOfSquaredDeviation {
 		// Calculate the sum of squared deviation.
 		for i, bound := range bounds {
@@ -575,20 +575,20 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint) *monitor
 func (m *metricMapper) exponentialHistogramPoint(point pmetric.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
 	// First calculate underflow bucket with all negatives + zeros.
 	underflow := point.ZeroCount()
-	for _, v := range point.Negative().BucketCounts() {
+	for _, v := range point.Negative().MBucketCounts() {
 		underflow += v
 	}
 	// Next, pull in remaining buckets.
-	counts := make([]int64, len(point.Positive().BucketCounts())+2)
+	counts := make([]int64, len(point.Positive().MBucketCounts())+2)
 	bucketOptions := &distribution.Distribution_BucketOptions{}
 	counts[0] = int64(underflow)
-	for i, v := range point.Positive().BucketCounts() {
+	for i, v := range point.Positive().MBucketCounts() {
 		counts[i+1] = int64(v)
 	}
 	// Overflow bucket is always empty
 	counts[len(counts)-1] = 0
 
-	if len(point.Positive().BucketCounts()) == 0 {
+	if len(point.Positive().MBucketCounts()) == 0 {
 		// We cannot send exponential distributions with no positive buckets,
 		// instead we send a simple overflow/underflow histogram.
 		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExplicitBuckets{
@@ -856,7 +856,7 @@ func defaultGetMetricName(baseName string, _ pmetric.Metric) (string, error) {
 func numberDataPointToValue(
 	point pmetric.NumberDataPoint,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	if point.ValueType() == pmetric.MetricValueTypeInt {
+	if point.ValueType() == pmetric.NumberDataPointValueTypeInt {
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
 				Int64Value: point.IntVal(),
 			}},
@@ -1081,11 +1081,11 @@ func (m *metricMapper) metricDescriptor(
 	}
 }
 
-func metricPointValueType(pt pmetric.MetricValueType) metricpb.MetricDescriptor_ValueType {
+func metricPointValueType(pt pmetric.NumberDataPointValueType) metricpb.MetricDescriptor_ValueType {
 	switch pt {
-	case pmetric.MetricValueTypeInt:
+	case pmetric.NumberDataPointValueTypeInt:
 		return metricpb.MetricDescriptor_INT64
-	case pmetric.MetricValueTypeDouble:
+	case pmetric.NumberDataPointValueTypeDouble:
 		return metricpb.MetricDescriptor_DOUBLE
 	default:
 		return metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED

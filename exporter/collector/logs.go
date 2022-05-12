@@ -266,7 +266,7 @@ func (l logMapper) logToEntry(
 	sourceLocation, ok := log.Attributes().Get(SourceLocationAttributeKey)
 	if ok {
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
-		err := json.Unmarshal(sourceLocation.BytesVal(), &logEntrySourceLocation)
+		err := json.Unmarshal(sourceLocation.MBytesVal(), &logEntrySourceLocation)
 		if err != nil {
 			return entry, err
 		}
@@ -310,7 +310,7 @@ func parseEntryPayload(logBody pcommon.Value) (interface{}, error) {
 	}
 	switch logBody.Type() {
 	case pcommon.ValueTypeBytes:
-		return logBody.BytesVal(), nil
+		return logBody.MBytesVal(), nil
 	case pcommon.ValueTypeString:
 		return logBody.AsString(), nil
 	case pcommon.ValueTypeMap:
@@ -345,7 +345,7 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTT
 	var bytes []byte
 	switch httpRequestAttr.Type() {
 	case pcommon.ValueTypeBytes:
-		bytes = httpRequestAttr.BytesVal()
+		bytes = httpRequestAttr.MBytesVal()
 	case pcommon.ValueTypeString, pcommon.ValueTypeMap:
 		bytes = []byte(httpRequestAttr.AsString())
 	}
