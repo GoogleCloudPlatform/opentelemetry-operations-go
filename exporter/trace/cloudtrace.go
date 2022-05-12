@@ -35,42 +35,13 @@ type Option func(*options)
 
 // options contains options for configuring the exporter.
 type options struct {
-	// ProjectID is the identifier of the Stackdriver
-	// project the user is uploading the stats data to.
-	// If not set, this will default to your "Application Default Credentials".
-	// For details see: https://developers.google.com/accounts/docs/application-default-credentials.
-	//
-	// It will be used in the project_id label of a Stackdriver monitored
-	// resource if the resource does not inherently belong to a specific
-	// project, e.g. on-premise resource like k8s_container or generic_task.
-	ProjectID string
-
-	// Location is the identifier of the GCP or AWS cloud region/zone in which
-	// the data for a resource is stored.
-	// If not set, it will default to the location provided by the metadata server.
-	//
-	// It will be used in the location label of a Stackdriver monitored resource
-	// if the resource does not inherently belong to a specific project, e.g.
-	// on-premise resource like k8s_container or generic_task.
-	Location string
-
 	// OnError is the hook to be called when there is
 	// an error uploading the stats or tracing data.
 	// If no custom hook is set, errors are handled with the
 	// OpenTelemetry global handler, which defaults to logging.
 	// Optional.
 	errorHandler otel.ErrorHandler
-
-	// TraceClientOptions are additional options to be passed
-	// to the underlying Stackdriver Trace API client.
-	// Optional.
-	TraceClientOptions []option.ClientOption
-
-	// BatchSpanProcessorOptions are additional options to be based
-	// to the underlying BatchSpanProcessor when call making a new export pipeline.
-	BatchSpanProcessorOptions []sdktrace.BatchSpanProcessorOption
-
-	// Context allows you to provide a custom context for API calls.
+	// context allows you to provide a custom context for API calls.
 	//
 	// This context will be used several times: first, to create Stackdriver
 	// trace and metric clients, and then every time a new batch of traces or
@@ -79,13 +50,35 @@ type options struct {
 	// Do not set a timeout on this context. Instead, set the Timeout option.
 	//
 	// If unset, context.Background() will be used.
-	Context context.Context
-
-	// Timeout for all API calls. If not set, defaults to 5 seconds.
-	Timeout time.Duration
-
+	context context.Context
 	// mapAttribute maps otel attribute keys to cloud trace attribute keys
 	mapAttribute AttributeMapping
+	// projectID is the identifier of the Stackdriver
+	// project the user is uploading the stats data to.
+	// If not set, this will default to your "Application Default Credentials".
+	// For details see: https://developers.google.com/accounts/docs/application-default-credentials.
+	//
+	// It will be used in the project_id label of a Stackdriver monitored
+	// resource if the resource does not inherently belong to a specific
+	// project, e.g. on-premise resource like k8s_container or generic_task.
+	projectID string
+	// location is the identifier of the GCP or AWS cloud region/zone in which
+	// the data for a resource is stored.
+	// If not set, it will default to the location provided by the metadata server.
+	//
+	// It will be used in the location label of a Stackdriver monitored resource
+	// if the resource does not inherently belong to a specific project, e.g.
+	// on-premise resource like k8s_container or generic_task.
+	location string
+	// traceClientOptions are additional options to be passed
+	// to the underlying Stackdriver Trace API client.
+	// Optional.
+	traceClientOptions []option.ClientOption
+	// batchSpanProcessorOptions are additional options to be based
+	// to the underlying BatchSpanProcessor when call making a new export pipeline.
+	batchSpanProcessorOptions []sdktrace.BatchSpanProcessorOption
+	// timeout for all API calls. If not set, defaults to 5 seconds.
+	timeout time.Duration
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -95,7 +88,7 @@ type options struct {
 // https://godoc.org/golang.org/x/oauth2/google#FindDefaultCredentials
 func WithProjectID(projectID string) func(o *options) {
 	return func(o *options) {
-		o.ProjectID = projectID
+		o.projectID = projectID
 	}
 }
 
@@ -111,7 +104,7 @@ func WithErrorHandler(handler otel.ErrorHandler) func(o *options) {
 // WithTraceClientOptions sets additionial client options for tracing.
 func WithTraceClientOptions(opts []option.ClientOption) func(o *options) {
 	return func(o *options) {
-		o.TraceClientOptions = opts
+		o.traceClientOptions = opts
 	}
 }
 
@@ -119,14 +112,14 @@ func WithTraceClientOptions(opts []option.ClientOption) func(o *options) {
 // relies on.
 func WithContext(ctx context.Context) func(o *options) {
 	return func(o *options) {
-		o.Context = ctx
+		o.context = ctx
 	}
 }
 
 // WithTimeout sets the timeout for trace exporter and metric exporter
 func WithTimeout(t time.Duration) func(o *options) {
 	return func(o *options) {
-		o.Timeout = t
+		o.timeout = t
 	}
 }
 
@@ -165,7 +158,7 @@ type Exporter struct {
 // New creates a new Exporter thats implements trace.Exporter.
 func New(opts ...Option) (*Exporter, error) {
 	o := options{
-		Context:      context.Background(),
+		context:      context.Background(),
 		mapAttribute: defaultAttributeMapping,
 	}
 	for _, opt := range opts {
@@ -175,15 +168,15 @@ func New(opts ...Option) (*Exporter, error) {
 }
 
 func newExporterWithOptions(o *options) (*Exporter, error) {
-	if o.ProjectID == "" {
-		creds, err := google.FindDefaultCredentials(o.Context, traceapi.DefaultAuthScopes()...)
+	if o.projectID == "" {
+		creds, err := google.FindDefaultCredentials(o.context, traceapi.DefaultAuthScopes()...)
 		if err != nil {
 			return nil, fmt.Errorf("stackdriver: %v", err)
 		}
 		if creds.ProjectID == "" {
 			return nil, errors.New("stackdriver: no project found with application default credentials")
 		}
-		o.ProjectID = creds.ProjectID
+		o.projectID = creds.ProjectID
 	}
 	te, err := newTraceExporter(o)
 	if err != nil {

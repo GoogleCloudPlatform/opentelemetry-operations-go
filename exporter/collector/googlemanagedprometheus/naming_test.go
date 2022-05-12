@@ -25,8 +25,8 @@ func TestGetMetricName(t *testing.T) {
 	for _, tc := range []struct {
 		desc      string
 		baseName  string
-		datatype  pmetric.MetricDataType
 		expected  string
+		datatype  pmetric.MetricDataType
 		expectErr bool
 	}{
 		{

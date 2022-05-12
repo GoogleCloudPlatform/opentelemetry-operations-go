@@ -31,16 +31,13 @@ import (
 )
 
 type MetricsTestServer struct {
-	// Address where the gRPC server is listening
-	Endpoint string
-
+	lis                         net.Listener
+	srv                         *grpc.Server
+	Endpoint                    string
 	createMetricDescriptorReqs  []*monitoringpb.CreateMetricDescriptorRequest
 	createTimeSeriesReqs        []*monitoringpb.CreateTimeSeriesRequest
 	createServiceTimeSeriesReqs []*monitoringpb.CreateTimeSeriesRequest
-
-	lis net.Listener
-	srv *grpc.Server
-	mu  sync.Mutex
+	mu                          sync.Mutex
 }
 
 func (m *MetricsTestServer) Shutdown() {

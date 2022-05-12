@@ -493,7 +493,7 @@ func (me *metricExporter) recordToMpb(r *export.Record, library instrumentation.
 	labels := make(map[string]string)
 	iter := r.Labels().Iter()
 	for iter.Next() {
-		kv := iter.Label()
+		kv := iter.Attribute()
 		labels[normalizeLabelKey(string(kv.Key))] = sanitizeUTF8(kv.Value.Emit())
 	}
 

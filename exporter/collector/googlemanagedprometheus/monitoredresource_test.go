@@ -24,9 +24,9 @@ import (
 
 func TestMapToPrometheusTarget(t *testing.T) {
 	for _, tc := range []struct {
-		desc           string
 		resourceLabels map[string]string
 		expected       *monitoredrespb.MonitoredResource
+		desc           string
 	}{
 		{
 			desc:           "no attributes",

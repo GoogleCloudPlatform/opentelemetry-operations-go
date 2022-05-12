@@ -4,6 +4,7 @@ TOOLS_MOD_DIR := ./tools
 ALL_DOCS := $(shell find . -name '*.md' -type f | sort)
 # All directories with go.mod files related to exporters. Used for building, testing and linting.
 ALL_GO_MOD_DIRS := $(filter-out $(TOOLS_MOD_DIR), $(shell find . -type f -name 'go.mod' -exec dirname {} \; | sort))
+ALL_GO_FILES_DIRS := $(filter-out $(TOOLS_MOD_DIR), $(shell find . -type f -name '*.go' -exec dirname {} \; | sort | uniq))
 ALL_COVERAGE_MOD_DIRS := $(shell find . -type f -name 'go.mod' -exec dirname {} \; | egrep -v '^./example|^$(TOOLS_MOD_DIR)' | sort)
 
 # Mac OS Catalina 10.5.x doesn't support 386. Hence skip 386 test
@@ -45,6 +46,10 @@ $(TOOLS_DIR)/gojq: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_D
 $(TOOLS_DIR)/protoc-gen-go: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
 	cd $(TOOLS_MOD_DIR) && \
 	go build -o $(TOOLS_DIR)/protoc-gen-go google.golang.org/protobuf/cmd/protoc-gen-go
+
+$(TOOLS_DIR)/fieldalignment: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
+	cd $(TOOLS_MOD_DIR) && \
+	go build -o $(TOOLS_DIR)/fieldalignment golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment
 
 PROTOBUF_VERSION = 3.19.0
 PROTOBUF_OS = linux
@@ -140,10 +145,15 @@ lint: $(TOOLS_DIR)/golangci-lint $(TOOLS_DIR)/misspell
 	done
 
 generate: $(TOOLS_DIR)/stringer $(TOOLS_DIR)/protoc
-	$(MAKE) for-all PATH="$(TOOLS_DIR):$${PATH}" CMD="go generate ./..."
+	$(MAKE) for-all-mod PATH="$(TOOLS_DIR):$${PATH}" CMD="go generate ./..."
 
-.PHONY: for-all
-for-all:
+.PHONY: fieldalignment
+fieldalignment: $(TOOLS_DIR)/fieldalignment
+	$(MAKE) for-all-package CMD="fieldalignment -fix ."
+
+
+.PHONY: for-all-mod
+for-all-mod:
 	@$${CMD}
 	@set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  (cd "$${dir}" && \
@@ -151,13 +161,22 @@ for-all:
 	 	$${CMD} ); \
 	done
 
+.PHONY: for-all-package
+for-all-package:
+	@$${CMD}
+	@set -e; for dir in $(ALL_GO_FILES_DIRS); do \
+	  (cd "$${dir}" && \
+	  	echo "running $${CMD} in $${dir}" && \
+	 	$${CMD} || true); \
+	done
+
 .PHONY: gotidy
 gotidy:
-	$(MAKE) for-all CMD="go mod tidy -compat=1.17"
+	$(MAKE) for-all-mod CMD="go mod tidy -compat=1.17"
 
 .PHONY: update-dep
 update-dep:
-	$(MAKE) for-all CMD="$(PWD)/internal/buildscripts/update-dep"
+	$(MAKE) for-all-mod CMD="$(PWD)/internal/buildscripts/update-dep"
 
 STABLE_OTEL_VERSION=v1.6.2
 UNSTABLE_OTEL_VERSION=v0.28.0

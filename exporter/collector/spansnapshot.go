@@ -28,18 +28,24 @@ import (
 // https://github.com/open-telemetry/opentelemetry-go/blob/main/sdk/trace/snapshot.go#L28
 // It allows instantiating ReadOnlySpans.
 type spanSnapshot struct {
-	sdktrace.ReadOnlySpan                                                 // so we can inherit the "private" func
-	spanContext, parent                                                   apitrace.SpanContext
-	spanKind                                                              apitrace.SpanKind
-	startTime, endTime                                                    time.Time
-	name                                                                  string
-	attributes                                                            []attribute.KeyValue
-	links                                                                 []sdktrace.Link
-	events                                                                []sdktrace.Event
-	droppedAttributes, droppedMessageEvents, droppedLinks, childSpanCount int
-	resource                                                              *sdkresource.Resource
-	instrumentationLibrary                                                instrumentation.Library
-	status                                                                sdktrace.Status
+	endTime   time.Time
+	startTime time.Time
+	// ReadOnlySpan is needed so we can inherit the "private" func
+	sdktrace.ReadOnlySpan
+	resource               *sdkresource.Resource
+	instrumentationLibrary instrumentation.Library
+	status                 sdktrace.Status
+	name                   string
+	attributes             []attribute.KeyValue
+	events                 []sdktrace.Event
+	links                  []sdktrace.Link
+	parent                 apitrace.SpanContext
+	spanContext            apitrace.SpanContext
+	droppedMessageEvents   int
+	droppedLinks           int
+	childSpanCount         int
+	spanKind               apitrace.SpanKind
+	droppedAttributes      int
 }
 
 func (s spanSnapshot) Name() string                      { return s.name }

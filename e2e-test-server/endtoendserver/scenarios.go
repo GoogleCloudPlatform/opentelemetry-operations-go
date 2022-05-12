@@ -39,8 +39,8 @@ type request struct {
 }
 
 type response struct {
-	statusCode code.Code
 	data       []byte
+	statusCode code.Code
 	traceID    trace.TraceID
 }
 

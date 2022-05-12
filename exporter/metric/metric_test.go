@@ -235,12 +235,12 @@ func TestRecordToMpb(t *testing.T) {
 func TestResourceToMonitoredResourcepb(t *testing.T) {
 	testCases := []struct {
 		resource       *resource.Resource
-		expectedType   string
 		expectedLabels map[string]string
+		expectedType   string
 	}{
 		// k8s_container
 		{
-			resource.NewWithAttributes(
+			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
@@ -249,8 +249,8 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
 				attribute.String("container.name", "opentelemetry"),
 			),
-			"k8s_container",
-			map[string]string{
+			expectedType: "k8s_container",
+			expectedLabels: map[string]string{
 				"project_id":     "",
 				"location":       "us-central1-a",
 				"cluster_name":   "opentelemetry-cluster",
@@ -261,15 +261,15 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// k8s_node
 		{
-			resource.NewWithAttributes(
+			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("host.name", "opentelemetry-node"),
 			),
-			"k8s_node",
-			map[string]string{
+			expectedType: "k8s_node",
+			expectedLabels: map[string]string{
 				"project_id":   "",
 				"location":     "us-central1-a",
 				"cluster_name": "opentelemetry-cluster",
@@ -278,7 +278,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// k8s_pod
 		{
-			resource.NewWithAttributes(
+			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
@@ -286,8 +286,8 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				attribute.String("k8s.namespace.name", "default"),
 				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
 			),
-			"k8s_pod",
-			map[string]string{
+			expectedType: "k8s_pod",
+			expectedLabels: map[string]string{
 				"project_id":     "",
 				"location":       "us-central1-a",
 				"cluster_name":   "opentelemetry-cluster",
@@ -297,14 +297,14 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// k8s_cluster
 		{
-			resource.NewWithAttributes(
+			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 			),
-			"k8s_cluster",
-			map[string]string{
+			expectedType: "k8s_cluster",
+			expectedLabels: map[string]string{
 				"project_id":   "",
 				"location":     "us-central1-a",
 				"cluster_name": "opentelemetry-cluster",
@@ -312,20 +312,20 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// k8s_node missing a field
 		{
-			resource.NewWithAttributes(
+			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("host.name", "opentelemetry-node"),
 			),
-			"global",
-			map[string]string{
+			expectedType: "global",
+			expectedLabels: map[string]string{
 				"project_id": "",
 			},
 		},
 		// nonexisting resource types
 		{
-			resource.NewWithAttributes(
+			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "none"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
@@ -334,21 +334,21 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
 				attribute.String("container.name", "opentelemetry"),
 			),
-			"global",
-			map[string]string{
+			expectedType: "global",
+			expectedLabels: map[string]string{
 				"project_id": "",
 			},
 		},
 		// GCE resource fields
 		{
-			resource.NewWithAttributes(
+			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("host.id", "123"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
 			),
-			"gce_instance",
-			map[string]string{
+			expectedType: "gce_instance",
+			expectedLabels: map[string]string{
 				"project_id":  "",
 				"instance_id": "123",
 				"zone":        "us-central1-a",
@@ -356,15 +356,15 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// AWS resources
 		{
-			resource.NewWithAttributes(
+			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "aws"),
 				attribute.String("cloud.region", "us-central1-a"),
 				attribute.String("host.id", "123"),
 				attribute.String("cloud.account.id", "fake_account"),
 			),
-			"aws_ec2_instance",
-			map[string]string{
+			expectedType: "aws_ec2_instance",
+			expectedLabels: map[string]string{
 				"project_id":  "",
 				"instance_id": "123",
 				"region":      "us-central1-a",
@@ -373,7 +373,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 		// Cloud Run
 		{
-			resource.NewWithAttributes(
+			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.region", "utopia"),
@@ -381,8 +381,8 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				attribute.String("service.name", "x-service"),
 				attribute.String("service.namespace", "cloud-run-managed"),
 			),
-			"generic_task",
-			map[string]string{
+			expectedType: "generic_task",
+			expectedLabels: map[string]string{
 				"project_id": "",
 				"location":   "utopia",
 				"namespace":  "cloud-run-managed",
@@ -673,8 +673,8 @@ func (m *mock) CreateMetricDescriptor(ctx context.Context, req *monitoringpb.Cre
 func TestExportMetricsWithUserAgent(t *testing.T) {
 	for _, tc := range []struct {
 		desc                   string
-		extraOpts              []option.ClientOption
 		expectedUserAgentRegex string
+		extraOpts              []option.ClientOption
 	}{
 		{
 			desc:                   "default",

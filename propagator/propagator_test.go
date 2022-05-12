@@ -175,18 +175,18 @@ func TestOneWayPropagatorInject(t *testing.T) {
 	propagator := CloudTraceOneWayPropagator{}
 
 	testCases := []struct {
+		wantHeaders map[string]string
 		name        string
 		scc         trace.SpanContextConfig
-		wantHeaders map[string]string
 	}{
 		{
-			"valid TraceID and SpanID with sampled flag doean't inject",
-			trace.SpanContextConfig{
+			name: "valid TraceID and SpanID with sampled flag doean't inject",
+			scc: trace.SpanContextConfig{
 				TraceID:    validTraceID,
 				SpanID:     validSpanID,
 				TraceFlags: trace.FlagsSampled,
 			},
-			map[string]string{},
+			wantHeaders: map[string]string{},
 		},
 	}
 
@@ -271,39 +271,39 @@ func TestCloudTraceContextHeaderInject(t *testing.T) {
 	propagator := CloudTraceFormatPropagator{}
 
 	testCases := []struct {
+		wantHeaders map[string]string
 		name        string
 		scc         trace.SpanContextConfig
-		wantHeaders map[string]string
 	}{
 		{
-			"valid TraceID and SpanID with sampled flag",
-			trace.SpanContextConfig{
+			name: "valid TraceID and SpanID with sampled flag",
+			scc: trace.SpanContextConfig{
 				TraceID:    validTraceID,
 				SpanID:     validSpanID,
 				TraceFlags: trace.FlagsSampled,
 			},
-			map[string]string{
+			wantHeaders: map[string]string{
 				TraceContextHeaderName: fmt.Sprintf("%s/%s;o=1", validTraceIDStr, validSpanIDStr),
 			},
 		},
 		{
-			"valid TraceID and SpanID without sampled flag",
-			trace.SpanContextConfig{
+			name: "valid TraceID and SpanID without sampled flag",
+			scc: trace.SpanContextConfig{
 				TraceID: validTraceID,
 				SpanID:  validSpanID,
 			},
-			map[string]string{
+			wantHeaders: map[string]string{
 				TraceContextHeaderName: fmt.Sprintf("%s/%s;o=0", validTraceIDStr, validSpanIDStr),
 			},
 		},
 		{
-			"valid TraceID and SpanID with sampled flag and proper camelcase header name",
-			trace.SpanContextConfig{
+			name: "valid TraceID and SpanID with sampled flag and proper camelcase header name",
+			scc: trace.SpanContextConfig{
 				TraceID:    validTraceID,
 				SpanID:     validSpanID,
 				TraceFlags: trace.FlagsSampled,
 			},
-			map[string]string{
+			wantHeaders: map[string]string{
 				xctcCamel: fmt.Sprintf("%s/%s;o=1", validTraceIDStr, validSpanIDStr),
 			},
 		},

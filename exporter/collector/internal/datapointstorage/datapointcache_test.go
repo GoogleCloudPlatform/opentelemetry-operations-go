@@ -149,12 +149,12 @@ func TestIdentifier(t *testing.T) {
 		"hello": "world",
 	}
 	for _, tc := range []struct {
-		desc        string
-		want        string
 		resource    *monitoredrespb.MonitoredResource
 		extraLabels map[string]string
 		metric      pmetric.Metric
 		labels      pcommon.Map
+		desc        string
+		want        string
 	}{
 		{
 			desc:   "empty",

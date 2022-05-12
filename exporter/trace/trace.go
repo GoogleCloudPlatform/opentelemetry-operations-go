@@ -30,22 +30,22 @@ import (
 // traceExporter is an implementation of trace.Exporter and trace.BatchExporter
 // that uploads spans to Stackdriver Trace in batch.
 type traceExporter struct {
-	o         *options
-	projectID string
+	o *options
 	// uploadFn defaults in uploadSpans; it can be replaced for tests.
-	uploadFn func(ctx context.Context, spans []*tracepb.Span) error
+	uploadFn  func(ctx context.Context, spans []*tracepb.Span) error
+	client    *traceclient.Client
+	projectID string
 	overflowLogger
-	client *traceclient.Client
 }
 
 func newTraceExporter(o *options) (*traceExporter, error) {
-	clientOps := append(o.TraceClientOptions, option.WithUserAgent(userAgent))
-	client, err := traceclient.NewClient(o.Context, clientOps...)
+	clientOps := append(o.traceClientOptions, option.WithUserAgent(userAgent))
+	client, err := traceclient.NewClient(o.context, clientOps...)
 	if err != nil {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
 	}
 	e := &traceExporter{
-		projectID:      o.ProjectID,
+		projectID:      o.projectID,
 		client:         client,
 		o:              o,
 		overflowLogger: overflowLogger{delayDur: 5 * time.Second},
@@ -80,7 +80,7 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 	}
 
 	var cancel func()
-	ctx, cancel = newContextWithTimeout(ctx, e.o.Timeout)
+	ctx, cancel = newContextWithTimeout(ctx, e.o.timeout)
 	defer cancel()
 
 	// TODO(ymotongpoo): add this part after OTel support NeverSampler
