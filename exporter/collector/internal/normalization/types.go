@@ -14,20 +14,22 @@
 
 package normalization
 
-import "go.opentelemetry.io/collector/model/pdata"
+import (
+	"go.opentelemetry.io/collector/pdata/pmetric"
+)
 
 // Normalizer can normalize data points to handle cases in which the start time is unknown.
 type Normalizer interface {
 	// NormalizeExponentialHistogramDataPoint normalizes an exponential histogram.
 	// It returns the normalized point, or nil if the point should be dropped.
-	NormalizeExponentialHistogramDataPoint(point pdata.ExponentialHistogramDataPoint, identifier string) *pdata.ExponentialHistogramDataPoint
+	NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier string) *pmetric.ExponentialHistogramDataPoint
 	// NormalizeHistogramDataPoint normalizes a cumulative histogram.
 	// It returns the normalized point, or nil if the point should be dropped.
-	NormalizeHistogramDataPoint(point pdata.HistogramDataPoint, identifier string) *pdata.HistogramDataPoint
+	NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) *pmetric.HistogramDataPoint
 	// NormalizeNumberDataPoint normalizes a cumulative, monotonic sum.
 	// It returns the normalized point, or nil if the point should be dropped.
-	NormalizeNumberDataPoint(point pdata.NumberDataPoint, identifier string) *pdata.NumberDataPoint
+	NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier string) *pmetric.NumberDataPoint
 	// NormalizeSummaryDataPoint normalizes a summary.
 	// It returns the normalized point, or nil if the point should be dropped.
-	NormalizeSummaryDataPoint(point pdata.SummaryDataPoint, identifier string) *pdata.SummaryDataPoint
+	NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier string) *pmetric.SummaryDataPoint
 }

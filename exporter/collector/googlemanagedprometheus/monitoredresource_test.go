@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -122,7 +122,7 @@ func TestMapToPrometheusTarget(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			r := pdata.NewResource()
+			r := pcommon.NewResource()
 			for k, v := range tc.resourceLabels {
 				r.Attributes().InsertString(k, v)
 			}

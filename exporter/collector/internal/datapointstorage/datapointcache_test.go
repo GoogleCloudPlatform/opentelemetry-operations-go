@@ -19,8 +19,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -38,7 +38,7 @@ func TestSetAndGet(t *testing.T) {
 	point, found = c.GetNumberDataPoint("bar")
 	assert.Nil(t, point)
 	assert.False(t, found)
-	setPoint := pdata.NewNumberDataPoint()
+	setPoint := pmetric.NewNumberDataPoint()
 	c.SetNumberDataPoint("bar", &setPoint)
 	point, found = c.GetNumberDataPoint("bar")
 	assert.Equal(t, point, &setPoint)
@@ -106,7 +106,7 @@ func TestGetPreventsGC(t *testing.T) {
 	}
 	fakeTicker := make(chan time.Time)
 
-	setPoint := pdata.NewNumberDataPoint()
+	setPoint := pmetric.NewNumberDataPoint()
 	c.SetNumberDataPoint("bar", &setPoint)
 	// bar exists since we just set it
 	_, found := c.numberCache["bar"]
@@ -131,9 +131,9 @@ func TestGetPreventsGC(t *testing.T) {
 }
 
 func TestIdentifier(t *testing.T) {
-	metricWithName := pdata.NewMetric()
+	metricWithName := pmetric.NewMetric()
 	metricWithName.SetName("custom.googleapis.com/test.metric")
-	dpWithAttributes := pdata.NewNumberDataPoint()
+	dpWithAttributes := pmetric.NewNumberDataPoint()
 	dpWithAttributes.Attributes().Insert("string", pcommon.NewValueString("strval"))
 	dpWithAttributes.Attributes().Insert("bool", pcommon.NewValueBool(true))
 	dpWithAttributes.Attributes().Insert("int", pcommon.NewValueInt(123))
@@ -153,39 +153,39 @@ func TestIdentifier(t *testing.T) {
 		want        string
 		resource    *monitoredrespb.MonitoredResource
 		extraLabels map[string]string
-		metric      pdata.Metric
-		labels      pdata.Map
+		metric      pmetric.Metric
+		labels      pcommon.Map
 	}{
 		{
 			desc:   "empty",
 			want:   " - map[] -  -",
-			metric: pdata.NewMetric(),
-			labels: pdata.NewNumberDataPoint().Attributes(),
+			metric: pmetric.NewMetric(),
+			labels: pmetric.NewNumberDataPoint().Attributes(),
 		},
 		{
 			desc:   "with name",
 			want:   " - map[] - custom.googleapis.com/test.metric -",
 			metric: metricWithName,
-			labels: pdata.NewNumberDataPoint().Attributes(),
+			labels: pmetric.NewNumberDataPoint().Attributes(),
 		},
 		{
 			desc:   "with attributes",
 			want:   " - map[] -  - bool=true int=123 string=strval",
-			metric: pdata.NewMetric(),
+			metric: pmetric.NewMetric(),
 			labels: dpWithAttributes.Attributes(),
 		},
 		{
 			desc:     "with resource",
 			want:     "map[location:us-central1-b project:project-foo] - map[] -  -",
 			resource: monitoredResource,
-			metric:   pdata.NewMetric(),
-			labels:   pdata.NewNumberDataPoint().Attributes(),
+			metric:   pmetric.NewMetric(),
+			labels:   pmetric.NewNumberDataPoint().Attributes(),
 		},
 		{
 			desc:        "with extra labels",
 			want:        " - map[foo:bar hello:world] -  -",
-			metric:      pdata.NewMetric(),
-			labels:      pdata.NewNumberDataPoint().Attributes(),
+			metric:      pmetric.NewMetric(),
+			labels:      pmetric.NewNumberDataPoint().Attributes(),
 			extraLabels: extraLabels,
 		},
 		{

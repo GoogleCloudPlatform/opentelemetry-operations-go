@@ -19,7 +19,8 @@ import (
 	"strings"
 	"time"
 
-	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -33,22 +34,22 @@ type Cache struct {
 }
 
 type usedNumberPoint struct {
-	point *pdata.NumberDataPoint
+	point *pmetric.NumberDataPoint
 	used  bool
 }
 
 type usedSummaryPoint struct {
-	point *pdata.SummaryDataPoint
+	point *pmetric.SummaryDataPoint
 	used  bool
 }
 
 type usedHistogramPoint struct {
-	point *pdata.HistogramDataPoint
+	point *pmetric.HistogramDataPoint
 	used  bool
 }
 
 type usedExponentialHistogramPoint struct {
-	point *pdata.ExponentialHistogramDataPoint
+	point *pmetric.ExponentialHistogramDataPoint
 	used  bool
 }
 
@@ -70,7 +71,7 @@ func NewCache(shutdown <-chan struct{}) Cache {
 
 // GetNumberDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c Cache) GetNumberDataPoint(identifier string) (*pdata.NumberDataPoint, bool) {
+func (c Cache) GetNumberDataPoint(identifier string) (*pmetric.NumberDataPoint, bool) {
 	point, found := c.numberCache[identifier]
 	if found {
 		point.used = true
@@ -80,13 +81,13 @@ func (c Cache) GetNumberDataPoint(identifier string) (*pdata.NumberDataPoint, bo
 }
 
 // SetNumberDataPoint assigns the point to the identifier in the cache
-func (c Cache) SetNumberDataPoint(identifier string, point *pdata.NumberDataPoint) {
+func (c Cache) SetNumberDataPoint(identifier string, point *pmetric.NumberDataPoint) {
 	c.numberCache[identifier] = usedNumberPoint{point, true}
 }
 
 // GetSummaryDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c Cache) GetSummaryDataPoint(identifier string) (*pdata.SummaryDataPoint, bool) {
+func (c Cache) GetSummaryDataPoint(identifier string) (*pmetric.SummaryDataPoint, bool) {
 	point, found := c.summaryCache[identifier]
 	if found {
 		point.used = true
@@ -96,13 +97,13 @@ func (c Cache) GetSummaryDataPoint(identifier string) (*pdata.SummaryDataPoint, 
 }
 
 // SetSummaryDataPoint assigns the point to the identifier in the cache
-func (c Cache) SetSummaryDataPoint(identifier string, point *pdata.SummaryDataPoint) {
+func (c Cache) SetSummaryDataPoint(identifier string, point *pmetric.SummaryDataPoint) {
 	c.summaryCache[identifier] = usedSummaryPoint{point, true}
 }
 
 // GetHistogramDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c Cache) GetHistogramDataPoint(identifier string) (*pdata.HistogramDataPoint, bool) {
+func (c Cache) GetHistogramDataPoint(identifier string) (*pmetric.HistogramDataPoint, bool) {
 	point, found := c.histogramCache[identifier]
 	if found {
 		point.used = true
@@ -112,13 +113,13 @@ func (c Cache) GetHistogramDataPoint(identifier string) (*pdata.HistogramDataPoi
 }
 
 // SetHistogramDataPoint assigns the point to the identifier in the cache
-func (c Cache) SetHistogramDataPoint(identifier string, point *pdata.HistogramDataPoint) {
+func (c Cache) SetHistogramDataPoint(identifier string, point *pmetric.HistogramDataPoint) {
 	c.histogramCache[identifier] = usedHistogramPoint{point, true}
 }
 
 // GetExponentialHistogramDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c Cache) GetExponentialHistogramDataPoint(identifier string) (*pdata.ExponentialHistogramDataPoint, bool) {
+func (c Cache) GetExponentialHistogramDataPoint(identifier string) (*pmetric.ExponentialHistogramDataPoint, bool) {
 	point, found := c.exponentialHistogramCache[identifier]
 	if found {
 		point.used = true
@@ -128,7 +129,7 @@ func (c Cache) GetExponentialHistogramDataPoint(identifier string) (*pdata.Expon
 }
 
 // SetExponentialHistogramDataPoint assigns the point to the identifier in the cache
-func (c Cache) SetExponentialHistogramDataPoint(identifier string, point *pdata.ExponentialHistogramDataPoint) {
+func (c Cache) SetExponentialHistogramDataPoint(identifier string, point *pmetric.ExponentialHistogramDataPoint) {
 	c.exponentialHistogramCache[identifier] = usedExponentialHistogramPoint{point, true}
 }
 
@@ -187,7 +188,7 @@ func (c Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 }
 
 // Identifier returns the unique string identifier for a metric
-func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pdata.Metric, attributes pdata.Map) string {
+func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pmetric.Metric, attributes pcommon.Map) string {
 	var b strings.Builder
 
 	// Resource identifiers
@@ -200,7 +201,7 @@ func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[stri
 
 	// Metric identifiers
 	fmt.Fprintf(&b, " - %s -", metric.Name())
-	attributes.Sort().Range(func(k string, v pdata.Value) bool {
+	attributes.Sort().Range(func(k string, v pcommon.Value) bool {
 		fmt.Fprintf(&b, " %s=%s", k, v.AsString())
 		return true
 	})

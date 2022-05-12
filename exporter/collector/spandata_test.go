@@ -19,7 +19,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
@@ -30,14 +30,14 @@ import (
 
 func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 	// The goal of this test is to ensure that each span in
-	// pdata.ResourceSpans is transformed to its *trace.SpanData correctly!
+	// ptrace.ResourceSpans is transformed to its *trace.SpanData correctly!
 
 	endTime := time.Now().Round(time.Second)
-	pdataEndTime := pdata.NewTimestampFromTime(endTime)
+	pdataEndTime := pcommon.NewTimestampFromTime(endTime)
 	startTime := endTime.Add(-90 * time.Second)
-	pdataStartTime := pdata.NewTimestampFromTime(startTime)
+	pdataStartTime := pcommon.NewTimestampFromTime(startTime)
 
-	rs := pdata.NewResourceSpans()
+	rs := ptrace.NewResourceSpans()
 	resource := rs.Resource()
 	resource.Attributes().InsertString("namespace", "kube-system")
 	ilss := rs.ScopeSpans()
@@ -45,9 +45,9 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 	il.SetName("test_il_name")
 	il.SetVersion("test_il_version")
 	span := ilss.At(0).Spans().AppendEmpty()
-	traceID := pdata.NewTraceID([16]byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F})
-	spanID := pdata.NewSpanID([8]byte{0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8})
-	parentSpanID := pdata.NewSpanID([8]byte{0xEF, 0xEE, 0xED, 0xEC, 0xEB, 0xEA, 0xE9, 0xE8})
+	traceID := pcommon.NewTraceID([16]byte{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F})
+	spanID := pcommon.NewSpanID([8]byte{0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8})
+	parentSpanID := pcommon.NewSpanID([8]byte{0xEF, 0xEE, 0xED, 0xEC, 0xEB, 0xEA, 0xE9, 0xE8})
 	span.SetTraceID(traceID)
 	span.SetSpanID(spanID)
 	span.SetParentSpanID(parentSpanID)
@@ -72,11 +72,11 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 
 	links := span.Links()
 	link0 := links.AppendEmpty()
-	link0.SetTraceID(pdata.NewTraceID([16]byte{0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF}))
-	link0.SetSpanID(pdata.NewSpanID([8]byte{0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7}))
+	link0.SetTraceID(pcommon.NewTraceID([16]byte{0xC0, 0xC1, 0xC2, 0xC3, 0xC4, 0xC5, 0xC6, 0xC7, 0xC8, 0xC9, 0xCA, 0xCB, 0xCC, 0xCD, 0xCE, 0xCF}))
+	link0.SetSpanID(pcommon.NewSpanID([8]byte{0xB0, 0xB1, 0xB2, 0xB3, 0xB4, 0xB5, 0xB6, 0xB7}))
 	link1 := links.AppendEmpty()
-	link1.SetTraceID(pdata.NewTraceID([16]byte{0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF}))
-	link1.SetSpanID(pdata.NewSpanID([8]byte{0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7}))
+	link1.SetTraceID(pcommon.NewTraceID([16]byte{0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF}))
+	link1.SetSpanID(pcommon.NewSpanID([8]byte{0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7}))
 
 	span.Attributes().InsertBool("cache_hit", true)
 	span.Attributes().InsertInt("timeout_ns", 12e9)

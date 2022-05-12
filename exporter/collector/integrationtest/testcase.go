@@ -28,8 +28,6 @@ import (
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/model/otlp"
-	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -142,25 +140,25 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
-) pdata.Metrics {
+) pmetric.Metrics {
 	bytes, err := ioutil.ReadFile(tc.OTLPInputFixturePath)
 	require.NoError(t, err)
-	metrics, err := otlp.NewJSONMetricsUnmarshaler().UnmarshalMetrics(bytes)
+	metrics, err := pmetric.NewJSONUnmarshaler().UnmarshalMetrics(bytes)
 	require.NoError(t, err)
 
 	// Interface with common fields that pdata metric points have
 	type point interface {
-		StartTimestamp() pdata.Timestamp
-		Timestamp() pdata.Timestamp
-		SetStartTimestamp(pdata.Timestamp)
-		SetTimestamp(pdata.Timestamp)
+		StartTimestamp() pcommon.Timestamp
+		Timestamp() pcommon.Timestamp
+		SetStartTimestamp(pcommon.Timestamp)
+		SetTimestamp(pcommon.Timestamp)
 	}
 	updatePoint := func(p point) {
 		if p.StartTimestamp() != 0 {
-			p.SetStartTimestamp(pdata.NewTimestampFromTime(startTime))
+			p.SetStartTimestamp(pcommon.NewTimestampFromTime(startTime))
 		}
 		if p.Timestamp() != 0 {
-			p.SetTimestamp(pdata.NewTimestampFromTime(endTime))
+			p.SetTimestamp(pcommon.NewTimestampFromTime(endTime))
 		}
 	}
 

@@ -17,16 +17,15 @@ package collector
 import (
 	"strings"
 
-	"go.opentelemetry.io/collector/model/pdata"
-	semconv "go.opentelemetry.io/collector/model/semconv/v1.8.0"
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	semconv "go.opentelemetry.io/collector/semconv/v1.8.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 )
 
 type attributes struct {
-	Attrs *pdata.Map
+	Attrs *pcommon.Map
 }
 
 func (attrs *attributes) GetString(key string) (string, bool) {
@@ -38,7 +37,7 @@ func (attrs *attributes) GetString(key string) (string, bool) {
 }
 
 // defaultResourceToMonitoredResource pdata Resource to a GCM Monitored Resource.
-func defaultResourceToMonitoredResource(resource pdata.Resource) *monitoredrespb.MonitoredResource {
+func defaultResourceToMonitoredResource(resource pcommon.Resource) *monitoredrespb.MonitoredResource {
 	attrs := resource.Attributes()
 	gmr := resourcemapping.ResourceAttributesToMonitoredResource(&attributes{
 		Attrs: &attrs,
@@ -57,10 +56,10 @@ func defaultResourceToMonitoredResource(resource pdata.Resource) *monitoredrespb
 // resourceToMetricLabels converts the Resource into metric labels needed to uniquely identify
 // the timeseries.
 func (m *metricMapper) resourceToMetricLabels(
-	resource pdata.Resource,
+	resource pcommon.Resource,
 ) labels {
 	attrs := pcommon.NewMap()
-	resource.Attributes().Range(func(k string, v pdata.Value) bool {
+	resource.Attributes().Range(func(k string, v pcommon.Value) bool {
 		// Is a service attribute and should be included
 		if m.cfg.MetricConfig.ServiceResourceLabels &&
 			(k == semconv.AttributeServiceName ||

@@ -22,7 +22,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	cloudtracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
@@ -104,14 +105,14 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			testTime := time.Now()
 			spanName := "foobar"
 
-			resource := pdata.NewResource()
-			traces := pdata.NewTraces()
+			resource := pcommon.NewResource()
+			traces := ptrace.NewTraces()
 			rspans := traces.ResourceSpans().AppendEmpty()
 			resource.CopyTo(rspans.Resource())
 			ispans := rspans.ScopeSpans().AppendEmpty()
 			span := ispans.Spans().AppendEmpty()
 			span.SetName(spanName)
-			span.SetStartTimestamp(pdata.NewTimestampFromTime(testTime))
+			span.SetStartTimestamp(pcommon.NewTimestampFromTime(testTime))
 			span.Attributes().InsertString("service.name", "myservice")
 			err = sde.PushTraces(ctx, traces)
 			assert.NoError(t, err)
