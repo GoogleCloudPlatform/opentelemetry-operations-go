@@ -131,7 +131,7 @@ func TestDescToMetricType(t *testing.T) {
 		},
 		{
 			o: &options{
-				MetricDescriptorTypeFormatter: formatter,
+				metricDescriptorTypeFormatter: formatter,
 			},
 		},
 	}
@@ -525,7 +525,7 @@ func TestResourceToMonitoredResourcepbProjectIDUTF8(t *testing.T) {
 
 	me := &metricExporter{
 		o: &options{
-			ProjectID: invalidUtf8SequenceID,
+			projectID: invalidUtf8SequenceID,
 		},
 	}
 

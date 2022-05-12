@@ -37,13 +37,14 @@ const (
 )
 
 type MetricExpectFixture struct {
-	state                           protoimpl.MessageState
-	SelfObservabilityMetrics        *SelfObservabilityMetric `protobuf:"bytes,4,opt,name=self_observability_metrics,json=selfObservabilityMetrics,proto3" json:"self_observability_metrics,omitempty"`
-	unknownFields                   protoimpl.UnknownFields
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
 	CreateTimeSeriesRequests        []*v3.CreateTimeSeriesRequest       `protobuf:"bytes,1,rep,name=create_time_series_requests,json=createTimeSeriesRequests,proto3" json:"create_time_series_requests,omitempty"`
 	CreateMetricDescriptorRequests  []*v3.CreateMetricDescriptorRequest `protobuf:"bytes,2,rep,name=create_metric_descriptor_requests,json=createMetricDescriptorRequests,proto3" json:"create_metric_descriptor_requests,omitempty"`
 	CreateServiceTimeSeriesRequests []*v3.CreateTimeSeriesRequest       `protobuf:"bytes,3,rep,name=create_service_time_series_requests,json=createServiceTimeSeriesRequests,proto3" json:"create_service_time_series_requests,omitempty"`
-	sizeCache                       protoimpl.SizeCache
+	SelfObservabilityMetrics        *SelfObservabilityMetric            `protobuf:"bytes,4,opt,name=self_observability_metrics,json=selfObservabilityMetrics,proto3" json:"self_observability_metrics,omitempty"`
 }
 
 func (x *MetricExpectFixture) Reset() {
@@ -107,11 +108,12 @@ func (x *MetricExpectFixture) GetSelfObservabilityMetrics() *SelfObservabilityMe
 }
 
 type SelfObservabilityMetric struct {
-	state                          protoimpl.MessageState
-	unknownFields                  protoimpl.UnknownFields
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
 	CreateTimeSeriesRequests       []*v3.CreateTimeSeriesRequest       `protobuf:"bytes,1,rep,name=create_time_series_requests,json=createTimeSeriesRequests,proto3" json:"create_time_series_requests,omitempty"`
 	CreateMetricDescriptorRequests []*v3.CreateMetricDescriptorRequest `protobuf:"bytes,2,rep,name=create_metric_descriptor_requests,json=createMetricDescriptorRequests,proto3" json:"create_metric_descriptor_requests,omitempty"`
-	sizeCache                      protoimpl.SizeCache
 }
 
 func (x *SelfObservabilityMetric) Reset() {
@@ -161,10 +163,11 @@ func (x *SelfObservabilityMetric) GetCreateMetricDescriptorRequests() []*v3.Crea
 }
 
 type LogExpectFixture struct {
-	state                   protoimpl.MessageState
-	unknownFields           protoimpl.UnknownFields
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
 	WriteLogEntriesRequests []*v2.WriteLogEntriesRequest `protobuf:"bytes,1,rep,name=write_log_entries_requests,json=writeLogEntriesRequests,proto3" json:"write_log_entries_requests,omitempty"`
-	sizeCache               protoimpl.SizeCache
 }
 
 func (x *LogExpectFixture) Reset() {
