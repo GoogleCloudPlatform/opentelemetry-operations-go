@@ -199,7 +199,7 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 					continue
 				}
 
-				splitEntries, logName, err := l.logToSplitEntries(
+				splitEntries, err := l.logToSplitEntries(
 					log,
 					mr,
 					instrumentationSource,
@@ -279,7 +279,7 @@ func (l logMapper) logToSplitEntries(
 	instrumentationVersion string,
 	processTime time.Time,
 	logName string,
-) ([]logging.Entry, string, error) {
+) ([]logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
 	}
@@ -306,7 +306,7 @@ func (l logMapper) logToSplitEntries(
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
 		err := json.Unmarshal(sourceLocation.MBytesVal(), &logEntrySourceLocation)
 		if err != nil {
-			return []logging.Entry{entry}, logName, err
+			return []logging.Entry{entry}, err
 		}
 		entry.SourceLocation = &logEntrySourceLocation
 	}
@@ -330,7 +330,7 @@ func (l logMapper) logToSplitEntries(
 	}
 
 	if log.SeverityNumber() < 0 || int(log.SeverityNumber()) > len(severityMapping)-1 {
-		return []logging.Entry{entry}, logName, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
+		return []logging.Entry{entry}, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
 	}
 	entry.Severity = severityMapping[log.SeverityNumber()]
 
@@ -339,7 +339,7 @@ func (l logMapper) logToSplitEntries(
 	// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
 	logOverhead, err := l.logEntryToInternal(entry, logName, mr, 0, 0)
 	if err != nil {
-		return []logging.Entry{entry}, logName, err
+		return []logging.Entry{entry}, err
 	}
 	// make a copy so the proto initialization doesn't modify the original entry
 	overheadClone := proto.Clone(logOverhead)
@@ -347,7 +347,7 @@ func (l logMapper) logToSplitEntries(
 
 	payload, splits, err := parseEntryPayload(log.Body(), l.maxEntrySize-overheadBytes)
 	if err != nil {
-		return []logging.Entry{entry}, logName, err
+		return []logging.Entry{entry}, err
 	}
 
 	// Split log entries with a string payload into fewer entries
@@ -374,11 +374,11 @@ func (l logMapper) logToSplitEntries(
 			startIndex = endIndex
 			endIndex = int(math.Floor((float64(i+1) / float64(splits)) * float64(len(payloadString))))
 		}
-		return entries, logName, nil
+		return entries, nil
 	}
 
 	entry.Payload = payload
-	return []logging.Entry{entry}, logName, nil
+	return []logging.Entry{entry}, nil
 }
 
 func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, int, error) {

@@ -276,7 +276,7 @@ func TestLogMapping(t *testing.T) {
 			mr := testCase.mr()
 			mapper := newTestLogMapper(testCase.maxEntrySize)
 			logName, _ := mapper.getLogName(log)
-			entries, _, err := mapper.logToSplitEntries(
+			entries, err := mapper.logToSplitEntries(
 				log,
 				mr,
 				"",
