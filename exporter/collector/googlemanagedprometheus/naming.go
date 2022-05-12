@@ -18,11 +18,10 @@ import (
 	"fmt"
 	"strings"
 
-	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-func GetMetricName(baseName string, metric pdata.Metric) (string, error) {
+func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
 	switch metric.DataType() {
 	case pmetric.MetricDataTypeSum:
 		return baseName + "/counter", nil

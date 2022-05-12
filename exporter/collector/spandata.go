@@ -18,7 +18,6 @@ import (
 	"context"
 	"time"
 
-	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
@@ -29,7 +28,7 @@ import (
 	apitrace "go.opentelemetry.io/otel/trace"
 )
 
-func pdataResourceSpansToOTSpanData(rs pdata.ResourceSpans) []sdktrace.ReadOnlySpan {
+func pdataResourceSpansToOTSpanData(rs ptrace.ResourceSpans) []sdktrace.ReadOnlySpan {
 	resource := rs.Resource()
 	var sds []sdktrace.ReadOnlySpan
 	ss := rs.ScopeSpans()
@@ -46,9 +45,9 @@ func pdataResourceSpansToOTSpanData(rs pdata.ResourceSpans) []sdktrace.ReadOnlyS
 }
 
 func pdataSpanToOTSpanData(
-	span pdata.Span,
-	resource pdata.Resource,
-	is pdata.InstrumentationScope,
+	span ptrace.Span,
+	resource pcommon.Resource,
+	is pcommon.InstrumentationScope,
 ) spanSnapshot {
 	sc := apitrace.SpanContextConfig{
 		TraceID: span.TraceID().Bytes(),
@@ -122,10 +121,10 @@ func pdataStatusCodeToOTCode(c ptrace.StatusCode) codes.Code {
 	}
 }
 
-func pdataAttributesToOTAttributes(attrs pdata.Map, resource pdata.Resource) []attribute.KeyValue {
+func pdataAttributesToOTAttributes(attrs pcommon.Map, resource pcommon.Resource) []attribute.KeyValue {
 	otAttrs := make([]attribute.KeyValue, 0, attrs.Len())
-	appendAttrs := func(m pdata.Map) {
-		m.Range(func(k string, v pdata.Value) bool {
+	appendAttrs := func(m pcommon.Map) {
+		m.Range(func(k string, v pcommon.Value) bool {
 			switch v.Type() {
 			case pcommon.ValueTypeString:
 				otAttrs = append(otAttrs, attribute.String(k, v.StringVal()))
@@ -144,7 +143,7 @@ func pdataAttributesToOTAttributes(attrs pdata.Map, resource pdata.Resource) []a
 	return otAttrs
 }
 
-func pdataLinksToOTLinks(links pdata.SpanLinkSlice) []sdktrace.Link {
+func pdataLinksToOTLinks(links ptrace.SpanLinkSlice) []sdktrace.Link {
 	size := links.Len()
 	otLinks := make([]sdktrace.Link, 0, size)
 	for i := 0; i < size; i++ {
@@ -154,20 +153,20 @@ func pdataLinksToOTLinks(links pdata.SpanLinkSlice) []sdktrace.Link {
 		sc.SpanID = link.SpanID().Bytes()
 		otLinks = append(otLinks, sdktrace.Link{
 			SpanContext: apitrace.NewSpanContext(sc),
-			Attributes:  pdataAttributesToOTAttributes(link.Attributes(), pdata.NewResource()),
+			Attributes:  pdataAttributesToOTAttributes(link.Attributes(), pcommon.NewResource()),
 		})
 	}
 	return otLinks
 }
 
-func pdataEventsToOTMessageEvents(events pdata.SpanEventSlice) []sdktrace.Event {
+func pdataEventsToOTMessageEvents(events ptrace.SpanEventSlice) []sdktrace.Event {
 	size := events.Len()
 	otEvents := make([]sdktrace.Event, 0, size)
 	for i := 0; i < size; i++ {
 		event := events.At(i)
 		otEvents = append(otEvents, sdktrace.Event{
 			Name:       event.Name(),
-			Attributes: pdataAttributesToOTAttributes(event.Attributes(), pdata.NewResource()),
+			Attributes: pdataAttributesToOTAttributes(event.Attributes(), pcommon.NewResource()),
 			Time:       time.Unix(0, int64(event.Timestamp())),
 		})
 	}

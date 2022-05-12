@@ -15,12 +15,12 @@
 package googlemanagedprometheus
 
 import (
-	"go.opentelemetry.io/collector/model/pdata"
-	semconv "go.opentelemetry.io/collector/model/semconv/v1.8.0"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	semconv "go.opentelemetry.io/collector/semconv/v1.8.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
-func MapToPrometheusTarget(res pdata.Resource) *monitoredrespb.MonitoredResource {
+func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
 	attrs := res.Attributes()
 	// Prepend namespace if it exists to match what is specified in
 	// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/datamodel.md#resource-attributes-1
@@ -46,7 +46,7 @@ func MapToPrometheusTarget(res pdata.Resource) *monitoredrespb.MonitoredResource
 	}
 }
 
-func getStringOrEmpty(attributes pdata.Map, key string) string {
+func getStringOrEmpty(attributes pcommon.Map, key string) string {
 	if val, ok := attributes.Get(key); ok {
 		return val.StringVal()
 	}

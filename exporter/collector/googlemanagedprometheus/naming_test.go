@@ -17,7 +17,6 @@ package googlemanagedprometheus
 import (
 	"testing"
 
-	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
@@ -86,7 +85,7 @@ func TestGetMetricName(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			metric := pdata.NewMetric()
+			metric := pmetric.NewMetric()
 			metric.SetDataType(tc.datatype)
 			got, err := GetMetricName(tc.baseName, metric)
 			if tc.expectErr == (err == nil) {

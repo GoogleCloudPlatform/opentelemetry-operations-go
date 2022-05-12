@@ -32,7 +32,7 @@ import (
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
-	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/distribution"
@@ -167,7 +167,7 @@ func NewGoogleCloudMetricsExporter(
 }
 
 // PushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary
-func (me *MetricsExporter) PushMetrics(ctx context.Context, m pdata.Metrics) error {
+func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) error {
 	pendingTimeSeries := []*monitoringpb.TimeSeries{}
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
@@ -316,7 +316,7 @@ func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, ts []*mo
 	)
 }
 
-func (m *metricMapper) instrumentationScopeToLabels(is pdata.InstrumentationScope) labels {
+func (m *metricMapper) instrumentationScopeToLabels(is pcommon.InstrumentationScope) labels {
 	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
 		return labels{}
 	}
@@ -329,7 +329,7 @@ func (m *metricMapper) instrumentationScopeToLabels(is pdata.InstrumentationScop
 func (m *metricMapper) metricToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
-	metric pdata.Metric,
+	metric pmetric.Metric,
 ) []*monitoringpb.TimeSeries {
 	timeSeries := []*monitoringpb.TimeSeries{}
 
@@ -379,9 +379,9 @@ func (m *metricMapper) metricToTimeSeries(
 func (m *metricMapper) summaryPointToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
-	metric pdata.Metric,
-	sum pdata.Summary,
-	point pdata.SummaryDataPoint,
+	metric pmetric.Metric,
+	sum pmetric.Summary,
+	point pmetric.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
@@ -479,7 +479,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	return result
 }
 
-func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Exemplar {
+func (m *metricMapper) exemplar(ex pmetric.Exemplar) *distribution.Distribution_Exemplar {
 	ctx := context.TODO()
 	attachments := []*anypb.Any{}
 	// TODO: Look into still sending exemplars with no span.
@@ -515,7 +515,7 @@ func (m *metricMapper) exemplar(ex pdata.Exemplar) *distribution.Distribution_Ex
 	}
 }
 
-func (m *metricMapper) exemplars(exs pdata.ExemplarSlice) []*distribution.Distribution_Exemplar {
+func (m *metricMapper) exemplars(exs pmetric.ExemplarSlice) []*distribution.Distribution_Exemplar {
 	exemplars := make([]*distribution.Distribution_Exemplar, exs.Len())
 	for i := 0; i < exs.Len(); i++ {
 		exemplars[i] = m.exemplar(exs.At(i))
@@ -524,7 +524,7 @@ func (m *metricMapper) exemplars(exs pdata.ExemplarSlice) []*distribution.Distri
 }
 
 // histogramPoint maps a histogram data point into a GCM point.
-func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitoringpb.TypedValue {
+func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint) *monitoringpb.TypedValue {
 	counts := make([]int64, len(point.BucketCounts()))
 	var mean, deviation, prevBound float64
 
@@ -572,7 +572,7 @@ func (m *metricMapper) histogramPoint(point pdata.HistogramDataPoint) *monitorin
 }
 
 // Maps an exponential distribution into a GCM point.
-func (m *metricMapper) exponentialHistogramPoint(point pdata.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
+func (m *metricMapper) exponentialHistogramPoint(point pmetric.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
 	// First calculate underflow bucket with all negatives + zeros.
 	underflow := point.ZeroCount()
 	for _, v := range point.Negative().BucketCounts() {
@@ -630,9 +630,9 @@ func (m *metricMapper) exponentialHistogramPoint(point pdata.ExponentialHistogra
 func (m *metricMapper) histogramToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
-	metric pdata.Metric,
-	hist pdata.Histogram,
-	point pdata.HistogramDataPoint,
+	metric pmetric.Metric,
+	hist pmetric.Histogram,
+	point pmetric.HistogramDataPoint,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) || !point.HasSum() {
 		// Drop points without a value or without a sum
@@ -683,9 +683,9 @@ func (m *metricMapper) histogramToTimeSeries(
 func (m *metricMapper) exponentialHistogramToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
-	metric pdata.Metric,
-	exponentialHist pdata.ExponentialHistogram,
-	point pdata.ExponentialHistogramDataPoint,
+	metric pmetric.Metric,
+	exponentialHist pmetric.ExponentialHistogram,
+	point pmetric.ExponentialHistogramDataPoint,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
@@ -735,9 +735,9 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 func (m *metricMapper) sumPointToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
-	metric pdata.Metric,
-	sum pdata.Sum,
-	point pdata.NumberDataPoint,
+	metric pmetric.Metric,
+	sum pmetric.Sum,
+	point pmetric.NumberDataPoint,
 ) []*monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	var startTime *timestamppb.Timestamp
@@ -792,9 +792,9 @@ func (m *metricMapper) sumPointToTimeSeries(
 func (m *metricMapper) gaugePointToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
-	metric pdata.Metric,
-	gauge pdata.Gauge,
-	point pdata.NumberDataPoint,
+	metric pmetric.Metric,
+	gauge pmetric.Gauge,
+	point pmetric.NumberDataPoint,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
@@ -840,7 +840,7 @@ func (m *metricMapper) getMetricNamePrefix(name string) string {
 }
 
 // metricNameToType maps OTLP metric name to GCM metric type (aka name)
-func (m *metricMapper) metricNameToType(name string, metric pdata.Metric) (string, error) {
+func (m *metricMapper) metricNameToType(name string, metric pmetric.Metric) (string, error) {
 	metricName, err := m.cfg.MetricConfig.GetMetricName(name, metric)
 	if err != nil {
 		return "", err
@@ -849,12 +849,12 @@ func (m *metricMapper) metricNameToType(name string, metric pdata.Metric) (strin
 }
 
 // defaultGetMetricName does not (further) customize the baseName
-func defaultGetMetricName(baseName string, _ pdata.Metric) (string, error) {
+func defaultGetMetricName(baseName string, _ pmetric.Metric) (string, error) {
 	return baseName, nil
 }
 
 func numberDataPointToValue(
-	point pdata.NumberDataPoint,
+	point pmetric.NumberDataPoint,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
 	if point.ValueType() == pmetric.MetricValueTypeInt {
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
@@ -868,9 +868,9 @@ func numberDataPointToValue(
 		metricpb.MetricDescriptor_DOUBLE
 }
 
-func attributesToLabels(attrs pdata.Map) labels {
+func attributesToLabels(attrs pcommon.Map) labels {
 	ls := make(labels, attrs.Len())
-	attrs.Range(func(k string, v pdata.Value) bool {
+	attrs.Range(func(k string, v pcommon.Value) bool {
 		ls[sanitizeKey(k)] = sanitizeUTF8(v.AsString())
 		return true
 	})
@@ -930,7 +930,7 @@ func (m *metricMapper) metricTypeToDisplayName(mURL string) string {
 
 // Returns label descriptors for a metric.
 func (m *metricMapper) labelDescriptors(
-	pm pdata.Metric,
+	pm pmetric.Metric,
 	extraLabels labels,
 ) []*label.LabelDescriptor {
 	// TODO - allow customization of label descriptions.
@@ -942,8 +942,8 @@ func (m *metricMapper) labelDescriptors(
 	}
 
 	seenKeys := map[string]struct{}{}
-	addAttributes := func(attr pdata.Map) {
-		attr.Range(func(key string, _ pdata.Value) bool {
+	addAttributes := func(attr pcommon.Map) {
+		attr.Range(func(key string, _ pcommon.Value) bool {
 			// Skip keys that have already been set
 			if _, ok := seenKeys[sanitizeKey(key)]; ok {
 				return true
@@ -986,7 +986,7 @@ func (m *metricMapper) labelDescriptors(
 }
 
 // Returns (sum, count, quantile) metric types (i.e. names) for a summary metric.
-func (m *metricMapper) summaryMetricTypes(pm pdata.Metric) (string, string, string, error) {
+func (m *metricMapper) summaryMetricTypes(pm pmetric.Metric) (string, string, string, error) {
 	sumType, err := m.metricNameToType(pm.Name()+SummarySumSuffix, pm)
 	if err != nil {
 		return "", "", "", err
@@ -1003,7 +1003,7 @@ func (m *metricMapper) summaryMetricTypes(pm pdata.Metric) (string, string, stri
 }
 
 func (m *metricMapper) summaryMetricDescriptors(
-	pm pdata.Metric,
+	pm pmetric.Metric,
 	extraLabels labels,
 ) []*metricpb.MetricDescriptor {
 	sumType, countType, quantileType, err := m.summaryMetricTypes(pm)
@@ -1050,7 +1050,7 @@ func (m *metricMapper) summaryMetricDescriptors(
 
 // Extract the metric descriptor from a metric data point.
 func (m *metricMapper) metricDescriptor(
-	pm pdata.Metric,
+	pm pmetric.Metric,
 	extraLabels labels,
 ) []*metricpb.MetricDescriptor {
 	if pm.DataType() == pmetric.MetricDataTypeSummary {
@@ -1092,7 +1092,7 @@ func metricPointValueType(pt pmetric.MetricValueType) metricpb.MetricDescriptor_
 	}
 }
 
-func mapMetricPointKind(m pdata.Metric) (metricpb.MetricDescriptor_MetricKind, metricpb.MetricDescriptor_ValueType) {
+func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind, metricpb.MetricDescriptor_ValueType) {
 	var kind metricpb.MetricDescriptor_MetricKind
 	var typ metricpb.MetricDescriptor_ValueType
 	switch m.DataType() {

@@ -26,7 +26,7 @@ import (
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
-	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"golang.org/x/oauth2/google"
@@ -140,7 +140,7 @@ func mappingFuncFromAKM(akm []AttributeMapping) func(attribute.Key) attribute.Ke
 }
 
 // PushTraces calls texporter.ExportSpan for each span in the given traces
-func (te *TraceExporter) PushTraces(ctx context.Context, td pdata.Traces) error {
+func (te *TraceExporter) PushTraces(ctx context.Context, td ptrace.Traces) error {
 	resourceSpans := td.ResourceSpans()
 	spans := make([]sdktrace.ReadOnlySpan, 0, td.SpanCount())
 	for i := 0; i < resourceSpans.Len(); i++ {

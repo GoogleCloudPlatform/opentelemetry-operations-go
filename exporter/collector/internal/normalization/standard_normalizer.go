@@ -15,7 +15,6 @@
 package normalization
 
 import (
-	"go.opentelemetry.io/collector/model/pdata"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 
@@ -39,7 +38,7 @@ type standardNormalizer struct {
 	log   *zap.Logger
 }
 
-func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pdata.ExponentialHistogramDataPoint, identifier string) *pdata.ExponentialHistogramDataPoint {
+func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier string) *pmetric.ExponentialHistogramDataPoint {
 	// if the point doesn't need to be normalized, use original point
 	normalizedPoint := &point
 	start, ok := s.cache.GetExponentialHistogramDataPoint(identifier)
@@ -62,7 +61,7 @@ func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pdata.
 			return nil
 		}
 		// Make a copy so we don't mutate underlying data
-		newPoint := pdata.NewExponentialHistogramDataPoint()
+		newPoint := pmetric.NewExponentialHistogramDataPoint()
 		point.CopyTo(newPoint)
 		// Use the start timestamp from the normalization point
 		newPoint.SetStartTimestamp(start.Timestamp())
@@ -86,7 +85,7 @@ func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pdata.
 	return normalizedPoint
 }
 
-func normalizeExponentialBuckets(pointBuckets, startBuckets pdata.Buckets) {
+func normalizeExponentialBuckets(pointBuckets, startBuckets pmetric.Buckets) {
 	newBuckets := make([]uint64, len(pointBuckets.BucketCounts()))
 	offsetDiff := int(pointBuckets.Offset() - startBuckets.Offset())
 	for i := range pointBuckets.BucketCounts() {
@@ -102,7 +101,7 @@ func normalizeExponentialBuckets(pointBuckets, startBuckets pdata.Buckets) {
 	pointBuckets.SetBucketCounts(newBuckets)
 }
 
-func (s *standardNormalizer) NormalizeHistogramDataPoint(point pdata.HistogramDataPoint, identifier string) *pdata.HistogramDataPoint {
+func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) *pmetric.HistogramDataPoint {
 	// if the point doesn't need to be normalized, use original point
 	normalizedPoint := &point
 	start, ok := s.cache.GetHistogramDataPoint(identifier)
@@ -118,7 +117,7 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pdata.HistogramDa
 			return nil
 		}
 		// Make a copy so we don't mutate underlying data
-		newPoint := pdata.NewHistogramDataPoint()
+		newPoint := pmetric.NewHistogramDataPoint()
 		point.CopyTo(newPoint)
 		// Use the start timestamp from the normalization point
 		newPoint.SetStartTimestamp(start.Timestamp())
@@ -166,7 +165,7 @@ func bucketBoundariesEqual(a, b []float64) bool {
 
 // NormalizeNumberDataPoint normalizes a cumulative, monotonic sum.
 // It returns the normalized point, or nil if the point should be dropped.
-func (s *standardNormalizer) NormalizeNumberDataPoint(point pdata.NumberDataPoint, identifier string) *pdata.NumberDataPoint {
+func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier string) *pmetric.NumberDataPoint {
 	// if the point doesn't need to be normalized, use original point
 	normalizedPoint := &point
 	start, ok := s.cache.GetNumberDataPoint(identifier)
@@ -182,7 +181,7 @@ func (s *standardNormalizer) NormalizeNumberDataPoint(point pdata.NumberDataPoin
 			return nil
 		}
 		// Make a copy so we don't mutate underlying data
-		newPoint := pdata.NewNumberDataPoint()
+		newPoint := pmetric.NewNumberDataPoint()
 		point.CopyTo(newPoint)
 		// Use the start timestamp from the normalization point
 		newPoint.SetStartTimestamp(start.Timestamp())
@@ -206,7 +205,7 @@ func (s *standardNormalizer) NormalizeNumberDataPoint(point pdata.NumberDataPoin
 	return normalizedPoint
 }
 
-func (s *standardNormalizer) NormalizeSummaryDataPoint(point pdata.SummaryDataPoint, identifier string) *pdata.SummaryDataPoint {
+func (s *standardNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier string) *pmetric.SummaryDataPoint {
 	// if the point doesn't need to be normalized, use original point
 	normalizedPoint := &point
 	start, ok := s.cache.GetSummaryDataPoint(identifier)
@@ -222,7 +221,7 @@ func (s *standardNormalizer) NormalizeSummaryDataPoint(point pdata.SummaryDataPo
 			return nil
 		}
 		// Make a copy so we don't mutate underlying data.
-		newPoint := pdata.NewSummaryDataPoint()
+		newPoint := pmetric.NewSummaryDataPoint()
 		// Quantile values are copied, and are not modified. Quantiles are
 		// computed over the same time period as sum and count, but it isn't
 		// possible to normalize them.

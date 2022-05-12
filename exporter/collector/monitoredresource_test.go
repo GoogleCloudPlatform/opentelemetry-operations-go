@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -287,7 +287,7 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			r := pdata.NewResource()
+			r := pcommon.NewResource()
 			for k, v := range test.resourceLabels {
 				r.Attributes().InsertString(k, v)
 			}
@@ -464,7 +464,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 			if test.updateMapper != nil {
 				test.updateMapper(&mapper)
 			}
-			r := pdata.NewResource()
+			r := pcommon.NewResource()
 			for k, v := range test.resourceLabels {
 				r.Attributes().InsertString(k, v)
 			}
@@ -510,7 +510,7 @@ func TestResourceMetricsToMonitoredResourceUTF8(t *testing.T) {
 		{Prefix: "valid_"},
 		{Prefix: "invalid_"},
 	}
-	r := pdata.NewResource()
+	r := pcommon.NewResource()
 	for k, v := range resourceLabels {
 		r.Attributes().InsertString(k, v)
 	}

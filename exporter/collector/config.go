@@ -18,7 +18,8 @@ import (
 	"fmt"
 	"time"
 
-	"go.opentelemetry.io/collector/model/pdata"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"google.golang.org/api/option"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
@@ -113,13 +114,13 @@ type MetricConfig struct {
 	// exporters which extend the functionality of this exporter. It allows
 	// customizing the naming of metrics. baseName already includes type
 	// suffixes for summary metrics, but does not (yet) include the domain prefix
-	GetMetricName func(baseName string, metric pdata.Metric) (string, error)
+	GetMetricName func(baseName string, metric pmetric.Metric) (string, error)
 
 	// MapMonitoredResource is not exposed as an option in the configuration, but
 	// can be used by other exporters to extend the functionality of this
 	// exporter. It allows overriding the function used to map otel resource to
 	// monitored resource.
-	MapMonitoredResource func(pdata.Resource) *monitoredrespb.MonitoredResource
+	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource
 }
 
 type ResourceFilter struct {
