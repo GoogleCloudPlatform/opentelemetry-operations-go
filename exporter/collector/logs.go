@@ -243,7 +243,7 @@ func (l logMapper) logEntryToInternal(
 	internalLogEntry.Resource = mr
 	if splits > 1 {
 		internalLogEntry.Split = &logpb.LogSplit{
-			Uid:         entry.Timestamp.String(),
+			Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.String()),
 			Index:       int32(splitIndex),
 			TotalSplits: int32(splits),
 		}
