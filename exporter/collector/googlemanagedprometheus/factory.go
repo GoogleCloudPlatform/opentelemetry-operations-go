@@ -88,8 +88,6 @@ func (c *GMPConfig) toCollectorConfig() collector.Config {
 	// Map to the prometheus_target monitored resource
 	cfg.MetricConfig.MapMonitoredResource = MapToPrometheusTarget
 	cfg.MetricConfig.EnableSumOfSquaredDeviation = true
-	// TODO: Change to GMP's method of reset handling.
-	cfg.MetricConfig.CumulativeNormalization = false
 	// map the GMP config's fields to the collector config
 	cfg.ProjectID = c.ProjectID
 	cfg.UserAgent = c.UserAgent
