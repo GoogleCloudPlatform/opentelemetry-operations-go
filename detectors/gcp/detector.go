@@ -23,7 +23,8 @@ import (
 
 var errEnvVarNotFound = errors.New("environment variable not found")
 
-// NewDetector returns a *Detector which can determine aspects of
+// NewDetector returns a *Detector which can get detect the platform,
+// and fetch attributes of the platform on which it is running.
 func NewDetector() *Detector {
 	return &Detector{metadata: metadata.NewClient(nil), os: realOSProvider{}}
 }

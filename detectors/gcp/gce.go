@@ -38,8 +38,8 @@ func (d *Detector) GCEHostName() (string, error) {
 	return d.metadata.InstanceName()
 }
 
-// GCEAvaiabilityZoneAndRegion returns the zone and region in which this program is running
-func (d *Detector) GCEAvaiabilityZoneAndRegion() (string, string, error) {
+// GCEAvailabilityZoneAndRegion returns the zone and region in which this program is running
+func (d *Detector) GCEAvailabilityZoneAndRegion() (string, string, error) {
 	zone, err := d.metadata.Zone()
 	if err != nil {
 		return "", "", err

@@ -40,7 +40,7 @@ func (d *Detector) onCloudFunctions() bool {
 	return found
 }
 
-// FAASName returns the name of the cloud run or cloud functions service
+// FAASName returns the name of the cloud run or cloud functions service.
 func (d *Detector) FAASName() (string, error) {
 	if name, found := d.os.LookupEnv(faasServiceEnv); found {
 		return name, nil
@@ -62,7 +62,7 @@ func (d *Detector) FAASInstanceID() (string, error) {
 }
 
 // FAASCloudRegion detects region from the metadata server.  It is in the
-// format /projects/123/regions/r.
+// format /projects/<project_number>/regions/<region>.
 // https://cloud.google.com/run/docs/reference/container-contract#metadata-server
 func (d *Detector) FAASCloudRegion() (string, error) {
 	region, err := d.metadata.Get(regionMetadataAttr)

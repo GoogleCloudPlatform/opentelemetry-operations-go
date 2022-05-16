@@ -79,7 +79,7 @@ func TestGKEAvaiabilityZoneOrRegionZonal(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		InstanceAttributes: map[string]string{clusterLocationMetadataAttr: "us-central1-c"},
 	}, &FakeOSProvider{})
-	location, zoneOrRegion, err := d.GKEAvaiabilityZoneOrRegion()
+	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, zoneOrRegion, Zone)
 	assert.Equal(t, location, "us-central1-c")
@@ -89,7 +89,7 @@ func TestGKEAvaiabilityZoneOrRegionRegional(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		InstanceAttributes: map[string]string{clusterLocationMetadataAttr: "us-central1"},
 	}, &FakeOSProvider{})
-	location, zoneOrRegion, err := d.GKEAvaiabilityZoneOrRegion()
+	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, zoneOrRegion, Region)
 	assert.Equal(t, location, "us-central1")
@@ -99,7 +99,7 @@ func TestGKEAvaiabilityZoneOrRegionMalformed(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		InstanceAttributes: map[string]string{clusterLocationMetadataAttr: "uscentral1c"},
 	}, &FakeOSProvider{})
-	location, zoneOrRegion, err := d.GKEAvaiabilityZoneOrRegion()
+	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zoneOrRegion, UndefinedLocation)
 	assert.Equal(t, location, "")
@@ -109,7 +109,7 @@ func TestGKEAvaiabilityZoneOrRegionErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
-	location, zoneOrRegion, err := d.GKEAvaiabilityZoneOrRegion()
+	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zoneOrRegion, UndefinedLocation)
 	assert.Equal(t, location, "")

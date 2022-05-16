@@ -58,8 +58,8 @@ const (
 	Region
 )
 
-// GKEAvaiabilityZoneOrRegion returns the location of the cluster and whether the cluster is zonal or regional
-func (d *Detector) GKEAvaiabilityZoneOrRegion() (string, LocationType, error) {
+// GKEAvailabilityZoneOrRegion returns the location of the cluster and whether the cluster is zonal or regional
+func (d *Detector) GKEAvailabilityZoneOrRegion() (string, LocationType, error) {
 	clusterLocation, err := d.metadata.InstanceAttributeValue(clusterLocationMetadataAttr)
 	if err != nil {
 		return "", UndefinedLocation, err

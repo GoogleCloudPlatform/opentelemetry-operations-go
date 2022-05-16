@@ -79,7 +79,7 @@ func TestGCEAvaiabilityZoneAndRegion(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		FakeZone: "us-central1-c",
 	}, &FakeOSProvider{})
-	zone, region, err := d.GCEAvaiabilityZoneAndRegion()
+	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, zone, "us-central1-c")
 	assert.Equal(t, region, "us-central1")
@@ -89,7 +89,7 @@ func TestGCEAvaiabilityZoneAndRegionMalformedZone(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		FakeZone: "us-central1",
 	}, &FakeOSProvider{})
-	zone, region, err := d.GCEAvaiabilityZoneAndRegion()
+	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zone, "")
 	assert.Equal(t, region, "")
@@ -99,7 +99,7 @@ func TestGCEAvaiabilityZoneAndRegionNoZone(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		FakeZone: "",
 	}, &FakeOSProvider{})
-	zone, region, err := d.GCEAvaiabilityZoneAndRegion()
+	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zone, "")
 	assert.Equal(t, region, "")
@@ -109,7 +109,7 @@ func TestGCEAvaiabilityZoneAndRegionErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
-	zone, region, err := d.GCEAvaiabilityZoneAndRegion()
+	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zone, "")
 	assert.Equal(t, region, "")
