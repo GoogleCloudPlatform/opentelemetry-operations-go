@@ -45,6 +45,8 @@ var versions = map[string]string{
 	"exporter/collector/googlemanagedprometheus/": unstable,
 
 	"internal/resourcemapping/": unstable,
+
+	"detectors/gcp": unstable,
 }
 
 type module string
