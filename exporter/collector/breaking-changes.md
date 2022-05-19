@@ -5,13 +5,12 @@ stackdriver based `googlecloud` exporter:
 
 ## Configuration
 
-Client-specific configuration, including `endpoint` and `use_insecure` are now separated per-signal.  `resource_mappings` is now nested under `metric`.  For example,
+Client-specific configuration, including `endpoint` and `use_insecure` are now separated per-signal. For example,
 
 ```yaml
 googlecloud:
   endpoint: test-endpoint
   use_insecure: true
-  resource_mappings:
 ```
 Is now:
 
@@ -23,7 +22,6 @@ googlecloud:
   metric:
     endpoint: test-metric-endpoint
     use_insecure: true
-    resource_mappings:
 ```
 
 ## Metric Names and Descriptors
