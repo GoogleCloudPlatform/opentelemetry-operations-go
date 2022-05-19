@@ -59,25 +59,37 @@ var (
 			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
 		},
 		k8sContainer: {
-			location:      {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			location: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
 			clusterName:   {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
 			namespaceName: {otelKeys: []string{string(semconv.K8SNamespaceNameKey)}},
 			podName:       {otelKeys: []string{string(semconv.K8SPodNameKey)}},
 			containerName: {otelKeys: []string{string(semconv.K8SContainerNameKey)}},
 		},
 		k8sPod: {
-			location:      {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			location: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
 			clusterName:   {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
 			namespaceName: {otelKeys: []string{string(semconv.K8SNamespaceNameKey)}},
 			podName:       {otelKeys: []string{string(semconv.K8SPodNameKey)}},
 		},
 		k8sNode: {
-			location:    {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			location: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
 			clusterName: {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
 			nodeName:    {otelKeys: []string{string(semconv.K8SNodeNameKey)}},
 		},
 		k8sCluster: {
-			location:    {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			location: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
 			clusterName: {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
 		},
 		awsEc2Instance: {
