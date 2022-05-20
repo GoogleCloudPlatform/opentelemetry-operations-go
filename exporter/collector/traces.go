@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
@@ -30,6 +31,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -64,7 +66,7 @@ func setProjectFromADC(ctx context.Context, cfg *Config, scopes []string) error 
 	return nil
 }
 
-func generateClientOptions(cfg *ClientConfig, userAgent string) ([]option.ClientOption, error) {
+func generateClientOptions(ctx context.Context, cfg *ClientConfig, userAgent string, impersonateConfig ImpersonateConfig) ([]option.ClientOption, error) {
 	var copts []option.ClientOption
 	// option.WithUserAgent is used by the Trace exporter, but not the Metric exporter (see comment below)
 	if userAgent != "" {
@@ -90,6 +92,18 @@ func generateClientOptions(cfg *ClientConfig, userAgent string) ([]option.Client
 			copts = append(copts, option.WithEndpoint(cfg.Endpoint))
 		}
 	}
+	if impersonateConfig.TargetPrincipal != "" {
+		tokenSource, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
+			TargetPrincipal: impersonateConfig.TargetPrincipal,
+			Delegates:       impersonateConfig.Delegates,
+			Subject:         impersonateConfig.Subject,
+			Scopes:          monitoring.DefaultAuthScopes(),
+		})
+		if err != nil {
+			return nil, err
+		}
+		copts = append(copts, option.WithTokenSource(tokenSource))
+	}
 	if cfg.GetClientOptions != nil {
 		copts = append(copts, cfg.GetClientOptions()...)
 	}
@@ -109,7 +123,7 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 		topts = append(topts, cloudtrace.WithAttributeMapping(mappingFuncFromAKM(cfg.TraceConfig.AttributeMappings)))
 	}
 
-	copts, err := generateClientOptions(&cfg.TraceConfig.ClientConfig, cfg.UserAgent)
+	copts, err := generateClientOptions(ctx, &cfg.TraceConfig.ClientConfig, cfg.UserAgent, cfg.ImpersonateConfig)
 	if err != nil {
 		return nil, err
 	}

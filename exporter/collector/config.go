@@ -30,11 +30,12 @@ const (
 
 // Config defines configuration for Google Cloud exporter.
 type Config struct {
-	LogConfig    LogConfig    `mapstructure:"log"`
-	ProjectID    string       `mapstructure:"project"`
-	UserAgent    string       `mapstructure:"user_agent"`
-	TraceConfig  TraceConfig  `mapstructure:"trace"`
-	MetricConfig MetricConfig `mapstructure:"metric"`
+	ImpersonateConfig ImpersonateConfig `mapstructure:"impersonate"`
+	ProjectID         string            `mapstructure:"project"`
+	UserAgent         string            `mapstructure:"user_agent"`
+	TraceConfig       TraceConfig       `mapstructure:"trace"`
+	LogConfig         LogConfig         `mapstructure:"log"`
+	MetricConfig      MetricConfig      `mapstructure:"metric"`
 }
 
 type ClientConfig struct {
@@ -111,6 +112,13 @@ type MetricConfig struct {
 	// deviation.  It isn't correct, so we don't send it by default, and don't expose
 	// it to users. For some uses, it is expected, however.
 	EnableSumOfSquaredDeviation bool `mapstructure:"sum_of_squared_deviation"`
+}
+
+// ImpersonateConfig defines configuration for service account impersonation
+type ImpersonateConfig struct {
+	TargetPrincipal string   `mapstructure:"target_principal"`
+	Subject         string   `mapstructure:"subject"`
+	Delegates       []string `mapstructure:"delegates"`
 }
 
 type ResourceFilter struct {

@@ -122,7 +122,7 @@ func NewGoogleCloudMetricsExporter(
 	setVersionInUserAgent(&cfg, version)
 	setProjectFromADC(ctx, &cfg, monitoring.DefaultAuthScopes())
 
-	clientOpts, err := generateClientOptions(&cfg.MetricConfig.ClientConfig, cfg.UserAgent)
+	clientOpts, err := generateClientOptions(ctx, &cfg.MetricConfig.ClientConfig, cfg.UserAgent, cfg.ImpersonateConfig)
 	if err != nil {
 		return nil, err
 	}
