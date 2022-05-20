@@ -6,6 +6,8 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trac
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../../internal/resourcemapping
 
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-go => ../../..
+
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go v0.31.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.7.0
