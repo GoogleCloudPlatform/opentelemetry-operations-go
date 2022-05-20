@@ -66,6 +66,32 @@ func TestMapToPrometheusTarget(t *testing.T) {
 			},
 		},
 		{
+			desc: "overridden attributes",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_kubernetes_engine",
+				"cloud.availability_zone": "us-central1-c",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+				"service.name":            "myservicename",
+				"service.instance.id":     "myserviceinstanceid",
+				"location":                "overridden-location",
+				"cluster":                 "overridden-cluster",
+				"namespace":               "overridden-namespace",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "overridden-location",
+					"cluster":   "overridden-cluster",
+					"namespace": "overridden-namespace",
+					"job":       "myservicename",
+					"instance":  "myserviceinstanceid",
+				},
+			},
+		},
+		{
 			desc: "Attributes from prometheus receiver, and zone",
 			resourceLabels: map[string]string{
 				"cloud.availability_zone": "us-central1-c",

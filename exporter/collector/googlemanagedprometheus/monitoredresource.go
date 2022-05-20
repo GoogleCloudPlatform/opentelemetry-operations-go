@@ -29,26 +29,24 @@ func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResour
 	if serviceNamespace != "" {
 		job = serviceNamespace + "/" + job
 	}
-	location := getStringOrEmpty(attrs, semconv.AttributeCloudAvailabilityZone)
-	if location == "" {
-		// fall back to region if we don't have a zone.
-		location = getStringOrEmpty(attrs, semconv.AttributeCloudRegion)
-	}
 	return &monitoredrespb.MonitoredResource{
 		Type: "prometheus_target",
 		Labels: map[string]string{
-			"location":  location,
-			"cluster":   getStringOrEmpty(attrs, semconv.AttributeK8SClusterName),
-			"namespace": getStringOrEmpty(attrs, semconv.AttributeK8SNamespaceName),
+			"location":  getStringOrEmpty(attrs, "location", semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion),
+			"cluster":   getStringOrEmpty(attrs, "cluster", semconv.AttributeK8SClusterName),
+			"namespace": getStringOrEmpty(attrs, "namespace", semconv.AttributeK8SNamespaceName),
 			"job":       job,
 			"instance":  getStringOrEmpty(attrs, semconv.AttributeServiceInstanceID),
 		},
 	}
 }
 
-func getStringOrEmpty(attributes pcommon.Map, key string) string {
-	if val, ok := attributes.Get(key); ok {
-		return val.StringVal()
+// getStringOrEmpty returns the value of the first key found, or the empty string
+func getStringOrEmpty(attributes pcommon.Map, keys ...string) string {
+	for _, k := range keys {
+		if val, ok := attributes.Get(k); ok {
+			return val.StringVal()
+		}
 	}
 	return ""
 }
