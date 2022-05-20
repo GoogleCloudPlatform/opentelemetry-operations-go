@@ -213,7 +213,7 @@ func (d *testDetector) Detect(ctx context.Context) (*resource.Resource, error) {
 			semconv.FaaSVersionKey: detector.AppEngineServiceVersion,
 			semconv.FaaSIDKey:      detector.AppEngineServiceInstance,
 		})
-	default:
+	case gcp.GCE:
 		attributes = append(attributes, semconv.CloudPlatformGCPComputeEngine)
 		zone, region, err := detector.GCEAvailabilityZoneAndRegion()
 		if err != nil {
@@ -226,6 +226,8 @@ func (d *testDetector) Detect(ctx context.Context) (*resource.Resource, error) {
 			semconv.HostIDKey:   detector.GCEHostID,
 			semconv.HostNameKey: detector.GCEHostName,
 		})
+	default:
+		return resource.NewWithAttributes(semconv.SchemaURL, attributes...), nil
 	}
 }
 
