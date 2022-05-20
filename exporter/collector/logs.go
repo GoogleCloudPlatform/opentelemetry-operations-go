@@ -98,7 +98,7 @@ func NewGoogleCloudLogsExporter(
 		return nil, err
 	}
 
-	clientOpts, err := generateClientOptions(&cfg.LogConfig.ClientConfig, cfg.UserAgent)
+	clientOpts, err := generateClientOptions(ctx, &cfg.LogConfig.ClientConfig, cfg.UserAgent, cfg.ImpersonateConfig)
 	if err != nil {
 		return nil, err
 	}
