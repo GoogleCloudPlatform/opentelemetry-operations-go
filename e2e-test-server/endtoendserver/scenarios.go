@@ -19,19 +19,19 @@ import (
 	"log"
 
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/genproto/googleapis/rpc/code"
 )
 
 var scenarioHandlers = map[string]scenarioHandler{
-	"/basicPropagator": (*Server).unimplementedHandler,
-	"/basicTrace":      (*Server).basicTraceHandler,
-	"/complexTrace":    (*Server).complexTraceHandler,
-	"/health":          (*Server).healthHandler,
+	"/basicPropagator": &unimplementedHandler{},
+	"/basicTrace":      &basicTraceHandler{},
+	"/complexTrace":    &complexTraceHandler{},
+	"/detectResource":  &detectResourceHandler{},
+	"/health":          &healthHandler{},
 }
-
-type scenarioHandler func(*Server, context.Context, request, *sdktrace.TracerProvider) *response
 
 type request struct {
 	scenario string
@@ -44,13 +44,26 @@ type response struct {
 	traceID    trace.TraceID
 }
 
+type scenarioHandler interface {
+	handle(context.Context, request, *sdktrace.TracerProvider) *response
+	tracerProvider() (*sdktrace.TracerProvider, error)
+}
+
 // healthHandler returns an OK response without creating any traces.
-func (s *Server) healthHandler(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
+type healthHandler struct{}
+
+func (*healthHandler) handle(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
 	return &response{statusCode: code.Code_OK}
 }
 
+func (*healthHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
+	return newTracerProvider(resource.Empty())
+}
+
 // basicTraceHandler creates a basic trace and returns an OK response.
-func (s *Server) basicTraceHandler(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
+type basicTraceHandler struct{}
+
+func (*basicTraceHandler) handle(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
 	if req.testID == "" {
 		log.Printf("request is missing required field 'testID'. request: %+v", req)
 		return &response{
@@ -67,8 +80,14 @@ func (s *Server) basicTraceHandler(ctx context.Context, req request, tracerProvi
 	return &response{statusCode: code.Code_OK, traceID: span.SpanContext().TraceID()}
 }
 
+func (*basicTraceHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
+	return newTracerProvider(resource.Empty())
+}
+
 // complexTraceHandler creates a complex trace and returns an OK response.
-func (s *Server) complexTraceHandler(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
+type complexTraceHandler struct{}
+
+func (*complexTraceHandler) handle(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
 	if req.testID == "" {
 		log.Printf("request is missing required field 'testID'. request: %+v", req)
 		return &response{
@@ -105,8 +124,50 @@ func (s *Server) complexTraceHandler(ctx context.Context, req request, tracerPro
 	return &response{statusCode: code.Code_OK, traceID: rootSpan.SpanContext().TraceID()}
 }
 
+func (*complexTraceHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
+	return newTracerProvider(resource.Empty())
+}
+
+// detectResourceHandler creates a basic trace with resource info and returns an OK response.
+type detectResourceHandler struct{}
+
+func (*detectResourceHandler) handle(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
+	if req.testID == "" {
+		log.Printf("request is missing required field 'testID'. request: %+v", req)
+		return &response{
+			statusCode: code.Code_INVALID_ARGUMENT,
+			data:       []byte("request is missing required field 'testID'"),
+		}
+	}
+
+	tracer := tracerProvider.Tracer(instrumentingModuleName)
+	_, span := tracer.Start(ctx, "resourceDetectionTrace",
+		trace.WithAttributes(attribute.String(testIDKey, req.testID)))
+	span.End()
+
+	return &response{statusCode: code.Code_OK, traceID: span.SpanContext().TraceID()}
+}
+
+func (*detectResourceHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
+	res, err := resource.New(context.Background(),
+		resource.WithDetectors(&testDetector{}),
+		resource.WithFromEnv(),
+		resource.WithTelemetrySDK(),
+	)
+	if err != nil {
+		return nil, err
+	}
+	return newTracerProvider(res)
+}
+
 // unimplementedHandler returns an UNIMPLEMENTED response without creating any traces.
-func (s *Server) unimplementedHandler(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
+type unimplementedHandler struct{}
+
+func (*unimplementedHandler) handle(ctx context.Context, req request, tracerProvider *sdktrace.TracerProvider) *response {
 	log.Printf("received unhandled scenario %q", req.scenario)
 	return &response{statusCode: code.Code_UNIMPLEMENTED}
+}
+
+func (*unimplementedHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
+	return newTracerProvider(resource.Empty())
 }

@@ -32,7 +32,7 @@ func NewDetector() *Detector {
 type Platform int64
 
 const (
-	Undefined Platform = iota
+	UnknownPlatform Platform = iota
 	GKE
 	GCE
 	CloudRun
@@ -51,9 +51,10 @@ func (d *Detector) CloudPlatform() Platform {
 		return CloudFunctions
 	case d.onAppEngine():
 		return AppEngine
-	default:
+	case d.onGCE():
 		return GCE
 	}
+	return UnknownPlatform
 }
 
 // ProjectID returns the ID of the project in which this program is running

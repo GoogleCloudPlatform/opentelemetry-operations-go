@@ -21,78 +21,78 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFAASName(t *testing.T) {
+func TestFaaSName(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{
 			faasServiceEnv: "my-service",
 		},
 	})
-	name, err := d.FAASName()
+	name, err := d.FaaSName()
 	assert.NoError(t, err)
 	assert.Equal(t, name, "my-service")
 }
 
-func TestFAASNameErr(t *testing.T) {
+func TestFaaSNameErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
-	name, err := d.FAASName()
+	name, err := d.FaaSName()
 	assert.Error(t, err)
 	assert.Equal(t, name, "")
 }
 
-func TestFAASVersion(t *testing.T) {
+func TestFaaSVersion(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{
 			faasRevisionEnv: "version-123",
 		},
 	})
-	version, err := d.FAASVersion()
+	version, err := d.FaaSVersion()
 	assert.NoError(t, err)
 	assert.Equal(t, version, "version-123")
 }
 
-func TestFAASVersionErr(t *testing.T) {
+func TestFaaSVersionErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
-	version, err := d.FAASVersion()
+	version, err := d.FaaSVersion()
 	assert.Error(t, err)
 	assert.Equal(t, version, "")
 }
 
-func TestFAASInstanceID(t *testing.T) {
+func TestFaaSInstanceID(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		FakeInstanceID: "instance-id-123",
 	}, &FakeOSProvider{})
-	instance, err := d.FAASInstanceID()
+	instance, err := d.FaaSID()
 	assert.NoError(t, err)
 	assert.Equal(t, instance, "instance-id-123")
 }
 
-func TestFAASInstanceIDErr(t *testing.T) {
+func TestFaaSInstanceIDErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
-	instance, err := d.FAASInstanceID()
+	instance, err := d.FaaSID()
 	assert.Error(t, err)
 	assert.Equal(t, instance, "")
 }
 
-func TestFAASCloudRegion(t *testing.T) {
+func TestFaaSCloudRegion(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Attributes: map[string]string{regionMetadataAttr: "/projects/123/regions/us-central1"},
 	}, &FakeOSProvider{})
-	instance, err := d.FAASCloudRegion()
+	instance, err := d.FaaSCloudRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, instance, "us-central1")
 }
 
-func TestFAASCloudRegionErr(t *testing.T) {
+func TestFaaSCloudRegionErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
-	instance, err := d.FAASCloudRegion()
+	instance, err := d.FaaSCloudRegion()
 	assert.Error(t, err)
 	assert.Equal(t, instance, "")
 }

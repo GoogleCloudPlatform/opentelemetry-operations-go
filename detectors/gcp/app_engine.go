@@ -50,3 +50,8 @@ func (d *Detector) AppEngineServiceInstance() (string, error) {
 	}
 	return "", errEnvVarNotFound
 }
+
+// AppEngineAvailabilityZoneAndRegion returns the zone and region in which this program is running
+func (d *Detector) AppEngineAvailabilityZoneAndRegion() (string, string, error) {
+	return d.GCEAvailabilityZoneAndRegion()
+}

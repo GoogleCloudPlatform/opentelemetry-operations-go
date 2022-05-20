@@ -23,6 +23,11 @@ import (
 // https://cloud.google.com/compute/docs/metadata/default-metadata-values#vm_instance_metadata
 const machineTypeMetadataAttr = "instance/machine-type"
 
+func (d *Detector) onGCE() bool {
+	_, err := d.metadata.Get(machineTypeMetadataAttr)
+	return err == nil
+}
+
 // GCEHostType returns the machine type of the instance on which this program is running
 func (d *Detector) GCEHostType() (string, error) {
 	return d.metadata.Get(machineTypeMetadataAttr)

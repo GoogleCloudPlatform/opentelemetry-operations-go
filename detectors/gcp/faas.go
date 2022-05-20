@@ -40,31 +40,31 @@ func (d *Detector) onCloudFunctions() bool {
 	return found
 }
 
-// FAASName returns the name of the cloud run or cloud functions service.
-func (d *Detector) FAASName() (string, error) {
+// FaaSName returns the name of the cloud run or cloud functions service.
+func (d *Detector) FaaSName() (string, error) {
 	if name, found := d.os.LookupEnv(faasServiceEnv); found {
 		return name, nil
 	}
 	return "", errEnvVarNotFound
 }
 
-// FAASVersion returns the revision of the cloud run or cloud functions service
-func (d *Detector) FAASVersion() (string, error) {
+// FaaSVersion returns the revision of the cloud run or cloud functions service
+func (d *Detector) FaaSVersion() (string, error) {
 	if version, found := d.os.LookupEnv(faasRevisionEnv); found {
 		return version, nil
 	}
 	return "", errEnvVarNotFound
 }
 
-// FAASVersion returns the instance id of the cloud run instance or cloud function
-func (d *Detector) FAASInstanceID() (string, error) {
+// FaaSID returns the instance id of the cloud run instance or cloud function
+func (d *Detector) FaaSID() (string, error) {
 	return d.metadata.InstanceID()
 }
 
-// FAASCloudRegion detects region from the metadata server.  It is in the
+// FaaSCloudRegion detects region from the metadata server.  It is in the
 // format /projects/<project_number>/regions/<region>.
 // https://cloud.google.com/run/docs/reference/container-contract#metadata-server
-func (d *Detector) FAASCloudRegion() (string, error) {
+func (d *Detector) FaaSCloudRegion() (string, error) {
 	region, err := d.metadata.Get(regionMetadataAttr)
 	if err != nil {
 		return "", err
