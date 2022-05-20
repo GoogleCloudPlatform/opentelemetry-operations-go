@@ -57,7 +57,7 @@ func (*healthHandler) handle(ctx context.Context, req request, tracerProvider *s
 }
 
 func (*healthHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
-	return newTraceProvider(resource.Empty())
+	return newTracerProvider(resource.Empty())
 }
 
 // basicTraceHandler creates a basic trace and returns an OK response.
@@ -81,7 +81,7 @@ func (*basicTraceHandler) handle(ctx context.Context, req request, tracerProvide
 }
 
 func (*basicTraceHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
-	return newTraceProvider(resource.Empty())
+	return newTracerProvider(resource.Empty())
 }
 
 // complexTraceHandler creates a complex trace and returns an OK response.
@@ -125,7 +125,7 @@ func (*complexTraceHandler) handle(ctx context.Context, req request, tracerProvi
 }
 
 func (*complexTraceHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
-	return newTraceProvider(resource.Empty())
+	return newTracerProvider(resource.Empty())
 }
 
 // detectResourceHandler creates a basic trace with resource info and returns an OK response.
@@ -157,7 +157,7 @@ func (*detectResourceHandler) tracerProvider() (*sdktrace.TracerProvider, error)
 	if err != nil {
 		return nil, err
 	}
-	return newTraceProvider(res)
+	return newTracerProvider(res)
 }
 
 // unimplementedHandler returns an UNIMPLEMENTED response without creating any traces.
@@ -169,5 +169,5 @@ func (*unimplementedHandler) handle(ctx context.Context, req request, tracerProv
 }
 
 func (*unimplementedHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
-	return newTraceProvider(resource.Empty())
+	return newTracerProvider(resource.Empty())
 }
