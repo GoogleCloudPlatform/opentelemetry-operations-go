@@ -39,6 +39,16 @@ receivers:
                 - action: labelmap
                 regex: __meta_kubernetes_pod_label_(.+)
 processors:
+    # groupbyattrs promotes labels from metrics to resources, allowing them to
+    # be added to the prometheus_target monitored resource.
+    # This allows exporters which monitor multiple namespaces, such as
+    # kube-state-metrics, to override the namespace in the resource by setting
+    # metric labels.
+    groupbyattrs:
+      keys:
+        - namespace
+        - cluster
+        - location
     batch:
         # batch metrics before sending to reduce API usage
         send_batch_max_size: 200
@@ -60,7 +70,7 @@ service:
   pipelines:
     metrics:
       receivers: [prometheus]
-      processors: [batch, memory_limiter, resourcedetection]
+      processors: [groupbyattrs, batch, memory_limiter, resourcedetection]
       exporters: [googlemanagedprometheus]
 ```
 
