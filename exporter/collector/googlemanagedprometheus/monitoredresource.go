@@ -20,6 +20,17 @@ import (
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
+const (
+	// In GMP, location, cluster, and namespace labels can be overridden by
+	// users to set corresponding fields in the monitored resource. To
+	// replicate that behavior in the collector, we expect these labels
+	// to be moved from metric labels to resource labels using the groupbyattrs
+	// processor. If these resource labels are present, use them to set the MR.
+	locationLabel  = "location"
+	clusterLabel   = "cluster"
+	namespaceLabel = "namespace"
+)
+
 func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
 	attrs := res.Attributes()
 	// Prepend namespace if it exists to match what is specified in
@@ -32,9 +43,9 @@ func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResour
 	return &monitoredrespb.MonitoredResource{
 		Type: "prometheus_target",
 		Labels: map[string]string{
-			"location":  getStringOrEmpty(attrs, "location", semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion),
-			"cluster":   getStringOrEmpty(attrs, "cluster", semconv.AttributeK8SClusterName),
-			"namespace": getStringOrEmpty(attrs, "namespace", semconv.AttributeK8SNamespaceName),
+			"location":  getStringOrEmpty(attrs, locationLabel, semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion),
+			"cluster":   getStringOrEmpty(attrs, clusterLabel, semconv.AttributeK8SClusterName),
+			"namespace": getStringOrEmpty(attrs, namespaceLabel, semconv.AttributeK8SNamespaceName),
 			"job":       job,
 			"instance":  getStringOrEmpty(attrs, semconv.AttributeServiceInstanceID),
 		},
