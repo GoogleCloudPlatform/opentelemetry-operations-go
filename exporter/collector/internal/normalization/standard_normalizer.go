@@ -195,7 +195,7 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 		// that behavior.
 		zeroPoint := pmetric.NewHistogramDataPoint()
 		zeroPoint.SetTimestamp(newPoint.StartTimestamp())
-		zeroPoint.SetExplicitBounds(newPoint.MExplicitBounds())
+		zeroPoint.SetMExplicitBounds(newPoint.MExplicitBounds())
 		zeroPoint.SetMBucketCounts(make([]uint64, len(newPoint.MBucketCounts())))
 		s.startCache.SetHistogramDataPoint(identifier, &zeroPoint)
 		return &newPoint
