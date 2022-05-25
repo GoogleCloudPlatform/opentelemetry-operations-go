@@ -16,12 +16,6 @@
                         }
                     },
                     {
-                        "key": "cloud.account.id",
-                        "value": {
-                            "stringValue": "josh-opsagenttester"
-                        }
-                    },
-                    {
                         "key": "cloud.availability_zone",
                         "value": {
                             "stringValue": "us-central1-a"
@@ -874,12 +868,6 @@
                         }
                     },
                     {
-                        "key": "cloud.account.id",
-                        "value": {
-                            "stringValue": "josh-opsagenttester"
-                        }
-                    },
-                    {
                         "key": "cloud.availability_zone",
                         "value": {
                             "stringValue": "us-central1-a"
@@ -1068,12 +1056,6 @@
                         }
                     },
                     {
-                        "key": "cloud.account.id",
-                        "value": {
-                            "stringValue": "josh-opsagenttester"
-                        }
-                    },
-                    {
                         "key": "cloud.availability_zone",
                         "value": {
                             "stringValue": "us-central1-a"
@@ -1160,12 +1142,6 @@
                         "key": "cloud.platform",
                         "value": {
                             "stringValue": "gcp_compute_engine"
-                        }
-                    },
-                    {
-                        "key": "cloud.account.id",
-                        "value": {
-                            "stringValue": "josh-opsagenttester"
                         }
                     },
                     {
@@ -1854,12 +1830,6 @@
                         }
                     },
                     {
-                        "key": "cloud.account.id",
-                        "value": {
-                            "stringValue": "josh-opsagenttester"
-                        }
-                    },
-                    {
                         "key": "cloud.availability_zone",
                         "value": {
                             "stringValue": "us-central1-a"
@@ -1913,12 +1883,6 @@
                         "key": "cloud.platform",
                         "value": {
                             "stringValue": "gcp_compute_engine"
-                        }
-                    },
-                    {
-                        "key": "cloud.account.id",
-                        "value": {
-                            "stringValue": "josh-opsagenttester"
                         }
                     },
                     {
@@ -2458,12 +2422,6 @@
                         }
                     },
                     {
-                        "key": "cloud.account.id",
-                        "value": {
-                            "stringValue": "josh-opsagenttester"
-                        }
-                    },
-                    {
                         "key": "cloud.availability_zone",
                         "value": {
                             "stringValue": "us-central1-a"
@@ -2745,12 +2703,6 @@
                         "key": "cloud.platform",
                         "value": {
                             "stringValue": "gcp_compute_engine"
-                        }
-                    },
-                    {
-                        "key": "cloud.account.id",
-                        "value": {
-                            "stringValue": "josh-opsagenttester"
                         }
                     },
                     {

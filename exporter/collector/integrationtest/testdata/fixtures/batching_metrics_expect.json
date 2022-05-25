@@ -1,6 +1,7 @@
 {
   "createTimeSeriesRequests": [
     {
+      "name": "projects/fakeprojectid",
       "timeSeries": [
         {
           "metric": {
@@ -6005,6 +6006,7 @@
       ]
     },
     {
+      "name": "projects/fakeprojectid",
       "timeSeries": [
         {
           "metric": {
@@ -6161,6 +6163,7 @@
   ],
   "createMetricDescriptorRequests": [
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_1_sum",
         "labels": [
@@ -6176,6 +6179,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_1_count",
         "labels": [
@@ -6191,6 +6195,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_1",
         "labels": [
@@ -6210,6 +6215,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_2_sum",
         "labels": [
@@ -6225,6 +6231,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_2_count",
         "labels": [
@@ -6240,6 +6247,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_2",
         "labels": [
@@ -6259,6 +6267,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_3_sum",
         "labels": [
@@ -6274,6 +6283,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_3_count",
         "labels": [
@@ -6289,6 +6299,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_3",
         "labels": [
@@ -6308,6 +6319,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_4_sum",
         "labels": [
@@ -6323,6 +6335,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_4_count",
         "labels": [
@@ -6338,6 +6351,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_4",
         "labels": [
@@ -6357,6 +6371,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_5_sum",
         "labels": [
@@ -6372,6 +6387,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_5_count",
         "labels": [
@@ -6387,6 +6403,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_5",
         "labels": [
@@ -6406,6 +6423,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_6_sum",
         "labels": [
@@ -6421,6 +6439,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_6_count",
         "labels": [
@@ -6436,6 +6455,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_6",
         "labels": [
@@ -6455,6 +6475,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_7_sum",
         "labels": [
@@ -6470,6 +6491,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_7_count",
         "labels": [
@@ -6485,6 +6507,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_7",
         "labels": [
@@ -6504,6 +6527,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_8_sum",
         "labels": [
@@ -6519,6 +6543,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_8_count",
         "labels": [
@@ -6534,6 +6559,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_8",
         "labels": [
@@ -6553,6 +6579,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_9_sum",
         "labels": [
@@ -6568,6 +6595,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_9_count",
         "labels": [
@@ -6583,6 +6611,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_9",
         "labels": [
@@ -6602,6 +6631,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_10_sum",
         "labels": [
@@ -6617,6 +6647,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_10_count",
         "labels": [
@@ -6632,6 +6663,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_10",
         "labels": [
@@ -6651,6 +6683,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_11_sum",
         "labels": [
@@ -6666,6 +6699,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_11_count",
         "labels": [
@@ -6681,6 +6715,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_11",
         "labels": [
@@ -6700,6 +6735,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_12_sum",
         "labels": [
@@ -6715,6 +6751,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_12_count",
         "labels": [
@@ -6730,6 +6767,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_12",
         "labels": [
@@ -6749,6 +6787,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_13_sum",
         "labels": [
@@ -6764,6 +6803,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_13_count",
         "labels": [
@@ -6779,6 +6819,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_13",
         "labels": [
@@ -6798,6 +6839,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_14_sum",
         "labels": [
@@ -6813,6 +6855,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_14_count",
         "labels": [
@@ -6828,6 +6871,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_14",
         "labels": [
@@ -6847,6 +6891,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_15_sum",
         "labels": [
@@ -6862,6 +6907,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_15_count",
         "labels": [
@@ -6877,6 +6923,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_15",
         "labels": [
@@ -6896,6 +6943,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_16_sum",
         "labels": [
@@ -6911,6 +6959,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_16_count",
         "labels": [
@@ -6926,6 +6975,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_16",
         "labels": [
@@ -6945,6 +6995,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_17_sum",
         "labels": [
@@ -6960,6 +7011,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_17_count",
         "labels": [
@@ -6975,6 +7027,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_17",
         "labels": [
@@ -6994,6 +7047,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_18_sum",
         "labels": [
@@ -7009,6 +7063,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_18_count",
         "labels": [
@@ -7024,6 +7079,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_18",
         "labels": [
@@ -7043,6 +7099,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_19_sum",
         "labels": [
@@ -7058,6 +7115,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_19_count",
         "labels": [
@@ -7073,6 +7131,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_19",
         "labels": [
@@ -7092,6 +7151,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_20_sum",
         "labels": [
@@ -7107,6 +7167,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_20_count",
         "labels": [
@@ -7122,6 +7183,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_20",
         "labels": [
@@ -7141,6 +7203,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_21_sum",
         "labels": [
@@ -7156,6 +7219,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_21_count",
         "labels": [
@@ -7171,6 +7235,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_21",
         "labels": [
@@ -7190,6 +7255,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_22_sum",
         "labels": [
@@ -7205,6 +7271,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_22_count",
         "labels": [
@@ -7220,6 +7287,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_22",
         "labels": [
@@ -7239,6 +7307,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_23_sum",
         "labels": [
@@ -7254,6 +7323,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_23_count",
         "labels": [
@@ -7269,6 +7339,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_23",
         "labels": [
@@ -7288,6 +7359,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_24_sum",
         "labels": [
@@ -7303,6 +7375,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_24_count",
         "labels": [
@@ -7318,6 +7391,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_24",
         "labels": [
@@ -7337,6 +7411,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_25_sum",
         "labels": [
@@ -7352,6 +7427,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_25_count",
         "labels": [
@@ -7367,6 +7443,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_25",
         "labels": [
@@ -7386,6 +7463,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_26_sum",
         "labels": [
@@ -7401,6 +7479,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_26_count",
         "labels": [
@@ -7416,6 +7495,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_26",
         "labels": [
@@ -7435,6 +7515,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_27_sum",
         "labels": [
@@ -7450,6 +7531,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_27_count",
         "labels": [
@@ -7465,6 +7547,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_27",
         "labels": [
@@ -7484,6 +7567,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_28_sum",
         "labels": [
@@ -7499,6 +7583,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_28_count",
         "labels": [
@@ -7514,6 +7599,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_28",
         "labels": [
@@ -7533,6 +7619,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_29_sum",
         "labels": [
@@ -7548,6 +7635,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_29_count",
         "labels": [
@@ -7563,6 +7651,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_29",
         "labels": [
@@ -7582,6 +7671,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_30_sum",
         "labels": [
@@ -7597,6 +7687,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_30_count",
         "labels": [
@@ -7612,6 +7703,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_30",
         "labels": [
@@ -7631,6 +7723,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_31_sum",
         "labels": [
@@ -7646,6 +7739,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_31_count",
         "labels": [
@@ -7661,6 +7755,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_31",
         "labels": [
@@ -7680,6 +7775,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_32_sum",
         "labels": [
@@ -7695,6 +7791,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_32_count",
         "labels": [
@@ -7710,6 +7807,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_32",
         "labels": [
@@ -7729,6 +7827,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_33_sum",
         "labels": [
@@ -7744,6 +7843,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_33_count",
         "labels": [
@@ -7759,6 +7859,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_33",
         "labels": [
@@ -7778,6 +7879,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_34_sum",
         "labels": [
@@ -7793,6 +7895,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_34_count",
         "labels": [
@@ -7808,6 +7911,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_34",
         "labels": [
@@ -7827,6 +7931,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_35_sum",
         "labels": [
@@ -7842,6 +7947,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_35_count",
         "labels": [
@@ -7857,6 +7963,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_35",
         "labels": [
@@ -7876,6 +7983,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_36_sum",
         "labels": [
@@ -7891,6 +7999,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_36_count",
         "labels": [
@@ -7906,6 +8015,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_36",
         "labels": [
@@ -7925,6 +8035,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_37_sum",
         "labels": [
@@ -7940,6 +8051,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_37_count",
         "labels": [
@@ -7955,6 +8067,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_37",
         "labels": [
@@ -7974,6 +8087,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_38_sum",
         "labels": [
@@ -7989,6 +8103,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_38_count",
         "labels": [
@@ -8004,6 +8119,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_38",
         "labels": [
@@ -8023,6 +8139,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_39_sum",
         "labels": [
@@ -8038,6 +8155,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_39_count",
         "labels": [
@@ -8053,6 +8171,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_39",
         "labels": [
@@ -8072,6 +8191,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_40_sum",
         "labels": [
@@ -8087,6 +8207,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_40_count",
         "labels": [
@@ -8102,6 +8223,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_40",
         "labels": [
@@ -8121,6 +8243,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_41_sum",
         "labels": [
@@ -8136,6 +8259,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_41_count",
         "labels": [
@@ -8151,6 +8275,7 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
         "type": "workload.googleapis.com/testsummary_41",
         "labels": [
@@ -8173,6 +8298,7 @@
   "selfObservabilityMetrics": {
     "createTimeSeriesRequests": [
       {
+        "name": "projects/myproject",
         "timeSeries": [
           {
             "metric": {
@@ -8715,7 +8841,9 @@
     ],
     "createMetricDescriptorRequests": [
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/exporter/enqueue_failed_log_records",
           "type": "custom.googleapis.com/opencensus/exporter/enqueue_failed_log_records",
           "labels": [
             {
@@ -8730,7 +8858,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/exporter/enqueue_failed_metric_points",
           "type": "custom.googleapis.com/opencensus/exporter/enqueue_failed_metric_points",
           "labels": [
             {
@@ -8745,7 +8875,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/exporter/enqueue_failed_spans",
           "type": "custom.googleapis.com/opencensus/exporter/enqueue_failed_spans",
           "labels": [
             {
@@ -8760,7 +8892,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/exporter/queue_size",
           "type": "custom.googleapis.com/opencensus/exporter/queue_size",
           "labels": [
             {
@@ -8775,7 +8909,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
           "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
           "labels": [
             {
@@ -8790,7 +8926,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
           "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
           "labels": [
             {
@@ -8808,7 +8946,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
           "type": "custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
           "labels": [
             {
@@ -8823,7 +8963,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
           "type": "custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
           "labels": [
             {
@@ -8838,7 +8980,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
           "type": "custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
           "labels": [
             {

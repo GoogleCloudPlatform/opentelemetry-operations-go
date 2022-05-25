@@ -1,6 +1,7 @@
 {
   "createTimeSeriesRequests": [
     {
+      "name": "projects/fakeprojectid",
       "timeSeries": [
         {
           "metric": {
@@ -353,7 +354,9 @@
   ],
   "createMetricDescriptorRequests": [
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
+        "name": "scrape_series_added",
         "type": "workload.googleapis.com/scrape_series_added",
         "labels": [
           {
@@ -370,7 +373,9 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
+        "name": "ex_com_one",
         "type": "workload.googleapis.com/ex_com_one",
         "labels": [
           {
@@ -407,7 +412,9 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
+        "name": "ex_com_two",
         "type": "workload.googleapis.com/ex_com_two",
         "labels": [
           {
@@ -444,7 +451,9 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
+        "name": "up",
         "type": "workload.googleapis.com/up",
         "labels": [
           {
@@ -461,7 +470,9 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
+        "name": "scrape_duration_seconds",
         "type": "workload.googleapis.com/scrape_duration_seconds",
         "labels": [
           {
@@ -479,7 +490,9 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
+        "name": "scrape_samples_scraped",
         "type": "workload.googleapis.com/scrape_samples_scraped",
         "labels": [
           {
@@ -496,7 +509,9 @@
       }
     },
     {
+      "name": "projects/fakeprojectid",
       "metricDescriptor": {
+        "name": "scrape_samples_post_metric_relabeling",
         "type": "workload.googleapis.com/scrape_samples_post_metric_relabeling",
         "labels": [
           {
@@ -516,6 +531,7 @@
   "selfObservabilityMetrics": {
     "createTimeSeriesRequests": [
       {
+        "name": "projects/myproject",
         "timeSeries": [
           {
             "metric": {
@@ -1058,7 +1074,9 @@
     ],
     "createMetricDescriptorRequests": [
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/exporter/enqueue_failed_log_records",
           "type": "custom.googleapis.com/opencensus/exporter/enqueue_failed_log_records",
           "labels": [
             {
@@ -1073,7 +1091,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/exporter/enqueue_failed_metric_points",
           "type": "custom.googleapis.com/opencensus/exporter/enqueue_failed_metric_points",
           "labels": [
             {
@@ -1088,7 +1108,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/exporter/enqueue_failed_spans",
           "type": "custom.googleapis.com/opencensus/exporter/enqueue_failed_spans",
           "labels": [
             {
@@ -1103,7 +1125,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/exporter/queue_size",
           "type": "custom.googleapis.com/opencensus/exporter/queue_size",
           "labels": [
             {
@@ -1118,7 +1142,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
           "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
           "labels": [
             {
@@ -1133,7 +1159,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
           "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
           "labels": [
             {
@@ -1151,7 +1179,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
           "type": "custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
           "labels": [
             {
@@ -1166,7 +1196,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
           "type": "custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
           "labels": [
             {
@@ -1181,7 +1213,9 @@
         }
       },
       {
+        "name": "projects/myproject",
         "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
           "type": "custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
           "labels": [
             {
