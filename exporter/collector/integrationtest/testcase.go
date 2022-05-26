@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"sort"
 	"testing"
 	"time"
@@ -89,8 +88,7 @@ func (tc *TestCase) LoadOTLPLogsInput(
 
 func (tc *TestCase) CreateLogConfig() collector.Config {
 	cfg := collector.DefaultConfig()
-	// If not set it will use ADC
-	cfg.ProjectID = os.Getenv("PROJECT_ID")
+	cfg.ProjectID = "fake-project"
 
 	if tc.Configure != nil {
 		tc.Configure(&cfg)
@@ -343,7 +341,6 @@ func (tc *TestCase) SkipIfNeeded(t testing.TB) {
 
 func (tc *TestCase) CreateMetricConfig() collector.Config {
 	cfg := collector.DefaultConfig()
-	// If not set it will use ADC
 	cfg.ProjectID = "fake-project"
 	// Set a big buffer to capture all CMD requests without dropping
 	cfg.MetricConfig.CreateMetricDescriptorBufferSize = 500
