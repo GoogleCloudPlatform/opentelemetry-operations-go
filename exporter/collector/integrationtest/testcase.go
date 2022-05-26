@@ -19,7 +19,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
-	"os"
 	"sort"
 	"testing"
 	"time"
@@ -89,8 +88,7 @@ func (tc *TestCase) LoadOTLPLogsInput(
 
 func (tc *TestCase) CreateLogConfig() collector.Config {
 	cfg := collector.DefaultConfig()
-	// If not set it will use ADC
-	cfg.ProjectID = os.Getenv("PROJECT_ID")
+	cfg.ProjectID = "fake-project"
 
 	if tc.Configure != nil {
 		tc.Configure(&cfg)
@@ -260,9 +258,6 @@ func normalizeFixture(t testing.TB, fixture *MetricExpectFixture) {
 
 func normalizeTimeSeriesReqs(t testing.TB, reqs ...*monitoringpb.CreateTimeSeriesRequest) {
 	for _, req := range reqs {
-		// clear project ID
-		req.Name = ""
-
 		for _, ts := range req.TimeSeries {
 			for _, p := range ts.Points {
 				// Normalize timestamps if they are set
@@ -282,12 +277,10 @@ func normalizeTimeSeriesReqs(t testing.TB, reqs ...*monitoringpb.CreateTimeSerie
 
 func normalizeMetricDescriptorReqs(t testing.TB, reqs ...*monitoringpb.CreateMetricDescriptorRequest) {
 	for _, req := range reqs {
-		req.Name = ""
 		if req.MetricDescriptor == nil {
 			continue
 		}
 		md := req.MetricDescriptor
-		md.Name = ""
 		sort.Slice(md.Labels, func(i, j int) bool {
 			return md.Labels[i].Key < md.Labels[j].Key
 		})
@@ -348,8 +341,7 @@ func (tc *TestCase) SkipIfNeeded(t testing.TB) {
 
 func (tc *TestCase) CreateMetricConfig() collector.Config {
 	cfg := collector.DefaultConfig()
-	// If not set it will use ADC
-	cfg.ProjectID = os.Getenv("PROJECT_ID")
+	cfg.ProjectID = "fake-project"
 	// Set a big buffer to capture all CMD requests without dropping
 	cfg.MetricConfig.CreateMetricDescriptorBufferSize = 500
 	cfg.MetricConfig.InstrumentationLibraryLabels = false

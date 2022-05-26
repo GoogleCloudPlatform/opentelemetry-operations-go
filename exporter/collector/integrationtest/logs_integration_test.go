@@ -19,6 +19,7 @@ package integrationtest
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -34,9 +35,12 @@ func createLogsExporter(
 	test *TestCase,
 ) *collector.LogsExporter {
 	logger, _ := zap.NewProduction()
+	cfg := test.CreateLogConfig()
+	// For sending to a real project, set the project ID from an env var.
+	cfg.ProjectID = os.Getenv("PROJECT_ID")
 	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
-		test.CreateLogConfig(),
+		cfg,
 		logger,
 	)
 	require.NoError(t, err)

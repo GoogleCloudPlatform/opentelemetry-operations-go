@@ -19,6 +19,7 @@ package integrationtest
 
 import (
 	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -34,9 +35,12 @@ func createMetricsExporter(
 	test *TestCase,
 ) *collector.MetricsExporter {
 	logger, _ := zap.NewProduction()
+	cfg := test.CreateMetricConfig()
+	// For sending to a real project, set the project ID from an env var.
+	cfg.ProjectID = os.Getenv("PROJECT_ID")
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
-		test.CreateMetricConfig(),
+		cfg,
 		logger,
 		"latest",
 		collector.DefaultTimeout,
