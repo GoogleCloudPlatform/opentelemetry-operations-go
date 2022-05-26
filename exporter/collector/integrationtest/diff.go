@@ -34,8 +34,8 @@ var (
 func DiffMetricProtos(t testing.TB, x, y *MetricExpectFixture) string {
 	x = proto.Clone(x).(*MetricExpectFixture)
 	y = proto.Clone(y).(*MetricExpectFixture)
-	normalizeFixture(t, x)
-	normalizeFixture(t, y)
+	normalizeMetricFixture(t, x)
+	normalizeMetricFixture(t, y)
 
 	return cmp.Diff(x, y, cmpOptions...)
 }
@@ -44,6 +44,8 @@ func DiffMetricProtos(t testing.TB, x, y *MetricExpectFixture) string {
 func DiffLogProtos(t testing.TB, x, y *LogExpectFixture) string {
 	x = proto.Clone(x).(*LogExpectFixture)
 	y = proto.Clone(y).(*LogExpectFixture)
+	normalizeLogFixture(t, x)
+	normalizeLogFixture(t, y)
 
 	return cmp.Diff(x, y, cmpOptions...)
 }
