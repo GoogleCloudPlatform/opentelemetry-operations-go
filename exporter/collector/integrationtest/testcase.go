@@ -119,6 +119,7 @@ func (tc *TestCase) SaveRecordedLogFixtures(
 	t testing.TB,
 	fixture *LogExpectFixture,
 ) {
+	normalizeLogFixture(t, fixture)
 
 	jsonBytes, err := protojson.Marshal(fixture)
 	require.NoError(t, err)
@@ -127,6 +128,19 @@ func (tc *TestCase) SaveRecordedLogFixtures(
 	formatted.WriteString("\n")
 	require.NoError(t, ioutil.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
 	t.Logf("Updated fixture %v", tc.ExpectFixturePath)
+}
+
+// Normalizes timestamps which create noise in the fixture because they can
+// vary each test run
+func normalizeLogFixture(t testing.TB, fixture *LogExpectFixture) {
+	for _, req := range fixture.WriteLogEntriesRequests {
+		for _, entry := range req.Entries {
+			// Normalize timestamps if they are set
+			if entry.GetTimestamp() != nil {
+				entry.Timestamp = &timestamppb.Timestamp{}
+			}
+		}
+	}
 }
 
 // Load OTLP metric fixture, test expectation fixtures and modify them so they're suitable for
@@ -236,7 +250,7 @@ func (tc *TestCase) SaveRecordedMetricFixtures(
 	t testing.TB,
 	fixture *MetricExpectFixture,
 ) {
-	normalizeFixture(t, fixture)
+	normalizeMetricFixture(t, fixture)
 
 	jsonBytes, err := protojson.Marshal(fixture)
 	require.NoError(t, err)
@@ -247,9 +261,9 @@ func (tc *TestCase) SaveRecordedMetricFixtures(
 	t.Logf("Updated fixture %v", tc.ExpectFixturePath)
 }
 
-// Normalizes timestamps and removes project ID fields which create noise in the fixture
-// because they can vary each test run
-func normalizeFixture(t testing.TB, fixture *MetricExpectFixture) {
+// Normalizes timestamps which create noise in the fixture because they can
+// vary each test run
+func normalizeMetricFixture(t testing.TB, fixture *MetricExpectFixture) {
 	normalizeTimeSeriesReqs(t, fixture.CreateTimeSeriesRequests...)
 	normalizeTimeSeriesReqs(t, fixture.CreateServiceTimeSeriesRequests...)
 	normalizeMetricDescriptorReqs(t, fixture.CreateMetricDescriptorRequests...)
