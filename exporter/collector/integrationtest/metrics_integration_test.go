@@ -23,7 +23,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
@@ -61,6 +64,7 @@ func TestIntegrationMetrics(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeeded(t)
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
+			setSecondProjectInMetrics(t, metrics)
 			exporter := createMetricsExporter(ctx, t, &test)
 			defer func() { require.NoError(t, exporter.Shutdown(ctx)) }()
 
@@ -70,5 +74,20 @@ func TestIntegrationMetrics(t *testing.T) {
 				"Failed to export metrics",
 			)
 		})
+	}
+}
+
+// setSecondProjectInMetrics overwrites the gcp.project.id resource attribute
+// with the contents of the SECOND_PROJECT_ID environment variable. This makes
+// the integration test send those metrics to the specified second project.
+func setSecondProjectInMetrics(t *testing.T, metrics pmetric.Metrics) {
+	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
+		rm := metrics.ResourceMetrics().At(i)
+		secondProject := os.Getenv(secondProjectEnv)
+		require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
+		rm.Resource().Attributes().Update(
+			resourcemapping.ProjectIDAttributeKey,
+			pcommon.NewValueString(secondProject),
+		)
 	}
 }

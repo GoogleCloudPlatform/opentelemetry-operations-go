@@ -41,6 +41,9 @@ credentials](https://cloud.google.com/docs/authentication/production#automatical
 # Only needed if you want to target a specific project instead of ADC
 export PROJECT_ID="foo"
 
+# Set SECOND_PROJECT_ID to test multi-project export.
+export SECOND_PROJECT_ID="bar"
+
 # from repo root
 make integrationtest
 

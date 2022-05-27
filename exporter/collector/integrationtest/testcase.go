@@ -47,6 +47,8 @@ var (
 	}
 )
 
+const secondProjectEnv = "SECOND_PROJECT_ID"
+
 type TestCase struct {
 	// Configure will be called to modify the default configuration for this test case. Optional.
 	Configure func(cfg *collector.Config)

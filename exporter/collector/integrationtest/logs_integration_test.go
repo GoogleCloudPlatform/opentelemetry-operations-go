@@ -23,7 +23,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
@@ -58,6 +61,7 @@ func TestIntegrationLogs(t *testing.T) {
 
 		t.Run(test.Name, func(t *testing.T) {
 			logs := test.LoadOTLPLogsInput(t, startTime)
+			setSecondProjectInLogs(t, logs)
 			exporter := createLogsExporter(ctx, t, &test)
 			defer func() { require.NoError(t, exporter.Shutdown(ctx)) }()
 
@@ -67,5 +71,20 @@ func TestIntegrationLogs(t *testing.T) {
 				"Failed to export logs",
 			)
 		})
+	}
+}
+
+// setSecondProjectInLogs overwrites the gcp.project.id resource attribute
+// with the contents of the SECOND_PROJECT_ID environment variable. This makes
+// the integration test send those logs to the specified second project.
+func setSecondProjectInLogs(t *testing.T, logs plog.Logs) {
+	for i := 0; i < logs.ResourceLogs().Len(); i++ {
+		rl := logs.ResourceLogs().At(i)
+		secondProject := os.Getenv(secondProjectEnv)
+		require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
+		rl.Resource().Attributes().Update(
+			resourcemapping.ProjectIDAttributeKey,
+			pcommon.NewValueString(secondProject),
+		)
 	}
 }

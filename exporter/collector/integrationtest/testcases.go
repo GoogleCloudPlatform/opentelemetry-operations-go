@@ -31,6 +31,11 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/logs_apache_error.json",
 			ExpectFixturePath:    "testdata/fixtures/logs_apache_error_expected.json",
 		},
+		{
+			Name:                 "Multi-project logs",
+			OTLPInputFixturePath: "testdata/fixtures/logs_multi_project.json",
+			ExpectFixturePath:    "testdata/fixtures/logs_multi_project_expected.json",
+		},
 	}
 
 	MetricsTestCases = []TestCase{
@@ -162,6 +167,11 @@ var (
 					{Prefix: "telemetry.sdk."},
 				}
 			},
+		},
+		{
+			Name:                 "Multi-project metrics",
+			OTLPInputFixturePath: "testdata/fixtures/metrics_multi_project.json",
+			ExpectFixturePath:    "testdata/fixtures/metrics_multi_project_expected.json",
 		},
 		// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 	}
