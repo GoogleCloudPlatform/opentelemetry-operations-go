@@ -20,9 +20,9 @@ import (
 	"fmt"
 	"time"
 
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-
 	traceclient "cloud.google.com/go/trace/apiv2"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 )
@@ -32,7 +32,7 @@ import (
 type traceExporter struct {
 	o *options
 	// uploadFn defaults in uploadSpans; it can be replaced for tests.
-	uploadFn  func(ctx context.Context, spans []*tracepb.Span) error
+	uploadFn  func(ctx context.Context, req *tracepb.BatchWriteSpansRequest) error
 	client    *traceclient.Client
 	projectID string
 	overflowLogger
@@ -56,16 +56,32 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 
 func (e *traceExporter) ExportSpans(ctx context.Context, spanData []sdktrace.ReadOnlySpan) error {
 	// Ship the whole bundle o data.
-	results := make([]*tracepb.Span, len(spanData))
-	for i, sd := range spanData {
-		results[i] = e.ConvertSpan(ctx, sd)
+	results := make(map[string][]*tracepb.Span)
+	for _, sd := range spanData {
+		span, project := e.protoFromReadOnlySpan(sd)
+		results[project] = append(results[project], span)
 	}
-	return e.uploadFn(ctx, results)
+	var errs []error
+	for projectID, spans := range results {
+		req := &tracepb.BatchWriteSpansRequest{
+			Name:  "projects/" + projectID,
+			Spans: spans,
+		}
+		err := e.uploadFn(ctx, req)
+		if err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if len(errs) > 0 {
+		return multierr.Combine(errs...)
+	}
+	return nil
 }
 
 // ConvertSpan converts a ReadOnlySpan to Stackdriver Trace.
 func (e *traceExporter) ConvertSpan(_ context.Context, sd sdktrace.ReadOnlySpan) *tracepb.Span {
-	return e.protoFromReadOnlySpan(sd, e.projectID)
+	span, _ := e.protoFromReadOnlySpan(sd)
+	return span
 }
 
 func (e *traceExporter) Shutdown(ctx context.Context) error {
@@ -73,11 +89,7 @@ func (e *traceExporter) Shutdown(ctx context.Context) error {
 }
 
 // uploadSpans sends a set of spans to Stackdriver.
-func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) error {
-	req := tracepb.BatchWriteSpansRequest{
-		Name:  "projects/" + e.projectID,
-		Spans: spans,
-	}
+func (e *traceExporter) uploadSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) error {
 
 	var cancel func()
 	ctx, cancel = newContextWithTimeout(ctx, e.o.timeout)
@@ -94,7 +106,7 @@ func (e *traceExporter) uploadSpans(ctx context.Context, spans []*tracepb.Span) 
 	// defer span.End()
 	// span.SetAttributes(kv.Int64("num_spans", int64(len(spans))))
 
-	err := e.client.BatchWriteSpans(ctx, &req)
+	err := e.client.BatchWriteSpans(ctx, req)
 	if err != nil {
 		// TODO(ymotongpoo): handle detailed error categories
 		// span.SetStatus(codes.Unknown)

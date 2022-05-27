@@ -83,6 +83,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 			mr,
 			labels{},
 			metric,
+			mapper.cfg.ProjectID,
 		)
 		require.Len(t, ts, 3, "Should create one timeseries for each sum point")
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
@@ -118,6 +119,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 			mr,
 			labels{},
 			metric,
+			mapper.cfg.ProjectID,
 		)
 		require.Len(t, ts, 2, "Should create one timeseries for each sum point")
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
@@ -156,6 +158,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 			mr,
 			labels{},
 			metric,
+			mapper.cfg.ProjectID,
 		)
 		require.Len(t, ts, 2, "Should create one timeseries for each sum point")
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
@@ -189,6 +192,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 			mr,
 			labels{},
 			metric,
+			mapper.cfg.ProjectID,
 		)
 		require.Len(t, ts, 2, "Should create one timeseries for each sum point, but omit the stale point")
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
@@ -209,6 +213,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 			mr,
 			labels{},
 			metric,
+			mapper.cfg.ProjectID,
 		)
 		require.Len(t, ts, 3, "Should create one timeseries for each gauge point")
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
@@ -230,6 +235,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 			mr,
 			labels{},
 			metric,
+			mapper.cfg.ProjectID,
 		)
 		require.Len(t, ts, 2, "Should create one timeseries for each gauge point, except the point without a value")
 		require.Same(t, ts[0].Resource, mr, "Should assign the passed in monitored resource")
@@ -280,7 +286,7 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pcommon.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point, mapper.cfg.ProjectID)
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
 	// Verify aspects
@@ -379,7 +385,7 @@ func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pcommon.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	tsl := mapper.metricToTimeSeries(mr, labels{}, metric)
+	tsl := mapper.metricToTimeSeries(mr, labels{}, metric, mapper.cfg.ProjectID)
 	// the first point should be dropped, so we expect 2 points
 	assert.Len(t, tsl, 2)
 	ts := tsl[0]
@@ -479,7 +485,7 @@ func TestNoValueHistogramPointToTimeSeries(t *testing.T) {
 	point.SetSum(42)
 	point.SetMExplicitBounds([]float64{10, 20, 30, 40})
 
-	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point, mapper.cfg.ProjectID)
 	// Points without a value are dropped
 	assert.Len(t, tsl, 0)
 }
@@ -504,7 +510,7 @@ func TestNoSumHistogramPointToTimeSeries(t *testing.T) {
 	// Leave the sum unset
 	point.SetMExplicitBounds([]float64{10, 20, 30, 40})
 
-	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point, mapper.cfg.ProjectID)
 	// Points without a sum are dropped
 	assert.Len(t, tsl, 0)
 }
@@ -529,7 +535,7 @@ func TestEmptyHistogramPointToTimeSeries(t *testing.T) {
 	point.SetSum(0)
 	point.SetMExplicitBounds([]float64{10, 20, 30, 40})
 
-	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point, mapper.cfg.ProjectID)
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
 	// Verify aspects
@@ -576,7 +582,7 @@ func TestNaNSumHistogramPointToTimeSeries(t *testing.T) {
 	point.SetSum(math.NaN())
 	point.SetMExplicitBounds([]float64{10, 20, 30, 40})
 
-	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point)
+	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point, mapper.cfg.ProjectID)
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
 	// Verify aspects
@@ -634,7 +640,7 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	// Add a second point with no value
 	hist.DataPoints().AppendEmpty().SetFlags(pmetric.MetricDataPointFlags(pmetric.MetricDataPointFlagNoRecordedValue))
 
-	tsl := mapper.metricToTimeSeries(mr, labels{}, metric)
+	tsl := mapper.metricToTimeSeries(mr, labels{}, metric, mapper.cfg.ProjectID)
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
 	// Verify aspects
@@ -748,7 +754,7 @@ func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	exemplar.SetSpanID(pcommon.NewSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7}))
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
-	tsl := mapper.metricToTimeSeries(mr, labels{}, metric)
+	tsl := mapper.metricToTimeSeries(mr, labels{}, metric, mapper.cfg.ProjectID)
 	// expect 2 timeseries, since the first is dropped
 	assert.Len(t, tsl, 2)
 	ts := tsl[0]
@@ -853,7 +859,7 @@ func TestNaNSumExponentialHistogramPointToTimeSeries(t *testing.T) {
 	point.SetScale(-1)
 	point.SetSum(math.NaN())
 
-	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point, mapper.cfg.ProjectID)
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
 	// Verify aspects
@@ -903,7 +909,7 @@ func TestZeroCountExponentialHistogramPointToTimeSeries(t *testing.T) {
 	point.SetScale(-1)
 	point.SetSum(0)
 
-	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point)
+	tsl := mapper.exponentialHistogramToTimeSeries(mr, labels{}, metric, hist, point, mapper.cfg.ProjectID)
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
 	// Verify aspects
@@ -938,7 +944,7 @@ func TestExemplarNoAttachements(t *testing.T) {
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(start))
 	exemplar.SetDoubleVal(1)
 
-	result := mapper.exemplar(exemplar)
+	result := mapper.exemplar(exemplar, mapper.cfg.ProjectID)
 	assert.Equal(t, float64(1), result.Value)
 	assert.Equal(t, timestamppb.New(start), result.Timestamp)
 	assert.Len(t, result.Attachments, 0)
@@ -952,7 +958,7 @@ func TestExemplarOnlyDroppedLabels(t *testing.T) {
 	exemplar.SetDoubleVal(1)
 	exemplar.FilteredAttributes().InsertString("test", "drop")
 
-	result := mapper.exemplar(exemplar)
+	result := mapper.exemplar(exemplar, mapper.cfg.ProjectID)
 	assert.Equal(t, float64(1), result.Value)
 	assert.Equal(t, timestamppb.New(start), result.Timestamp)
 	assert.Len(t, result.Attachments, 1)
@@ -977,7 +983,7 @@ func TestExemplarOnlyTraceId(t *testing.T) {
 		0, 0, 0, 0, 0, 0, 0, 2,
 	}))
 
-	result := mapper.exemplar(exemplar)
+	result := mapper.exemplar(exemplar, mapper.cfg.ProjectID)
 	assert.Equal(t, float64(1), result.Value)
 	assert.Equal(t, timestamppb.New(start), result.Timestamp)
 	assert.Len(t, result.Attachments, 1)
@@ -1210,7 +1216,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	// Add a second point with no value
 	summary.DataPoints().AppendEmpty().SetFlags(pmetric.MetricDataPointFlags(pmetric.MetricDataPointFlagNoRecordedValue))
 
-	ts := mapper.metricToTimeSeries(mr, labels{}, metric)
+	ts := mapper.metricToTimeSeries(mr, labels{}, metric, mapper.cfg.ProjectID)
 	assert.Len(t, ts, 3)
 	sumResult := ts[0]
 	countResult := ts[1]
@@ -1305,7 +1311,7 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	// Don't set start timestamp.  This point will be normalized
 	point.SetTimestamp(pcommon.NewTimestampFromTime(end2))
 
-	ts := mapper.metricToTimeSeries(mr, labels{}, metric)
+	ts := mapper.metricToTimeSeries(mr, labels{}, metric, mapper.cfg.ProjectID)
 	assert.Len(t, ts, 6)
 	sumResult := ts[0]
 	countResult := ts[1]

@@ -31,11 +31,14 @@ const (
 // Config defines configuration for Google Cloud exporter.
 type Config struct {
 	ImpersonateConfig ImpersonateConfig `mapstructure:"impersonate"`
-	ProjectID         string            `mapstructure:"project"`
-	UserAgent         string            `mapstructure:"user_agent"`
-	TraceConfig       TraceConfig       `mapstructure:"trace"`
-	LogConfig         LogConfig         `mapstructure:"log"`
-	MetricConfig      MetricConfig      `mapstructure:"metric"`
+	// ProjectID is the project telemetry is sent to if the gcp.project.id
+	// resource attribute is not set. If unspecified, this is determined using
+	// application default credentials.
+	ProjectID    string       `mapstructure:"project"`
+	UserAgent    string       `mapstructure:"user_agent"`
+	TraceConfig  TraceConfig  `mapstructure:"trace"`
+	LogConfig    LogConfig    `mapstructure:"log"`
+	MetricConfig MetricConfig `mapstructure:"metric"`
 }
 
 type ClientConfig struct {

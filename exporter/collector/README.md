@@ -313,6 +313,10 @@ The upstream [severity parser](https://github.com/open-telemetry/opentelemetry-l
 with the [regex parser](https://github.com/open-telemetry/opentelemetry-log-collection/blob/main/docs/operators/regex_parser.md)) allows for 
 additional flexibility in parsing log severity from incoming entries.
 
+## Multi-Project exporting
+
+By default, the exporter sends telemetry to the project specified by `project` in the configuration. This can be overridden on a per-metrics basis using the `gcp.project.id` resource attribute. For example, if a metric has a label `project`, you could use the `groupbyattrs` processor to promote it to a resource label, and the `resource` processor to rename the attribute from `project` to `gcp.project.id`.
+
 ## Recommendations
 
 It is recommended to always run a [batch processor](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/batchprocessor)

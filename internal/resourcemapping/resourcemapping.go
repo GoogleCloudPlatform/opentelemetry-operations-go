@@ -19,6 +19,8 @@ import (
 )
 
 const (
+	ProjectIDAttributeKey = "gcp.project.id"
+
 	awsAccount     = "aws_account"
 	awsEc2Instance = "aws_ec2_instance"
 	clusterName    = "cluster_name"

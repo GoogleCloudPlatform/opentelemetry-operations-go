@@ -128,13 +128,22 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 	return attributes
 }
 
-func (e *traceExporter) protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, projectID string) *tracepb.Span {
+func (e *traceExporter) protoFromReadOnlySpan(s sdktrace.ReadOnlySpan) (*tracepb.Span, string) {
 	if s == nil {
-		return nil
+		return nil, ""
 	}
 
 	traceIDString := s.SpanContext().TraceID().String()
 	spanIDString := s.SpanContext().SpanID().String()
+	projectID := e.projectID
+	// override project ID with gcp.project.id, if present
+	attrs := s.Resource().Attributes()
+	for _, attr := range attrs {
+		if attr.Key == resourcemapping.ProjectIDAttributeKey {
+			projectID = attr.Value.AsString()
+			break
+		}
+	}
 
 	sp := &tracepb.Span{
 		Name:                    "projects/" + projectID + "/traces/" + traceIDString + "/spans/" + spanIDString,
@@ -214,7 +223,7 @@ func (e *traceExporter) protoFromReadOnlySpan(s sdktrace.ReadOnlySpan, projectID
 
 	sp.Links = e.linksProtoFromLinks(s.Links())
 
-	return sp
+	return sp, projectID
 }
 
 // Converts OTel span links to Cloud Trace links proto in order. If there are

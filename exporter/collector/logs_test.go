@@ -283,6 +283,7 @@ func TestLogMapping(t *testing.T) {
 				"",
 				testObservedTime,
 				logName,
+				"",
 			)
 
 			if testCase.expectError {
