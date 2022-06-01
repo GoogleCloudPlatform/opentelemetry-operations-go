@@ -39,24 +39,6 @@ func TestGKEHostIDErr(t *testing.T) {
 	assert.Equal(t, instanceID, "")
 }
 
-func TestGKEHostName(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeInstanceName: "my-host-123",
-	}, &FakeOSProvider{})
-	hostName, err := d.GKEHostName()
-	assert.NoError(t, err)
-	assert.Equal(t, hostName, "my-host-123")
-}
-
-func TestGKEHostNameErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		Err: fmt.Errorf("fake error"),
-	}, &FakeOSProvider{})
-	hostName, err := d.GKEHostName()
-	assert.Error(t, err)
-	assert.Equal(t, hostName, "")
-}
-
 func TestGKEClusterName(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		InstanceAttributes: map[string]string{clusterNameMetadataAttr: "my-cluster"},

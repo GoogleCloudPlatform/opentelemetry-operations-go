@@ -182,7 +182,6 @@ func (d *testDetector) Detect(ctx context.Context) (*resource.Resource, error) {
 		return detectWithFuncs(attributes, map[attribute.Key]detectionFunc{
 			semconv.K8SClusterNameKey: detector.GKEClusterName,
 			semconv.HostIDKey:         detector.GKEHostID,
-			semconv.HostNameKey:       detector.GKEHostName,
 		})
 	case gcp.CloudRun:
 		attributes = append(attributes, semconv.CloudPlatformGCPCloudRun)
