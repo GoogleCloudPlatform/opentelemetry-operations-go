@@ -79,13 +79,13 @@ func TestIntegrationMetrics(t *testing.T) {
 
 // setSecondProjectInMetrics overwrites the gcp.project.id resource attribute
 // with the contents of the SECOND_PROJECT_ID environment variable. This makes
-// the integration test send those metrics to the specified second project.
+// the integration test send those metrics with a gcp.project.id attribute to
+// the specified second project.
 func setSecondProjectInMetrics(t *testing.T, metrics pmetric.Metrics) {
+	secondProject := os.Getenv(secondProjectEnv)
+	require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
 	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
-		rm := metrics.ResourceMetrics().At(i)
-		secondProject := os.Getenv(secondProjectEnv)
-		require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
-		rm.Resource().Attributes().Update(
+		metrics.ResourceMetrics().At(i).Resource().Attributes().Update(
 			resourcemapping.ProjectIDAttributeKey,
 			pcommon.NewValueString(secondProject),
 		)

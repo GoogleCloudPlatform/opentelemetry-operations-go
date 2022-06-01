@@ -76,13 +76,13 @@ func TestIntegrationLogs(t *testing.T) {
 
 // setSecondProjectInLogs overwrites the gcp.project.id resource attribute
 // with the contents of the SECOND_PROJECT_ID environment variable. This makes
-// the integration test send those logs to the specified second project.
+// the integration test send those logs with a gcp.project.id attribute to the
+// specified second project.
 func setSecondProjectInLogs(t *testing.T, logs plog.Logs) {
+	secondProject := os.Getenv(secondProjectEnv)
+	require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
 	for i := 0; i < logs.ResourceLogs().Len(); i++ {
-		rl := logs.ResourceLogs().At(i)
-		secondProject := os.Getenv(secondProjectEnv)
-		require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
-		rl.Resource().Attributes().Update(
+		logs.ResourceLogs().At(i).Resource().Attributes().Update(
 			resourcemapping.ProjectIDAttributeKey,
 			pcommon.NewValueString(secondProject),
 		)
