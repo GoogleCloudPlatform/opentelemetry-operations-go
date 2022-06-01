@@ -34,6 +34,7 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
@@ -46,6 +47,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/datapointstorage"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/normalization"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 )
 
 // self-observability reporting meters/tracers/loggers.
@@ -58,13 +60,13 @@ type selfObservability struct {
 type MetricsExporter struct {
 	mapper metricMapper
 	// A channel that receives metric descriptor and sends them to GCM once
-	metricDescriptorC chan *metricpb.MetricDescriptor
+	metricDescriptorC chan *monitoringpb.CreateMetricDescriptorRequest
 	client            *monitoring.MetricClient
 	obs               selfObservability
 	// shutdownC is a channel for signaling a graceful shutdown
 	shutdownC chan struct{}
 	// mdCache tracks the metric descriptors that have already been sent to GCM
-	mdCache map[string]*metricpb.MetricDescriptor
+	mdCache map[string]*monitoringpb.CreateMetricDescriptorRequest
 	cfg     Config
 	// goroutines tracks the currently running child tasks
 	goroutines sync.WaitGroup
@@ -150,8 +152,8 @@ func NewGoogleCloudMetricsExporter(
 		// MetricDescritpors are asychronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok
 		// to drop / conserve resources for sending timeseries.
-		metricDescriptorC: make(chan *metricpb.MetricDescriptor, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
-		mdCache:           make(map[string]*metricpb.MetricDescriptor),
+		metricDescriptorC: make(chan *monitoringpb.CreateMetricDescriptorRequest, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
+		mdCache:           make(map[string]*monitoringpb.CreateMetricDescriptorRequest),
 		shutdownC:         shutdown,
 		timeout:           timeout,
 	}
@@ -165,12 +167,20 @@ func NewGoogleCloudMetricsExporter(
 
 // PushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary
 func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) error {
-	pendingTimeSeries := []*monitoringpb.TimeSeries{}
+	// map from project -> []timeseries. This groups timeseries by the project
+	// they need to be sent to. Each project's timeseries are sent in a
+	// separate request later.
+	pendingTimeSeries := map[string][]*monitoringpb.TimeSeries{}
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		monitoredResource := me.cfg.MetricConfig.MapMonitoredResource(rm.Resource())
 		extraResourceLabels := me.mapper.resourceToMetricLabels(rm.Resource())
+		projectID := me.cfg.ProjectID
+		// override project ID with gcp.project.id, if present
+		if projectFromResource, found := rm.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
+			projectID = projectFromResource.AsString()
+		}
 		sms := rm.ScopeMetrics()
 		for j := 0; j < sms.Len(); j++ {
 			sm := sms.At(j)
@@ -181,7 +191,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 			mes := sm.Metrics()
 			for k := 0; k < mes.Len(); k++ {
 				metric := mes.At(k)
-				pendingTimeSeries = append(pendingTimeSeries, me.mapper.metricToTimeSeries(monitoredResource, metricLabels, metric)...)
+				pendingTimeSeries[projectID] = append(pendingTimeSeries[projectID], me.mapper.metricToTimeSeries(monitoredResource, metricLabels, metric, projectID)...)
 
 				// We only send metric descriptors if we're configured *and* we're not sending service timeseries.
 				if me.cfg.MetricConfig.SkipCreateMetricDescriptor || me.cfg.MetricConfig.CreateServiceTimeSeries {
@@ -192,8 +202,12 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 					if md == nil {
 						continue
 					}
+					req := &monitoringpb.CreateMetricDescriptorRequest{
+						Name:             projectName(projectID),
+						MetricDescriptor: md,
+					}
 					select {
-					case me.metricDescriptorC <- md:
+					case me.metricDescriptorC <- req:
 					default:
 						// Ignore drops, we'll catch descriptor next time around.
 					}
@@ -201,33 +215,44 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 			}
 		}
 	}
-	// Batch and export
-	for len(pendingTimeSeries) > 0 {
-		var sendSize int
-		if len(pendingTimeSeries) < sendBatchSize {
-			sendSize = len(pendingTimeSeries)
-		} else {
-			sendSize = sendBatchSize
+	var errs []error
+	// timeseries for each project are batched and exported separately
+	for projectID, projectTS := range pendingTimeSeries {
+		// Batch and export
+		for len(projectTS) > 0 {
+			var sendSize int
+			if len(projectTS) < sendBatchSize {
+				sendSize = len(projectTS)
+			} else {
+				sendSize = sendBatchSize
+			}
+
+			var ts []*monitoringpb.TimeSeries
+			ts, projectTS = projectTS[:sendSize], projectTS[sendSize:]
+
+			var err error
+			req := &monitoringpb.CreateTimeSeriesRequest{
+				Name:       projectName(projectID),
+				TimeSeries: ts,
+			}
+			if me.cfg.MetricConfig.CreateServiceTimeSeries {
+				err = me.createServiceTimeSeries(ctx, req)
+			} else {
+				err = me.createTimeSeries(ctx, req)
+			}
+
+			var st string
+			s, _ := status.FromError(err)
+			st = statusCodeToString(s)
+
+			recordPointCountDataPoint(ctx, len(ts), st)
+			if err != nil {
+				errs = append(errs, fmt.Errorf("failed to export time series to GCM: %v", err))
+			}
 		}
-
-		var ts []*monitoringpb.TimeSeries
-		ts, pendingTimeSeries = pendingTimeSeries[:sendSize], pendingTimeSeries[sendSize:]
-
-		var err error
-		if me.cfg.MetricConfig.CreateServiceTimeSeries {
-			err = me.createServiceTimeSeries(ctx, ts)
-		} else {
-			err = me.createTimeSeries(ctx, ts)
-		}
-
-		var st string
-		s, _ := status.FromError(err)
-		st = statusCodeToString(s)
-
-		recordPointCountDataPoint(ctx, len(ts), st)
-		if err != nil {
-			return fmt.Errorf("failed to export time series to GCM: %v", err)
-		}
+	}
+	if len(errs) > 0 {
+		return multierr.Combine(errs...)
 	}
 	return nil
 }
@@ -260,57 +285,41 @@ func (me *MetricsExporter) exportMetricDescriptorRunner() {
 	}
 }
 
-func (me *MetricsExporter) projectName() string {
-	return fmt.Sprintf("projects/%s", me.cfg.ProjectID)
+func projectName(projectID string) string {
+	return fmt.Sprintf("projects/%s", projectID)
 }
 
 // Helper method to send metric descriptors to GCM.
-func (me *MetricsExporter) exportMetricDescriptor(md *metricpb.MetricDescriptor) {
-	if _, exists := me.mdCache[md.Type]; exists {
+func (me *MetricsExporter) exportMetricDescriptor(req *monitoringpb.CreateMetricDescriptorRequest) {
+	cacheKey := fmt.Sprintf("%s/%s", req.Name, req.MetricDescriptor.Type)
+	if _, exists := me.mdCache[cacheKey]; exists {
 		return
-	}
-
-	req := &monitoringpb.CreateMetricDescriptorRequest{
-		Name:             me.projectName(),
-		MetricDescriptor: md,
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), me.timeout)
 	defer cancel()
 	_, err := me.client.CreateMetricDescriptor(ctx, req)
 	if err != nil {
 		// TODO: Log-once on error, per metric descriptor?
-		me.obs.log.Error("Unable to send metric descriptor.", zap.Error(err), zap.Any("metric_descriptor", md))
+		me.obs.log.Error("Unable to send metric descriptor.", zap.Error(err), zap.Any("metric_descriptor", req.MetricDescriptor))
 		return
 	}
 
 	// only cache if we are successful. We want to retry if there is an error
-	me.mdCache[md.Type] = md
+	me.mdCache[cacheKey] = req
 }
 
 // Sends a user-custom-metric timeseries.
-func (me *MetricsExporter) createTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+func (me *MetricsExporter) createTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
 	ctx, cancel := context.WithTimeout(ctx, me.timeout)
 	defer cancel()
-	return me.client.CreateTimeSeries(
-		ctx,
-		&monitoringpb.CreateTimeSeriesRequest{
-			Name:       me.projectName(),
-			TimeSeries: ts,
-		},
-	)
+	return me.client.CreateTimeSeries(ctx, req)
 }
 
 // Sends a service timeseries.
-func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, ts []*monitoringpb.TimeSeries) error {
+func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
 	ctx, cancel := context.WithTimeout(ctx, me.timeout)
 	defer cancel()
-	return me.client.CreateServiceTimeSeries(
-		ctx,
-		&monitoringpb.CreateTimeSeriesRequest{
-			Name:       me.projectName(),
-			TimeSeries: ts,
-		},
-	)
+	return me.client.CreateServiceTimeSeries(ctx, req)
 }
 
 func (m *metricMapper) instrumentationScopeToLabels(is pcommon.InstrumentationScope) labels {
@@ -327,6 +336,7 @@ func (m *metricMapper) metricToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
 	metric pmetric.Metric,
+	projectID string,
 ) []*monitoringpb.TimeSeries {
 	timeSeries := []*monitoringpb.TimeSeries{}
 
@@ -356,14 +366,14 @@ func (m *metricMapper) metricToTimeSeries(
 		hist := metric.Histogram()
 		points := hist.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i))
+			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i), projectID)
 			timeSeries = append(timeSeries, ts...)
 		}
 	case pmetric.MetricDataTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
 		for i := 0; i < points.Len(); i++ {
-			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, points.At(i))
+			ts := m.exponentialHistogramToTimeSeries(resource, extraLabels, metric, eh, points.At(i), projectID)
 			timeSeries = append(timeSeries, ts...)
 		}
 	default:
@@ -476,14 +486,14 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	return result
 }
 
-func (m *metricMapper) exemplar(ex pmetric.Exemplar) *distribution.Distribution_Exemplar {
+func (m *metricMapper) exemplar(ex pmetric.Exemplar, projectID string) *distribution.Distribution_Exemplar {
 	ctx := context.TODO()
 	attachments := []*anypb.Any{}
 	// TODO: Look into still sending exemplars with no span.
 	if !ex.TraceID().IsEmpty() && !ex.SpanID().IsEmpty() {
 		sctx, err := anypb.New(&monitoringpb.SpanContext{
 			// TODO - make sure project id is correct.
-			SpanName: fmt.Sprintf("projects/%s/traces/%s/spans/%s", m.cfg.ProjectID, ex.TraceID().HexString(), ex.SpanID().HexString()),
+			SpanName: fmt.Sprintf("projects/%s/traces/%s/spans/%s", projectID, ex.TraceID().HexString(), ex.SpanID().HexString()),
 		})
 		if err == nil {
 			attachments = append(attachments, sctx)
@@ -512,16 +522,16 @@ func (m *metricMapper) exemplar(ex pmetric.Exemplar) *distribution.Distribution_
 	}
 }
 
-func (m *metricMapper) exemplars(exs pmetric.ExemplarSlice) []*distribution.Distribution_Exemplar {
+func (m *metricMapper) exemplars(exs pmetric.ExemplarSlice, projectID string) []*distribution.Distribution_Exemplar {
 	exemplars := make([]*distribution.Distribution_Exemplar, exs.Len())
 	for i := 0; i < exs.Len(); i++ {
-		exemplars[i] = m.exemplar(exs.At(i))
+		exemplars[i] = m.exemplar(exs.At(i), projectID)
 	}
 	return exemplars
 }
 
 // histogramPoint maps a histogram data point into a GCM point.
-func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint) *monitoringpb.TypedValue {
+func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectID string) *monitoringpb.TypedValue {
 	counts := make([]int64, len(point.MBucketCounts()))
 	var mean, deviation, prevBound float64
 
@@ -562,14 +572,14 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint) *monitor
 						},
 					},
 				},
-				Exemplars: m.exemplars(point.Exemplars()),
+				Exemplars: m.exemplars(point.Exemplars(), projectID),
 			},
 		},
 	}
 }
 
 // Maps an exponential distribution into a GCM point.
-func (m *metricMapper) exponentialHistogramPoint(point pmetric.ExponentialHistogramDataPoint) *monitoringpb.TypedValue {
+func (m *metricMapper) exponentialHistogramPoint(point pmetric.ExponentialHistogramDataPoint, projectID string) *monitoringpb.TypedValue {
 	// First calculate underflow bucket with all negatives + zeros.
 	underflow := point.ZeroCount()
 	for _, v := range point.Negative().MBucketCounts() {
@@ -618,7 +628,7 @@ func (m *metricMapper) exponentialHistogramPoint(point pmetric.ExponentialHistog
 				Mean:          mean,
 				BucketCounts:  counts,
 				BucketOptions: bucketOptions,
-				Exemplars:     m.exemplars(point.Exemplars()),
+				Exemplars:     m.exemplars(point.Exemplars(), projectID),
 			},
 		},
 	}
@@ -630,6 +640,7 @@ func (m *metricMapper) histogramToTimeSeries(
 	metric pmetric.Metric,
 	hist pmetric.Histogram,
 	point pmetric.HistogramDataPoint,
+	projectID string,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) || !point.HasSum() {
 		// Drop points without a value or without a sum
@@ -654,7 +665,7 @@ func (m *metricMapper) histogramToTimeSeries(
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
-	value := m.histogramPoint(point)
+	value := m.histogramPoint(point, projectID)
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
 		Unit:       metric.Unit(),
@@ -683,6 +694,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	metric pmetric.Metric,
 	exponentialHist pmetric.ExponentialHistogram,
 	point pmetric.ExponentialHistogramDataPoint,
+	projectID string,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().HasFlag(pmetric.MetricDataPointFlagNoRecordedValue) {
 		// Drop points without a value.
@@ -706,7 +718,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	startTime := timestamppb.New(point.StartTimestamp().AsTime())
 	endTime := timestamppb.New(point.Timestamp().AsTime())
-	value := m.exponentialHistogramPoint(point)
+	value := m.exponentialHistogramPoint(point, projectID)
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
 		Unit:       metric.Unit(),

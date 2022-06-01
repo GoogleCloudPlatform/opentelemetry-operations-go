@@ -282,6 +282,8 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 		}
 	}
 
+	// TODO: When this exporter is rewritten, support writing to multiple
+	// projects based on the "gcp.project.id" resource.
 	req := &monitoringpb.CreateTimeSeriesRequest{
 		Name:       fmt.Sprintf("projects/%s", me.o.projectID),
 		TimeSeries: tss,

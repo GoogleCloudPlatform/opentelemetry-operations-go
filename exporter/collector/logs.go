@@ -30,6 +30,8 @@ import (
 	logpb "google.golang.org/genproto/googleapis/logging/v2"
 	"google.golang.org/protobuf/proto"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
+
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/multierr"
@@ -180,6 +182,11 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr := defaultResourceToMonitoredResource(rl.Resource())
+		projectID := l.cfg.ProjectID
+		// override project ID with gcp.project.id, if present
+		if projectFromResource, found := rl.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
+			projectID = projectFromResource.AsString()
+		}
 
 		for j := 0; j < rl.ScopeLogs().Len(); j++ {
 			sl := rl.ScopeLogs().At(j)
@@ -204,14 +211,16 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 					instrumentationSource,
 					instrumentationVersion,
 					time.Now(),
-					logName)
+					logName,
+					projectID,
+				)
 				if err != nil {
 					errors = append(errors, err)
 					continue
 				}
 
 				for splitIndex, entry := range splitEntries {
-					internalLogEntry, err := l.logEntryToInternal(entry, logName, mr, len(splitEntries), splitIndex)
+					internalLogEntry, err := l.logEntryToInternal(entry, logName, projectID, mr, len(splitEntries), splitIndex)
 					if err != nil {
 						errors = append(errors, err)
 						continue
@@ -228,17 +237,18 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 func (l logMapper) logEntryToInternal(
 	entry logging.Entry,
 	logName string,
+	projectID string,
 	mr *monitoredrespb.MonitoredResource,
 	splits int,
 	splitIndex int,
 ) (*logpb.LogEntry, error) {
 
-	internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", l.cfg.ProjectID))
+	internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", projectID))
 	if err != nil {
 		return nil, err
 	}
 
-	internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", l.cfg.ProjectID, url.PathEscape(logName))
+	internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", projectID, url.PathEscape(logName))
 	internalLogEntry.Resource = mr
 	if splits > 1 {
 		internalLogEntry.Split = &logpb.LogSplit{
@@ -278,6 +288,7 @@ func (l logMapper) logToSplitEntries(
 	instrumentationVersion string,
 	processTime time.Time,
 	logName string,
+	projectID string,
 ) ([]logging.Entry, error) {
 	entry := logging.Entry{
 		Resource: mr,
@@ -336,7 +347,7 @@ func (l logMapper) logToSplitEntries(
 	// Calculate the size of the internal log entry so this overhead can be accounted
 	// for when determining the need to split based on payload size
 	// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
-	logOverhead, err := l.logEntryToInternal(entry, logName, mr, 0, 0)
+	logOverhead, err := l.logEntryToInternal(entry, logName, projectID, mr, 0, 0)
 	if err != nil {
 		return []logging.Entry{entry}, err
 	}
