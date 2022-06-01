@@ -40,11 +40,6 @@ func (d *Detector) GKEHostID() (string, error) {
 	return d.GCEHostID()
 }
 
-// GKEHostName returns the instance name of the instance on which this program is running
-func (d *Detector) GKEHostName() (string, error) {
-	return d.GCEHostName()
-}
-
 // GKEClusterName returns the name if the GKE cluster in which this program is running
 func (d *Detector) GKEClusterName() (string, error) {
 	return d.metadata.InstanceAttributeValue(clusterNameMetadataAttr)
