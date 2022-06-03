@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/colle
 go 1.17
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.31.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.32.0
 	github.com/stretchr/testify v1.7.1
 	go.opentelemetry.io/collector v0.51.0
 	go.opentelemetry.io/collector/pdata v0.51.0
@@ -17,8 +17,8 @@ require (
 	cloud.google.com/go/logging v1.4.2 // indirect
 	cloud.google.com/go/monitoring v1.4.0 // indirect
 	cloud.google.com/go/trace v1.2.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.7.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.31.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.8.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.32.0 // indirect
 	github.com/cenkalti/backoff/v4 v4.1.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
