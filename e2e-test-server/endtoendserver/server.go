@@ -201,16 +201,12 @@ func (d *testDetector) Detect(ctx context.Context) (*resource.Resource, error) {
 		})
 	case gcp.AppEngine:
 		attributes = append(attributes, semconv.CloudPlatformGCPAppEngine)
-		zone, region, err := detector.AppEngineAvailabilityZoneAndRegion()
-		if err != nil {
-			return nil, err
-		}
-		attributes = append(attributes, semconv.CloudAvailabilityZoneKey.String(zone))
-		attributes = append(attributes, semconv.CloudRegionKey.String(region))
 		return detectWithFuncs(attributes, map[attribute.Key]detectionFunc{
-			semconv.FaaSNameKey:    detector.AppEngineServiceName,
-			semconv.FaaSVersionKey: detector.AppEngineServiceVersion,
-			semconv.FaaSIDKey:      detector.AppEngineServiceInstance,
+			semconv.FaaSNameKey:              detector.AppEngineServiceName,
+			semconv.FaaSVersionKey:           detector.AppEngineServiceVersion,
+			semconv.FaaSIDKey:                detector.AppEngineServiceInstance,
+			semconv.CloudRegionKey:           detector.AppEngineCloudRegion,
+			semconv.CloudAvailabilityZoneKey: detector.AppEngineAvailabilityZone,
 		})
 	case gcp.GCE:
 		attributes = append(attributes, semconv.CloudPlatformGCPComputeEngine)

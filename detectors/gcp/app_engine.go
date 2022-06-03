@@ -52,6 +52,22 @@ func (d *Detector) AppEngineServiceInstance() (string, error) {
 }
 
 // AppEngineAvailabilityZoneAndRegion returns the zone and region in which this program is running
+// Deprecated: Use AppEngineAvailabilityZone and AppEngineCloudRegion instead.
 func (d *Detector) AppEngineAvailabilityZoneAndRegion() (string, string, error) {
-	return d.GCEAvailabilityZoneAndRegion()
+	zone, err := d.AppEngineAvailabilityZone()
+	if err != nil {
+		return "", "", err
+	}
+	region, err := d.AppEngineCloudRegion()
+	return zone, region, err
+}
+
+// AppEngineCloudRegion returns the zone the app engine service is running in.
+func (d *Detector) AppEngineAvailabilityZone() (string, error) {
+	return d.metadata.Zone()
+}
+
+// AppEngineCloudRegion returns the region the app engine service is running in.
+func (d *Detector) AppEngineCloudRegion() (string, error) {
+	return d.FaaSCloudRegion()
 }
