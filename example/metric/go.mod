@@ -5,7 +5,7 @@ go 1.17
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric => ../../exporter/metric
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.32.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.32.1
 	go.opentelemetry.io/otel v1.6.2
 	go.opentelemetry.io/otel/metric v0.28.0
 	go.opentelemetry.io/otel/sdk v1.6.2
