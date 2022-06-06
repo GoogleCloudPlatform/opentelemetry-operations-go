@@ -21,14 +21,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCloudPlatformAppEngine(t *testing.T) {
+func TestCloudPlatformAppEngineFlex(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{
 			gaeServiceEnv: "foo",
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, AppEngine)
+	assert.Equal(t, platform, AppEngineFlex)
+}
+
+func TestCloudPlatformAppEngineStandard(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{
+			gaeServiceEnv: "foo",
+			gaeEnv:        "standard",
+		},
+	})
+	platform := d.CloudPlatform()
+	assert.Equal(t, platform, AppEngineStandard)
 }
 
 func TestCloudPlatformGKE(t *testing.T) {

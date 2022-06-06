@@ -36,8 +36,9 @@ const (
 	GKE
 	GCE
 	CloudRun
-	AppEngine
 	CloudFunctions
+	AppEngineStandard
+	AppEngineFlex
 )
 
 // CloudPlatform returns the platform on which this program is running
@@ -49,8 +50,10 @@ func (d *Detector) CloudPlatform() Platform {
 		return CloudRun
 	case d.onCloudFunctions():
 		return CloudFunctions
+	case d.onAppEngineStandard():
+		return AppEngineStandard
 	case d.onAppEngine():
-		return AppEngine
+		return AppEngineFlex
 	case d.onGCE():
 		return GCE
 	}
