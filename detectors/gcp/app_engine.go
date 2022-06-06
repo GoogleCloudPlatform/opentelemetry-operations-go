@@ -20,7 +20,15 @@ const (
 	gaeServiceEnv  = "GAE_SERVICE"
 	gaeVersionEnv  = "GAE_VERSION"
 	gaeInstanceEnv = "GAE_INSTANCE"
+	gaeEnv         = "GAE_ENV"
+	gaeStandard    = "standard"
 )
+
+func (d *Detector) onAppEngineStandard() bool {
+	// See https://cloud.google.com/appengine/docs/standard/go111/runtime#environment_variables.
+	env, found := d.os.LookupEnv(gaeEnv)
+	return found && env == gaeStandard
+}
 
 func (d *Detector) onAppEngine() bool {
 	_, found := d.os.LookupEnv(gaeServiceEnv)
@@ -51,23 +59,18 @@ func (d *Detector) AppEngineServiceInstance() (string, error) {
 	return "", errEnvVarNotFound
 }
 
-// AppEngineAvailabilityZoneAndRegion returns the zone and region in which this program is running
-// Deprecated: Use AppEngineAvailabilityZone and AppEngineCloudRegion instead.
-func (d *Detector) AppEngineAvailabilityZoneAndRegion() (string, string, error) {
-	zone, err := d.AppEngineAvailabilityZone()
-	if err != nil {
-		return "", "", err
-	}
-	region, err := d.AppEngineCloudRegion()
-	return zone, region, err
+// AppEngineFlexAvailabilityZoneAndRegion returns the zone and region in which this program is running.
+func (d *Detector) AppEngineFlexAvailabilityZoneAndRegion() (string, string, error) {
+	// The GCE metadata server is available on App Engine Flex.
+	return d.GCEAvailabilityZoneAndRegion()
 }
 
-// AppEngineCloudRegion returns the zone the app engine service is running in.
-func (d *Detector) AppEngineAvailabilityZone() (string, error) {
+// AppEngineStandardAvailabilityZone returns the zone the app engine service is running in.
+func (d *Detector) AppEngineStandardAvailabilityZone() (string, error) {
 	return d.metadata.Zone()
 }
 
-// AppEngineCloudRegion returns the region the app engine service is running in.
-func (d *Detector) AppEngineCloudRegion() (string, error) {
+// AppEngineStandardCloudRegion returns the region the app engine service is running in.
+func (d *Detector) AppEngineStandardCloudRegion() (string, error) {
 	return d.FaaSCloudRegion()
 }
