@@ -15,6 +15,7 @@
 package gcp
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -76,6 +77,42 @@ func TestAppEngineServiceInstanceErr(t *testing.T) {
 		Vars: map[string]string{},
 	})
 	instance, err := d.AppEngineServiceInstance()
+	assert.Error(t, err)
+	assert.Equal(t, instance, "")
+}
+
+func TestAppEngineAvailabilityZone(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{
+		FakeZone: "us16",
+	}, &FakeOSProvider{})
+	zone, err := d.AppEngineAvailabilityZone()
+	assert.NoError(t, err)
+	assert.Equal(t, zone, "us16")
+}
+
+func TestAppEngineAvailabilityZoneErr(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{
+		Err: fmt.Errorf("fake error"),
+	}, &FakeOSProvider{})
+	zone, err := d.AppEngineAvailabilityZone()
+	assert.Error(t, err)
+	assert.Equal(t, zone, "")
+}
+
+func TestAppEngineCloudRegion(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{
+		Attributes: map[string]string{regionMetadataAttr: "/projects/123/regions/us-central1"},
+	}, &FakeOSProvider{})
+	instance, err := d.AppEngineCloudRegion()
+	assert.NoError(t, err)
+	assert.Equal(t, instance, "us-central1")
+}
+
+func TestAppEngineCloudRegionErr(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{
+		Err: fmt.Errorf("fake error"),
+	}, &FakeOSProvider{})
+	instance, err := d.AppEngineCloudRegion()
 	assert.Error(t, err)
 	assert.Equal(t, instance, "")
 }
