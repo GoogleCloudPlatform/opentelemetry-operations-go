@@ -3,6 +3,9 @@
 
 # options for analysis running
 run:
+  # https://github.com/golangci/golangci-lint/issues/2664#issuecomment-1073337317
+  go: 1.18
+
   # default concurrency is a available CPU number
   concurrency: 4
 

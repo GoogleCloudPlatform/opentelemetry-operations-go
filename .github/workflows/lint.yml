@@ -1,0 +1,18 @@
+# This action runs "make lint" to check go file validity
+
+name: lint
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    branches:
+      - main
+
+jobs:
+  gotidy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Check for lint failures
+        run: |
+          make lint
