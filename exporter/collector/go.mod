@@ -12,6 +12,7 @@ require (
 	go.opentelemetry.io/otel v1.6.3
 	go.opentelemetry.io/otel/sdk v1.6.2
 	go.opentelemetry.io/otel/trace v1.6.3
+	go.uber.org/atomic v1.9.0
 	google.golang.org/api v0.74.0
 	google.golang.org/genproto v0.0.0-20220405205423-9d709892a2bf
 	google.golang.org/grpc v1.46.0
@@ -46,7 +47,6 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/net v0.0.0-20220325170049-de3da57026de // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220328115105-d36c6a25d886 // indirect

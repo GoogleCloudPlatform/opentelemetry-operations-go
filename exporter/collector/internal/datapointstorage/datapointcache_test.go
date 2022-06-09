@@ -15,6 +15,7 @@
 package datapointstorage
 
 import (
+	"sync"
 	"testing"
 	"time"
 
@@ -73,7 +74,7 @@ func TestGC(t *testing.T) {
 
 	// bar exists since we just set it
 	usedPoint, found := c.numberCache["bar"]
-	assert.True(t, usedPoint.used)
+	assert.True(t, usedPoint.used.Load())
 	assert.True(t, found)
 
 	// first gc tick marks bar stale
@@ -83,7 +84,7 @@ func TestGC(t *testing.T) {
 	cont := c.gc(shutdown, fakeTicker)
 	assert.True(t, cont)
 	usedPoint, found = c.numberCache["bar"]
-	assert.False(t, usedPoint.used)
+	assert.False(t, usedPoint.used.Load())
 	assert.True(t, found)
 
 	// second gc tick removes bar
@@ -128,6 +129,130 @@ func TestGetPreventsGC(t *testing.T) {
 	assert.True(t, cont)
 	_, found = c.numberCache["bar"]
 	assert.True(t, found)
+}
+
+func TestConcurrentNumber(t *testing.T) {
+	c := Cache{
+		numberCache:               make(map[string]usedNumberPoint),
+		summaryCache:              make(map[string]usedSummaryPoint),
+		histogramCache:            make(map[string]usedHistogramPoint),
+		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+	}
+	setPoint := pmetric.NewNumberDataPoint()
+
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			c.SetNumberDataPoint("bar", &setPoint)
+			point, found := c.GetNumberDataPoint("bar")
+			assert.Equal(t, point, &setPoint)
+			assert.True(t, found)
+			wg.Done()
+		}()
+	}
+	wg.Add(1)
+	go func() {
+		dontShutdown := make(chan struct{})
+		fakeTick := make(chan time.Time)
+		go func() { fakeTick <- time.Now() }()
+		c.gc(dontShutdown, fakeTick)
+		wg.Done()
+	}()
+	wg.Wait()
+}
+
+func TestConcurrentSummary(t *testing.T) {
+	c := Cache{
+		numberCache:               make(map[string]usedNumberPoint),
+		summaryCache:              make(map[string]usedSummaryPoint),
+		histogramCache:            make(map[string]usedHistogramPoint),
+		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+	}
+	setPoint := pmetric.NewSummaryDataPoint()
+
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			c.SetSummaryDataPoint("bar", &setPoint)
+			point, found := c.GetSummaryDataPoint("bar")
+			assert.Equal(t, point, &setPoint)
+			assert.True(t, found)
+			wg.Done()
+		}()
+	}
+	wg.Add(1)
+	go func() {
+		dontShutdown := make(chan struct{})
+		fakeTick := make(chan time.Time)
+		go func() { fakeTick <- time.Now() }()
+		c.gc(dontShutdown, fakeTick)
+		wg.Done()
+	}()
+	wg.Wait()
+}
+
+func TestConcurrentHistogram(t *testing.T) {
+	c := Cache{
+		numberCache:               make(map[string]usedNumberPoint),
+		summaryCache:              make(map[string]usedSummaryPoint),
+		histogramCache:            make(map[string]usedHistogramPoint),
+		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+	}
+	setPoint := pmetric.NewHistogramDataPoint()
+
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			c.SetHistogramDataPoint("bar", &setPoint)
+			point, found := c.GetHistogramDataPoint("bar")
+			assert.Equal(t, point, &setPoint)
+			assert.True(t, found)
+			wg.Done()
+		}()
+	}
+	wg.Add(1)
+	go func() {
+		dontShutdown := make(chan struct{})
+		fakeTick := make(chan time.Time)
+		go func() { fakeTick <- time.Now() }()
+		c.gc(dontShutdown, fakeTick)
+		wg.Done()
+	}()
+	wg.Wait()
+}
+
+func TestConcurrentExponentialHistogram(t *testing.T) {
+	c := Cache{
+		numberCache:               make(map[string]usedNumberPoint),
+		summaryCache:              make(map[string]usedSummaryPoint),
+		histogramCache:            make(map[string]usedHistogramPoint),
+		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+	}
+	setPoint := pmetric.NewExponentialHistogramDataPoint()
+
+	var wg sync.WaitGroup
+	for i := 0; i < 5; i++ {
+		wg.Add(1)
+		go func() {
+			c.SetExponentialHistogramDataPoint("bar", &setPoint)
+			point, found := c.GetExponentialHistogramDataPoint("bar")
+			assert.Equal(t, point, &setPoint)
+			assert.True(t, found)
+			wg.Done()
+		}()
+	}
+	wg.Add(1)
+	go func() {
+		dontShutdown := make(chan struct{})
+		fakeTick := make(chan time.Time)
+		go func() { fakeTick <- time.Now() }()
+		c.gc(dontShutdown, fakeTick)
+		wg.Done()
+	}()
+	wg.Wait()
 }
 
 func TestIdentifier(t *testing.T) {
