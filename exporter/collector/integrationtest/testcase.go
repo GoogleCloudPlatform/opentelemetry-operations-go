@@ -62,6 +62,8 @@ type TestCase struct {
 	ExpectFixturePath string
 	// Skip, if true, skips this test case
 	Skip bool
+	// ExpectErr sets whether the test is expected to fail
+	ExpectErr bool
 }
 
 func (tc *TestCase) LoadOTLPLogsInput(
@@ -357,7 +359,7 @@ func (tc *TestCase) SkipIfNeeded(t testing.TB) {
 
 func (tc *TestCase) CreateMetricConfig() collector.Config {
 	cfg := collector.DefaultConfig()
-	cfg.ProjectID = "fake-project"
+	cfg.ProjectID = "fakeprojectid"
 	// Set a big buffer to capture all CMD requests without dropping
 	cfg.MetricConfig.CreateMetricDescriptorBufferSize = 500
 	cfg.MetricConfig.InstrumentationLibraryLabels = false

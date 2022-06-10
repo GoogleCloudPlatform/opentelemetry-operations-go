@@ -32,6 +32,7 @@ func TestMetrics(t *testing.T) {
 
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeeded(t)
+
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 
 			testServer, err := NewMetricTestServer()
@@ -44,11 +45,10 @@ func TestMetrics(t *testing.T) {
 			require.NoError(t, err)
 			defer inMemoryOCExporter.Shutdown(ctx)
 
-			require.NoError(
-				t,
-				testServerExporter.PushMetrics(ctx, metrics),
-				"Failed to export metrics to local test server",
-			)
+			err = testServerExporter.PushMetrics(ctx, metrics)
+			if !test.ExpectErr {
+				require.NoError(t, err, "Failed to export metrics to local test server")
+			}
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
 			expectFixture := test.LoadMetricExpectFixture(
