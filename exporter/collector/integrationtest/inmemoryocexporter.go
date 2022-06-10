@@ -47,7 +47,8 @@ func (i *InMemoryOCExporter) Proto(ctx context.Context) (*SelfObservabilityMetri
 	// Hack to flush stats, see https://tinyurl.com/5hfcxzk2
 	view.SetReportingPeriod(time.Minute)
 	i.reader.ReadAndExport(i.stackdriverExporter)
-	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*500)
+	// this isn't important, it is just to collect self-obs metrics for the test.
+	ctx, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
 	done := make(chan struct{}, 1)

@@ -19,6 +19,7 @@ import (
 	"net"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
@@ -101,6 +102,7 @@ func (f *fakeMetricServiceServer) CreateTimeSeries(
 	ctx context.Context,
 	req *monitoringpb.CreateTimeSeriesRequest,
 ) (*emptypb.Empty, error) {
+	time.Sleep(15 * time.Second)
 	f.metricsTestServer.appendCreateTimeSeriesReq(req)
 	return &emptypb.Empty{}, nil
 }
@@ -157,7 +159,7 @@ func (m *MetricsTestServer) NewExporter(
 		cfg,
 		zap.NewNop(),
 		"latest",
-		collector.DefaultTimeout,
+		14*time.Second,
 	)
 	require.NoError(t, err)
 	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.MetricConfig.ClientConfig.Endpoint)
