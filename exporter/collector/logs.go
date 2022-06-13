@@ -21,6 +21,7 @@ import (
 	"math"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/logging"
@@ -310,15 +311,23 @@ func (l logMapper) logToSplitEntries(
 		entry.Timestamp = processTime
 	}
 
+	// build our own map off OTel attributes so we don't have to call .Get() for each special case
+	// (.Get() ranges over all attributes each time)
+	attrsMap := make(map[string]pcommon.Value)
+	log.Attributes().Range(func(k string, v pcommon.Value) bool {
+		attrsMap[k] = v
+		return true
+	})
+
 	// parse LogEntrySourceLocation struct from OTel attribute
-	sourceLocation, ok := log.Attributes().Get(SourceLocationAttributeKey)
-	if ok {
+	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
 		err := json.Unmarshal(sourceLocation.MBytesVal(), &logEntrySourceLocation)
 		if err != nil {
 			return []logging.Entry{entry}, err
 		}
 		entry.SourceLocation = &logEntrySourceLocation
+		delete(attrsMap, SourceLocationAttributeKey)
 	}
 
 	// parse TraceID and SpanID, if present
@@ -329,20 +338,34 @@ func (l logMapper) logToSplitEntries(
 		entry.SpanID = log.SpanID().HexString()
 	}
 
-	httpRequestAttr, ok := log.Attributes().Get(HTTPRequestAttributeKey)
-	if ok {
+	if httpRequestAttr, ok := attrsMap[HTTPRequestAttributeKey]; ok {
 		var httpRequest *logging.HTTPRequest
 		httpRequest, err := l.parseHTTPRequest(httpRequestAttr)
 		if err != nil {
 			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
 		}
 		entry.HTTPRequest = httpRequest
+		delete(attrsMap, HTTPRequestAttributeKey)
 	}
 
 	if log.SeverityNumber() < 0 || int(log.SeverityNumber()) > len(severityMapping)-1 {
 		return []logging.Entry{entry}, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
 	}
 	entry.Severity = severityMapping[log.SeverityNumber()]
+
+	// parse remaining OTel attributes to GCP labels
+	for k, v := range attrsMap {
+		// skip "gcp.*" attributes since we process these to other fields
+		if strings.HasPrefix(k, "gcp.") {
+			continue
+		}
+		if entry.Labels == nil {
+			entry.Labels = make(map[string]string)
+		}
+		if _, ok := entry.Labels[k]; !ok {
+			entry.Labels[k] = v.AsString()
+		}
+	}
 
 	// Calculate the size of the internal log entry so this overhead can be accounted
 	// for when determining the need to split based on payload size
