@@ -111,7 +111,15 @@ func (f *fakeMetricServiceServer) CreateTimeSeries(
 		code = codes.NotFound
 	}
 
-	return &emptypb.Empty{}, status.Error(code, "foo")
+	statusResp := status.New(code, "foo")
+	if code == codes.NotFound {
+		statusResp, _ = statusResp.WithDetails(&monitoringpb.CreateTimeSeriesSummary{
+			TotalPointCount:   int32(len(req.TimeSeries)),
+			SuccessPointCount: 0,
+		})
+	}
+
+	return &emptypb.Empty{}, statusResp.Err()
 }
 
 func (f *fakeMetricServiceServer) CreateServiceTimeSeries(
