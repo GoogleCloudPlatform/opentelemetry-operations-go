@@ -45,6 +45,15 @@ var (
 			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_expect.json",
 		},
 		{
+			Name:                 "Basic Counter with not found return code",
+			OTLPInputFixturePath: "testdata/fixtures/basic_counter_metrics.json",
+			ExpectFixturePath:    "testdata/fixtures/basic_counter_metrics_notfound_expect.json",
+			Configure: func(cfg *collector.Config) {
+				cfg.ProjectID = "notfoundproject"
+			},
+			ExpectErr: true,
+		},
+		{
 			Name:                 "Basic Prometheus metrics",
 			OTLPInputFixturePath: "testdata/fixtures/basic_prometheus_metrics.json",
 			ExpectFixturePath:    "testdata/fixtures/basic_prometheus_metrics_expect.json",

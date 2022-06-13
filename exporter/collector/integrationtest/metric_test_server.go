@@ -17,6 +17,7 @@ package integrationtest
 import (
 	"context"
 	"net"
+	"strings"
 	"sync"
 	"testing"
 
@@ -25,6 +26,8 @@ import (
 	"google.golang.org/genproto/googleapis/api/metric"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
@@ -102,7 +105,21 @@ func (f *fakeMetricServiceServer) CreateTimeSeries(
 	req *monitoringpb.CreateTimeSeriesRequest,
 ) (*emptypb.Empty, error) {
 	f.metricsTestServer.appendCreateTimeSeriesReq(req)
-	return &emptypb.Empty{}, nil
+
+	var code codes.Code
+	if strings.Contains(req.Name, "notfound") {
+		code = codes.NotFound
+	}
+
+	statusResp := status.New(code, "FORCED_TEST_ERROR")
+	if code == codes.NotFound {
+		statusResp, _ = statusResp.WithDetails(&monitoringpb.CreateTimeSeriesSummary{
+			TotalPointCount:   int32(len(req.TimeSeries)),
+			SuccessPointCount: 0,
+		})
+	}
+
+	return &emptypb.Empty{}, statusResp.Err()
 }
 
 func (f *fakeMetricServiceServer) CreateServiceTimeSeries(
@@ -150,7 +167,6 @@ func (m *MetricsTestServer) NewExporter(
 ) *collector.MetricsExporter {
 	cfg.MetricConfig.ClientConfig.Endpoint = m.Endpoint
 	cfg.MetricConfig.ClientConfig.UseInsecure = true
-	cfg.ProjectID = "fakeprojectid"
 
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
