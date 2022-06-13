@@ -20,15 +20,11 @@ import (
 	"log"
 	"strconv"
 
-	"cloud.google.com/go/compute/metadata"
 	"cloud.google.com/go/pubsub"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"google.golang.org/genproto/googleapis/rpc/code"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp"
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
 
@@ -148,108 +144,6 @@ func newTracerProvider(res *resource.Resource) (*sdktrace.TracerProvider, error)
 		sdktrace.WithResource(res))
 
 	return traceProvider, nil
-}
-
-// TODO: replace with upstream resource detector
-type testDetector struct{}
-
-func (d *testDetector) Detect(ctx context.Context) (*resource.Resource, error) {
-	if !metadata.OnGCE() {
-		return nil, nil
-	}
-	detector := gcp.NewDetector()
-	projectID, err := detector.ProjectID()
-	if err != nil {
-		return nil, err
-	}
-	attributes := []attribute.KeyValue{semconv.CloudProviderGCP, semconv.CloudAccountIDKey.String(projectID)}
-
-	switch detector.CloudPlatform() {
-	case gcp.GKE:
-		attributes = append(attributes, semconv.CloudPlatformGCPKubernetesEngine)
-		v, locType, err := detector.GKEAvailabilityZoneOrRegion()
-		if err != nil {
-			return nil, err
-		}
-		switch locType {
-		case gcp.Zone:
-			attributes = append(attributes, semconv.CloudAvailabilityZoneKey.String(v))
-		case gcp.Region:
-			attributes = append(attributes, semconv.CloudRegionKey.String(v))
-		default:
-			return nil, fmt.Errorf("location must be zone or region. Got %v", locType)
-		}
-		return detectWithFuncs(attributes, map[attribute.Key]detectionFunc{
-			semconv.K8SClusterNameKey: detector.GKEClusterName,
-			semconv.HostIDKey:         detector.GKEHostID,
-		})
-	case gcp.CloudRun:
-		attributes = append(attributes, semconv.CloudPlatformGCPCloudRun)
-		return detectWithFuncs(attributes, map[attribute.Key]detectionFunc{
-			semconv.FaaSNameKey:    detector.FaaSName,
-			semconv.FaaSVersionKey: detector.FaaSVersion,
-			semconv.FaaSIDKey:      detector.FaaSID,
-			semconv.CloudRegionKey: detector.FaaSCloudRegion,
-		})
-	case gcp.CloudFunctions:
-		attributes = append(attributes, semconv.CloudPlatformGCPCloudFunctions)
-		return detectWithFuncs(attributes, map[attribute.Key]detectionFunc{
-			semconv.FaaSNameKey:    detector.FaaSName,
-			semconv.FaaSVersionKey: detector.FaaSVersion,
-			semconv.FaaSIDKey:      detector.FaaSID,
-			semconv.CloudRegionKey: detector.FaaSCloudRegion,
-		})
-	case gcp.AppEngineStandard:
-		attributes = append(attributes, semconv.CloudPlatformGCPAppEngine)
-		return detectWithFuncs(attributes, map[attribute.Key]detectionFunc{
-			semconv.FaaSNameKey:              detector.AppEngineServiceName,
-			semconv.FaaSVersionKey:           detector.AppEngineServiceVersion,
-			semconv.FaaSIDKey:                detector.AppEngineServiceInstance,
-			semconv.CloudRegionKey:           detector.AppEngineStandardCloudRegion,
-			semconv.CloudAvailabilityZoneKey: detector.AppEngineStandardAvailabilityZone,
-		})
-	case gcp.AppEngineFlex:
-		attributes = append(attributes, semconv.CloudPlatformGCPAppEngine)
-		zone, region, err := detector.AppEngineFlexAvailabilityZoneAndRegion()
-		if err != nil {
-			return nil, err
-		}
-		attributes = append(attributes, semconv.CloudAvailabilityZoneKey.String(zone))
-		attributes = append(attributes, semconv.CloudRegionKey.String(region))
-		return detectWithFuncs(attributes, map[attribute.Key]detectionFunc{
-			semconv.FaaSNameKey:    detector.AppEngineServiceName,
-			semconv.FaaSVersionKey: detector.AppEngineServiceVersion,
-			semconv.FaaSIDKey:      detector.AppEngineServiceInstance,
-		})
-	case gcp.GCE:
-		attributes = append(attributes, semconv.CloudPlatformGCPComputeEngine)
-		zone, region, err := detector.GCEAvailabilityZoneAndRegion()
-		if err != nil {
-			return nil, err
-		}
-		attributes = append(attributes, semconv.CloudAvailabilityZoneKey.String(zone))
-		attributes = append(attributes, semconv.CloudRegionKey.String(region))
-		return detectWithFuncs(attributes, map[attribute.Key]detectionFunc{
-			semconv.HostTypeKey: detector.GCEHostType,
-			semconv.HostIDKey:   detector.GCEHostID,
-			semconv.HostNameKey: detector.GCEHostName,
-		})
-	default:
-		return resource.NewWithAttributes(semconv.SchemaURL, attributes...), nil
-	}
-}
-
-type detectionFunc func() (string, error)
-
-func detectWithFuncs(attributes []attribute.KeyValue, funcs map[attribute.Key]detectionFunc) (*resource.Resource, error) {
-	for key, detect := range funcs {
-		v, err := detect()
-		if err != nil {
-			return nil, err
-		}
-		attributes = append(attributes, key.String(v))
-	}
-	return resource.NewWithAttributes(semconv.SchemaURL, attributes...), nil
 }
 
 func shutdownTraceProvider(ctx context.Context, tracerProvider *sdktrace.TracerProvider) error {
