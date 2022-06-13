@@ -48,6 +48,8 @@ func TestMetrics(t *testing.T) {
 			err = testServerExporter.PushMetrics(ctx, metrics)
 			if !test.ExpectErr {
 				require.NoError(t, err, "Failed to export metrics to local test server")
+			} else {
+				require.Error(t, err, "Did not see expected error")
 			}
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 

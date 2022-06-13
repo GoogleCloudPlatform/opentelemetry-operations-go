@@ -245,17 +245,20 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 			s, _ := status.FromError(err)
 			st = statusCodeToString(s)
 
-			summaryPointCount := len(ts)
+			succeededPoints := len(ts)
+			failedPoints := 0
 			for _, detail := range s.Details() {
 				if summary, ok := detail.(*monitoringpb.CreateTimeSeriesSummary); ok {
-					// if success != total, we're reporting a failed create and change to using the diff
-					if summary.TotalPointCount != summary.SuccessPointCount {
-						summaryPointCount = int(summary.TotalPointCount - summary.SuccessPointCount)
-					}
+					failedPoints = int(summary.TotalPointCount - summary.SuccessPointCount)
+					succeededPoints = int(summary.SuccessPointCount)
 				}
 			}
 
-			recordPointCountDataPoint(ctx, summaryPointCount, st)
+			// always record the number of successful points
+			recordPointCountDataPoint(ctx, succeededPoints, "OK")
+			if failedPoints > 0 {
+				recordPointCountDataPoint(ctx, failedPoints, st)
+			}
 			if err != nil {
 				errs = append(errs, fmt.Errorf("failed to export time series to GCM: %v", err))
 			}
