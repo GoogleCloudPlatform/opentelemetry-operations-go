@@ -102,7 +102,12 @@ func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.
 			require.NoError(t, err)
 			defer inMemoryOCExporter.Shutdown(ctx)
 
-			require.NoError(t, testServerExporter.PushMetrics(ctx, metrics), "failed to export metrics to local test server")
+			err = testServerExporter.PushMetrics(ctx, metrics)
+			if !test.ExpectErr {
+				require.NoError(t, err, "failed to export metrics to local test server")
+			} else {
+				require.Error(t, err, "didn't record expected error")
+			}
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
 			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)

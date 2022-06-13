@@ -84,6 +84,28 @@
           },
           {
             "metric": {
+              "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+              "labels": {
+                "status": "OK"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "0"
+                }
+              }
+            ]
+          },
+          {
+            "metric": {
               "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
               "labels": {
                 "grpc_client_method": "google.monitoring.v3.MetricService/CreateMetricDescriptor",

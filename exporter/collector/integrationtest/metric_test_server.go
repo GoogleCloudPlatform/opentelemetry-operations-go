@@ -111,7 +111,7 @@ func (f *fakeMetricServiceServer) CreateTimeSeries(
 		code = codes.NotFound
 	}
 
-	statusResp := status.New(code, "foo")
+	statusResp := status.New(code, "FORCED_TEST_ERROR")
 	if code == codes.NotFound {
 		statusResp, _ = statusResp.WithDetails(&monitoringpb.CreateTimeSeriesSummary{
 			TotalPointCount:   int32(len(req.TimeSeries)),
