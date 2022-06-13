@@ -20,6 +20,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -40,6 +43,9 @@
             "responseSize": "51164",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -60,6 +66,9 @@
             "responseSize": "3990",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -80,6 +89,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -100,6 +112,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -120,6 +135,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -140,6 +158,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -160,6 +181,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -180,6 +204,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -200,6 +227,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -220,6 +250,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -240,6 +273,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -260,6 +296,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -280,6 +319,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -300,6 +342,9 @@
             "responseSize": "1247",
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -320,6 +365,9 @@
             "responseSize": "4429",
             "remoteIp": "127.0.0.2",
             "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
           }
         },
         {
@@ -332,7 +380,10 @@
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:54:43 +0800] \"-\" 408 -",
-          "timestamp": "1970-01-01T00:00:00Z"
+          "timestamp": "1970-01-01T00:00:00Z",
+          "labels": {
+            "log.file.name": "test.log"
+          }
         }
       ],
       "partialSuccess": true
