@@ -21,50 +21,30 @@ Once you import the trace exporter package, create and install a new export pipe
 package main
 
 import (
-    "context"
-    "log"
-    "os"
+	"context"
+	"log"
 
-    texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 
-    "go.opentelemetry.io/otel"
-    sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 )
 
 func main() {
-    // Create exporter and trace provider pipeline, and register provider.
-    _, shutdown, err := texporter.InstallNewPipeline(
-        []texporter.Option {
-            // optional exporter options
-        },
-        // This example code uses sdktrace.AlwaysSample sampler to sample all traces.
-        // In a production environment or high QPS setup please use ProbabilitySampler
-        // set at the desired probability.
-        // Example:
-        // sdktrace.WithConfig(sdktrace.Config {
-        //     DefaultSampler: sdktrace.ProbabilitySampler(0.0001),
-        // })
-        sdktrace.WithConfig(sdktrace.Config{
-            DefaultSampler: sdktrace.AlwaysSample(),
-        }),
-        // other optional provider options
-    )
-    if err != nil {
-        log.Fatalf("texporter.InstallNewPipeline: %v", err)
-    }
-    // before ending program, wait for all enqueued spans to be exported
-    defer shutdown()
+	exporter, err := texporter.New()
+	if err != nil {
+		log.Fatalf("unable to set up tracing: %v", err)
+	}
+	tp := sdktrace.NewTracerProvider(sdktrace.WithBatcher(exporter))
+	defer tp.Shutdown(context.Background())
 
-    // Create custom span.
-    tracer := otel.TraceProvider().Tracer("example.com/trace")
-    err = func(ctx context.Context) error {
-        ctx, span := tracer.Start(ctx, "foo")
-        defer span.End()
+	otel.SetTracerProvider(tp)
 
-        // Do some work.
+	tracer := tp.Tracer("example.com/trace")
+	ctx, span := tracer.Start(ctx, "foo")
+	defer span.End()
 
-        return nil
-    }(ctx)
+	// Do some work.
 }
 ```
 
