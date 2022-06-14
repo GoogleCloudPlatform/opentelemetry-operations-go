@@ -61,15 +61,25 @@ func TestMetrics(t *testing.T) {
 
 			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
 			require.NoError(t, err)
+			fixture := &MetricExpectFixture{
+				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
+				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
+				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
+				SelfObservabilityMetrics:        selfObsMetrics,
+			}
 			diff := DiffMetricProtos(
 				t,
-				&MetricExpectFixture{
-					CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
-					CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
-					CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
-					SelfObservabilityMetrics:        selfObsMetrics,
-				},
+				fixture,
 				expectFixture,
+				func(i, j int) bool {
+					return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
+				},
+				func(i, j int) bool {
+					return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
+				},
+				func(i, j int) bool {
+					return fixture.CreateServiceTimeSeriesRequests[i].Name < fixture.CreateServiceTimeSeriesRequests[j].Name
+				},
 			)
 			if diff != "" {
 				require.Fail(
