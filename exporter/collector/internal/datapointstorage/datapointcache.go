@@ -83,7 +83,6 @@ func (c *Cache) GetNumberDataPoint(identifier string) (*pmetric.NumberDataPoint,
 	point, found := c.numberCache[identifier]
 	if found {
 		point.used.Store(true)
-		c.numberCache[identifier] = point
 	}
 	return point.point, found
 }
@@ -103,7 +102,6 @@ func (c *Cache) GetSummaryDataPoint(identifier string) (*pmetric.SummaryDataPoin
 	point, found := c.summaryCache[identifier]
 	if found {
 		point.used.Store(true)
-		c.summaryCache[identifier] = point
 	}
 	return point.point, found
 }
@@ -123,7 +121,6 @@ func (c *Cache) GetHistogramDataPoint(identifier string) (*pmetric.HistogramData
 	point, found := c.histogramCache[identifier]
 	if found {
 		point.used.Store(true)
-		c.histogramCache[identifier] = point
 	}
 	return point.point, found
 }
@@ -143,7 +140,6 @@ func (c *Cache) GetExponentialHistogramDataPoint(identifier string) (*pmetric.Ex
 	point, found := c.exponentialHistogramCache[identifier]
 	if found {
 		point.used.Store(true)
-		c.exponentialHistogramCache[identifier] = point
 	}
 	return point.point, found
 }
@@ -164,8 +160,10 @@ func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 		// garbage collect the numberCache
 		c.numberLock.Lock()
 		for id, point := range c.numberCache {
-			// If used is true, swap it to false. Otherwise, delete the point.
-			if !point.used.CAS(true, false) {
+			// for points that have been used, mark them as unused
+			if point.used.Load() {
+				point.used.Store(false)
+			} else {
 				// for points that have not been used, delete points
 				delete(c.numberCache, id)
 			}
@@ -174,8 +172,10 @@ func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 		// garbage collect the summaryCache
 		c.summaryLock.Lock()
 		for id, point := range c.summaryCache {
-			// If used is true, swap it to false. Otherwise, delete the point.
-			if !point.used.CAS(true, false) {
+			// for points that have been used, mark them as unused
+			if point.used.Load() {
+				point.used.Store(false)
+			} else {
 				// for points that have not been used, delete points
 				delete(c.summaryCache, id)
 			}
@@ -184,8 +184,10 @@ func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 		// garbage collect the histogramCache
 		c.histogramLock.Lock()
 		for id, point := range c.histogramCache {
-			// If used is true, swap it to false. Otherwise, delete the point.
-			if !point.used.CAS(true, false) {
+			// for points that have been used, mark them as unused
+			if point.used.Load() {
+				point.used.Store(false)
+			} else {
 				// for points that have not been used, delete points
 				delete(c.histogramCache, id)
 			}
@@ -194,8 +196,10 @@ func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 		// garbage collect the exponentialHistogramCache
 		c.exponentialHistogramLock.Lock()
 		for id, point := range c.exponentialHistogramCache {
-			// If used is true, swap it to false. Otherwise, delete the point.
-			if !point.used.CAS(true, false) {
+			// for points that have been used, mark them as unused
+			if point.used.Load() {
+				point.used.Store(false)
+			} else {
 				// for points that have not been used, delete points
 				delete(c.exponentialHistogramCache, id)
 			}
