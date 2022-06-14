@@ -206,22 +206,3 @@ func (e *Exporter) ExportSpans(ctx context.Context, spanData []sdktrace.ReadOnly
 func (e *Exporter) Shutdown(ctx context.Context) error {
 	return e.traceExporter.Shutdown(ctx)
 }
-
-func createKeyValueAttributes(attr map[string]interface{}) []attribute.KeyValue {
-	kv := make([]attribute.KeyValue, 0, len(attr))
-
-	for k, v := range attr {
-		switch val := v.(type) {
-		case bool:
-			kv = append(kv, attribute.Bool(k, val))
-		case int64:
-			kv = append(kv, attribute.Int64(k, val))
-		case float64:
-			kv = append(kv, attribute.Float64(k, val))
-		case string:
-			kv = append(kv, attribute.String(k, val))
-		}
-	}
-
-	return kv
-}
