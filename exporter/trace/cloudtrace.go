@@ -66,9 +66,6 @@ type options struct {
 	// to the underlying Stackdriver Trace API client.
 	// Optional.
 	traceClientOptions []option.ClientOption
-	// batchSpanProcessorOptions are additional options to be based
-	// to the underlying BatchSpanProcessor when call making a new export pipeline.
-	batchSpanProcessorOptions []sdktrace.BatchSpanProcessorOption
 	// timeout for all API calls. If not set, defaults to 5 seconds.
 	timeout time.Duration
 }
