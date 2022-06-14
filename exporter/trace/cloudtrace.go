@@ -62,14 +62,6 @@ type options struct {
 	// resource if the resource does not inherently belong to a specific
 	// project, e.g. on-premise resource like k8s_container or generic_task.
 	projectID string
-	// location is the identifier of the GCP or AWS cloud region/zone in which
-	// the data for a resource is stored.
-	// If not set, it will default to the location provided by the metadata server.
-	//
-	// It will be used in the location label of a Stackdriver monitored resource
-	// if the resource does not inherently belong to a specific project, e.g.
-	// on-premise resource like k8s_container or generic_task.
-	location string
 	// traceClientOptions are additional options to be passed
 	// to the underlying Stackdriver Trace API client.
 	// Optional.
