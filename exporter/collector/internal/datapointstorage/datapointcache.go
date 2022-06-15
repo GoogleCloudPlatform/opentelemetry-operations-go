@@ -17,10 +17,12 @@ package datapointstorage
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.uber.org/atomic"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -31,31 +33,35 @@ type Cache struct {
 	summaryCache              map[string]usedSummaryPoint
 	histogramCache            map[string]usedHistogramPoint
 	exponentialHistogramCache map[string]usedExponentialHistogramPoint
+	numberLock                sync.RWMutex
+	summaryLock               sync.RWMutex
+	histogramLock             sync.RWMutex
+	exponentialHistogramLock  sync.RWMutex
 }
 
 type usedNumberPoint struct {
 	point *pmetric.NumberDataPoint
-	used  bool
+	used  *atomic.Bool
 }
 
 type usedSummaryPoint struct {
 	point *pmetric.SummaryDataPoint
-	used  bool
+	used  *atomic.Bool
 }
 
 type usedHistogramPoint struct {
 	point *pmetric.HistogramDataPoint
-	used  bool
+	used  *atomic.Bool
 }
 
 type usedExponentialHistogramPoint struct {
 	point *pmetric.ExponentialHistogramDataPoint
-	used  bool
+	used  *atomic.Bool
 }
 
 // NewCache instantiates a cache and starts background processes
-func NewCache(shutdown <-chan struct{}) Cache {
-	c := Cache{
+func NewCache(shutdown <-chan struct{}) *Cache {
+	c := &Cache{
 		numberCache:               make(map[string]usedNumberPoint),
 		summaryCache:              make(map[string]usedSummaryPoint),
 		histogramCache:            make(map[string]usedHistogramPoint),
@@ -71,118 +77,134 @@ func NewCache(shutdown <-chan struct{}) Cache {
 
 // GetNumberDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c Cache) GetNumberDataPoint(identifier string) (*pmetric.NumberDataPoint, bool) {
+func (c *Cache) GetNumberDataPoint(identifier string) (*pmetric.NumberDataPoint, bool) {
+	c.numberLock.RLock()
+	defer c.numberLock.RUnlock()
 	point, found := c.numberCache[identifier]
 	if found {
-		point.used = true
-		c.numberCache[identifier] = point
+		point.used.Store(true)
 	}
 	return point.point, found
 }
 
 // SetNumberDataPoint assigns the point to the identifier in the cache
-func (c Cache) SetNumberDataPoint(identifier string, point *pmetric.NumberDataPoint) {
-	c.numberCache[identifier] = usedNumberPoint{point, true}
+func (c *Cache) SetNumberDataPoint(identifier string, point *pmetric.NumberDataPoint) {
+	c.numberLock.Lock()
+	defer c.numberLock.Unlock()
+	c.numberCache[identifier] = usedNumberPoint{point, atomic.NewBool(true)}
 }
 
 // GetSummaryDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c Cache) GetSummaryDataPoint(identifier string) (*pmetric.SummaryDataPoint, bool) {
+func (c *Cache) GetSummaryDataPoint(identifier string) (*pmetric.SummaryDataPoint, bool) {
+	c.summaryLock.RLock()
+	defer c.summaryLock.RUnlock()
 	point, found := c.summaryCache[identifier]
 	if found {
-		point.used = true
-		c.summaryCache[identifier] = point
+		point.used.Store(true)
 	}
 	return point.point, found
 }
 
 // SetSummaryDataPoint assigns the point to the identifier in the cache
-func (c Cache) SetSummaryDataPoint(identifier string, point *pmetric.SummaryDataPoint) {
-	c.summaryCache[identifier] = usedSummaryPoint{point, true}
+func (c *Cache) SetSummaryDataPoint(identifier string, point *pmetric.SummaryDataPoint) {
+	c.summaryLock.Lock()
+	defer c.summaryLock.Unlock()
+	c.summaryCache[identifier] = usedSummaryPoint{point, atomic.NewBool(true)}
 }
 
 // GetHistogramDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c Cache) GetHistogramDataPoint(identifier string) (*pmetric.HistogramDataPoint, bool) {
+func (c *Cache) GetHistogramDataPoint(identifier string) (*pmetric.HistogramDataPoint, bool) {
+	c.histogramLock.RLock()
+	defer c.histogramLock.RUnlock()
 	point, found := c.histogramCache[identifier]
 	if found {
-		point.used = true
-		c.histogramCache[identifier] = point
+		point.used.Store(true)
 	}
 	return point.point, found
 }
 
 // SetHistogramDataPoint assigns the point to the identifier in the cache
-func (c Cache) SetHistogramDataPoint(identifier string, point *pmetric.HistogramDataPoint) {
-	c.histogramCache[identifier] = usedHistogramPoint{point, true}
+func (c *Cache) SetHistogramDataPoint(identifier string, point *pmetric.HistogramDataPoint) {
+	c.histogramLock.Lock()
+	defer c.histogramLock.Unlock()
+	c.histogramCache[identifier] = usedHistogramPoint{point, atomic.NewBool(true)}
 }
 
 // GetExponentialHistogramDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c Cache) GetExponentialHistogramDataPoint(identifier string) (*pmetric.ExponentialHistogramDataPoint, bool) {
+func (c *Cache) GetExponentialHistogramDataPoint(identifier string) (*pmetric.ExponentialHistogramDataPoint, bool) {
+	c.exponentialHistogramLock.RLock()
+	defer c.exponentialHistogramLock.RUnlock()
 	point, found := c.exponentialHistogramCache[identifier]
 	if found {
-		point.used = true
-		c.exponentialHistogramCache[identifier] = point
+		point.used.Store(true)
 	}
 	return point.point, found
 }
 
 // SetExponentialHistogramDataPoint assigns the point to the identifier in the cache
-func (c Cache) SetExponentialHistogramDataPoint(identifier string, point *pmetric.ExponentialHistogramDataPoint) {
-	c.exponentialHistogramCache[identifier] = usedExponentialHistogramPoint{point, true}
+func (c *Cache) SetExponentialHistogramDataPoint(identifier string, point *pmetric.ExponentialHistogramDataPoint) {
+	c.exponentialHistogramLock.Lock()
+	defer c.exponentialHistogramLock.Unlock()
+	c.exponentialHistogramCache[identifier] = usedExponentialHistogramPoint{point, atomic.NewBool(true)}
 }
 
 // gc garbage collects the cache after the ticker ticks
-func (c Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
+func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 	select {
 	case <-shutdown:
 		return false
 	case <-tickerCh:
 		// garbage collect the numberCache
+		c.numberLock.Lock()
 		for id, point := range c.numberCache {
-			if point.used {
-				// for points that have been used, mark them as unused
-				point.used = false
-				c.numberCache[id] = point
+			// for points that have been used, mark them as unused
+			if point.used.Load() {
+				point.used.Store(false)
 			} else {
 				// for points that have not been used, delete points
 				delete(c.numberCache, id)
 			}
 		}
+		c.numberLock.Unlock()
 		// garbage collect the summaryCache
+		c.summaryLock.Lock()
 		for id, point := range c.summaryCache {
-			if point.used {
-				// for points that have been used, mark them as unused
-				point.used = false
-				c.summaryCache[id] = point
+			// for points that have been used, mark them as unused
+			if point.used.Load() {
+				point.used.Store(false)
 			} else {
 				// for points that have not been used, delete points
 				delete(c.summaryCache, id)
 			}
 		}
+		c.summaryLock.Unlock()
 		// garbage collect the histogramCache
+		c.histogramLock.Lock()
 		for id, point := range c.histogramCache {
-			if point.used {
-				// for points that have been used, mark them as unused
-				point.used = false
-				c.histogramCache[id] = point
+			// for points that have been used, mark them as unused
+			if point.used.Load() {
+				point.used.Store(false)
 			} else {
 				// for points that have not been used, delete points
 				delete(c.histogramCache, id)
 			}
 		}
+		c.histogramLock.Unlock()
 		// garbage collect the exponentialHistogramCache
+		c.exponentialHistogramLock.Lock()
 		for id, point := range c.exponentialHistogramCache {
-			if point.used {
-				// for points that have been used, mark them as unused
-				point.used = false
-				c.exponentialHistogramCache[id] = point
+			// for points that have been used, mark them as unused
+			if point.used.Load() {
+				point.used.Store(false)
 			} else {
 				// for points that have not been used, delete points
 				delete(c.exponentialHistogramCache, id)
 			}
 		}
+		c.exponentialHistogramLock.Unlock()
 	}
 	return true
 }

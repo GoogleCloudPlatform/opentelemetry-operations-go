@@ -40,8 +40,8 @@ func NewStandardNormalizer(shutdown <-chan struct{}, logger *zap.Logger) Normali
 }
 
 type standardNormalizer struct {
-	startCache    datapointstorage.Cache
-	previousCache datapointstorage.Cache
+	startCache    *datapointstorage.Cache
+	previousCache *datapointstorage.Cache
 	log           *zap.Logger
 }
 
