@@ -43,10 +43,10 @@ func (e errUnexpectedNumberKind) Error() string {
 	return fmt.Sprintf("the number kind is unexpected: %v", e.kind)
 }
 
-type errUnexpectedInstrumentKind struct {
+type errUnexpectedAggregationKind struct {
 	kind sdkapi.InstrumentKind
 }
 
-func (e errUnexpectedInstrumentKind) Error() string {
+func (e errUnexpectedAggregationKind) Error() string {
 	return fmt.Sprintf("the metric kind is unexpected: %v", e.kind)
 }

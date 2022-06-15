@@ -124,6 +124,44 @@ func TestExportCounter(t *testing.T) {
 	counter.Add(ctx, 100, clabels...)
 }
 
+func TestExportHistogram(t *testing.T) {
+	cloudMock := cloudmock.NewCloudMock()
+	defer cloudMock.Shutdown()
+
+	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+
+	resOpt := basic.WithResource(
+		resource.NewWithAttributes(
+			semconv.SchemaURL,
+			attribute.String("test_id", "abc123"),
+		),
+	)
+
+	pusher, err := InstallNewPipeline(
+		[]Option{
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithMonitoringClientOptions(clientOpt),
+			WithMetricDescriptorTypeFormatter(formatter),
+		},
+		resOpt,
+	)
+	assert.NoError(t, err)
+
+	ctx := context.Background()
+	defer pusher.Stop(ctx)
+
+	// Start meter
+	meter := pusher.Meter("cloudmonitoring/test")
+
+	// Register counter value
+	counter, err := meter.SyncInt64().Histogram("counter-a")
+	assert.NoError(t, err)
+	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
+	counter.Record(ctx, 100, clabels...)
+	counter.Record(ctx, 50, clabels...)
+	counter.Record(ctx, 200, clabels...)
+}
+
 func TestDescToMetricType(t *testing.T) {
 	inMe := []*metricExporter{
 		{

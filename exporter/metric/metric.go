@@ -18,24 +18,25 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math"
 	"strings"
 	"time"
 
 	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
-	"go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue"
-	"go.opentelemetry.io/otel/sdk/metric/aggregator/sum"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/metric/export"
 	"go.opentelemetry.io/otel/sdk/metric/export/aggregation"
 	"go.opentelemetry.io/otel/sdk/metric/number"
 	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
+	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"google.golang.org/api/option"
 	apioption "google.golang.org/api/option"
+	"google.golang.org/genproto/googleapis/api/distribution"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -161,7 +162,7 @@ func InstallNewPipeline(opts []Option, popts ...controller.Option) (*controller.
 // NewExportPipeline sets up a complete export pipeline with the recommended setup,
 // chaining a NewRawExporter into the recommended selectors and integrators.
 func NewExportPipeline(opts []Option, popts ...controller.Option) (*controller.Controller, error) {
-	selector := NewWithCloudMonitoringDistribution()
+	selector := simple.NewWithHistogramDistribution()
 	exporter, err := NewRawExporter(opts...)
 	if err != nil {
 		return nil, err
@@ -290,30 +291,6 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 	}
 
 	return me.client.CreateTimeSeries(ctx, req)
-}
-
-// recordToTspb converts record to TimeSeries proto type with common resource.
-// ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
-func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource, library instrumentation.Library) (*monitoringpb.TimeSeries, error) {
-	m := me.recordToMpb(r, library)
-
-	mr := me.resourceToMonitoredResourcepb(res)
-
-	tv, t, err := me.recordToTypedValueAndTimestamp(r)
-	if err != nil {
-		return nil, err
-	}
-
-	p := &monitoringpb.Point{
-		Value:    tv,
-		Interval: t,
-	}
-
-	return &monitoringpb.TimeSeries{
-		Metric:   m,
-		Resource: mr,
-		Points:   []*monitoringpb.Point{p},
-	}, nil
 }
 
 // descToMetricType converts descriptor to MetricType proto type.
@@ -453,23 +430,19 @@ func transformResource(match, input map[string]string) (map[string]string, bool)
 // recordToMdpbKindType return the mapping from OTel's record descriptor to
 // Cloud Monitoring's MetricKind and ValueType.
 func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_MetricKind, googlemetricpb.MetricDescriptor_ValueType) {
-	ikind := r.Descriptor().InstrumentKind()
-	nkind := r.Descriptor().NumberKind()
-
 	var kind googlemetricpb.MetricDescriptor_MetricKind
-	switch ikind {
-	// TODO: Decide how UpDownCounterKind and UpDownCounterObserverKind should be handled.
-	// CUMULATIVE might not be correct as it assumes the metric always goes up.
-	case sdkapi.CounterInstrumentKind, sdkapi.UpDownCounterInstrumentKind, sdkapi.CounterObserverInstrumentKind, sdkapi.UpDownCounterObserverInstrumentKind:
-		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
-	case sdkapi.GaugeObserverInstrumentKind, sdkapi.HistogramInstrumentKind:
+	switch r.Aggregation().Kind() {
+	case aggregation.LastValueKind:
 		kind = googlemetricpb.MetricDescriptor_GAUGE
+	case aggregation.SumKind:
+		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
+	case aggregation.HistogramKind:
+		return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DISTRIBUTION
 	default:
 		kind = googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
 	}
-
 	var typ googlemetricpb.MetricDescriptor_ValueType
-	switch nkind {
+	switch r.Descriptor().NumberKind() {
 	case number.Int64Kind:
 		typ = googlemetricpb.MetricDescriptor_INT64
 	case number.Float64Kind:
@@ -505,14 +478,16 @@ func (me *metricExporter) recordToMpb(r *export.Record, library instrumentation.
 	}
 }
 
-// recordToTypedValueAndTimestamp converts measurement value stored in r to
-// correspoinding counterpart in monitoringpb, and extracts timestamp of the record
-// and convert it to appropriate TimeInterval.
+// recordToTspb converts record to TimeSeries proto type with common resource.
+// ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
 //
 // TODO: Apply appropriate TimeInterval based upon MetricKind. See details in the doc.
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries#Point
 // See detils in #25.
-func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource, library instrumentation.Library) (*monitoringpb.TimeSeries, error) {
+	m := me.recordToMpb(r, library)
+	mr := me.resourceToMonitoredResourcepb(res)
+
 	agg := r.Aggregation()
 	nkind := r.Descriptor().NumberKind()
 	ikind := r.Descriptor().InstrumentKind()
@@ -529,38 +504,45 @@ func (me *metricExporter) recordToTypedValueAndTimestamp(r *export.Record) (*mon
 	// https://github.com/open-telemetry/opentelemetry-specification/issues/466
 	// In OpenCensus, view interface provided the bundle of name, measure, labels and aggregation in one place,
 	// and it should return the appropriate value based on the aggregation type specified there.
-	switch ikind {
-	case sdkapi.GaugeObserverInstrumentKind, sdkapi.HistogramInstrumentKind:
-		if lv, ok := agg.(*lastvalue.Aggregator); ok {
-			return lastValueToTypedValueAndTimestamp(lv, nkind)
+	switch agg.Kind() {
+	case aggregation.LastValueKind:
+		lv, ok := agg.(aggregation.LastValue)
+		if !ok {
+			return nil, errUnsupportedAggregation{agg: agg}
 		}
-		return nil, nil, errUnsupportedAggregation{agg: agg}
-	case sdkapi.CounterInstrumentKind, sdkapi.UpDownCounterInstrumentKind, sdkapi.CounterObserverInstrumentKind, sdkapi.UpDownCounterObserverInstrumentKind:
+		return lastValueToTypedValueAndTimestamp(lv, nkind, m, mr)
+	case aggregation.SumKind:
 		// CUMULATIVE measurement should have the same start time and increasing end time.
 		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
-		if sum, ok := agg.(*sum.Aggregator); ok {
-			return sumToTypedValueAndTimestamp(sum, nkind, me.startTime, time.Now())
+		sum, ok := agg.(aggregation.Sum)
+		if !ok {
+			return nil, errUnsupportedAggregation{agg: agg}
 		}
-		return nil, nil, errUnsupportedAggregation{agg: agg}
+		return sumToTypedValueAndTimestamp(sum, nkind, me.startTime, time.Now(), m, mr)
+	case aggregation.HistogramKind:
+		hist, ok := agg.(aggregation.Histogram)
+		if !ok {
+			return nil, errUnsupportedAggregation{agg: agg}
+		}
+		return histogramToTypedValueAndTimestamp(hist, r, m, mr)
 	}
-
-	return nil, nil, errUnexpectedInstrumentKind{kind: ikind}
+	return nil, errUnexpectedAggregationKind{kind: ikind}
 }
 
 func sanitizeUTF8(s string) string {
 	return strings.ToValidUTF8(s, "�")
 }
 
-func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind number.Kind) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func lastValueToTypedValueAndTimestamp(lv aggregation.LastValue, kind number.Kind, m *googlemetricpb.Metric, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
 	value, timestamp, err := lv.LastValue()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	timestampPb := timestamppb.New(timestamp)
 	err = timestampPb.CheckValid()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	// TODO: Consider the expression of TimeInterval (#25)
@@ -571,27 +553,71 @@ func lastValueToTypedValueAndTimestamp(lv *lastvalue.Aggregator, kind number.Kin
 
 	tv, err := aggToTypedValue(kind, value)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return tv, t, nil
+
+	p := &monitoringpb.Point{
+		Value:    tv,
+		Interval: t,
+	}
+
+	return &monitoringpb.TimeSeries{
+		Metric:   m,
+		Resource: mr,
+		Points:   []*monitoringpb.Point{p},
+	}, nil
 }
 
-func sumToTypedValueAndTimestamp(sum *sum.Aggregator, kind number.Kind, start, end time.Time) (*monitoringpb.TypedValue, *monitoringpb.TimeInterval, error) {
+func sumToTypedValueAndTimestamp(sum aggregation.Sum, kind number.Kind, start, end time.Time, m *googlemetricpb.Metric, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
 	value, err := sum.Sum()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	t, err := toNonemptyTimeIntervalpb(start, end)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	tv, err := aggToTypedValue(kind, value)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	return tv, t, err
+
+	p := &monitoringpb.Point{
+		Value:    tv,
+		Interval: t,
+	}
+
+	return &monitoringpb.TimeSeries{
+		Metric:   m,
+		Resource: mr,
+		Points:   []*monitoringpb.Point{p},
+	}, nil
+}
+
+func histogramToTypedValueAndTimestamp(hist aggregation.Histogram, r *export.Record, m *googlemetricpb.Metric, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
+	tv, err := histToTypedValue(hist)
+	if err != nil {
+		return nil, err
+	}
+
+	t, err := toNonemptyTimeIntervalpb(r.StartTime(), r.EndTime())
+	if err != nil {
+		return nil, err
+	}
+	p := &monitoringpb.Point{
+		Value:    tv,
+		Interval: t,
+	}
+	return &monitoringpb.TimeSeries{
+		Resource:   mr,
+		Unit:       string(r.Descriptor().Unit()),
+		MetricKind: googlemetricpb.MetricDescriptor_CUMULATIVE,
+		ValueType:  googlemetricpb.MetricDescriptor_DISTRIBUTION,
+		Points:     []*monitoringpb.Point{p},
+		Metric:     m,
+	}, nil
 }
 
 func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval, error) {
@@ -615,6 +641,46 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 	return &monitoringpb.TimeInterval{
 		StartTime: startpb,
 		EndTime:   endpb,
+	}, nil
+}
+
+func histToTypedValue(hist aggregation.Histogram) (*monitoringpb.TypedValue, error) {
+	buckets, err := hist.Histogram()
+	if err != nil {
+		return nil, err
+	}
+	counts := make([]int64, len(buckets.Counts))
+	for i, v := range buckets.Counts {
+		counts[i] = int64(v)
+	}
+	sum, err := hist.Sum()
+	if err != nil {
+		return nil, err
+	}
+	count, err := hist.Count()
+	if err != nil {
+		return nil, err
+	}
+	var mean float64
+	if !math.IsNaN(sum.AsFloat64()) && count > 0 { // Avoid divide-by-zero
+		mean = sum.AsFloat64() / float64(count)
+	}
+	return &monitoringpb.TypedValue{
+		Value: &monitoringpb.TypedValue_DistributionValue{
+			DistributionValue: &distribution.Distribution{
+				Count:        int64(count),
+				Mean:         mean,
+				BucketCounts: counts,
+				BucketOptions: &distribution.Distribution_BucketOptions{
+					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
+						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
+							Bounds: buckets.Boundaries,
+						},
+					},
+				},
+				// TODO: support exemplars
+			},
+		},
 	}, nil
 }
 
