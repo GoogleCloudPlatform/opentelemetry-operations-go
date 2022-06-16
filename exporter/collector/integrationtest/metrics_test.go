@@ -72,7 +72,7 @@ func TestMetrics(t *testing.T) {
 				fixture,
 				expectFixture,
 				func(i, j int) bool {
-					return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
+					return fixture.CreateTimeSeriesRequests[i].Name > fixture.CreateTimeSeriesRequests[j].Name
 				},
 				func(i, j int) bool {
 					return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
