@@ -242,7 +242,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 			}
 
 			var st string
-			s, _ := status.FromError(err)
+			s := status.Convert(err)
 			st = statusCodeToString(s)
 
 			succeededPoints := len(ts)
@@ -260,7 +260,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 				recordPointCountDataPoint(ctx, failedPoints, st)
 			}
 			if err != nil {
-				errs = append(errs, fmt.Errorf("failed to export time series to GCM: %v", err))
+				errs = append(errs, fmt.Errorf("failed to export time series to GCM: %w", err))
 			}
 		}
 	}
@@ -325,14 +325,14 @@ func (me *MetricsExporter) exportMetricDescriptor(req *monitoringpb.CreateMetric
 func (me *MetricsExporter) createTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
 	ctx, cancel := context.WithTimeout(ctx, me.timeout)
 	defer cancel()
-	return me.client.CreateTimeSeries(ctx, req)
+	return processGRPCError(me.client.CreateTimeSeries(ctx, req))
 }
 
 // Sends a service timeseries.
 func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
 	ctx, cancel := context.WithTimeout(ctx, me.timeout)
 	defer cancel()
-	return me.client.CreateServiceTimeSeries(ctx, req)
+	return processGRPCError(me.client.CreateServiceTimeSeries(ctx, req))
 }
 
 func (m *metricMapper) instrumentationScopeToLabels(is pcommon.InstrumentationScope) labels {

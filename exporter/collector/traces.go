@@ -162,5 +162,5 @@ func (te *TraceExporter) PushTraces(ctx context.Context, td ptrace.Traces) error
 		spans = append(spans, sd...)
 	}
 
-	return te.texporter.ExportSpans(ctx, spans)
+	return processGRPCError(te.texporter.ExportSpans(ctx, spans))
 }

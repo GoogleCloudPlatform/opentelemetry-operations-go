@@ -26,17 +26,17 @@ import (
 
 	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
+	"go.opentelemetry.io/collector/consumer/consumererror"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
+	"go.uber.org/multierr"
+	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	logpb "google.golang.org/genproto/googleapis/logging/v2"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
-
-	"go.opentelemetry.io/collector/pdata/pcommon"
-	"go.opentelemetry.io/collector/pdata/plog"
-	"go.uber.org/multierr"
-	"go.uber.org/zap"
 )
 
 const (
@@ -135,7 +135,7 @@ func (l *LogsExporter) Shutdown(ctx context.Context) error {
 func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 	entries, err := l.mapper.createEntries(ld)
 	if err != nil {
-		return err
+		return consumererror.NewPermanant(err)
 	}
 
 	errors := []error{}
@@ -267,8 +267,11 @@ func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEn
 		Entries:        batch,
 	}
 
-	// TODO(damemi): handle response code
-	return l.loggingClient.WriteLogEntries(ctx, request)
+	resp, err := l.loggingClient.WriteLogEntries(ctx, request)
+	if err != nil {
+		return nil, processGRPCError(err)
+	}
+	return resp, nil
 }
 
 func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
