@@ -18,6 +18,7 @@ import (
 	"context"
 	"log"
 
+	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -150,7 +151,7 @@ func (*detectResourceHandler) handle(ctx context.Context, req request, tracerPro
 
 func (*detectResourceHandler) tracerProvider() (*sdktrace.TracerProvider, error) {
 	res, err := resource.New(context.Background(),
-		resource.WithDetectors(&testDetector{}),
+		resource.WithDetectors(gcp.NewDetector()),
 		resource.WithFromEnv(),
 		resource.WithTelemetrySDK(),
 	)
