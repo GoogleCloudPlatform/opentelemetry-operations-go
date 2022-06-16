@@ -86,6 +86,11 @@ func main() {
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
 	counter.Add(ctx, 100, clabels...)
 
+	histogram, err := meter.SyncFloat64().Histogram("histogram-b")
+	if err != nil {
+		log.Fatalf("Failed to create histogram: %v", err)
+	}
+
 	// Register observer value
 	olabels := []attribute.KeyValue{
 		attribute.String("foo", "Tokyo"),
@@ -112,8 +117,10 @@ func main() {
 		counter.Add(ctx, cv, clabels...)
 
 		r2 := rand.Int63n(100)
-		ov := 12.34 + float64(r2)/20.0
+		hv := float64(r2) / 20.0
+		histogram.Record(ctx, hv, clabels...)
+		ov := 12.34 + hv
 		of.set(ov)
-		log.Printf("Most recent data: counter %v, observer %v", cv, ov)
+		log.Printf("Most recent data: counter %v, observer %v; histogram %v", cv, ov, hv)
 	}
 }
