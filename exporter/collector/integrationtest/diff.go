@@ -31,11 +31,16 @@ var (
 )
 
 // Diff uses cmp.Diff(), protocmp, and some custom options to compare two protobuf messages.
-func DiffMetricProtos(t testing.TB, x, y *MetricExpectFixture) string {
+func DiffMetricProtos(t testing.TB, x, y *MetricExpectFixture, lessFunc ...interface{}) string {
 	x = proto.Clone(x).(*MetricExpectFixture)
 	y = proto.Clone(y).(*MetricExpectFixture)
 	normalizeMetricFixture(t, x)
 	normalizeMetricFixture(t, y)
+
+	cmpOptions := cmpOptions // copy
+	for _, lessfn := range lessFunc {
+		cmpOptions = append(cmpOptions, cmpopts.SortSlices(lessfn))
+	}
 
 	return cmp.Diff(x, y, cmpOptions...)
 }
