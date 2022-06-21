@@ -1,0 +1,30 @@
+{
+  "writeLogEntriesRequests": [
+    {
+      "entries": [
+        {
+          "logName": "projects/fakeprojectid/logs/apache-error-fixture",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "jsonPayload": {
+            "message": "[pid 769:tid 140159306111872] AH00094: Command line: '/usr/local/apache/bin/httpd'",
+            "severity": "notice",
+            "time": "Tue Apr 26 22:48:35.606298 2022"
+          },
+          "timestamp": "1970-01-01T00:00:00Z",
+          "labels": {
+            "instrumentation_source": "scopeNameFoo",
+            "instrumentation_version": "9000",
+            "log.file.name": "test.log"
+          }
+        }
+      ],
+      "partialSuccess": true
+    }
+  ]
+}

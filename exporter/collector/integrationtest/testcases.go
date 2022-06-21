@@ -36,6 +36,11 @@ var (
 			OTLPInputFixturePath: "testdata/fixtures/logs_multi_project.json",
 			ExpectFixturePath:    "testdata/fixtures/logs_multi_project_expected.json",
 		},
+		{
+			Name:                 "Logs with scope information",
+			OTLPInputFixturePath: "testdata/fixtures/logs_apache_error_scope.json",
+			ExpectFixturePath:    "testdata/fixtures/logs_apache_error_scope_expected.json",
+		},
 	}
 
 	MetricsTestCases = []TestCase{
