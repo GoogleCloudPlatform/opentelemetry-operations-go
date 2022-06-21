@@ -23,7 +23,7 @@
                     ],
                     "startTimeUnixNano": "1634322229906722370",
                     "timeUnixNano": "1634322234906722370",
-                    "asInt": "253"
+                    "asInt": "400"
                   }
                 ],
                 "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
