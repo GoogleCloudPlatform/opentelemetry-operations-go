@@ -295,14 +295,6 @@ func (l logMapper) logToSplitEntries(
 		Resource: mr,
 	}
 
-	// TODO(damemi): Make overwriting these labels (if they already exist) configurable
-	if len(instrumentationSource) > 0 {
-		entry.Labels["instrumentation_source"] = instrumentationSource
-	}
-	if len(instrumentationVersion) > 0 {
-		entry.Labels["instrumentation_version"] = instrumentationVersion
-	}
-
 	// if timestamp has not been explicitly initialized, default to current time
 	// TODO: figure out how to fall back to observed_time_unix_nano as recommended
 	//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
@@ -352,6 +344,20 @@ func (l logMapper) logToSplitEntries(
 		return []logging.Entry{entry}, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
 	}
 	entry.Severity = severityMapping[log.SeverityNumber()]
+
+	if entry.Labels == nil &&
+		(len(instrumentationSource) > 0 ||
+			len(instrumentationVersion) > 0) {
+		entry.Labels = make(map[string]string)
+	}
+
+	// TODO(damemi): Make overwriting these labels (if they already exist) configurable
+	if len(instrumentationSource) > 0 {
+		entry.Labels["instrumentation_source"] = instrumentationSource
+	}
+	if len(instrumentationVersion) > 0 {
+		entry.Labels["instrumentation_version"] = instrumentationVersion
+	}
 
 	// parse remaining OTel attributes to GCP labels
 	for k, v := range attrsMap {
