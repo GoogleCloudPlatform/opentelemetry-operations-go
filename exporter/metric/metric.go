@@ -35,7 +35,6 @@ import (
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"google.golang.org/api/option"
-	apioption "google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -129,7 +128,7 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 		return nil, errBlankProjectID
 	}
 
-	clientOpts := append([]apioption.ClientOption{option.WithUserAgent(userAgent)}, o.monitoringClientOptions...)
+	clientOpts := append([]option.ClientOption{option.WithUserAgent(userAgent)}, o.monitoringClientOptions...)
 	ctx := o.context
 	if ctx == nil {
 		ctx = context.Background()

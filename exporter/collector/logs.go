@@ -27,7 +27,6 @@ import (
 	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
-	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	logpb "google.golang.org/genproto/googleapis/logging/v2"
 	"google.golang.org/protobuf/proto"
 
@@ -239,7 +238,7 @@ func (l logMapper) logEntryToInternal(
 	entry logging.Entry,
 	logName string,
 	projectID string,
-	mr *monitoredrespb.MonitoredResource,
+	mr *monitoredres.MonitoredResource,
 	splits int,
 	splitIndex int,
 ) (*logpb.LogEntry, error) {
