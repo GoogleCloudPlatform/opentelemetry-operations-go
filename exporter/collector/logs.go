@@ -324,7 +324,7 @@ func (l logMapper) logToSplitEntries(
 
 	// parse TraceID and SpanID, if present
 	if !log.TraceID().IsEmpty() {
-		entry.Trace = log.TraceID().HexString()
+		entry.Trace = fmt.Sprintf("projects/%s/traces/%s", l.cfg.ProjectID, log.TraceID().HexString())
 	}
 	if !log.SpanID().IsEmpty() {
 		entry.SpanID = log.SpanID().HexString()
