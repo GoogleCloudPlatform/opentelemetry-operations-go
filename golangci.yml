@@ -122,6 +122,12 @@ linters:
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
   exclude-rules:
+    # integrationtests defines constants that are used by _test.go files which
+    # aren't detected as being used (for some reason)
+    - path: testcase.go
+      linters:
+        - unused
+      text: "secondProjectEnv"
     # Exclude some linters from running on tests files.
     - path: _test\.go
       linters:
