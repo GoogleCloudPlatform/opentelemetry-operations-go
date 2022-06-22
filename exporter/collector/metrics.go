@@ -1159,6 +1159,3 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 	}
 	return kind, typ
 }
-
-func (me *MetricsExporter) processItem(ts *monitoringpb.TimeSeries) {
-}
