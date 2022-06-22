@@ -15,6 +15,7 @@
 package collector
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -60,7 +61,7 @@ func TestLogMapping(t *testing.T) {
 	}{
 		{
 			name:         "split entry size",
-			maxEntrySize: 3 + 38, // 3 bytes for payload + 38 for overhead
+			maxEntrySize: 3 + 51, // 3 bytes for payload + 51 for overhead
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				log.Body().SetStringVal("abcxyz")
@@ -230,7 +231,7 @@ func TestLogMapping(t *testing.T) {
 			},
 			expectedEntries: []logging.Entry{
 				{
-					Trace:     testTraceID.HexString(),
+					Trace:     fmt.Sprintf("projects/fakeprojectid/traces/%s", testTraceID.HexString()),
 					SpanID:    testSpanID.HexString(),
 					Timestamp: testObservedTime,
 				},
@@ -283,7 +284,7 @@ func TestLogMapping(t *testing.T) {
 				"",
 				testObservedTime,
 				logName,
-				"",
+				"fakeprojectid",
 			)
 
 			if testCase.expectError {
