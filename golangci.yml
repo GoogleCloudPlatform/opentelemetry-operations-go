@@ -106,6 +106,9 @@ linters-settings:
     - metres
     - kilometre
     - kilometres
+  revive:
+    rules:
+      - name: duplicated-imports
 
 linters:
   disable-all: true
