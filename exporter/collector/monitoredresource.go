@@ -79,3 +79,5 @@ func (m *metricMapper) resourceToMetricLabels(
 	})
 	return attributesToLabels(attrs)
 }
+
+/// Fooooo bazz
