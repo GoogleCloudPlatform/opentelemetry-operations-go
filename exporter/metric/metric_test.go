@@ -24,7 +24,6 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
-	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	"go.opentelemetry.io/otel/sdk/metric/export"
 	"go.opentelemetry.io/otel/sdk/metric/export/aggregation"
@@ -94,7 +93,7 @@ func TestExportCounter(t *testing.T) {
 
 	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 
-	resOpt := basic.WithResource(
+	resOpt := controller.WithResource(
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
 			attribute.String("test_id", "abc123"),
@@ -130,7 +129,7 @@ func TestExportHistogram(t *testing.T) {
 
 	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 
-	resOpt := basic.WithResource(
+	resOpt := controller.WithResource(
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
 			attribute.String("test_id", "abc123"),
@@ -199,7 +198,7 @@ func TestRecordToMpb(t *testing.T) {
 
 	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
 
-	resOpt := basic.WithResource(
+	resOpt := controller.WithResource(
 		resource.NewWithAttributes(
 			semconv.SchemaURL,
 			attribute.String("test_id", "abc123"),
