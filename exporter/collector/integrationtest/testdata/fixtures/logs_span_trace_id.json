@@ -1,0 +1,274 @@
+{
+  "resourceLogs": [
+    {
+      "resource": {},
+      "scopeLogs": [
+        {
+          "scope": {},
+          "logRecords": [
+            {
+              "timeUnixNano": "1655923556339005014",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "body",
+                      "value": {
+                        "kvlistValue": {
+                          "values": [
+                            {
+                              "key": "time",
+                              "value": {
+                                "stringValue": "2022-06-22T16:13:19Z"
+                              }
+                            },
+                            {
+                              "key": "level",
+                              "value": {
+                                "stringValue": "info"
+                              }
+                            },
+                            {
+                              "key": "msg",
+                              "value": {
+                                "stringValue": "hello world 0"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "file.name",
+                  "value": {
+                    "stringValue": "apache.log"
+                  }
+                },
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "ad57e7b40d6f172d04f8a0e1b80cafe4",
+              "spanId": "d39ba683befbd246"
+            },
+            {
+              "timeUnixNano": "1655923556339179012",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "body",
+                      "value": {
+                        "kvlistValue": {
+                          "values": [
+                            {
+                              "key": "time",
+                              "value": {
+                                "stringValue": "2022-06-22T16:13:19Z"
+                              }
+                            },
+                            {
+                              "key": "level",
+                              "value": {
+                                "stringValue": "info"
+                              }
+                            },
+                            {
+                              "key": "msg",
+                              "value": {
+                                "stringValue": "hello world 1"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "file.name",
+                  "value": {
+                    "stringValue": "apache.log"
+                  }
+                },
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "ad57e7b40d6f172d04f8a0e1b80cafe4",
+              "spanId": "97c0f2f642dd1306"
+            },
+            {
+              "timeUnixNano": "1655923556339195932",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "body",
+                      "value": {
+                        "kvlistValue": {
+                          "values": [
+                            {
+                              "key": "level",
+                              "value": {
+                                "stringValue": "info"
+                              }
+                            },
+                            {
+                              "key": "msg",
+                              "value": {
+                                "stringValue": "hello world 2"
+                              }
+                            },
+                            {
+                              "key": "time",
+                              "value": {
+                                "stringValue": "2022-06-22T16:13:19Z"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "file.name",
+                  "value": {
+                    "stringValue": "apache.log"
+                  }
+                },
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "ad57e7b40d6f172d04f8a0e1b80cafe4",
+              "spanId": "fded437fb39abed9"
+            },
+            {
+              "timeUnixNano": "1655923556339234508",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "body",
+                      "value": {
+                        "kvlistValue": {
+                          "values": [
+                            {
+                              "key": "time",
+                              "value": {
+                                "stringValue": "2022-06-22T16:13:19Z"
+                              }
+                            },
+                            {
+                              "key": "level",
+                              "value": {
+                                "stringValue": "info"
+                              }
+                            },
+                            {
+                              "key": "msg",
+                              "value": {
+                                "stringValue": "hello world 3"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "file.name",
+                  "value": {
+                    "stringValue": "apache.log"
+                  }
+                },
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "ad57e7b40d6f172d04f8a0e1b80cafe4",
+              "spanId": "6acb5055846322e7"
+            },
+            {
+              "timeUnixNano": "1655923556339240397",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "body",
+                      "value": {
+                        "kvlistValue": {
+                          "values": [
+                            {
+                              "key": "time",
+                              "value": {
+                                "stringValue": "2022-06-22T16:13:19Z"
+                              }
+                            },
+                            {
+                              "key": "level",
+                              "value": {
+                                "stringValue": "info"
+                              }
+                            },
+                            {
+                              "key": "msg",
+                              "value": {
+                                "stringValue": "hello world 4"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "file.name",
+                  "value": {
+                    "stringValue": "apache.log"
+                  }
+                },
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "ad57e7b40d6f172d04f8a0e1b80cafe4",
+              "spanId": "d9ae3a7b26ef239f"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
