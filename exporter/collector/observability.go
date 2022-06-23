@@ -44,21 +44,6 @@ func MetricViews() []*view.View {
 	return []*view.View{viewPointCount}
 }
 
-func recordPointCount(ctx context.Context, success, dropped int, grpcErr error) {
-	if success > 0 {
-		recordPointCountDataPoint(ctx, success, "OK")
-	}
-
-	if dropped > 0 {
-		st := "UNKNOWN"
-		s, ok := status.FromError(grpcErr)
-		if ok {
-			st = statusCodeToString(s)
-		}
-		recordPointCountDataPoint(ctx, dropped, st)
-	}
-}
-
 func recordExemplarFailure(ctx context.Context, point int) {
 	stats.Record(ctx, exemplarAttachmentDropCount.M(int64(point)))
 }
