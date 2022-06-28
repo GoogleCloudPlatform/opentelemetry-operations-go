@@ -16,6 +16,7 @@ package integrationtest
 
 import (
 	"context"
+	"sort"
 	"testing"
 	"time"
 
@@ -58,6 +59,15 @@ func TestMetrics(t *testing.T) {
 				startTime,
 				endTime,
 			)
+			sort.Slice(expectFixture.CreateTimeSeriesRequests, func(i, j int) bool {
+				return expectFixture.CreateTimeSeriesRequests[i].Name < expectFixture.CreateTimeSeriesRequests[j].Name
+			})
+			sort.Slice(expectFixture.CreateMetricDescriptorRequests, func(i, j int) bool {
+				return expectFixture.CreateMetricDescriptorRequests[i].Name < expectFixture.CreateMetricDescriptorRequests[j].Name
+			})
+			sort.Slice(expectFixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
+				return expectFixture.CreateServiceTimeSeriesRequests[i].Name < expectFixture.CreateServiceTimeSeriesRequests[j].Name
+			})
 
 			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
 			require.NoError(t, err)
@@ -67,18 +77,36 @@ func TestMetrics(t *testing.T) {
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
 				SelfObservabilityMetrics:        selfObsMetrics,
 			}
+			sort.Slice(fixture.CreateTimeSeriesRequests, func(i, j int) bool {
+				return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
+			})
+			sort.Slice(fixture.CreateMetricDescriptorRequests, func(i, j int) bool {
+				return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
+			})
+			sort.Slice(fixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
+				return fixture.CreateServiceTimeSeriesRequests[i].Name < fixture.CreateServiceTimeSeriesRequests[j].Name
+			})
 			diff := DiffMetricProtos(
 				t,
 				fixture,
 				expectFixture,
 				func(i, j int) bool {
-					return fixture.CreateTimeSeriesRequests[i].Name > fixture.CreateTimeSeriesRequests[j].Name
+					return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
 				},
 				func(i, j int) bool {
 					return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
 				},
 				func(i, j int) bool {
 					return fixture.CreateServiceTimeSeriesRequests[i].Name < fixture.CreateServiceTimeSeriesRequests[j].Name
+				},
+				func(i, j int) bool {
+					return expectFixture.CreateTimeSeriesRequests[i].Name < expectFixture.CreateTimeSeriesRequests[j].Name
+				},
+				func(i, j int) bool {
+					return expectFixture.CreateMetricDescriptorRequests[i].Name < expectFixture.CreateMetricDescriptorRequests[j].Name
+				},
+				func(i, j int) bool {
+					return expectFixture.CreateServiceTimeSeriesRequests[i].Name < expectFixture.CreateServiceTimeSeriesRequests[j].Name
 				},
 			)
 			if diff != "" {
