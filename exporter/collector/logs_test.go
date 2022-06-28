@@ -219,6 +219,27 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log with traceSampled (bool)",
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().Insert(
+					TraceSampledAttributeKey,
+					pcommon.NewValueBool(true),
+				)
+				return log
+			},
+			expectedEntries: []logging.Entry{
+				{
+					TraceSampled: true,
+					Timestamp:    testObservedTime,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
 			name: "log with trace and span id",
 			mr: func() *monitoredres.MonitoredResource {
 				return nil

@@ -45,6 +45,7 @@ const (
 	HTTPRequestAttributeKey    = "gcp.http_request"
 	LogNameAttributeKey        = "gcp.log_name"
 	SourceLocationAttributeKey = "gcp.source_location"
+	TraceSampledAttributeKey   = "gcp.trace_sampled"
 )
 
 // severityMapping maps the integer severity level values from OTel [0-24]
@@ -319,6 +320,12 @@ func (l logMapper) logToSplitEntries(
 		}
 		entry.SourceLocation = &logEntrySourceLocation
 		delete(attrsMap, SourceLocationAttributeKey)
+	}
+
+	// parse TraceSampled boolean from OTel attribute
+	if traceSampled, ok := attrsMap[TraceSampledAttributeKey]; ok {
+		entry.TraceSampled = traceSampled.BoolVal()
+		delete(attrsMap, TraceSampledAttributeKey)
 	}
 
 	// parse TraceID and SpanID, if present
