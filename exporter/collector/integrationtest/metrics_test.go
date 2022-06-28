@@ -90,24 +90,6 @@ func TestMetrics(t *testing.T) {
 				t,
 				fixture,
 				expectFixture,
-				func(i, j int) bool {
-					return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
-				},
-				func(i, j int) bool {
-					return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
-				},
-				func(i, j int) bool {
-					return fixture.CreateServiceTimeSeriesRequests[i].Name < fixture.CreateServiceTimeSeriesRequests[j].Name
-				},
-				func(i, j int) bool {
-					return expectFixture.CreateTimeSeriesRequests[i].Name < expectFixture.CreateTimeSeriesRequests[j].Name
-				},
-				func(i, j int) bool {
-					return expectFixture.CreateMetricDescriptorRequests[i].Name < expectFixture.CreateMetricDescriptorRequests[j].Name
-				},
-				func(i, j int) bool {
-					return expectFixture.CreateServiceTimeSeriesRequests[i].Name < expectFixture.CreateServiceTimeSeriesRequests[j].Name
-				},
 			)
 			if diff != "" {
 				require.Fail(
