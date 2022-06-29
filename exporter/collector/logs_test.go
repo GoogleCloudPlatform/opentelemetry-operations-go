@@ -290,6 +290,24 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 			expectError:  true,
 		},
+		{
+			name: "log with severity text",
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("fatal3")
+				return log
+			},
+			expectedEntries: []logging.Entry{
+				{
+					Timestamp: testObservedTime,
+					Severity:  logging.Alert,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
 	}
 
 	for _, testCase := range testCases {
