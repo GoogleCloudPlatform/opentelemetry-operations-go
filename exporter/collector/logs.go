@@ -78,13 +78,13 @@ var severityMapping = []logging.Severity{
 	logging.Emergency, // 24 -> Emergency
 }
 
-// otelSeverityTexts maps the generic aliases of SeverityTexts to SeverityNumbers.
+// otelSeverityForText maps the generic aliases of SeverityTexts to SeverityNumbers.
 // This can be useful if SeverityText is manually set to one of the values from the data
 // model in a way that doesn't automatically parse the SeverityNumber as well
 // (see https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/issues/442)
 // Otherwise, this is the mapping that is automatically used by the Stanza log severity parser
 // (https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/pkg/stanza/operator/helper/severity_builder.go#L34-L57)
-var otelSeverityTexts = map[string]plog.SeverityNumber{
+var otelSeverityForText = map[string]plog.SeverityNumber{
 	"trace":  plog.SeverityNumberTRACE,
 	"trace2": plog.SeverityNumberTRACE2,
 	"trace3": plog.SeverityNumberTRACE3,
@@ -382,14 +382,18 @@ func (l logMapper) logToSplitEntries(
 	if log.SeverityNumber() < 0 || int(log.SeverityNumber()) > len(severityMapping)-1 {
 		return []logging.Entry{entry}, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
 	}
-	logSeverity := severityMapping[log.SeverityNumber()]
-	if severityNumber, ok := otelSeverityTexts[strings.ToLower(log.SeverityText())]; ok && log.SeverityNumber() == 0 {
-		// if the severity text is not "default" (or some other unknown) but the
-		// severity number is "0", then the text wasn't parsed.
-		// So if we have an appropriate mapping to a generic severity text, use that
-		logSeverity = severityMapping[severityNumber]
+	severityNumber := log.SeverityNumber()
+	// Log severity levels are based on numerical values defined by Otel/GCP, which are informally mapped to generic text values such as "ALERT", "DEBUG", etc.
+	// In some cases, a SeverityText value can be automatically mapped to a matching SeverityNumber.
+	// If not (for example, when directly setting the SeverityText on a Log entry with the Transform processor), then the
+	// SeverityText might be something like "ALERT" while the SeverityNumber is still "0".
+	// In this case, we will attempt to map the text ourselves to one of the defined Otel SeverityNumbers.
+	// We do this by checking that the SeverityText is NOT "default" (ie, it exists in our map) and that the SeverityNumber IS "0".
+	// (This also excludes other unknown/custom severity text values, which may have user-defined mappings in the collector)
+	if severityForText, ok := otelSeverityForText[strings.ToLower(log.SeverityText())]; ok && severityNumber == 0 {
+		severityNumber = severityForText
 	}
-	entry.Severity = logSeverity
+	entry.Severity = severityMapping[severityNumber]
 
 	if entry.Labels == nil &&
 		(len(instrumentationSource) > 0 ||
