@@ -18,3 +18,5 @@ See [README.md](https://github.com/GoogleCloudPlatform/opentelemetry-operations-
 
 [circleci-image]: https://circleci.com/gh/GoogleCloudPlatform/opentelemetry-operations-go.svg?style=shield 
 [circleci-url]: https://circleci.com/gh/GoogleCloudPlatform/opentelemetry-operations-go
+
+<!-- foo !>
