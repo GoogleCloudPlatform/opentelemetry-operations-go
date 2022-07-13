@@ -104,6 +104,9 @@ func generateClientOptions(ctx context.Context, cfg *ClientConfig, userAgent str
 		}
 		copts = append(copts, option.WithTokenSource(tokenSource))
 	}
+	if cfg.GRPCPoolSize > 0 {
+		copts = append(copts, option.WithGRPCConnectionPool(cfg.GRPCPoolSize))
+	}
 	if cfg.GetClientOptions != nil {
 		copts = append(copts, cfg.GetClientOptions()...)
 	}
