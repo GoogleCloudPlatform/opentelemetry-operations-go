@@ -52,7 +52,7 @@ type ClientConfig struct {
 	// Only has effect if Endpoint is not ""
 	UseInsecure bool `mapstructure:"use_insecure"`
 	// GRPCPoolSize sets the size of the connection pool in the GCP client
-	GRPCPoolSize int `mapstructure:"grpcPoolSize"`
+	GRPCPoolSize int `mapstructure:"grpc_pool_size"`
 }
 
 type TraceConfig struct {
