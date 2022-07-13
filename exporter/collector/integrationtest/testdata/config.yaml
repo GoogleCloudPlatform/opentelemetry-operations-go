@@ -12,11 +12,16 @@ exporters:
     trace:
       endpoint: test-trace-endpoint
       use_insecure: true
+      grpc_pool_size: 1
     metric:
       endpoint: test-metric-endpoint
       use_insecure: true
       prefix: prefix
       skip_create_descriptor: true
+      grpc_pool_size: 1
+    log:
+      default_log_name: foo-log
+      grpc_pool_size: 1
 
 service:
   pipelines:

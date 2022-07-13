@@ -51,14 +51,17 @@ type ClientConfig struct {
 	Endpoint string `mapstructure:"endpoint"`
 	// Only has effect if Endpoint is not ""
 	UseInsecure bool `mapstructure:"use_insecure"`
+	// GRPCPoolSize sets the size of the connection pool in the GCP client
+	GRPCPoolSize int `mapstructure:"grpc_pool_size"`
 }
 
 type TraceConfig struct {
-	ClientConfig ClientConfig `mapstructure:",squash"`
 	// AttributeMappings determines how to map from OpenTelemetry attribute
 	// keys to Google Cloud Trace keys.  By default, it changes http and
 	// service keys so that they appear more prominently in the UI.
 	AttributeMappings []AttributeMapping `mapstructure:"attribute_mappings"`
+
+	ClientConfig ClientConfig `mapstructure:",squash"`
 }
 
 // AttributeMapping maps from an OpenTelemetry key to a Google Cloud Trace key.
@@ -80,8 +83,7 @@ type MetricConfig struct {
 	// exporter. It allows overriding the function used to map otel resource to
 	// monitored resource.
 	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource
-	Prefix               string       `mapstructure:"prefix"`
-	ClientConfig         ClientConfig `mapstructure:",squash"`
+	Prefix               string `mapstructure:"prefix"`
 	// KnownDomains contains a list of prefixes. If a metric already has one
 	// of these prefixes, the prefix is not added.
 	KnownDomains []string `mapstructure:"known_domains"`
@@ -90,6 +92,7 @@ type MetricConfig struct {
 	// Defaults to empty, which won't include any additional resource labels. Note that the
 	// service_resource_labels option operates independently from resource_filters.
 	ResourceFilters []ResourceFilter `mapstructure:"resource_filters"`
+	ClientConfig    ClientConfig     `mapstructure:",squash"`
 	// CreateMetricDescriptorBufferSize is the buffer size for the channel
 	// which asynchronously calls CreateMetricDescriptor. Default is 10.
 	CreateMetricDescriptorBufferSize int  `mapstructure:"create_metric_descriptor_buffer_size"`

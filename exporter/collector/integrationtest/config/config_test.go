@@ -58,14 +58,16 @@ func TestLoadConfig(t *testing.T) {
 				UserAgent: "opentelemetry-collector-contrib {{version}}",
 				TraceConfig: collector.TraceConfig{
 					ClientConfig: collector.ClientConfig{
-						Endpoint:    "test-trace-endpoint",
-						UseInsecure: true,
+						Endpoint:     "test-trace-endpoint",
+						UseInsecure:  true,
+						GRPCPoolSize: 1,
 					},
 				},
 				MetricConfig: collector.MetricConfig{
 					ClientConfig: collector.ClientConfig{
-						Endpoint:    "test-metric-endpoint",
-						UseInsecure: true,
+						Endpoint:     "test-metric-endpoint",
+						UseInsecure:  true,
+						GRPCPoolSize: 1,
 					},
 					Prefix:                     "prefix",
 					SkipCreateMetricDescriptor: true,
@@ -76,6 +78,12 @@ func TestLoadConfig(t *testing.T) {
 					CreateMetricDescriptorBufferSize: 10,
 					ServiceResourceLabels:            true,
 					CumulativeNormalization:          true,
+				},
+				LogConfig: collector.LogConfig{
+					ClientConfig: collector.ClientConfig{
+						GRPCPoolSize: 1,
+					},
+					DefaultLogName: "foo-log",
 				},
 			},
 		})
