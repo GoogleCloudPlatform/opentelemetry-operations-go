@@ -194,4 +194,6 @@ var (
 		},
 		// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 	}
+
+	TracesTestCases = []TestCase{}
 )

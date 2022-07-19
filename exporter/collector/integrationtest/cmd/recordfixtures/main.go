@@ -52,7 +52,36 @@ func main() {
 
 	recordLogs(ctx, t, endTime)
 	recordMetrics(ctx, t, startTime, endTime)
+	recordTraces(ctx, t, startTime, endTime)
+}
 
+func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
+	testServer, err := integrationtest.NewTracesTestServer()
+	if err != nil {
+		panic(err)
+	}
+	go testServer.Serve()
+	defer testServer.Shutdown()
+
+	for _, test := range integrationtest.TracesTestCases {
+		if test.Skip {
+			continue
+		}
+
+		func() {
+			traces := test.LoadOTLPTracesInput(t, startTime, endTime)
+			testServerExporter := testServer.NewExporter(ctx, t, test.CreateTraceConfig())
+
+			require.NoError(t, testServerExporter.PushTraces(ctx, traces), "failed to export logs to local test server")
+			require.NoError(t, testServerExporter.Shutdown(ctx))
+
+			require.NoError(t, err)
+			fixture := &integrationtest.TraceExpectFixture{
+				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
+			}
+			test.SaveRecordedTraceFixtures(t, fixture)
+		}()
+	}
 }
 
 func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {

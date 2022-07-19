@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"go.opentelemetry.io/collector/pdata/ptrace"
 	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 
@@ -64,6 +65,93 @@ type TestCase struct {
 	Skip bool
 	// ExpectErr sets whether the test is expected to fail
 	ExpectErr bool
+}
+
+func (tc *TestCase) LoadOTLPTracesInput(
+	t testing.TB,
+	startTimestamp time.Time,
+	endTimestamp time.Time,
+) ptrace.Traces {
+	bytes, err := ioutil.ReadFile(tc.OTLPInputFixturePath)
+	require.NoError(t, err)
+	traces, err := ptrace.NewJSONUnmarshaler().UnmarshalTraces(bytes)
+	require.NoError(t, err)
+
+	for i := 0; i < traces.ResourceSpans().Len(); i++ {
+		rs := traces.ResourceSpans().At(i)
+		for j := 0; j < rs.ScopeSpans().Len(); j++ {
+			sss := rs.ScopeSpans().At(j)
+			for k := 0; k < sss.Spans().Len(); k++ {
+				span := sss.Spans().At(k)
+				if span.StartTimestamp() != 0 {
+					span.SetStartTimestamp(pcommon.NewTimestampFromTime(startTimestamp))
+				}
+				if span.EndTimestamp() != 0 {
+					span.SetEndTimestamp(pcommon.NewTimestampFromTime(endTimestamp))
+				}
+			}
+		}
+	}
+	return traces
+}
+
+func (tc *TestCase) LoadTraceExpectFixture(
+	t testing.TB,
+	startTimestamp time.Time,
+	endTimestamp time.Time,
+) *TraceExpectFixture {
+	bytes, err := ioutil.ReadFile(tc.ExpectFixturePath)
+	require.NoError(t, err)
+	fixture := &TraceExpectFixture{}
+	require.NoError(t, protojson.Unmarshal(bytes, fixture))
+
+	for _, request := range fixture.BatchWriteSpansRequest {
+		for _, span := range request.Spans {
+			span.StartTime = timestamppb.New(startTimestamp)
+			span.EndTime = timestamppb.New(endTimestamp)
+		}
+	}
+
+	return fixture
+}
+
+func (tc *TestCase) SaveRecordedTraceFixtures(
+	t testing.TB,
+	fixture *TraceExpectFixture,
+) {
+	normalizeTraceFixture(t, fixture)
+
+	jsonBytes, err := protojson.Marshal(fixture)
+	require.NoError(t, err)
+	formatted := bytes.Buffer{}
+	require.NoError(t, json.Indent(&formatted, jsonBytes, "", "  "))
+	formatted.WriteString("\n")
+	require.NoError(t, ioutil.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
+	t.Logf("Updated fixture %v", tc.ExpectFixturePath)
+}
+
+func normalizeTraceFixture(t testing.TB, fixture *TraceExpectFixture) {
+	for _, req := range fixture.BatchWriteSpansRequest {
+		for _, span := range req.Spans {
+			if span.GetStartTime() != nil {
+				span.StartTime = &timestamppb.Timestamp{}
+			}
+			if span.GetEndTime() != nil {
+				span.EndTime = &timestamppb.Timestamp{}
+			}
+		}
+	}
+}
+
+func (tc *TestCase) CreateTraceConfig() collector.Config {
+	cfg := collector.DefaultConfig()
+	cfg.ProjectID = "fake-project"
+
+	if tc.Configure != nil {
+		tc.Configure(&cfg)
+	}
+
+	return cfg
 }
 
 func (tc *TestCase) LoadOTLPLogsInput(
