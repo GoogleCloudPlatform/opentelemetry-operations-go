@@ -49,3 +49,13 @@ func DiffLogProtos(t testing.TB, x, y *LogExpectFixture) string {
 
 	return cmp.Diff(x, y, cmpOptions...)
 }
+
+// Diff uses cmp.Diff(), protocmp, and some custom options to compare two protobuf messages.
+func DiffTraceProtos(t testing.TB, x, y *TraceExpectFixture) string {
+	x = proto.Clone(x).(*TraceExpectFixture)
+	y = proto.Clone(y).(*TraceExpectFixture)
+	normalizeTraceFixture(t, x)
+	normalizeTraceFixture(t, y)
+
+	return cmp.Diff(x, y, cmpOptions...)
+}
