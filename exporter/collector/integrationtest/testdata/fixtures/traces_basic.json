@@ -1,0 +1,3627 @@
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2634978"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-server"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+            "version": "semver:0.33.0"
+          },
+          "spans": [
+            {
+              "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+              "spanId": "84f9e8929bb1cd5b",
+              "parentSpanId": "a514c25ace3f0a5a",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413463217165380",
+              "endTimeUnixNano": "1658413463225568609",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "32878"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "df6abba5b998b3046de7ecd2c23d7459",
+              "spanId": "dc1adbd8a2e1d6b6",
+              "parentSpanId": "ba144401a09fc5c5",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413464226928166",
+              "endTimeUnixNano": "1658413465261408366",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "32886"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "666cba42b1f5777a74e1cb81b3d221a2",
+              "spanId": "acf9b35cd028e694",
+              "parentSpanId": "03bfb23a0cb56fa3",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413466262728610",
+              "endTimeUnixNano": "1658413466270100456",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "32902"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "38bf17bbbfc0e07a54bc6329656e1930",
+              "spanId": "3fe400c29bfecd69",
+              "parentSpanId": "78229db3839d4cf8",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413467272143441",
+              "endTimeUnixNano": "1658413467292464937",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "32912"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2635405"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-client"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+            "version": "semver:0.33.0"
+          },
+          "spans": [
+            {
+              "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+              "spanId": "a514c25ace3f0a5a",
+              "parentSpanId": "df3970ec0d4c6163",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413463216491059",
+              "endTimeUnixNano": "1658413463225857539",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "df6abba5b998b3046de7ecd2c23d7459",
+              "spanId": "ba144401a09fc5c5",
+              "parentSpanId": "a8826159d61b39d7",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413464226225074",
+              "endTimeUnixNano": "1658413465261634046",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "666cba42b1f5777a74e1cb81b3d221a2",
+              "spanId": "03bfb23a0cb56fa3",
+              "parentSpanId": "1f1d2da13f72b58f",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413466262035321",
+              "endTimeUnixNano": "1658413466270318756",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "38bf17bbbfc0e07a54bc6329656e1930",
+              "spanId": "78229db3839d4cf8",
+              "parentSpanId": "cd32b09d82d743ce",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413467271471280",
+              "endTimeUnixNano": "1658413467292723269",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        },
+        {
+          "scope": {
+            "name": "demo-client-tracer"
+          },
+          "spans": [
+            {
+              "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+              "spanId": "df3970ec0d4c6163",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413463216468350",
+              "endTimeUnixNano": "1658413463225932517",
+              "status": {}
+            },
+            {
+              "traceId": "df6abba5b998b3046de7ecd2c23d7459",
+              "spanId": "a8826159d61b39d7",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413464226175158",
+              "endTimeUnixNano": "1658413465261670387",
+              "status": {}
+            },
+            {
+              "traceId": "666cba42b1f5777a74e1cb81b3d221a2",
+              "spanId": "1f1d2da13f72b58f",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413466261974203",
+              "endTimeUnixNano": "1658413466270418372",
+              "status": {}
+            },
+            {
+              "traceId": "38bf17bbbfc0e07a54bc6329656e1930",
+              "spanId": "cd32b09d82d743ce",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413467271410268",
+              "endTimeUnixNano": "1658413467292798095",
+              "status": {}
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2634978"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-server"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+            "version": "semver:0.33.0"
+          },
+          "spans": [
+            {
+              "traceId": "c2824081ecac96c496ff2ab9265b9590",
+              "spanId": "758080723210fa18",
+              "parentSpanId": "894c881be709e0e5",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413468293954707",
+              "endTimeUnixNano": "1658413468359352060",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "32924"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "7f014cc852bd0f881fa1cfd745d183b6",
+              "spanId": "55ac070a34ee08df",
+              "parentSpanId": "5a8bd3205d2e964d",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413469360993413",
+              "endTimeUnixNano": "1658413469524615611",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "32928"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "f28b0673f1147f72b0655b4960772a05",
+              "spanId": "0628d269872bb264",
+              "parentSpanId": "59dd652ebd1fb5b3",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413470525827839",
+              "endTimeUnixNano": "1658413471212869453",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "32942"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2635405"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-client"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+            "version": "semver:0.33.0"
+          },
+          "spans": [
+            {
+              "traceId": "c2824081ecac96c496ff2ab9265b9590",
+              "spanId": "894c881be709e0e5",
+              "parentSpanId": "847ab8fd2ebbc3a1",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413468293221343",
+              "endTimeUnixNano": "1658413468359589936",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "7f014cc852bd0f881fa1cfd745d183b6",
+              "spanId": "5a8bd3205d2e964d",
+              "parentSpanId": "f9b36c6bc9da2da4",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413469360430339",
+              "endTimeUnixNano": "1658413469524889310",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "f28b0673f1147f72b0655b4960772a05",
+              "spanId": "59dd652ebd1fb5b3",
+              "parentSpanId": "58d2299363617187",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413470525215286",
+              "endTimeUnixNano": "1658413471213087518",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "01807a8911d7cc2704124128b4d9741a",
+              "spanId": "83fc30eb9796c970",
+              "parentSpanId": "1783176e15b37558",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413472214074826",
+              "endTimeUnixNano": "1658413473129784936",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        },
+        {
+          "scope": {
+            "name": "demo-client-tracer"
+          },
+          "spans": [
+            {
+              "traceId": "c2824081ecac96c496ff2ab9265b9590",
+              "spanId": "847ab8fd2ebbc3a1",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413468293162902",
+              "endTimeUnixNano": "1658413468359675892",
+              "status": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2635405"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-client"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "demo-client-tracer"
+          },
+          "spans": [
+            {
+              "traceId": "7f014cc852bd0f881fa1cfd745d183b6",
+              "spanId": "f9b36c6bc9da2da4",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413469360378080",
+              "endTimeUnixNano": "1658413469524940688",
+              "status": {}
+            },
+            {
+              "traceId": "f28b0673f1147f72b0655b4960772a05",
+              "spanId": "58d2299363617187",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413470525169484",
+              "endTimeUnixNano": "1658413471213150034",
+              "status": {}
+            },
+            {
+              "traceId": "01807a8911d7cc2704124128b4d9741a",
+              "spanId": "1783176e15b37558",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413472214022383",
+              "endTimeUnixNano": "1658413473129828300",
+              "status": {}
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2634978"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-server"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+            "version": "semver:0.33.0"
+          },
+          "spans": [
+            {
+              "traceId": "01807a8911d7cc2704124128b4d9741a",
+              "spanId": "9185d4d7dcdbb952",
+              "parentSpanId": "83fc30eb9796c970",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413472215308192",
+              "endTimeUnixNano": "1658413473129496597",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "36490"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "72c124e7128a5966a11948f5b428d4b2",
+              "spanId": "852cda5d2f223761",
+              "parentSpanId": "91f8dce92b8f6aca",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413474130807407",
+              "endTimeUnixNano": "1658413474759788566",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "36504"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "99d3702eb8ee3afe55343118c72c6f2e",
+              "spanId": "fb42ddd09175efd5",
+              "parentSpanId": "6b5b9b1ff8f6098b",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413475762105500",
+              "endTimeUnixNano": "1658413475762165675",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "36514"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "76d1aded19713ed6b62f3b30668cccaa",
+              "spanId": "40d261a9a0b30f0c",
+              "parentSpanId": "07c4adc6011d03ec",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413476763726348",
+              "endTimeUnixNano": "1658413476766036366",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "36526"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "4c491db83a534f6a6720508f43466597",
+              "spanId": "6ca6a521f369e333",
+              "parentSpanId": "7abc7dcd79cdd49e",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413477768017948",
+              "endTimeUnixNano": "1658413477912426188",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "36540"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2635405"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-client"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+            "version": "semver:0.33.0"
+          },
+          "spans": [
+            {
+              "traceId": "72c124e7128a5966a11948f5b428d4b2",
+              "spanId": "91f8dce92b8f6aca",
+              "parentSpanId": "0abb33889a5bcb90",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413474130213758",
+              "endTimeUnixNano": "1658413474760070223",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "99d3702eb8ee3afe55343118c72c6f2e",
+              "spanId": "6b5b9b1ff8f6098b",
+              "parentSpanId": "756a674940de18db",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413475761359402",
+              "endTimeUnixNano": "1658413475762316838",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "76d1aded19713ed6b62f3b30668cccaa",
+              "spanId": "07c4adc6011d03ec",
+              "parentSpanId": "20474356a0aba2e6",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413476762741795",
+              "endTimeUnixNano": "1658413476766264455",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "4c491db83a534f6a6720508f43466597",
+              "spanId": "7abc7dcd79cdd49e",
+              "parentSpanId": "0544d62d996e2c48",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413477767442864",
+              "endTimeUnixNano": "1658413477912686765",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        },
+        {
+          "scope": {
+            "name": "demo-client-tracer"
+          },
+          "spans": [
+            {
+              "traceId": "72c124e7128a5966a11948f5b428d4b2",
+              "spanId": "0abb33889a5bcb90",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413474130151726",
+              "endTimeUnixNano": "1658413474760141133",
+              "status": {}
+            },
+            {
+              "traceId": "99d3702eb8ee3afe55343118c72c6f2e",
+              "spanId": "756a674940de18db",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413475761276560",
+              "endTimeUnixNano": "1658413475762351677",
+              "status": {}
+            },
+            {
+              "traceId": "76d1aded19713ed6b62f3b30668cccaa",
+              "spanId": "20474356a0aba2e6",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413476762694663",
+              "endTimeUnixNano": "1658413476766337916",
+              "status": {}
+            },
+            {
+              "traceId": "4c491db83a534f6a6720508f43466597",
+              "spanId": "0544d62d996e2c48",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413477767397840",
+              "endTimeUnixNano": "1658413477912738495",
+              "status": {}
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2634978"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-server"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+            "version": "semver:0.33.0"
+          },
+          "spans": [
+            {
+              "traceId": "e9f20b835c1c5b95e52b04051041f3a7",
+              "spanId": "ce78a156d9514e51",
+              "parentSpanId": "7a6adcee21f16ac9",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413478913761176",
+              "endTimeUnixNano": "1658413478936123105",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "36546"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "44f485ec45d674c5af7e8aa13cdc412c",
+              "spanId": "237a06b8b87878a4",
+              "parentSpanId": "9322648541febd9d",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413479938596529",
+              "endTimeUnixNano": "1658413479940928991",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "36560"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "1f513c3677589c252610a3b678fc72e5",
+              "spanId": "9f92f9278be79b4c",
+              "parentSpanId": "8e86d88cc4422ec3",
+              "name": "/hello",
+              "kind": "SPAN_KIND_SERVER",
+              "startTimeUnixNano": "1658413480942135588",
+              "endTimeUnixNano": "1658413482914366524",
+              "attributes": [
+                {
+                  "key": "net.transport",
+                  "value": {
+                    "stringValue": "ip_tcp"
+                  }
+                },
+                {
+                  "key": "net.peer.ip",
+                  "value": {
+                    "stringValue": "127.0.0.1"
+                  }
+                },
+                {
+                  "key": "net.peer.port",
+                  "value": {
+                    "intValue": "35198"
+                  }
+                },
+                {
+                  "key": "net.host.ip",
+                  "value": {
+                    "stringValue": "0.0.0.0"
+                  }
+                },
+                {
+                  "key": "net.host.port",
+                  "value": {
+                    "intValue": "7080"
+                  }
+                },
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.target",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.server_name",
+                  "value": {
+                    "stringValue": "/hello"
+                  }
+                },
+                {
+                  "key": "http.user_agent",
+                  "value": {
+                    "stringValue": "Go-http-client/1.1"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "server-attribute",
+                  "value": {
+                    "stringValue": "foo"
+                  }
+                },
+                {
+                  "key": "baggage key:method",
+                  "value": {
+                    "stringValue": "repl"
+                  }
+                },
+                {
+                  "key": "baggage key:client",
+                  "value": {
+                    "stringValue": "cli"
+                  }
+                },
+                {
+                  "key": "http.wrote_bytes",
+                  "value": {
+                    "intValue": "11"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+    },
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2635405"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-client"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+            "version": "semver:0.33.0"
+          },
+          "spans": [
+            {
+              "traceId": "e9f20b835c1c5b95e52b04051041f3a7",
+              "spanId": "7a6adcee21f16ac9",
+              "parentSpanId": "b5422aae8b757330",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413478912972581",
+              "endTimeUnixNano": "1658413478936362704",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+{
+  "resourceSpans": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "foo.bar.host"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "./main"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "main"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "mikedame"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "2635405"
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo-client"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "telemetry.sdk.name",
+            "value": {
+              "stringValue": "opentelemetry"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "1.8.0"
+            }
+          }
+        ]
+      },
+      "scopeSpans": [
+        {
+          "scope": {
+            "name": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp",
+            "version": "semver:0.33.0"
+          },
+          "spans": [
+            {
+              "traceId": "44f485ec45d674c5af7e8aa13cdc412c",
+              "spanId": "9322648541febd9d",
+              "parentSpanId": "54fbb81b8855eaa4",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413479937728471",
+              "endTimeUnixNano": "1658413479941110617",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            },
+            {
+              "traceId": "1f513c3677589c252610a3b678fc72e5",
+              "spanId": "8e86d88cc4422ec3",
+              "parentSpanId": "5718984a91459758",
+              "name": "HTTP GET",
+              "kind": "SPAN_KIND_CLIENT",
+              "startTimeUnixNano": "1658413480941545910",
+              "endTimeUnixNano": "1658413482914590690",
+              "attributes": [
+                {
+                  "key": "http.method",
+                  "value": {
+                    "stringValue": "GET"
+                  }
+                },
+                {
+                  "key": "http.url",
+                  "value": {
+                    "stringValue": "http://0.0.0.0:7080/hello"
+                  }
+                },
+                {
+                  "key": "http.scheme",
+                  "value": {
+                    "stringValue": "http"
+                  }
+                },
+                {
+                  "key": "http.host",
+                  "value": {
+                    "stringValue": "0.0.0.0:7080"
+                  }
+                },
+                {
+                  "key": "http.flavor",
+                  "value": {
+                    "stringValue": "1.1"
+                  }
+                },
+                {
+                  "key": "http.status_code",
+                  "value": {
+                    "intValue": "200"
+                  }
+                }
+              ],
+              "status": {}
+            }
+          ]
+        },
+        {
+          "scope": {
+            "name": "demo-client-tracer"
+          },
+          "spans": [
+            {
+              "traceId": "e9f20b835c1c5b95e52b04051041f3a7",
+              "spanId": "b5422aae8b757330",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413478912926158",
+              "endTimeUnixNano": "1658413478936423907",
+              "status": {}
+            },
+            {
+              "traceId": "44f485ec45d674c5af7e8aa13cdc412c",
+              "spanId": "54fbb81b8855eaa4",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413479937681934",
+              "endTimeUnixNano": "1658413479941183557",
+              "status": {}
+            },
+            {
+              "traceId": "1f513c3677589c252610a3b678fc72e5",
+              "spanId": "5718984a91459758",
+              "parentSpanId": "",
+              "name": "ExecuteRequest",
+              "kind": "SPAN_KIND_INTERNAL",
+              "startTimeUnixNano": "1658413480941481313",
+              "endTimeUnixNano": "1658413482914691399",
+              "status": {}
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.10.0"
+    }
+  ]
+}
