@@ -20,11 +20,12 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/stretchr/testify/require"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 type TracesTestServer struct {
