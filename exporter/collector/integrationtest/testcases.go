@@ -195,5 +195,11 @@ var (
 		// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 	}
 
-	TracesTestCases = []TestCase{}
+	TracesTestCases = []TestCase{
+		{
+			Name:                 "Basic traces",
+			OTLPInputFixturePath: "testdata/fixtures/traces_basic.json",
+			ExpectFixturePath:    "testdata/fixtures/traces_basic_expected.json",
+		},
+	}
 )
