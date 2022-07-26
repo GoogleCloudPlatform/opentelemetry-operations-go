@@ -1,7 +1,7 @@
 {
   "createTimeSeriesRequests": [
     {
-      "name": "projects/fake-other-project",
+      "name": "projects/fakeprojectid",
       "timeSeries": [
         {
           "metric": {
@@ -352,7 +352,7 @@
       ]
     },
     {
-      "name": "projects/fakeprojectid",
+      "name": "projects/fake-other-project",
       "timeSeries": [
         {
           "metric": {
