@@ -360,6 +360,15 @@ func normalizeMetricFixture(t testing.TB, fixture *MetricExpectFixture) {
 	normalizeTimeSeriesReqs(t, fixture.CreateServiceTimeSeriesRequests...)
 	normalizeMetricDescriptorReqs(t, fixture.CreateMetricDescriptorRequests...)
 	normalizeSelfObs(t, fixture.SelfObservabilityMetrics)
+	sort.Slice(fixture.CreateTimeSeriesRequests, func(i, j int) bool {
+		return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
+	})
+	sort.Slice(fixture.CreateMetricDescriptorRequests, func(i, j int) bool {
+		return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
+	})
+	sort.Slice(fixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
+		return fixture.CreateServiceTimeSeriesRequests[i].Name < fixture.CreateServiceTimeSeriesRequests[j].Name
+	})
 }
 
 func normalizeTimeSeriesReqs(t testing.TB, reqs ...*monitoringpb.CreateTimeSeriesRequest) {

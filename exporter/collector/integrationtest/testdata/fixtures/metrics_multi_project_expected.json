@@ -705,7 +705,7 @@
   ],
   "createMetricDescriptorRequests": [
     {
-      "name": "projects/fakeprojectid",
+      "name": "projects/fake-other-project",
       "metricDescriptor": {
         "name": "scrape_series_added",
         "type": "workload.googleapis.com/scrape_series_added",
@@ -724,88 +724,10 @@
       }
     },
     {
-      "name": "projects/fakeprojectid",
+      "name": "projects/fake-other-project",
       "metricDescriptor": {
-        "name": "ex_com_one",
-        "type": "workload.googleapis.com/ex_com_one",
-        "labels": [
-          {
-            "key": "A"
-          },
-          {
-            "key": "B"
-          },
-          {
-            "key": "C"
-          },
-          {
-            "key": "ex_com_lemons"
-          },
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          },
-          {
-            "key": "telemetry_sdk_language"
-          },
-          {
-            "key": "telemetry_sdk_name"
-          },
-          {
-            "key": "telemetry_sdk_version"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "displayName": "ex_com_one"
-      }
-    },
-    {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
-        "name": "ex_com_two",
-        "type": "workload.googleapis.com/ex_com_two",
-        "labels": [
-          {
-            "key": "A"
-          },
-          {
-            "key": "B"
-          },
-          {
-            "key": "C"
-          },
-          {
-            "key": "ex_com_lemons"
-          },
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          },
-          {
-            "key": "telemetry_sdk_language"
-          },
-          {
-            "key": "telemetry_sdk_name"
-          },
-          {
-            "key": "telemetry_sdk_version"
-          }
-        ],
-        "metricKind": "CUMULATIVE",
-        "valueType": "DISTRIBUTION",
-        "displayName": "ex_com_two"
-      }
-    },
-    {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
-        "name": "up",
-        "type": "workload.googleapis.com/up",
+        "name": "scrape_samples_scraped",
+        "type": "workload.googleapis.com/scrape_samples_scraped",
         "labels": [
           {
             "key": "service_instance_id"
@@ -816,12 +738,12 @@
         ],
         "metricKind": "GAUGE",
         "valueType": "DOUBLE",
-        "description": "The scraping was successful",
-        "displayName": "up"
+        "description": "The number of samples the target exposed",
+        "displayName": "scrape_samples_scraped"
       }
     },
     {
-      "name": "projects/fakeprojectid",
+      "name": "projects/fake-other-project",
       "metricDescriptor": {
         "name": "scrape_duration_seconds",
         "type": "workload.googleapis.com/scrape_duration_seconds",
@@ -841,48 +763,10 @@
       }
     },
     {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
-        "name": "scrape_samples_scraped",
-        "type": "workload.googleapis.com/scrape_samples_scraped",
-        "labels": [
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The number of samples the target exposed",
-        "displayName": "scrape_samples_scraped"
-      }
-    },
-    {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
-        "name": "scrape_samples_post_metric_relabeling",
-        "type": "workload.googleapis.com/scrape_samples_post_metric_relabeling",
-        "labels": [
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The number of samples remaining after metric relabeling was applied",
-        "displayName": "scrape_samples_post_metric_relabeling"
-      }
-    },
-    {
       "name": "projects/fake-other-project",
       "metricDescriptor": {
-        "name": "scrape_series_added",
-        "type": "workload.googleapis.com/scrape_series_added",
+        "name": "up",
+        "type": "workload.googleapis.com/up",
         "labels": [
           {
             "key": "service_instance_id"
@@ -893,47 +777,8 @@
         ],
         "metricKind": "GAUGE",
         "valueType": "DOUBLE",
-        "description": "The approximate number of new series in this scrape",
-        "displayName": "scrape_series_added"
-      }
-    },
-    {
-      "name": "projects/fake-other-project",
-      "metricDescriptor": {
-        "name": "ex_com_one",
-        "type": "workload.googleapis.com/ex_com_one",
-        "labels": [
-          {
-            "key": "A"
-          },
-          {
-            "key": "B"
-          },
-          {
-            "key": "C"
-          },
-          {
-            "key": "ex_com_lemons"
-          },
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          },
-          {
-            "key": "telemetry_sdk_language"
-          },
-          {
-            "key": "telemetry_sdk_name"
-          },
-          {
-            "key": "telemetry_sdk_version"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "displayName": "ex_com_one"
+        "description": "The scraping was successful",
+        "displayName": "up"
       }
     },
     {
@@ -978,59 +823,40 @@
     {
       "name": "projects/fake-other-project",
       "metricDescriptor": {
-        "name": "up",
-        "type": "workload.googleapis.com/up",
+        "name": "ex_com_one",
+        "type": "workload.googleapis.com/ex_com_one",
         "labels": [
+          {
+            "key": "A"
+          },
+          {
+            "key": "B"
+          },
+          {
+            "key": "C"
+          },
+          {
+            "key": "ex_com_lemons"
+          },
           {
             "key": "service_instance_id"
           },
           {
             "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The scraping was successful",
-        "displayName": "up"
-      }
-    },
-    {
-      "name": "projects/fake-other-project",
-      "metricDescriptor": {
-        "name": "scrape_duration_seconds",
-        "type": "workload.googleapis.com/scrape_duration_seconds",
-        "labels": [
-          {
-            "key": "service_instance_id"
           },
           {
-            "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "seconds",
-        "description": "Duration of the scrape",
-        "displayName": "scrape_duration_seconds"
-      }
-    },
-    {
-      "name": "projects/fake-other-project",
-      "metricDescriptor": {
-        "name": "scrape_samples_scraped",
-        "type": "workload.googleapis.com/scrape_samples_scraped",
-        "labels": [
-          {
-            "key": "service_instance_id"
+            "key": "telemetry_sdk_language"
           },
           {
-            "key": "service_name"
+            "key": "telemetry_sdk_name"
+          },
+          {
+            "key": "telemetry_sdk_version"
           }
         ],
         "metricKind": "GAUGE",
         "valueType": "DOUBLE",
-        "description": "The number of samples the target exposed",
-        "displayName": "scrape_samples_scraped"
+        "displayName": "ex_com_one"
       }
     },
     {
@@ -1050,6 +876,180 @@
         "valueType": "DOUBLE",
         "description": "The number of samples remaining after metric relabeling was applied",
         "displayName": "scrape_samples_post_metric_relabeling"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "scrape_samples_post_metric_relabeling",
+        "type": "workload.googleapis.com/scrape_samples_post_metric_relabeling",
+        "labels": [
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "description": "The number of samples remaining after metric relabeling was applied",
+        "displayName": "scrape_samples_post_metric_relabeling"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "scrape_samples_scraped",
+        "type": "workload.googleapis.com/scrape_samples_scraped",
+        "labels": [
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "description": "The number of samples the target exposed",
+        "displayName": "scrape_samples_scraped"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "scrape_duration_seconds",
+        "type": "workload.googleapis.com/scrape_duration_seconds",
+        "labels": [
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "unit": "seconds",
+        "description": "Duration of the scrape",
+        "displayName": "scrape_duration_seconds"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "up",
+        "type": "workload.googleapis.com/up",
+        "labels": [
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "description": "The scraping was successful",
+        "displayName": "up"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "ex_com_two",
+        "type": "workload.googleapis.com/ex_com_two",
+        "labels": [
+          {
+            "key": "A"
+          },
+          {
+            "key": "B"
+          },
+          {
+            "key": "C"
+          },
+          {
+            "key": "ex_com_lemons"
+          },
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          },
+          {
+            "key": "telemetry_sdk_language"
+          },
+          {
+            "key": "telemetry_sdk_name"
+          },
+          {
+            "key": "telemetry_sdk_version"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DISTRIBUTION",
+        "displayName": "ex_com_two"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "ex_com_one",
+        "type": "workload.googleapis.com/ex_com_one",
+        "labels": [
+          {
+            "key": "A"
+          },
+          {
+            "key": "B"
+          },
+          {
+            "key": "C"
+          },
+          {
+            "key": "ex_com_lemons"
+          },
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          },
+          {
+            "key": "telemetry_sdk_language"
+          },
+          {
+            "key": "telemetry_sdk_name"
+          },
+          {
+            "key": "telemetry_sdk_version"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "displayName": "ex_com_one"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "scrape_series_added",
+        "type": "workload.googleapis.com/scrape_series_added",
+        "labels": [
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "description": "The approximate number of new series in this scrape",
+        "displayName": "scrape_series_added"
       }
     }
   ],

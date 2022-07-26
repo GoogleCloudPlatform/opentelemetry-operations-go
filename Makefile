@@ -66,7 +66,7 @@ $(TOOLS_DIR)/protoc: $(TOOLS_DIR)/protoc-gen-go
 	cp bin/protoc $(TOOLS_DIR)/ ; \
 	rm -rf $$tmpdir
 
-precommit: generate build lint test
+precommit: generate build lint test fixtures
 
 .PHONY: test-with-coverage
 test-with-coverage:
@@ -209,3 +209,8 @@ prepare-release:
 .PHONY: release
 release: prepare-release check-clean-work-tree
 	go run tools/release.go tag
+
+.PHONY: fixtures
+fixtures:
+	cd ./exporter/collector/integrationtest && \
+	go run cmd/recordfixtures/main.go
