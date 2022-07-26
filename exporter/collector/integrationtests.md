@@ -92,6 +92,11 @@ To add a new test:
     cd integrationtest
     go run cmd/recordfixtures/main.go
     ```
+    
+    or from the repo root:
+    ```sh
+    make fixtures
+    ```
 
     The generated file is a JSON encoded
     [`MetricExpectFixture`](integrationtest/fixtures.proto#L21) protobuf message.
