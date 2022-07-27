@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +28,7 @@ func TestTraces(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range TracesTestCases {
+	for _, test := range testcases.TracesTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {

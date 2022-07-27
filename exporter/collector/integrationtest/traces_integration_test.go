@@ -24,13 +24,14 @@ import (
 	"time"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 	"github.com/stretchr/testify/require"
 )
 
 func createTracesExporter(
 	ctx context.Context,
 	t *testing.T,
-	test *TestCase,
+	test *testcases.TestCase,
 ) *collector.TraceExporter {
 	cfg := test.CreateTraceConfig()
 	cfg.ProjectID = os.Getenv("PROJECT_ID")
@@ -50,7 +51,7 @@ func TestIntegrationTraces(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range TracesTestCases {
+	for _, test := range testcases.TracesTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {

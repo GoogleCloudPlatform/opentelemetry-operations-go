@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 	"github.com/stretchr/testify/require"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
@@ -63,7 +64,7 @@ func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.T
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
-	for _, test := range integrationtest.TracesTestCases {
+	for _, test := range testcases.TracesTestCases {
 		if test.Skip {
 			continue
 		}
@@ -92,7 +93,7 @@ func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
-	for _, test := range integrationtest.LogsTestCases {
+	for _, test := range testcases.LogsTestCases {
 		if test.Skip {
 			continue
 		}
@@ -120,7 +121,7 @@ func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
-	for _, test := range integrationtest.MetricsTestCases {
+	for _, test := range testcases.MetricsTestCases {
 		if test.Skip {
 			continue
 		}

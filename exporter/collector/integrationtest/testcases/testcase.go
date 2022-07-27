@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package integrationtest
+package testcases
 
 import (
 	"bytes"
@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -99,10 +100,10 @@ func (tc *TestCase) LoadTraceExpectFixture(
 	t testing.TB,
 	startTimestamp time.Time,
 	endTimestamp time.Time,
-) *TraceExpectFixture {
+) *integrationtest.TraceExpectFixture {
 	bytes, err := ioutil.ReadFile(tc.ExpectFixturePath)
 	require.NoError(t, err)
-	fixture := &TraceExpectFixture{}
+	fixture := &integrationtest.TraceExpectFixture{}
 	require.NoError(t, protojson.Unmarshal(bytes, fixture))
 
 	for _, request := range fixture.BatchWriteSpansRequest {
@@ -117,7 +118,7 @@ func (tc *TestCase) LoadTraceExpectFixture(
 
 func (tc *TestCase) SaveRecordedTraceFixtures(
 	t testing.TB,
-	fixture *TraceExpectFixture,
+	fixture *integrationtest.TraceExpectFixture,
 ) {
 	normalizeTraceFixture(t, fixture)
 
@@ -130,7 +131,7 @@ func (tc *TestCase) SaveRecordedTraceFixtures(
 	t.Logf("Updated fixture %v", tc.ExpectFixturePath)
 }
 
-func normalizeTraceFixture(t testing.TB, fixture *TraceExpectFixture) {
+func normalizeTraceFixture(t testing.TB, fixture *integrationtest.TraceExpectFixture) {
 	for _, req := range fixture.BatchWriteSpansRequest {
 		for _, span := range req.Spans {
 			if span.GetStartTime() != nil {
@@ -192,10 +193,10 @@ func (tc *TestCase) CreateLogConfig() collector.Config {
 func (tc *TestCase) LoadLogExpectFixture(
 	t testing.TB,
 	timestamp time.Time,
-) *LogExpectFixture {
+) *integrationtest.LogExpectFixture {
 	bytes, err := ioutil.ReadFile(tc.ExpectFixturePath)
 	require.NoError(t, err)
-	fixture := &LogExpectFixture{}
+	fixture := &integrationtest.LogExpectFixture{}
 	require.NoError(t, protojson.Unmarshal(bytes, fixture))
 
 	for _, request := range fixture.WriteLogEntriesRequests {
@@ -209,7 +210,7 @@ func (tc *TestCase) LoadLogExpectFixture(
 
 func (tc *TestCase) SaveRecordedLogFixtures(
 	t testing.TB,
-	fixture *LogExpectFixture,
+	fixture *integrationtest.LogExpectFixture,
 ) {
 	normalizeLogFixture(t, fixture)
 
@@ -224,7 +225,7 @@ func (tc *TestCase) SaveRecordedLogFixtures(
 
 // Normalizes timestamps which create noise in the fixture because they can
 // vary each test run
-func normalizeLogFixture(t testing.TB, fixture *LogExpectFixture) {
+func normalizeLogFixture(t testing.TB, fixture *integrationtest.LogExpectFixture) {
 	for _, req := range fixture.WriteLogEntriesRequests {
 		for _, entry := range req.Entries {
 			// Normalize timestamps if they are set
@@ -303,10 +304,10 @@ func (tc *TestCase) LoadMetricExpectFixture(
 	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
-) *MetricExpectFixture {
+) *integrationtest.MetricExpectFixture {
 	bytes, err := ioutil.ReadFile(tc.ExpectFixturePath)
 	require.NoError(t, err)
-	fixture := &MetricExpectFixture{}
+	fixture := &integrationtest.MetricExpectFixture{}
 	require.NoError(t, protojson.Unmarshal(bytes, fixture))
 	tc.updateMetricExpectFixture(t, startTime, endTime, fixture)
 
@@ -317,7 +318,7 @@ func (tc *TestCase) updateMetricExpectFixture(
 	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
-	fixture *MetricExpectFixture,
+	fixture *integrationtest.MetricExpectFixture,
 ) {
 	reqs := append(
 		fixture.GetCreateTimeSeriesRequests(),
@@ -340,7 +341,7 @@ func (tc *TestCase) updateMetricExpectFixture(
 
 func (tc *TestCase) SaveRecordedMetricFixtures(
 	t testing.TB,
-	fixture *MetricExpectFixture,
+	fixture *integrationtest.MetricExpectFixture,
 ) {
 	normalizeMetricFixture(t, fixture)
 
@@ -355,7 +356,7 @@ func (tc *TestCase) SaveRecordedMetricFixtures(
 
 // Normalizes timestamps which create noise in the fixture because they can
 // vary each test run
-func normalizeMetricFixture(t testing.TB, fixture *MetricExpectFixture) {
+func normalizeMetricFixture(t testing.TB, fixture *integrationtest.MetricExpectFixture) {
 	normalizeTimeSeriesReqs(t, fixture.CreateTimeSeriesRequests...)
 	normalizeTimeSeriesReqs(t, fixture.CreateServiceTimeSeriesRequests...)
 	normalizeMetricDescriptorReqs(t, fixture.CreateMetricDescriptorRequests...)
@@ -402,7 +403,7 @@ func normalizeMetricDescriptorReqs(t testing.TB, reqs ...*monitoringpb.CreateMet
 	}
 }
 
-func normalizeSelfObs(t testing.TB, selfObs *SelfObservabilityMetric) {
+func normalizeSelfObs(t testing.TB, selfObs *integrationtest.SelfObservabilityMetric) {
 	for _, req := range selfObs.CreateTimeSeriesRequests {
 		normalizeTimeSeriesReqs(t, req)
 		tss := req.TimeSeries
@@ -450,7 +451,7 @@ func normalizeSelfObs(t testing.TB, selfObs *SelfObservabilityMetric) {
 
 func (tc *TestCase) SkipIfNeeded(t testing.TB) {
 	if tc.Skip {
-		t.Skip("Test case is marked to skip in internal/integrationtest/testcases.go")
+		t.Skip("Test case is marked to skip")
 	}
 }
 

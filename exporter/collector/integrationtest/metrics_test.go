@@ -20,6 +20,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +29,7 @@ func TestMetrics(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range MetricsTestCases {
+	for _, test := range testcases.MetricsTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {

@@ -23,6 +23,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -35,7 +36,7 @@ import (
 func createMetricsExporter(
 	ctx context.Context,
 	t *testing.T,
-	test *TestCase,
+	test *testcases.TestCase,
 ) *collector.MetricsExporter {
 	logger, _ := zap.NewProduction()
 	cfg := test.CreateMetricConfig()
@@ -58,7 +59,7 @@ func TestIntegrationMetrics(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range MetricsTestCases {
+	for _, test := range testcases.MetricsTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
@@ -82,7 +83,7 @@ func TestIntegrationMetrics(t *testing.T) {
 // the integration test send those metrics with a gcp.project.id attribute to
 // the specified second project.
 func setSecondProjectInMetrics(t *testing.T, metrics pmetric.Metrics) {
-	secondProject := os.Getenv(secondProjectEnv)
+	secondProject := os.Getenv(testcases.secondProjectEnv)
 	require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
 	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
 		metrics.ResourceMetrics().At(i).Resource().Attributes().Update(

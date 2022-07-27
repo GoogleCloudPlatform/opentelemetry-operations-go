@@ -17,6 +17,7 @@ package integrationtest
 import (
 	"testing"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/protobuf/proto"
@@ -34,8 +35,8 @@ var (
 func DiffMetricProtos(t testing.TB, x, y *MetricExpectFixture) string {
 	x = proto.Clone(x).(*MetricExpectFixture)
 	y = proto.Clone(y).(*MetricExpectFixture)
-	normalizeMetricFixture(t, x)
-	normalizeMetricFixture(t, y)
+	testcases.normalizeMetricFixture(t, x)
+	testcases.normalizeMetricFixture(t, y)
 
 	return cmp.Diff(x, y, cmpOptions...)
 }
@@ -44,8 +45,8 @@ func DiffMetricProtos(t testing.TB, x, y *MetricExpectFixture) string {
 func DiffLogProtos(t testing.TB, x, y *LogExpectFixture) string {
 	x = proto.Clone(x).(*LogExpectFixture)
 	y = proto.Clone(y).(*LogExpectFixture)
-	normalizeLogFixture(t, x)
-	normalizeLogFixture(t, y)
+	testcases.normalizeLogFixture(t, x)
+	testcases.normalizeLogFixture(t, y)
 
 	return cmp.Diff(x, y, cmpOptions...)
 }
@@ -54,8 +55,8 @@ func DiffLogProtos(t testing.TB, x, y *LogExpectFixture) string {
 func DiffTraceProtos(t testing.TB, x, y *TraceExpectFixture) string {
 	x = proto.Clone(x).(*TraceExpectFixture)
 	y = proto.Clone(y).(*TraceExpectFixture)
-	normalizeTraceFixture(t, x)
-	normalizeTraceFixture(t, y)
+	testcases.normalizeTraceFixture(t, x)
+	testcases.normalizeTraceFixture(t, y)
 
 	return cmp.Diff(x, y, cmpOptions...)
 }
