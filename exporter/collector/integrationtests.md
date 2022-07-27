@@ -63,7 +63,7 @@ To add a new test:
     [`ExportMetricsServiceRequest`](https://github.com/open-telemetry/opentelemetry-proto/blob/b43e9b18b76abf3ee040164b55b9c355217151f3/opentelemetry/proto/collector/metrics/v1/metrics_service.proto#L35)
     message. Put the fixture in the [`testdata/fixtures`](integrationtest/testdata/fixtures) directory. As an example,
     see
-    [`testdata/fixtures/basic_counter_metrics.json`](integrationtest/testdata/fixtures/basic_counter_metrics.json).
+    [`testdata/fixtures/basic_counter_metrics.json`](integrationtest/testdata/fixtures/metrics/basic_counter_metrics.json).
 
     One easy way to generate these fixtures is by using the collector's `file` exporter in a
     collector pipeline to dump OTLP. For example, update the collector config to:
