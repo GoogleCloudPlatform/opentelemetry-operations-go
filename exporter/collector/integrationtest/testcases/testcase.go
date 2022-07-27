@@ -23,10 +23,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"

@@ -19,13 +19,14 @@ import (
 	"time"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"go.opencensus.io/metric/metricexport"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
