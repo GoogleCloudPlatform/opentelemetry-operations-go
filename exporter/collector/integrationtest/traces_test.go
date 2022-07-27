@@ -20,6 +20,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 )
 
 func TestTraces(t *testing.T) {
@@ -27,7 +30,7 @@ func TestTraces(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range TracesTestCases {
+	for _, test := range testcases.TracesTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
@@ -54,7 +57,7 @@ func TestTraces(t *testing.T) {
 				endTime,
 			)
 
-			fixture := &TraceExpectFixture{
+			fixture := &protos.TraceExpectFixture{
 				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
 			}
 

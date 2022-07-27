@@ -21,6 +21,9 @@ import (
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/testing/protocmp"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 )
 
 var (
@@ -31,31 +34,31 @@ var (
 )
 
 // Diff uses cmp.Diff(), protocmp, and some custom options to compare two protobuf messages.
-func DiffMetricProtos(t testing.TB, x, y *MetricExpectFixture) string {
-	x = proto.Clone(x).(*MetricExpectFixture)
-	y = proto.Clone(y).(*MetricExpectFixture)
-	normalizeMetricFixture(t, x)
-	normalizeMetricFixture(t, y)
+func DiffMetricProtos(t testing.TB, x, y *protos.MetricExpectFixture) string {
+	x = proto.Clone(x).(*protos.MetricExpectFixture)
+	y = proto.Clone(y).(*protos.MetricExpectFixture)
+	testcases.NormalizeMetricFixture(t, x)
+	testcases.NormalizeMetricFixture(t, y)
 
 	return cmp.Diff(x, y, cmpOptions...)
 }
 
 // Diff uses cmp.Diff(), protocmp, and some custom options to compare two protobuf messages.
-func DiffLogProtos(t testing.TB, x, y *LogExpectFixture) string {
-	x = proto.Clone(x).(*LogExpectFixture)
-	y = proto.Clone(y).(*LogExpectFixture)
-	normalizeLogFixture(t, x)
-	normalizeLogFixture(t, y)
+func DiffLogProtos(t testing.TB, x, y *protos.LogExpectFixture) string {
+	x = proto.Clone(x).(*protos.LogExpectFixture)
+	y = proto.Clone(y).(*protos.LogExpectFixture)
+	testcases.NormalizeLogFixture(t, x)
+	testcases.NormalizeLogFixture(t, y)
 
 	return cmp.Diff(x, y, cmpOptions...)
 }
 
 // Diff uses cmp.Diff(), protocmp, and some custom options to compare two protobuf messages.
-func DiffTraceProtos(t testing.TB, x, y *TraceExpectFixture) string {
-	x = proto.Clone(x).(*TraceExpectFixture)
-	y = proto.Clone(y).(*TraceExpectFixture)
-	normalizeTraceFixture(t, x)
-	normalizeTraceFixture(t, y)
+func DiffTraceProtos(t testing.TB, x, y *protos.TraceExpectFixture) string {
+	x = proto.Clone(x).(*protos.TraceExpectFixture)
+	y = proto.Clone(y).(*protos.TraceExpectFixture)
+	testcases.NormalizeTraceFixture(t, x)
+	testcases.NormalizeTraceFixture(t, y)
 
 	return cmp.Diff(x, y, cmpOptions...)
 }

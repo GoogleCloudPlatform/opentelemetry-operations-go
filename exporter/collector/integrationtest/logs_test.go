@@ -20,6 +20,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 )
 
 func TestLogs(t *testing.T) {
@@ -27,7 +30,7 @@ func TestLogs(t *testing.T) {
 	ctx := context.Background()
 	timestamp := time.Now()
 
-	for _, test := range LogsTestCases {
+	for _, test := range testcases.LogsTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
@@ -53,7 +56,7 @@ func TestLogs(t *testing.T) {
 
 			diff := DiffLogProtos(
 				t,
-				&LogExpectFixture{
+				&protos.LogExpectFixture{
 					WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
 				},
 				expectFixture,

@@ -26,6 +26,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
@@ -43,7 +45,7 @@ func getViews() []*view.View {
 	return views
 }
 
-func (i *InMemoryOCExporter) Proto(ctx context.Context) (*SelfObservabilityMetric, error) {
+func (i *InMemoryOCExporter) Proto(ctx context.Context) (*protos.SelfObservabilityMetric, error) {
 	// Hack to flush stats, see https://tinyurl.com/5hfcxzk2
 	view.SetReportingPeriod(time.Minute)
 	i.reader.ReadAndExport(i.stackdriverExporter)
@@ -62,7 +64,7 @@ func (i *InMemoryOCExporter) Proto(ctx context.Context) (*SelfObservabilityMetri
 	case <-done:
 	}
 
-	return &SelfObservabilityMetric{
+	return &protos.SelfObservabilityMetric{
 			CreateTimeSeriesRequests:       i.testServer.CreateTimeSeriesRequests(),
 			CreateMetricDescriptorRequests: i.testServer.CreateMetricDescriptorRequests(),
 		},

@@ -25,6 +25,9 @@ import (
 
 	"github.com/stretchr/testify/require"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
+
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
 
@@ -63,7 +66,7 @@ func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.T
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
-	for _, test := range integrationtest.TracesTestCases {
+	for _, test := range testcases.TracesTestCases {
 		if test.Skip {
 			continue
 		}
@@ -76,7 +79,7 @@ func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.T
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
 			require.NoError(t, err)
-			fixture := &integrationtest.TraceExpectFixture{
+			fixture := &protos.TraceExpectFixture{
 				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
 			}
 			test.SaveRecordedTraceFixtures(t, fixture)
@@ -92,7 +95,7 @@ func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
-	for _, test := range integrationtest.LogsTestCases {
+	for _, test := range testcases.LogsTestCases {
 		if test.Skip {
 			continue
 		}
@@ -104,7 +107,7 @@ func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
 			require.NoError(t, err)
-			fixture := &integrationtest.LogExpectFixture{
+			fixture := &protos.LogExpectFixture{
 				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
 			}
 			test.SaveRecordedLogFixtures(t, fixture)
@@ -120,7 +123,7 @@ func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
-	for _, test := range integrationtest.MetricsTestCases {
+	for _, test := range testcases.MetricsTestCases {
 		if test.Skip {
 			continue
 		}
@@ -141,7 +144,7 @@ func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.
 
 			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
 			require.NoError(t, err)
-			fixture := &integrationtest.MetricExpectFixture{
+			fixture := &protos.MetricExpectFixture{
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),

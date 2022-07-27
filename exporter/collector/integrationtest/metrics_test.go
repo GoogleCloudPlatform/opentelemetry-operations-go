@@ -21,6 +21,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 )
 
 func TestMetrics(t *testing.T) {
@@ -28,7 +31,7 @@ func TestMetrics(t *testing.T) {
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
 
-	for _, test := range MetricsTestCases {
+	for _, test := range testcases.MetricsTestCases {
 		test := test
 
 		t.Run(test.Name, func(t *testing.T) {
@@ -71,7 +74,7 @@ func TestMetrics(t *testing.T) {
 
 			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
 			require.NoError(t, err)
-			fixture := &MetricExpectFixture{
+			fixture := &protos.MetricExpectFixture{
 				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
