@@ -83,7 +83,7 @@ func TestIntegrationMetrics(t *testing.T) {
 // the integration test send those metrics with a gcp.project.id attribute to
 // the specified second project.
 func setSecondProjectInMetrics(t *testing.T, metrics pmetric.Metrics) {
-	secondProject := os.Getenv(testcases.secondProjectEnv)
+	secondProject := os.Getenv(testcases.SecondProjectEnv)
 	require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
 	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
 		metrics.ResourceMetrics().At(i).Resource().Attributes().Update(

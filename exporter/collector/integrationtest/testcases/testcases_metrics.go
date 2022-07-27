@@ -138,7 +138,7 @@ var MetricsTestCases = []TestCase{
 	{
 		Name:                 "Exponential Histogram",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/emetrics/xponential_histogram_metrics_expect.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_metrics_expect.json",
 	},
 	{
 		Name:                 "CreateServiceTimeSeries",

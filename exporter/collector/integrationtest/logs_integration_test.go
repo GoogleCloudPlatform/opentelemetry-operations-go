@@ -80,7 +80,7 @@ func TestIntegrationLogs(t *testing.T) {
 // the integration test send those logs with a gcp.project.id attribute to the
 // specified second project.
 func setSecondProjectInLogs(t *testing.T, logs plog.Logs) {
-	secondProject := os.Getenv(testcases.secondProjectEnv)
+	secondProject := os.Getenv(testcases.SecondProjectEnv)
 	require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
 	for i := 0; i < logs.ResourceLogs().Len(); i++ {
 		logs.ResourceLogs().At(i).Resource().Attributes().Update(
