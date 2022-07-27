@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"go.opencensus.io/metric/metricexport"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
@@ -43,7 +44,7 @@ func getViews() []*view.View {
 	return views
 }
 
-func (i *InMemoryOCExporter) Proto(ctx context.Context) (*SelfObservabilityMetric, error) {
+func (i *InMemoryOCExporter) Proto(ctx context.Context) (*protos.SelfObservabilityMetric, error) {
 	// Hack to flush stats, see https://tinyurl.com/5hfcxzk2
 	view.SetReportingPeriod(time.Minute)
 	i.reader.ReadAndExport(i.stackdriverExporter)
@@ -62,7 +63,7 @@ func (i *InMemoryOCExporter) Proto(ctx context.Context) (*SelfObservabilityMetri
 	case <-done:
 	}
 
-	return &SelfObservabilityMetric{
+	return &protos.SelfObservabilityMetric{
 			CreateTimeSeriesRequests:       i.testServer.CreateTimeSeriesRequests(),
 			CreateMetricDescriptorRequests: i.testServer.CreateMetricDescriptorRequests(),
 		},

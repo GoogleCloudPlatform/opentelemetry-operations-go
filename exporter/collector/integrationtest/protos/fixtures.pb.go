@@ -18,16 +18,17 @@
 // 	protoc        v3.19.0
 // source: fixtures.proto
 
-package integrationtest
+package protos
 
 import (
+	reflect "reflect"
+	sync "sync"
+
 	v21 "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	v2 "google.golang.org/genproto/googleapis/logging/v2"
 	v3 "google.golang.org/genproto/googleapis/monitoring/v3"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
-	reflect "reflect"
-	sync "sync"
 )
 
 const (
@@ -44,8 +45,8 @@ type MetricExpectFixture struct {
 
 	CreateTimeSeriesRequests        []*v3.CreateTimeSeriesRequest       `protobuf:"bytes,1,rep,name=create_time_series_requests,json=createTimeSeriesRequests,proto3" json:"create_time_series_requests,omitempty"`
 	CreateMetricDescriptorRequests  []*v3.CreateMetricDescriptorRequest `protobuf:"bytes,2,rep,name=create_metric_descriptor_requests,json=createMetricDescriptorRequests,proto3" json:"create_metric_descriptor_requests,omitempty"`
-	CreateServiceTimeSeriesRequests []*v3.CreateTimeSeriesRequest       `protobuf:"bytes,3,rep,name=create_service_time_series_requests,json=createServiceTimeSeriesRequests,proto3" json:"create_service_time_series_requests,omitempty"`
-	SelfObservabilityMetrics        *SelfObservabilityMetric            `protobuf:"bytes,4,opt,name=self_observability_metrics,json=selfObservabilityMetrics,proto3" json:"self_observability_metrics,omitempty"`
+	CreateServiceTimeSeriesRequests []*v3.CreateTimeSeriesRequest `protobuf:"bytes,3,rep,name=create_service_time_series_requests,json=createServiceTimeSeriesRequests,proto3" json:"create_service_time_series_requests,omitempty"`
+	SelfObservabilityMetrics        *SelfObservabilityMetric      `protobuf:"bytes,4,opt,name=self_observability_metrics,json=selfObservabilityMetrics,proto3" json:"self_observability_metrics,omitempty"`
 }
 
 func (x *MetricExpectFixture) Reset() {

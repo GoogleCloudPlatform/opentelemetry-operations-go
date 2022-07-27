@@ -19,6 +19,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 	"github.com/stretchr/testify/require"
 )
@@ -55,7 +56,7 @@ func TestTraces(t *testing.T) {
 				endTime,
 			)
 
-			fixture := &TraceExpectFixture{
+			fixture := &protos.TraceExpectFixture{
 				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
 			}
 

@@ -17,4 +17,4 @@
 
 //go:generate protoc -I=. --go_opt=paths=source_relative --go_out=. fixtures.proto
 
-package integrationtest
+package protos

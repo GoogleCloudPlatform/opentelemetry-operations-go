@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 package fixtures;
-option go_package = "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest";
+option go_package = "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos";
 
 import "metric_service.proto";
 import "logging_service.proto";

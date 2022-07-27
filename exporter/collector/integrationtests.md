@@ -99,7 +99,7 @@ To add a new test:
     ```
 
     The generated file is a JSON encoded
-    [`MetricExpectFixture`](integrationtest/fixtures.proto#L21) protobuf message.
+    [`MetricExpectFixture`](integrationtest/protos/fixtures.proto#L21) protobuf message.
 
 See [#229](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/229) for an
 example PR.
