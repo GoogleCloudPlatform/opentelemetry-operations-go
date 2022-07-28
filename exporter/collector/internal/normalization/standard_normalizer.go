@@ -129,25 +129,25 @@ func subtractExponentialHistogramDataPoint(a, b *pmetric.ExponentialHistogramDat
 	// We drop points without a sum, so no need to check here.
 	newPoint.SetSum(a.Sum() - b.Sum())
 	newPoint.SetZeroCount(a.ZeroCount() - b.ZeroCount())
-	newPoint.Positive().SetMBucketCounts(subtractExponentialBuckets(a.Positive(), b.Positive()))
-	newPoint.Negative().SetMBucketCounts(subtractExponentialBuckets(a.Negative(), b.Negative()))
+	newPoint.Positive().SetBucketCounts(subtractExponentialBuckets(a.Positive(), b.Positive()))
+	newPoint.Negative().SetBucketCounts(subtractExponentialBuckets(a.Negative(), b.Negative()))
 	return &newPoint
 }
 
 // subtractExponentialBuckets returns a - b
-func subtractExponentialBuckets(a, b pmetric.Buckets) []uint64 {
-	newBuckets := make([]uint64, len(a.MBucketCounts()))
+func subtractExponentialBuckets(a, b pmetric.Buckets) pcommon.ImmutableUInt64Slice {
+	newBuckets := make([]uint64, a.BucketCounts().Len())
 	offsetDiff := int(a.Offset() - b.Offset())
-	for i := range a.MBucketCounts() {
+	for i := 0; i < a.BucketCounts().Len(); i++ {
 		bOffset := i + offsetDiff
-		// if there is no corresponding bucket for the starting MBucketCounts, don't normalize
-		if bOffset < 0 || bOffset >= len(b.MBucketCounts()) {
-			newBuckets[i] = a.MBucketCounts()[i]
+		// if there is no corresponding bucket for the starting BucketCounts, don't normalize
+		if bOffset < 0 || bOffset >= b.BucketCounts().Len() {
+			newBuckets[i] = a.BucketCounts().At(i)
 		} else {
-			newBuckets[i] = a.MBucketCounts()[i] - b.MBucketCounts()[bOffset]
+			newBuckets[i] = a.BucketCounts().At(i) - b.BucketCounts().At(bOffset)
 		}
 	}
-	return newBuckets
+	return pcommon.NewImmutableUInt64Slice(newBuckets)
 }
 
 func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) *pmetric.HistogramDataPoint {
@@ -168,7 +168,7 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 
 	// The number of buckets changed, so we can't normalize points anymore.
 	// Treat this as a reset.
-	if !bucketBoundariesEqual(point.MExplicitBounds(), start.MExplicitBounds()) {
+	if !bucketBoundariesEqual(point.ExplicitBounds(), start.ExplicitBounds()) {
 		s.startCache.SetHistogramDataPoint(identifier, &point)
 		s.previousCache.SetHistogramDataPoint(identifier, &point)
 		return nil
@@ -195,8 +195,8 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 		// that behavior.
 		zeroPoint := pmetric.NewHistogramDataPoint()
 		zeroPoint.SetTimestamp(newPoint.StartTimestamp())
-		zeroPoint.SetMExplicitBounds(newPoint.MExplicitBounds())
-		zeroPoint.SetMBucketCounts(make([]uint64, len(newPoint.MBucketCounts())))
+		zeroPoint.SetExplicitBounds(newPoint.ExplicitBounds())
+		zeroPoint.SetBucketCounts(pcommon.NewImmutableUInt64Slice(make([]uint64, newPoint.BucketCounts().Len())))
 		s.startCache.SetHistogramDataPoint(identifier, &zeroPoint)
 		return &newPoint
 	}
@@ -232,22 +232,22 @@ func subtractHistogramDataPoint(a, b *pmetric.HistogramDataPoint) *pmetric.Histo
 	newPoint.SetCount(a.Count() - b.Count())
 	// We drop points without a sum, so no need to check here.
 	newPoint.SetSum(a.Sum() - b.Sum())
-	aBuckets := a.MBucketCounts()
-	bBuckets := b.MBucketCounts()
-	newBuckets := make([]uint64, len(aBuckets))
-	for i := range aBuckets {
-		newBuckets[i] = aBuckets[i] - bBuckets[i]
+	aBuckets := a.BucketCounts()
+	bBuckets := b.BucketCounts()
+	newBuckets := make([]uint64, aBuckets.Len())
+	for i := 0; i < aBuckets.Len(); i++ {
+		newBuckets[i] = aBuckets.At(i) - bBuckets.At(i)
 	}
-	newPoint.SetMBucketCounts(newBuckets)
+	newPoint.SetBucketCounts(pcommon.NewImmutableUInt64Slice(newBuckets))
 	return &newPoint
 }
 
-func bucketBoundariesEqual(a, b []float64) bool {
-	if len(a) != len(b) {
+func bucketBoundariesEqual(a, b pcommon.ImmutableFloat64Slice) bool {
+	if a.Len() != b.Len() {
 		return false
 	}
-	for i := range a {
-		if a[i] != b[i] {
+	for i := 0; i < a.Len(); i++ {
+		if a.At(i) != b.At(i) {
 			return false
 		}
 	}

@@ -98,7 +98,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetMBytesVal([]byte(`{"this": "is json"}`))
+				log.Body().SetBytesVal(pcommon.NewImmutableByteSlice([]byte(`{"this": "is json"}`)))
 				return log
 			},
 			mr: func() *monitoredres.MonitoredResource {
@@ -116,8 +116,8 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json and httpRequest, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetMBytesVal([]byte(`{"message": "hello!"}`))
-				log.Attributes().Insert(HTTPRequestAttributeKey, pcommon.NewValueBytes([]byte(`{
+				log.Body().SetBytesVal(pcommon.NewImmutableByteSlice([]byte(`{"message": "hello!"}`)))
+				log.Attributes().Insert(HTTPRequestAttributeKey, pcommon.NewValueBytes(pcommon.NewImmutableByteSlice([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
 						"requestSize": "1",
@@ -131,7 +131,7 @@ func TestLogMapping(t *testing.T) {
 						"cacheValidatedWithOriginServer": false,
 						"cacheFillBytes": "1",
 						"protocol": "HTTP/2"
-					}`)))
+					}`))))
 				return log
 			},
 			mr: func() *monitoredres.MonitoredResource {
@@ -202,7 +202,7 @@ func TestLogMapping(t *testing.T) {
 				log := plog.NewLogRecord()
 				log.Attributes().Insert(
 					SourceLocationAttributeKey,
-					pcommon.NewValueBytes([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`)),
+					pcommon.NewValueBytes(pcommon.NewImmutableByteSlice([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`))),
 				)
 				return log
 			},
