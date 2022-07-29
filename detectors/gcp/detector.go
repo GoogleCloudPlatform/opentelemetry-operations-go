@@ -36,6 +36,7 @@ const (
 	GKE
 	GCE
 	CloudRun
+	CloudRunJobs
 	CloudFunctions
 	AppEngineStandard
 	AppEngineFlex
@@ -46,10 +47,12 @@ func (d *Detector) CloudPlatform() Platform {
 	switch {
 	case d.onGKE():
 		return GKE
-	case d.onCloudFunctions():
-		return CloudFunctions
 	case d.onCloudRun():
 		return CloudRun
+	case d.onCloudRunJobs():
+		return CloudRunJobs
+	case d.onCloudFunctions():
+		return CloudFunctions
 	case d.onAppEngineStandard():
 		return AppEngineStandard
 	case d.onAppEngine():

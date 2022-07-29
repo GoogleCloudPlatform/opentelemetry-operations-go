@@ -24,9 +24,11 @@ const (
 	// and the Cloud Functions env vars:
 	// https://cloud.google.com/functions/docs/configuring/env-var#runtime_environment_variables_set_automatically
 	cloudRunConfigEnv      = "K_CONFIGURATION"
+	cloudRunJobsEnv        = "CLOUD_RUN_JOB"
 	cloudFunctionTargetEnv = "FUNCTION_TARGET"
 	faasServiceEnv         = "K_SERVICE"
 	faasRevisionEnv        = "K_REVISION"
+	jobsRevisionEnv        = "CLOUD_RUN_EXECUTION"
 	regionMetadataAttr     = "instance/region"
 )
 
@@ -35,22 +37,33 @@ func (d *Detector) onCloudRun() bool {
 	return found
 }
 
+func (d *Detector) onCloudRunJobs() bool {
+	_, found := d.os.LookupEnv(cloudRunJobsEnv)
+	return found
+}
+
 func (d *Detector) onCloudFunctions() bool {
 	_, found := d.os.LookupEnv(cloudFunctionTargetEnv)
 	return found
 }
 
-// FaaSName returns the name of the cloud run or cloud functions service.
+// FaaSName returns the name of the cloud run, cloud run jobs or cloud functions service.
 func (d *Detector) FaaSName() (string, error) {
 	if name, found := d.os.LookupEnv(faasServiceEnv); found {
+		return name, nil
+	}
+	if name, found := d.os.LookupEnv(cloudRunJobsEnv); found {
 		return name, nil
 	}
 	return "", errEnvVarNotFound
 }
 
-// FaaSVersion returns the revision of the cloud run or cloud functions service.
+// FaaSVersion returns the revision of the cloud run, cloud run jobs or cloud functions service.
 func (d *Detector) FaaSVersion() (string, error) {
 	if version, found := d.os.LookupEnv(faasRevisionEnv); found {
+		return version, nil
+	}
+	if version, found := d.os.LookupEnv(jobsRevisionEnv); found {
 		return version, nil
 	}
 	return "", errEnvVarNotFound

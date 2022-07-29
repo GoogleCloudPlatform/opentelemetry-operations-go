@@ -32,6 +32,17 @@ func TestFaaSName(t *testing.T) {
 	assert.Equal(t, name, "my-service")
 }
 
+func TestFaaSJobsName(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{
+			cloudRunJobsEnv: "my-service",
+		},
+	})
+	name, err := d.FaaSName()
+	assert.NoError(t, err)
+	assert.Equal(t, name, "my-service")
+}
+
 func TestFaaSNameErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
@@ -45,6 +56,17 @@ func TestFaaSVersion(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{
 			faasRevisionEnv: "version-123",
+		},
+	})
+	version, err := d.FaaSVersion()
+	assert.NoError(t, err)
+	assert.Equal(t, version, "version-123")
+}
+
+func TestFaaSJobsVersion(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{
+			jobsRevisionEnv: "version-123",
 		},
 	})
 	version, err := d.FaaSVersion()
