@@ -33,11 +33,10 @@ const (
 )
 
 func (d *Detector) onCloudRun() bool {
-	_, found := d.os.LookupEnv(cloudRunConfigEnv)
-	return found
-}
+	if _, found := d.os.LookupEnv(cloudRunConfigEnv); found {
+		return found
+	}
 
-func (d *Detector) onCloudRunJobs() bool {
 	_, found := d.os.LookupEnv(cloudRunJobsEnv)
 	return found
 }
