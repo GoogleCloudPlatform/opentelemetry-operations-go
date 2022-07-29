@@ -9,8 +9,8 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/reso
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go => ../../..
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go v0.32.3
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.8.3
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go v0.32.4
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.8.4
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.33.0
 	go.opentelemetry.io/otel v1.8.0
 	go.opentelemetry.io/otel/sdk v1.8.0
@@ -20,7 +20,7 @@ require (
 require (
 	cloud.google.com/go/compute v1.5.0 // indirect
 	cloud.google.com/go/trace v1.2.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.32.3 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.32.4 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
