@@ -347,7 +347,7 @@ func (l logMapper) logToSplitEntries(
 	// parse LogEntrySourceLocation struct from OTel attribute
 	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
-		err := json.Unmarshal(sourceLocation.MBytesVal(), &logEntrySourceLocation)
+		err := json.Unmarshal(sourceLocation.BytesVal().AsRaw(), &logEntrySourceLocation)
 		if err != nil {
 			return []logging.Entry{entry}, err
 		}
@@ -476,7 +476,7 @@ func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, in
 	}
 	switch logBody.Type() {
 	case pcommon.ValueTypeBytes:
-		return logBody.MBytesVal(), 1, nil
+		return logBody.BytesVal().AsRaw(), 1, nil
 	case pcommon.ValueTypeString:
 		return logBody.AsString(), int(math.Ceil(float64(len([]byte(logBody.AsString()))) / float64(maxEntrySize))), nil
 	case pcommon.ValueTypeMap:
@@ -511,7 +511,7 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTT
 	var bytes []byte
 	switch httpRequestAttr.Type() {
 	case pcommon.ValueTypeBytes:
-		bytes = httpRequestAttr.MBytesVal()
+		bytes = httpRequestAttr.BytesVal().AsRaw()
 	case pcommon.ValueTypeString, pcommon.ValueTypeMap:
 		bytes = []byte(httpRequestAttr.AsString())
 	}

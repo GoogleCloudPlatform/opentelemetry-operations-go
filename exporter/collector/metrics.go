@@ -545,25 +545,25 @@ func (m *metricMapper) exemplars(exs pmetric.ExemplarSlice, projectID string) []
 
 // histogramPoint maps a histogram data point into a GCM point.
 func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectID string) *monitoringpb.TypedValue {
-	counts := make([]int64, len(point.MBucketCounts()))
+	counts := make([]int64, point.BucketCounts().Len())
 	var mean, deviation, prevBound float64
 
-	for i, v := range point.MBucketCounts() {
-		counts[i] = int64(v)
+	for i := 0; i < point.BucketCounts().Len(); i++ {
+		counts[i] = int64(point.BucketCounts().At(i))
 	}
 
 	if !math.IsNaN(point.Sum()) && point.Count() > 0 { // Avoid divide-by-zero
 		mean = float64(point.Sum() / float64(point.Count()))
 	}
 
-	bounds := point.MExplicitBounds()
+	bounds := point.ExplicitBounds()
 	if m.cfg.MetricConfig.EnableSumOfSquaredDeviation {
 		// Calculate the sum of squared deviation.
-		for i, bound := range bounds {
+		for i := 0; i < bounds.Len(); i++ {
 			// Assume all points in the bucket occur at the middle of the bucket range
-			middleOfBucket := (prevBound + bound) / 2
+			middleOfBucket := (prevBound + bounds.At(i)) / 2
 			deviation += float64(counts[i]) * (middleOfBucket - mean) * (middleOfBucket - mean)
-			prevBound = bound
+			prevBound = bounds.At(i)
 		}
 		// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
 		// Assume points in the infinity bucket are at the top of the previous bucket
@@ -581,7 +581,7 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectI
 				BucketOptions: &distribution.Distribution_BucketOptions{
 					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
 						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
-							Bounds: bounds,
+							Bounds: bounds.AsRaw(),
 						},
 					},
 				},
@@ -595,20 +595,23 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectI
 func (m *metricMapper) exponentialHistogramPoint(point pmetric.ExponentialHistogramDataPoint, projectID string) *monitoringpb.TypedValue {
 	// First calculate underflow bucket with all negatives + zeros.
 	underflow := point.ZeroCount()
-	for _, v := range point.Negative().MBucketCounts() {
-		underflow += v
+	negativeBuckets := point.Negative().BucketCounts()
+	for i := 0; i < negativeBuckets.Len(); i++ {
+		underflow += negativeBuckets.At(i)
 	}
+
 	// Next, pull in remaining buckets.
-	counts := make([]int64, len(point.Positive().MBucketCounts())+2)
+	counts := make([]int64, point.Positive().BucketCounts().Len()+2)
 	bucketOptions := &distribution.Distribution_BucketOptions{}
 	counts[0] = int64(underflow)
-	for i, v := range point.Positive().MBucketCounts() {
-		counts[i+1] = int64(v)
+	positiveBuckets := point.Positive().BucketCounts()
+	for i := 0; i < positiveBuckets.Len(); i++ {
+		counts[i+1] = int64(positiveBuckets.At(i))
 	}
 	// Overflow bucket is always empty
 	counts[len(counts)-1] = 0
 
-	if len(point.Positive().MBucketCounts()) == 0 {
+	if point.Positive().BucketCounts().Len() == 0 {
 		// We cannot send exponential distributions with no positive buckets,
 		// instead we send a simple overflow/underflow histogram.
 		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExplicitBuckets{
