@@ -41,9 +41,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -193,9 +193,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -344,9 +344,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -506,9 +506,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -622,9 +622,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -767,9 +767,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -912,9 +912,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -1057,9 +1057,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -1202,9 +1202,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -1347,9 +1347,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -1492,9 +1492,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -1637,9 +1637,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -1782,9 +1782,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -1927,9 +1927,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -2072,9 +2072,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -2217,9 +2217,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -2362,9 +2362,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -2507,9 +2507,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -2652,9 +2652,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -2797,9 +2797,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
@@ -2942,9 +2942,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[

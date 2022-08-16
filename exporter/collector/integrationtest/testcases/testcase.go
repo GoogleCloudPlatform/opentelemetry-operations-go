@@ -18,7 +18,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"sort"
 	"testing"
 	"time"
@@ -74,7 +74,7 @@ func (tc *TestCase) LoadOTLPTracesInput(
 	startTimestamp time.Time,
 	endTimestamp time.Time,
 ) ptrace.Traces {
-	bytes, err := ioutil.ReadFile(tc.OTLPInputFixturePath)
+	bytes, err := os.ReadFile(tc.OTLPInputFixturePath)
 	require.NoError(t, err)
 	traces, err := ptrace.NewJSONUnmarshaler().UnmarshalTraces(bytes)
 	require.NoError(t, err)
@@ -102,7 +102,7 @@ func (tc *TestCase) LoadTraceExpectFixture(
 	startTimestamp time.Time,
 	endTimestamp time.Time,
 ) *protos.TraceExpectFixture {
-	bytes, err := ioutil.ReadFile(tc.ExpectFixturePath)
+	bytes, err := os.ReadFile(tc.ExpectFixturePath)
 	require.NoError(t, err)
 	fixture := &protos.TraceExpectFixture{}
 	require.NoError(t, protojson.Unmarshal(bytes, fixture))
@@ -128,7 +128,7 @@ func (tc *TestCase) SaveRecordedTraceFixtures(
 	formatted := bytes.Buffer{}
 	require.NoError(t, json.Indent(&formatted, jsonBytes, "", "  "))
 	formatted.WriteString("\n")
-	require.NoError(t, ioutil.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
+	require.NoError(t, os.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
 	t.Logf("Updated fixture %v", tc.ExpectFixturePath)
 }
 
@@ -160,7 +160,7 @@ func (tc *TestCase) LoadOTLPLogsInput(
 	t testing.TB,
 	timestamp time.Time,
 ) plog.Logs {
-	bytes, err := ioutil.ReadFile(tc.OTLPInputFixturePath)
+	bytes, err := os.ReadFile(tc.OTLPInputFixturePath)
 	require.NoError(t, err)
 	logs, err := plog.NewJSONUnmarshaler().UnmarshalLogs(bytes)
 	require.NoError(t, err)
@@ -195,7 +195,7 @@ func (tc *TestCase) LoadLogExpectFixture(
 	t testing.TB,
 	timestamp time.Time,
 ) *protos.LogExpectFixture {
-	bytes, err := ioutil.ReadFile(tc.ExpectFixturePath)
+	bytes, err := os.ReadFile(tc.ExpectFixturePath)
 	require.NoError(t, err)
 	fixture := &protos.LogExpectFixture{}
 	require.NoError(t, protojson.Unmarshal(bytes, fixture))
@@ -220,7 +220,7 @@ func (tc *TestCase) SaveRecordedLogFixtures(
 	formatted := bytes.Buffer{}
 	require.NoError(t, json.Indent(&formatted, jsonBytes, "", "  "))
 	formatted.WriteString("\n")
-	require.NoError(t, ioutil.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
+	require.NoError(t, os.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
 	t.Logf("Updated fixture %v", tc.ExpectFixturePath)
 }
 
@@ -244,7 +244,7 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 	startTime time.Time,
 	endTime time.Time,
 ) pmetric.Metrics {
-	bytes, err := ioutil.ReadFile(tc.OTLPInputFixturePath)
+	bytes, err := os.ReadFile(tc.OTLPInputFixturePath)
 	require.NoError(t, err)
 	metrics, err := pmetric.NewJSONUnmarshaler().UnmarshalMetrics(bytes)
 	require.NoError(t, err)
@@ -306,7 +306,7 @@ func (tc *TestCase) LoadMetricExpectFixture(
 	startTime time.Time,
 	endTime time.Time,
 ) *protos.MetricExpectFixture {
-	bytes, err := ioutil.ReadFile(tc.ExpectFixturePath)
+	bytes, err := os.ReadFile(tc.ExpectFixturePath)
 	require.NoError(t, err)
 	fixture := &protos.MetricExpectFixture{}
 	require.NoError(t, protojson.Unmarshal(bytes, fixture))
@@ -351,7 +351,7 @@ func (tc *TestCase) SaveRecordedMetricFixtures(
 	formatted := bytes.Buffer{}
 	require.NoError(t, json.Indent(&formatted, jsonBytes, "", "  "))
 	formatted.WriteString("\n")
-	require.NoError(t, ioutil.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
+	require.NoError(t, os.WriteFile(tc.ExpectFixturePath, formatted.Bytes(), 0640))
 	t.Logf("Updated fixture %v", tc.ExpectFixturePath)
 }
 

@@ -2,6 +2,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resou
 
 go 1.17
 
-require go.opentelemetry.io/otel v1.8.0
+require go.opentelemetry.io/otel v1.9.0
 
-require go.opentelemetry.io/otel/trace v1.8.0 // indirect
+require go.opentelemetry.io/otel/trace v1.9.0 // indirect

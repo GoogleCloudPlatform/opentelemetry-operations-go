@@ -11,10 +11,10 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go => ../../..
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go v0.32.5
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.8.5
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.33.0
-	go.opentelemetry.io/otel v1.8.0
-	go.opentelemetry.io/otel/sdk v1.8.0
-	go.opentelemetry.io/otel/trace v1.8.0
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.34.0
+	go.opentelemetry.io/otel v1.9.0
+	go.opentelemetry.io/otel/sdk v1.9.0
+	go.opentelemetry.io/otel/trace v1.9.0
 )
 
 require (

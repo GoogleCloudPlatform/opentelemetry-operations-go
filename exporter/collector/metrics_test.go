@@ -186,7 +186,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 		point.SetTimestamp(endTs)
 		// The last point has no value
 		point = sum.DataPoints().AppendEmpty()
-		point.FlagsStruct().SetNoRecordedValue(true)
+		point.Flags().SetNoRecordedValue(true)
 
 		ts := mapper.metricToTimeSeries(
 			mr,
@@ -229,7 +229,7 @@ func TestMetricToTimeSeries(t *testing.T) {
 		gauge.DataPoints().AppendEmpty().SetIntVal(10)
 		gauge.DataPoints().AppendEmpty().SetIntVal(15)
 		// The last point has no value
-		gauge.DataPoints().AppendEmpty().FlagsStruct().SetNoRecordedValue(true)
+		gauge.DataPoints().AppendEmpty().Flags().SetNoRecordedValue(true)
 
 		ts := mapper.metricToTimeSeries(
 			mr,
@@ -476,7 +476,7 @@ func TestNoValueHistogramPointToTimeSeries(t *testing.T) {
 	metric.SetUnit(unit)
 	hist := metric.Histogram()
 	point := hist.DataPoints().AppendEmpty()
-	point.FlagsStruct().SetNoRecordedValue(true)
+	point.Flags().SetNoRecordedValue(true)
 	end := start.Add(time.Hour)
 	point.SetStartTimestamp(pcommon.NewTimestampFromTime(start))
 	point.SetTimestamp(pcommon.NewTimestampFromTime(end))
@@ -638,7 +638,7 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	exemplar.FilteredAttributes().InsertString("test", "extra")
 
 	// Add a second point with no value
-	hist.DataPoints().AppendEmpty().FlagsStruct().SetNoRecordedValue(true)
+	hist.DataPoints().AppendEmpty().Flags().SetNoRecordedValue(true)
 
 	tsl := mapper.metricToTimeSeries(mr, labels{}, metric, mapper.cfg.ProjectID)
 	assert.Len(t, tsl, 1)
@@ -1005,7 +1005,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		sum := metric.Sum()
 		point := sum.DataPoints().AppendEmpty()
 		// Add a second point with no value
-		sum.DataPoints().AppendEmpty().FlagsStruct().SetNoRecordedValue(true)
+		sum.DataPoints().AppendEmpty().Flags().SetNoRecordedValue(true)
 		return metric, sum, point
 	}
 
@@ -1133,7 +1133,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 		gauge := metric.Gauge()
 		point := gauge.DataPoints().AppendEmpty()
 		// Add a second point with no value
-		gauge.DataPoints().AppendEmpty().FlagsStruct().SetNoRecordedValue(true)
+		gauge.DataPoints().AppendEmpty().Flags().SetNoRecordedValue(true)
 		return metric, gauge, point
 	}
 
@@ -1214,7 +1214,7 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	point.SetTimestamp(pcommon.NewTimestampFromTime(end))
 
 	// Add a second point with no value
-	summary.DataPoints().AppendEmpty().FlagsStruct().SetNoRecordedValue(true)
+	summary.DataPoints().AppendEmpty().Flags().SetNoRecordedValue(true)
 
 	ts := mapper.metricToTimeSeries(mr, labels{}, metric, mapper.cfg.ProjectID)
 	assert.Len(t, ts, 3)

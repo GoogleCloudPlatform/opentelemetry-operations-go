@@ -29,9 +29,9 @@
             }
          ]
         },
-        "instrumentationLibraryMetrics": [
+        "scopeMetrics": [
           {
-            "instrumentationLibrary": {
+            "scope": {
                "name": "foo",
                "version": "1.2.3"
             },
