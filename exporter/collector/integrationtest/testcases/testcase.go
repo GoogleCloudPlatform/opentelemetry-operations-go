@@ -366,7 +366,10 @@ func NormalizeMetricFixture(t testing.TB, fixture *protos.MetricExpectFixture) {
 		return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
 	})
 	sort.Slice(fixture.CreateMetricDescriptorRequests, func(i, j int) bool {
-		return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
+		if fixture.CreateMetricDescriptorRequests[i].Name != fixture.CreateMetricDescriptorRequests[j].Name {
+			return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
+		}
+		return fixture.CreateMetricDescriptorRequests[i].MetricDescriptor.Name < fixture.CreateMetricDescriptorRequests[j].MetricDescriptor.Name
 	})
 	sort.Slice(fixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
 		return fixture.CreateServiceTimeSeriesRequests[i].Name < fixture.CreateServiceTimeSeriesRequests[j].Name

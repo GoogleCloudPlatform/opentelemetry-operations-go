@@ -66,7 +66,10 @@ func TestMetrics(t *testing.T) {
 				return expectFixture.CreateTimeSeriesRequests[i].Name < expectFixture.CreateTimeSeriesRequests[j].Name
 			})
 			sort.Slice(expectFixture.CreateMetricDescriptorRequests, func(i, j int) bool {
-				return expectFixture.CreateMetricDescriptorRequests[i].Name < expectFixture.CreateMetricDescriptorRequests[j].Name
+				if expectFixture.CreateMetricDescriptorRequests[i].Name != expectFixture.CreateMetricDescriptorRequests[j].Name {
+					return expectFixture.CreateMetricDescriptorRequests[i].Name < expectFixture.CreateMetricDescriptorRequests[j].Name
+				}
+				return expectFixture.CreateMetricDescriptorRequests[i].MetricDescriptor.Name < expectFixture.CreateMetricDescriptorRequests[j].MetricDescriptor.Name
 			})
 			sort.Slice(expectFixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
 				return expectFixture.CreateServiceTimeSeriesRequests[i].Name < expectFixture.CreateServiceTimeSeriesRequests[j].Name
@@ -84,7 +87,10 @@ func TestMetrics(t *testing.T) {
 				return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
 			})
 			sort.Slice(fixture.CreateMetricDescriptorRequests, func(i, j int) bool {
-				return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
+				if fixture.CreateMetricDescriptorRequests[i].Name != fixture.CreateMetricDescriptorRequests[j].Name {
+					return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
+				}
+				return fixture.CreateMetricDescriptorRequests[i].MetricDescriptor.Name < fixture.CreateMetricDescriptorRequests[j].MetricDescriptor.Name
 			})
 			sort.Slice(fixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
 				return fixture.CreateServiceTimeSeriesRequests[i].Name < fixture.CreateServiceTimeSeriesRequests[j].Name

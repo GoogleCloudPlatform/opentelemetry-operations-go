@@ -356,25 +356,6 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "scrape_series_added",
-        "type": "workload.googleapis.com/scrape_series_added",
-        "labels": [
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The approximate number of new series in this scrape",
-        "displayName": "scrape_series_added"
-      }
-    },
-    {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
         "name": "ex_com_one",
         "type": "workload.googleapis.com/ex_com_one",
         "labels": [
@@ -453,25 +434,6 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "up",
-        "type": "workload.googleapis.com/up",
-        "labels": [
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The scraping was successful",
-        "displayName": "up"
-      }
-    },
-    {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
         "name": "scrape_duration_seconds",
         "type": "workload.googleapis.com/scrape_duration_seconds",
         "labels": [
@@ -487,6 +449,25 @@
         "unit": "seconds",
         "description": "Duration of the scrape",
         "displayName": "scrape_duration_seconds"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "scrape_samples_post_metric_relabeling",
+        "type": "workload.googleapis.com/scrape_samples_post_metric_relabeling",
+        "labels": [
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "description": "The number of samples remaining after metric relabeling was applied",
+        "displayName": "scrape_samples_post_metric_relabeling"
       }
     },
     {
@@ -511,8 +492,8 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "scrape_samples_post_metric_relabeling",
-        "type": "workload.googleapis.com/scrape_samples_post_metric_relabeling",
+        "name": "scrape_series_added",
+        "type": "workload.googleapis.com/scrape_series_added",
         "labels": [
           {
             "key": "service_instance_id"
@@ -523,8 +504,27 @@
         ],
         "metricKind": "GAUGE",
         "valueType": "DOUBLE",
-        "description": "The number of samples remaining after metric relabeling was applied",
-        "displayName": "scrape_samples_post_metric_relabeling"
+        "description": "The approximate number of new series in this scrape",
+        "displayName": "scrape_series_added"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "up",
+        "type": "workload.googleapis.com/up",
+        "labels": [
+          {
+            "key": "service_instance_id"
+          },
+          {
+            "key": "service_name"
+          }
+        ],
+        "metricKind": "GAUGE",
+        "valueType": "DOUBLE",
+        "description": "The scraping was successful",
+        "displayName": "up"
       }
     }
   ],
