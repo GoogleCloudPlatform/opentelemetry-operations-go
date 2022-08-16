@@ -29,9 +29,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{},
+                "scope":{},
                 "metrics":[
                    {
                       "name":"scrape_series_added",
@@ -360,9 +360,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{},
+                "scope":{},
                 "metrics":[
                    {
                       "name":"scrape_series_added",

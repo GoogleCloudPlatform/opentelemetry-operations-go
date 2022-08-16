@@ -41,9 +41,9 @@
           }
         ]
       },
-      "instrumentationLibraryMetrics": [
+      "scopeMetrics": [
         {
-          "instrumentationLibrary": {},
+          "scope": {},
           "metrics": [
             {
               "name": "testresourcefilter",

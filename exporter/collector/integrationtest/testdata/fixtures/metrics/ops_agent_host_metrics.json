@@ -41,9 +41,9 @@
                     }
                 ]
             },
-            "instrumentationLibraryMetrics": [
+            "scopeMetrics": [
                 {
-                    "instrumentationLibrary": {},
+                    "scope": {},
                     "metrics": [
                         {
                             "name": "agent.googleapis.com/swap/bytes_used",
@@ -893,9 +893,9 @@
                     }
                 ]
             },
-            "instrumentationLibraryMetrics": [
+            "scopeMetrics": [
                 {
-                    "instrumentationLibrary": {},
+                    "scope": {},
                     "metrics": [
                         {
                             "name": "agent.googleapis.com/memory/bytes_used",
@@ -1081,9 +1081,9 @@
                     }
                 ]
             },
-            "instrumentationLibraryMetrics": [
+            "scopeMetrics": [
                 {
-                    "instrumentationLibrary": {},
+                    "scope": {},
                     "metrics": [
                         {
                             "name": "agent.googleapis.com/cpu/load_1m",
@@ -1170,9 +1170,9 @@
                     }
                 ]
             },
-            "instrumentationLibraryMetrics": [
+            "scopeMetrics": [
                 {
-                    "instrumentationLibrary": {},
+                    "scope": {},
                     "metrics": [
                         {
                             "name": "agent.googleapis.com/disk/read_bytes_count",
@@ -1855,9 +1855,9 @@
                     }
                 ]
             },
-            "instrumentationLibraryMetrics": [
+            "scopeMetrics": [
                 {
-                    "instrumentationLibrary": {},
+                    "scope": {},
                     "metrics": [
                         {
                             "name": "agent.googleapis.com/cpu/utilization",
@@ -1911,9 +1911,9 @@
                     }
                 ]
             },
-            "instrumentationLibraryMetrics": [
+            "scopeMetrics": [
                 {
-                    "instrumentationLibrary": {},
+                    "scope": {},
                     "metrics": [
                         {
                             "name": "agent.googleapis.com/interface/packets",
@@ -2447,9 +2447,9 @@
                     }
                 ]
             },
-            "instrumentationLibraryMetrics": [
+            "scopeMetrics": [
                 {
-                    "instrumentationLibrary": {},
+                    "scope": {},
                     "metrics": [
                         {
                             "name": "agent.googleapis.com/disk/bytes_used",
@@ -2731,9 +2731,9 @@
                     }
                 ]
             },
-            "instrumentationLibraryMetrics": [
+            "scopeMetrics": [
                 {
-                    "instrumentationLibrary": {},
+                    "scope": {},
                     "metrics": [
                         {
                             "name": "agent.googleapis.com/processes/fork_count",

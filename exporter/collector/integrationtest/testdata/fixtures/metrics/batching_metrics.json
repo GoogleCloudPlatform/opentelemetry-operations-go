@@ -2,9 +2,9 @@
   "resourceMetrics": [
     {
       "resource": {},
-      "instrumentationLibraryMetrics": [
+      "scopeMetrics": [
         {
-          "instrumentationLibrary": {},
+          "scope": {},
           "metrics": [
             {
               "name": "testsummary_1",

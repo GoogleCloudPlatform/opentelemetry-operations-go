@@ -53,9 +53,9 @@
                 }
              ]
           },
-          "instrumentationLibraryMetrics":[
+          "scopeMetrics":[
              {
-                "instrumentationLibrary":{
+                "scope":{
                    
                 },
                 "metrics":[
