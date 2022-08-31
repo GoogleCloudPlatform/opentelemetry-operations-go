@@ -117,7 +117,7 @@ func TestLogMapping(t *testing.T) {
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				log.Body().SetBytesVal(pcommon.NewImmutableByteSlice([]byte(`{"message": "hello!"}`)))
-				log.Attributes().Insert(HTTPRequestAttributeKey, pcommon.NewValueBytes(pcommon.NewImmutableByteSlice([]byte(`{
+				log.Attributes().UpsertBytes(HTTPRequestAttributeKey, pcommon.NewImmutableByteSlice([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
 						"requestSize": "1",
@@ -131,7 +131,7 @@ func TestLogMapping(t *testing.T) {
 						"cacheValidatedWithOriginServer": false,
 						"cacheFillBytes": "1",
 						"protocol": "HTTP/2"
-					}`))))
+					}`)))
 				return log
 			},
 			mr: func() *monitoredres.MonitoredResource {
@@ -200,9 +200,9 @@ func TestLogMapping(t *testing.T) {
 			},
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Attributes().Insert(
+				log.Attributes().UpsertBytes(
 					SourceLocationAttributeKey,
-					pcommon.NewValueBytes(pcommon.NewImmutableByteSlice([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`))),
+					pcommon.NewImmutableByteSlice([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`)),
 				)
 				return log
 			},
@@ -225,10 +225,7 @@ func TestLogMapping(t *testing.T) {
 			},
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Attributes().Insert(
-					TraceSampledAttributeKey,
-					pcommon.NewValueBool(true),
-				)
+				log.Attributes().UpsertBool(TraceSampledAttributeKey, true)
 				return log
 			},
 			expectedEntries: []logging.Entry{
@@ -266,7 +263,7 @@ func TestLogMapping(t *testing.T) {
 			},
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.SetSeverityNumber(plog.SeverityNumberFATAL)
+				log.SetSeverityNumber(plog.SeverityNumberFatal)
 				return log
 			},
 			expectedEntries: []logging.Entry{
@@ -347,7 +344,7 @@ func TestGetLogName(t *testing.T) {
 			name: "log with name attribute",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Attributes().Insert(LogNameAttributeKey, pcommon.NewValueString("foo-log"))
+				log.Attributes().UpsertString(LogNameAttributeKey, "foo-log")
 				return log
 			},
 			expectedName: "foo-log",

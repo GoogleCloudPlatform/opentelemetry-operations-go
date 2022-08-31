@@ -289,7 +289,7 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			r := pcommon.NewResource()
 			for k, v := range test.resourceLabels {
-				r.Attributes().InsertString(k, v)
+				r.Attributes().UpsertString(k, v)
 			}
 			mr := defaultResourceToMonitoredResource(r)
 			assert.Equal(t, test.expectMr, mr)
@@ -466,7 +466,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 			}
 			r := pcommon.NewResource()
 			for k, v := range test.resourceLabels {
-				r.Attributes().InsertString(k, v)
+				r.Attributes().UpsertString(k, v)
 			}
 			extraLabels := mapper.resourceToMetricLabels(r)
 			assert.Equal(t, test.expectExtraLabels, extraLabels)
@@ -512,7 +512,7 @@ func TestResourceMetricsToMonitoredResourceUTF8(t *testing.T) {
 	}
 	r := pcommon.NewResource()
 	for k, v := range resourceLabels {
-		r.Attributes().InsertString(k, v)
+		r.Attributes().UpsertString(k, v)
 	}
 	mr := defaultResourceToMonitoredResource(r)
 	assert.Equal(t, expectMr, mr)

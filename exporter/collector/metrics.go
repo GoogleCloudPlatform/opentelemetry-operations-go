@@ -403,7 +403,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	sum pmetric.Summary,
 	point pmetric.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().NoRecordedValue() {
+	if point.FlagsImmutable().NoRecordedValue() {
 		// Drop points without a value.
 		return nil
 	}
@@ -658,7 +658,7 @@ func (m *metricMapper) histogramToTimeSeries(
 	point pmetric.HistogramDataPoint,
 	projectID string,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().NoRecordedValue() || !point.HasSum() {
+	if point.FlagsImmutable().NoRecordedValue() || !point.HasSum() {
 		// Drop points without a value or without a sum
 		return nil
 	}
@@ -712,7 +712,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	point pmetric.ExponentialHistogramDataPoint,
 	projectID string,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().NoRecordedValue() {
+	if point.FlagsImmutable().NoRecordedValue() {
 		// Drop points without a value.
 		return nil
 	}
@@ -766,7 +766,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 ) []*monitoringpb.TimeSeries {
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
 	var startTime *timestamppb.Timestamp
-	if point.Flags().NoRecordedValue() {
+	if point.FlagsImmutable().NoRecordedValue() {
 		// Drop points without a value.  This may be a staleness marker from
 		// prometheus.
 		return nil
@@ -821,7 +821,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	gauge pmetric.Gauge,
 	point pmetric.NumberDataPoint,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().NoRecordedValue() {
+	if point.FlagsImmutable().NoRecordedValue() {
 		// Drop points without a value.
 		return nil
 	}

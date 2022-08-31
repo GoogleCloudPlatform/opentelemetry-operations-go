@@ -85,30 +85,30 @@ var severityMapping = []logging.Severity{
 // Otherwise, this is the mapping that is automatically used by the Stanza log severity parser
 // (https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/v0.54.0/pkg/stanza/operator/helper/severity_builder.go#L34-L57)
 var otelSeverityForText = map[string]plog.SeverityNumber{
-	"trace":  plog.SeverityNumberTRACE,
-	"trace2": plog.SeverityNumberTRACE2,
-	"trace3": plog.SeverityNumberTRACE3,
-	"trace4": plog.SeverityNumberTRACE4,
-	"debug":  plog.SeverityNumberDEBUG,
-	"debug2": plog.SeverityNumberDEBUG2,
-	"debug3": plog.SeverityNumberDEBUG3,
-	"debug4": plog.SeverityNumberDEBUG4,
-	"info":   plog.SeverityNumberINFO,
-	"info2":  plog.SeverityNumberINFO2,
-	"info3":  plog.SeverityNumberINFO3,
-	"info4":  plog.SeverityNumberINFO4,
-	"warn":   plog.SeverityNumberWARN,
-	"warn2":  plog.SeverityNumberWARN2,
-	"warn3":  plog.SeverityNumberWARN3,
-	"warn4":  plog.SeverityNumberWARN4,
-	"error":  plog.SeverityNumberERROR,
-	"error2": plog.SeverityNumberERROR2,
-	"error3": plog.SeverityNumberERROR3,
-	"error4": plog.SeverityNumberERROR4,
-	"fatal":  plog.SeverityNumberFATAL,
-	"fatal2": plog.SeverityNumberFATAL2,
-	"fatal3": plog.SeverityNumberFATAL3,
-	"fatal4": plog.SeverityNumberFATAL4,
+	"trace":  plog.SeverityNumberTrace,
+	"trace2": plog.SeverityNumberTrace2,
+	"trace3": plog.SeverityNumberTrace3,
+	"trace4": plog.SeverityNumberTrace4,
+	"debug":  plog.SeverityNumberDebug,
+	"debug2": plog.SeverityNumberDebug2,
+	"debug3": plog.SeverityNumberDebug3,
+	"debug4": plog.SeverityNumberDebug4,
+	"info":   plog.SeverityNumberInfo,
+	"info2":  plog.SeverityNumberInfo2,
+	"info3":  plog.SeverityNumberInfo3,
+	"info4":  plog.SeverityNumberInfo4,
+	"warn":   plog.SeverityNumberWarn,
+	"warn2":  plog.SeverityNumberWarn2,
+	"warn3":  plog.SeverityNumberWarn3,
+	"warn4":  plog.SeverityNumberWarn4,
+	"error":  plog.SeverityNumberError,
+	"error2": plog.SeverityNumberError2,
+	"error3": plog.SeverityNumberError3,
+	"error4": plog.SeverityNumberError4,
+	"fatal":  plog.SeverityNumberFatal,
+	"fatal2": plog.SeverityNumberFatal2,
+	"fatal3": plog.SeverityNumberFatal3,
+	"fatal4": plog.SeverityNumberFatal4,
 }
 
 type LogsExporter struct {
@@ -383,7 +383,7 @@ func (l logMapper) logToSplitEntries(
 		return []logging.Entry{entry}, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
 	}
 	severityNumber := log.SeverityNumber()
-	// Log severity levels are based on numerical values defined by Otel/GCP, which are informally mapped to generic text values such as "ALERT", "DEBUG", etc.
+	// Log severity levels are based on numerical values defined by Otel/GCP, which are informally mapped to generic text values such as "ALERT", "Debug", etc.
 	// In some cases, a SeverityText value can be automatically mapped to a matching SeverityNumber.
 	// If not (for example, when directly setting the SeverityText on a Log entry with the Transform processor), then the
 	// SeverityText might be something like "ALERT" while the SeverityNumber is still "0".
