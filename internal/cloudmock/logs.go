@@ -12,20 +12,15 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package integrationtest
+package cloudmock
 
 import (
 	"context"
 	"net"
 	"sync"
-	"testing"
 
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	logpb "google.golang.org/genproto/googleapis/logging/v2"
 	"google.golang.org/grpc"
-
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 type LogsTestServer struct {
@@ -89,27 +84,4 @@ func NewLoggingTestServer() (*LogsTestServer, error) {
 	)
 
 	return testServer, nil
-}
-
-func (l *LogsTestServer) NewExporter(
-	ctx context.Context,
-	t testing.TB,
-	cfg collector.Config,
-) *collector.LogsExporter {
-
-	cfg.LogConfig.ClientConfig.Endpoint = l.Endpoint
-	cfg.LogConfig.ClientConfig.UseInsecure = true
-	cfg.ProjectID = "fakeprojectid"
-
-	logger, err := zap.NewDevelopment()
-	require.NoError(t, err)
-
-	exporter, err := collector.NewGoogleCloudLogsExporter(
-		ctx,
-		cfg,
-		logger,
-	)
-	require.NoError(t, err)
-	t.Logf("Collector LogsTestServer exporter started, pointing at %v", cfg.LogConfig.ClientConfig.Endpoint)
-	return exporter
 }

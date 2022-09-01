@@ -6,6 +6,7 @@ require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.11
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.32.6
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.32.6
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.0.0-00010101000000-000000000000
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.32.6
 	github.com/google/go-cmp v0.5.8
 	github.com/stretchr/testify v1.8.0
@@ -14,7 +15,7 @@ require (
 	go.opentelemetry.io/collector/pdata v0.59.0
 	go.uber.org/zap v1.23.0
 	google.golang.org/api v0.74.0
-	google.golang.org/genproto v0.0.0-20220405205423-9d709892a2bf
+	google.golang.org/genproto v0.0.0-20220829175752-36a9c930ecbf
 	google.golang.org/grpc v1.49.0
 	google.golang.org/protobuf v1.28.1
 )
@@ -64,5 +65,6 @@ replace (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector => ../../collector
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus => ../../collector/googlemanagedprometheus
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../../trace
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../../internal/cloudmock
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../../internal/resourcemapping
 )

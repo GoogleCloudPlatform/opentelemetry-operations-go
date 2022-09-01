@@ -12,20 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package integrationtest
+package cloudmock
 
 import (
 	"context"
 	"net"
 	"sync"
-	"testing"
+	"time"
 
-	"github.com/stretchr/testify/require"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
-
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 type TracesTestServer struct {
@@ -48,12 +45,14 @@ func (t *TracesTestServer) Serve() {
 type fakeTraceServiceServer struct {
 	tracepb.UnimplementedTraceServiceServer
 	tracesTestServer *TracesTestServer
+	cfg              config
 }
 
 func (f *fakeTraceServiceServer) BatchWriteSpans(
 	ctx context.Context,
 	request *tracepb.BatchWriteSpansRequest,
 ) (*emptypb.Empty, error) {
+	time.Sleep(f.cfg.delay)
 	f.tracesTestServer.appendBatchWriteSpansRequest(request)
 	return &emptypb.Empty{}, nil
 }
@@ -72,7 +71,7 @@ func (t *TracesTestServer) CreateBatchWriteSpansRequests() []*tracepb.BatchWrite
 	return reqs
 }
 
-func NewTracesTestServer() (*TracesTestServer, error) {
+func NewTracesTestServer(opts ...TraceServerOption) (*TracesTestServer, error) {
 	srv := grpc.NewServer()
 	lis, err := net.Listen("tcp", "localhost:0")
 	if err != nil {
@@ -83,31 +82,36 @@ func NewTracesTestServer() (*TracesTestServer, error) {
 		lis:      lis,
 		srv:      srv,
 	}
+	var c config
+	for _, option := range opts {
+		c = option.apply(c)
+	}
 	tracepb.RegisterTraceServiceServer(
 		srv,
-		&fakeTraceServiceServer{tracesTestServer: testServer},
+		&fakeTraceServiceServer{tracesTestServer: testServer, cfg: c},
 	)
 
 	return testServer, nil
 }
 
-func (s *TracesTestServer) NewExporter(
-	ctx context.Context,
-	t testing.TB,
-	cfg collector.Config,
-) *collector.TraceExporter {
+type TraceServerOption interface {
+	apply(config) config
+}
 
-	cfg.TraceConfig.ClientConfig.Endpoint = s.Endpoint
-	cfg.TraceConfig.ClientConfig.UseInsecure = true
-	cfg.ProjectID = "fakeprojectid"
+type config struct {
+	delay time.Duration
+}
 
-	exporter, err := collector.NewGoogleCloudTracesExporter(
-		ctx,
-		cfg,
-		"latest",
-		collector.DefaultTimeout,
-	)
-	require.NoError(t, err)
-	t.Logf("Collector TracesTestServer exporter started, pointing at %v", cfg.TraceConfig.ClientConfig.Endpoint)
-	return exporter
+type optionFunc func(config) config
+
+func (fn optionFunc) apply(cfg config) config {
+	return fn(cfg)
+}
+
+// WithDelay sets a delay on the test server before it responds
+func WithDelay(t time.Duration) TraceServerOption {
+	return optionFunc(func(cfg config) config {
+		cfg.delay = t
+		return cfg
+	})
 }

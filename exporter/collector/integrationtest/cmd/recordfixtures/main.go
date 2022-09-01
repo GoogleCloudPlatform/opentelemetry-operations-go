@@ -27,6 +27,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest"
 )
@@ -59,7 +60,7 @@ func main() {
 }
 
 func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
-	testServer, err := integrationtest.NewTracesTestServer()
+	testServer, err := cloudmock.NewTracesTestServer()
 	if err != nil {
 		panic(err)
 	}
@@ -73,7 +74,7 @@ func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.T
 
 		func() {
 			traces := test.LoadOTLPTracesInput(t, startTime, endTime)
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateTraceConfig())
+			testServerExporter := integrationtest.NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig())
 
 			require.NoError(t, testServerExporter.PushTraces(ctx, traces), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
@@ -88,7 +89,7 @@ func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.T
 }
 
 func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
-	testServer, err := integrationtest.NewLoggingTestServer()
+	testServer, err := cloudmock.NewLoggingTestServer()
 	if err != nil {
 		panic(err)
 	}
@@ -101,7 +102,7 @@ func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
 		}
 		func() {
 			logs := test.LoadOTLPLogsInput(t, timestamp)
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateLogConfig())
+			testServerExporter := integrationtest.NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig())
 
 			require.NoError(t, testServerExporter.PushLogs(ctx, logs), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
@@ -116,7 +117,7 @@ func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
 }
 
 func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
-	testServer, err := integrationtest.NewMetricTestServer()
+	testServer, err := cloudmock.NewMetricTestServer()
 	if err != nil {
 		panic(err)
 	}
@@ -129,7 +130,7 @@ func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.
 		}
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateMetricConfig())
+			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateMetricConfig())
 			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
 			require.NoError(t, err)
 			defer inMemoryOCExporter.Shutdown(ctx)

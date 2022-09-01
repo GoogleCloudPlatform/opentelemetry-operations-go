@@ -9,7 +9,7 @@ require (
 	go.opentelemetry.io/otel v1.9.0
 	go.opentelemetry.io/otel/sdk v1.9.0
 	go.opentelemetry.io/otel/trace v1.9.0
-	google.golang.org/genproto v0.0.0-20220616135557-88e70c0c3a90
+	google.golang.org/genproto v0.0.0-20220829175752-36a9c930ecbf
 )
 
 require go.opentelemetry.io/contrib/detectors/gcp v1.9.0
@@ -37,8 +37,8 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/api v0.84.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/grpc v1.47.0 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/grpc v1.49.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 )
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../exporter/trace
@@ -46,5 +46,7 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trac
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../internal/resourcemapping
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp => ../detectors/gcp
+
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../internal/cloudmock
 
 retract v1.0.0-RC1

@@ -27,7 +27,6 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
@@ -37,12 +36,21 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
 func TestExporter_ExportSpan(t *testing.T) {
 	// Initial test precondition
-	mock := cloudmock.NewCloudMock()
-	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
+	testServer, err := cloudmock.NewTracesTestServer()
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
+	clientOpt := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
 
 	// Create Google Cloud Trace Exporter
 	exporter, err := New(
@@ -51,10 +59,9 @@ func TestExporter_ExportSpan(t *testing.T) {
 	assert.NoError(t, err)
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithBatcher(exporter))
-
+		sdktrace.WithSyncer(exporter))
+	defer tp.Shutdown(context.Background())
 	otel.SetTracerProvider(tp)
-	shutdown := func() { tp.Shutdown(context.Background()) }
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	// NOTE: https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#set-status
@@ -71,16 +78,19 @@ func TestExporter_ExportSpan(t *testing.T) {
 	span.SetStatus(codes.Error, "Error Message")
 	span.End()
 
-	// wait exporter to shutdown (closes grpc connection)
-	shutdown()
-	assert.EqualValues(t, 2, mock.GetNumSpans())
+	batch := testServer.CreateBatchWriteSpansRequests()
+	assert.Equal(t, 2, len(batch))
+	assert.Equal(t, batch[0].GetName(), "projects/PROJECT_ID_NOT_REAL")
+	assert.Equal(t, batch[1].GetName(), "projects/PROJECT_ID_NOT_REAL")
+	assert.Equal(t, 1, len(batch[0].GetSpans()))
+	assert.Equal(t, 1, len(batch[1].GetSpans()))
 	// Note: Go returns empty string for an unset member.
-	assert.EqualValues(t, codepb.Code_OK, mock.GetSpan(0).GetStatus().Code)
-	assert.EqualValues(t, "", mock.GetSpan(0).GetStatus().Message)
-	assert.EqualValues(t, codepb.Code_UNKNOWN, mock.GetSpan(1).GetStatus().Code)
-	assert.EqualValues(t, "Error Message", mock.GetSpan(1).GetStatus().Message)
-	assert.Nil(t, mock.GetSpan(0).Links)
-	assert.Len(t, mock.GetSpan(1).Links.Link, 1)
+	assert.EqualValues(t, codepb.Code_OK, batch[0].GetSpans()[0].GetStatus().Code)
+	assert.EqualValues(t, "", batch[0].GetSpans()[0].GetStatus().Message)
+	assert.EqualValues(t, codepb.Code_UNKNOWN, batch[1].GetSpans()[0].GetStatus().Code)
+	assert.EqualValues(t, "Error Message", batch[1].GetSpans()[0].GetStatus().Message)
+	assert.Nil(t, batch[0].GetSpans()[0].Links)
+	assert.Len(t, batch[1].GetSpans()[0].Links.Link, 1)
 }
 
 type errorHandler struct {
@@ -93,34 +103,39 @@ func (e *errorHandler) Handle(err error) {
 
 func TestExporter_Timeout(t *testing.T) {
 	// Initial test precondition
-	mock := cloudmock.NewCloudMock()
-	mock.SetDelay(20 * time.Millisecond)
-	clientOpt := []option.ClientOption{option.WithGRPCConn(mock.ClientConn())}
+	testServer, err := cloudmock.NewTracesTestServer(cloudmock.WithDelay(20 * time.Millisecond))
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
+	clientOpt := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
 	handler := &errorHandler{}
 
 	// Create Google Cloud Trace Exporter
 	exporter, err := New(
 		WithProjectID("PROJECT_ID_NOT_REAL"),
 		WithTraceClientOptions(clientOpt),
-		WithTimeout(1*time.Millisecond),
+		WithTimeout(time.Millisecond),
 		// handle bundle as soon as span is received
 		WithErrorHandler(handler),
 	)
 	assert.NoError(t, err)
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithBatcher(exporter))
-
+		sdktrace.WithSyncer(exporter))
+	defer tp.Shutdown(context.Background())
 	otel.SetTracerProvider(tp)
-	shutdown := func() { tp.Shutdown(context.Background()) }
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.End()
 	assert.True(t, span.SpanContext().IsValid())
 
 	// wait for error to be handled
-	shutdown() // closed grpc connection
-	assert.EqualValues(t, 0, mock.GetNumSpans())
+	batch := testServer.CreateBatchWriteSpansRequests()
+	assert.Equal(t, 0, len(batch))
 	if got, want := len(handler.errs), 1; got != want {
 		t.Fatalf("len(exportErrors) = %q; want %q", got, want)
 	}

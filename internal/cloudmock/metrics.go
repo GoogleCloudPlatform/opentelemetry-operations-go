@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2022 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,25 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package integrationtest
+package cloudmock
 
 import (
 	"context"
 	"net"
 	"strings"
 	"sync"
-	"testing"
 
-	"github.com/stretchr/testify/require"
-	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/metric"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
-
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 type MetricsTestServer struct {
@@ -156,26 +151,4 @@ func NewMetricTestServer() (*MetricsTestServer, error) {
 	)
 
 	return testServer, nil
-}
-
-// NewExporter creates and starts a googlecloud exporter by updating the
-// given cfg copy to point to the test server.
-func (m *MetricsTestServer) NewExporter(
-	ctx context.Context,
-	t testing.TB,
-	cfg collector.Config,
-) *collector.MetricsExporter {
-	cfg.MetricConfig.ClientConfig.Endpoint = m.Endpoint
-	cfg.MetricConfig.ClientConfig.UseInsecure = true
-
-	exporter, err := collector.NewGoogleCloudMetricsExporter(
-		ctx,
-		cfg,
-		zap.NewNop(),
-		"latest",
-		collector.DefaultTimeout,
-	)
-	require.NoError(t, err)
-	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.MetricConfig.ClientConfig.Endpoint)
-	return exporter
 }
