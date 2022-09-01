@@ -35,7 +35,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
-	"github.com/googleinterns/cloud-operations-api-mock/cloudmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
@@ -45,6 +44,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
 var (
@@ -55,17 +56,23 @@ var (
 
 func TestExportMetrics(t *testing.T) {
 	ctx := context.Background()
-	cloudMock := cloudmock.NewCloudMock()
-	defer cloudMock.Shutdown()
+	testServer, err := cloudmock.NewMetricTestServer()
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
 
-	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
 	res := &resource.Resource{}
 	aggSel := processortest.AggregatorSelector()
 	proc := processor.NewFactory(aggSel, aggregation.CumulativeTemporalitySelector())
 
 	opts := []Option{
 		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithMonitoringClientOptions(clientOpt),
+		WithMonitoringClientOptions(clientOpts...),
 		WithMetricDescriptorTypeFormatter(formatter),
 	}
 
@@ -88,10 +95,16 @@ func TestExportMetrics(t *testing.T) {
 }
 
 func TestExportCounter(t *testing.T) {
-	cloudMock := cloudmock.NewCloudMock()
-	defer cloudMock.Shutdown()
+	testServer, err := cloudmock.NewMetricTestServer()
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
 
-	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
 
 	resOpt := controller.WithResource(
 		resource.NewWithAttributes(
@@ -103,7 +116,7 @@ func TestExportCounter(t *testing.T) {
 	pusher, err := InstallNewPipeline(
 		[]Option{
 			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpt),
+			WithMonitoringClientOptions(clientOpts...),
 			WithMetricDescriptorTypeFormatter(formatter),
 		},
 		resOpt,
@@ -124,10 +137,16 @@ func TestExportCounter(t *testing.T) {
 }
 
 func TestExportHistogram(t *testing.T) {
-	cloudMock := cloudmock.NewCloudMock()
-	defer cloudMock.Shutdown()
+	testServer, err := cloudmock.NewMetricTestServer()
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
 
-	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
 
 	resOpt := controller.WithResource(
 		resource.NewWithAttributes(
@@ -139,7 +158,7 @@ func TestExportHistogram(t *testing.T) {
 	pusher, err := InstallNewPipeline(
 		[]Option{
 			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpt),
+			WithMonitoringClientOptions(clientOpts...),
 			WithMetricDescriptorTypeFormatter(formatter),
 		},
 		resOpt,
@@ -193,10 +212,16 @@ func TestDescToMetricType(t *testing.T) {
 
 func TestRecordToMpb(t *testing.T) {
 	ctx := context.Background()
-	cloudMock := cloudmock.NewCloudMock()
-	defer cloudMock.Shutdown()
+	testServer, err := cloudmock.NewMetricTestServer()
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
 
-	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
 
 	resOpt := controller.WithResource(
 		resource.NewWithAttributes(
@@ -208,7 +233,7 @@ func TestRecordToMpb(t *testing.T) {
 	pusher, err := InstallNewPipeline(
 		[]Option{
 			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpt),
+			WithMonitoringClientOptions(clientOpts...),
 			WithMetricDescriptorTypeFormatter(formatter),
 		},
 		resOpt,
@@ -603,15 +628,21 @@ func TestRecordToMpbUTF8(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	cloudMock := cloudmock.NewCloudMock()
-	defer cloudMock.Shutdown()
+	testServer, err := cloudmock.NewMetricTestServer()
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
 
-	clientOpt := option.WithGRPCConn(cloudMock.ClientConn())
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
 
 	pusher, err := InstallNewPipeline(
 		[]Option{
 			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpt),
+			WithMonitoringClientOptions(clientOpts...),
 			WithMetricDescriptorTypeFormatter(formatter),
 		},
 	)
