@@ -65,13 +65,13 @@ func (m *metricMapper) resourceToMetricLabels(
 			(k == semconv.AttributeServiceName ||
 				k == semconv.AttributeServiceNamespace ||
 				k == semconv.AttributeServiceInstanceID) {
-			attrs.Insert(k, v)
+			v.CopyTo(attrs.UpsertEmpty(k))
 			return true
 		}
 		// Matches one of the resource filters
 		for _, resourceFilter := range m.cfg.MetricConfig.ResourceFilters {
 			if strings.HasPrefix(k, resourceFilter.Prefix) {
-				attrs.Insert(k, v)
+				v.CopyTo(attrs.UpsertEmpty(k))
 				return true
 			}
 		}

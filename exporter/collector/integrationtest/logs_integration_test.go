@@ -26,7 +26,6 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 
@@ -83,9 +82,6 @@ func setSecondProjectInLogs(t *testing.T, logs plog.Logs) {
 	secondProject := os.Getenv(testcases.SecondProjectEnv)
 	require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
 	for i := 0; i < logs.ResourceLogs().Len(); i++ {
-		logs.ResourceLogs().At(i).Resource().Attributes().Update(
-			resourcemapping.ProjectIDAttributeKey,
-			pcommon.NewValueString(secondProject),
-		)
+		logs.ResourceLogs().At(i).Resource().Attributes().UpdateString(resourcemapping.ProjectIDAttributeKey, secondProject)
 	}
 }

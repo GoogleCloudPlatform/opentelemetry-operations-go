@@ -113,7 +113,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			span := ispans.Spans().AppendEmpty()
 			span.SetName(spanName)
 			span.SetStartTimestamp(pcommon.NewTimestampFromTime(testTime))
-			span.Attributes().InsertString("service.name", "myservice")
+			span.Attributes().UpsertString("service.name", "myservice")
 			err = sde.PushTraces(ctx, traces)
 			assert.NoError(t, err)
 
