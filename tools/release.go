@@ -29,8 +29,8 @@ import (
 const (
 	prefix = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
 
-	stable   = "1.8.6"
-	unstable = "0.32.6"
+	stable   = "1.8.7"
+	unstable = "0.32.7"
 )
 
 var versions = map[string]string{
@@ -45,6 +45,7 @@ var versions = map[string]string{
 	"exporter/collector/googlemanagedprometheus/": unstable,
 
 	"internal/resourcemapping/": unstable,
+	"internal/cloudmock/":       unstable,
 
 	"detectors/gcp/": unstable,
 }

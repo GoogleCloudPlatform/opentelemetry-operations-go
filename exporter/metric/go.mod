@@ -21,7 +21,7 @@ require (
 	gopkg.in/check.v1 v1.0.0-20190902080502-41f04d3bba15 // indirect
 )
 
-require github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.0.0-00010101000000-000000000000
+require github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.32.7
 
 require (
 	cloud.google.com/go/compute v1.5.0 // indirect
