@@ -16,20 +16,22 @@ package integrationtest
 
 import (
 	"context"
+	"testing"
 	"time"
 
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	"github.com/stretchr/testify/require"
 	"go.opencensus.io/metric/metricexport"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
+	"go.uber.org/zap"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
-
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 // OC stats/metrics exporter used to capture self observability metrics
@@ -117,4 +119,73 @@ func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
 			reader:              metricexport.NewReader(),
 		},
 		nil
+}
+
+func NewTraceTestExporter(
+	ctx context.Context,
+	t testing.TB,
+	s *cloudmock.TracesTestServer,
+	cfg collector.Config,
+) *collector.TraceExporter {
+
+	cfg.TraceConfig.ClientConfig.Endpoint = s.Endpoint
+	cfg.TraceConfig.ClientConfig.UseInsecure = true
+	cfg.ProjectID = "fakeprojectid"
+
+	exporter, err := collector.NewGoogleCloudTracesExporter(
+		ctx,
+		cfg,
+		"latest",
+		collector.DefaultTimeout,
+	)
+	require.NoError(t, err)
+	t.Logf("Collector TracesTestServer exporter started, pointing at %v", cfg.TraceConfig.ClientConfig.Endpoint)
+	return exporter
+}
+
+// NewMetricsTestExporter creates and starts a googlecloud exporter by updating the
+// given cfg copy to point to the test server.
+func NewMetricTestExporter(
+	ctx context.Context,
+	t testing.TB,
+	m *cloudmock.MetricsTestServer,
+	cfg collector.Config,
+) *collector.MetricsExporter {
+	cfg.MetricConfig.ClientConfig.Endpoint = m.Endpoint
+	cfg.MetricConfig.ClientConfig.UseInsecure = true
+
+	exporter, err := collector.NewGoogleCloudMetricsExporter(
+		ctx,
+		cfg,
+		zap.NewNop(),
+		"latest",
+		collector.DefaultTimeout,
+	)
+	require.NoError(t, err)
+	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.MetricConfig.ClientConfig.Endpoint)
+	return exporter
+}
+
+func NewLogTestExporter(
+	ctx context.Context,
+	t testing.TB,
+	l *cloudmock.LogsTestServer,
+	cfg collector.Config,
+) *collector.LogsExporter {
+
+	cfg.LogConfig.ClientConfig.Endpoint = l.Endpoint
+	cfg.LogConfig.ClientConfig.UseInsecure = true
+	cfg.ProjectID = "fakeprojectid"
+
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+
+	exporter, err := collector.NewGoogleCloudLogsExporter(
+		ctx,
+		cfg,
+		logger,
+	)
+	require.NoError(t, err)
+	t.Logf("Collector LogsTestServer exporter started, pointing at %v", cfg.LogConfig.ClientConfig.Endpoint)
+	return exporter
 }
