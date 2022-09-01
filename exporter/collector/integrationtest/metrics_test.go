@@ -24,6 +24,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
 func TestMetrics(t *testing.T) {
@@ -39,11 +40,11 @@ func TestMetrics(t *testing.T) {
 
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 
-			testServer, err := NewMetricTestServer()
+			testServer, err := cloudmock.NewMetricTestServer()
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateMetricConfig())
+			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateMetricConfig())
 			// For collecting self observability metrics
 			inMemoryOCExporter, err := NewInMemoryOCViewExporter()
 			require.NoError(t, err)

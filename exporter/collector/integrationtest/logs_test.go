@@ -23,6 +23,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
 func TestLogs(t *testing.T) {
@@ -36,12 +37,12 @@ func TestLogs(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			logs := test.LoadOTLPLogsInput(t, timestamp)
 
-			testServer, err := NewLoggingTestServer()
+			testServer, err := cloudmock.NewLoggingTestServer()
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
 
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateLogConfig())
+			testServerExporter := NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig())
 
 			require.NoError(
 				t,

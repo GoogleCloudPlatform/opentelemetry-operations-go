@@ -23,6 +23,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
 func TestTraces(t *testing.T) {
@@ -37,11 +38,11 @@ func TestTraces(t *testing.T) {
 			test.SkipIfNeeded(t)
 
 			traces := test.LoadOTLPTracesInput(t, startTime, endTime)
-			testServer, err := NewTracesTestServer()
+			testServer, err := cloudmock.NewTracesTestServer()
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := testServer.NewExporter(ctx, t, test.CreateTraceConfig())
+			testServerExporter := NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig())
 
 			err = testServerExporter.PushTraces(ctx, traces)
 			if !test.ExpectErr {

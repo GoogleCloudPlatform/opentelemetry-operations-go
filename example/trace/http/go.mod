@@ -8,6 +8,8 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/reso
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go => ../../..
 
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../../internal/cloudmock
+
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go v0.32.6
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.8.6
@@ -38,9 +40,9 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/api v0.74.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20220405205423-9d709892a2bf // indirect
-	google.golang.org/grpc v1.45.0 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/genproto v0.0.0-20220829175752-36a9c930ecbf // indirect
+	google.golang.org/grpc v1.49.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 )
 
 retract (

@@ -27,13 +27,14 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 // OC stats/metrics exporter used to capture self observability metrics
 type InMemoryOCExporter struct {
-	testServer          *MetricsTestServer
+	testServer          *cloudmock.MetricsTestServer
 	reader              *metricexport.Reader
 	stackdriverExporter *stackdriver.Exporter
 }
@@ -89,7 +90,7 @@ func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
 	view.Unregister(views...)
 	view.Register(views...)
 
-	testServer, err := NewMetricTestServer()
+	testServer, err := cloudmock.NewMetricTestServer()
 	if err != nil {
 		return nil, err
 	}

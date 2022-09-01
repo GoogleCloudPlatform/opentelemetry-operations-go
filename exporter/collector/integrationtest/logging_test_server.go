@@ -16,84 +16,19 @@ package integrationtest
 
 import (
 	"context"
-	"net"
-	"sync"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
-	logpb "google.golang.org/genproto/googleapis/logging/v2"
-	"google.golang.org/grpc"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
-type LogsTestServer struct {
-	lis net.Listener
-	srv *grpc.Server
-	// Endpoint where the gRPC server is listening
-	Endpoint                string
-	writeLogEntriesRequests []*logpb.WriteLogEntriesRequest
-	mu                      sync.Mutex
-}
-
-func (l *LogsTestServer) Shutdown() {
-	l.srv.GracefulStop()
-}
-
-func (l *LogsTestServer) Serve() {
-	l.srv.Serve(l.lis)
-}
-
-func (l *LogsTestServer) CreateWriteLogEntriesRequests() []*logpb.WriteLogEntriesRequest {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	reqs := l.writeLogEntriesRequests
-	l.writeLogEntriesRequests = nil
-	return reqs
-}
-
-func (l *LogsTestServer) appendWriteLogEntriesRequest(req *logpb.WriteLogEntriesRequest) {
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.writeLogEntriesRequests = append(l.writeLogEntriesRequests, req)
-}
-
-type fakeLoggingServiceServer struct {
-	logpb.UnimplementedLoggingServiceV2Server
-	logsTestServer *LogsTestServer
-}
-
-func (f *fakeLoggingServiceServer) WriteLogEntries(
-	ctx context.Context,
-	request *logpb.WriteLogEntriesRequest,
-) (*logpb.WriteLogEntriesResponse, error) {
-	f.logsTestServer.appendWriteLogEntriesRequest(request)
-	return &logpb.WriteLogEntriesResponse{}, nil
-}
-
-func NewLoggingTestServer() (*LogsTestServer, error) {
-	srv := grpc.NewServer()
-	lis, err := net.Listen("tcp", "localhost:0")
-	if err != nil {
-		return nil, err
-	}
-	testServer := &LogsTestServer{
-		Endpoint: lis.Addr().String(),
-		lis:      lis,
-		srv:      srv,
-	}
-	logpb.RegisterLoggingServiceV2Server(
-		srv,
-		&fakeLoggingServiceServer{logsTestServer: testServer},
-	)
-
-	return testServer, nil
-}
-
-func (l *LogsTestServer) NewExporter(
+func NewLogTestExporter(
 	ctx context.Context,
 	t testing.TB,
+	l *cloudmock.LogsTestServer,
 	cfg collector.Config,
 ) *collector.LogsExporter {
 
