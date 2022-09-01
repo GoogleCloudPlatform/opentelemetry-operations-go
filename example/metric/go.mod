@@ -7,7 +7,7 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metr
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../internal/cloudmock
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.32.6
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.32.7
 	go.opentelemetry.io/otel v1.9.0
 	go.opentelemetry.io/otel/metric v0.31.0
 	go.opentelemetry.io/otel/sdk v1.9.0
