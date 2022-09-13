@@ -15,6 +15,7 @@
 package gcp
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -29,6 +30,7 @@ const (
 	faasServiceEnv         = "K_SERVICE"
 	faasRevisionEnv        = "K_REVISION"
 	jobsRevisionEnv        = "CLOUD_RUN_EXECUTION"
+	jobsTaskIndexEnv       = "CLOUD_RUN_TASK_INDEX"
 	regionMetadataAttr     = "instance/region"
 )
 
@@ -63,7 +65,9 @@ func (d *Detector) FaaSVersion() (string, error) {
 		return version, nil
 	}
 	if version, found := d.os.LookupEnv(jobsRevisionEnv); found {
-		return version, nil
+		if index, found := d.os.LookupEnv(jobsTaskIndexEnv); found {
+			return fmt.Sprintf("%s/%s", version, index), nil
+		}
 	}
 	return "", errEnvVarNotFound
 }

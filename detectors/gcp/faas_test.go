@@ -66,12 +66,13 @@ func TestFaaSVersion(t *testing.T) {
 func TestFaaSJobsVersion(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{
-			jobsRevisionEnv: "version-123",
+			jobsRevisionEnv:  "version-123",
+			jobsTaskIndexEnv: "0",
 		},
 	})
 	version, err := d.FaaSVersion()
 	assert.NoError(t, err)
-	assert.Equal(t, version, "version-123")
+	assert.Equal(t, version, "version-123/0")
 }
 
 func TestFaaSVersionErr(t *testing.T) {
