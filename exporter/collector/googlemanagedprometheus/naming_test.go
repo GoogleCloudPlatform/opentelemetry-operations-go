@@ -86,7 +86,18 @@ func TestGetMetricName(t *testing.T) {
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			metric := pmetric.NewMetric()
-			metric.SetDataType(tc.datatype)
+			switch tc.datatype {
+			case pmetric.MetricDataTypeSum:
+				metric.SetEmptySum()
+			case pmetric.MetricDataTypeGauge:
+				metric.SetEmptyGauge()
+			case pmetric.MetricDataTypeSummary:
+				metric.SetEmptySummary()
+			case pmetric.MetricDataTypeHistogram:
+				metric.SetEmptyHistogram()
+			case pmetric.MetricDataTypeExponentialHistogram:
+				metric.SetEmptyExponentialHistogram()
+			}
 			got, err := GetMetricName(tc.baseName, metric)
 			if tc.expectErr == (err == nil) {
 				t.Errorf("MetricName(%v, %v)=err(%v); want err: %v", baseName, tc.datatype, err, tc.expectErr)

@@ -4,8 +4,8 @@ go 1.17
 
 require (
 	github.com/stretchr/testify v1.8.0
-	go.opentelemetry.io/collector/pdata v0.59.0
-	go.opentelemetry.io/collector/semconv v0.59.0
+	go.opentelemetry.io/collector/pdata v0.60.0
+	go.opentelemetry.io/collector/semconv v0.60.0
 	google.golang.org/genproto v0.0.0-20220405205423-9d709892a2bf
 )
 

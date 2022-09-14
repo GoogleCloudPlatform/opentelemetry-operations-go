@@ -259,9 +259,9 @@ func TestIdentifier(t *testing.T) {
 	metricWithName := pmetric.NewMetric()
 	metricWithName.SetName("custom.googleapis.com/test.metric")
 	dpWithAttributes := pmetric.NewNumberDataPoint()
-	dpWithAttributes.Attributes().UpsertString("string", "strval")
-	dpWithAttributes.Attributes().UpsertBool("bool", true)
-	dpWithAttributes.Attributes().UpsertInt("int", 123)
+	dpWithAttributes.Attributes().PutString("string", "strval")
+	dpWithAttributes.Attributes().PutBool("bool", true)
+	dpWithAttributes.Attributes().PutInt("int", 123)
 	monitoredResource := &monitoredrespb.MonitoredResource{
 		Type: "generic_task",
 		Labels: map[string]string{

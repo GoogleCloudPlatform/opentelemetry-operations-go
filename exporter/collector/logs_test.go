@@ -44,10 +44,10 @@ func newTestLogMapper(entrySize int) logMapper {
 func TestLogMapping(t *testing.T) {
 	testObservedTime, _ := time.Parse("2006-01-02", "2022-04-12")
 	testSampleTime, _ := time.Parse("2006-01-02", "2021-07-10")
-	testTraceID := pcommon.NewTraceID([16]byte{
+	testTraceID := pcommon.TraceID([16]byte{
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	})
-	testSpanID := pcommon.NewSpanID([8]byte{
+	testSpanID := pcommon.SpanID([8]byte{
 		0, 0, 0, 0, 0, 0, 0, 1,
 	})
 
@@ -98,7 +98,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetBytesVal(pcommon.NewImmutableByteSlice([]byte(`{"this": "is json"}`)))
+				log.Body().SetEmptyBytesVal().FromRaw([]byte(`{"this": "is json"}`))
 				return log
 			},
 			mr: func() *monitoredres.MonitoredResource {
@@ -116,8 +116,8 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json and httpRequest, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetBytesVal(pcommon.NewImmutableByteSlice([]byte(`{"message": "hello!"}`)))
-				log.Attributes().UpsertBytes(HTTPRequestAttributeKey, pcommon.NewImmutableByteSlice([]byte(`{
+				log.Body().SetEmptyBytesVal().FromRaw([]byte(`{"message": "hello!"}`))
+				log.Attributes().PutEmptyBytes(HTTPRequestAttributeKey).FromRaw([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
 						"requestSize": "1",
@@ -131,7 +131,7 @@ func TestLogMapping(t *testing.T) {
 						"cacheValidatedWithOriginServer": false,
 						"cacheFillBytes": "1",
 						"protocol": "HTTP/2"
-					}`)))
+					}`))
 				return log
 			},
 			mr: func() *monitoredres.MonitoredResource {
@@ -200,9 +200,8 @@ func TestLogMapping(t *testing.T) {
 			},
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Attributes().UpsertBytes(
-					SourceLocationAttributeKey,
-					pcommon.NewImmutableByteSlice([]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`)),
+				log.Attributes().PutEmptyBytes(SourceLocationAttributeKey).FromRaw(
+					[]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`),
 				)
 				return log
 			},
@@ -225,7 +224,7 @@ func TestLogMapping(t *testing.T) {
 			},
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Attributes().UpsertBool(TraceSampledAttributeKey, true)
+				log.Attributes().PutBool(TraceSampledAttributeKey, true)
 				return log
 			},
 			expectedEntries: []logging.Entry{
@@ -344,7 +343,7 @@ func TestGetLogName(t *testing.T) {
 			name: "log with name attribute",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Attributes().UpsertString(LogNameAttributeKey, "foo-log")
+				log.Attributes().PutString(LogNameAttributeKey, "foo-log")
 				return log
 			},
 			expectedName: "foo-log",

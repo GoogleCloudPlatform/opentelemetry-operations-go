@@ -25,8 +25,10 @@ import (
 )
 
 // NewStandardNormalizer performs normalization on cumulative points which:
-//  (a) don't have a start time, OR
-//  (b) have been sent a preceding "reset" point as described in https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
+//
+//	(a) don't have a start time, OR
+//	(b) have been sent a preceding "reset" point as described in https://github.com/open-telemetry/opentelemetry-specification/blob/9555f9594c7ffe5dc333b53da5e0f880026cead1/specification/metrics/datamodel.md#resets-and-gaps
+//
 // The first point without a start time or the reset point is cached, and is
 // NOT exported. Subsequent points "subtract" the initial point prior to exporting.
 // This normalizer also detects subsequent resets, and produces a new start time for those points.
@@ -129,13 +131,13 @@ func subtractExponentialHistogramDataPoint(a, b *pmetric.ExponentialHistogramDat
 	// We drop points without a sum, so no need to check here.
 	newPoint.SetSum(a.Sum() - b.Sum())
 	newPoint.SetZeroCount(a.ZeroCount() - b.ZeroCount())
-	newPoint.Positive().SetBucketCounts(subtractExponentialBuckets(a.Positive(), b.Positive()))
-	newPoint.Negative().SetBucketCounts(subtractExponentialBuckets(a.Negative(), b.Negative()))
+	newPoint.Positive().BucketCounts().FromRaw(subtractExponentialBuckets(a.Positive(), b.Positive()))
+	newPoint.Negative().BucketCounts().FromRaw(subtractExponentialBuckets(a.Negative(), b.Negative()))
 	return &newPoint
 }
 
 // subtractExponentialBuckets returns a - b
-func subtractExponentialBuckets(a, b pmetric.Buckets) pcommon.ImmutableUInt64Slice {
+func subtractExponentialBuckets(a, b pmetric.Buckets) []uint64 {
 	newBuckets := make([]uint64, a.BucketCounts().Len())
 	offsetDiff := int(a.Offset() - b.Offset())
 	for i := 0; i < a.BucketCounts().Len(); i++ {
@@ -147,7 +149,7 @@ func subtractExponentialBuckets(a, b pmetric.Buckets) pcommon.ImmutableUInt64Sli
 			newBuckets[i] = a.BucketCounts().At(i) - b.BucketCounts().At(bOffset)
 		}
 	}
-	return pcommon.NewImmutableUInt64Slice(newBuckets)
+	return newBuckets
 }
 
 func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) *pmetric.HistogramDataPoint {
@@ -195,8 +197,8 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 		// that behavior.
 		zeroPoint := pmetric.NewHistogramDataPoint()
 		zeroPoint.SetTimestamp(newPoint.StartTimestamp())
-		zeroPoint.SetExplicitBounds(newPoint.ExplicitBounds())
-		zeroPoint.SetBucketCounts(pcommon.NewImmutableUInt64Slice(make([]uint64, newPoint.BucketCounts().Len())))
+		newPoint.ExplicitBounds().CopyTo(zeroPoint.ExplicitBounds())
+		zeroPoint.BucketCounts().FromRaw(make([]uint64, newPoint.BucketCounts().Len()))
 		s.startCache.SetHistogramDataPoint(identifier, &zeroPoint)
 		return &newPoint
 	}
@@ -238,11 +240,11 @@ func subtractHistogramDataPoint(a, b *pmetric.HistogramDataPoint) *pmetric.Histo
 	for i := 0; i < aBuckets.Len(); i++ {
 		newBuckets[i] = aBuckets.At(i) - bBuckets.At(i)
 	}
-	newPoint.SetBucketCounts(pcommon.NewImmutableUInt64Slice(newBuckets))
+	newPoint.BucketCounts().FromRaw(newBuckets)
 	return &newPoint
 }
 
-func bucketBoundariesEqual(a, b pcommon.ImmutableFloat64Slice) bool {
+func bucketBoundariesEqual(a, b pcommon.Float64Slice) bool {
 	if a.Len() != b.Len() {
 		return false
 	}
