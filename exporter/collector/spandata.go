@@ -50,12 +50,12 @@ func pdataSpanToOTSpanData(
 	is pcommon.InstrumentationScope,
 ) spanSnapshot {
 	sc := apitrace.SpanContextConfig{
-		TraceID: span.TraceID().Bytes(),
-		SpanID:  span.SpanID().Bytes(),
+		TraceID: [16]byte(span.TraceID()),
+		SpanID:  [8]byte(span.SpanID()),
 	}
 	parentSc := apitrace.SpanContextConfig{
-		TraceID: span.TraceID().Bytes(),
-		SpanID:  span.ParentSpanID().Bytes(),
+		TraceID: [16]byte(span.TraceID()),
+		SpanID:  [8]byte(span.ParentSpanID()),
 	}
 	startTime := time.Unix(0, int64(span.StartTimestamp()))
 	endTime := time.Unix(0, int64(span.EndTimestamp()))
@@ -80,7 +80,7 @@ func pdataSpanToOTSpanData(
 		droppedMessageEvents: int(span.DroppedEventsCount()),
 		droppedLinks:         int(span.DroppedLinksCount()),
 		resource:             r,
-		instrumentationLibrary: instrumentation.Library{
+		instrumentationLibrary: instrumentation.Scope{
 			Name:    is.Name(),
 			Version: is.Version(),
 		},
@@ -149,8 +149,8 @@ func pdataLinksToOTLinks(links ptrace.SpanLinkSlice) []sdktrace.Link {
 	for i := 0; i < size; i++ {
 		link := links.At(i)
 		sc := apitrace.SpanContextConfig{}
-		sc.TraceID = link.TraceID().Bytes()
-		sc.SpanID = link.SpanID().Bytes()
+		sc.TraceID = [16]byte(link.TraceID())
+		sc.SpanID = [8]byte(link.SpanID())
 		otLinks = append(otLinks, sdktrace.Link{
 			SpanContext: apitrace.NewSpanContext(sc),
 			Attributes:  pdataAttributesToOTAttributes(link.Attributes(), pcommon.NewResource()),
