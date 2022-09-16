@@ -32,17 +32,12 @@ func TestSetAndGet(t *testing.T) {
 		histogramCache:            make(map[string]usedHistogramPoint),
 		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
 	}
-	c.SetNumberDataPoint("foo", nil)
-	point, found := c.GetNumberDataPoint("foo")
-	assert.Nil(t, point)
-	assert.True(t, found)
-	point, found = c.GetNumberDataPoint("bar")
-	assert.Nil(t, point)
+	_, found := c.GetNumberDataPoint("bar")
 	assert.False(t, found)
 	setPoint := pmetric.NewNumberDataPoint()
-	c.SetNumberDataPoint("bar", &setPoint)
-	point, found = c.GetNumberDataPoint("bar")
-	assert.Equal(t, point, &setPoint)
+	c.SetNumberDataPoint("bar", setPoint)
+	point, found := c.GetNumberDataPoint("bar")
+	assert.Equal(t, point, setPoint)
 	assert.True(t, found)
 }
 
@@ -70,7 +65,7 @@ func TestGC(t *testing.T) {
 	}
 	fakeTicker := make(chan time.Time)
 
-	c.SetNumberDataPoint("bar", nil)
+	c.SetNumberDataPoint("bar", pmetric.NumberDataPoint{})
 
 	// bar exists since we just set it
 	usedPoint, found := c.numberCache["bar"]
@@ -108,7 +103,7 @@ func TestGetPreventsGC(t *testing.T) {
 	fakeTicker := make(chan time.Time)
 
 	setPoint := pmetric.NewNumberDataPoint()
-	c.SetNumberDataPoint("bar", &setPoint)
+	c.SetNumberDataPoint("bar", setPoint)
 	// bar exists since we just set it
 	_, found := c.numberCache["bar"]
 	assert.True(t, found)
@@ -144,9 +139,9 @@ func TestConcurrentNumber(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
-			c.SetNumberDataPoint("bar", &setPoint)
+			c.SetNumberDataPoint("bar", setPoint)
 			point, found := c.GetNumberDataPoint("bar")
-			assert.Equal(t, point, &setPoint)
+			assert.Equal(t, point, setPoint)
 			assert.True(t, found)
 			wg.Done()
 		}()
@@ -175,9 +170,9 @@ func TestConcurrentSummary(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
-			c.SetSummaryDataPoint("bar", &setPoint)
+			c.SetSummaryDataPoint("bar", setPoint)
 			point, found := c.GetSummaryDataPoint("bar")
-			assert.Equal(t, point, &setPoint)
+			assert.Equal(t, point, setPoint)
 			assert.True(t, found)
 			wg.Done()
 		}()
@@ -206,9 +201,9 @@ func TestConcurrentHistogram(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
-			c.SetHistogramDataPoint("bar", &setPoint)
+			c.SetHistogramDataPoint("bar", setPoint)
 			point, found := c.GetHistogramDataPoint("bar")
-			assert.Equal(t, point, &setPoint)
+			assert.Equal(t, point, setPoint)
 			assert.True(t, found)
 			wg.Done()
 		}()
@@ -237,9 +232,9 @@ func TestConcurrentExponentialHistogram(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
-			c.SetExponentialHistogramDataPoint("bar", &setPoint)
+			c.SetExponentialHistogramDataPoint("bar", setPoint)
 			point, found := c.GetExponentialHistogramDataPoint("bar")
-			assert.Equal(t, point, &setPoint)
+			assert.Equal(t, point, setPoint)
 			assert.True(t, found)
 			wg.Done()
 		}()

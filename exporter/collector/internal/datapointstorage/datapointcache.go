@@ -40,22 +40,22 @@ type Cache struct {
 }
 
 type usedNumberPoint struct {
-	point *pmetric.NumberDataPoint
+	point pmetric.NumberDataPoint
 	used  *atomic.Bool
 }
 
 type usedSummaryPoint struct {
-	point *pmetric.SummaryDataPoint
+	point pmetric.SummaryDataPoint
 	used  *atomic.Bool
 }
 
 type usedHistogramPoint struct {
-	point *pmetric.HistogramDataPoint
+	point pmetric.HistogramDataPoint
 	used  *atomic.Bool
 }
 
 type usedExponentialHistogramPoint struct {
-	point *pmetric.ExponentialHistogramDataPoint
+	point pmetric.ExponentialHistogramDataPoint
 	used  *atomic.Bool
 }
 
@@ -77,7 +77,7 @@ func NewCache(shutdown <-chan struct{}) *Cache {
 
 // GetNumberDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c *Cache) GetNumberDataPoint(identifier string) (*pmetric.NumberDataPoint, bool) {
+func (c *Cache) GetNumberDataPoint(identifier string) (pmetric.NumberDataPoint, bool) {
 	c.numberLock.RLock()
 	defer c.numberLock.RUnlock()
 	point, found := c.numberCache[identifier]
@@ -88,7 +88,7 @@ func (c *Cache) GetNumberDataPoint(identifier string) (*pmetric.NumberDataPoint,
 }
 
 // SetNumberDataPoint assigns the point to the identifier in the cache
-func (c *Cache) SetNumberDataPoint(identifier string, point *pmetric.NumberDataPoint) {
+func (c *Cache) SetNumberDataPoint(identifier string, point pmetric.NumberDataPoint) {
 	c.numberLock.Lock()
 	defer c.numberLock.Unlock()
 	c.numberCache[identifier] = usedNumberPoint{point, atomic.NewBool(true)}
@@ -96,7 +96,7 @@ func (c *Cache) SetNumberDataPoint(identifier string, point *pmetric.NumberDataP
 
 // GetSummaryDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c *Cache) GetSummaryDataPoint(identifier string) (*pmetric.SummaryDataPoint, bool) {
+func (c *Cache) GetSummaryDataPoint(identifier string) (pmetric.SummaryDataPoint, bool) {
 	c.summaryLock.RLock()
 	defer c.summaryLock.RUnlock()
 	point, found := c.summaryCache[identifier]
@@ -107,7 +107,7 @@ func (c *Cache) GetSummaryDataPoint(identifier string) (*pmetric.SummaryDataPoin
 }
 
 // SetSummaryDataPoint assigns the point to the identifier in the cache
-func (c *Cache) SetSummaryDataPoint(identifier string, point *pmetric.SummaryDataPoint) {
+func (c *Cache) SetSummaryDataPoint(identifier string, point pmetric.SummaryDataPoint) {
 	c.summaryLock.Lock()
 	defer c.summaryLock.Unlock()
 	c.summaryCache[identifier] = usedSummaryPoint{point, atomic.NewBool(true)}
@@ -115,7 +115,7 @@ func (c *Cache) SetSummaryDataPoint(identifier string, point *pmetric.SummaryDat
 
 // GetHistogramDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c *Cache) GetHistogramDataPoint(identifier string) (*pmetric.HistogramDataPoint, bool) {
+func (c *Cache) GetHistogramDataPoint(identifier string) (pmetric.HistogramDataPoint, bool) {
 	c.histogramLock.RLock()
 	defer c.histogramLock.RUnlock()
 	point, found := c.histogramCache[identifier]
@@ -126,7 +126,7 @@ func (c *Cache) GetHistogramDataPoint(identifier string) (*pmetric.HistogramData
 }
 
 // SetHistogramDataPoint assigns the point to the identifier in the cache
-func (c *Cache) SetHistogramDataPoint(identifier string, point *pmetric.HistogramDataPoint) {
+func (c *Cache) SetHistogramDataPoint(identifier string, point pmetric.HistogramDataPoint) {
 	c.histogramLock.Lock()
 	defer c.histogramLock.Unlock()
 	c.histogramCache[identifier] = usedHistogramPoint{point, atomic.NewBool(true)}
@@ -134,7 +134,7 @@ func (c *Cache) SetHistogramDataPoint(identifier string, point *pmetric.Histogra
 
 // GetExponentialHistogramDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found
-func (c *Cache) GetExponentialHistogramDataPoint(identifier string) (*pmetric.ExponentialHistogramDataPoint, bool) {
+func (c *Cache) GetExponentialHistogramDataPoint(identifier string) (pmetric.ExponentialHistogramDataPoint, bool) {
 	c.exponentialHistogramLock.RLock()
 	defer c.exponentialHistogramLock.RUnlock()
 	point, found := c.exponentialHistogramCache[identifier]
@@ -145,7 +145,7 @@ func (c *Cache) GetExponentialHistogramDataPoint(identifier string) (*pmetric.Ex
 }
 
 // SetExponentialHistogramDataPoint assigns the point to the identifier in the cache
-func (c *Cache) SetExponentialHistogramDataPoint(identifier string, point *pmetric.ExponentialHistogramDataPoint) {
+func (c *Cache) SetExponentialHistogramDataPoint(identifier string, point pmetric.ExponentialHistogramDataPoint) {
 	c.exponentialHistogramLock.Lock()
 	defer c.exponentialHistogramLock.Unlock()
 	c.exponentialHistogramCache[identifier] = usedExponentialHistogramPoint{point, atomic.NewBool(true)}

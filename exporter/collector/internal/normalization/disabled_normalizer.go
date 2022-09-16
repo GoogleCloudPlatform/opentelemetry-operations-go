@@ -34,7 +34,7 @@ func NewDisabledNormalizer() Normalizer {
 type disabledNormalizer struct{}
 
 // NormalizeExponentialHistogramDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, _ string) *pmetric.ExponentialHistogramDataPoint {
+func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, _ string) (pmetric.ExponentialHistogramDataPoint, bool) {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
 		// Make a copy so we don't mutate underlying data.
@@ -42,13 +42,13 @@ func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetri
 		point.CopyTo(newPoint)
 		// StartTime = Timestamp - 1 ms
 		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		return &newPoint
+		return newPoint, true
 	}
-	return &point
+	return point, true
 }
 
 // NormalizeHistogramDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, _ string) *pmetric.HistogramDataPoint {
+func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, _ string) (pmetric.HistogramDataPoint, bool) {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
 		// Make a copy so we don't mutate underlying data.
@@ -56,13 +56,13 @@ func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 		point.CopyTo(newPoint)
 		// StartTime = Timestamp - 1 ms
 		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		return &newPoint
+		return newPoint, true
 	}
-	return &point
+	return point, true
 }
 
 // NormalizeNumberDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, _ string) *pmetric.NumberDataPoint {
+func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, _ string) (pmetric.NumberDataPoint, bool) {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
 		// Make a copy so we don't mutate underlying data.
@@ -70,13 +70,13 @@ func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPo
 		point.CopyTo(newPoint)
 		// StartTime = Timestamp - 1 ms
 		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		return &newPoint
+		return newPoint, true
 	}
-	return &point
+	return point, true
 }
 
 // NormalizeSummaryDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, _ string) *pmetric.SummaryDataPoint {
+func (d *disabledNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, _ string) (pmetric.SummaryDataPoint, bool) {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
 		// Make a copy so we don't mutate underlying data.
@@ -84,7 +84,7 @@ func (d *disabledNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryData
 		point.CopyTo(newPoint)
 		// StartTime = Timestamp - 1 ms
 		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		return &newPoint
+		return newPoint, true
 	}
-	return &point
+	return point, true
 }
