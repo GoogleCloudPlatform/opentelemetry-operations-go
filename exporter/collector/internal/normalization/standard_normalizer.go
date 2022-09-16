@@ -131,25 +131,25 @@ func subtractExponentialHistogramDataPoint(a, b *pmetric.ExponentialHistogramDat
 	// We drop points without a sum, so no need to check here.
 	newPoint.SetSum(a.Sum() - b.Sum())
 	newPoint.SetZeroCount(a.ZeroCount() - b.ZeroCount())
-	newPoint.Positive().BucketCounts().FromRaw(subtractExponentialBuckets(a.Positive(), b.Positive()))
-	newPoint.Negative().BucketCounts().FromRaw(subtractExponentialBuckets(a.Negative(), b.Negative()))
+	subtractExponentialBuckets(a.Positive(), b.Positive(), newPoint.Positive())
+	subtractExponentialBuckets(a.Negative(), b.Negative(), newPoint.Negative())
 	return &newPoint
 }
 
-// subtractExponentialBuckets returns a - b
-func subtractExponentialBuckets(a, b pmetric.Buckets) []uint64 {
-	newBuckets := make([]uint64, a.BucketCounts().Len())
+// subtractExponentialBuckets does a - b into c
+func subtractExponentialBuckets(a, b, c pmetric.Buckets) {
+	newBuckets := c.BucketCounts()
+	newBuckets.EnsureCapacity(a.BucketCounts.Len())
 	offsetDiff := int(a.Offset() - b.Offset())
 	for i := 0; i < a.BucketCounts().Len(); i++ {
 		bOffset := i + offsetDiff
 		// if there is no corresponding bucket for the starting BucketCounts, don't normalize
 		if bOffset < 0 || bOffset >= b.BucketCounts().Len() {
-			newBuckets[i] = a.BucketCounts().At(i)
+			newBuckets.SetAt(i, a.BucketCounts().At(i))
 		} else {
-			newBuckets[i] = a.BucketCounts().At(i) - b.BucketCounts().At(bOffset)
+			newBuckets.SetAt(i, a.BucketCounts().At(i)-b.BucketCounts().At(bOffset))
 		}
 	}
-	return newBuckets
 }
 
 func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) *pmetric.HistogramDataPoint {
@@ -198,7 +198,8 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 		zeroPoint := pmetric.NewHistogramDataPoint()
 		zeroPoint.SetTimestamp(newPoint.StartTimestamp())
 		newPoint.ExplicitBounds().CopyTo(zeroPoint.ExplicitBounds())
-		zeroPoint.BucketCounts().FromRaw(make([]uint64, newPoint.BucketCounts().Len()))
+		zeroCounts := zeroPoint.BucketCounts()
+		zeroCounts.EnsureCapacity(newPoint.BucketCounts().Len())
 		s.startCache.SetHistogramDataPoint(identifier, &zeroPoint)
 		return &newPoint
 	}
@@ -236,11 +237,11 @@ func subtractHistogramDataPoint(a, b *pmetric.HistogramDataPoint) *pmetric.Histo
 	newPoint.SetSum(a.Sum() - b.Sum())
 	aBuckets := a.BucketCounts()
 	bBuckets := b.BucketCounts()
-	newBuckets := make([]uint64, aBuckets.Len())
+	newBuckets := newPoint.BucketCounts()
+	newBuckets.EnsureCapacity(aBuckets.Len())
 	for i := 0; i < aBuckets.Len(); i++ {
-		newBuckets[i] = aBuckets.At(i) - bBuckets.At(i)
+		newBuckets.SetAt(i, aBuckets.At(i)-bBuckets.At(i))
 	}
-	newPoint.BucketCounts().FromRaw(newBuckets)
 	return &newPoint
 }
 
