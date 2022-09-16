@@ -25,7 +25,7 @@ import (
 )
 
 type attributes struct {
-	Attrs *pcommon.Map
+	Attrs pcommon.Map
 }
 
 func (attrs *attributes) GetString(key string) (string, bool) {
@@ -40,7 +40,7 @@ func (attrs *attributes) GetString(key string) (string, bool) {
 func defaultResourceToMonitoredResource(resource pcommon.Resource) *monitoredrespb.MonitoredResource {
 	attrs := resource.Attributes()
 	gmr := resourcemapping.ResourceAttributesToMonitoredResource(&attributes{
-		Attrs: &attrs,
+		Attrs: attrs,
 	})
 	newLabels := make(labels, len(gmr.Labels))
 	for k, v := range gmr.Labels {

@@ -21,15 +21,15 @@ import (
 // Normalizer can normalize data points to handle cases in which the start time is unknown.
 type Normalizer interface {
 	// NormalizeExponentialHistogramDataPoint normalizes an exponential histogram.
-	// It returns the normalized point, or nil if the point should be dropped.
-	NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier string) *pmetric.ExponentialHistogramDataPoint
+	// It returns the normalized point, and true if the point should be kept.
+	NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier string) (pmetric.ExponentialHistogramDataPoint, bool)
 	// NormalizeHistogramDataPoint normalizes a cumulative histogram.
-	// It returns the normalized point, or nil if the point should be dropped.
-	NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) *pmetric.HistogramDataPoint
+	// It returns the normalized point, and true if the point should be kept.
+	NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) (pmetric.HistogramDataPoint, bool)
 	// NormalizeNumberDataPoint normalizes a cumulative, monotonic sum.
-	// It returns the normalized point, or nil if the point should be dropped.
-	NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier string) *pmetric.NumberDataPoint
+	// It returns the normalized point, and true if the point should be kept.
+	NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier string) (pmetric.NumberDataPoint, bool)
 	// NormalizeSummaryDataPoint normalizes a summary.
-	// It returns the normalized point, or nil if the point should be dropped.
-	NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier string) *pmetric.SummaryDataPoint
+	// It returns the normalized point, and true if the point should be kept.
+	NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier string) (pmetric.SummaryDataPoint, bool)
 }
