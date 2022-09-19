@@ -1,0 +1,433 @@
+{
+  "batchWriteSpansRequest": [
+    {
+      "name": "projects/fakeprojectid",
+      "spans": [
+        {
+          "name": "projects/fakeprojectid/traces/4fe6e2a7cd0de3a1076362c74d21f1b9/spans/73ba0470cf8d6d02",
+          "spanId": "73ba0470cf8d6d02",
+          "displayName": {
+            "value": "test-small-gpt-20220425-9dff66f59-pslkw"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.9.0; google-cloud-trace-exporter 1.8.8"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "model-start-up"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "generation": {
+                "intValue": "0"
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "k8s.namespace.name": {
+                "stringValue": {
+                  "value": "default"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {}
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "0.19.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/4fe6e2a7cd0de3a1076362c74d21f1b9/spans/9d48e19f405a39f0",
+          "spanId": "9d48e19f405a39f0",
+          "parentSpanId": "73ba0470cf8d6d02",
+          "displayName": {
+            "value": "Scheduling"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.9.0; google-cloud-trace-exporter 1.8.8"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "model-start-up"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "generation": {
+                "intValue": "0"
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "k8s.namespace.name": {
+                "stringValue": {
+                  "value": "default"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {}
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "0.19.0"
+                }
+              }
+            }
+          },
+          "status": {},
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/4fe6e2a7cd0de3a1076362c74d21f1b9/spans/9d48e19f405a39f0",
+          "spanId": "9d48e19f405a39f0",
+          "parentSpanId": "73ba0470cf8d6d02",
+          "displayName": {
+            "value": "WorkloadIdentityInit"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.9.0; google-cloud-trace-exporter 1.8.8"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "model-start-up"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "generation": {
+                "intValue": "0"
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "k8s.namespace.name": {
+                "stringValue": {
+                  "value": "default"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {}
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "0.19.0"
+                }
+              }
+            }
+          },
+          "status": {},
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/4fe6e2a7cd0de3a1076362c74d21f1b9/spans/9d48e19f405a39f0",
+          "spanId": "9d48e19f405a39f0",
+          "parentSpanId": "73ba0470cf8d6d02",
+          "displayName": {
+            "value": "DownloadingModel"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.9.0; google-cloud-trace-exporter 1.8.8"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "model-start-up"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "generation": {
+                "intValue": "0"
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "k8s.namespace.name": {
+                "stringValue": {
+                  "value": "default"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {}
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "0.19.0"
+                }
+              }
+            }
+          },
+          "status": {},
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/4fe6e2a7cd0de3a1076362c74d21f1b9/spans/9d48e19f405a39f0",
+          "spanId": "9d48e19f405a39f0",
+          "parentSpanId": "73ba0470cf8d6d02",
+          "displayName": {
+            "value": "DownloadingModel"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.9.0; google-cloud-trace-exporter 1.8.8"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "model-start-up"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "generation": {
+                "intValue": "0"
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "k8s.namespace.name": {
+                "stringValue": {
+                  "value": "default"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {}
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "0.19.0"
+                }
+              }
+            }
+          },
+          "status": {},
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/4fe6e2a7cd0de3a1076362c74d21f1b9/spans/9d48e19f405a39f0",
+          "spanId": "9d48e19f405a39f0",
+          "parentSpanId": "73ba0470cf8d6d02",
+          "displayName": {
+            "value": "LoadingModel"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.9.0; google-cloud-trace-exporter 1.8.8"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "model-start-up"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "generation": {
+                "intValue": "0"
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "vx-event-watcher-7bdf7f657c-l65pb"
+                }
+              },
+              "k8s.namespace.name": {
+                "stringValue": {
+                  "value": "default"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {}
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "0.19.0"
+                }
+              }
+            }
+          },
+          "status": {},
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        }
+      ]
+    }
+  ]
+}

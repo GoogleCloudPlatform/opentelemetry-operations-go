@@ -1,0 +1,208 @@
+{
+    "resourceSpans": [
+      {
+        "resource": {
+          "attributes": [
+            {
+              "key": "host.name",
+              "value": {
+                "stringValue": "vx-event-watcher-7bdf7f657c-l65pb"
+              }
+            },
+            {
+              "key": "service.name",
+              "value": {
+                "stringValue": "model-start-up"
+              }
+            },
+            {
+              "key": "telemetry.sdk.language",
+              "value": {
+                "stringValue": "go"
+              }
+            },
+            {
+              "key": "telemetry.sdk.name",
+              "value": {
+                "stringValue": "opentelemetry"
+              }
+            },
+            {
+              "key": "telemetry.sdk.version",
+              "value": {
+                "stringValue": "0.19.0"
+              }
+            }
+          ]
+        },
+        "scopeSpans": [
+          {
+            "scope": {
+            },
+            "spans": [
+              {
+                "traceId": "4fe6e2a7cd0de3a1076362c74d21f1b0",
+                "spanId": "73ba0470cf8d6d02",
+                "parentSpanId": "",
+                "name": "test-small-gpt-20220425-9dff66f59-pslkw",
+                "kind": "SPAN_KIND_INTERNAL",
+                "startTimeUnixNano": "1662591502000000000", 
+                "endTimeUnixNano": "1662591604837877541",
+                "attributes": [
+                  {
+                    "key": "k8s.namespace.name",
+                    "value": {
+                      "stringValue": "default"
+                    }
+                  },
+                  {
+                    "key": "generation",
+                    "value": {
+                      "intValue": "0"
+                    }
+                  }
+                ],
+                "status": {}
+              },
+              {
+                "traceId": "4fe6e2a7cd0de3a1076362c74d21f1b0",
+                "spanId": "9d48e19f405a39f0",
+                "parentSpanId": "73ba0470cf8d6d02",
+                "name": "Scheduling",
+                "kind": "SPAN_KIND_INTERNAL",
+                "startTimeUnixNano": "1662591500000000000",
+                "endTimeUnixNano": "1662591500000000000",
+                "attributes": [
+                    {
+                      "key": "k8s.namespace.name",
+                      "value": {
+                        "stringValue": "default"
+                      }
+                    },
+                    {
+                      "key": "generation",
+                      "value": {
+                        "intValue": "0"
+                      }
+                    }
+                ],
+                "status": {
+                    "code": "STATUS_CODE_OK",
+                    "message": ""
+                }
+              },
+              {
+                "traceId": "4fe6e2a7cd0de3a1076362c74d21f1b0",
+                "spanId": "9d48e19f405a39f0",
+                "parentSpanId": "73ba0470cf8d6d02",
+                "name": "WorkloadIdentityInit",
+                "kind": "SPAN_KIND_INTERNAL",
+                "startTimeUnixNano": "1662591502000000000",
+                "endTimeUnixNano": "1662591565000000000",
+                "attributes": [
+                    {
+                      "key": "k8s.namespace.name",
+                      "value": {
+                        "stringValue": "default"
+                      }
+                    },
+                    {
+                      "key": "generation",
+                      "value": {
+                        "intValue": "0"
+                      }
+                    }
+                ],
+                "status": {
+                    "code": "STATUS_CODE_OK",
+                    "message": ""
+                }
+              },
+              {
+                "traceId": "4fe6e2a7cd0de3a1076362c74d21f1b0",
+                "spanId": "9d48e19f405a39f0",
+                "parentSpanId": "73ba0470cf8d6d02",
+                "name": "DownloadingModel",
+                "kind": "SPAN_KIND_INTERNAL",
+                "startTimeUnixNano": "1662591566000000000",
+                "endTimeUnixNano": "1662591572000000000",
+                "attributes": [
+                    {
+                      "key": "k8s.namespace.name",
+                      "value": {
+                        "stringValue": "default"
+                      }
+                    },
+                    {
+                      "key": "generation",
+                      "value": {
+                        "intValue": "0"
+                      }
+                    }
+                ],
+                "status": {
+                    "code": "STATUS_CODE_OK",
+                    "message": ""
+                }
+              },
+              {
+                "traceId": "4fe6e2a7cd0de3a1076362c74d21f1b0",
+                "spanId": "9d48e19f405a39f0",
+                "parentSpanId": "73ba0470cf8d6d02",
+                "name": "DownloadingModel",
+                "kind": "SPAN_KIND_INTERNAL",
+                "startTimeUnixNano": "1662591566000000000",
+                "endTimeUnixNano": "1662591572000000000",
+                "attributes": [
+                    {
+                      "key": "k8s.namespace.name",
+                      "value": {
+                        "stringValue": "default"
+                      }
+                    },
+                    {
+                      "key": "generation",
+                      "value": {
+                        "intValue": "0"
+                      }
+                    }
+                ],
+                "status": {
+                    "code": "STATUS_CODE_OK",
+                    "message": ""
+                }
+              },
+              {
+                "traceId": "4fe6e2a7cd0de3a1076362c74d21f1b0",
+                "spanId": "9d48e19f405a39f0",
+                "parentSpanId": "73ba0470cf8d6d02",
+                "name": "LoadingModel",
+                "kind": "SPAN_KIND_INTERNAL",
+                "startTimeUnixNano": "1662591580000000000",
+                "endTimeUnixNano": "1662591604000000000",
+                "attributes": [
+                    {
+                      "key": "k8s.namespace.name",
+                      "value": {
+                        "stringValue": "default"
+                      }
+                    },
+                    {
+                      "key": "generation",
+                      "value": {
+                        "intValue": "0"
+                      }
+                    }
+                ],
+                "status": {
+                    "code": "STATUS_CODE_OK",
+                    "message": ""
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+  

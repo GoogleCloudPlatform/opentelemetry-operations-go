@@ -20,4 +20,9 @@ var TracesTestCases = []TestCase{
 		OTLPInputFixturePath: "testdata/fixtures/traces/traces_basic.json",
 		ExpectFixturePath:    "testdata/fixtures/traces/traces_basic_expected.json",
 	},
+	{
+		Name:                 "Reproduce missing spans bug",
+		OTLPInputFixturePath: "testdata/fixtures/traces/repro.json",
+		ExpectFixturePath:    "testdata/fixtures/traces/repro_expected.json",
+	},
 }
