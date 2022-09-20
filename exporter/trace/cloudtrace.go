@@ -66,7 +66,7 @@ type options struct {
 	// to the underlying Stackdriver Trace API client.
 	// Optional.
 	traceClientOptions []option.ClientOption
-	// timeout for all API calls. If not set, defaults to 5 seconds.
+	// timeout for all API calls. If not set, defaults to 12 seconds.
 	timeout time.Duration
 }
 
@@ -106,6 +106,7 @@ func WithContext(ctx context.Context) func(o *options) {
 }
 
 // WithTimeout sets the timeout for trace exporter and metric exporter
+// If unset, it defaults to a 12 second timeout.
 func WithTimeout(t time.Duration) func(o *options) {
 	return func(o *options) {
 		o.timeout = t
@@ -134,7 +135,7 @@ func (o *options) handleError(err error) {
 }
 
 // defaultTimeout is used as default when timeout is not set in newContextWithTimout.
-const defaultTimeout = 5 * time.Second
+const defaultTimeout = 12 * time.Second
 
 // Exporter is a trace exporter that uploads data to Stackdriver.
 //
