@@ -242,7 +242,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 			}
 
 			var st string
-			s, _ := status.FromError(err)
+			s := status.Convert(err)
 			st = statusCodeToString(s)
 
 			succeededPoints := len(ts)
@@ -260,7 +260,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 				recordPointCountDataPoint(ctx, failedPoints, st)
 			}
 			if err != nil {
-				errs = append(errs, fmt.Errorf("failed to export time series to GCM: %v", err))
+				errs = append(errs, fmt.Errorf("failed to export time series to GCM: %+v", s))
 			}
 		}
 	}
