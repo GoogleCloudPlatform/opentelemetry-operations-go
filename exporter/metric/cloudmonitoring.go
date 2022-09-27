@@ -18,39 +18,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
-	"go.opentelemetry.io/otel/sdk/metric/export"
-	"go.opentelemetry.io/otel/sdk/metric/export/aggregation"
-	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
-	"go.opentelemetry.io/otel/sdk/resource"
+	metricapi "go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/global"
+	"go.opentelemetry.io/otel/sdk/metric"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"golang.org/x/oauth2/google"
 )
 
-const (
-	// defaultReportingDuration defaults to 60 seconds.
-	defaultReportingDuration = 60 * time.Second
-
-	// minimumReportingDuration is the minimum duration supported by Google Cloud Monitoring.
-	// As of Apr 2020, the minimum duration is 10 second for custom metrics.
-	// https://cloud.google.com/monitoring/custom-metrics/creating-metrics#writing-ts
-	minimumReportingDuration = 10 * time.Second
-)
-
-var (
-	errReportingIntervalTooLow = fmt.Errorf("reporting interval less than %s", minimumReportingDuration)
-)
-
-// Exporter is the public interface of OpenTelemetry metric exporter for
-// Google Cloud Monitoring.
-type Exporter struct {
-	metricExporter *metricExporter
-}
-
-// NewRawExporter creates a new Exporter thats implements metric.Exporter.
-func NewRawExporter(opts ...Option) (*Exporter, error) {
+// New creates a new Exporter thats implements metric.Exporter.
+func New(opts ...Option) (metric.Exporter, error) {
 	o := options{context: context.Background()}
 	for _, opt := range opts {
 		opt(&o)
@@ -59,35 +37,42 @@ func NewRawExporter(opts ...Option) (*Exporter, error) {
 	if o.projectID == "" {
 		creds, err := google.FindDefaultCredentials(o.context, monitoring.DefaultAuthScopes()...)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to find Google Cloud credentials: %v", err)
+			return nil, fmt.Errorf("failed to find Google Cloud credentials: %v", err)
 		}
 		if creds.ProjectID == "" {
-			return nil, errors.New("Google Cloud Monitoring: no project found with application default credentials")
+			return nil, errors.New("google cloud monitoring: no project found with application default credentials")
 		}
 		o.projectID = creds.ProjectID
 	}
-	if o.reportingInterval == 0 {
-		o.reportingInterval = defaultReportingDuration
-	}
-	if o.reportingInterval < minimumReportingDuration {
-		return nil, errReportingIntervalTooLow
-	}
+	return newMetricExporter(&o)
+}
 
-	me, err := newMetricExporter(&o)
+// NewRawExporter creates a new Exporter thats implements metric.Exporter.
+// Deprecated: Use New() instead.
+func NewRawExporter(opts ...Option) (metric.Exporter, error) {
+	return New(opts...)
+}
+
+// InstallNewPipeline creates a fully-configured MeterProvider which exports to cloud monitoring.
+// Deprecated: Use New() instead and metric.NewMeterProvider instead.
+func NewExportPipeline(opts []Option, popts ...metric.Option) (metricapi.MeterProvider, error) {
+	exporter, err := New(opts...)
 	if err != nil {
 		return nil, err
 	}
-	return &Exporter{
-		metricExporter: me,
-	}, nil
+	popts = append(popts, metric.WithReader(metric.NewPeriodicReader(exporter)))
+	provider := metric.NewMeterProvider(popts...)
+	return provider, nil
 }
 
-// Export exports the provide metric record to Google Cloud Monitoring.
-func (e *Exporter) Export(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
-	return e.metricExporter.ExportMetrics(ctx, res, ilr)
-}
-
-// TemporalityFor returns cumulative temporality
-func (e *Exporter) TemporalityFor(*sdkapi.Descriptor, aggregation.Kind) aggregation.Temporality {
-	return aggregation.CumulativeTemporality
+// InstallNewPipeline creates a fully-configured MeterProvider which exports to cloud monitoring,
+// and sets it as the global MeterProvider
+// Deprecated: Use New(), metric.NewMeterProvider, and global.SetMeterProvider instead.
+func InstallNewPipeline(opts []Option, popts ...metric.Option) (metricapi.MeterProvider, error) {
+	provider, err := NewExportPipeline(opts, popts...)
+	if err != nil {
+		return nil, err
+	}
+	global.SetMeterProvider(provider)
+	return provider, nil
 }

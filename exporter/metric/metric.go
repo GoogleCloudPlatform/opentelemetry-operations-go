@@ -19,21 +19,17 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"reflect"
 	"strings"
 	"time"
 
-	"go.opentelemetry.io/otel/metric/global"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
-	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
-	"go.opentelemetry.io/otel/sdk/metric/export"
-	"go.opentelemetry.io/otel/sdk/metric/export/aggregation"
-	"go.opentelemetry.io/otel/sdk/metric/number"
-	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
-	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
-	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
+	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
@@ -52,9 +48,9 @@ type key struct {
 	libraryname string
 }
 
-func keyOf(descriptor *sdkapi.Descriptor, library instrumentation.Library) key {
+func keyOf(metrics metricdata.Metrics, library instrumentation.Library) key {
 	return key{
-		name:        descriptor.Name(),
+		name:        metrics.Name,
 		libraryname: library.Name,
 	}
 }
@@ -69,11 +65,14 @@ type metricExporter struct {
 	mdCache map[key]*googlemetricpb.MetricDescriptor
 
 	client *monitoring.MetricClient
+}
 
-	// startTime is the cache of start time shared among all CUMULATIVE values.
-	// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
-	//  TODO: Remove this when OTel SDK provides start time for each record specifically for stateful batcher.
-	startTime time.Time
+// ForceFlush does nothing, the exporter holds no state.
+func (e *metricExporter) ForceFlush(ctx context.Context) error { return ctx.Err() }
+
+// Shutdown shuts down the client connections
+func (e *metricExporter) Shutdown(ctx context.Context) error {
+	return multierr.Combine(ctx.Err(), e.client.Close())
 }
 
 // Below are maps with monitored resources fields as keys
@@ -140,53 +139,20 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 
 	cache := map[key]*googlemetricpb.MetricDescriptor{}
 	e := &metricExporter{
-		o:         o,
-		mdCache:   cache,
-		client:    client,
-		startTime: time.Now(),
+		o:       o,
+		mdCache: cache,
+		client:  client,
 	}
 	return e, nil
 }
 
-// InstallNewPipeline instantiates a NewExportPipeline and registers it globally.
-func InstallNewPipeline(opts []Option, popts ...controller.Option) (*controller.Controller, error) {
-	pusher, err := NewExportPipeline(opts, popts...)
-	if err != nil {
-		return nil, err
-	}
-	global.SetMeterProvider(pusher)
-	return pusher, err
-}
-
-// NewExportPipeline sets up a complete export pipeline with the recommended setup,
-// chaining a NewRawExporter into the recommended selectors and integrators.
-func NewExportPipeline(opts []Option, popts ...controller.Option) (*controller.Controller, error) {
-	selector := simple.NewWithHistogramDistribution()
-	exporter, err := NewRawExporter(opts...)
-	if err != nil {
-		return nil, err
-	}
-	period := exporter.metricExporter.o.reportingInterval
-	checkpointer := processor.NewFactory(selector, exporter)
-
-	pusher := controller.New(
-		checkpointer,
-		append([]controller.Option{
-			controller.WithExporter(exporter),
-			controller.WithCollectPeriod(period),
-		}, popts...)...,
-	)
-	pusher.Start(context.Background())
-	return pusher, nil
-}
-
-// ExportMetrics exports OpenTelemetry Metrics to Google Cloud Monitoring.
-func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
-	if err := me.exportMetricDescriptor(ctx, res, ilr); err != nil {
+// Export exports OpenTelemetry Metrics to Google Cloud Monitoring.
+func (me *metricExporter) Export(ctx context.Context, rm metricdata.ResourceMetrics) error {
+	if err := me.exportMetricDescriptor(ctx, rm); err != nil {
 		return err
 	}
 
-	if err := me.exportTimeSeries(ctx, res, ilr); err != nil {
+	if err := me.exportTimeSeries(ctx, rm); err != nil {
 		return err
 	}
 	return nil
@@ -194,29 +160,21 @@ func (me *metricExporter) ExportMetrics(ctx context.Context, res *resource.Resou
 
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registered in Cloud Monitoring yet.
-func (me *metricExporter) exportMetricDescriptor(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
+func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricdata.ResourceMetrics) error {
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
-	aggError := ilr.ForEach(func(library instrumentation.Library, reader export.Reader) error {
-		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
-			k := keyOf(r.Descriptor(), library)
+	for _, scope := range rm.ScopeMetrics {
+		for _, metrics := range scope.Metrics {
+			k := keyOf(metrics, scope.Scope)
 
 			if _, ok := me.mdCache[k]; ok {
-				return nil
+				continue
 			}
 
 			if _, localok := mds[k]; !localok {
-				md := me.recordToMdpb(&r)
+				md := me.recordToMdpb(metrics)
 				mds[k] = md
 			}
-			return nil
-		})
-
-	})
-	if aggError != nil {
-		return aggError
-	}
-	if len(mds) == 0 {
-		return nil
+		}
 	}
 
 	// TODO: This process is synchronous and blocks longer time if records in cps
@@ -256,22 +214,25 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 
 // exportTimeSeries create TimeSeries from the records in cps.
 // res should be the common resource among all TimeSeries, such as instance id, application name and so on.
-func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Resource, ilr export.InstrumentationLibraryReader) error {
+func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.ResourceMetrics) error {
 	tss := []*monitoringpb.TimeSeries{}
+	mr := me.resourceToMonitoredResourcepb(rm.Resource)
+	var errs []error
 
-	aggError := ilr.ForEach(func(library instrumentation.Library, reader export.Reader) error {
-		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
-			ts, err := me.recordToTspb(&r, res, library)
+	for _, scope := range rm.ScopeMetrics {
+		for _, metrics := range scope.Metrics {
+			ts, err := me.recordToTspb(metrics, mr, scope.Scope)
 			if err != nil {
-				return err
+				errs = append(errs, err)
+			} else {
+				tss = append(tss, ts...)
 			}
-			tss = append(tss, ts)
-			return nil
-		})
-	})
+		}
+	}
 
-	if len(tss) == 0 {
-		return nil
+	var aggError error
+	if len(errs) > 0 {
+		aggError = multierr.Combine(errs...)
 	}
 
 	if aggError != nil {
@@ -280,6 +241,10 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 		} else {
 			log.Printf("Error during exporting TimeSeries: %v", aggError)
 		}
+	}
+
+	if len(tss) == 0 {
+		return nil
 	}
 
 	// TODO: When this exporter is rewritten, support writing to multiple
@@ -294,30 +259,28 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, res *resource.Re
 
 // descToMetricType converts descriptor to MetricType proto type.
 // Basically this returns default value ("custom.googleapis.com/opentelemetry/[metric type]")
-func (me *metricExporter) descToMetricType(desc *sdkapi.Descriptor) string {
+func (me *metricExporter) descToMetricType(desc metricdata.Metrics) string {
 	if formatter := me.o.metricDescriptorTypeFormatter; formatter != nil {
 		return formatter(desc)
 	}
-	return fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name())
+	return fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name)
 }
 
 // recordToMdpb extracts data and converts them to googlemetricpb.MetricDescriptor.
-func (me *metricExporter) recordToMdpb(record *export.Record) *googlemetricpb.MetricDescriptor {
-	desc := record.Descriptor()
-	name := desc.Name()
-	unit := record.Descriptor().Unit()
-	kind, typ := recordToMdpbKindType(record)
+func (me *metricExporter) recordToMdpb(metrics metricdata.Metrics) *googlemetricpb.MetricDescriptor {
+	name := metrics.Name
+	kind, valueType := recordToMdpbKindType(metrics.Data)
 
 	// Detailed explanations on MetricDescriptor proto is not documented on
 	// generated Go packages. Refer to the original proto file.
 	// https://github.com/googleapis/googleapis/blob/50af053/google/api/metric.proto#L33
 	return &googlemetricpb.MetricDescriptor{
 		Name:        name,
-		Type:        me.descToMetricType(desc),
+		Type:        me.descToMetricType(metrics),
 		MetricKind:  kind,
-		ValueType:   typ,
-		Unit:        string(unit),
-		Description: desc.Description(),
+		ValueType:   valueType,
+		Unit:        string(metrics.Unit),
+		Description: metrics.Description,
 	}
 }
 
@@ -428,44 +391,33 @@ func transformResource(match, input map[string]string) (map[string]string, bool)
 
 // recordToMdpbKindType return the mapping from OTel's record descriptor to
 // Cloud Monitoring's MetricKind and ValueType.
-func recordToMdpbKindType(r *export.Record) (googlemetricpb.MetricDescriptor_MetricKind, googlemetricpb.MetricDescriptor_ValueType) {
-	var kind googlemetricpb.MetricDescriptor_MetricKind
-	switch r.Aggregation().Kind() {
-	case aggregation.LastValueKind:
-		kind = googlemetricpb.MetricDescriptor_GAUGE
-	case aggregation.SumKind:
-		kind = googlemetricpb.MetricDescriptor_CUMULATIVE
-	case aggregation.HistogramKind:
+func recordToMdpbKindType(a metricdata.Aggregation) (googlemetricpb.MetricDescriptor_MetricKind, googlemetricpb.MetricDescriptor_ValueType) {
+	switch a.(type) {
+	case metricdata.Gauge[int64]:
+		return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_INT64
+	case metricdata.Gauge[float64]:
+		return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_DOUBLE
+	case metricdata.Sum[int64]:
+		return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_INT64
+	case metricdata.Sum[float64]:
+		return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DOUBLE
+	case metricdata.Histogram:
 		return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DISTRIBUTION
 	default:
-		kind = googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
+		return googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED, googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 	}
-	var typ googlemetricpb.MetricDescriptor_ValueType
-	switch r.Descriptor().NumberKind() {
-	case number.Int64Kind:
-		typ = googlemetricpb.MetricDescriptor_INT64
-	case number.Float64Kind:
-		typ = googlemetricpb.MetricDescriptor_DOUBLE
-	default:
-		typ = googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
-	}
-
-	// TODO: Add handling for MeasureKind if necessary.
-
-	return kind, typ
 }
 
 // recordToMpb converts data from records to Metric proto type for Cloud Monitoring.
-func (me *metricExporter) recordToMpb(r *export.Record, library instrumentation.Library) *googlemetricpb.Metric {
-	desc := r.Descriptor()
-	k := keyOf(desc, library)
+func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes attribute.Set, library instrumentation.Library) *googlemetricpb.Metric {
+	k := keyOf(metrics, library)
 	md, ok := me.mdCache[k]
 	if !ok {
-		md = me.recordToMdpb(r)
+		md = me.recordToMdpb(metrics)
 	}
 
 	labels := make(map[string]string)
-	iter := r.Attributes().Iter()
+	iter := attributes.Iter()
 	for iter.Next() {
 		kv := iter.Attribute()
 		labels[normalizeLabelKey(string(kv.Key))] = sanitizeUTF8(kv.Value.Emit())
@@ -479,143 +431,142 @@ func (me *metricExporter) recordToMpb(r *export.Record, library instrumentation.
 
 // recordToTspb converts record to TimeSeries proto type with common resource.
 // ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
-//
-// TODO: Apply appropriate TimeInterval based upon MetricKind. See details in the doc.
-// https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries#Point
-// See detils in #25.
-func (me *metricExporter) recordToTspb(r *export.Record, res *resource.Resource, library instrumentation.Library) (*monitoringpb.TimeSeries, error) {
-	m := me.recordToMpb(r, library)
-	mr := me.resourceToMonitoredResourcepb(res)
-
-	agg := r.Aggregation()
-	nkind := r.Descriptor().NumberKind()
-	ikind := r.Descriptor().InstrumentKind()
-
-	// TODO: Ignoring the case for Min, Max and Distribution to simply
-	// the first implementation.
-	//
-	// NOTE: Currently the selector used in the integrator is our own implementation,
-	// because none of those in go.opentelemetry.io/otel/sdk/metric/selector/simple
-	// gives interfaces to fetch LastValue.
-	//
-	// Views API should provide better interface that does not require the complicated codition handling
-	// done in this function.
-	// https://github.com/open-telemetry/opentelemetry-specification/issues/466
-	// In OpenCensus, view interface provided the bundle of name, measure, labels and aggregation in one place,
-	// and it should return the appropriate value based on the aggregation type specified there.
-	switch agg.Kind() {
-	case aggregation.LastValueKind:
-		lv, ok := agg.(aggregation.LastValue)
-		if !ok {
-			return nil, errUnsupportedAggregation{agg: agg}
+func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.MonitoredResource, library instrumentation.Scope) ([]*monitoringpb.TimeSeries, error) {
+	var tss []*monitoringpb.TimeSeries
+	errs := []error{}
+	switch a := m.Data.(type) {
+	case metricdata.Gauge[int64]:
+		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
+		for _, point := range a.DataPoints {
+			ts, err := gaugeToTimeSeries[int64](point, m, mr)
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			tss = append(tss, ts)
 		}
-		return lastValueToTypedValueAndTimestamp(lv, nkind, m, mr)
-	case aggregation.SumKind:
-		// CUMULATIVE measurement should have the same start time and increasing end time.
-		// c.f. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.metricDescriptors#MetricKind
-		sum, ok := agg.(aggregation.Sum)
-		if !ok {
-			return nil, errUnsupportedAggregation{agg: agg}
+	case metricdata.Gauge[float64]:
+		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
+		for _, point := range a.DataPoints {
+			ts, err := gaugeToTimeSeries[float64](point, m, mr)
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			tss = append(tss, ts)
 		}
-		return sumToTypedValueAndTimestamp(sum, nkind, me.startTime, time.Now(), m, mr)
-	case aggregation.HistogramKind:
-		hist, ok := agg.(aggregation.Histogram)
-		if !ok {
-			return nil, errUnsupportedAggregation{agg: agg}
+	case metricdata.Sum[int64]:
+		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
+		for _, point := range a.DataPoints {
+			var ts *monitoringpb.TimeSeries
+			var err error
+			if a.IsMonotonic {
+				ts, err = sumToTimeSeries[int64](point, m, mr)
+			} else {
+				// Send non-monotonic sums as gauges
+				ts, err = gaugeToTimeSeries[int64](point, m, mr)
+			}
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			tss = append(tss, ts)
 		}
-		return histogramToTypedValueAndTimestamp(hist, r, m, mr)
+	case metricdata.Sum[float64]:
+		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
+		for _, point := range a.DataPoints {
+			var ts *monitoringpb.TimeSeries
+			var err error
+			if a.IsMonotonic {
+				ts, err = sumToTimeSeries[float64](point, m, mr)
+			} else {
+				// Send non-monotonic sums as gauges
+				ts, err = gaugeToTimeSeries[float64](point, m, mr)
+			}
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			tss = append(tss, ts)
+		}
+	case metricdata.Histogram:
+		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
+		for _, point := range a.DataPoints {
+			ts, err := histogramToTimeSeries(point, m, mr)
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			tss = append(tss, ts)
+		}
+	default:
+		errs = append(errs, errUnexpectedAggregationKind{kind: reflect.TypeOf(m.Data).String()})
 	}
-	return nil, errUnexpectedAggregationKind{kind: ikind}
+	return tss, multierr.Combine(errs...)
 }
 
 func sanitizeUTF8(s string) string {
 	return strings.ToValidUTF8(s, "�")
 }
 
-func lastValueToTypedValueAndTimestamp(lv aggregation.LastValue, kind number.Kind, m *googlemetricpb.Metric, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
-	value, timestamp, err := lv.LastValue()
-	if err != nil {
+func gaugeToTimeSeries[N int64 | float64](point metricdata.DataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
+	value, valueType := numberDataPointToValue(point)
+	timestamp := timestamppb.New(point.Time)
+	if err := timestamp.CheckValid(); err != nil {
 		return nil, err
-	}
-
-	timestampPb := timestamppb.New(timestamp)
-	err = timestampPb.CheckValid()
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: Consider the expression of TimeInterval (#25)
-	t := &monitoringpb.TimeInterval{
-		StartTime: timestampPb,
-		EndTime:   timestampPb,
-	}
-
-	tv, err := aggToTypedValue(kind, value)
-	if err != nil {
-		return nil, err
-	}
-
-	p := &monitoringpb.Point{
-		Value:    tv,
-		Interval: t,
-	}
-
-	return &monitoringpb.TimeSeries{
-		Metric:   m,
-		Resource: mr,
-		Points:   []*monitoringpb.Point{p},
-	}, nil
-}
-
-func sumToTypedValueAndTimestamp(sum aggregation.Sum, kind number.Kind, start, end time.Time, m *googlemetricpb.Metric, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
-	value, err := sum.Sum()
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := toNonemptyTimeIntervalpb(start, end)
-	if err != nil {
-		return nil, err
-	}
-
-	tv, err := aggToTypedValue(kind, value)
-	if err != nil {
-		return nil, err
-	}
-
-	p := &monitoringpb.Point{
-		Value:    tv,
-		Interval: t,
-	}
-
-	return &monitoringpb.TimeSeries{
-		Metric:   m,
-		Resource: mr,
-		Points:   []*monitoringpb.Point{p},
-	}, nil
-}
-
-func histogramToTypedValueAndTimestamp(hist aggregation.Histogram, r *export.Record, m *googlemetricpb.Metric, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
-	tv, err := histToTypedValue(hist)
-	if err != nil {
-		return nil, err
-	}
-
-	t, err := toNonemptyTimeIntervalpb(r.StartTime(), r.EndTime())
-	if err != nil {
-		return nil, err
-	}
-	p := &monitoringpb.Point{
-		Value:    tv,
-		Interval: t,
 	}
 	return &monitoringpb.TimeSeries{
 		Resource:   mr,
-		Unit:       string(r.Descriptor().Unit()),
+		Unit:       string(metrics.Unit),
+		MetricKind: googlemetricpb.MetricDescriptor_GAUGE,
+		ValueType:  valueType,
+		Points: []*monitoringpb.Point{{
+			Interval: &monitoringpb.TimeInterval{
+				StartTime: timestamp,
+				EndTime:   timestamp,
+			},
+			Value: value,
+		}},
+	}, nil
+}
+
+func sumToTimeSeries[N int64 | float64](point metricdata.DataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
+	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
+	if err != nil {
+		return nil, err
+	}
+	value, valueType := numberDataPointToValue[N](point)
+	return &monitoringpb.TimeSeries{
+		Resource:   mr,
+		Unit:       string(metrics.Unit),
+		MetricKind: googlemetricpb.MetricDescriptor_CUMULATIVE,
+		ValueType:  valueType,
+		Points: []*monitoringpb.Point{{
+			Interval: interval,
+			Value:    value,
+		}},
+	}, nil
+}
+
+func histogramToTimeSeries(point metricdata.HistogramDataPoint, metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
+	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
+	if err != nil {
+		return nil, err
+	}
+	return &monitoringpb.TimeSeries{
+		Resource:   mr,
+		Unit:       string(metrics.Unit),
 		MetricKind: googlemetricpb.MetricDescriptor_CUMULATIVE,
 		ValueType:  googlemetricpb.MetricDescriptor_DISTRIBUTION,
-		Points:     []*monitoringpb.Point{p},
-		Metric:     m,
+		Points: []*monitoringpb.Point{{
+			Interval: interval,
+			Value:    histToTypedValue(point),
+		}},
 	}, nil
 }
 
@@ -643,62 +594,51 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 	}, nil
 }
 
-func histToTypedValue(hist aggregation.Histogram) (*monitoringpb.TypedValue, error) {
-	buckets, err := hist.Histogram()
-	if err != nil {
-		return nil, err
-	}
-	counts := make([]int64, len(buckets.Counts))
-	for i, v := range buckets.Counts {
+func histToTypedValue(hist metricdata.HistogramDataPoint) *monitoringpb.TypedValue {
+	counts := make([]int64, len(hist.BucketCounts))
+	for i, v := range hist.BucketCounts {
 		counts[i] = int64(v)
 	}
-	sum, err := hist.Sum()
-	if err != nil {
-		return nil, err
-	}
-	count, err := hist.Count()
-	if err != nil {
-		return nil, err
-	}
 	var mean float64
-	if !math.IsNaN(sum.AsFloat64()) && count > 0 { // Avoid divide-by-zero
-		mean = sum.AsFloat64() / float64(count)
+	if !math.IsNaN(hist.Sum) && hist.Count > 0 { // Avoid divide-by-zero
+		mean = hist.Sum / float64(hist.Count)
 	}
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distribution.Distribution{
-				Count:        int64(count),
+				Count:        int64(hist.Count),
 				Mean:         mean,
 				BucketCounts: counts,
 				BucketOptions: &distribution.Distribution_BucketOptions{
 					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
 						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
-							Bounds: buckets.Boundaries,
+							Bounds: hist.Bounds,
 						},
 					},
 				},
 				// TODO: support exemplars
 			},
 		},
-	}, nil
+	}
 }
 
-func aggToTypedValue(kind number.Kind, value number.Number) (*monitoringpb.TypedValue, error) {
-	switch kind {
-	case number.Int64Kind:
-		return &monitoringpb.TypedValue{
-			Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: value.AsInt64(),
-			},
-		}, nil
-	case number.Float64Kind:
-		return &monitoringpb.TypedValue{
-			Value: &monitoringpb.TypedValue_DoubleValue{
-				DoubleValue: value.AsFloat64(),
-			},
-		}, nil
+func numberDataPointToValue[N int64 | float64](
+	point metricdata.DataPoint[N],
+) (*monitoringpb.TypedValue, googlemetricpb.MetricDescriptor_ValueType) {
+	switch v := any(point.Value).(type) {
+	case int64:
+		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
+				Int64Value: v,
+			}},
+			googlemetricpb.MetricDescriptor_INT64
+	case float64:
+		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+				DoubleValue: v,
+			}},
+			googlemetricpb.MetricDescriptor_DOUBLE
 	}
-	return nil, errUnexpectedNumberKind{kind: kind}
+	// It is impossible to reach this statement
+	return nil, googlemetricpb.MetricDescriptor_INT64
 }
 
 // https://github.com/googleapis/googleapis/blob/c4c562f89acce603fb189679836712d08c7f8584/google/api/metric.proto#L149

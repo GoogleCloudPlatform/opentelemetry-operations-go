@@ -25,9 +25,7 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/sdk/metric/controller/basic"
-	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	"go.opentelemetry.io/otel/sdk/metric"
 )
 
 type observedFloat struct {
@@ -57,26 +55,24 @@ func main() {
 	// Initialization. In order to pass the credentials to the exporter,
 	// prepare credential file following the instruction described in this doc.
 	// https://pkg.go.dev/golang.org/x/oauth2/google?tab=doc#FindDefaultCredentials
-	opts := []mexporter.Option{}
-
-	// NOTE: In current implementation of exporter, this resource is ignored because
-	// the function to handle the common resource just ignore the passed resource and
-	// it returned hard coded "global" resource.
-	// This should be fixed in #29.
-	resOpt := basic.WithResource(resource.NewWithAttributes(
-		semconv.SchemaURL,
-		attribute.String("instance_id", "abc123"),
-		attribute.String("application", "example-app"),
-	))
-	pusher, err := mexporter.InstallNewPipeline(opts, resOpt)
+	exporter, err := mexporter.New()
 	if err != nil {
-		log.Fatalf("Failed to establish pipeline: %v", err)
+		log.Fatalf("Failed to create exporter: %v", err)
 	}
-	ctx := context.Background()
-	defer pusher.Stop(ctx)
 
-	// Start meter
-	meter := pusher.Meter("cloudmonitoring/example")
+	// initialize a MeterProvider with that periodically exports to the GCP exporter.
+	provider := metric.NewMeterProvider(
+		metric.WithReader(metric.NewPeriodicReader(exporter)),
+	)
+	ctx := context.Background()
+	defer func() {
+		if err = provider.Shutdown(ctx); err != nil {
+			log.Fatalf("failed to shutdown meter provider: %v", err)
+		}
+	}()
+
+	// Create a meter with which we will record metrics for our package.
+	meter := provider.Meter("github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric")
 
 	// Register counter value
 	counter, err := meter.SyncInt64().Counter("counter-a")
@@ -100,12 +96,15 @@ func main() {
 
 	gaugeObserver, err := meter.AsyncFloat64().Gauge("observer-a")
 	if err != nil {
-		log.Panicf("failed to initialize instrument: %v", err)
+		log.Fatalf("failed to initialize instrument: %v", err)
 	}
-	_ = meter.RegisterCallback([]instrument.Asynchronous{gaugeObserver}, func(ctx context.Context) {
+	err = meter.RegisterCallback([]instrument.Asynchronous{gaugeObserver}, func(ctx context.Context) {
 		v := of.get()
 		gaugeObserver.Observe(ctx, v, olabels...)
 	})
+	if err != nil {
+		log.Fatalf("failed to register callback: %v", err)
+	}
 
 	// Add measurement once an every 10 second.
 	timer := time.NewTicker(10 * time.Second)

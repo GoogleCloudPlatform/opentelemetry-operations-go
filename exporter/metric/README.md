@@ -15,13 +15,13 @@ Google Cloud Monitoring is a managed service provided by Google Cloud Platform. 
 
 After you import the metric exporter package, then register the exporter to the application, and start sending metrics. If you are running in a GCP environment, the exporter will automatically authenticate using the environment's service account. If not, you will need to follow the instructions in [Authentication](#Authentication).
 
+// TODO update!
 ```go
 package main
 
 import (
     "go.opentelemetry.io/otel/metric"
     "go.opentelemetry.io/otel/label"
-    "go.opentelemetry.io/otel/sdk/metric/controller/basic"
     "go.opentelemetry.io/otel/sdk/resource"
 
     mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"

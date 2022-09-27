@@ -24,14 +24,8 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
-	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
-	"go.opentelemetry.io/otel/sdk/metric/export"
-	"go.opentelemetry.io/otel/sdk/metric/export/aggregation"
-	"go.opentelemetry.io/otel/sdk/metric/metrictest"
-	"go.opentelemetry.io/otel/sdk/metric/number"
-	processor "go.opentelemetry.io/otel/sdk/metric/processor/basic"
-	"go.opentelemetry.io/otel/sdk/metric/processor/processortest"
-	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
@@ -49,8 +43,8 @@ import (
 )
 
 var (
-	formatter = func(d *sdkapi.Descriptor) string {
-		return fmt.Sprintf("test.googleapis.com/%s", d.Name())
+	formatter = func(d metricdata.Metrics) string {
+		return fmt.Sprintf("test.googleapis.com/%s", d.Name)
 	}
 )
 
@@ -67,8 +61,6 @@ func TestExportMetrics(t *testing.T) {
 		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	}
 	res := &resource.Resource{}
-	aggSel := processortest.AggregatorSelector()
-	proc := processor.NewFactory(aggSel, aggregation.CumulativeTemporalitySelector())
 
 	opts := []Option{
 		WithProjectID("PROJECT_ID_NOT_REAL"),
@@ -76,22 +68,21 @@ func TestExportMetrics(t *testing.T) {
 		WithMetricDescriptorTypeFormatter(formatter),
 	}
 
-	exporter, err := NewRawExporter(opts...)
+	exporter, err := New(opts...)
 	if err != nil {
 		t.Errorf("Error occurred when creating exporter: %v", err)
 	}
-	cont := controller.New(proc,
-		controller.WithExporter(exporter),
-		controller.WithResource(res),
+	provider := metric.NewMeterProvider(
+		metric.WithReader(metric.NewPeriodicReader(exporter)),
+		metric.WithResource(res),
 	)
 
-	assert.NoError(t, cont.Start(ctx))
-	meter := cont.Meter("test")
+	meter := provider.Meter("test")
 	counter, err := meter.SyncInt64().Counter("name.lastvalue")
 	require.NoError(t, err)
 
 	counter.Add(ctx, 1)
-	require.NoError(t, cont.Stop(ctx))
+	require.NoError(t, provider.Shutdown(ctx))
 }
 
 func TestExportCounter(t *testing.T) {
@@ -106,28 +97,26 @@ func TestExportCounter(t *testing.T) {
 		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	}
 
-	resOpt := controller.WithResource(
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			attribute.String("test_id", "abc123"),
-		),
-	)
-
-	pusher, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpts...),
-			WithMetricDescriptorTypeFormatter(formatter),
-		},
-		resOpt,
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithMonitoringClientOptions(clientOpts...),
+		WithMetricDescriptorTypeFormatter(formatter),
 	)
 	assert.NoError(t, err)
+	provider := metric.NewMeterProvider(
+		metric.WithReader(metric.NewPeriodicReader(exporter)),
+		metric.WithResource(
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("test_id", "abc123"),
+			)),
+	)
 
 	ctx := context.Background()
-	defer pusher.Stop(ctx)
+	defer provider.Shutdown(ctx)
 
 	// Start meter
-	meter := pusher.Meter("cloudmonitoring/test")
+	meter := provider.Meter("cloudmonitoring/test")
 
 	// Register counter value
 	counter, err := meter.SyncInt64().Counter("counter-a")
@@ -148,28 +137,28 @@ func TestExportHistogram(t *testing.T) {
 		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	}
 
-	resOpt := controller.WithResource(
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			attribute.String("test_id", "abc123"),
-		),
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithMonitoringClientOptions(clientOpts...),
+		WithMetricDescriptorTypeFormatter(formatter),
 	)
-
-	pusher, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpts...),
-			WithMetricDescriptorTypeFormatter(formatter),
-		},
-		resOpt,
+	assert.NoError(t, err)
+	provider := metric.NewMeterProvider(
+		metric.WithReader(metric.NewPeriodicReader(exporter)),
+		metric.WithResource(
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("test_id", "abc123"),
+			),
+		),
 	)
 	assert.NoError(t, err)
 
 	ctx := context.Background()
-	defer pusher.Stop(ctx)
+	defer provider.Shutdown(ctx)
 
 	// Start meter
-	meter := pusher.Meter("cloudmonitoring/test")
+	meter := provider.Meter("cloudmonitoring/test")
 
 	// Register counter value
 	counter, err := meter.SyncInt64().Histogram("counter-a")
@@ -192,9 +181,9 @@ func TestDescToMetricType(t *testing.T) {
 		},
 	}
 
-	inDesc := []sdkapi.Descriptor{
-		metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind),
-		metrictest.NewDescriptor("test/of/path", sdkapi.HistogramInstrumentKind, number.Float64Kind),
+	inDesc := []metricdata.Metrics{
+		{Name: "testing", Data: metricdata.Histogram{}},
+		{Name: "test/of/path", Data: metricdata.Histogram{}},
 	}
 
 	wants := []string{
@@ -203,7 +192,7 @@ func TestDescToMetricType(t *testing.T) {
 	}
 
 	for i, w := range wants {
-		out := inMe[i].descToMetricType(&inDesc[i])
+		out := inMe[i].descToMetricType(inDesc[i])
 		if out != w {
 			t.Errorf("expected: %v, actual: %v", w, out)
 		}
@@ -211,40 +200,11 @@ func TestDescToMetricType(t *testing.T) {
 }
 
 func TestRecordToMpb(t *testing.T) {
-	ctx := context.Background()
-	testServer, err := cloudmock.NewMetricTestServer()
-	go testServer.Serve()
-	defer testServer.Shutdown()
-	assert.NoError(t, err)
-
-	clientOpts := []option.ClientOption{
-		option.WithEndpoint(testServer.Endpoint),
-		option.WithoutAuthentication(),
-		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	}
-
-	resOpt := controller.WithResource(
-		resource.NewWithAttributes(
-			semconv.SchemaURL,
-			attribute.String("test_id", "abc123"),
-		),
-	)
-
-	pusher, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpts...),
-			WithMetricDescriptorTypeFormatter(formatter),
-		},
-		resOpt,
-	)
-	assert.NoError(t, err)
-
-	desc := metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind)
+	metricName := "testing"
 
 	md := &googlemetricpb.MetricDescriptor{
-		Name:        desc.Name(),
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		Name:        metricName,
+		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, metricName),
 		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
 		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
 		Description: "test",
@@ -260,15 +220,16 @@ func TestRecordToMpb(t *testing.T) {
 			mdkey: md,
 		},
 	}
-	meter := pusher.Meter("custom.googleapis.com/opentelemetry")
-	counter, err := meter.SyncInt64().Counter(desc.Name())
-	require.NoError(t, err)
-	clabels := []attribute.KeyValue{
+
+	inputLibrary := instrumentation.Library{Name: "custom.googleapis.com/opentelemetry"}
+	inputAttributes := attribute.NewSet(
 		attribute.Key("a").String("A"),
 		attribute.Key("b_b").String("B"),
 		attribute.Key("foo").Int64(100),
+	)
+	inputMetrics := metricdata.Metrics{
+		Name: metricName,
 	}
-	counter.Add(ctx, 100, clabels...)
 
 	want := &googlemetricpb.Metric{
 		Type: md.Type,
@@ -278,19 +239,9 @@ func TestRecordToMpb(t *testing.T) {
 			"foo": "100",
 		},
 	}
-	require.NoError(t, pusher.Stop(ctx))
-
-	aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
-		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
-			out := me.recordToMpb(&r, library)
-			if !reflect.DeepEqual(want, out) {
-				return fmt.Errorf("expected: %v, actual: %v", want, out)
-			}
-			return nil
-		})
-	})
-	if aggError != nil {
-		t.Errorf("%v", aggError)
+	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary)
+	if !reflect.DeepEqual(want, out) {
+		t.Errorf("expected: %v, actual: %v", want, out)
 	}
 }
 
@@ -454,11 +405,9 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		},
 	}
 
-	desc := metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind)
-
 	md := &googlemetricpb.MetricDescriptor{
-		Name:        desc.Name(),
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		Name:        "testing",
+		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, "testing"),
 		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
 		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
 		Description: "test",
@@ -598,11 +547,11 @@ func TestResourceToMonitoredResourcepbProjectIDUTF8(t *testing.T) {
 }
 
 func TestRecordToMpbUTF8(t *testing.T) {
-	desc := metrictest.NewDescriptor("testing", sdkapi.HistogramInstrumentKind, number.Float64Kind)
+	metricName := "testing"
 
 	md := &googlemetricpb.MetricDescriptor{
-		Name:        desc.Name(),
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name()),
+		Name:        metricName,
+		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, metricName),
 		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
 		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
 		Description: "test",
@@ -613,13 +562,6 @@ func TestRecordToMpbUTF8(t *testing.T) {
 		libraryname: "",
 	}
 
-	metricLabels := []attribute.KeyValue{
-		attribute.Key("valid_ascii").String("abcdefg"),
-		attribute.Key("valid_utf8").String("שלום"),
-		attribute.Key("invalid_two_octet").String(invalidUtf8TwoOctet),
-		attribute.Key("invalid_sequence_id").String(invalidUtf8SequenceID),
-	}
-
 	expectedLabels := map[string]string{
 		"valid_ascii":         "abcdefg",
 		"valid_utf8":          "שלום",
@@ -627,55 +569,30 @@ func TestRecordToMpbUTF8(t *testing.T) {
 		"invalid_sequence_id": "�",
 	}
 
-	ctx := context.Background()
-	testServer, err := cloudmock.NewMetricTestServer()
-	go testServer.Serve()
-	defer testServer.Shutdown()
-	assert.NoError(t, err)
-
-	clientOpts := []option.ClientOption{
-		option.WithEndpoint(testServer.Endpoint),
-		option.WithoutAuthentication(),
-		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	}
-
-	pusher, err := InstallNewPipeline(
-		[]Option{
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpts...),
-			WithMetricDescriptorTypeFormatter(formatter),
-		},
-	)
-	assert.NoError(t, err)
-
 	me := &metricExporter{
 		o: &options{},
 		mdCache: map[key]*googlemetricpb.MetricDescriptor{
 			mdkey: md,
 		},
 	}
-	meter := pusher.Meter("custom.googleapis.com/opentelemetry")
-	counter, err := meter.SyncInt64().Counter(desc.Name())
-	require.NoError(t, err)
-	counter.Add(ctx, 100, metricLabels...)
 
-	require.NoError(t, pusher.Stop(ctx))
+	inputLibrary := instrumentation.Library{Name: "custom.googleapis.com/opentelemetry"}
+	inputAttributes := attribute.NewSet(
+		attribute.Key("valid_ascii").String("abcdefg"),
+		attribute.Key("valid_utf8").String("שלום"),
+		attribute.Key("invalid_two_octet").String(invalidUtf8TwoOctet),
+		attribute.Key("invalid_sequence_id").String(invalidUtf8SequenceID))
+	inputMetrics := metricdata.Metrics{
+		Name: metricName,
+	}
 
 	want := &googlemetricpb.Metric{
 		Type:   md.Type,
 		Labels: expectedLabels,
 	}
-	aggError := pusher.ForEach(func(library instrumentation.Library, reader export.Reader) error {
-		return reader.ForEach(aggregation.CumulativeTemporalitySelector(), func(r export.Record) error {
-			out := me.recordToMpb(&r, library)
-			if !reflect.DeepEqual(want, out) {
-				return fmt.Errorf("expected: %v, actual: %v", want, out)
-			}
-			return nil
-		})
-	})
-	if aggError != nil {
-		t.Errorf("%v", aggError)
+	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary)
+	if !reflect.DeepEqual(want, out) {
+		t.Errorf("expected: %v, actual: %v", want, out)
 	}
 }
 
@@ -794,8 +711,6 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 			}
 			clientOpts = append(clientOpts, tc.extraOpts...)
 			res := &resource.Resource{}
-			aggSel := processortest.AggregatorSelector()
-			proc := processor.NewFactory(aggSel, aggregation.CumulativeTemporalitySelector())
 			ctx := context.Background()
 
 			opts := []Option{
@@ -804,23 +719,22 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 				WithMetricDescriptorTypeFormatter(formatter),
 			}
 
-			exporter, err := NewRawExporter(opts...)
+			exporter, err := New(opts...)
 			if err != nil {
 				t.Errorf("Error occurred when creating exporter: %v", err)
 			}
-			cont := controller.New(proc,
-				controller.WithExporter(exporter),
-				controller.WithResource(res),
+			provider := metric.NewMeterProvider(
+				metric.WithReader(metric.NewPeriodicReader(exporter)),
+				metric.WithResource(res),
 			)
 
-			assert.NoError(t, cont.Start(ctx))
-			meter := cont.Meter("test")
+			meter := provider.Meter("test")
 
 			counter, err := meter.SyncInt64().Counter("name.lastvalue")
 			require.NoError(t, err)
 
 			counter.Add(ctx, 1)
-			require.NoError(t, cont.Stop(ctx))
+			require.NoError(t, provider.ForceFlush(ctx))
 
 			// User agent checking happens above in parallel to this flow.
 		})
