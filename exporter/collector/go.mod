@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector
 
-go 1.17
+go 1.18
 
 require (
 	cloud.google.com/go/logging v1.4.2

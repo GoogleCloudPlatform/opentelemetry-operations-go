@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest
 
-go 1.17
+go 1.18
 
 require (
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.11
