@@ -66,15 +66,15 @@ func TestMetricToTimeSeries(t *testing.T) {
 		endTs := pcommon.NewTimestampFromTime(start.Add(time.Hour))
 		// Add three points
 		point := sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(10)
+		point.SetDoubleValue(10)
 		point.SetStartTimestamp(startTs)
 		point.SetTimestamp(endTs)
 		point = sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(15)
+		point.SetDoubleValue(15)
 		point.SetStartTimestamp(startTs)
 		point.SetTimestamp(endTs)
 		point = sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(16)
+		point.SetDoubleValue(16)
 		point.SetStartTimestamp(startTs)
 		point.SetTimestamp(endTs)
 
@@ -101,15 +101,15 @@ func TestMetricToTimeSeries(t *testing.T) {
 		// Add three points without start timestamps.
 		// The first one should be dropped to set the start timestamp for the rest
 		point := sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(10)
+		point.SetDoubleValue(10)
 		point.SetStartTimestamp(zeroTs)
 		point.SetTimestamp(startTs)
 		point = sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(15)
+		point.SetDoubleValue(15)
 		point.SetStartTimestamp(zeroTs)
 		point.SetTimestamp(endTs)
 		point = sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(16)
+		point.SetDoubleValue(16)
 		point.SetStartTimestamp(zeroTs)
 		point.SetTimestamp(endTs)
 
@@ -137,17 +137,17 @@ func TestMetricToTimeSeries(t *testing.T) {
 		endTs := pcommon.NewTimestampFromTime(start.Add(time.Hour))
 		// Add three points
 		point := sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(10)
+		point.SetDoubleValue(10)
 		point.SetStartTimestamp(startTs)
 		point.SetTimestamp(middleTs)
 		point = sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(15)
+		point.SetDoubleValue(15)
 		// identical start and end indicates a reset point
 		// this point is expected to be dropped, and to normalize subsequent points
 		point.SetStartTimestamp(middleTs)
 		point.SetTimestamp(middleTs)
 		point = sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(16)
+		point.SetDoubleValue(16)
 		point.SetStartTimestamp(middleTs)
 		point.SetTimestamp(endTs)
 
@@ -173,11 +173,11 @@ func TestMetricToTimeSeries(t *testing.T) {
 		endTs := pcommon.NewTimestampFromTime(start.Add(time.Hour))
 		// Add three points
 		point := sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(10)
+		point.SetDoubleValue(10)
 		point.SetStartTimestamp(startTs)
 		point.SetTimestamp(endTs)
 		point = sum.DataPoints().AppendEmpty()
-		point.SetDoubleVal(15)
+		point.SetDoubleValue(15)
 		point.SetStartTimestamp(startTs)
 		point.SetTimestamp(endTs)
 		// The last point has no value
@@ -200,9 +200,9 @@ func TestMetricToTimeSeries(t *testing.T) {
 		metric := pmetric.NewMetric()
 		gauge := metric.SetEmptyGauge()
 		// Add three points
-		gauge.DataPoints().AppendEmpty().SetIntVal(10)
-		gauge.DataPoints().AppendEmpty().SetIntVal(15)
-		gauge.DataPoints().AppendEmpty().SetIntVal(16)
+		gauge.DataPoints().AppendEmpty().SetIntValue(10)
+		gauge.DataPoints().AppendEmpty().SetIntValue(15)
+		gauge.DataPoints().AppendEmpty().SetIntValue(16)
 
 		ts := mapper.metricToTimeSeries(
 			mr,
@@ -220,8 +220,8 @@ func TestMetricToTimeSeries(t *testing.T) {
 		metric := pmetric.NewMetric()
 		gauge := metric.SetEmptyGauge()
 		// Add three points
-		gauge.DataPoints().AppendEmpty().SetIntVal(10)
-		gauge.DataPoints().AppendEmpty().SetIntVal(15)
+		gauge.DataPoints().AppendEmpty().SetIntValue(10)
+		gauge.DataPoints().AppendEmpty().SetIntValue(15)
 		// The last point has no value
 		gauge.DataPoints().AppendEmpty().SetFlags(pmetric.DefaultMetricDataPointFlags.WithNoRecordedValue(true))
 
@@ -273,7 +273,7 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	point.SetSum(42)
 	point.ExplicitBounds().FromRaw([]float64{10, 20, 30, 40})
 	exemplar := point.Exemplars().AppendEmpty()
-	exemplar.SetDoubleVal(2)
+	exemplar.SetDoubleValue(2)
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(end))
 	exemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
 	exemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
@@ -339,7 +339,7 @@ func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
 	point.SetSum(2)
 	point.ExplicitBounds().FromRaw([]float64{10, 20, 30, 40})
 	exemplar := point.Exemplars().AppendEmpty()
-	exemplar.SetDoubleVal(2)
+	exemplar.SetDoubleValue(2)
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(start))
 	exemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
 	exemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
@@ -355,7 +355,7 @@ func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
 	point.SetSum(44)
 	point.ExplicitBounds().FromRaw([]float64{10, 20, 30, 40})
 	exemplar = point.Exemplars().AppendEmpty()
-	exemplar.SetDoubleVal(2)
+	exemplar.SetDoubleValue(2)
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(end))
 	exemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
 	exemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
@@ -371,7 +371,7 @@ func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
 	point.SetSum(445)
 	point.ExplicitBounds().FromRaw([]float64{10, 20, 30, 40})
 	exemplar = point.Exemplars().AppendEmpty()
-	exemplar.SetDoubleVal(2)
+	exemplar.SetDoubleValue(2)
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(end2))
 	exemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
 	exemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
@@ -618,7 +618,7 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	point.SetScale(-1)
 	point.SetSum(42)
 	exemplar := point.Exemplars().AppendEmpty()
-	exemplar.SetDoubleVal(2)
+	exemplar.SetDoubleValue(2)
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(end))
 	exemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
 	exemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
@@ -694,7 +694,7 @@ func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	point.SetScale(-1)
 	point.SetSum(10)
 	exemplar := point.Exemplars().AppendEmpty()
-	exemplar.SetDoubleVal(2)
+	exemplar.SetDoubleValue(2)
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(start))
 	exemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
 	exemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
@@ -714,7 +714,7 @@ func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	point.SetScale(-1)
 	point.SetSum(56)
 	exemplar = point.Exemplars().AppendEmpty()
-	exemplar.SetDoubleVal(2)
+	exemplar.SetDoubleValue(2)
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(end))
 	exemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
 	exemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
@@ -734,7 +734,7 @@ func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	point.SetScale(-1)
 	point.SetSum(72)
 	exemplar = point.Exemplars().AppendEmpty()
-	exemplar.SetDoubleVal(2)
+	exemplar.SetDoubleValue(2)
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(end2))
 	exemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
 	exemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
@@ -926,7 +926,7 @@ func TestExemplarNoAttachements(t *testing.T) {
 	defer shutdown()
 	exemplar := pmetric.NewExemplar()
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(start))
-	exemplar.SetDoubleVal(1)
+	exemplar.SetDoubleValue(1)
 
 	result := mapper.exemplar(exemplar, mapper.cfg.ProjectID)
 	assert.Equal(t, float64(1), result.Value)
@@ -939,7 +939,7 @@ func TestExemplarOnlyDroppedLabels(t *testing.T) {
 	defer shutdown()
 	exemplar := pmetric.NewExemplar()
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(start))
-	exemplar.SetDoubleVal(1)
+	exemplar.SetDoubleValue(1)
 	exemplar.FilteredAttributes().PutString("test", "drop")
 
 	result := mapper.exemplar(exemplar, mapper.cfg.ProjectID)
@@ -959,7 +959,7 @@ func TestExemplarOnlyTraceId(t *testing.T) {
 	mapper.cfg.ProjectID = "p"
 	exemplar := pmetric.NewExemplar()
 	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(start))
-	exemplar.SetDoubleVal(1)
+	exemplar.SetDoubleValue(1)
 	exemplar.SetTraceID([16]byte{
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 	})
@@ -1000,7 +1000,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		sum.SetIsMonotonic(true)
 		sum.SetAggregationTemporality(pmetric.MetricAggregationTemporalityCumulative)
 		var value int64 = 10
-		point.SetIntVal(value)
+		point.SetIntValue(value)
 		end := start.Add(time.Hour)
 		point.SetStartTimestamp(pcommon.NewTimestampFromTime(start))
 		point.SetTimestamp(pcommon.NewTimestampFromTime(end))
@@ -1026,7 +1026,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		assert.Equal(t, ts.Points[0].Value.GetInt64Value(), value)
 
 		// Test double as well
-		point.SetDoubleVal(float64(value))
+		point.SetDoubleValue(float64(value))
 		tsl = mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
 		assert.Equal(t, 1, len(tsl))
 		ts = tsl[0]
@@ -1040,7 +1040,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		metric.SetName("mysum")
 		sum.SetIsMonotonic(true)
 		sum.SetAggregationTemporality(pmetric.MetricAggregationTemporalityDelta)
-		point.SetIntVal(10)
+		point.SetIntValue(10)
 		end := start.Add(time.Hour)
 		point.SetStartTimestamp(pcommon.NewTimestampFromTime(start))
 		point.SetTimestamp(pcommon.NewTimestampFromTime(end))
@@ -1061,7 +1061,7 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		metric.SetName("mysum")
 		sum.SetIsMonotonic(false)
 		sum.SetAggregationTemporality(pmetric.MetricAggregationTemporalityDelta)
-		point.SetIntVal(10)
+		point.SetIntValue(10)
 		end := start.Add(time.Hour)
 		point.SetStartTimestamp(pcommon.NewTimestampFromTime(start))
 		point.SetTimestamp(pcommon.NewTimestampFromTime(end))
@@ -1124,7 +1124,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	unit := "1"
 	metric.SetUnit(unit)
 	var value int64 = 10
-	point.SetIntVal(value)
+	point.SetIntValue(value)
 	end := start.Add(time.Hour)
 	point.SetTimestamp(pcommon.NewTimestampFromTime(end))
 
@@ -1148,7 +1148,7 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	assert.Equal(t, ts.Points[0].Value.GetInt64Value(), value)
 
 	// Test double as well
-	point.SetDoubleVal(float64(value))
+	point.SetDoubleValue(float64(value))
 	tsl = mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
 	assert.Len(t, tsl, 1)
 	ts = tsl[0]
@@ -1465,12 +1465,12 @@ func TestAttributesToLabels(t *testing.T) {
 func TestNumberDataPointToValue(t *testing.T) {
 	point := pmetric.NewNumberDataPoint()
 
-	point.SetIntVal(12)
+	point.SetIntValue(12)
 	value, valueType := numberDataPointToValue(point)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_INT64)
 	assert.EqualValues(t, value.GetInt64Value(), 12)
 
-	point.SetDoubleVal(12.3)
+	point.SetDoubleValue(12.3)
 	value, valueType = numberDataPointToValue(point)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
@@ -1494,7 +1494,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				metric.SetUnit("1")
 				gauge := metric.SetEmptyGauge()
 				point := gauge.DataPoints().AppendEmpty()
-				point.SetDoubleVal(10)
+				point.SetDoubleValue(10)
 				point.Attributes().PutString("test.label", "test_value")
 				return metric
 			},
@@ -1526,7 +1526,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetIsMonotonic(true)
 				sum.SetAggregationTemporality(pmetric.MetricAggregationTemporalityCumulative)
 				point := sum.DataPoints().AppendEmpty()
-				point.SetDoubleVal(10)
+				point.SetDoubleValue(10)
 				point.Attributes().PutString("test.label", "test_value")
 				return metric
 			},
@@ -1558,7 +1558,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetIsMonotonic(true)
 				sum.SetAggregationTemporality(pmetric.MetricAggregationTemporalityDelta)
 				point := sum.DataPoints().AppendEmpty()
-				point.SetDoubleVal(10)
+				point.SetDoubleValue(10)
 				point.Attributes().PutString("test.label", "test_value")
 				return metric
 			},
@@ -1590,7 +1590,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetIsMonotonic(false)
 				sum.SetAggregationTemporality(pmetric.MetricAggregationTemporalityCumulative)
 				point := sum.DataPoints().AppendEmpty()
-				point.SetDoubleVal(10)
+				point.SetDoubleValue(10)
 				point.Attributes().PutString("test.label", "test_value")
 				return metric
 			},
@@ -1734,7 +1734,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 
 				for i := 0; i < 5; i++ {
 					point := gauge.DataPoints().AppendEmpty()
-					point.SetDoubleVal(10)
+					point.SetDoubleValue(10)
 					point.Attributes().PutString("test.label", "test_value")
 				}
 				return metric
@@ -1767,7 +1767,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				sum.SetIsMonotonic(true)
 				sum.SetAggregationTemporality(pmetric.MetricAggregationTemporalityCumulative)
 				point := sum.DataPoints().AppendEmpty()
-				point.SetDoubleVal(10)
+				point.SetDoubleValue(10)
 				point.Attributes().PutString("test.label", "test_value")
 				return metric
 			},
@@ -1811,7 +1811,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				metric.SetUnit("1")
 				gauge := metric.SetEmptyGauge()
 				point := gauge.DataPoints().AppendEmpty()
-				point.SetDoubleVal(10)
+				point.SetDoubleValue(10)
 				point.Attributes().PutString("test.label", "test_value")
 				point.Attributes().PutString("test_label", "other_value")
 				return metric

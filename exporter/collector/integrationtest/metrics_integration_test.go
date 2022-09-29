@@ -86,7 +86,7 @@ func setSecondProjectInMetrics(t *testing.T, metrics pmetric.Metrics) {
 	require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
 	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
 		if project, found := metrics.ResourceMetrics().At(i).Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
-			project.SetStringVal(secondProject)
+			project.SetStr(secondProject)
 		}
 	}
 }

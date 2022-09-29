@@ -56,7 +56,7 @@ func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResour
 func getStringOrEmpty(attributes pcommon.Map, keys ...string) string {
 	for _, k := range keys {
 		if val, ok := attributes.Get(k); ok {
-			return val.StringVal()
+			return val.Str()
 		}
 	}
 	return ""

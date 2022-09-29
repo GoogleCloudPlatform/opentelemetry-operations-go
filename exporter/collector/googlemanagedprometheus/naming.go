@@ -22,12 +22,12 @@ import (
 )
 
 func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
-	switch metric.DataType() {
-	case pmetric.MetricDataTypeSum:
+	switch metric.Type() {
+	case pmetric.MetricTypeSum:
 		return baseName + "/counter", nil
-	case pmetric.MetricDataTypeGauge:
+	case pmetric.MetricTypeGauge:
 		return baseName + "/gauge", nil
-	case pmetric.MetricDataTypeSummary:
+	case pmetric.MetricTypeSummary:
 		// summaries are sent as the following series:
 		// * Sum: prometheus.googleapis.com/<baseName>_sum/summary:counter
 		// * Count: prometheus.googleapis.com/<baseName>_count/summary
@@ -36,9 +36,9 @@ func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
 			return baseName + "/summary:counter", nil
 		}
 		return baseName + "/summary", nil
-	case pmetric.MetricDataTypeHistogram:
+	case pmetric.MetricTypeHistogram:
 		return baseName + "/histogram", nil
 	default:
-		return "", fmt.Errorf("unsupported metric datatype: %v", metric.DataType())
+		return "", fmt.Errorf("unsupported metric datatype: %v", metric.Type())
 	}
 }

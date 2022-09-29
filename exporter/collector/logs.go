@@ -347,7 +347,7 @@ func (l logMapper) logToSplitEntries(
 	// parse LogEntrySourceLocation struct from OTel attribute
 	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
-		err := json.Unmarshal(sourceLocation.BytesVal().AsRaw(), &logEntrySourceLocation)
+		err := json.Unmarshal(sourceLocation.Bytes().AsRaw(), &logEntrySourceLocation)
 		if err != nil {
 			return []logging.Entry{entry}, err
 		}
@@ -357,7 +357,7 @@ func (l logMapper) logToSplitEntries(
 
 	// parse TraceSampled boolean from OTel attribute
 	if traceSampled, ok := attrsMap[TraceSampledAttributeKey]; ok {
-		entry.TraceSampled = traceSampled.BoolVal()
+		entry.TraceSampled = traceSampled.Bool()
 		delete(attrsMap, TraceSampledAttributeKey)
 	}
 
@@ -476,11 +476,11 @@ func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, in
 	}
 	switch logBody.Type() {
 	case pcommon.ValueTypeBytes:
-		return logBody.BytesVal().AsRaw(), 1, nil
-	case pcommon.ValueTypeString:
+		return logBody.Bytes().AsRaw(), 1, nil
+	case pcommon.ValueTypeStr:
 		return logBody.AsString(), int(math.Ceil(float64(len([]byte(logBody.AsString()))) / float64(maxEntrySize))), nil
 	case pcommon.ValueTypeMap:
-		return logBody.MapVal().AsRaw(), 1, nil
+		return logBody.Map().AsRaw(), 1, nil
 
 	default:
 		return nil, 0, fmt.Errorf("unknown log body value %v", logBody.Type().String())
@@ -511,8 +511,8 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTT
 	var bytes []byte
 	switch httpRequestAttr.Type() {
 	case pcommon.ValueTypeBytes:
-		bytes = httpRequestAttr.BytesVal().AsRaw()
-	case pcommon.ValueTypeString, pcommon.ValueTypeMap:
+		bytes = httpRequestAttr.Bytes().AsRaw()
+	case pcommon.ValueTypeStr, pcommon.ValueTypeMap:
 		bytes = []byte(httpRequestAttr.AsString())
 	}
 

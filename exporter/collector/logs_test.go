@@ -64,7 +64,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: 3 + 51, // 3 bytes for payload + 51 for overhead
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetStringVal("abcxyz")
+				log.Body().SetStr("abcxyz")
 				return log
 			},
 			expectedEntries: []logging.Entry{
@@ -98,7 +98,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetEmptyBytesVal().FromRaw([]byte(`{"this": "is json"}`))
+				log.Body().SetEmptyBytes().FromRaw([]byte(`{"this": "is json"}`))
 				return log
 			},
 			mr: func() *monitoredres.MonitoredResource {
@@ -116,7 +116,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json and httpRequest, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetEmptyBytesVal().FromRaw([]byte(`{"message": "hello!"}`))
+				log.Body().SetEmptyBytes().FromRaw([]byte(`{"message": "hello!"}`))
 				log.Attributes().PutEmptyBytes(HTTPRequestAttributeKey).FromRaw([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
@@ -181,7 +181,7 @@ func TestLogMapping(t *testing.T) {
 			},
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetStringVal("{\"message\": \"hello!\"}")
+				log.Body().SetStr("{\"message\": \"hello!\"}")
 				return log
 			},
 			expectedEntries: []logging.Entry{

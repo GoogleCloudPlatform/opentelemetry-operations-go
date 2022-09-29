@@ -126,14 +126,14 @@ func pdataAttributesToOTAttributes(attrs pcommon.Map, resource pcommon.Resource)
 	appendAttrs := func(m pcommon.Map) {
 		m.Range(func(k string, v pcommon.Value) bool {
 			switch v.Type() {
-			case pcommon.ValueTypeString:
-				otAttrs = append(otAttrs, attribute.String(k, v.StringVal()))
+			case pcommon.ValueTypeStr:
+				otAttrs = append(otAttrs, attribute.String(k, v.Str()))
 			case pcommon.ValueTypeBool:
-				otAttrs = append(otAttrs, attribute.Bool(k, v.BoolVal()))
+				otAttrs = append(otAttrs, attribute.Bool(k, v.Bool()))
 			case pcommon.ValueTypeInt:
-				otAttrs = append(otAttrs, attribute.Int64(k, v.IntVal()))
+				otAttrs = append(otAttrs, attribute.Int64(k, v.Int()))
 			case pcommon.ValueTypeDouble:
-				otAttrs = append(otAttrs, attribute.Float64(k, v.DoubleVal()))
+				otAttrs = append(otAttrs, attribute.Float64(k, v.Double()))
 			}
 			return true
 		})
