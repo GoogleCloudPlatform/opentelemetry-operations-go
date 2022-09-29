@@ -17,10 +17,9 @@ package metric
 import (
 	"context"
 	"fmt"
-	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
+	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 
 	apioption "google.golang.org/api/option"
 )
@@ -41,7 +40,7 @@ type options struct {
 	context context.Context
 	// metricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
 	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
-	metricDescriptorTypeFormatter func(*sdkapi.Descriptor) string
+	metricDescriptorTypeFormatter func(metricdata.Metrics) string
 	// onError is the hook to be called when there is an error uploading the metric data.
 	// If no custom hook is set, errors are logged. Optional.
 	//
@@ -61,9 +60,6 @@ type options struct {
 	// to the underlying Stackdriver Monitoring API client.
 	// Optional.
 	monitoringClientOptions []apioption.ClientOption
-	// reportingInterval sets the interval between reporting metrics.
-	// If it is set to zero then default value is used.
-	reportingInterval time.Duration
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -85,20 +81,11 @@ func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options
 	}
 }
 
-// WithInterval sets the interval for metric exporter to send data to Cloud Monitoring.
-// t should not be less than 10 seconds.
-// c.f. https://cloud.google.com/monitoring/docs/release-notes#March_30_2020
-func WithInterval(t time.Duration) func(o *options) {
-	return func(o *options) {
-		o.reportingInterval = t
-	}
-}
-
 // WithMetricDescriptorTypeFormatter sets the custom formatter for MetricDescriptor.
 // Note that the format has to follow the convention defined in the official document.
 // The default is "custom.googleapis.com/[metric name]".
 // ref. https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom_metric_names
-func WithMetricDescriptorTypeFormatter(f func(*sdkapi.Descriptor) string) func(o *options) {
+func WithMetricDescriptorTypeFormatter(f func(metricdata.Metrics) string) func(o *options) {
 	return func(o *options) {
 		o.metricDescriptorTypeFormatter = f
 	}

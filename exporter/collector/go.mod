@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector
 
-go 1.17
+go 1.18
 
 require (
 	cloud.google.com/go/logging v1.4.2
@@ -14,9 +14,9 @@ require (
 	go.opencensus.io v0.23.0
 	go.opentelemetry.io/collector/pdata v0.60.0
 	go.opentelemetry.io/collector/semconv v0.60.0
-	go.opentelemetry.io/otel v1.9.0
-	go.opentelemetry.io/otel/sdk v1.9.0
-	go.opentelemetry.io/otel/trace v1.9.0
+	go.opentelemetry.io/otel v1.10.0
+	go.opentelemetry.io/otel/sdk v1.10.0
+	go.opentelemetry.io/otel/trace v1.10.0
 	go.uber.org/atomic v1.9.0
 	go.uber.org/multierr v1.8.0
 	go.uber.org/zap v1.21.0

@@ -139,9 +139,9 @@ lint: $(TOOLS_DIR)/golangci-lint $(TOOLS_DIR)/misspell
 	done
 	$(TOOLS_DIR)/misspell -w $(ALL_DOCS)
 	set -e; for dir in $(ALL_GO_MOD_DIRS) $(TOOLS_MOD_DIR); do \
-	  echo "go mod tidy -compat=1.17 in $${dir}"; \
+	  echo "go mod tidy -compat=1.18 in $${dir}"; \
 	  (cd "$${dir}" && \
-	    go mod tidy -compat=1.17); \
+	    go mod tidy -compat=1.18); \
 	done
 
 generate: $(TOOLS_DIR)/stringer $(TOOLS_DIR)/protoc
@@ -172,16 +172,16 @@ for-all-package:
 
 .PHONY: gotidy
 gotidy:
-	$(MAKE) for-all-mod CMD="go mod tidy -compat=1.17"
+	$(MAKE) for-all-mod CMD="go mod tidy -compat=1.18"
 
 .PHONY: update-dep
 update-dep:
 	$(MAKE) for-all-mod CMD="$(PWD)/internal/buildscripts/update-dep"
 
-STABLE_OTEL_VERSION=v1.9.0
-UNSTABLE_OTEL_VERSION=v0.31.0
-UNSTABLE_CONTRIB_OTEL_VERSION=v0.34.0
-STABLE_CONTRIB_OTEL_VERSION=v1.9.0
+STABLE_OTEL_VERSION=v1.10.0
+UNSTABLE_OTEL_VERSION=v0.32.1
+UNSTABLE_CONTRIB_OTEL_VERSION=v0.36.0
+STABLE_CONTRIB_OTEL_VERSION=v1.10.0
 COLLECTOR_VERSION=v0.60.0
 
 .PHONY: update-otel

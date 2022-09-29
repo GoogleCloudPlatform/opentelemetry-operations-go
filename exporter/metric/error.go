@@ -17,34 +17,14 @@ package metric
 import (
 	"errors"
 	"fmt"
-
-	"go.opentelemetry.io/otel/sdk/metric/export/aggregation"
-	"go.opentelemetry.io/otel/sdk/metric/number"
-	"go.opentelemetry.io/otel/sdk/metric/sdkapi"
 )
 
 var (
 	errBlankProjectID = errors.New("expecting a non-blank ProjectID")
 )
 
-type errUnsupportedAggregation struct {
-	agg aggregation.Aggregation
-}
-
-func (e errUnsupportedAggregation) Error() string {
-	return fmt.Sprintf("currently the aggregator is not supported: %v", e.agg)
-}
-
-type errUnexpectedNumberKind struct {
-	kind number.Kind
-}
-
-func (e errUnexpectedNumberKind) Error() string {
-	return fmt.Sprintf("the number kind is unexpected: %v", e.kind)
-}
-
 type errUnexpectedAggregationKind struct {
-	kind sdkapi.InstrumentKind
+	kind string
 }
 
 func (e errUnexpectedAggregationKind) Error() string {
