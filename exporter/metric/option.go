@@ -41,12 +41,6 @@ type options struct {
 	// metricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
 	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
 	metricDescriptorTypeFormatter func(metricdata.Metrics) string
-	// onError is the hook to be called when there is an error uploading the metric data.
-	// If no custom hook is set, errors are logged. Optional.
-	//
-	// TODO: This option should be replaced with OTel defining error handler.
-	// c.f. https://pkg.go.dev/go.opentelemetry.io/otel@v0.6.0/sdk/metric/controller/push?tab=doc#Config
-	onError func(error)
 	// projectID is the identifier of the Cloud Monitoring
 	// project the user is uploading the stats data to.
 	// If not set, this will default to your "Application Default Credentials".
@@ -88,12 +82,5 @@ func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options
 func WithMetricDescriptorTypeFormatter(f func(metricdata.Metrics) string) func(o *options) {
 	return func(o *options) {
 		o.metricDescriptorTypeFormatter = f
-	}
-}
-
-// WithOnError sets the custom error handler to be called on errors.
-func WithOnError(f func(error)) func(o *options) {
-	return func(o *options) {
-		o.onError = f
 	}
 }
