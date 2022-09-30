@@ -17,7 +17,6 @@ package metric
 import (
 	"context"
 	"fmt"
-	"log"
 	"math"
 	"reflect"
 	"strings"
@@ -148,14 +147,10 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 
 // Export exports OpenTelemetry Metrics to Google Cloud Monitoring.
 func (me *metricExporter) Export(ctx context.Context, rm metricdata.ResourceMetrics) error {
-	if err := me.exportMetricDescriptor(ctx, rm); err != nil {
-		return err
-	}
-
-	if err := me.exportTimeSeries(ctx, rm); err != nil {
-		return err
-	}
-	return nil
+	return multierr.Combine(
+		me.exportMetricDescriptor(ctx, rm),
+		me.exportTimeSeries(ctx, rm),
+	)
 }
 
 // exportMetricDescriptor create MetricDescriptor from the record
@@ -182,14 +177,15 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricd
 	// goroutines to send CreateMetricDescriptorRequest asynchronously in the case
 	// the descriptor does not exist in global cache (me.mdCache).
 	// See details in #26.
+	var err error
 	for kmd, md := range mds {
-		err := me.createMetricDescriptorIfNeeded(ctx, md)
-		if err != nil {
-			return err
+		cmdErr := me.createMetricDescriptorIfNeeded(ctx, md)
+		if cmdErr == nil {
+			me.mdCache[kmd] = md
 		}
-		me.mdCache[kmd] = md
+		err = multierr.Append(err, cmdErr)
 	}
-	return nil
+	return err
 }
 
 func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md *googlemetricpb.MetricDescriptor) error {
@@ -217,34 +213,18 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.ResourceMetrics) error {
 	tss := []*monitoringpb.TimeSeries{}
 	mr := me.resourceToMonitoredResourcepb(rm.Resource)
-	var errs []error
+	var aggError error
 
 	for _, scope := range rm.ScopeMetrics {
 		for _, metrics := range scope.Metrics {
 			ts, err := me.recordToTspb(metrics, mr, scope.Scope)
-			if err != nil {
-				errs = append(errs, err)
-			} else {
-				tss = append(tss, ts...)
-			}
-		}
-	}
-
-	var aggError error
-	if len(errs) > 0 {
-		aggError = multierr.Combine(errs...)
-	}
-
-	if aggError != nil {
-		if me.o.onError != nil {
-			me.o.onError(aggError)
-		} else {
-			log.Printf("Error during exporting TimeSeries: %v", aggError)
+			aggError = multierr.Append(aggError, err)
+			tss = append(tss, ts...)
 		}
 	}
 
 	if len(tss) == 0 {
-		return nil
+		return aggError
 	}
 
 	// TODO: When this exporter is rewritten, support writing to multiple
@@ -254,7 +234,7 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.Re
 		TimeSeries: tss,
 	}
 
-	return me.client.CreateTimeSeries(ctx, req)
+	return multierr.Append(aggError, me.client.CreateTimeSeries(ctx, req))
 }
 
 // descToMetricType converts descriptor to MetricType proto type.
@@ -433,13 +413,13 @@ func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes att
 // ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
 func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.MonitoredResource, library instrumentation.Scope) ([]*monitoringpb.TimeSeries, error) {
 	var tss []*monitoringpb.TimeSeries
-	errs := []error{}
+	var aggErr error
 	switch a := m.Data.(type) {
 	case metricdata.Gauge[int64]:
 		for _, point := range a.DataPoints {
 			ts, err := gaugeToTimeSeries[int64](point, m, mr)
 			if err != nil {
-				errs = append(errs, err)
+				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library)
@@ -449,7 +429,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		for _, point := range a.DataPoints {
 			ts, err := gaugeToTimeSeries[float64](point, m, mr)
 			if err != nil {
-				errs = append(errs, err)
+				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library)
@@ -466,7 +446,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				ts, err = gaugeToTimeSeries[int64](point, m, mr)
 			}
 			if err != nil {
-				errs = append(errs, err)
+				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library)
@@ -483,7 +463,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				ts, err = gaugeToTimeSeries[float64](point, m, mr)
 			}
 			if err != nil {
-				errs = append(errs, err)
+				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library)
@@ -493,16 +473,16 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		for _, point := range a.DataPoints {
 			ts, err := histogramToTimeSeries(point, m, mr)
 			if err != nil {
-				errs = append(errs, err)
+				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library)
 			tss = append(tss, ts)
 		}
 	default:
-		errs = append(errs, errUnexpectedAggregationKind{kind: reflect.TypeOf(m.Data).String()})
+		aggErr = multierr.Append(aggErr, errUnexpectedAggregationKind{kind: reflect.TypeOf(m.Data).String()})
 	}
-	return tss, multierr.Combine(errs...)
+	return tss, aggErr
 }
 
 func sanitizeUTF8(s string) string {
@@ -572,14 +552,13 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 	if end.Sub(start).Milliseconds() <= 1 {
 		end = start.Add(time.Millisecond)
 	}
-
 	startpb := timestamppb.New(start)
-	if err := startpb.CheckValid(); err != nil {
-		return nil, err
-	}
-
 	endpb := timestamppb.New(end)
-	if err := endpb.CheckValid(); err != nil {
+	err := multierr.Combine(
+		startpb.CheckValid(),
+		endpb.CheckValid(),
+	)
+	if err != nil {
 		return nil, err
 	}
 
