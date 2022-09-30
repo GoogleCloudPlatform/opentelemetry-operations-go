@@ -353,36 +353,36 @@ func (m *metricMapper) metricToTimeSeries(
 ) []*monitoringpb.TimeSeries {
 	timeSeries := []*monitoringpb.TimeSeries{}
 
-	switch metric.DataType() {
-	case pmetric.MetricDataTypeSum:
+	switch metric.Type() {
+	case pmetric.MetricTypeSum:
 		sum := metric.Sum()
 		points := sum.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pmetric.MetricDataTypeGauge:
+	case pmetric.MetricTypeGauge:
 		gauge := metric.Gauge()
 		points := gauge.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pmetric.MetricDataTypeSummary:
+	case pmetric.MetricTypeSummary:
 		summary := metric.Summary()
 		points := summary.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.summaryPointToTimeSeries(resource, extraLabels, metric, summary, points.At(i))
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pmetric.MetricDataTypeHistogram:
+	case pmetric.MetricTypeHistogram:
 		hist := metric.Histogram()
 		points := hist.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.histogramToTimeSeries(resource, extraLabels, metric, hist, points.At(i), projectID)
 			timeSeries = append(timeSeries, ts...)
 		}
-	case pmetric.MetricDataTypeExponentialHistogram:
+	case pmetric.MetricTypeExponentialHistogram:
 		eh := metric.ExponentialHistogram()
 		points := eh.DataPoints()
 		for i := 0; i < points.Len(); i++ {
@@ -390,7 +390,7 @@ func (m *metricMapper) metricToTimeSeries(
 			timeSeries = append(timeSeries, ts...)
 		}
 	default:
-		m.obs.log.Error("Unsupported metric data type", zap.Any("data_type", metric.DataType()))
+		m.obs.log.Error("Unsupported metric data type", zap.Any("data_type", metric.Type()))
 	}
 
 	return timeSeries
@@ -529,7 +529,7 @@ func (m *metricMapper) exemplar(ex pmetric.Exemplar, projectID string) *distribu
 		}
 	}
 	return &distribution.Distribution_Exemplar{
-		Value:       ex.DoubleVal(),
+		Value:       ex.DoubleValue(),
 		Timestamp:   timestamppb.New(ex.Timestamp().AsTime()),
 		Attachments: attachments,
 	}
@@ -883,12 +883,12 @@ func numberDataPointToValue(
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
 	if point.ValueType() == pmetric.NumberDataPointValueTypeInt {
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: point.IntVal(),
+				Int64Value: point.IntValue(),
 			}},
 			metricpb.MetricDescriptor_INT64
 	}
 	return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
-			DoubleValue: point.DoubleVal(),
+			DoubleValue: point.DoubleValue(),
 		}},
 		metricpb.MetricDescriptor_DOUBLE
 }
@@ -980,28 +980,28 @@ func (m *metricMapper) labelDescriptors(
 			return true
 		})
 	}
-	switch pm.DataType() {
-	case pmetric.MetricDataTypeGauge:
+	switch pm.Type() {
+	case pmetric.MetricTypeGauge:
 		points := pm.Gauge().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pmetric.MetricDataTypeSum:
+	case pmetric.MetricTypeSum:
 		points := pm.Sum().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pmetric.MetricDataTypeSummary:
+	case pmetric.MetricTypeSummary:
 		points := pm.Summary().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pmetric.MetricDataTypeHistogram:
+	case pmetric.MetricTypeHistogram:
 		points := pm.Histogram().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
 		}
-	case pmetric.MetricDataTypeExponentialHistogram:
+	case pmetric.MetricTypeExponentialHistogram:
 		points := pm.ExponentialHistogram().DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			addAttributes(points.At(i).Attributes())
@@ -1078,7 +1078,7 @@ func (m *metricMapper) metricDescriptor(
 	pm pmetric.Metric,
 	extraLabels labels,
 ) []*metricpb.MetricDescriptor {
-	if pm.DataType() == pmetric.MetricDataTypeSummary {
+	if pm.Type() == pmetric.MetricTypeSummary {
 		return m.summaryMetricDescriptors(pm, extraLabels)
 	}
 	kind, typ := mapMetricPointKind(pm)
@@ -1120,13 +1120,13 @@ func metricPointValueType(pt pmetric.NumberDataPointValueType) metricpb.MetricDe
 func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind, metricpb.MetricDescriptor_ValueType) {
 	var kind metricpb.MetricDescriptor_MetricKind
 	var typ metricpb.MetricDescriptor_ValueType
-	switch m.DataType() {
-	case pmetric.MetricDataTypeGauge:
+	switch m.Type() {
+	case pmetric.MetricTypeGauge:
 		kind = metricpb.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
 			typ = metricPointValueType(m.Gauge().DataPoints().At(0).ValueType())
 		}
-	case pmetric.MetricDataTypeSum:
+	case pmetric.MetricTypeSum:
 		if !m.Sum().IsMonotonic() {
 			kind = metricpb.MetricDescriptor_GAUGE
 		} else if m.Sum().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
@@ -1138,9 +1138,9 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 		if m.Sum().DataPoints().Len() > 0 {
 			typ = metricPointValueType(m.Sum().DataPoints().At(0).ValueType())
 		}
-	case pmetric.MetricDataTypeSummary:
+	case pmetric.MetricTypeSummary:
 		kind = metricpb.MetricDescriptor_GAUGE
-	case pmetric.MetricDataTypeHistogram:
+	case pmetric.MetricTypeHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
 		if m.Histogram().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.
@@ -1148,7 +1148,7 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 		} else {
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
-	case pmetric.MetricDataTypeExponentialHistogram:
+	case pmetric.MetricTypeExponentialHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
 		if m.ExponentialHistogram().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
 			// We report fake-deltas for now.

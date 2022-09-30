@@ -272,24 +272,24 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 			for i := 0; i < sms.Metrics().Len(); i++ {
 				m := sms.Metrics().At(i)
 
-				switch m.DataType() {
-				case pmetric.MetricDataTypeGauge:
+				switch m.Type() {
+				case pmetric.MetricTypeGauge:
 					for i := 0; i < m.Gauge().DataPoints().Len(); i++ {
 						updatePoint(m.Gauge().DataPoints().At(i))
 					}
-				case pmetric.MetricDataTypeSum:
+				case pmetric.MetricTypeSum:
 					for i := 0; i < m.Sum().DataPoints().Len(); i++ {
 						updatePoint(m.Sum().DataPoints().At(i))
 					}
-				case pmetric.MetricDataTypeHistogram:
+				case pmetric.MetricTypeHistogram:
 					for i := 0; i < m.Histogram().DataPoints().Len(); i++ {
 						updatePoint(m.Histogram().DataPoints().At(i))
 					}
-				case pmetric.MetricDataTypeSummary:
+				case pmetric.MetricTypeSummary:
 					for i := 0; i < m.Summary().DataPoints().Len(); i++ {
 						updatePoint(m.Summary().DataPoints().At(i))
 					}
-				case pmetric.MetricDataTypeExponentialHistogram:
+				case pmetric.MetricTypeExponentialHistogram:
 					for i := 0; i < m.ExponentialHistogram().DataPoints().Len(); i++ {
 						updatePoint(m.ExponentialHistogram().DataPoints().At(i))
 					}

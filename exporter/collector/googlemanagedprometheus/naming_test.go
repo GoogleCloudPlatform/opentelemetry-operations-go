@@ -26,76 +26,76 @@ func TestGetMetricName(t *testing.T) {
 		desc      string
 		baseName  string
 		expected  string
-		datatype  pmetric.MetricDataType
+		datatype  pmetric.MetricType
 		expectErr bool
 	}{
 		{
 			desc:     "sum",
 			baseName: "foo_total",
-			datatype: pmetric.MetricDataTypeSum,
+			datatype: pmetric.MetricTypeSum,
 			expected: "foo_total/counter",
 		},
 		{
 			desc:     "gauge",
 			baseName: "bar",
-			datatype: pmetric.MetricDataTypeGauge,
+			datatype: pmetric.MetricTypeGauge,
 			expected: "bar/gauge",
 		},
 		{
 			desc:     "summary sum",
 			baseName: "baz_sum",
-			datatype: pmetric.MetricDataTypeSummary,
+			datatype: pmetric.MetricTypeSummary,
 			expected: "baz_sum/summary:counter",
 		},
 		{
 			desc:     "summary count",
 			baseName: "baz_count",
-			datatype: pmetric.MetricDataTypeSummary,
+			datatype: pmetric.MetricTypeSummary,
 			expected: "baz_count/summary",
 		},
 		{
 			desc:     "summary quantile",
 			baseName: "baz",
-			datatype: pmetric.MetricDataTypeSummary,
+			datatype: pmetric.MetricTypeSummary,
 			expected: "baz/summary",
 		},
 		{
 			desc:     "histogram sum",
 			baseName: "hello_sum",
-			datatype: pmetric.MetricDataTypeHistogram,
+			datatype: pmetric.MetricTypeHistogram,
 			expected: "hello_sum/histogram",
 		},
 		{
 			desc:     "histogram count",
 			baseName: "hello_count",
-			datatype: pmetric.MetricDataTypeHistogram,
+			datatype: pmetric.MetricTypeHistogram,
 			expected: "hello_count/histogram",
 		},
 		{
 			desc:     "histogram bucket",
 			baseName: "hello",
-			datatype: pmetric.MetricDataTypeHistogram,
+			datatype: pmetric.MetricTypeHistogram,
 			expected: "hello/histogram",
 		},
 		{
 			desc:      "other",
 			baseName:  "other",
-			datatype:  pmetric.MetricDataTypeExponentialHistogram,
+			datatype:  pmetric.MetricTypeExponentialHistogram,
 			expectErr: true,
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			metric := pmetric.NewMetric()
 			switch tc.datatype {
-			case pmetric.MetricDataTypeSum:
+			case pmetric.MetricTypeSum:
 				metric.SetEmptySum()
-			case pmetric.MetricDataTypeGauge:
+			case pmetric.MetricTypeGauge:
 				metric.SetEmptyGauge()
-			case pmetric.MetricDataTypeSummary:
+			case pmetric.MetricTypeSummary:
 				metric.SetEmptySummary()
-			case pmetric.MetricDataTypeHistogram:
+			case pmetric.MetricTypeHistogram:
 				metric.SetEmptyHistogram()
-			case pmetric.MetricDataTypeExponentialHistogram:
+			case pmetric.MetricTypeExponentialHistogram:
 				metric.SetEmptyExponentialHistogram()
 			}
 			got, err := GetMetricName(tc.baseName, metric)

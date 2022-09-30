@@ -317,9 +317,9 @@ func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPo
 func lessThanNumberDataPoint(a, b pmetric.NumberDataPoint) bool {
 	switch a.ValueType() {
 	case pmetric.NumberDataPointValueTypeInt:
-		return a.IntVal() < b.IntVal()
+		return a.IntValue() < b.IntValue()
 	case pmetric.NumberDataPointValueTypeDouble:
-		return a.DoubleVal() < b.DoubleVal()
+		return a.DoubleValue() < b.DoubleValue()
 	}
 	return false
 }
@@ -334,9 +334,9 @@ func subtractNumberDataPoint(a, b pmetric.NumberDataPoint) pmetric.NumberDataPoi
 	// Adjust the value based on the start point's value
 	switch newPoint.ValueType() {
 	case pmetric.NumberDataPointValueTypeInt:
-		newPoint.SetIntVal(a.IntVal() - b.IntVal())
+		newPoint.SetIntValue(a.IntValue() - b.IntValue())
 	case pmetric.NumberDataPointValueTypeDouble:
-		newPoint.SetDoubleVal(a.DoubleVal() - b.DoubleVal())
+		newPoint.SetDoubleValue(a.DoubleValue() - b.DoubleValue())
 	}
 	return newPoint
 }

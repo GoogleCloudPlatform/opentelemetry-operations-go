@@ -83,7 +83,7 @@ func setSecondProjectInLogs(t *testing.T, logs plog.Logs) {
 	require.NotEmpty(t, secondProject, "set the SECOND_PROJECT_ID environment to run this test")
 	for i := 0; i < logs.ResourceLogs().Len(); i++ {
 		if project, found := logs.ResourceLogs().At(i).Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
-			project.SetStringVal(secondProject)
+			project.SetStr(secondProject)
 		}
 	}
 }
