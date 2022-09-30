@@ -436,7 +436,6 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 	errs := []error{}
 	switch a := m.Data.(type) {
 	case metricdata.Gauge[int64]:
-		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
 		for _, point := range a.DataPoints {
 			ts, err := gaugeToTimeSeries[int64](point, m, mr)
 			if err != nil {
@@ -447,7 +446,6 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			tss = append(tss, ts)
 		}
 	case metricdata.Gauge[float64]:
-		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
 		for _, point := range a.DataPoints {
 			ts, err := gaugeToTimeSeries[float64](point, m, mr)
 			if err != nil {
@@ -458,7 +456,6 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			tss = append(tss, ts)
 		}
 	case metricdata.Sum[int64]:
-		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
 		for _, point := range a.DataPoints {
 			var ts *monitoringpb.TimeSeries
 			var err error
@@ -476,7 +473,6 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			tss = append(tss, ts)
 		}
 	case metricdata.Sum[float64]:
-		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
 		for _, point := range a.DataPoints {
 			var ts *monitoringpb.TimeSeries
 			var err error
@@ -494,7 +490,6 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			tss = append(tss, ts)
 		}
 	case metricdata.Histogram:
-		tss = make([]*monitoringpb.TimeSeries, len(a.DataPoints))
 		for _, point := range a.DataPoints {
 			ts, err := histogramToTimeSeries(point, m, mr)
 			if err != nil {
