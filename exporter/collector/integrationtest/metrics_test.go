@@ -21,13 +21,17 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	apioption "google.golang.org/api/option"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/testcases"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
-func TestMetrics(t *testing.T) {
+func TestCollectorMetrics(t *testing.T) {
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
@@ -44,7 +48,7 @@ func TestMetrics(t *testing.T) {
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateMetricConfig())
+			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig())
 			// For collecting self observability metrics
 			inMemoryOCExporter, err := NewInMemoryOCViewExporter()
 			require.NoError(t, err)
@@ -83,6 +87,96 @@ func TestMetrics(t *testing.T) {
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
 				SelfObservabilityMetrics:        selfObsMetrics,
+			}
+			sort.Slice(fixture.CreateTimeSeriesRequests, func(i, j int) bool {
+				return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
+			})
+			sort.Slice(fixture.CreateMetricDescriptorRequests, func(i, j int) bool {
+				if fixture.CreateMetricDescriptorRequests[i].Name != fixture.CreateMetricDescriptorRequests[j].Name {
+					return fixture.CreateMetricDescriptorRequests[i].Name < fixture.CreateMetricDescriptorRequests[j].Name
+				}
+				return fixture.CreateMetricDescriptorRequests[i].MetricDescriptor.Name < fixture.CreateMetricDescriptorRequests[j].MetricDescriptor.Name
+			})
+			sort.Slice(fixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
+				return fixture.CreateServiceTimeSeriesRequests[i].Name < fixture.CreateServiceTimeSeriesRequests[j].Name
+			})
+			diff := DiffMetricProtos(
+				t,
+				fixture,
+				expectFixture,
+			)
+			if diff != "" {
+				require.Fail(
+					t,
+					"Expected requests fixture and actual GCM requests differ",
+					diff,
+				)
+			}
+		})
+	}
+}
+
+func TestSDKMetrics(t *testing.T) {
+	ctx := context.Background()
+	endTime := time.Now()
+	startTime := endTime.Add(-time.Second)
+
+	for _, test := range testcases.MetricsTestCases {
+		test := test
+
+		t.Run(test.Name, func(t *testing.T) {
+			test.SkipIfNeededForSDK(t)
+
+			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
+
+			testServer, err := cloudmock.NewMetricTestServer()
+			require.NoError(t, err)
+			go testServer.Serve()
+			defer testServer.Shutdown()
+			testServerExporter, err := metric.New(
+				metric.WithProjectID("fakeprojectid"),
+				metric.WithMonitoringClientOptions(
+					apioption.WithEndpoint(testServer.Endpoint),
+					apioption.WithoutAuthentication(),
+					apioption.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+				),
+			)
+			require.NoError(t, err)
+
+			for _, m := range testcases.ConvertResourceMetrics(metrics) {
+				err = testServerExporter.Export(ctx, m)
+				if !test.ExpectErr {
+					require.NoError(t, err, "Failed to export metrics to local test server")
+				} else {
+					require.Error(t, err, "Did not see expected error")
+				}
+			}
+			require.NoError(t, testServerExporter.Shutdown(ctx))
+
+			expectFixture := test.LoadMetricExpectFixture(
+				t,
+				startTime,
+				endTime,
+			)
+			sort.Slice(expectFixture.CreateTimeSeriesRequests, func(i, j int) bool {
+				return expectFixture.CreateTimeSeriesRequests[i].Name < expectFixture.CreateTimeSeriesRequests[j].Name
+			})
+			sort.Slice(expectFixture.CreateMetricDescriptorRequests, func(i, j int) bool {
+				if expectFixture.CreateMetricDescriptorRequests[i].Name != expectFixture.CreateMetricDescriptorRequests[j].Name {
+					return expectFixture.CreateMetricDescriptorRequests[i].Name < expectFixture.CreateMetricDescriptorRequests[j].Name
+				}
+				return expectFixture.CreateMetricDescriptorRequests[i].MetricDescriptor.Name < expectFixture.CreateMetricDescriptorRequests[j].MetricDescriptor.Name
+			})
+			sort.Slice(expectFixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
+				return expectFixture.CreateServiceTimeSeriesRequests[i].Name < expectFixture.CreateServiceTimeSeriesRequests[j].Name
+			})
+
+			require.NoError(t, err)
+			fixture := &protos.MetricExpectFixture{
+				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
+				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
+				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
+				// Do not test self-observability metrics with SDK exporters
 			}
 			sort.Slice(fixture.CreateTimeSeriesRequests, func(i, j int) bool {
 				return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name

@@ -30,6 +30,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 )
 
 func createMetricsExporter(
@@ -38,7 +39,7 @@ func createMetricsExporter(
 	test *testcases.TestCase,
 ) *collector.MetricsExporter {
 	logger, _ := zap.NewProduction()
-	cfg := test.CreateMetricConfig()
+	cfg := test.CreateCollectorMetricConfig()
 	// For sending to a real project, set the project ID from an env var.
 	cfg.ProjectID = os.Getenv("PROJECT_ID")
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
@@ -53,7 +54,7 @@ func createMetricsExporter(
 	return exporter
 }
 
-func TestIntegrationMetrics(t *testing.T) {
+func TestCollectorIntegrationMetrics(t *testing.T) {
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
@@ -73,6 +74,35 @@ func TestIntegrationMetrics(t *testing.T) {
 				exporter.PushMetrics(ctx, metrics),
 				"Failed to export metrics",
 			)
+		})
+	}
+}
+
+func TestSDKIntegrationMetrics(t *testing.T) {
+	ctx := context.Background()
+	endTime := time.Now()
+	startTime := endTime.Add(-time.Second)
+
+	for _, test := range testcases.MetricsTestCases {
+		test := test
+
+		t.Run(test.Name, func(t *testing.T) {
+			test.SkipIfNeededForSDK(t)
+			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
+			setSecondProjectInMetrics(t, metrics)
+			exporter, err := metric.New(
+				metric.WithProjectID(os.Getenv("PROJECT_ID")),
+			)
+			require.NoError(t, err)
+			defer func() { require.NoError(t, exporter.Shutdown(ctx)) }()
+
+			for _, m := range testcases.ConvertResourceMetrics(metrics) {
+				require.NoError(
+					t,
+					exporter.Export(ctx, m),
+					"Failed to export metrics",
+				)
+			}
 		})
 	}
 }

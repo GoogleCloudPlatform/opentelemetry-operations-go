@@ -130,7 +130,7 @@ func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.
 		}
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateMetricConfig())
+			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig())
 			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
 			require.NoError(t, err)
 			defer inMemoryOCExporter.Shutdown(ctx)
