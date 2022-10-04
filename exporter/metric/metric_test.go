@@ -187,7 +187,7 @@ func TestDescToMetricType(t *testing.T) {
 	}
 
 	wants := []string{
-		"custom.googleapis.com/opentelemetry/testing",
+		"workload.googleapis.com/testing",
 		"test.googleapis.com/test/of/path",
 	}
 
@@ -221,7 +221,7 @@ func TestRecordToMpb(t *testing.T) {
 		},
 	}
 
-	inputLibrary := instrumentation.Library{Name: "custom.googleapis.com/opentelemetry"}
+	inputLibrary := instrumentation.Library{Name: "workload.googleapis.com"}
 	inputAttributes := attribute.NewSet(
 		attribute.Key("a").String("A"),
 		attribute.Key("b_b").String("B"),
@@ -576,7 +576,7 @@ func TestRecordToMpbUTF8(t *testing.T) {
 		},
 	}
 
-	inputLibrary := instrumentation.Library{Name: "custom.googleapis.com/opentelemetry"}
+	inputLibrary := instrumentation.Library{Name: "workload.googleapis.com"}
 	inputAttributes := attribute.NewSet(
 		attribute.Key("valid_ascii").String("abcdefg"),
 		attribute.Key("valid_utf8").String("שלום"),
