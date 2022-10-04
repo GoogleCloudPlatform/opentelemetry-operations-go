@@ -414,6 +414,9 @@ func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes att
 func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.MonitoredResource, library instrumentation.Scope) ([]*monitoringpb.TimeSeries, error) {
 	var tss []*monitoringpb.TimeSeries
 	var aggErr error
+	if m.Data == nil {
+		return nil, nil
+	}
 	switch a := m.Data.(type) {
 	case metricdata.Gauge[int64]:
 		for _, point := range a.DataPoints {

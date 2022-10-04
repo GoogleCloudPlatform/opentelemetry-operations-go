@@ -420,6 +420,8 @@ go.opentelemetry.io/otel/metric v0.32.1 h1:ftff5LSBCIDwL0UkhBuDg8j9NNxx2IusvJ18q
 go.opentelemetry.io/otel/metric v0.32.1/go.mod h1:iLPP7FaKMAD5BIxJ2VX7f2KTuz//0QK2hEUyti5psqQ=
 go.opentelemetry.io/otel/sdk v1.10.0 h1:jZ6K7sVn04kk/3DNUdJ4mqRlGDiXAVuIG+MMENpTNdY=
 go.opentelemetry.io/otel/sdk v1.10.0/go.mod h1:vO06iKzD5baltJz1zarxMCNHFpUlUiOy4s65ECtn6kE=
+go.opentelemetry.io/otel/sdk/metric v0.32.1 h1:S6AqzulzGQl+sTpYeAoVLw1SJbc2LYuKCMUmfEKG+zM=
+go.opentelemetry.io/otel/sdk/metric v0.32.1/go.mod h1:Nn+Nt/7cKzm5ISmvLzNO5RLf0Xuv8/Qo8fkpr0JDOzs=
 go.opentelemetry.io/otel/trace v1.10.0 h1:npQMbR8o7mum8uF95yFbOEJffhs1sbCOfDh8zAJiH5E=
 go.opentelemetry.io/otel/trace v1.10.0/go.mod h1:Sij3YYczqAdz+EhmGhE6TpTxUO5/F/AzrK+kxfGqySM=
 go.opentelemetry.io/proto/otlp v0.7.0/go.mod h1:PqfVotwruBrMGOCsRd/89rSnXhoiJIqeYNgFYFoEGnI=

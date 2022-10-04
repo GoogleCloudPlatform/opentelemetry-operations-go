@@ -54,7 +54,7 @@ const SecondProjectEnv = "SECOND_PROJECT_ID"
 
 type TestCase struct {
 	// Configure will be called to modify the default configuration for this test case. Optional.
-	Configure func(cfg *collector.Config)
+	ConfigureCollector func(cfg *collector.Config)
 	// Name of the test case
 	Name string
 	// OTLPInputFixturePath is the path to the JSON encoded OTLP
@@ -65,6 +65,8 @@ type TestCase struct {
 	ExpectFixturePath string
 	// Skip, if true, skips this test case
 	Skip bool
+	// SkipForSDK, if true, skips this test case when testing the SDK
+	SkipForSDK bool
 	// ExpectErr sets whether the test is expected to fail
 	ExpectErr bool
 }
@@ -149,8 +151,8 @@ func (tc *TestCase) CreateTraceConfig() collector.Config {
 	cfg := collector.DefaultConfig()
 	cfg.ProjectID = "fake-project"
 
-	if tc.Configure != nil {
-		tc.Configure(&cfg)
+	if tc.ConfigureCollector != nil {
+		tc.ConfigureCollector(&cfg)
 	}
 
 	return cfg
@@ -184,8 +186,8 @@ func (tc *TestCase) CreateLogConfig() collector.Config {
 	cfg := collector.DefaultConfig()
 	cfg.ProjectID = "fake-project"
 
-	if tc.Configure != nil {
-		tc.Configure(&cfg)
+	if tc.ConfigureCollector != nil {
+		tc.ConfigureCollector(&cfg)
 	}
 
 	return cfg
@@ -408,6 +410,9 @@ func normalizeMetricDescriptorReqs(t testing.TB, reqs ...*monitoringpb.CreateMet
 }
 
 func normalizeSelfObs(t testing.TB, selfObs *protos.SelfObservabilityMetric) {
+	if selfObs == nil {
+		return
+	}
 	for _, req := range selfObs.CreateTimeSeriesRequests {
 		normalizeTimeSeriesReqs(t, req)
 		tss := req.TimeSeries
@@ -459,15 +464,21 @@ func (tc *TestCase) SkipIfNeeded(t testing.TB) {
 	}
 }
 
-func (tc *TestCase) CreateMetricConfig() collector.Config {
+func (tc *TestCase) SkipIfNeededForSDK(t testing.TB) {
+	if tc.SkipForSDK {
+		t.Skip("Test case is marked to skip")
+	}
+}
+
+func (tc *TestCase) CreateCollectorMetricConfig() collector.Config {
 	cfg := collector.DefaultConfig()
 	cfg.ProjectID = "fakeprojectid"
 	// Set a big buffer to capture all CMD requests without dropping
 	cfg.MetricConfig.CreateMetricDescriptorBufferSize = 500
 	cfg.MetricConfig.InstrumentationLibraryLabels = false
 
-	if tc.Configure != nil {
-		tc.Configure(&cfg)
+	if tc.ConfigureCollector != nil {
+		tc.ConfigureCollector(&cfg)
 	}
 
 	return cfg
