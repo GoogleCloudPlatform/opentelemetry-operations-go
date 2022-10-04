@@ -224,8 +224,8 @@ func TestRecordToMpb(t *testing.T) {
 	inputLibrary := instrumentation.Library{Name: "custom.googleapis.com/opentelemetry"}
 	inputAttributes := attribute.NewSet(
 		attribute.Key("a").String("A"),
-		attribute.Key("b_b").String("B"),
-		attribute.Key("foo").Int64(100),
+		attribute.Key("b?b").String("B"),
+		attribute.Key("8foo").Int64(100),
 	)
 	inputMetrics := metricdata.Metrics{
 		Name: metricName,
@@ -234,9 +234,9 @@ func TestRecordToMpb(t *testing.T) {
 	want := &googlemetricpb.Metric{
 		Type: md.Type,
 		Labels: map[string]string{
-			"a":   "A",
-			"b_b": "B",
-			"foo": "100",
+			"a":        "A",
+			"b_b":      "B",
+			"key_8foo": "100",
 		},
 	}
 	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary)

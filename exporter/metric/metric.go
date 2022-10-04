@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"strings"
 	"time"
+	"unicode"
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
@@ -626,6 +627,23 @@ func numberDataPointToValue[N int64 | float64](
 // >   allowed.
 // > * Label name must start with a letter or digit.
 // > * The maximum length of a label name is 100 characters.
+//     Note: this does not truncate if a label is too long.
 func normalizeLabelKey(s string) string {
-	return strings.ReplaceAll(s, ".", "_")
+	if len(s) == 0 {
+		return s
+	}
+	s = strings.Map(sanitizeRune, s)
+	if unicode.IsDigit(rune(s[0])) {
+		s = "key_" + s
+	}
+	return s
+}
+
+// converts anything that is not a letter or digit to an underscore
+func sanitizeRune(r rune) rune {
+	if unicode.IsLetter(r) || unicode.IsDigit(r) {
+		return r
+	}
+	// Everything else turns into an underscore
+	return '_'
 }
