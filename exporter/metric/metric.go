@@ -20,6 +20,7 @@ import (
 	"math"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
@@ -57,13 +58,13 @@ func keyOf(metrics metricdata.Metrics, library instrumentation.Library) key {
 // metricExporter is the implementation of OpenTelemetry metric exporter for
 // Google Cloud Monitoring.
 type metricExporter struct {
-	o *options
-
+	o        *options
+	shutdown chan struct{}
 	// mdCache is the cache to hold MetricDescriptor to avoid creating duplicate MD.
-	// TODO: [ymotongpoo] this map should be goroutine safe with mutex.
-	mdCache map[key]*googlemetricpb.MetricDescriptor
-
-	client *monitoring.MetricClient
+	mdCache      map[key]*googlemetricpb.MetricDescriptor
+	client       *monitoring.MetricClient
+	mdLock       sync.RWMutex
+	shutdownOnce sync.Once
 }
 
 // ForceFlush does nothing, the exporter holds no state.
@@ -71,7 +72,12 @@ func (e *metricExporter) ForceFlush(ctx context.Context) error { return ctx.Err(
 
 // Shutdown shuts down the client connections
 func (e *metricExporter) Shutdown(ctx context.Context) error {
-	return multierr.Combine(ctx.Err(), e.client.Close())
+	err := errShutdown
+	e.shutdownOnce.Do(func() {
+		close(e.shutdown)
+		err = multierr.Combine(ctx.Err(), e.client.Close())
+	})
+	return err
 }
 
 // Below are maps with monitored resources fields as keys
@@ -138,15 +144,23 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 
 	cache := map[key]*googlemetricpb.MetricDescriptor{}
 	e := &metricExporter{
-		o:       o,
-		mdCache: cache,
-		client:  client,
+		o:        o,
+		mdCache:  cache,
+		client:   client,
+		shutdown: make(chan struct{}),
 	}
 	return e, nil
 }
 
+var errShutdown = fmt.Errorf("exporter is shutdown")
+
 // Export exports OpenTelemetry Metrics to Google Cloud Monitoring.
 func (me *metricExporter) Export(ctx context.Context, rm metricdata.ResourceMetrics) error {
+	select {
+	case <-me.shutdown:
+		return errShutdown
+	default:
+	}
 	return multierr.Combine(
 		me.exportMetricDescriptor(ctx, rm),
 		me.exportTimeSeries(ctx, rm),
@@ -156,6 +170,8 @@ func (me *metricExporter) Export(ctx context.Context, rm metricdata.ResourceMetr
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricdata.ResourceMetrics) error {
+	me.mdLock.Lock()
+	defer me.mdLock.Unlock()
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
 	for _, scope := range rm.ScopeMetrics {
 		for _, metrics := range scope.Metrics {
@@ -390,6 +406,8 @@ func recordToMdpbKindType(a metricdata.Aggregation) (googlemetricpb.MetricDescri
 
 // recordToMpb converts data from records to Metric proto type for Cloud Monitoring.
 func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes attribute.Set, library instrumentation.Library) *googlemetricpb.Metric {
+	me.mdLock.RLock()
+	defer me.mdLock.RUnlock()
 	k := keyOf(metrics, library)
 	md, ok := me.mdCache[k]
 	if !ok {
