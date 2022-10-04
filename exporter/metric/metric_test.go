@@ -32,6 +32,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
+	"google.golang.org/genproto/googleapis/api/label"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/grpc"
@@ -240,6 +241,53 @@ func TestRecordToMpb(t *testing.T) {
 		},
 	}
 	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary)
+	if !reflect.DeepEqual(want, out) {
+		t.Errorf("expected: %v, actual: %v", want, out)
+	}
+}
+
+func TestRecordToMdpb(t *testing.T) {
+	metricName := "testing"
+
+	want := &googlemetricpb.MetricDescriptor{
+		Name:        metricName,
+		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, metricName),
+		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
+		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
+		Description: "test",
+		Labels: []*label.LabelDescriptor{
+			{Key: normalizeLabelKey("a")},
+			{Key: normalizeLabelKey("b.b")},
+			{Key: normalizeLabelKey("foo")},
+		},
+	}
+
+	mdkey := key{
+		name:        want.Name,
+		libraryname: "",
+	}
+	me := &metricExporter{
+		o: &options{},
+		mdCache: map[key]*googlemetricpb.MetricDescriptor{
+			mdkey: want,
+		},
+	}
+	inputMetrics := metricdata.Metrics{
+		Name:        metricName,
+		Description: "test",
+		Data: metricdata.Gauge[float64]{
+			DataPoints: []metricdata.DataPoint[float64]{
+				{
+					Attributes: attribute.NewSet(
+						attribute.Key("a").String("A"),
+						attribute.Key("b_b").String("B"),
+						attribute.Key("foo").Int64(100),
+					),
+				},
+			},
+		},
+	}
+	out := me.recordToMdpb(inputMetrics)
 	if !reflect.DeepEqual(want, out) {
 		t.Errorf("expected: %v, actual: %v", want, out)
 	}
