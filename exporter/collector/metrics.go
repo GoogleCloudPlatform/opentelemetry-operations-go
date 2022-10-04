@@ -947,7 +947,7 @@ func (m *metricMapper) metricTypeToDisplayName(mURL string) string {
 	// TODO - user configuration around display name?
 	// Default: strip domain, keep path after domain.
 	u, err := url.Parse(fmt.Sprintf("metrics://%s", mURL))
-	if err != nil {
+	if err != nil || u.Path == "" {
 		return mURL
 	}
 	return strings.TrimLeft(u.Path, "/")
