@@ -277,7 +277,8 @@ func TestRecordToMdpb(t *testing.T) {
 	inputMetrics := metricdata.Metrics{
 		Name:        metricName,
 		Description: "test",
-		Data: metricdata.Gauge[float64]{
+		Data: metricdata.Sum[float64]{
+			IsMonotonic: false,
 			DataPoints: []metricdata.DataPoint[float64]{
 				{
 					Attributes: attribute.NewSet(
