@@ -252,6 +252,7 @@ func TestRecordToMdpb(t *testing.T) {
 
 	want := &googlemetricpb.MetricDescriptor{
 		Name:        metricName,
+		DisplayName: metricName,
 		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, metricName),
 		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
 		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
@@ -893,4 +894,33 @@ func TestConcurrentExport(t *testing.T) {
 	}()
 
 	wg.Wait()
+}
+
+func TestMetricTypeToDisplayName(t *testing.T) {
+	for _, tc := range []struct {
+		desc     string
+		input    string
+		expected string
+	}{
+		{desc: "empty input"},
+		{
+			desc:     "default prefix",
+			input:    "workload.googleapis.com/MyCoolMetric",
+			expected: "MyCoolMetric",
+		},
+		{
+			desc:     "no prefix",
+			input:    "helloworld",
+			expected: "helloworld",
+		},
+		{
+			desc:     "other prefix",
+			input:    "custom.googleapis.com/MyCoolMetric",
+			expected: "MyCoolMetric",
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			require.Equal(t, tc.expected, metricTypeToDisplayName(tc.input))
+		})
+	}
 }

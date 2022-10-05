@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"net/url"
 	"reflect"
 	"strings"
 	"sync"
@@ -263,9 +264,20 @@ func (me *metricExporter) descToMetricType(desc metricdata.Metrics) string {
 	return fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, desc.Name)
 }
 
+// metricTypeToDisplayName takes a GCM metric type, like (workload.googleapis.com/MyCoolMetric) and returns the display name.
+func metricTypeToDisplayName(mURL string) string {
+	// strip domain, keep path after domain.
+	u, err := url.Parse(fmt.Sprintf("metrics://%s", mURL))
+	if err != nil || u.Path == "" {
+		return mURL
+	}
+	return strings.TrimLeft(u.Path, "/")
+}
+
 // recordToMdpb extracts data and converts them to googlemetricpb.MetricDescriptor.
 func (me *metricExporter) recordToMdpb(metrics metricdata.Metrics) *googlemetricpb.MetricDescriptor {
 	name := metrics.Name
+	typ := me.descToMetricType(metrics)
 	kind, valueType := recordToMdpbKindType(metrics.Data)
 
 	// Detailed explanations on MetricDescriptor proto is not documented on
@@ -273,7 +285,8 @@ func (me *metricExporter) recordToMdpb(metrics metricdata.Metrics) *googlemetric
 	// https://github.com/googleapis/googleapis/blob/50af053/google/api/metric.proto#L33
 	return &googlemetricpb.MetricDescriptor{
 		Name:        name,
-		Type:        me.descToMetricType(metrics),
+		DisplayName: metricTypeToDisplayName(typ),
+		Type:        typ,
 		MetricKind:  kind,
 		ValueType:   valueType,
 		Unit:        string(metrics.Unit),
