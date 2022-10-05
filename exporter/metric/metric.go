@@ -40,7 +40,7 @@ import (
 )
 
 const (
-	cloudMonitoringMetricDescriptorNameFormat = "custom.googleapis.com/opentelemetry/%s"
+	cloudMonitoringMetricDescriptorNameFormat = "workload.googleapis.com/%s"
 )
 
 // key is used to judge the uniqueness of the record descriptor.
@@ -255,7 +255,7 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.Re
 }
 
 // descToMetricType converts descriptor to MetricType proto type.
-// Basically this returns default value ("custom.googleapis.com/opentelemetry/[metric type]")
+// Basically this returns default value ("workload.googleapis.com/[metric type]")
 func (me *metricExporter) descToMetricType(desc metricdata.Metrics) string {
 	if formatter := me.o.metricDescriptorTypeFormatter; formatter != nil {
 		return formatter(desc)

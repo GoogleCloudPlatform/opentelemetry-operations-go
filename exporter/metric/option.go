@@ -39,7 +39,7 @@ type options struct {
 	// If unset, context.Background() will be used.
 	context context.Context
 	// metricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
-	// By default, the format string is "custom.googleapis.com/opentelemetry/[metric name]".
+	// By default, the format string is "workload.googleapis.com/[metric name]".
 	metricDescriptorTypeFormatter func(metricdata.Metrics) string
 	// projectID is the identifier of the Cloud Monitoring
 	// project the user is uploading the stats data to.
@@ -77,7 +77,7 @@ func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options
 
 // WithMetricDescriptorTypeFormatter sets the custom formatter for MetricDescriptor.
 // Note that the format has to follow the convention defined in the official document.
-// The default is "custom.googleapis.com/[metric name]".
+// The default is "workload.googleapis.com/[metric name]".
 // ref. https://cloud.google.com/monitoring/custom-metrics/creating-metrics#custom_metric_names
 func WithMetricDescriptorTypeFormatter(f func(metricdata.Metrics) string) func(o *options) {
 	return func(o *options) {
