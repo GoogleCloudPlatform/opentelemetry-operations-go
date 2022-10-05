@@ -32,6 +32,7 @@ import (
 	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/distribution"
+	"google.golang.org/genproto/googleapis/api/label"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
@@ -277,7 +278,51 @@ func (me *metricExporter) recordToMdpb(metrics metricdata.Metrics) *googlemetric
 		ValueType:   valueType,
 		Unit:        string(metrics.Unit),
 		Description: metrics.Description,
+		Labels:      labelDescriptors(metrics),
 	}
+}
+
+func labelDescriptors(metrics metricdata.Metrics) []*label.LabelDescriptor {
+	labels := []*label.LabelDescriptor{}
+	seenKeys := map[string]struct{}{}
+	addAttributes := func(attr attribute.Set) {
+		iter := attr.Iter()
+		for iter.Next() {
+			kv := iter.Attribute()
+			// Skip keys that have already been set
+			if _, ok := seenKeys[normalizeLabelKey(string(kv.Key))]; ok {
+				continue
+			}
+			labels = append(labels, &label.LabelDescriptor{
+				Key: normalizeLabelKey(string(kv.Key)),
+			})
+			seenKeys[normalizeLabelKey(string(kv.Key))] = struct{}{}
+		}
+	}
+
+	switch a := metrics.Data.(type) {
+	case metricdata.Gauge[int64]:
+		for _, pt := range a.DataPoints {
+			addAttributes(pt.Attributes)
+		}
+	case metricdata.Gauge[float64]:
+		for _, pt := range a.DataPoints {
+			addAttributes(pt.Attributes)
+		}
+	case metricdata.Sum[int64]:
+		for _, pt := range a.DataPoints {
+			addAttributes(pt.Attributes)
+		}
+	case metricdata.Sum[float64]:
+		for _, pt := range a.DataPoints {
+			addAttributes(pt.Attributes)
+		}
+	case metricdata.Histogram:
+		for _, pt := range a.DataPoints {
+			addAttributes(pt.Attributes)
+		}
+	}
+	return labels
 }
 
 // refer to the monitored resources fields
