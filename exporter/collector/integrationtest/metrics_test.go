@@ -133,14 +133,16 @@ func TestSDKMetrics(t *testing.T) {
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter, err := metric.New(
+			opts := append([]metric.Option{
 				metric.WithProjectID("fakeprojectid"),
 				metric.WithMonitoringClientOptions(
 					apioption.WithEndpoint(testServer.Endpoint),
 					apioption.WithoutAuthentication(),
 					apioption.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-				),
+				)},
+				test.MetricSDKExporterOptions...,
 			)
+			testServerExporter, err := metric.New(opts...)
 			require.NoError(t, err)
 
 			for _, m := range testcases.ConvertResourceMetrics(metrics) {
@@ -171,7 +173,9 @@ func TestSDKMetrics(t *testing.T) {
 				return expectFixture.CreateServiceTimeSeriesRequests[i].Name < expectFixture.CreateServiceTimeSeriesRequests[j].Name
 			})
 
-			require.NoError(t, err)
+			// Do not test self-observability metrics with SDK exporters
+			expectFixture.SelfObservabilityMetrics = nil
+
 			fixture := &protos.MetricExpectFixture{
 				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),

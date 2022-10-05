@@ -480,8 +480,7 @@ func gaugeToTimeSeries[N int64 | float64](point metricdata.DataPoint[N], metrics
 		ValueType:  valueType,
 		Points: []*monitoringpb.Point{{
 			Interval: &monitoringpb.TimeInterval{
-				StartTime: timestamp,
-				EndTime:   timestamp,
+				EndTime: timestamp,
 			},
 			Value: value,
 		}},

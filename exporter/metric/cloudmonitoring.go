@@ -31,7 +31,7 @@ import (
 func New(opts ...Option) (metric.Exporter, error) {
 	o := options{
 		context:                 context.Background(),
-		resourceAttributeFilter: defaultResourceAttributesFilter,
+		resourceAttributeFilter: DefaultResourceAttributesFilter,
 	}
 	for _, opt := range opts {
 		opt(&o)

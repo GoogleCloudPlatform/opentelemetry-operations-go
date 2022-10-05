@@ -15,8 +15,14 @@
 package testcases
 
 import (
+	"strings"
+
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/metric/metricdata"
+
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 )
 
 var MetricsTestCases = []TestCase{
@@ -24,7 +30,6 @@ var MetricsTestCases = []TestCase{
 		Name:                 "Basic Counter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_expect.json",
-		SkipForSDK:           true,
 	},
 	{
 		Name:                 "Basic Counter with not found return code",
@@ -33,14 +38,13 @@ var MetricsTestCases = []TestCase{
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.ProjectID = "notfoundproject"
 		},
-		ExpectErr:  true,
-		SkipForSDK: true,
+		MetricSDKExporterOptions: []metric.Option{metric.WithProjectID("notfoundproject")},
+		ExpectErr:                true,
 	},
 	{
 		Name:                 "Basic Prometheus metrics",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_prometheus_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/basic_prometheus_metrics_expect.json",
-		SkipForSDK:           true,
 	},
 	{
 		Name:                 "Modified prefix unknown domain",
@@ -49,7 +53,9 @@ var MetricsTestCases = []TestCase{
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.Prefix = "custom.googleapis.com/foobar.org"
 		},
-		SkipForSDK: true,
+		MetricSDKExporterOptions: []metric.Option{metric.WithMetricDescriptorTypeFormatter(func(m metricdata.Metrics) string {
+			return "custom.googleapis.com/foobar.org/" + m.Name
+		})},
 	},
 	{
 		Name:                 "Modified prefix workload.googleapis.com",
@@ -58,31 +64,30 @@ var MetricsTestCases = []TestCase{
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.Prefix = "workload.googleapis.com"
 		},
-		SkipForSDK: true,
 	},
 	{
 		Name:                 "Delta Counter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/delta_counter_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/delta_counter_metrics_expect.json",
-		SkipForSDK:           true,
 	},
 	{
 		Name:                 "Non-monotonic Counter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_metrics_expect.json",
-		SkipForSDK:           true,
 	},
 	{
 		Name:                 "Summary",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/summary_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/summary_metrics_expect.json",
-		SkipForSDK:           true,
+		// Summary metrics are not possible with the SDK.
+		SkipForSDK: true,
 	},
 	{
 		Name:                 "Batching",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/batching_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/batching_metrics_expect.json",
-		SkipForSDK:           true,
+		// Summary metrics are not possible with the SDK.
+		SkipForSDK: true,
 	},
 	{
 		Name:                 "Ops Agent Self-Reported metrics",
@@ -93,6 +98,7 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.SkipCreateMetricDescriptor = true
 			cfg.MetricConfig.ServiceResourceLabels = false
 		},
+		// We don't support disabling metric descriptor creation for the SDK exporter
 		SkipForSDK: true,
 	},
 	{
@@ -103,6 +109,7 @@ var MetricsTestCases = []TestCase{
 			// Metric descriptors should not be created under agent.googleapis.com
 			cfg.MetricConfig.SkipCreateMetricDescriptor = true
 		},
+		// We don't support disabling metric descriptor creation for the SDK exporter
 		SkipForSDK: true,
 	},
 	{
@@ -114,6 +121,7 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.SkipCreateMetricDescriptor = true
 			cfg.MetricConfig.ServiceResourceLabels = false
 		},
+		// We don't support disabling metric descriptor creation for the SDK exporter
 		SkipForSDK: true,
 	},
 	{
@@ -129,6 +137,7 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.ServiceResourceLabels = false
 			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 		},
+		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,
 	},
 	{
@@ -138,6 +147,7 @@ var MetricsTestCases = []TestCase{
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.CreateServiceTimeSeries = true
 		},
+		// SDK exporter does not support CreateServiceTimeSeries
 		SkipForSDK: true,
 	},
 	{
@@ -148,13 +158,16 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.CreateServiceTimeSeries = true
 			cfg.MetricConfig.ServiceResourceLabels = false
 		},
+		// SDK exporter does not support CreateServiceTimeSeries
 		SkipForSDK: true,
 	},
 	{
 		Name:                 "Exponential Histogram",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_metrics_expect.json",
-		SkipForSDK:           true,
+		// Blocked on upstream support for exponential histograms:
+		// https://github.com/open-telemetry/opentelemetry-go/issues/2966
+		SkipForSDK: true,
 	},
 	{
 		Name:                 "CreateServiceTimeSeries",
@@ -163,6 +176,7 @@ var MetricsTestCases = []TestCase{
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.CreateServiceTimeSeries = true
 		},
+		// SDK exporter does not support CreateServiceTimeSeries
 		SkipForSDK: true,
 	},
 	{
@@ -174,13 +188,22 @@ var MetricsTestCases = []TestCase{
 				{Prefix: "telemetry.sdk."},
 			}
 		},
-		SkipForSDK: true,
+		MetricSDKExporterOptions: []metric.Option{
+			metric.WithFilteredResourceAttributes(func(kv attribute.KeyValue) bool {
+				// Include the default set of promoted resource attributes
+				if metric.DefaultResourceAttributesFilter(kv) {
+					return true
+				}
+				return strings.HasPrefix(string(kv.Key), "telemetry.sdk.")
+			}),
+		},
 	},
 	{
 		Name:                 "Multi-project metrics",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/metrics_multi_project.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/metrics_multi_project_expected.json",
-		SkipForSDK:           true,
+		// Multi-project exporting is not supported in the SDK exporter
+		SkipForSDK: true,
 	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }
