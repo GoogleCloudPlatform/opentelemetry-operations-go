@@ -96,7 +96,12 @@ var (
 		},
 		awsEc2Instance: {
 			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
-			region:     {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			region: {
+				otelKeys: []string{
+					string(semconv.CloudAvailabilityZoneKey),
+					string(semconv.CloudRegionKey),
+				},
+			},
 			awsAccount: {otelKeys: []string{string(semconv.CloudAccountIDKey)}},
 		},
 		genericTask: {
