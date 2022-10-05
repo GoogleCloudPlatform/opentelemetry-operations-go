@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"net"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -739,4 +740,109 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 			// User agent checking happens above in parallel to this flow.
 		})
 	}
+}
+
+func TestConcurrentCallsAfterShutdown(t *testing.T) {
+	testServer, err := cloudmock.NewMetricTestServer()
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
+
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
+
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithMonitoringClientOptions(clientOpts...),
+		WithMetricDescriptorTypeFormatter(formatter),
+	)
+	assert.NoError(t, err)
+
+	ctx := context.Background()
+	err = exporter.Shutdown(ctx)
+	assert.NoError(t, err)
+
+	var wg sync.WaitGroup
+	wg.Add(3)
+
+	go func() {
+		err := exporter.Shutdown(ctx)
+		assert.ErrorIs(t, err, errShutdown)
+		wg.Done()
+	}()
+	go func() {
+		err := exporter.ForceFlush(ctx)
+		assert.NoError(t, err)
+		wg.Done()
+	}()
+	go func() {
+		err := exporter.Export(ctx, metricdata.ResourceMetrics{})
+		assert.ErrorIs(t, err, errShutdown)
+		wg.Done()
+	}()
+
+	wg.Wait()
+}
+
+func TestConcurrentExport(t *testing.T) {
+	testServer, err := cloudmock.NewMetricTestServer()
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
+
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
+
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithMonitoringClientOptions(clientOpts...),
+		WithMetricDescriptorTypeFormatter(formatter),
+	)
+	assert.NoError(t, err)
+
+	ctx := context.Background()
+	defer func() {
+		err := exporter.Shutdown(ctx)
+		assert.NoError(t, err)
+	}()
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	go func() {
+		err := exporter.Export(ctx, metricdata.ResourceMetrics{
+			ScopeMetrics: []metricdata.ScopeMetrics{
+				{
+					Metrics: []metricdata.Metrics{
+						{Name: "testing", Data: metricdata.Histogram{}},
+						{Name: "test/of/path", Data: metricdata.Histogram{}},
+					},
+				},
+			},
+		})
+		assert.NoError(t, err)
+		wg.Done()
+	}()
+	go func() {
+		err := exporter.Export(ctx, metricdata.ResourceMetrics{
+			ScopeMetrics: []metricdata.ScopeMetrics{
+				{
+					Metrics: []metricdata.Metrics{
+						{Name: "testing", Data: metricdata.Histogram{}},
+						{Name: "test/of/path", Data: metricdata.Histogram{}},
+					},
+				},
+			},
+		})
+		assert.NoError(t, err)
+		wg.Done()
+	}()
+
+	wg.Wait()
 }
