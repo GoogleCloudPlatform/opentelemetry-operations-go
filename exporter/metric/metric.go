@@ -39,6 +39,8 @@ import (
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 )
 
 const (
@@ -81,52 +83,6 @@ func (e *metricExporter) Shutdown(ctx context.Context) error {
 		err = multierr.Combine(ctx.Err(), e.client.Close())
 	})
 	return err
-}
-
-// Below are maps with monitored resources fields as keys
-// and OpenTelemetry resources fields as values
-var k8sContainerMap = map[string]string{
-	"location":       CloudKeyZone,
-	"cluster_name":   K8SKeyClusterName,
-	"namespace_name": K8SKeyNamespaceName,
-	"pod_name":       K8SKeyPodName,
-	"container_name": ContainerKeyName,
-}
-
-var k8sNodeMap = map[string]string{
-	"location":     CloudKeyZone,
-	"cluster_name": K8SKeyClusterName,
-	"node_name":    HostKeyName,
-}
-
-var k8sClusterMap = map[string]string{
-	"location":     CloudKeyZone,
-	"cluster_name": K8SKeyClusterName,
-}
-
-var k8sPodMap = map[string]string{
-	"location":       CloudKeyZone,
-	"cluster_name":   K8SKeyClusterName,
-	"namespace_name": K8SKeyNamespaceName,
-	"pod_name":       K8SKeyPodName,
-}
-
-var gceResourceMap = map[string]string{
-	"instance_id": HostKeyID,
-	"zone":        CloudKeyZone,
-}
-
-var awsResourceMap = map[string]string{
-	"instance_id": HostKeyID,
-	"region":      CloudKeyRegion,
-	"aws_account": CloudKeyAccountID,
-}
-
-var cloudRunResourceMap = map[string]string{
-	"task_id":   ServiceKeyInstanceID,
-	"location":  CloudKeyRegion,
-	"namespace": ServiceKeyNamespace,
-	"job":       ServiceKeyName,
 }
 
 // newMetricExporter returns an exporter that uploads OTel metric data to Google Cloud Monitoring.
@@ -339,38 +295,13 @@ func labelDescriptors(metrics metricdata.Metrics) []*label.LabelDescriptor {
 	return labels
 }
 
-// refer to the monitored resources fields
-// https://cloud.google.com/monitoring/api/resources
-func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
-	_, hasLocation := labelMap[CloudKeyZone]
-	_, hasClusterName := labelMap[K8SKeyClusterName]
-	_, hasNamespaceName := labelMap[K8SKeyNamespaceName]
-	_, hasPodName := labelMap[K8SKeyPodName]
-	_, hasContainerName := labelMap[ContainerKeyName]
+type attributes struct {
+	attrs attribute.Set
+}
 
-	if hasLocation && hasClusterName && hasNamespaceName && hasPodName && hasContainerName {
-		return K8SContainer, k8sContainerMap
-	}
-
-	_, hasNodeName := labelMap[HostKeyName]
-
-	if hasLocation && hasClusterName && hasNodeName {
-		return K8SNode, k8sNodeMap
-	}
-
-	if hasLocation && hasClusterName && hasNamespaceName && hasPodName {
-		return K8SPod, k8sPodMap
-	}
-
-	if hasLocation && hasClusterName {
-		return K8SCluster, k8sClusterMap
-	}
-
-	if labelMap[ServiceKeyNamespace] == "cloud-run-managed" {
-		return GenericTask, cloudRunResourceMap
-	}
-
-	return GCEInstance, gceResourceMap
+func (attrs *attributes) GetString(key string) (string, bool) {
+	value, ok := attrs.attrs.Value(attribute.Key(key))
+	return value.AsString(), ok
 }
 
 // resourceToMonitoredResourcepb converts resource in OTel to MonitoredResource
@@ -378,70 +309,18 @@ func subdivideGCPTypes(labelMap map[string]string) (string, map[string]string) {
 //
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
 func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
-
-	monitoredRes := &monitoredrespb.MonitoredResource{
-		Type: "global",
-		Labels: map[string]string{
-			"project_id": sanitizeUTF8(me.o.projectID),
-		},
+	gmr := resourcemapping.ResourceAttributesToMonitoredResource(&attributes{
+		attrs: attribute.NewSet(res.Attributes()...),
+	})
+	newLabels := make(map[string]string, len(gmr.Labels))
+	for k, v := range gmr.Labels {
+		newLabels[k] = sanitizeUTF8(v)
 	}
-
-	// Return "global" Monitored resources if the input resource is null or empty
-	// "global" only accepts "project_id" for label.
-	// https://cloud.google.com/monitoring/api/resources#tag_global
-	if res == nil || res.Len() == 0 {
-		return monitoredRes
+	mr := &monitoredrespb.MonitoredResource{
+		Type:   gmr.Type,
+		Labels: newLabels,
 	}
-
-	resLabelMap := generateResLabelMap(res)
-
-	resTypeStr := "global"
-	match := map[string]string{}
-
-	if resType, found := resLabelMap[CloudKeyProvider]; found {
-		switch resType {
-		case CloudProviderGCP:
-			resTypeStr, match = subdivideGCPTypes(resLabelMap)
-		case CloudProviderAWS:
-			resTypeStr = AWSEC2Instance
-			match = awsResourceMap
-		}
-
-		outputMap, isMissing := transformResource(match, resLabelMap)
-		if isMissing {
-			resTypeStr = "global"
-		} else {
-			monitoredRes.Labels = outputMap
-		}
-	}
-
-	monitoredRes.Type = resTypeStr
-	monitoredRes.Labels["project_id"] = sanitizeUTF8(me.o.projectID)
-
-	return monitoredRes
-}
-
-func generateResLabelMap(res *resource.Resource) map[string]string {
-	resLabelMap := make(map[string]string)
-	for _, label := range res.Attributes() {
-		resLabelMap[string(label.Key)] = sanitizeUTF8(label.Value.Emit())
-	}
-	return resLabelMap
-}
-
-// returns transformed label map and false if all labels in match are found
-// in input except optional project_id. It returns true if at least one label
-// other than project_id is missing.
-func transformResource(match, input map[string]string) (map[string]string, bool) {
-	output := make(map[string]string, len(input))
-	for dst, src := range match {
-		if v, ok := input[src]; ok {
-			output[dst] = v
-		} else {
-			return map[string]string{}, true
-		}
-	}
-	return output, false
+	return mr
 }
 
 // recordToMdpbKindType return the mapping from OTel's record descriptor to

@@ -297,24 +297,25 @@ func TestRecordToMdpb(t *testing.T) {
 
 func TestResourceToMonitoredResourcepb(t *testing.T) {
 	testCases := []struct {
+		desc           string
 		resource       *resource.Resource
 		expectedLabels map[string]string
 		expectedType   string
 	}{
-		// k8s_container
 		{
+			desc: "k8s_container success",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_kubernetes_engine"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("k8s.namespace.name", "default"),
 				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-				attribute.String("container.name", "opentelemetry"),
+				attribute.String("k8s.container.name", "opentelemetry"),
 			),
 			expectedType: "k8s_container",
 			expectedLabels: map[string]string{
-				"project_id":     "",
 				"location":       "us-central1-a",
 				"cluster_name":   "opentelemetry-cluster",
 				"namespace_name": "default",
@@ -322,28 +323,29 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				"container_name": "opentelemetry",
 			},
 		},
-		// k8s_node
 		{
+			desc: "k8s_node success",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_kubernetes_engine"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
-				attribute.String("host.name", "opentelemetry-node"),
+				attribute.String("k8s.node.name", "opentelemetry-node"),
 			),
 			expectedType: "k8s_node",
 			expectedLabels: map[string]string{
-				"project_id":   "",
 				"location":     "us-central1-a",
 				"cluster_name": "opentelemetry-cluster",
 				"node_name":    "opentelemetry-node",
 			},
 		},
-		// k8s_pod
 		{
+			desc: "k8s_pod success",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_kubernetes_engine"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("k8s.namespace.name", "default"),
@@ -351,94 +353,84 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			),
 			expectedType: "k8s_pod",
 			expectedLabels: map[string]string{
-				"project_id":     "",
 				"location":       "us-central1-a",
 				"cluster_name":   "opentelemetry-cluster",
 				"namespace_name": "default",
 				"pod_name":       "opentelemetry-pod-autoconf",
 			},
 		},
-		// k8s_cluster
 		{
+			desc: "k8s_cluster success",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_kubernetes_engine"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 			),
 			expectedType: "k8s_cluster",
 			expectedLabels: map[string]string{
-				"project_id":   "",
 				"location":     "us-central1-a",
 				"cluster_name": "opentelemetry-cluster",
 			},
 		},
-		// k8s_node missing a field
 		{
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
-				attribute.String("host.name", "opentelemetry-node"),
-			),
-			expectedType: "global",
-			expectedLabels: map[string]string{
-				"project_id": "",
-			},
-		},
-		// nonexisting resource types
-		{
+			desc: "nonexisting resource types",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "none"),
+				attribute.String("cloud.platform", "gcp_foobar"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
 				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
 				attribute.String("k8s.namespace.name", "default"),
 				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-				attribute.String("container.name", "opentelemetry"),
+				attribute.String("k8s.container.name", "opentelemetry"),
 			),
-			expectedType: "global",
+			expectedType: "generic_node",
 			expectedLabels: map[string]string{
-				"project_id": "",
+				"location":  "us-central1-a",
+				"namespace": "",
+				"node_id":   "",
 			},
 		},
-		// GCE resource fields
 		{
+			desc: "GCE instance",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_compute_engine"),
 				attribute.String("host.id", "123"),
 				attribute.String("cloud.availability_zone", "us-central1-a"),
 			),
 			expectedType: "gce_instance",
 			expectedLabels: map[string]string{
-				"project_id":  "",
 				"instance_id": "123",
 				"zone":        "us-central1-a",
 			},
 		},
-		// AWS resources
 		{
+			desc: "AWS resources",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "aws"),
+				attribute.String("cloud.platform", "aws_ec2"),
 				attribute.String("cloud.region", "us-central1-a"),
 				attribute.String("host.id", "123"),
 				attribute.String("cloud.account.id", "fake_account"),
 			),
 			expectedType: "aws_ec2_instance",
 			expectedLabels: map[string]string{
-				"project_id":  "",
 				"instance_id": "123",
 				"region":      "us-central1-a",
 				"aws_account": "fake_account",
 			},
 		},
-		// Cloud Run
 		{
+			desc: "Cloud Run",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_cloud_run"),
 				attribute.String("cloud.region", "utopia"),
 				attribute.String("service.instance.id", "bar"),
 				attribute.String("service.name", "x-service"),
@@ -446,11 +438,25 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			),
 			expectedType: "generic_task",
 			expectedLabels: map[string]string{
-				"project_id": "",
-				"location":   "utopia",
-				"namespace":  "cloud-run-managed",
-				"job":        "x-service",
-				"task_id":    "bar",
+				"location":  "utopia",
+				"namespace": "cloud-run-managed",
+				"job":       "x-service",
+				"task_id":   "bar",
+			},
+		},
+		{
+			desc: "GCE instance invalid utf8",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_compute_engine"),
+				attribute.String("host.id", invalidUtf8SequenceID),
+				attribute.String("cloud.availability_zone", "us-central1-a"),
+			),
+			expectedType: "gce_instance",
+			expectedLabels: map[string]string{
+				"instance_id": "�",
+				"zone":        "us-central1-a",
 			},
 		},
 	}
@@ -476,7 +482,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	}
 
 	for _, test := range testCases {
-		t.Run(test.resource.String(), func(t *testing.T) {
+		t.Run(test.desc, func(t *testing.T) {
 			got := me.resourceToMonitoredResourcepb(test.resource)
 			if !reflect.DeepEqual(got.GetLabels(), test.expectedLabels) {
 				t.Errorf("expected: %v, actual: %v", test.expectedLabels, got.GetLabels())
@@ -488,113 +494,10 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	}
 }
 
-func TestGenerateResLabelMap(t *testing.T) {
-	testCases := []struct {
-		resource       *resource.Resource
-		expectedLabels map[string]string
-	}{
-		// Bool attribute
-		{
-			resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.Bool("key", true),
-			),
-			map[string]string{
-				"key": "true",
-			},
-		},
-		// Int attribute
-		{
-			resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.Int("key", 1),
-			),
-			map[string]string{
-				"key": "1",
-			},
-		},
-		// Int64 attribute
-		{
-			resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.Int64("key", 1),
-			),
-			map[string]string{
-				"key": "1",
-			},
-		},
-		// Float64 attribute
-		{
-			resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.Float64("key", 1.3),
-			),
-			map[string]string{
-				"key": "1.3",
-			},
-		},
-		// String attribute
-		{
-			resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("key", "str"),
-			),
-			map[string]string{
-				"key": "str",
-			},
-		},
-	}
-
-	for _, test := range testCases {
-		t.Run(test.resource.String(), func(t *testing.T) {
-			got := generateResLabelMap(test.resource)
-			if !reflect.DeepEqual(got, test.expectedLabels) {
-				t.Errorf("expected: %v, actual: %v", test.expectedLabels, got)
-			}
-		})
-	}
-}
-
 var (
 	invalidUtf8TwoOctet   = string([]byte{0xc3, 0x28}) // Invalid 2-octet sequence
 	invalidUtf8SequenceID = string([]byte{0xa0, 0xa1}) // Invalid sequence identifier
 )
-
-func TestGenerateResLabelMapUTF8(t *testing.T) {
-	monResource := resource.NewWithAttributes(
-		semconv.SchemaURL,
-		attribute.String("valid_ascii", "abcdefg"),
-		attribute.String("valid_utf8", "שלום"),
-		attribute.String("invalid_two_octet", invalidUtf8TwoOctet),
-		attribute.String("invalid_sequence_id", invalidUtf8SequenceID),
-	)
-	expectedLabels := map[string]string{
-		"valid_ascii":         "abcdefg",
-		"valid_utf8":          "שלום",
-		"invalid_two_octet":   "�(",
-		"invalid_sequence_id": "�",
-	}
-
-	got := generateResLabelMap(monResource)
-	if !reflect.DeepEqual(got, expectedLabels) {
-		t.Errorf("expected: %v, actual: %v", expectedLabels, got)
-	}
-}
-
-func TestResourceToMonitoredResourcepbProjectIDUTF8(t *testing.T) {
-	expectedProjectID := "�"
-
-	me := &metricExporter{
-		o: &options{
-			projectID: invalidUtf8SequenceID,
-		},
-	}
-
-	got := me.resourceToMonitoredResourcepb(nil)
-	if got.Labels["project_id"] != expectedProjectID {
-		t.Errorf("expected: %v, actual: %v", expectedProjectID, got.Labels["project_id"])
-	}
-}
 
 func TestRecordToMpbUTF8(t *testing.T) {
 	metricName := "testing"
