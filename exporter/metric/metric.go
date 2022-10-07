@@ -326,15 +326,23 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 // recordToMdpbKindType return the mapping from OTel's record descriptor to
 // Cloud Monitoring's MetricKind and ValueType.
 func recordToMdpbKindType(a metricdata.Aggregation) (googlemetricpb.MetricDescriptor_MetricKind, googlemetricpb.MetricDescriptor_ValueType) {
-	switch a.(type) {
+	switch agg := a.(type) {
 	case metricdata.Gauge[int64]:
 		return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_INT64
 	case metricdata.Gauge[float64]:
 		return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_DOUBLE
 	case metricdata.Sum[int64]:
-		return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_INT64
+		if agg.IsMonotonic {
+			return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_INT64
+		} else {
+			return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_INT64
+		}
 	case metricdata.Sum[float64]:
-		return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DOUBLE
+		if agg.IsMonotonic {
+			return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DOUBLE
+		} else {
+			return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_DOUBLE
+		}
 	case metricdata.Histogram:
 		return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DISTRIBUTION
 	default:
