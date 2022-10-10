@@ -19,8 +19,6 @@ import (
 	"errors"
 	"fmt"
 
-	metricapi "go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/metric/global"
 	"go.opentelemetry.io/otel/sdk/metric"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
@@ -48,34 +46,4 @@ func New(opts ...Option) (metric.Exporter, error) {
 		o.projectID = creds.ProjectID
 	}
 	return newMetricExporter(&o)
-}
-
-// NewRawExporter creates a new Exporter thats implements metric.Exporter.
-// Deprecated: Use New() instead.
-func NewRawExporter(opts ...Option) (metric.Exporter, error) {
-	return New(opts...)
-}
-
-// InstallNewPipeline creates a fully-configured MeterProvider which exports to cloud monitoring.
-// Deprecated: Use New() instead and metric.NewMeterProvider instead.
-func NewExportPipeline(opts []Option, popts ...metric.Option) (metricapi.MeterProvider, error) {
-	exporter, err := New(opts...)
-	if err != nil {
-		return nil, err
-	}
-	popts = append(popts, metric.WithReader(metric.NewPeriodicReader(exporter)))
-	provider := metric.NewMeterProvider(popts...)
-	return provider, nil
-}
-
-// InstallNewPipeline creates a fully-configured MeterProvider which exports to cloud monitoring,
-// and sets it as the global MeterProvider
-// Deprecated: Use New(), metric.NewMeterProvider, and global.SetMeterProvider instead.
-func InstallNewPipeline(opts []Option, popts ...metric.Option) (metricapi.MeterProvider, error) {
-	provider, err := NewExportPipeline(opts, popts...)
-	if err != nil {
-		return nil, err
-	}
-	global.SetMeterProvider(provider)
-	return provider, nil
 }
