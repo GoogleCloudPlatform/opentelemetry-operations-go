@@ -275,12 +275,12 @@ func TestExtraLabelsFromResource(t *testing.T) {
 	}{
 		{
 			desc:                    "empty resource",
-			resourceAttributeFilter: defaultResourceAttributesFilter,
+			resourceAttributeFilter: DefaultResourceAttributesFilter,
 			expected:                attribute.EmptySet(),
 		},
 		{
 			desc:                    "service labels added",
-			resourceAttributeFilter: defaultResourceAttributesFilter,
+			resourceAttributeFilter: DefaultResourceAttributesFilter,
 			input: resource.NewSchemaless(
 				semconv.ServiceNameKey.String("myservicename"),
 				semconv.ServiceNamespaceKey.String("myservicenamespace"),
@@ -290,7 +290,7 @@ func TestExtraLabelsFromResource(t *testing.T) {
 		},
 		{
 			desc:                    "non-service labels ignored",
-			resourceAttributeFilter: defaultResourceAttributesFilter,
+			resourceAttributeFilter: DefaultResourceAttributesFilter,
 			input: resource.NewSchemaless(
 				semconv.ServiceNameKey.String("myservicename"),
 				semconv.ServiceNamespaceKey.String("myservicenamespace"),

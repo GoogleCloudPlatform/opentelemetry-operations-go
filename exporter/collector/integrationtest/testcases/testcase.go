@@ -28,6 +28,7 @@ import (
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -53,7 +54,7 @@ var (
 const SecondProjectEnv = "SECOND_PROJECT_ID"
 
 type TestCase struct {
-	// Configure will be called to modify the default configuration for this test case. Optional.
+	// ConfigureCollector will be called to modify the default configuration for this test case. Optional.
 	ConfigureCollector func(cfg *collector.Config)
 	// Name of the test case
 	Name string
@@ -63,6 +64,8 @@ type TestCase struct {
 	// ExpectFixturePath is the path to the JSON encoded MetricExpectFixture
 	// (see fixtures.proto) that contains request messages the exporter is expected to send.
 	ExpectFixturePath string
+	// When testing the SDK metrics exporter (not collector), this is the options to use. Optional.
+	MetricSDKExporterOptions []metric.Option
 	// Skip, if true, skips this test case
 	Skip bool
 	// SkipForSDK, if true, skips this test case when testing the SDK

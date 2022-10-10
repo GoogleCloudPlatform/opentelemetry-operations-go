@@ -103,9 +103,9 @@ func WithFilteredResourceAttributes(filter attribute.Filter) func(o *options) {
 	}
 }
 
-// defaultResourceAttributesFilter is the default filter applied to resource
+// DefaultResourceAttributesFilter is the default filter applied to resource
 // attributes.
-func defaultResourceAttributesFilter(kv attribute.KeyValue) bool {
+func DefaultResourceAttributesFilter(kv attribute.KeyValue) bool {
 	return kv.Key == semconv.ServiceNameKey ||
 		kv.Key == semconv.ServiceNamespaceKey ||
 		kv.Key == semconv.ServiceInstanceIDKey
