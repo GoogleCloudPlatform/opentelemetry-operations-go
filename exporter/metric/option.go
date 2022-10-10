@@ -54,6 +54,12 @@ type options struct {
 	// to the underlying Stackdriver Monitoring API client.
 	// Optional.
 	monitoringClientOptions []apioption.ClientOption
+	// disableServiceLabels, if false, causes the exporter to copy
+	// OTel's service.name, service.namespace, and service.instance.id resource
+	// attributes into the GCM timeseries metric labels. This option is
+	// recommended to avoid writing duplicate timeseries against the same
+	// monitored resource. Default is false (not disabled).
+	disableServiceLabels bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -82,5 +88,16 @@ func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options
 func WithMetricDescriptorTypeFormatter(f func(metricdata.Metrics) string) func(o *options) {
 	return func(o *options) {
 		o.metricDescriptorTypeFormatter = f
+	}
+}
+
+// WithServiceLabelsDisabled disables the addition of service labels to GCM
+// timeseries. If this option is not provided, the exporter to copies OTel's
+// service.name, service.namespace, and service.instance.id resource attributes
+// into the GCM timeseries metric labels. This option is recommended to avoid
+// writing duplicate timeseries against the same monitored resource.
+func WithServiceLabelsDisabled() func(o *options) {
+	return func(o *options) {
+		o.disableServiceLabels = true
 	}
 }

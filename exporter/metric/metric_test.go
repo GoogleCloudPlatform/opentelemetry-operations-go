@@ -28,7 +28,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -232,18 +232,88 @@ func TestRecordToMpb(t *testing.T) {
 	inputMetrics := metricdata.Metrics{
 		Name: metricName,
 	}
+	inputExtraLabels := attribute.NewSet(
+		attribute.Key("service.name").String("servicename"),
+		attribute.Key("service.namespace").String("servicenamespace"),
+		attribute.Key("service.instance.id").String("23490238490235gfdg87g"),
+	)
 
 	want := &googlemetricpb.Metric{
 		Type: md.Type,
 		Labels: map[string]string{
-			"a":        "A",
-			"b_b":      "B",
-			"key_8foo": "100",
+			"a":                   "A",
+			"b_b":                 "B",
+			"key_8foo":            "100",
+			"service_instance_id": "23490238490235gfdg87g",
+			"service_name":        "servicename",
+			"service_namespace":   "servicenamespace",
 		},
 	}
-	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary)
+	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary, &inputExtraLabels)
 	if !reflect.DeepEqual(want, out) {
 		t.Errorf("expected: %v, actual: %v", want, out)
+	}
+}
+
+func TestExtraLabelsFromResource(t *testing.T) {
+	serviceLabelsSet := attribute.NewSet(
+		semconv.ServiceNameKey.String("myservicename"),
+		semconv.ServiceNamespaceKey.String("myservicenamespace"),
+		semconv.ServiceInstanceIDKey.String("123456789"),
+	)
+	for _, tc := range []struct {
+		input                *resource.Resource
+		expected             *attribute.Set
+		desc                 string
+		disableServiceLabels bool
+	}{
+		{
+			desc:     "empty resource",
+			expected: attribute.EmptySet(),
+		},
+		{
+			desc: "service labels added",
+			input: resource.NewSchemaless(
+				semconv.ServiceNameKey.String("myservicename"),
+				semconv.ServiceNamespaceKey.String("myservicenamespace"),
+				semconv.ServiceInstanceIDKey.String("123456789"),
+			),
+			expected: &serviceLabelsSet,
+		},
+		{
+			desc: "non-service labels ignored",
+			input: resource.NewSchemaless(
+				semconv.ServiceNameKey.String("myservicename"),
+				semconv.ServiceNamespaceKey.String("myservicenamespace"),
+				semconv.ServiceInstanceIDKey.String("123456789"),
+				semconv.CloudProviderKey.String("gcp"),
+			),
+			expected: &serviceLabelsSet,
+		},
+		{
+			desc:                 "service labels disabled",
+			disableServiceLabels: true,
+			input: resource.NewSchemaless(
+				semconv.ServiceNameKey.String("myservicename"),
+				semconv.ServiceNamespaceKey.String("myservicenamespace"),
+				semconv.ServiceInstanceIDKey.String("123456789"),
+				semconv.CloudProviderKey.String("gcp"),
+			),
+			expected: attribute.EmptySet(),
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			me := &metricExporter{
+				o: &options{
+					disableServiceLabels: tc.disableServiceLabels,
+				},
+			}
+			actual := me.extraLabelsFromResource(tc.input)
+			if !tc.expected.Equals(actual) {
+				t.Errorf("expected: %v, actual: %v", tc.expected, actual)
+			}
+
+		})
 	}
 }
 
@@ -258,6 +328,9 @@ func TestRecordToMdpb(t *testing.T) {
 		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
 		Description: "test",
 		Labels: []*label.LabelDescriptor{
+			{Key: normalizeLabelKey("service.instance.id")},
+			{Key: normalizeLabelKey("service.name")},
+			{Key: normalizeLabelKey("service.namespace")},
 			{Key: normalizeLabelKey("a")},
 			{Key: normalizeLabelKey("b.b")},
 			{Key: normalizeLabelKey("foo")},
@@ -290,7 +363,12 @@ func TestRecordToMdpb(t *testing.T) {
 			},
 		},
 	}
-	out := me.recordToMdpb(inputMetrics)
+	inputExtraLabels := attribute.NewSet(
+		attribute.Key("service.name").String("servicename"),
+		attribute.Key("service.namespace").String("servicenamespace"),
+		attribute.Key("service.instance.id").String("23490238490235gfdg87g"),
+	)
+	out := me.recordToMdpb(inputMetrics, &inputExtraLabels)
 	if !reflect.DeepEqual(want, out) {
 		t.Errorf("expected: %v, actual: %v", want, out)
 	}
@@ -544,7 +622,7 @@ func TestRecordToMpbUTF8(t *testing.T) {
 		Type:   md.Type,
 		Labels: expectedLabels,
 	}
-	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary)
+	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary, attribute.EmptySet())
 	if !reflect.DeepEqual(want, out) {
 		t.Errorf("expected: %v, actual: %v", want, out)
 	}

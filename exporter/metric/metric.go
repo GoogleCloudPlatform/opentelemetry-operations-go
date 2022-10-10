@@ -29,6 +29,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"go.uber.org/multierr"
@@ -132,6 +133,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricd
 	me.mdLock.Lock()
 	defer me.mdLock.Unlock()
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
+	extraLabels := me.extraLabelsFromResource(rm.Resource)
 	for _, scope := range rm.ScopeMetrics {
 		for _, metrics := range scope.Metrics {
 			k := keyOf(metrics, scope.Scope)
@@ -141,7 +143,7 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricd
 			}
 
 			if _, localok := mds[k]; !localok {
-				md := me.recordToMdpb(metrics)
+				md := me.recordToMdpb(metrics, extraLabels)
 				mds[k] = md
 			}
 		}
@@ -190,9 +192,10 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.Re
 	mr := me.resourceToMonitoredResourcepb(rm.Resource)
 	var aggError error
 
+	extraLabels := me.extraLabelsFromResource(rm.Resource)
 	for _, scope := range rm.ScopeMetrics {
 		for _, metrics := range scope.Metrics {
-			ts, err := me.recordToTspb(metrics, mr, scope.Scope)
+			ts, err := me.recordToTspb(metrics, mr, scope.Scope, extraLabels)
 			aggError = multierr.Append(aggError, err)
 			tss = append(tss, ts...)
 		}
@@ -210,6 +213,18 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.Re
 	}
 
 	return multierr.Append(aggError, me.client.CreateTimeSeries(ctx, req))
+}
+
+func (me *metricExporter) extraLabelsFromResource(res *resource.Resource) *attribute.Set {
+	if me.o.disableServiceLabels {
+		return attribute.EmptySet()
+	}
+	set, _ := attribute.NewSetWithFiltered(res.Attributes(), func(kv attribute.KeyValue) bool {
+		return kv.Key == semconv.ServiceNameKey ||
+			kv.Key == semconv.ServiceNamespaceKey ||
+			kv.Key == semconv.ServiceInstanceIDKey
+	})
+	return &set
 }
 
 // descToMetricType converts descriptor to MetricType proto type.
@@ -232,7 +247,7 @@ func metricTypeToDisplayName(mURL string) string {
 }
 
 // recordToMdpb extracts data and converts them to googlemetricpb.MetricDescriptor.
-func (me *metricExporter) recordToMdpb(metrics metricdata.Metrics) *googlemetricpb.MetricDescriptor {
+func (me *metricExporter) recordToMdpb(metrics metricdata.Metrics, extraLabels *attribute.Set) *googlemetricpb.MetricDescriptor {
 	name := metrics.Name
 	typ := me.descToMetricType(metrics)
 	kind, valueType := recordToMdpbKindType(metrics.Data)
@@ -248,14 +263,14 @@ func (me *metricExporter) recordToMdpb(metrics metricdata.Metrics) *googlemetric
 		ValueType:   valueType,
 		Unit:        string(metrics.Unit),
 		Description: metrics.Description,
-		Labels:      labelDescriptors(metrics),
+		Labels:      labelDescriptors(metrics, extraLabels),
 	}
 }
 
-func labelDescriptors(metrics metricdata.Metrics) []*label.LabelDescriptor {
+func labelDescriptors(metrics metricdata.Metrics, extraLabels *attribute.Set) []*label.LabelDescriptor {
 	labels := []*label.LabelDescriptor{}
 	seenKeys := map[string]struct{}{}
-	addAttributes := func(attr attribute.Set) {
+	addAttributes := func(attr *attribute.Set) {
 		iter := attr.Iter()
 		for iter.Next() {
 			kv := iter.Attribute()
@@ -269,27 +284,27 @@ func labelDescriptors(metrics metricdata.Metrics) []*label.LabelDescriptor {
 			seenKeys[normalizeLabelKey(string(kv.Key))] = struct{}{}
 		}
 	}
-
+	addAttributes(extraLabels)
 	switch a := metrics.Data.(type) {
 	case metricdata.Gauge[int64]:
 		for _, pt := range a.DataPoints {
-			addAttributes(pt.Attributes)
+			addAttributes(&pt.Attributes)
 		}
 	case metricdata.Gauge[float64]:
 		for _, pt := range a.DataPoints {
-			addAttributes(pt.Attributes)
+			addAttributes(&pt.Attributes)
 		}
 	case metricdata.Sum[int64]:
 		for _, pt := range a.DataPoints {
-			addAttributes(pt.Attributes)
+			addAttributes(&pt.Attributes)
 		}
 	case metricdata.Sum[float64]:
 		for _, pt := range a.DataPoints {
-			addAttributes(pt.Attributes)
+			addAttributes(&pt.Attributes)
 		}
 	case metricdata.Histogram:
 		for _, pt := range a.DataPoints {
-			addAttributes(pt.Attributes)
+			addAttributes(&pt.Attributes)
 		}
 	}
 	return labels
@@ -351,21 +366,25 @@ func recordToMdpbKindType(a metricdata.Aggregation) (googlemetricpb.MetricDescri
 }
 
 // recordToMpb converts data from records to Metric proto type for Cloud Monitoring.
-func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes attribute.Set, library instrumentation.Library) *googlemetricpb.Metric {
+func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes attribute.Set, library instrumentation.Library, extraLabels *attribute.Set) *googlemetricpb.Metric {
 	me.mdLock.RLock()
 	defer me.mdLock.RUnlock()
 	k := keyOf(metrics, library)
 	md, ok := me.mdCache[k]
 	if !ok {
-		md = me.recordToMdpb(metrics)
+		md = me.recordToMdpb(metrics, extraLabels)
 	}
 
 	labels := make(map[string]string)
-	iter := attributes.Iter()
-	for iter.Next() {
-		kv := iter.Attribute()
-		labels[normalizeLabelKey(string(kv.Key))] = sanitizeUTF8(kv.Value.Emit())
+	addAttributes := func(attr *attribute.Set) {
+		iter := attr.Iter()
+		for iter.Next() {
+			kv := iter.Attribute()
+			labels[normalizeLabelKey(string(kv.Key))] = sanitizeUTF8(kv.Value.Emit())
+		}
 	}
+	addAttributes(extraLabels)
+	addAttributes(&attributes)
 
 	return &googlemetricpb.Metric{
 		Type:   md.Type,
@@ -375,7 +394,7 @@ func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes att
 
 // recordToTspb converts record to TimeSeries proto type with common resource.
 // ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
-func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.MonitoredResource, library instrumentation.Scope) ([]*monitoringpb.TimeSeries, error) {
+func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.MonitoredResource, library instrumentation.Scope, extraLabels *attribute.Set) ([]*monitoringpb.TimeSeries, error) {
 	var tss []*monitoringpb.TimeSeries
 	var aggErr error
 	if m.Data == nil {
@@ -389,7 +408,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.Gauge[float64]:
@@ -399,7 +418,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.Sum[int64]:
@@ -416,7 +435,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.Sum[float64]:
@@ -433,7 +452,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.Histogram:
@@ -443,7 +462,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				aggErr = multierr.Append(aggErr, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library)
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	default:
