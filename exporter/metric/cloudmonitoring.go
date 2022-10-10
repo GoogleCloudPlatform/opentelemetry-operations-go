@@ -29,7 +29,10 @@ import (
 
 // New creates a new Exporter thats implements metric.Exporter.
 func New(opts ...Option) (metric.Exporter, error) {
-	o := options{context: context.Background()}
+	o := options{
+		context:                 context.Background(),
+		resourceAttributeFilter: defaultResourceAttributesFilter,
+	}
 	for _, opt := range opts {
 		opt(&o)
 	}

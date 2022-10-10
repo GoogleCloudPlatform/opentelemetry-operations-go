@@ -29,7 +29,6 @@ import (
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"go.uber.org/multierr"
@@ -216,14 +215,7 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.Re
 }
 
 func (me *metricExporter) extraLabelsFromResource(res *resource.Resource) *attribute.Set {
-	if me.o.disableServiceLabels {
-		return attribute.EmptySet()
-	}
-	set, _ := attribute.NewSetWithFiltered(res.Attributes(), func(kv attribute.KeyValue) bool {
-		return kv.Key == semconv.ServiceNameKey ||
-			kv.Key == semconv.ServiceNamespaceKey ||
-			kv.Key == semconv.ServiceInstanceIDKey
-	})
+	set, _ := attribute.NewSetWithFiltered(res.Attributes(), me.o.resourceAttributeFilter)
 	return &set
 }
 

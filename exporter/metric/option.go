@@ -19,7 +19,9 @@ import (
 	"fmt"
 
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 
 	apioption "google.golang.org/api/option"
 )
@@ -41,6 +43,10 @@ type options struct {
 	// metricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
 	// By default, the format string is "workload.googleapis.com/[metric name]".
 	metricDescriptorTypeFormatter func(metricdata.Metrics) string
+	// resourceAttributeFilter determinies which resource attributes to
+	// add to metrics as metric labels. By default, it adds service.name,
+	// service.namespace, and service.instance.id.
+	resourceAttributeFilter attribute.Filter
 	// projectID is the identifier of the Cloud Monitoring
 	// project the user is uploading the stats data to.
 	// If not set, this will default to your "Application Default Credentials".
@@ -54,12 +60,6 @@ type options struct {
 	// to the underlying Stackdriver Monitoring API client.
 	// Optional.
 	monitoringClientOptions []apioption.ClientOption
-	// disableServiceLabels, if false, causes the exporter to copy
-	// OTel's service.name, service.namespace, and service.instance.id resource
-	// attributes into the GCM timeseries metric labels. This option is
-	// recommended to avoid writing duplicate timeseries against the same
-	// monitored resource. Default is false (not disabled).
-	disableServiceLabels bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -91,13 +91,28 @@ func WithMetricDescriptorTypeFormatter(f func(metricdata.Metrics) string) func(o
 	}
 }
 
-// WithServiceLabelsDisabled disables the addition of service labels to GCM
-// timeseries. If this option is not provided, the exporter to copies OTel's
-// service.name, service.namespace, and service.instance.id resource attributes
-// into the GCM timeseries metric labels. This option is recommended to avoid
-// writing duplicate timeseries against the same monitored resource.
-func WithServiceLabelsDisabled() func(o *options) {
+// WithFilteredResourceAttributes determinies which resource attributes to
+// add to metrics as metric labels. By default, it adds service.name,
+// service.namespace, and service.instance.id. This is recommended to avoid
+// writing duplicate timeseries against the same monitored resource. Use
+// WithFilteredResourceAttributes(NoAttributes()) to disable the addition of
+// resource attributes to metric labels.
+func WithFilteredResourceAttributes(filter attribute.Filter) func(o *options) {
 	return func(o *options) {
-		o.disableServiceLabels = true
+		o.resourceAttributeFilter = filter
 	}
+}
+
+// defaultResourceAttributesFilter is the default filter applied to resource
+// attributes.
+func defaultResourceAttributesFilter(kv attribute.KeyValue) bool {
+	return kv.Key == semconv.ServiceNameKey ||
+		kv.Key == semconv.ServiceNamespaceKey ||
+		kv.Key == semconv.ServiceInstanceIDKey
+}
+
+// NoAttributes can be passed to WithFilteredResourceAttributes to disable
+// adding resource attributes as metric labels.
+func NoAttributes(attribute.KeyValue) bool {
+	return false
 }

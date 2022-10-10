@@ -261,18 +261,26 @@ func TestExtraLabelsFromResource(t *testing.T) {
 		semconv.ServiceNamespaceKey.String("myservicenamespace"),
 		semconv.ServiceInstanceIDKey.String("123456789"),
 	)
+	allLabelsSet := attribute.NewSet(
+		semconv.ServiceNameKey.String("myservicename"),
+		semconv.ServiceNamespaceKey.String("myservicenamespace"),
+		semconv.ServiceInstanceIDKey.String("123456789"),
+		semconv.CloudProviderKey.String("gcp"),
+	)
 	for _, tc := range []struct {
-		input                *resource.Resource
-		expected             *attribute.Set
-		desc                 string
-		disableServiceLabels bool
+		input                   *resource.Resource
+		expected                *attribute.Set
+		resourceAttributeFilter attribute.Filter
+		desc                    string
 	}{
 		{
-			desc:     "empty resource",
-			expected: attribute.EmptySet(),
+			desc:                    "empty resource",
+			resourceAttributeFilter: defaultResourceAttributesFilter,
+			expected:                attribute.EmptySet(),
 		},
 		{
-			desc: "service labels added",
+			desc:                    "service labels added",
+			resourceAttributeFilter: defaultResourceAttributesFilter,
 			input: resource.NewSchemaless(
 				semconv.ServiceNameKey.String("myservicename"),
 				semconv.ServiceNamespaceKey.String("myservicenamespace"),
@@ -281,7 +289,8 @@ func TestExtraLabelsFromResource(t *testing.T) {
 			expected: &serviceLabelsSet,
 		},
 		{
-			desc: "non-service labels ignored",
+			desc:                    "non-service labels ignored",
+			resourceAttributeFilter: defaultResourceAttributesFilter,
 			input: resource.NewSchemaless(
 				semconv.ServiceNameKey.String("myservicename"),
 				semconv.ServiceNamespaceKey.String("myservicenamespace"),
@@ -291,8 +300,19 @@ func TestExtraLabelsFromResource(t *testing.T) {
 			expected: &serviceLabelsSet,
 		},
 		{
-			desc:                 "service labels disabled",
-			disableServiceLabels: true,
+			desc:                    "all labels with custom filter",
+			resourceAttributeFilter: func(attribute.KeyValue) bool { return true },
+			input: resource.NewSchemaless(
+				semconv.ServiceNameKey.String("myservicename"),
+				semconv.ServiceNamespaceKey.String("myservicenamespace"),
+				semconv.ServiceInstanceIDKey.String("123456789"),
+				semconv.CloudProviderKey.String("gcp"),
+			),
+			expected: &allLabelsSet,
+		},
+		{
+			desc:                    "service labels disabled",
+			resourceAttributeFilter: NoAttributes,
 			input: resource.NewSchemaless(
 				semconv.ServiceNameKey.String("myservicename"),
 				semconv.ServiceNamespaceKey.String("myservicenamespace"),
@@ -305,7 +325,7 @@ func TestExtraLabelsFromResource(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			me := &metricExporter{
 				o: &options{
-					disableServiceLabels: tc.disableServiceLabels,
+					resourceAttributeFilter: tc.resourceAttributeFilter,
 				},
 			}
 			actual := me.extraLabelsFromResource(tc.input)
