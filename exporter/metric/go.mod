@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/monitoring v1.4.0
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	go.opentelemetry.io/otel v1.10.0
-	go.opentelemetry.io/otel/metric v0.32.1
+	go.opentelemetry.io/otel/metric v0.32.1 // indirect
 	go.opentelemetry.io/otel/sdk v1.10.0
 	go.opentelemetry.io/otel/sdk/metric v0.32.1
 	golang.org/x/net v0.0.0-20220325170049-de3da57026de // indirect
