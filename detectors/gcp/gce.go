@@ -43,6 +43,11 @@ func (d *Detector) GCEHostName() (string, error) {
 	return d.metadata.InstanceName()
 }
 
+// GCEHostname returns the hostname of the instance on which this program is running
+func (d *Detector) GCEHostname() (string, error) {
+	return d.metadata.Hostname()
+}
+
 // GCEAvailabilityZoneAndRegion returns the zone and region in which this program is running
 func (d *Detector) GCEAvailabilityZoneAndRegion() (string, string, error) {
 	zone, err := d.metadata.Zone()
