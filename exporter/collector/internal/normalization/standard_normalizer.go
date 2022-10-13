@@ -137,7 +137,7 @@ func subtractExponentialHistogramDataPoint(a, b pmetric.ExponentialHistogramData
 }
 
 // subtractExponentialBuckets returns a - b
-func subtractExponentialBuckets(a, b pmetric.Buckets) []uint64 {
+func subtractExponentialBuckets(a, b pmetric.ExponentialHistogramDataPointBuckets) []uint64 {
 	newBuckets := make([]uint64, a.BucketCounts().Len())
 	offsetDiff := int(a.Offset() - b.Offset())
 	for i := 0; i < a.BucketCounts().Len(); i++ {

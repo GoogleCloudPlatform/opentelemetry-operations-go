@@ -150,7 +150,7 @@ func TestMapToPrometheusTarget(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			r := pcommon.NewResource()
 			for k, v := range tc.resourceLabels {
-				r.Attributes().PutString(k, v)
+				r.Attributes().PutStr(k, v)
 			}
 			got := MapToPrometheusTarget(r)
 			assert.Equal(t, tc.expected, got)

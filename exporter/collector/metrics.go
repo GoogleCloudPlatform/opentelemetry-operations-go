@@ -667,7 +667,7 @@ func (m *metricMapper) histogramToTimeSeries(
 		m.obs.log.Debug("Failed to get metric type (i.e. name) for histogram metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
 		return nil
 	}
-	if hist.AggregationTemporality() == pmetric.MetricAggregationTemporalityCumulative {
+	if hist.AggregationTemporality() == pmetric.AggregationTemporalityCumulative {
 		// Normalize cumulative histogram points.
 		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
 		normalizedPoint, keep := m.normalizer.NormalizeHistogramDataPoint(point, metricIdentifier)
@@ -721,7 +721,7 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 		m.obs.log.Debug("Failed to get metric type (i.e. name) for exponential histogram metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
 		return nil
 	}
-	if exponentialHist.AggregationTemporality() == pmetric.MetricAggregationTemporalityCumulative {
+	if exponentialHist.AggregationTemporality() == pmetric.AggregationTemporalityCumulative {
 		// Normalize the histogram point.
 		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
 		normalizedPoint, keep := m.normalizer.NormalizeExponentialHistogramDataPoint(point, metricIdentifier)
@@ -777,7 +777,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 		return nil
 	}
 	if sum.IsMonotonic() {
-		if sum.AggregationTemporality() == pmetric.MetricAggregationTemporalityCumulative {
+		if sum.AggregationTemporality() == pmetric.AggregationTemporalityCumulative {
 			metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
 			normalizedPoint, keep := m.normalizer.NormalizeNumberDataPoint(point, metricIdentifier)
 			if !keep {
@@ -1129,7 +1129,7 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 	case pmetric.MetricTypeSum:
 		if !m.Sum().IsMonotonic() {
 			kind = metricpb.MetricDescriptor_GAUGE
-		} else if m.Sum().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
+		} else if m.Sum().AggregationTemporality() == pmetric.AggregationTemporalityDelta {
 			// We report fake-deltas for now.
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
@@ -1142,7 +1142,7 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 		kind = metricpb.MetricDescriptor_GAUGE
 	case pmetric.MetricTypeHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.Histogram().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
+		if m.Histogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta {
 			// We report fake-deltas for now.
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
@@ -1150,7 +1150,7 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 		}
 	case pmetric.MetricTypeExponentialHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.ExponentialHistogram().AggregationTemporality() == pmetric.MetricAggregationTemporalityDelta {
+		if m.ExponentialHistogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta {
 			// We report fake-deltas for now.
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
