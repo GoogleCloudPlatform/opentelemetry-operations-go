@@ -39,7 +39,7 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 
 	rs := ptrace.NewResourceSpans()
 	resource := rs.Resource()
-	resource.Attributes().PutString("namespace", "kube-system")
+	resource.Attributes().PutStr("namespace", "kube-system")
 	ilss := rs.ScopeSpans()
 	il := ilss.AppendEmpty().Scope()
 	il.SetName("test_il_name")
@@ -81,7 +81,7 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 	span.Attributes().PutBool("cache_hit", true)
 	span.Attributes().PutInt("timeout_ns", 12e9)
 	span.Attributes().PutInt("ping_count", 25)
-	span.Attributes().PutString("agent", "ocagent")
+	span.Attributes().PutStr("agent", "ocagent")
 
 	gotOTSpanData := pdataResourceSpansToOTSpanData(rs)
 

@@ -254,7 +254,7 @@ func TestIdentifier(t *testing.T) {
 	metricWithName := pmetric.NewMetric()
 	metricWithName.SetName("custom.googleapis.com/test.metric")
 	dpWithAttributes := pmetric.NewNumberDataPoint()
-	dpWithAttributes.Attributes().PutString("string", "strval")
+	dpWithAttributes.Attributes().PutStr("string", "strval")
 	dpWithAttributes.Attributes().PutBool("bool", true)
 	dpWithAttributes.Attributes().PutInt("int", 123)
 	monitoredResource := &monitoredrespb.MonitoredResource{

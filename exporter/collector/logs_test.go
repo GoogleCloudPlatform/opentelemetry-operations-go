@@ -343,7 +343,7 @@ func TestGetLogName(t *testing.T) {
 			name: "log with name attribute",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Attributes().PutString(LogNameAttributeKey, "foo-log")
+				log.Attributes().PutStr(LogNameAttributeKey, "foo-log")
 				return log
 			},
 			expectedName: "foo-log",

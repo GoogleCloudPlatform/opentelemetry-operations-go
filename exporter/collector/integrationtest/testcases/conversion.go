@@ -192,12 +192,12 @@ func convertAttributes(attrs pcommon.Map) []attribute.KeyValue {
 	return kvs
 }
 
-func convertTemporality(t pmetric.MetricAggregationTemporality) metricdata.Temporality {
+func convertTemporality(t pmetric.AggregationTemporality) metricdata.Temporality {
 	var temp metricdata.Temporality
 	switch t {
-	case pmetric.MetricAggregationTemporalityDelta:
+	case pmetric.AggregationTemporalityDelta:
 		return metricdata.DeltaTemporality
-	case pmetric.MetricAggregationTemporalityCumulative:
+	case pmetric.AggregationTemporalityCumulative:
 		return metricdata.CumulativeTemporality
 	}
 	return temp
