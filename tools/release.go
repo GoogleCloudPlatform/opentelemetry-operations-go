@@ -48,6 +48,8 @@ var versions = map[string]string{
 	"internal/cloudmock/":       unstable,
 
 	"detectors/gcp/": unstable,
+
+	"propagator": unstable,
 }
 
 type module string
