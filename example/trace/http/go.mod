@@ -11,7 +11,7 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go => ../../..
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../../internal/cloudmock
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go v1.8.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go v0.34.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.3
 	go.opentelemetry.io/otel v1.11.0
