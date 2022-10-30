@@ -23,32 +23,32 @@ import (
 	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/sdk/metric"
 
-    mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
+	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 )
 
 func main() {
-    exporter, err := mexporter.New()
+	exporter, err := mexporter.New()
 	if err != nil {
 		log.Fatalf("Failed to create exporter: %v", err)
 	}
-    // initialize a MeterProvider with that periodically exports to the GCP exporter.
+	// initialize a MeterProvider with that periodically exports to the GCP exporter.
 	provider := metric.NewMeterProvider(
 		metric.WithReader(metric.NewPeriodicReader(exporter)),
 	)
-    ctx := context.Background()
-    defer provider.Shutdown(ctx)
+	ctx := context.Background()
+	defer provider.Shutdown(ctx)
 
-    // Start meter
+	// Start meter
 	meter := provider.Meter("github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric")
 
 	counter, err := meter.SyncInt64().Counter("counter-foo")
 	if err != nil {
 		log.Fatalf("Failed to create counter: %v", err)
 	}
-    labels := []label.KeyValue{
-        label.Key("key").String("value"),
-    }
-    counter.Add(ctx, 123, labels...)
+	labels := []label.KeyValue{
+		label.Key("key").String("value"),
+	}
+	counter.Add(ctx, 123, labels...)
 }
 ```
 
