@@ -157,13 +157,14 @@ func (e *traceExporter) protoFromReadOnlySpan(s sdktrace.ReadOnlySpan) (*tracepb
 	if s.Parent().SpanID() != s.SpanContext().SpanID() && s.Parent().SpanID().IsValid() {
 		sp.ParentSpanId = s.Parent().SpanID().String()
 	}
-	if s.Status().Code == codes.Ok {
+	switch s.Status().Code {
+	case codes.Ok:
 		sp.Status = &statuspb.Status{Code: int32(codepb.Code_OK)}
-	} else if s.Status().Code == codes.Unset {
+	case codes.Unset:
 		// Don't set status code.
-	} else if s.Status().Code == codes.Error {
+	case codes.Error:
 		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN), Message: s.Status().Description}
-	} else {
+	default:
 		sp.Status = &statuspb.Status{Code: int32(codepb.Code_UNKNOWN)}
 	}
 
