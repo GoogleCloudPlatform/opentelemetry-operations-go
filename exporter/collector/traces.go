@@ -18,23 +18,15 @@ package collector
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strings"
 	"time"
 
-	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/impersonate"
-	"google.golang.org/api/option"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -48,75 +40,9 @@ func (te *TraceExporter) Shutdown(ctx context.Context) error {
 	return te.texporter.Shutdown(ctx)
 }
 
-func setVersionInUserAgent(cfg *Config, version string) {
-	cfg.UserAgent = strings.ReplaceAll(cfg.UserAgent, "{{version}}", version)
-}
-
-func setProjectFromADC(ctx context.Context, cfg *Config, scopes []string) error {
-	if cfg.ProjectID == "" {
-		creds, err := google.FindDefaultCredentials(ctx, scopes...)
-		if err != nil {
-			return fmt.Errorf("error finding default application credentials: %v", err)
-		}
-		if creds.ProjectID == "" {
-			return errors.New("no project found with application default credentials")
-		}
-		cfg.ProjectID = creds.ProjectID
-	}
-	return nil
-}
-
-func generateClientOptions(ctx context.Context, cfg *ClientConfig, userAgent string, impersonateConfig ImpersonateConfig) ([]option.ClientOption, error) {
-	var copts []option.ClientOption
-	// option.WithUserAgent is used by the Trace exporter, but not the Metric exporter (see comment below)
-	if userAgent != "" {
-		copts = append(copts, option.WithUserAgent(userAgent))
-	}
-	if cfg.Endpoint != "" {
-		if cfg.UseInsecure {
-			// option.WithGRPCConn option takes precedent over all other supplied options so the
-			// following user agent will be used by both exporters if we reach this branch
-			dialOpts := []grpc.DialOption{
-				grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
-				grpc.WithTransportCredentials(insecure.NewCredentials()),
-			}
-			if userAgent != "" {
-				dialOpts = append(dialOpts, grpc.WithUserAgent(userAgent))
-			}
-			conn, err := grpc.Dial(cfg.Endpoint, dialOpts...)
-			if err != nil {
-				return nil, fmt.Errorf("cannot configure grpc conn: %w", err)
-			}
-			copts = append(copts, option.WithGRPCConn(conn))
-		} else {
-			copts = append(copts, option.WithEndpoint(cfg.Endpoint))
-		}
-	}
-	if impersonateConfig.TargetPrincipal != "" {
-		tokenSource, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
-			TargetPrincipal: impersonateConfig.TargetPrincipal,
-			Delegates:       impersonateConfig.Delegates,
-			Subject:         impersonateConfig.Subject,
-			Scopes:          monitoring.DefaultAuthScopes(),
-		})
-		if err != nil {
-			return nil, err
-		}
-		copts = append(copts, option.WithTokenSource(tokenSource))
-	}
-	if cfg.GRPCPoolSize > 0 {
-		copts = append(copts, option.WithGRPCConnectionPool(cfg.GRPCPoolSize))
-	}
-	if cfg.GetClientOptions != nil {
-		copts = append(copts, cfg.GetClientOptions()...)
-	}
-	return copts, nil
-}
-
 func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
 	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
-	setProjectFromADC(ctx, &cfg, traceapi.DefaultAuthScopes())
 
 	topts := []cloudtrace.Option{
 		cloudtrace.WithProjectID(cfg.ProjectID),
@@ -126,7 +52,7 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 		topts = append(topts, cloudtrace.WithAttributeMapping(mappingFuncFromAKM(cfg.TraceConfig.AttributeMappings)))
 	}
 
-	copts, err := generateClientOptions(ctx, &cfg.TraceConfig.ClientConfig, cfg.UserAgent, cfg.ImpersonateConfig)
+	copts, err := generateClientOptions(ctx, &cfg.TraceConfig.ClientConfig, &cfg, traceapi.DefaultAuthScopes())
 	if err != nil {
 		return nil, err
 	}

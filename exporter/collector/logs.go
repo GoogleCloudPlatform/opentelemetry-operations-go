@@ -129,12 +129,7 @@ func NewGoogleCloudLogsExporter(
 	cfg Config,
 	log *zap.Logger,
 ) (*LogsExporter, error) {
-	err := setProjectFromADC(ctx, &cfg, loggingv2.DefaultAuthScopes())
-	if err != nil {
-		return nil, err
-	}
-
-	clientOpts, err := generateClientOptions(ctx, &cfg.LogConfig.ClientConfig, cfg.UserAgent, cfg.ImpersonateConfig)
+	clientOpts, err := generateClientOptions(ctx, &cfg.LogConfig.ClientConfig, &cfg, loggingv2.DefaultAuthScopes())
 	if err != nil {
 		return nil, err
 	}
