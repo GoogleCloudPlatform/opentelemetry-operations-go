@@ -143,8 +143,12 @@ type ResourceFilter struct {
 type LogConfig struct {
 	// DefaultLogName sets the fallback log name to use when one isn't explicitly set
 	// for a log entry. If unset, logs without a log name will raise an error.
-	DefaultLogName string       `mapstructure:"default_log_name"`
-	ClientConfig   ClientConfig `mapstructure:",squash"`
+	DefaultLogName string `mapstructure:"default_log_name"`
+	// ResourceFilters, if provided, provides a list of resource filters.
+	// Resource attributes matching any filter will be included in LogEntry labels.
+	// Defaults to empty, which won't include any additional resource labels.
+	ResourceFilters []ResourceFilter `mapstructure:"resource_filters"`
+	ClientConfig    ClientConfig     `mapstructure:",squash"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.

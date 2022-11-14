@@ -315,8 +315,7 @@ func TestLogMapping(t *testing.T) {
 			entries, err := mapper.logToSplitEntries(
 				log,
 				mr,
-				"",
-				"",
+				nil,
 				testObservedTime,
 				logName,
 				"fakeprojectid",

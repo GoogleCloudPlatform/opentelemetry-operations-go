@@ -14,6 +14,8 @@
 
 package testcases
 
+import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+
 var LogsTestCases = []TestCase{
 	{
 		Name:                 "Apache access log with HTTPRequest",
@@ -39,5 +41,15 @@ var LogsTestCases = []TestCase{
 		Name:                 "Logs with trace/span info",
 		OTLPInputFixturePath: "testdata/fixtures/logs/logs_span_trace_id.json",
 		ExpectFixturePath:    "testdata/fixtures/logs/logs_span_trace_id_expected.json",
+	},
+	{
+		Name:                 "Logs with additional resource attributes",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_apache_access_resource_attributes.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_access_resource_attributes_expected.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.LogConfig.ResourceFilters = []collector.ResourceFilter{
+				{Prefix: "custom."},
+			}
+		},
 	},
 }

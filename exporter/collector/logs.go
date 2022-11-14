@@ -211,6 +211,7 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr := defaultResourceToMonitoredResource(rl.Resource())
+		extraResourceLabels := resourceToLabels(rl.Resource(), false, l.cfg.LogConfig.ResourceFilters)
 		projectID := l.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
 		if projectFromResource, found := rl.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
@@ -219,8 +220,7 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 
 		for j := 0; j < rl.ScopeLogs().Len(); j++ {
 			sl := rl.ScopeLogs().At(j)
-			instrumentationSource := sl.Scope().Name()
-			instrumentationVersion := sl.Scope().Version()
+			logLabels := mergeLogLabels(sl.Scope().Name(), sl.Scope().Version(), extraResourceLabels)
 
 			for k := 0; k < sl.LogRecords().Len(); k++ {
 				log := sl.LogRecords().At(k)
@@ -237,8 +237,7 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 				splitEntries, err := l.logToSplitEntries(
 					log,
 					mr,
-					instrumentationSource,
-					instrumentationVersion,
+					logLabels,
 					time.Now(),
 					logName,
 					projectID,
@@ -261,6 +260,18 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 	}
 
 	return entries, multierr.Combine(errors...)
+}
+
+func mergeLogLabels(instrumentationSource, instrumentationVersion string, resourceLabels map[string]string) map[string]string {
+	labelsMap := make(map[string]string)
+	// TODO(damemi): Make overwriting these labels (if they already exist) configurable
+	if len(instrumentationSource) > 0 {
+		labelsMap["instrumentation_source"] = instrumentationSource
+	}
+	if len(instrumentationVersion) > 0 {
+		labelsMap["instrumentation_version"] = instrumentationVersion
+	}
+	return mergeLabels(labelsMap, resourceLabels)
 }
 
 func (l logMapper) logEntryToInternal(
@@ -313,8 +324,7 @@ func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
 func (l logMapper) logToSplitEntries(
 	log plog.LogRecord,
 	mr *monitoredres.MonitoredResource,
-	instrumentationSource string,
-	instrumentationVersion string,
+	logLabels map[string]string,
 	processTime time.Time,
 	logName string,
 	projectID string,
@@ -390,19 +400,7 @@ func (l logMapper) logToSplitEntries(
 	}
 	entry.Severity = severityMapping[severityNumber]
 
-	if entry.Labels == nil &&
-		(len(instrumentationSource) > 0 ||
-			len(instrumentationVersion) > 0) {
-		entry.Labels = make(map[string]string)
-	}
-
-	// TODO(damemi): Make overwriting these labels (if they already exist) configurable
-	if len(instrumentationSource) > 0 {
-		entry.Labels["instrumentation_source"] = instrumentationSource
-	}
-	if len(instrumentationVersion) > 0 {
-		entry.Labels["instrumentation_version"] = instrumentationVersion
-	}
+	entry.Labels = logLabels
 
 	// parse remaining OTel attributes to GCP labels
 	for k, v := range attrsMap {
