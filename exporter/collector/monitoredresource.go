@@ -53,15 +53,16 @@ func defaultResourceToMonitoredResource(resource pcommon.Resource) *monitoredres
 	return mr
 }
 
-// resourceToMetricLabels converts the Resource into metric labels needed to uniquely identify
-// the timeseries.
-func (m *metricMapper) resourceToMetricLabels(
+// resourceToLabels converts the Resource attributes into labels.
+func resourceToLabels(
 	resource pcommon.Resource,
+	serviceResourceLabels bool,
+	resourceFilters []ResourceFilter,
 ) labels {
 	attrs := pcommon.NewMap()
 	resource.Attributes().Range(func(k string, v pcommon.Value) bool {
 		// Is a service attribute and should be included
-		if m.cfg.MetricConfig.ServiceResourceLabels &&
+		if serviceResourceLabels &&
 			(k == semconv.AttributeServiceName ||
 				k == semconv.AttributeServiceNamespace ||
 				k == semconv.AttributeServiceInstanceID) {
@@ -69,7 +70,7 @@ func (m *metricMapper) resourceToMetricLabels(
 			return true
 		}
 		// Matches one of the resource filters
-		for _, resourceFilter := range m.cfg.MetricConfig.ResourceFilters {
+		for _, resourceFilter := range resourceFilters {
 			if strings.HasPrefix(k, resourceFilter.Prefix) {
 				v.CopyTo(attrs.PutEmpty(k))
 				return true

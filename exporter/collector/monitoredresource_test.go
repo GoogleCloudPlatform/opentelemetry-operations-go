@@ -468,7 +468,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 			for k, v := range test.resourceLabels {
 				r.Attributes().PutStr(k, v)
 			}
-			extraLabels := mapper.resourceToMetricLabels(r)
+			extraLabels := resourceToLabels(r, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters)
 			assert.Equal(t, test.expectExtraLabels, extraLabels)
 		})
 	}
@@ -516,6 +516,6 @@ func TestResourceMetricsToMonitoredResourceUTF8(t *testing.T) {
 	}
 	mr := defaultResourceToMonitoredResource(r)
 	assert.Equal(t, expectMr, mr)
-	extraLabels := mapper.resourceToMetricLabels(r)
+	extraLabels := resourceToLabels(r, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters)
 	assert.Equal(t, expectExtraLabels, extraLabels)
 }
