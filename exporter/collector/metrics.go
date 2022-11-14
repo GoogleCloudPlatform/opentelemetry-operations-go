@@ -1081,6 +1081,14 @@ func (m *metricMapper) metricDescriptor(
 		return m.summaryMetricDescriptors(pm, extraLabels)
 	}
 	kind, typ := mapMetricPointKind(pm)
+	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
+		m.obs.log.Debug("Failed to get metric kind (i.e. aggregation) for metric descriptor. Dropping the metric descriptor.", zap.Any("metric", pm))
+		return nil
+	}
+	if typ == metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
+		m.obs.log.Debug("Failed to get metric type (int / double) for metric descriptor. Dropping the metric descriptor.", zap.Any("metric", pm))
+		return nil
+	}
 	metricType, err := m.metricNameToType(pm.Name(), pm)
 	if err != nil {
 		m.obs.log.Debug("Failed to get metric type (i.e. name) for metric descriptor. Dropping the metric descriptor.", zap.Error(err), zap.Any("metric", pm))
