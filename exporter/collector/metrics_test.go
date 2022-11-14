@@ -1835,6 +1835,27 @@ func TestMetricDescriptorMapping(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "No data points",
+			metricCreator: func() pmetric.Metric {
+				metric := pmetric.NewMetric()
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				metric.SetEmptyGauge()
+				return metric
+			},
+		},
+		{
+			name: "No aggregation",
+			metricCreator: func() pmetric.Metric {
+				metric := pmetric.NewMetric()
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("1")
+				return metric
+			},
+		},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
