@@ -148,6 +148,10 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricd
 		}
 	}
 
+	if me.o.disableCreateMetricDescriptors {
+		return nil
+	}
+
 	// TODO: This process is synchronous and blocks longer time if records in cps
 	// have many different descriptors. In the cps.ForEach above, it should spawn
 	// goroutines to send CreateMetricDescriptorRequest asynchronously in the case
@@ -600,7 +604,8 @@ func numberDataPointToValue[N int64 | float64](
 // >   allowed.
 // > * Label name must start with a letter or digit.
 // > * The maximum length of a label name is 100 characters.
-//     Note: this does not truncate if a label is too long.
+//
+//	Note: this does not truncate if a label is too long.
 func normalizeLabelKey(s string) string {
 	if len(s) == 0 {
 		return s
