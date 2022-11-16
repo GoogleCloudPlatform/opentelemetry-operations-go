@@ -129,6 +129,10 @@ func (me *metricExporter) Export(ctx context.Context, rm metricdata.ResourceMetr
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricdata.ResourceMetrics) error {
+	if me.o.disableCreateMetricDescriptors {
+		return nil
+	}
+
 	me.mdLock.Lock()
 	defer me.mdLock.Unlock()
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
@@ -146,10 +150,6 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricd
 				mds[k] = md
 			}
 		}
-	}
-
-	if me.o.disableCreateMetricDescriptors {
-		return nil
 	}
 
 	// TODO: This process is synchronous and blocks longer time if records in cps

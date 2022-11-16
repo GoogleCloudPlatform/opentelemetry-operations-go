@@ -122,8 +122,8 @@ func NoAttributes(attribute.KeyValue) bool {
 
 // WithDisableCreateMetricDescriptors will disable the automatic creation of
 // MetricDescriptors when an unknown metric is set to be exported.
-func WithDisableCreateMetricDescriptors(create bool) func(o *options) {
+func WithDisableCreateMetricDescriptors() func(o *options) {
 	return func(o *options) {
-		o.disableCreateMetricDescriptors = create
+		o.disableCreateMetricDescriptors = true
 	}
 }

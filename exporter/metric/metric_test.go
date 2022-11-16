@@ -727,14 +727,14 @@ func TestExportWithDisableCreateMetricDescriptors(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			server := grpc.NewServer()
 
-			flag := false
+			metricDescriptorCreated := false
 
 			m := mock{
 				createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
 					return &emptypb.Empty{}, nil
 				},
 				createMetricDescriptor: func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
-					flag = true
+					metricDescriptorCreated = true
 					return req.MetricDescriptor, nil
 				},
 			}
@@ -757,7 +757,10 @@ func TestExportWithDisableCreateMetricDescriptors(t *testing.T) {
 				WithProjectID("PROJECT_ID_NOT_REAL"),
 				WithMonitoringClientOptions(clientOpts...),
 				WithMetricDescriptorTypeFormatter(formatter),
-				WithDisableCreateMetricDescriptors(tc.disableCreateMetricsDescriptor),
+			}
+
+			if tc.disableCreateMetricsDescriptor {
+				opts = append(opts, WithDisableCreateMetricDescriptors())
 			}
 
 			exporter, err := New(opts...)
@@ -777,7 +780,7 @@ func TestExportWithDisableCreateMetricDescriptors(t *testing.T) {
 			counter.Add(ctx, 1)
 			require.NoError(t, provider.ForceFlush(ctx))
 			server.Stop()
-			require.Equal(t, tc.expectExportMetricDescriptor, flag)
+			require.Equal(t, tc.expectExportMetricDescriptor, metricDescriptorCreated)
 		})
 	}
 }
