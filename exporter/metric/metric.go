@@ -129,6 +129,10 @@ func (me *metricExporter) Export(ctx context.Context, rm metricdata.ResourceMetr
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricdata.ResourceMetrics) error {
+	if me.o.disableCreateMetricDescriptors {
+		return nil
+	}
+
 	me.mdLock.Lock()
 	defer me.mdLock.Unlock()
 	mds := make(map[key]*googlemetricpb.MetricDescriptor)
@@ -600,7 +604,8 @@ func numberDataPointToValue[N int64 | float64](
 // >   allowed.
 // > * Label name must start with a letter or digit.
 // > * The maximum length of a label name is 100 characters.
-//     Note: this does not truncate if a label is too long.
+//
+//	Note: this does not truncate if a label is too long.
 func normalizeLabelKey(s string) string {
 	if len(s) == 0 {
 		return s

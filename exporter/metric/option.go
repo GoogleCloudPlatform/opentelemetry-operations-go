@@ -60,6 +60,9 @@ type options struct {
 	// to the underlying Stackdriver Monitoring API client.
 	// Optional.
 	monitoringClientOptions []apioption.ClientOption
+
+	// disableCreateMetricDescriptors disables automatic MetricDescriptor creation
+	disableCreateMetricDescriptors bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -115,4 +118,12 @@ func DefaultResourceAttributesFilter(kv attribute.KeyValue) bool {
 // adding resource attributes as metric labels.
 func NoAttributes(attribute.KeyValue) bool {
 	return false
+}
+
+// WithDisableCreateMetricDescriptors will disable the automatic creation of
+// MetricDescriptors when an unknown metric is set to be exported.
+func WithDisableCreateMetricDescriptors() func(o *options) {
+	return func(o *options) {
+		o.disableCreateMetricDescriptors = true
+	}
 }

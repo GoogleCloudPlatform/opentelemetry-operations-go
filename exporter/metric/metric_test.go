@@ -707,6 +707,84 @@ func (m *mock) CreateMetricDescriptor(ctx context.Context, req *monitoringpb.Cre
 	return m.createMetricDescriptor(ctx, req)
 }
 
+func TestExportWithDisableCreateMetricDescriptors(t *testing.T) {
+	for _, tc := range []struct {
+		desc                           string
+		disableCreateMetricsDescriptor bool
+		expectExportMetricDescriptor   bool
+	}{
+		{
+			desc:                           "default",
+			disableCreateMetricsDescriptor: false,
+			expectExportMetricDescriptor:   true,
+		},
+		{
+			desc:                           "Disable CreateMetricsDescriptor",
+			disableCreateMetricsDescriptor: true,
+			expectExportMetricDescriptor:   false,
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			server := grpc.NewServer()
+
+			metricDescriptorCreated := false
+
+			m := mock{
+				createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
+					return &emptypb.Empty{}, nil
+				},
+				createMetricDescriptor: func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
+					metricDescriptorCreated = true
+					return req.MetricDescriptor, nil
+				},
+			}
+
+			monitoringpb.RegisterMetricServiceServer(server, &m)
+
+			lis, err := net.Listen("tcp", "127.0.0.1:0")
+			require.NoError(t, err)
+			go server.Serve(lis)
+
+			clientOpts := []option.ClientOption{
+				option.WithEndpoint(lis.Addr().String()),
+				option.WithoutAuthentication(),
+				option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+			}
+			res := &resource.Resource{}
+			ctx := context.Background()
+
+			opts := []Option{
+				WithProjectID("PROJECT_ID_NOT_REAL"),
+				WithMonitoringClientOptions(clientOpts...),
+				WithMetricDescriptorTypeFormatter(formatter),
+			}
+
+			if tc.disableCreateMetricsDescriptor {
+				opts = append(opts, WithDisableCreateMetricDescriptors())
+			}
+
+			exporter, err := New(opts...)
+			if err != nil {
+				t.Errorf("Error occurred when creating exporter: %v", err)
+			}
+			provider := metric.NewMeterProvider(
+				metric.WithReader(metric.NewPeriodicReader(exporter)),
+				metric.WithResource(res),
+			)
+
+			meter := provider.Meter("test")
+
+			counter, err := meter.SyncInt64().Counter("name.lastvalue")
+			require.NoError(t, err)
+
+			counter.Add(ctx, 1)
+			require.NoError(t, provider.ForceFlush(ctx))
+			server.Stop()
+			require.Equal(t, tc.expectExportMetricDescriptor, metricDescriptorCreated)
+		})
+	}
+}
+
 func TestExportMetricsWithUserAgent(t *testing.T) {
 	for _, tc := range []struct {
 		desc                   string
