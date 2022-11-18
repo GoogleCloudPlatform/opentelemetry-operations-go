@@ -1,0 +1,125 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "otel-collector"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "0.0.0.0:2112"
+            }
+          },
+          {
+            "key": "net.host.port",
+            "value": {
+              "stringValue": "2112"
+            }
+          },
+          {
+            "key": "http.scheme",
+            "value": {
+              "stringValue": "http"
+            }
+          }
+        ]
+      },
+      "scopeMetrics": [
+        {
+          "scope": {},
+          "metrics": [
+            {
+              "name": "kv_prober_write_latency",
+              "description": "Latency of successful KV write probes",
+              "histogram": {
+                "dataPoints": [
+                  {
+                    "attributes": [],
+                    "startTimeUnixNano": "1668799015877000000",
+                    "timeUnixNano": "1668799015877000000",
+                    "sum": 0,
+                    "bucketCounts": [
+                      "0"
+                    ]
+                  }
+                ],
+                "aggregationTemporality": 2
+              }
+            },
+            {
+              "name": "up",
+              "description": "The scraping was successful",
+              "gauge": {
+                "dataPoints": [
+                  {
+                    "attributes": [],
+                    "timeUnixNano": "1668799015877000000",
+                    "asDouble": 1
+                  }
+                ]
+              }
+            },
+            {
+              "name": "scrape_duration_seconds",
+              "description": "Duration of the scrape",
+              "unit": "seconds",
+              "gauge": {
+                "dataPoints": [
+                  {
+                    "attributes": [],
+                    "timeUnixNano": "1668799015877000000",
+                    "asDouble": 0.003655446
+                  }
+                ]
+              }
+            },
+            {
+              "name": "scrape_samples_scraped",
+              "description": "The number of samples the target exposed",
+              "gauge": {
+                "dataPoints": [
+                  {
+                    "attributes": [],
+                    "timeUnixNano": "1668799015877000000",
+                    "asDouble": 3
+                  }
+                ]
+              }
+            },
+            {
+              "name": "scrape_samples_post_metric_relabeling",
+              "description": "The number of samples remaining after metric relabeling was applied",
+              "gauge": {
+                "dataPoints": [
+                  {
+                    "attributes": [],
+                    "timeUnixNano": "1668799015877000000",
+                    "asDouble": 3
+                  }
+                ]
+              }
+            },
+            {
+              "name": "scrape_series_added",
+              "description": "The approximate number of new series in this scrape",
+              "gauge": {
+                "dataPoints": [
+                  {
+                    "attributes": [],
+                    "timeUnixNano": "1668799015877000000",
+                    "asDouble": 3
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

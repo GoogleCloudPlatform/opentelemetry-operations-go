@@ -205,5 +205,12 @@ var MetricsTestCases = []TestCase{
 		// Multi-project exporting is not supported in the SDK exporter
 		SkipForSDK: true,
 	},
+	{
+		// see https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/issues/525
+		Name:                 "Metrics with only one +inf bucket",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus_empty_buckets.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_empty_buckets_expected.json",
+		SkipForSDK:           true,
+	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }
