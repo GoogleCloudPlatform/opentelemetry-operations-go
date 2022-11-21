@@ -15,7 +15,10 @@
 package collector
 
 import (
+	"regexp"
 	"strings"
+
+	"go.uber.org/zap"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	semconv "go.opentelemetry.io/collector/semconv/v1.8.0"
@@ -58,6 +61,7 @@ func resourceToLabels(
 	resource pcommon.Resource,
 	serviceResourceLabels bool,
 	resourceFilters []ResourceFilter,
+	log *zap.Logger,
 ) labels {
 	attrs := pcommon.NewMap()
 	resource.Attributes().Range(func(k string, v pcommon.Value) bool {
@@ -71,7 +75,7 @@ func resourceToLabels(
 		}
 		// Matches one of the resource filters
 		for _, resourceFilter := range resourceFilters {
-			if strings.HasPrefix(k, resourceFilter.Prefix) {
+			if match, _ := regexp.Match(resourceFilter.Regex, []byte(k)); strings.HasPrefix(k, resourceFilter.Prefix) && match {
 				v.CopyTo(attrs.PutEmpty(k))
 				return true
 			}

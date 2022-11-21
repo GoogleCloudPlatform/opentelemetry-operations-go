@@ -174,7 +174,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		monitoredResource := me.cfg.MetricConfig.MapMonitoredResource(rm.Resource())
-		extraResourceLabels := resourceToLabels(rm.Resource(), me.cfg.MetricConfig.ServiceResourceLabels, me.cfg.MetricConfig.ResourceFilters)
+		extraResourceLabels := resourceToLabels(rm.Resource(), me.cfg.MetricConfig.ServiceResourceLabels, me.cfg.MetricConfig.ResourceFilters, me.obs.log)
 		projectID := me.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
 		if projectFromResource, found := rm.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {

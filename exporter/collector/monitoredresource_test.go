@@ -456,6 +456,27 @@ func TestResourceToMetricLabels(t *testing.T) {
 				"service_namespace": "myservicenamespace",
 			},
 		},
+		{
+			name: "Resource filter regex config + prefix",
+			updateMapper: func(mapper *metricMapper) {
+				mapper.cfg.MetricConfig.ResourceFilters = []ResourceFilter{
+					{Prefix: "cloud.", Regex: ".*availability.*"},
+					{Regex: "host.*"},
+				}
+			},
+			resourceLabels: map[string]string{
+				"cloud.platform":            "gcp_compute_engine",
+				"cloud.availability_zone":   "us-central1",
+				"cloud.availability_region": "us-central",
+				"host.id":                   "abc123",
+				"random.fake":               "woot",
+			},
+			expectExtraLabels: labels{
+				"cloud_availability_zone":   "us-central1",
+				"cloud_availability_region": "us-central",
+				"host_id":                   "abc123",
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -468,7 +489,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 			for k, v := range test.resourceLabels {
 				r.Attributes().PutStr(k, v)
 			}
-			extraLabels := resourceToLabels(r, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters)
+			extraLabels := resourceToLabels(r, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters, nil)
 			assert.Equal(t, test.expectExtraLabels, extraLabels)
 		})
 	}
@@ -516,6 +537,6 @@ func TestResourceMetricsToMonitoredResourceUTF8(t *testing.T) {
 	}
 	mr := defaultResourceToMonitoredResource(r)
 	assert.Equal(t, expectMr, mr)
-	extraLabels := resourceToLabels(r, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters)
+	extraLabels := resourceToLabels(r, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters, nil)
 	assert.Equal(t, expectExtraLabels, extraLabels)
 }
