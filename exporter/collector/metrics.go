@@ -657,8 +657,9 @@ func (m *metricMapper) histogramToTimeSeries(
 	point pmetric.HistogramDataPoint,
 	projectID string,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().NoRecordedValue() || !point.HasSum() {
+	if point.Flags().NoRecordedValue() || !point.HasSum() || point.ExplicitBounds().Len() == 0 {
 		// Drop points without a value or without a sum
+		m.obs.log.Debug("Metric has no value, sum, or explicit bounds. Dropping the metric.", zap.Any("metric", metric))
 		return nil
 	}
 	t, err := m.metricNameToType(metric.Name(), metric)
