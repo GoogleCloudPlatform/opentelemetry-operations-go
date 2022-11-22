@@ -66,6 +66,15 @@ func TestValidateConfig(t *testing.T) {
 			},
 			expectedErr: true,
 		},
+		{
+			desc: "Invalid resource filter regex",
+			input: Config{
+				MetricConfig: MetricConfig{
+					ResourceFilters: []ResourceFilter{{Regex: "*"}},
+				},
+			},
+			expectedErr: true,
+		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			err := ValidateConfig(tc.input)

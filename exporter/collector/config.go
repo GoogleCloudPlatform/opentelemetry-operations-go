@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -138,6 +139,8 @@ type ImpersonateConfig struct {
 type ResourceFilter struct {
 	// Match resource keys by prefix
 	Prefix string `mapstructure:"prefix"`
+	// Match resource keys by regex
+	Regex string `mapstructure:"regex"`
 }
 
 type LogConfig struct {
@@ -184,6 +187,15 @@ func ValidateConfig(cfg Config) error {
 			return fmt.Errorf("duplicate replacement in traces.attribute_mappings: %q", mapping.Replacement)
 		}
 		seenReplacements[mapping.Replacement] = struct{}{}
+	}
+
+	for _, resourceFilter := range cfg.MetricConfig.ResourceFilters {
+		if len(resourceFilter.Regex) == 0 {
+			continue
+		}
+		if _, err := regexp.Compile(resourceFilter.Regex); err != nil {
+			return fmt.Errorf("unable to parse resource filter regex: %s", err.Error())
+		}
 	}
 	return nil
 }

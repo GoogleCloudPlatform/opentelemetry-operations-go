@@ -211,7 +211,7 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr := defaultResourceToMonitoredResource(rl.Resource())
-		extraResourceLabels := resourceToLabels(rl.Resource(), false, l.cfg.LogConfig.ResourceFilters)
+		extraResourceLabels := resourceToLabels(rl.Resource(), false, l.cfg.LogConfig.ResourceFilters, l.obs.log)
 		projectID := l.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
 		if projectFromResource, found := rl.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
