@@ -60,6 +60,7 @@ func TestExporter_ExportSpan(t *testing.T) {
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithSyncer(exporter))
+	//nolint:errcheck
 	defer tp.Shutdown(context.Background())
 	otel.SetTracerProvider(tp)
 
@@ -126,6 +127,7 @@ func TestExporter_Timeout(t *testing.T) {
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
 		sdktrace.WithSyncer(exporter))
+	//nolint:errcheck
 	defer tp.Shutdown(context.Background())
 	otel.SetTracerProvider(tp)
 
@@ -175,6 +177,7 @@ func TestExporter_ExportWithUserAgent(t *testing.T) {
 	lis, err := net.Listen("tcp", "127.0.0.1:0")
 	require.NoError(t, err)
 	// GO GO gadget local server!
+	//nolint:errcheck
 	go server.Serve(lis)
 
 	// Wire into buffer output.
@@ -194,7 +197,12 @@ func TestExporter_ExportWithUserAgent(t *testing.T) {
 		sdktrace.WithBatcher(exporter))
 
 	otel.SetTracerProvider(tp)
-	shutdown := func() { tp.Shutdown(context.Background()) }
+	shutdown := func() {
+		err := tp.Shutdown(context.Background())
+		if err != nil {
+			t.Fatalf("error shutting down tracer provider: %+v", err)
+		}
+	}
 
 	_, span := otel.Tracer("test-tracer").Start(context.Background(), "test-span")
 	span.SetStatus(codes.Ok, "Status Message")
@@ -206,5 +214,4 @@ func TestExporter_ExportWithUserAgent(t *testing.T) {
 	// Now check for user agent string in the buffer.
 	ua := <-ch
 	require.Regexp(t, "opentelemetry-go .*; google-cloud-trace-exporter .*", ua[0])
-
 }
