@@ -105,10 +105,12 @@ func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
 
 	if err := shutdownTraceProvider(ctx, tracerProvider); err != nil {
 		log.Printf("could not shutdown tracer-provider: %v", err)
-		s.respond(ctx, testID, &response{
+		if respondErr := s.respond(ctx, testID, &response{
 			statusCode: code.Code_INTERNAL,
 			data:       []byte(fmt.Sprintf("could not shutdown tracer-provider: %v", err)),
-		})
+		}); respondErr != nil {
+			log.Printf("could not publish response: %v", respondErr)
+		}
 		return
 	}
 
