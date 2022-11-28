@@ -39,6 +39,7 @@ func (t *TracesTestServer) Shutdown() {
 }
 
 func (t *TracesTestServer) Serve() {
+	//nolint:errcheck
 	t.srv.Serve(t.lis)
 }
 
@@ -108,7 +109,7 @@ func (fn optionFunc) apply(cfg config) config {
 	return fn(cfg)
 }
 
-// WithDelay sets a delay on the test server before it responds
+// WithDelay sets a delay on the test server before it responds.
 func WithDelay(t time.Duration) TraceServerOption {
 	return optionFunc(func(cfg config) config {
 		cfg.delay = t

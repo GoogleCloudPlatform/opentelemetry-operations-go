@@ -43,7 +43,7 @@ func (m *MetricsTestServer) Shutdown() {
 	m.srv.GracefulStop()
 }
 
-// Pops out the CreateMetricDescriptorRequests which the test server has received so far
+// Pops out the CreateMetricDescriptorRequests which the test server has received so far.
 func (m *MetricsTestServer) CreateMetricDescriptorRequests() []*monitoringpb.CreateMetricDescriptorRequest {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -52,7 +52,7 @@ func (m *MetricsTestServer) CreateMetricDescriptorRequests() []*monitoringpb.Cre
 	return reqs
 }
 
-// Pops out the CreateTimeSeriesRequests which the test server has received so far
+// Pops out the CreateTimeSeriesRequests which the test server has received so far.
 func (m *MetricsTestServer) CreateTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
 	m.mu.Lock()
 	defer m.mu.Unlock()
@@ -61,7 +61,7 @@ func (m *MetricsTestServer) CreateTimeSeriesRequests() []*monitoringpb.CreateTim
 	return reqs
 }
 
-// Pops out the CreateServiceTimeSeriesRequests which the test server has received so far
+// Pops out the CreateServiceTimeSeriesRequests which the test server has received so far.
 func (m *MetricsTestServer) CreateServiceTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
 	m.mu.Lock()
 	defer m.mu.Unlock()
