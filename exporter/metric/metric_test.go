@@ -53,6 +53,7 @@ var (
 func TestExportMetrics(t *testing.T) {
 	ctx := context.Background()
 	testServer, err := cloudmock.NewMetricTestServer()
+	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
 	assert.NoError(t, err)
@@ -89,6 +90,7 @@ func TestExportMetrics(t *testing.T) {
 
 func TestExportCounter(t *testing.T) {
 	testServer, err := cloudmock.NewMetricTestServer()
+	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
 	assert.NoError(t, err)
@@ -115,6 +117,7 @@ func TestExportCounter(t *testing.T) {
 	)
 
 	ctx := context.Background()
+	//nolint:errcheck
 	defer provider.Shutdown(ctx)
 
 	// Start meter
@@ -129,6 +132,7 @@ func TestExportCounter(t *testing.T) {
 
 func TestExportHistogram(t *testing.T) {
 	testServer, err := cloudmock.NewMetricTestServer()
+	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
 	assert.NoError(t, err)
@@ -157,6 +161,7 @@ func TestExportHistogram(t *testing.T) {
 	assert.NoError(t, err)
 
 	ctx := context.Background()
+	//nolint:errcheck
 	defer provider.Shutdown(ctx)
 
 	// Start meter
@@ -332,7 +337,6 @@ func TestExtraLabelsFromResource(t *testing.T) {
 			if !tc.expected.Equals(actual) {
 				t.Errorf("expected: %v, actual: %v", tc.expected, actual)
 			}
-
 		})
 	}
 }
@@ -743,6 +747,7 @@ func TestExportWithDisableCreateMetricDescriptors(t *testing.T) {
 
 			lis, err := net.Listen("tcp", "127.0.0.1:0")
 			require.NoError(t, err)
+			//nolint:errcheck
 			go server.Serve(lis)
 
 			clientOpts := []option.ClientOption{
@@ -832,6 +837,7 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 
 			lis, err := net.Listen("tcp", "127.0.0.1:0")
 			require.NoError(t, err)
+			//nolint:errcheck
 			go server.Serve(lis)
 
 			clientOpts := []option.ClientOption{
@@ -865,7 +871,6 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 
 			counter.Add(ctx, 1)
 			require.NoError(t, provider.ForceFlush(ctx))
-
 			// User agent checking happens above in parallel to this flow.
 		})
 	}
@@ -873,6 +878,7 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 
 func TestConcurrentCallsAfterShutdown(t *testing.T) {
 	testServer, err := cloudmock.NewMetricTestServer()
+	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
 	assert.NoError(t, err)
@@ -918,6 +924,7 @@ func TestConcurrentCallsAfterShutdown(t *testing.T) {
 
 func TestConcurrentExport(t *testing.T) {
 	testServer, err := cloudmock.NewMetricTestServer()
+	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
 	assert.NoError(t, err)

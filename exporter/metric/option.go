@@ -77,7 +77,7 @@ func WithProjectID(id string) func(o *options) {
 }
 
 // WithMonitoringClientOptions add the options for Cloud Monitoring client instance.
-// Available options are defined in
+// Available options are defined in.
 func WithMonitoringClientOptions(opts ...apioption.ClientOption) func(o *options) {
 	return func(o *options) {
 		o.monitoringClientOptions = append(o.monitoringClientOptions, opts...)

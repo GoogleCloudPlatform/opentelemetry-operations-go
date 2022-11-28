@@ -75,7 +75,7 @@ type metricExporter struct {
 // ForceFlush does nothing, the exporter holds no state.
 func (e *metricExporter) ForceFlush(ctx context.Context) error { return ctx.Err() }
 
-// Shutdown shuts down the client connections
+// Shutdown shuts down the client connections.
 func (e *metricExporter) Shutdown(ctx context.Context) error {
 	err := errShutdown
 	e.shutdownOnce.Do(func() {
@@ -224,7 +224,7 @@ func (me *metricExporter) extraLabelsFromResource(res *resource.Resource) *attri
 }
 
 // descToMetricType converts descriptor to MetricType proto type.
-// Basically this returns default value ("workload.googleapis.com/[metric type]")
+// Basically this returns default value ("workload.googleapis.com/[metric type]").
 func (me *metricExporter) descToMetricType(desc metricdata.Metrics) string {
 	if formatter := me.o.metricDescriptorTypeFormatter; formatter != nil {
 		return formatter(desc)
@@ -345,15 +345,13 @@ func recordToMdpbKindType(a metricdata.Aggregation) (googlemetricpb.MetricDescri
 	case metricdata.Sum[int64]:
 		if agg.IsMonotonic {
 			return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_INT64
-		} else {
-			return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_INT64
 		}
+		return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_INT64
 	case metricdata.Sum[float64]:
 		if agg.IsMonotonic {
 			return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DOUBLE
-		} else {
-			return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_DOUBLE
 		}
+		return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_DOUBLE
 	case metricdata.Histogram:
 		return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DISTRIBUTION
 	default:
@@ -617,7 +615,7 @@ func normalizeLabelKey(s string) string {
 	return s
 }
 
-// converts anything that is not a letter or digit to an underscore
+// converts anything that is not a letter or digit to an underscore.
 func sanitizeRune(r rune) rune {
 	if unicode.IsLetter(r) || unicode.IsDigit(r) {
 		return r
