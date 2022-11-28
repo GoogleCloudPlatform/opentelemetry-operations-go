@@ -45,14 +45,14 @@ func TestLoadConfig(t *testing.T) {
 
 	assert.Equal(t, len(cfg.Exporters), 2)
 
-	r0 := cfg.Exporters[config.NewComponentID(typeStr)].(*testExporterConfig)
+	r0 := cfg.Exporters[component.NewID(typeStr)].(*testExporterConfig)
 	defaultConfig := factory.CreateDefaultConfig().(*testExporterConfig)
 	assert.Equal(t, sanitize(r0), sanitize(defaultConfig))
 
-	r1 := cfg.Exporters[config.NewComponentIDWithName(typeStr, "customname")].(*testExporterConfig)
+	r1 := cfg.Exporters[component.NewIDWithName(typeStr, "customname")].(*testExporterConfig)
 	assert.Equal(t, sanitize(r1),
 		&testExporterConfig{
-			ExporterSettings: config.NewExporterSettings(config.NewComponentIDWithName(typeStr, "customname")),
+			ExporterSettings: config.NewExporterSettings(component.NewIDWithName(typeStr, "customname")),
 			Config: collector.Config{
 				ProjectID: "my-project",
 				UserAgent: "opentelemetry-collector-contrib {{version}}",
@@ -98,7 +98,7 @@ func sanitize(cfg *testExporterConfig) *testExporterConfig {
 func newFactory() component.ExporterFactory {
 	return component.NewExporterFactory(
 		typeStr,
-		func() config.Exporter { return defaultConfig() },
+		func() component.ExporterConfig { return defaultConfig() },
 	)
 }
 
@@ -110,7 +110,7 @@ type testExporterConfig struct {
 
 func defaultConfig() *testExporterConfig {
 	return &testExporterConfig{
-		ExporterSettings: config.NewExporterSettings(config.NewComponentID(typeStr)),
+		ExporterSettings: config.NewExporterSettings(component.NewID(typeStr)),
 		Config:           collector.DefaultConfig(),
 	}
 }

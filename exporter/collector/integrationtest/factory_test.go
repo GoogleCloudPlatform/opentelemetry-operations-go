@@ -18,7 +18,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/collector/config/configtest"
+	"go.opentelemetry.io/collector/component/componenttest"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
@@ -26,5 +26,5 @@ import (
 func TestCreateDefaultConfig(t *testing.T) {
 	cfg := collector.DefaultConfig()
 	assert.NotNil(t, cfg, "failed to create default config")
-	assert.NoError(t, configtest.CheckConfigStruct(cfg))
+	assert.NoError(t, componenttest.CheckConfigStruct(cfg))
 }
