@@ -93,6 +93,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			require.NoError(t, err)
 			defer lis.Close()
 
+			//nolint:errcheck
 			go srv.Serve(lis)
 			sde, err := NewGoogleCloudTracesExporter(ctx, test.cfg, "latest", DefaultTimeout)
 			if test.expectedErr != "" {

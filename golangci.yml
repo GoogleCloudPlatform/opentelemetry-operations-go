@@ -92,7 +92,8 @@ linters-settings:
         ignore-file-rules:
           - "**/*_test.go"
           - "**/*test/*.go"
-          - "**/internal/matchers/*.go"
+          - "**/testcase.go"
+          - "**/recordfixtures/*.go"
   godot:
     exclude:
       # Exclude sentence fragments for lists.

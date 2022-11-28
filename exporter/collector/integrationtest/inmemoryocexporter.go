@@ -34,7 +34,7 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
-// OC stats/metrics exporter used to capture self observability metrics
+// OC stats/metrics exporter used to capture self observability metrics.
 type InMemoryOCExporter struct {
 	testServer          *cloudmock.MetricsTestServer
 	reader              *metricexport.Reader
@@ -74,7 +74,7 @@ func (i *InMemoryOCExporter) Proto(ctx context.Context) (*protos.SelfObservabili
 		nil
 }
 
-// Shutdown unregisters the global OpenCensus views to reset state for the next test
+// Shutdown unregisters the global OpenCensus views to reset state for the next test.
 func (i *InMemoryOCExporter) Shutdown(ctx context.Context) error {
 	i.stackdriverExporter.StopMetricsExporter()
 	err := i.stackdriverExporter.Close()
@@ -90,12 +90,16 @@ func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
 	// Reset our views in case any tests ran before this
 	views := getViews()
 	view.Unregister(views...)
-	view.Register(views...)
+	err := view.Register(views...)
+	if err != nil {
+		return nil, err
+	}
 
 	testServer, err := cloudmock.NewMetricTestServer()
 	if err != nil {
 		return nil, err
 	}
+	//nolint:errcheck
 	go testServer.Serve()
 	conn, err := grpc.Dial(testServer.Endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
@@ -127,7 +131,6 @@ func NewTraceTestExporter(
 	s *cloudmock.TracesTestServer,
 	cfg collector.Config,
 ) *collector.TraceExporter {
-
 	cfg.TraceConfig.ClientConfig.Endpoint = s.Endpoint
 	cfg.TraceConfig.ClientConfig.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
@@ -172,7 +175,6 @@ func NewLogTestExporter(
 	l *cloudmock.LogsTestServer,
 	cfg collector.Config,
 ) *collector.LogsExporter {
-
 	cfg.LogConfig.ClientConfig.Endpoint = l.Endpoint
 	cfg.LogConfig.ClientConfig.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"

@@ -41,7 +41,10 @@ func (te *TraceExporter) Shutdown(ctx context.Context) error {
 }
 
 func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
-	view.Register(ocgrpc.DefaultClientViews...)
+	err := view.Register(ocgrpc.DefaultClientViews...)
+	if err != nil {
+		return nil, err
+	}
 	setVersionInUserAgent(&cfg, version)
 
 	topts := []cloudtrace.Option{

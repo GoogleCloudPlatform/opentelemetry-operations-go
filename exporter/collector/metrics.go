@@ -120,8 +120,14 @@ func NewGoogleCloudMetricsExporter(
 	version string,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
-	view.Register(MetricViews()...)
-	view.Register(ocgrpc.DefaultClientViews...)
+	err := view.Register(MetricViews()...)
+	if err != nil {
+		return nil, err
+	}
+	err = view.Register(ocgrpc.DefaultClientViews...)
+	if err != nil {
+		return nil, err
+	}
 	setVersionInUserAgent(&cfg, version)
 
 	clientOpts, err := generateClientOptions(ctx, &cfg.MetricConfig.ClientConfig, &cfg, monitoring.DefaultAuthScopes())
@@ -1138,9 +1144,6 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 	case pmetric.MetricTypeSum:
 		if !m.Sum().IsMonotonic() {
 			kind = metricpb.MetricDescriptor_GAUGE
-		} else if m.Sum().AggregationTemporality() == pmetric.AggregationTemporalityDelta {
-			// We report fake-deltas for now.
-			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
@@ -1151,20 +1154,10 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 		kind = metricpb.MetricDescriptor_GAUGE
 	case pmetric.MetricTypeHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.Histogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta {
-			// We report fake-deltas for now.
-			kind = metricpb.MetricDescriptor_CUMULATIVE
-		} else {
-			kind = metricpb.MetricDescriptor_CUMULATIVE
-		}
+		kind = metricpb.MetricDescriptor_CUMULATIVE
 	case pmetric.MetricTypeExponentialHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.ExponentialHistogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta {
-			// We report fake-deltas for now.
-			kind = metricpb.MetricDescriptor_CUMULATIVE
-		} else {
-			kind = metricpb.MetricDescriptor_CUMULATIVE
-		}
+		kind = metricpb.MetricDescriptor_CUMULATIVE
 	default:
 		kind = metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
 		typ = metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED

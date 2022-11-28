@@ -52,7 +52,7 @@ func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResour
 	}
 }
 
-// getStringOrEmpty returns the value of the first key found, or the empty string
+// getStringOrEmpty returns the value of the first key found, or the empty string.
 func getStringOrEmpty(attributes pcommon.Map, keys ...string) string {
 	for _, k := range keys {
 		if val, ok := attributes.Get(k); ok {

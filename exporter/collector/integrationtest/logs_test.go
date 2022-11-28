@@ -27,7 +27,6 @@ import (
 )
 
 func TestLogs(t *testing.T) {
-
 	ctx := context.Background()
 	timestamp := time.Now()
 
@@ -72,5 +71,4 @@ func TestLogs(t *testing.T) {
 			}
 		})
 	}
-
 }

@@ -69,6 +69,7 @@ func NewCache(shutdown <-chan struct{}) *Cache {
 	}
 	go func() {
 		ticker := time.NewTicker(gcInterval)
+		//nolint:revive
 		for c.gc(shutdown, ticker.C) {
 		}
 	}()

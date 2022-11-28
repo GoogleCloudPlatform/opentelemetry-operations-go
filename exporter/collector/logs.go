@@ -208,7 +208,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 
 func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 	errors := []error{}
-	entries := make([]*logpb.LogEntry, 0, 0)
+	entries := make([]*logpb.LogEntry, 0)
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr := defaultResourceToMonitoredResource(rl.Resource())
@@ -283,7 +283,6 @@ func (l logMapper) logEntryToInternal(
 	splits int,
 	splitIndex int,
 ) (*logpb.LogEntry, error) {
-
 	internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", projectID))
 	if err != nil {
 		return nil, err
@@ -386,7 +385,7 @@ func (l logMapper) logToSplitEntries(
 	}
 
 	if log.SeverityNumber() < 0 || int(log.SeverityNumber()) > len(severityMapping)-1 {
-		return []logging.Entry{entry}, fmt.Errorf("Unknown SeverityNumber %v", log.SeverityNumber())
+		return []logging.Entry{entry}, fmt.Errorf("unknown SeverityNumber %v", log.SeverityNumber())
 	}
 	severityNumber := log.SeverityNumber()
 	// Log severity levels are based on numerical values defined by Otel/GCP, which are informally mapped to generic text values such as "ALERT", "Debug", etc.
