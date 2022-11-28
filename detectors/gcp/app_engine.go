@@ -16,7 +16,7 @@ package gcp
 
 const (
 	// See https://cloud.google.com/appengine/docs/flexible/python/migrating#modules
-	// for the environment variables available in GAE environments
+	// for the environment variables available in GAE environments.
 	gaeServiceEnv  = "GAE_SERVICE"
 	gaeVersionEnv  = "GAE_VERSION"
 	gaeInstanceEnv = "GAE_INSTANCE"

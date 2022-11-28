@@ -50,7 +50,7 @@ const (
 )
 
 // severityMapping maps the integer severity level values from OTel [0-24]
-// to matching Cloud Logging severity levels
+// to matching Cloud Logging severity levels.
 var severityMapping = []logging.Severity{
 	logging.Default,   // Default, 0
 	logging.Debug,     //

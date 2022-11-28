@@ -129,7 +129,7 @@ type MetricConfig struct {
 	EnableSumOfSquaredDeviation bool `mapstructure:"sum_of_squared_deviation"`
 }
 
-// ImpersonateConfig defines configuration for service account impersonation
+// ImpersonateConfig defines configuration for service account impersonation.
 type ImpersonateConfig struct {
 	TargetPrincipal string   `mapstructure:"target_principal"`
 	Subject         string   `mapstructure:"subject"`
@@ -174,7 +174,7 @@ func DefaultConfig() Config {
 	}
 }
 
-// ValidateConfig returns an error if the provided configuration is invalid
+// ValidateConfig returns an error if the provided configuration is invalid.
 func ValidateConfig(cfg Config) error {
 	seenKeys := make(map[string]struct{}, len(cfg.TraceConfig.AttributeMappings))
 	seenReplacements := make(map[string]struct{}, len(cfg.TraceConfig.AttributeMappings))

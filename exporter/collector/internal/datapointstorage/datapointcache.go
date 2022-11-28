@@ -59,7 +59,7 @@ type usedExponentialHistogramPoint struct {
 	used  *atomic.Bool
 }
 
-// NewCache instantiates a cache and starts background processes
+// NewCache instantiates a cache and starts background processes.
 func NewCache(shutdown <-chan struct{}) *Cache {
 	c := &Cache{
 		numberCache:               make(map[string]usedNumberPoint),
@@ -76,7 +76,7 @@ func NewCache(shutdown <-chan struct{}) *Cache {
 }
 
 // GetNumberDataPoint retrieves the point associated with the identifier, and whether
-// or not it was found
+// or not it was found.
 func (c *Cache) GetNumberDataPoint(identifier string) (pmetric.NumberDataPoint, bool) {
 	c.numberLock.RLock()
 	defer c.numberLock.RUnlock()
@@ -87,7 +87,7 @@ func (c *Cache) GetNumberDataPoint(identifier string) (pmetric.NumberDataPoint, 
 	return point.point, found
 }
 
-// SetNumberDataPoint assigns the point to the identifier in the cache
+// SetNumberDataPoint assigns the point to the identifier in the cache.
 func (c *Cache) SetNumberDataPoint(identifier string, point pmetric.NumberDataPoint) {
 	c.numberLock.Lock()
 	defer c.numberLock.Unlock()
@@ -95,7 +95,7 @@ func (c *Cache) SetNumberDataPoint(identifier string, point pmetric.NumberDataPo
 }
 
 // GetSummaryDataPoint retrieves the point associated with the identifier, and whether
-// or not it was found
+// or not it was found.
 func (c *Cache) GetSummaryDataPoint(identifier string) (pmetric.SummaryDataPoint, bool) {
 	c.summaryLock.RLock()
 	defer c.summaryLock.RUnlock()
@@ -106,7 +106,7 @@ func (c *Cache) GetSummaryDataPoint(identifier string) (pmetric.SummaryDataPoint
 	return point.point, found
 }
 
-// SetSummaryDataPoint assigns the point to the identifier in the cache
+// SetSummaryDataPoint assigns the point to the identifier in the cache.
 func (c *Cache) SetSummaryDataPoint(identifier string, point pmetric.SummaryDataPoint) {
 	c.summaryLock.Lock()
 	defer c.summaryLock.Unlock()
@@ -114,7 +114,7 @@ func (c *Cache) SetSummaryDataPoint(identifier string, point pmetric.SummaryData
 }
 
 // GetHistogramDataPoint retrieves the point associated with the identifier, and whether
-// or not it was found
+// or not it was found.
 func (c *Cache) GetHistogramDataPoint(identifier string) (pmetric.HistogramDataPoint, bool) {
 	c.histogramLock.RLock()
 	defer c.histogramLock.RUnlock()
@@ -125,7 +125,7 @@ func (c *Cache) GetHistogramDataPoint(identifier string) (pmetric.HistogramDataP
 	return point.point, found
 }
 
-// SetHistogramDataPoint assigns the point to the identifier in the cache
+// SetHistogramDataPoint assigns the point to the identifier in the cache.
 func (c *Cache) SetHistogramDataPoint(identifier string, point pmetric.HistogramDataPoint) {
 	c.histogramLock.Lock()
 	defer c.histogramLock.Unlock()
@@ -133,7 +133,7 @@ func (c *Cache) SetHistogramDataPoint(identifier string, point pmetric.Histogram
 }
 
 // GetExponentialHistogramDataPoint retrieves the point associated with the identifier, and whether
-// or not it was found
+// or not it was found.
 func (c *Cache) GetExponentialHistogramDataPoint(identifier string) (pmetric.ExponentialHistogramDataPoint, bool) {
 	c.exponentialHistogramLock.RLock()
 	defer c.exponentialHistogramLock.RUnlock()
@@ -144,14 +144,14 @@ func (c *Cache) GetExponentialHistogramDataPoint(identifier string) (pmetric.Exp
 	return point.point, found
 }
 
-// SetExponentialHistogramDataPoint assigns the point to the identifier in the cache
+// SetExponentialHistogramDataPoint assigns the point to the identifier in the cache.
 func (c *Cache) SetExponentialHistogramDataPoint(identifier string, point pmetric.ExponentialHistogramDataPoint) {
 	c.exponentialHistogramLock.Lock()
 	defer c.exponentialHistogramLock.Unlock()
 	c.exponentialHistogramCache[identifier] = usedExponentialHistogramPoint{point, atomic.NewBool(true)}
 }
 
-// gc garbage collects the cache after the ticker ticks
+// gc garbage collects the cache after the ticker ticks.
 func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 	select {
 	case <-shutdown:
@@ -209,7 +209,7 @@ func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 	return true
 }
 
-// Identifier returns the unique string identifier for a metric
+// Identifier returns the unique string identifier for a metric.
 func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pmetric.Metric, attributes pcommon.Map) string {
 	var b strings.Builder
 

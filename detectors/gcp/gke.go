@@ -35,12 +35,12 @@ func (d *Detector) onGKE() bool {
 	return found
 }
 
-// GKEHostID returns the instance ID of the instance on which this program is running
+// GKEHostID returns the instance ID of the instance on which this program is running.
 func (d *Detector) GKEHostID() (string, error) {
 	return d.GCEHostID()
 }
 
-// GKEClusterName returns the name if the GKE cluster in which this program is running
+// GKEClusterName returns the name if the GKE cluster in which this program is running.
 func (d *Detector) GKEClusterName() (string, error) {
 	return d.metadata.InstanceAttributeValue(clusterNameMetadataAttr)
 }
@@ -53,7 +53,7 @@ const (
 	Region
 )
 
-// GKEAvailabilityZoneOrRegion returns the location of the cluster and whether the cluster is zonal or regional
+// GKEAvailabilityZoneOrRegion returns the location of the cluster and whether the cluster is zonal or regional.
 func (d *Detector) GKEAvailabilityZoneOrRegion() (string, LocationType, error) {
 	clusterLocation, err := d.metadata.InstanceAttributeValue(clusterLocationMetadataAttr)
 	if err != nil {
