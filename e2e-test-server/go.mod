@@ -6,13 +6,13 @@ require (
 	cloud.google.com/go/iam v0.5.0 // indirect
 	cloud.google.com/go/pubsub v1.25.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.1
-	go.opentelemetry.io/otel v1.11.0
-	go.opentelemetry.io/otel/sdk v1.11.0
-	go.opentelemetry.io/otel/trace v1.11.0
+	go.opentelemetry.io/otel v1.11.1
+	go.opentelemetry.io/otel/sdk v1.11.1
+	go.opentelemetry.io/otel/trace v1.11.1
 	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55
 )
 
-require go.opentelemetry.io/contrib/detectors/gcp v1.11.0
+require go.opentelemetry.io/contrib/detectors/gcp v1.11.1
 
 require (
 	cloud.google.com/go v0.104.0 // indirect

@@ -19,6 +19,7 @@ package collector
 
 import (
 	"context"
+	"encoding/hex"
 	"fmt"
 	"math"
 	"net/url"
@@ -502,10 +503,10 @@ func (m *metricMapper) exemplar(ex pmetric.Exemplar, projectID string) *distribu
 	ctx := context.TODO()
 	attachments := []*anypb.Any{}
 	// TODO: Look into still sending exemplars with no span.
-	if !ex.TraceID().IsEmpty() && !ex.SpanID().IsEmpty() {
+	if traceID, spanID := ex.TraceID(), ex.SpanID(); !traceID.IsEmpty() && !spanID.IsEmpty() {
 		sctx, err := anypb.New(&monitoringpb.SpanContext{
 			// TODO - make sure project id is correct.
-			SpanName: fmt.Sprintf("projects/%s/traces/%s/spans/%s", projectID, ex.TraceID().HexString(), ex.SpanID().HexString()),
+			SpanName: fmt.Sprintf("projects/%s/traces/%s/spans/%s", projectID, hex.EncodeToString(traceID[:]), hex.EncodeToString(spanID[:])),
 		})
 		if err == nil {
 			attachments = append(attachments, sctx)

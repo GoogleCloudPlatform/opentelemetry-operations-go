@@ -16,6 +16,7 @@ package collector
 
 import (
 	"context"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"math"
@@ -367,11 +368,11 @@ func (l logMapper) logToSplitEntries(
 	}
 
 	// parse TraceID and SpanID, if present
-	if !log.TraceID().IsEmpty() {
-		entry.Trace = fmt.Sprintf("projects/%s/traces/%s", projectID, log.TraceID().HexString())
+	if traceID := log.TraceID(); !traceID.IsEmpty() {
+		entry.Trace = fmt.Sprintf("projects/%s/traces/%s", projectID, hex.EncodeToString(traceID[:]))
 	}
-	if !log.SpanID().IsEmpty() {
-		entry.SpanID = log.SpanID().HexString()
+	if spanID := log.SpanID(); !spanID.IsEmpty() {
+		entry.SpanID = hex.EncodeToString(spanID[:])
 	}
 
 	if httpRequestAttr, ok := attrsMap[HTTPRequestAttributeKey]; ok {

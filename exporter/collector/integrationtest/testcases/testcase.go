@@ -81,7 +81,8 @@ func (tc *TestCase) LoadOTLPTracesInput(
 ) ptrace.Traces {
 	bytes, err := os.ReadFile(tc.OTLPInputFixturePath)
 	require.NoError(t, err)
-	traces, err := ptrace.NewJSONUnmarshaler().UnmarshalTraces(bytes)
+	unmarshaler := &ptrace.JSONUnmarshaler{}
+	traces, err := unmarshaler.UnmarshalTraces(bytes)
 	require.NoError(t, err)
 
 	for i := 0; i < traces.ResourceSpans().Len(); i++ {
@@ -167,7 +168,8 @@ func (tc *TestCase) LoadOTLPLogsInput(
 ) plog.Logs {
 	bytes, err := os.ReadFile(tc.OTLPInputFixturePath)
 	require.NoError(t, err)
-	logs, err := plog.NewJSONUnmarshaler().UnmarshalLogs(bytes)
+	unmarshaler := &plog.JSONUnmarshaler{}
+	logs, err := unmarshaler.UnmarshalLogs(bytes)
 	require.NoError(t, err)
 
 	for i := 0; i < logs.ResourceLogs().Len(); i++ {
@@ -251,7 +253,8 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 ) pmetric.Metrics {
 	bytes, err := os.ReadFile(tc.OTLPInputFixturePath)
 	require.NoError(t, err)
-	metrics, err := pmetric.NewJSONUnmarshaler().UnmarshalMetrics(bytes)
+	unmarshaler := &pmetric.JSONUnmarshaler{}
+	metrics, err := unmarshaler.UnmarshalMetrics(bytes)
 	require.NoError(t, err)
 
 	// Interface with common fields that pdata metric points have

@@ -15,6 +15,7 @@
 package collector
 
 import (
+	"encoding/hex"
 	"fmt"
 	"io"
 	"net/http"
@@ -248,8 +249,8 @@ func TestLogMapping(t *testing.T) {
 			},
 			expectedEntries: []logging.Entry{
 				{
-					Trace:     fmt.Sprintf("projects/fakeprojectid/traces/%s", testTraceID.HexString()),
-					SpanID:    testSpanID.HexString(),
+					Trace:     fmt.Sprintf("projects/fakeprojectid/traces/%s", hex.EncodeToString(testTraceID[:])),
+					SpanID:    hex.EncodeToString(testSpanID[:]),
 					Timestamp: testObservedTime,
 				},
 			},
