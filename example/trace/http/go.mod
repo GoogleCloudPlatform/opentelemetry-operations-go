@@ -2,6 +2,8 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/trace/
 
 go 1.18
 
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-go => ../../..
+
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../../../exporter/trace
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../../internal/resourcemapping
@@ -11,8 +13,8 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator =>
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../../internal/cloudmock
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go v0.34.1
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.2
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator v0.0.0-00010101000000-000000000000
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.4
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/sdk v1.11.1
@@ -22,7 +24,7 @@ require (
 require (
 	cloud.google.com/go/compute v1.10.0 // indirect
 	cloud.google.com/go/trace v1.2.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.1 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.2 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect

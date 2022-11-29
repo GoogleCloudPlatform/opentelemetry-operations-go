@@ -9,7 +9,7 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/clou
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../internal/resourcemapping
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.34.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.34.2
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/metric v0.33.0
 	go.opentelemetry.io/otel/sdk/metric v0.33.0
@@ -18,7 +18,7 @@ require (
 require (
 	cloud.google.com/go/compute v1.10.0 // indirect
 	cloud.google.com/go/monitoring v1.6.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.1 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.2 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
