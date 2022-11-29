@@ -49,7 +49,7 @@ var versions = map[string]string{
 
 	"detectors/gcp/": unstable,
 
-	"propagator": unstable,
+	"propagator/": unstable,
 }
 
 type module string

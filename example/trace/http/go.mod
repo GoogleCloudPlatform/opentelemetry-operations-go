@@ -14,7 +14,7 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/clou
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.2
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator v0.0.0-00010101000000-000000000000
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator v0.34.2
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.36.4
 	go.opentelemetry.io/otel v1.11.1
 	go.opentelemetry.io/otel/sdk v1.11.1
