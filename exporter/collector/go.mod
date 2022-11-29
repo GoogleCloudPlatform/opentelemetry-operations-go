@@ -6,8 +6,8 @@ require (
 	cloud.google.com/go/logging v1.5.0
 	cloud.google.com/go/monitoring v1.6.0
 	cloud.google.com/go/trace v1.2.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.1
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.2
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.2
 	github.com/census-instrumentation/opencensus-proto v0.4.1
 	github.com/google/go-cmp v0.5.9
 	github.com/stretchr/testify v1.8.1
