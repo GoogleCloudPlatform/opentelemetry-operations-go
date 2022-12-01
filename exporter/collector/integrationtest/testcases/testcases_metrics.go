@@ -212,5 +212,17 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_empty_buckets_expected.json",
 		SkipForSDK:           true,
 	},
+	{
+		Name:                 "Resource filtered metrics",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/resource_filtered_attributes.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/resource_filtered_attributes_expected.json",
+		SkipForSDK:           true,
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.Prefix = "custom.googleapis.com/opencensus/config_sync/"
+			cfg.MetricConfig.SkipCreateMetricDescriptor = true
+			cfg.MetricConfig.ResourceFilters = []collector.ResourceFilter{collector.ResourceFilter{Prefix: "config"}}
+			cfg.MetricConfig.InstrumentationLibraryLabels = false
+		},
+	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }

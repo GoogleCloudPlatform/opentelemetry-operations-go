@@ -1,0 +1,407 @@
+{
+  "resourceMetrics": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "opencensus.starttime",
+            "value": {
+              "stringValue": "2022-11-22T21:29:22.810809666Z"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "ns-reconciler-gamestore-d9d977948-n62jw"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": "1"
+            }
+          },
+          {
+            "key": "telemetry.sdk.version",
+            "value": {
+              "stringValue": "0.23.0"
+            }
+          },
+          {
+            "key": "opencensus.exporterversion",
+            "value": {
+              "stringValue": "0.0.1"
+            }
+          },
+          {
+            "key": "telemetry.sdk.language",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "cloud.provider",
+            "value": {
+              "stringValue": "gcp"
+            }
+          },
+          {
+            "key": "k8s.pod.name",
+            "value": {
+              "stringValue": "ns-reconciler-gamestore-d9d977948-n62jw"
+            }
+          },
+          {
+            "key": "k8s.node.name",
+            "value": {
+              "stringValue": "gke-peip-test-default-pool-33ce93fa-u2qd"
+            }
+          },
+          {
+            "key": "configsync.sync.namespace",
+            "value": {
+              "stringValue": "gamestore"
+            }
+          },
+          {
+            "key": "k8s.pod.namespace",
+            "value": {
+              "stringValue": "config-management-system"
+            }
+          },
+          {
+            "key": "cloud.availability_zone",
+            "value": {
+              "stringValue": "us-central1-c"
+            }
+          },
+          {
+            "key": "k8s.deployment.name",
+            "value": {
+              "stringValue": "ns-reconciler-gamestore"
+            }
+          },
+          {
+            "key": "k8s.namespace.name",
+            "value": {
+              "stringValue": "gamestore"
+            }
+          },
+          {
+            "key": "k8s.pod.ip",
+            "value": {
+              "stringValue": "10.104.0.199"
+            }
+          },
+          {
+            "key": "k8s.cluster.name",
+            "value": {
+              "stringValue": "peip-test"
+            }
+          },
+          {
+            "key": "host.id",
+            "value": {
+              "stringValue": "3475782092259600616"
+            }
+          },
+          {
+            "key": "configsync.sync.name",
+            "value": {
+              "stringValue": "repo-sync"
+            }
+          },
+          {
+            "key": "cloud.account.id",
+            "value": {
+              "stringValue": "haiyanmeng-gke-322517"
+            }
+          },
+          {
+            "key": "k8s.pod.uid",
+            "value": {
+              "stringValue": "a2427d08-a6b4-40b9-83e6-c7161aba8a62"
+            }
+          },
+          {
+            "key": "configsync.sync.kind",
+            "value": {
+              "stringValue": ""
+            }
+          },
+          {
+            "key": "cloud.platform",
+            "value": {
+              "stringValue": "gcp_kubernetes_engine"
+            }
+          },
+          {
+            "key": "opencensus.resourcetype",
+            "value": {
+              "stringValue": "k8s"
+            }
+          }
+        ]
+      },
+      "scopeMetrics": [
+        {
+          "scope": {},
+          "metrics": [
+            {
+              "name": "apply_operations_total",
+              "description": "The total number of operations that have been performed to sync resources to source of truth",
+              "unit": "1",
+              "sum": {
+                "dataPoints": [
+                  {
+                    "attributes": [
+                      {
+                        "key": "operation",
+                        "value": {
+                          "stringValue": "update"
+                        }
+                      },
+                      {
+                        "key": "status",
+                        "value": {
+                          "stringValue": "success"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1669152562824383742",
+                    "timeUnixNano": "1669859622810196763",
+                    "asInt": "402"
+                  }
+                ],
+                "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                "isMonotonic": true
+              }
+            },
+            {
+              "name": "pipeline_error_observed",
+              "description": "A boolean value indicates if error happened from different stages when syncing a commit",
+              "unit": "1",
+              "gauge": {
+                "dataPoints": [
+                  {
+                    "attributes": [
+                      {
+                        "key": "component",
+                        "value": {
+                          "stringValue": "sync"
+                        }
+                      },
+                      {
+                        "key": "name",
+                        "value": {
+                          "stringValue": "ns-reconciler-gamestore"
+                        }
+                      },
+                      {
+                        "key": "reconciler",
+                        "value": {
+                          "stringValue": "repo-sync"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1669152562824418390",
+                    "timeUnixNano": "1669859622810236046",
+                    "asInt": "0"
+                  },
+                  {
+                    "attributes": [
+                      {
+                        "key": "component",
+                        "value": {
+                          "stringValue": "rendering"
+                        }
+                      },
+                      {
+                        "key": "name",
+                        "value": {
+                          "stringValue": "ns-reconciler-gamestore"
+                        }
+                      },
+                      {
+                        "key": "reconciler",
+                        "value": {
+                          "stringValue": "repo-sync"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1669152562824418390",
+                    "timeUnixNano": "1669859622810236046",
+                    "asInt": "0"
+                  },
+                  {
+                    "attributes": [
+                      {
+                        "key": "component",
+                        "value": {
+                          "stringValue": "source"
+                        }
+                      },
+                      {
+                        "key": "name",
+                        "value": {
+                          "stringValue": "ns-reconciler-gamestore"
+                        }
+                      },
+                      {
+                        "key": "reconciler",
+                        "value": {
+                          "stringValue": "repo-sync"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1669152562824418390",
+                    "timeUnixNano": "1669859622810236046",
+                    "asInt": "0"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "declared_resources",
+              "description": "The current number of declared resources parsed from Git",
+              "unit": "1",
+              "gauge": {
+                "dataPoints": [
+                  {
+                    "startTimeUnixNano": "1669152562824381933",
+                    "timeUnixNano": "1669859622810286550",
+                    "asInt": "2"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "resource_fights_total",
+              "description": "The total number of resources that are being synced too frequently",
+              "unit": "1",
+              "sum": {
+                "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                "isMonotonic": true
+              }
+            },
+            {
+              "name": "reconciler_errors",
+              "description": "The current number of errors in the RootSync and RepoSync reconcilers",
+              "unit": "1",
+              "gauge": {
+                "dataPoints": [
+                  {
+                    "attributes": [
+                      {
+                        "key": "component",
+                        "value": {
+                          "stringValue": "sync"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1669152562824373714",
+                    "timeUnixNano": "1669859622810299138",
+                    "asInt": "0"
+                  },
+                  {
+                    "attributes": [
+                      {
+                        "key": "component",
+                        "value": {
+                          "stringValue": "parsing"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1669152562824373714",
+                    "timeUnixNano": "1669859622810299138",
+                    "asInt": "0"
+                  },
+                  {
+                    "attributes": [
+                      {
+                        "key": "component",
+                        "value": {
+                          "stringValue": "source"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1669152562824373714",
+                    "timeUnixNano": "1669859622810299138",
+                    "asInt": "0"
+                  }
+                ]
+              }
+            },
+            {
+              "name": "internal_errors_total",
+              "description": "The total number of internal errors triggered by Config Sync",
+              "unit": "1",
+              "sum": {
+                "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                "isMonotonic": true
+              }
+            },
+            {
+              "name": "api_duration_seconds",
+              "description": "The latency distribution of API server calls",
+              "unit": "s",
+              "histogram": {
+                "dataPoints": [
+                  {
+                    "attributes": [
+                      {
+                        "key": "operation",
+                        "value": {
+                          "stringValue": "update"
+                        }
+                      },
+                      {
+                        "key": "status",
+                        "value": {
+                          "stringValue": "success"
+                        }
+                      }
+                    ],
+                    "startTimeUnixNano": "1669152562824368286",
+                    "timeUnixNano": "1669859622810308415",
+                    "count": "396",
+                    "sum": 0.003984054000000001,
+                    "bucketCounts": [
+                      "396",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ],
+                    "explicitBounds": [
+                      0.005,
+                      0.01,
+                      0.025,
+                      0.05,
+                      0.1,
+                      0.25,
+                      0.5,
+                      1,
+                      2.5,
+                      5,
+                      10
+                    ]
+                  }
+                ],
+                "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE"
+              }
+            }
+          ]
+        }
+      ],
+      "schemaUrl": "https://opentelemetry.io/schemas/1.6.1"
+    }
+  ]
+}
