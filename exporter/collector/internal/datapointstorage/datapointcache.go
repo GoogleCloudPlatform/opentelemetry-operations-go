@@ -16,6 +16,7 @@ package datapointstorage
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -223,9 +224,14 @@ func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[stri
 
 	// Metric identifiers
 	fmt.Fprintf(&b, " - %s -", metric.Name())
-	attributes.Sort().Range(func(k string, v pcommon.Value) bool {
-		fmt.Fprintf(&b, " %s=%s", k, v.AsString())
+	attrsIds := make([]string, 0, attributes.Len())
+	attributes.Range(func(k string, v pcommon.Value) bool {
+		attrsIds = append(attrsIds, k+"="+v.AsString())
 		return true
 	})
+	if len(attrsIds) > 0 {
+		sort.Strings(attrsIds)
+		fmt.Fprint(&b, " "+strings.Join(attrsIds, " "))
+	}
 	return b.String()
 }

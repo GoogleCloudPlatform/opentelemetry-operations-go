@@ -318,10 +318,13 @@ func TestIdentifier(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
+			origLabels := pcommon.NewMap()
+			tc.labels.CopyTo(origLabels)
 			got := Identifier(tc.resource, tc.extraLabels, tc.metric, tc.labels)
 			if tc.want != got {
 				t.Errorf("Identifier() = %q; want %q", got, tc.want)
 			}
+			assert.Equal(t, origLabels, tc.labels) // Make sure the labels are not mutated
 		})
 	}
 }
