@@ -41,10 +41,9 @@ func (te *TraceExporter) Shutdown(ctx context.Context) error {
 }
 
 func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
-	err := view.Register(ocgrpc.DefaultClientViews...)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/537#discussion_r1038290097
+	//nolint:errcheck
+	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
 
 	topts := []cloudtrace.Option{

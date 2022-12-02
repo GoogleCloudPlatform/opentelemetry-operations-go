@@ -120,14 +120,11 @@ func NewGoogleCloudMetricsExporter(
 	version string,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
-	err := view.Register(MetricViews()...)
-	if err != nil {
-		return nil, err
-	}
-	err = view.Register(ocgrpc.DefaultClientViews...)
-	if err != nil {
-		return nil, err
-	}
+	// TODO: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/537#discussion_r1038290097
+	//nolint:errcheck
+	view.Register(MetricViews()...)
+	//nolint:errcheck
+	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
 
 	clientOpts, err := generateClientOptions(ctx, &cfg.MetricConfig.ClientConfig, &cfg, monitoring.DefaultAuthScopes())
