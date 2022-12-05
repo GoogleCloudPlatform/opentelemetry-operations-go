@@ -48,8 +48,8 @@ func recordExemplarFailure(ctx context.Context, point int) {
 	stats.Record(ctx, exemplarAttachmentDropCount.M(int64(point)))
 }
 
-func recordPointCountDataPoint(ctx context.Context, points int, status string) {
-	ctx, err := tag.New(ctx, tag.Insert(statusKey, status))
+func recordPointCountDataPoint(ctx context.Context, points int, statusValue string) {
+	ctx, err := tag.New(ctx, tag.Insert(statusKey, statusValue))
 	if err != nil {
 		return
 	}

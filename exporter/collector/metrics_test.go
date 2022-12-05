@@ -1406,6 +1406,7 @@ func TestMetricNameToType(t *testing.T) {
 
 func TestAttributesToLabels(t *testing.T) {
 	attr := pcommon.NewMap()
+	//nolint:errcheck
 	attr.FromRaw(map[string]interface{}{
 		"foo": "bar",
 		"bar": "baz",
@@ -1418,6 +1419,7 @@ func TestAttributesToLabels(t *testing.T) {
 	)
 
 	// various key special cases
+	//nolint:errcheck
 	attr.FromRaw(map[string]interface{}{
 		"foo.bar":   "bar",
 		"_foo":      "bar",
@@ -1436,6 +1438,7 @@ func TestAttributesToLabels(t *testing.T) {
 	)
 
 	// value special cases
+	//nolint:errcheck
 	attr.FromRaw(map[string]interface{}{
 		"a": true,
 		"b": false,
@@ -1981,6 +1984,7 @@ var (
 
 func TestAttributesToLabelsUTF8(t *testing.T) {
 	attributes := pcommon.NewMap()
+	//nolint:errcheck
 	attributes.FromRaw(map[string]interface{}{
 		"valid_ascii":         "abcdefg",
 		"valid_utf8":          "שלום",

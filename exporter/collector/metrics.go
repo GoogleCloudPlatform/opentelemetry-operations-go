@@ -57,7 +57,7 @@ type selfObservability struct {
 	log *zap.Logger
 }
 
-// MetricsExporter is the GCM exporter that uses pdata directly
+// MetricsExporter is the GCM exporter that uses pdata directly.
 type MetricsExporter struct {
 	mapper metricMapper
 	// A channel that receives metric descriptor and sends them to GCM once
@@ -120,7 +120,10 @@ func NewGoogleCloudMetricsExporter(
 	version string,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
+	// TODO: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/537#discussion_r1038290097
+	//nolint:errcheck
 	view.Register(MetricViews()...)
+	//nolint:errcheck
 	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
 
@@ -165,7 +168,7 @@ func NewGoogleCloudMetricsExporter(
 	return mExp, nil
 }
 
-// PushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary
+// PushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary.
 func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) error {
 	// map from project -> []timeseries. This groups timeseries by the project
 	// they need to be sent to. Each project's timeseries are sent in a
@@ -865,7 +868,7 @@ func (m *metricMapper) getMetricNamePrefix(name string) string {
 	return m.cfg.MetricConfig.Prefix
 }
 
-// metricNameToType maps OTLP metric name to GCM metric type (aka name)
+// metricNameToType maps OTLP metric name to GCM metric type (aka name).
 func (m *metricMapper) metricNameToType(name string, metric pmetric.Metric) (string, error) {
 	metricName, err := m.cfg.MetricConfig.GetMetricName(name, metric)
 	if err != nil {
@@ -874,7 +877,7 @@ func (m *metricMapper) metricNameToType(name string, metric pmetric.Metric) (str
 	return path.Join(m.getMetricNamePrefix(name), metricName), nil
 }
 
-// defaultGetMetricName does not (further) customize the baseName
+// defaultGetMetricName does not (further) customize the baseName.
 func defaultGetMetricName(baseName string, _ pmetric.Metric) (string, error) {
 	return baseName, nil
 }
@@ -921,7 +924,7 @@ func sanitizeKey(s string) string {
 	return s
 }
 
-// converts anything that is not a letter or digit to an underscore
+// converts anything that is not a letter or digit to an underscore.
 func sanitizeRune(r rune) rune {
 	if unicode.IsLetter(r) || unicode.IsDigit(r) {
 		return r
@@ -1138,9 +1141,6 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 	case pmetric.MetricTypeSum:
 		if !m.Sum().IsMonotonic() {
 			kind = metricpb.MetricDescriptor_GAUGE
-		} else if m.Sum().AggregationTemporality() == pmetric.AggregationTemporalityDelta {
-			// We report fake-deltas for now.
-			kind = metricpb.MetricDescriptor_CUMULATIVE
 		} else {
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
@@ -1151,20 +1151,10 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 		kind = metricpb.MetricDescriptor_GAUGE
 	case pmetric.MetricTypeHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.Histogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta {
-			// We report fake-deltas for now.
-			kind = metricpb.MetricDescriptor_CUMULATIVE
-		} else {
-			kind = metricpb.MetricDescriptor_CUMULATIVE
-		}
+		kind = metricpb.MetricDescriptor_CUMULATIVE
 	case pmetric.MetricTypeExponentialHistogram:
 		typ = metricpb.MetricDescriptor_DISTRIBUTION
-		if m.ExponentialHistogram().AggregationTemporality() == pmetric.AggregationTemporalityDelta {
-			// We report fake-deltas for now.
-			kind = metricpb.MetricDescriptor_CUMULATIVE
-		} else {
-			kind = metricpb.MetricDescriptor_CUMULATIVE
-		}
+		kind = metricpb.MetricDescriptor_CUMULATIVE
 	default:
 		kind = metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED
 		typ = metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED

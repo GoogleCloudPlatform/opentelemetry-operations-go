@@ -31,7 +31,7 @@ import (
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
 
-// TraceExporter is a wrapper struct of OT cloud trace exporter
+// TraceExporter is a wrapper struct of OT cloud trace exporter.
 type TraceExporter struct {
 	texporter *cloudtrace.Exporter
 }
@@ -41,6 +41,8 @@ func (te *TraceExporter) Shutdown(ctx context.Context) error {
 }
 
 func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
+	// TODO: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/537#discussion_r1038290097
+	//nolint:errcheck
 	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
 
@@ -82,7 +84,7 @@ func mappingFuncFromAKM(akm []AttributeMapping) func(attribute.Key) attribute.Ke
 	}
 }
 
-// PushTraces calls texporter.ExportSpan for each span in the given traces
+// PushTraces calls texporter.ExportSpan for each span in the given traces.
 func (te *TraceExporter) PushTraces(ctx context.Context, td ptrace.Traces) error {
 	resourceSpans := td.ResourceSpans()
 	spans := make([]sdktrace.ReadOnlySpan, 0, td.SpanCount())

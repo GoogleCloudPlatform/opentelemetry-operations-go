@@ -32,7 +32,7 @@ import (
 // https://cloud.google.com/trace/docs/setup#force-trace
 const TraceContextHeaderName = "x-cloud-trace-context"
 
-// traceContextHeaderFormat is the regular expression pattern for valid Cloud Trace header value
+// traceContextHeaderFormat is the regular expression pattern for valid Cloud Trace header value.
 const traceContextHeaderFormat = "^(?P<trace_id>[0-9a-f]{32})/(?P<span_id>[0-9]{1,20})(;o=(?P<trace_flags>[0-9]))?$"
 
 // traceContextHeaderRe is a regular expression object of TraceContextHeaderFormat.
@@ -64,11 +64,11 @@ type CloudTraceOneWayPropagator struct {
 	CloudTraceFormatPropagator
 }
 
-// Inject does not inject anything for the oneway propagator
+// Inject does not inject anything for the oneway propagator.
 func (p CloudTraceOneWayPropagator) Inject(ctx context.Context, carrier propagation.TextMapCarrier) {}
 
 // Fields returns an empty list of fields, since the one way propagator does
-// not inject any fields
+// not inject any fields.
 func (p CloudTraceOneWayPropagator) Fields() []string {
 	return oneWayContextHeaders
 }

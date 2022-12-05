@@ -32,16 +32,27 @@ const (
 )
 
 var (
-	subscriptionMode        = mustGetenv("SUBSCRIPTION_MODE")
-	projectID               = mustGetenv("PROJECT_ID")
-	requestSubscriptionName = mustGetenv("REQUEST_SUBSCRIPTION_NAME")
-	responseTopicName       = mustGetenv("RESPONSE_TOPIC_NAME")
+	subscriptionMode        string
+	projectID               string
+	requestSubscriptionName string
+	responseTopicName       string
 )
 
-func mustGetenv(key string) string {
-	v := os.Getenv(key)
-	if v == "" {
-		log.Fatalf("environment variable %q must be set", key)
+func init() {
+	subscriptionMode = os.Getenv("SUBSCRIPTION_MODE")
+	if subscriptionMode == "" {
+		log.Fatalf("environment variable SUBSCRIPTION_MODE must be set")
 	}
-	return v
+	projectID = os.Getenv("PROJECT_ID")
+	if projectID == "" {
+		log.Fatalf("environment variable PROJECT_ID must be set")
+	}
+	requestSubscriptionName = os.Getenv("REQUEST_SUBSCRIPTION_NAME")
+	if requestSubscriptionName == "" {
+		log.Fatalf("environment variable REQUEST_SUBSCRIPTION_NAME must be set")
+	}
+	responseTopicName = os.Getenv("RESPONSE_TOPIC_NAME")
+	if responseTopicName == "" {
+		log.Fatalf("environment variable RESPONSE_TOPIC_NAME must be set")
+	}
 }

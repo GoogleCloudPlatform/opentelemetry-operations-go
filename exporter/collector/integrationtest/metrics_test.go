@@ -46,12 +46,14 @@ func TestCollectorMetrics(t *testing.T) {
 
 			testServer, err := cloudmock.NewMetricTestServer()
 			require.NoError(t, err)
+			//nolint:errcheck
 			go testServer.Serve()
 			defer testServer.Shutdown()
 			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig())
 			// For collecting self observability metrics
 			inMemoryOCExporter, err := NewInMemoryOCViewExporter()
 			require.NoError(t, err)
+			//nolint:errcheck
 			defer inMemoryOCExporter.Shutdown(ctx)
 
 			err = testServerExporter.PushMetrics(ctx, metrics)
@@ -131,6 +133,7 @@ func TestSDKMetrics(t *testing.T) {
 
 			testServer, err := cloudmock.NewMetricTestServer()
 			require.NoError(t, err)
+			//nolint:errcheck
 			go testServer.Serve()
 			defer testServer.Shutdown()
 			opts := append([]metric.Option{

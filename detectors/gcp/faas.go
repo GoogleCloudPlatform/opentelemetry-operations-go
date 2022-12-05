@@ -48,7 +48,7 @@ func (d *Detector) FaaSName() (string, error) {
 	return "", errEnvVarNotFound
 }
 
-// FaaSVersion returns the revision of the cloud run or cloud functions service
+// FaaSVersion returns the revision of the cloud run or cloud functions service.
 func (d *Detector) FaaSVersion() (string, error) {
 	if version, found := d.os.LookupEnv(faasRevisionEnv); found {
 		return version, nil
@@ -56,7 +56,7 @@ func (d *Detector) FaaSVersion() (string, error) {
 	return "", errEnvVarNotFound
 }
 
-// FaaSID returns the instance id of the cloud run instance or cloud function
+// FaaSID returns the instance id of the cloud run instance or cloud function.
 func (d *Detector) FaaSID() (string, error) {
 	return d.metadata.InstanceID()
 }

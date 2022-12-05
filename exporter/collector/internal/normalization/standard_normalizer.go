@@ -114,12 +114,12 @@ func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetri
 	return newPoint, true
 }
 
-// lessThanExponentialHistogramDataPoint returns a < b
+// lessThanExponentialHistogramDataPoint returns a < b.
 func lessThanExponentialHistogramDataPoint(a, b pmetric.ExponentialHistogramDataPoint) bool {
 	return a.Count() < b.Count() || a.Sum() < b.Sum()
 }
 
-// subtractExponentialHistogramDataPoint returns a - b
+// subtractExponentialHistogramDataPoint returns a - b.
 func subtractExponentialHistogramDataPoint(a, b pmetric.ExponentialHistogramDataPoint) pmetric.ExponentialHistogramDataPoint {
 	// Make a copy so we don't mutate underlying data
 	newPoint := pmetric.NewExponentialHistogramDataPoint()
@@ -136,7 +136,7 @@ func subtractExponentialHistogramDataPoint(a, b pmetric.ExponentialHistogramData
 	return newPoint
 }
 
-// subtractExponentialBuckets returns a - b
+// subtractExponentialBuckets returns a - b.
 func subtractExponentialBuckets(a, b pmetric.ExponentialHistogramDataPointBuckets) []uint64 {
 	newBuckets := make([]uint64, a.BucketCounts().Len())
 	offsetDiff := int(a.Offset() - b.Offset())
@@ -218,12 +218,12 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 	return newPoint, true
 }
 
-// lessThanHistogramDataPoint returns a < b
+// lessThanHistogramDataPoint returns a < b.
 func lessThanHistogramDataPoint(a, b pmetric.HistogramDataPoint) bool {
 	return a.Count() < b.Count() || a.Sum() < b.Sum()
 }
 
-// subtractHistogramDataPoint returns a - b
+// subtractHistogramDataPoint returns a - b.
 func subtractHistogramDataPoint(a, b pmetric.HistogramDataPoint) pmetric.HistogramDataPoint {
 	// Make a copy so we don't mutate underlying data
 	newPoint := pmetric.NewHistogramDataPoint()
@@ -313,7 +313,7 @@ func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPo
 	return newPoint, true
 }
 
-// lessThanNumberDataPoint returns a < b
+// lessThanNumberDataPoint returns a < b.
 func lessThanNumberDataPoint(a, b pmetric.NumberDataPoint) bool {
 	switch a.ValueType() {
 	case pmetric.NumberDataPointValueTypeInt:
@@ -324,7 +324,7 @@ func lessThanNumberDataPoint(a, b pmetric.NumberDataPoint) bool {
 	return false
 }
 
-// subtractNumberDataPoint returns a - b
+// subtractNumberDataPoint returns a - b.
 func subtractNumberDataPoint(a, b pmetric.NumberDataPoint) pmetric.NumberDataPoint {
 	// Make a copy so we don't mutate underlying data
 	newPoint := pmetric.NewNumberDataPoint()
@@ -396,12 +396,12 @@ func (s *standardNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryData
 	return newPoint, true
 }
 
-// lessThanSummaryDataPoint returns a < b
+// lessThanSummaryDataPoint returns a < b.
 func lessThanSummaryDataPoint(a, b pmetric.SummaryDataPoint) bool {
 	return a.Count() < b.Count() || a.Sum() < b.Sum()
 }
 
-// subtractSummaryDataPoint returns a - b
+// subtractSummaryDataPoint returns a - b.
 func subtractSummaryDataPoint(a, b pmetric.SummaryDataPoint) pmetric.SummaryDataPoint {
 	// Make a copy so we don't mutate underlying data.
 	newPoint := pmetric.NewSummaryDataPoint()

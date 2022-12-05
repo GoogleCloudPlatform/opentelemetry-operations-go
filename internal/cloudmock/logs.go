@@ -37,6 +37,7 @@ func (l *LogsTestServer) Shutdown() {
 }
 
 func (l *LogsTestServer) Serve() {
+	//nolint:errcheck
 	l.srv.Serve(l.lis)
 }
 

@@ -102,7 +102,7 @@ func newFactory() component.ExporterFactory {
 	)
 }
 
-// testExporterConfig implements exporter.Config so we can test parsing of configuration
+// testExporterConfig implements exporter.Config so we can test parsing of configuration.
 type testExporterConfig struct {
 	config.ExporterSettings `mapstructure:",squash"`
 	collector.Config        `mapstructure:",squash"`

@@ -90,7 +90,6 @@ func (e *traceExporter) Shutdown(ctx context.Context) error {
 
 // uploadSpans sends a set of spans to Stackdriver.
 func (e *traceExporter) uploadSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) error {
-
 	var cancel func()
 	ctx, cancel = newContextWithTimeout(ctx, e.o.timeout)
 	defer cancel()

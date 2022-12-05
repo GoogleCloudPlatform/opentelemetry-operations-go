@@ -64,6 +64,7 @@ func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.T
 	if err != nil {
 		panic(err)
 	}
+	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
@@ -121,6 +122,7 @@ func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.
 	if err != nil {
 		panic(err)
 	}
+	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
 
@@ -133,6 +135,7 @@ func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.
 			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig())
 			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
 			require.NoError(t, err)
+			//nolint:errcheck
 			defer inMemoryOCExporter.Shutdown(ctx)
 
 			err = testServerExporter.PushMetrics(ctx, metrics)

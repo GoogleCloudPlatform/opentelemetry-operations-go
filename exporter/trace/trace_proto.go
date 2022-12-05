@@ -41,7 +41,7 @@ import (
 const (
 	maxAnnotationEventsPerSpan = 32
 	// TODO(ymotongpoo): uncomment this after gRPC trace get supported.
-	// maxMessageEventsPerSpan    = 128
+	// maxMessageEventsPerSpan    = 128.
 	maxAttributeStringValue = 256
 	maxNumLinks             = 128
 	agentLabel              = "g.co/agent"
@@ -62,7 +62,7 @@ const (
 	labelHTTPPath       = `/http/path`
 	labelHTTPUserAgent  = `/http/user_agent`
 	// This is prefixed for google app engine, but translates to the service
-	// in the trace UI
+	// in the trace UI.
 	labelService = `g.co/gae/app/module`
 
 	instrumentationScopeNameAttribute    = "otel.scope.name"
@@ -71,7 +71,7 @@ const (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-trace-exporter %s", otel.Version(), Version())
 
-// Adapters for using resourcemapping library
+// Adapters for using resourcemapping library.
 type attrs struct {
 	Attrs []attribute.KeyValue
 }

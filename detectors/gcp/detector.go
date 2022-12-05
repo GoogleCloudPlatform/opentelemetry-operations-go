@@ -41,7 +41,7 @@ const (
 	AppEngineFlex
 )
 
-// CloudPlatform returns the platform on which this program is running
+// CloudPlatform returns the platform on which this program is running.
 func (d *Detector) CloudPlatform() Platform {
 	switch {
 	case d.onGKE():
@@ -60,12 +60,12 @@ func (d *Detector) CloudPlatform() Platform {
 	return UnknownPlatform
 }
 
-// ProjectID returns the ID of the project in which this program is running
+// ProjectID returns the ID of the project in which this program is running.
 func (d *Detector) ProjectID() (string, error) {
 	return d.metadata.ProjectID()
 }
 
-// Detector collects resource information for all GCP platforms
+// Detector collects resource information for all GCP platforms.
 type Detector struct {
 	metadata metadataProvider
 	os       osProvider
@@ -82,12 +82,12 @@ type metadataProvider interface {
 	InstanceAttributeValue(string) (string, error)
 }
 
-// osProvider contains the subset of the os package functions used by
+// osProvider contains the subset of the os package functions used by.
 type osProvider interface {
 	LookupEnv(string) (string, bool)
 }
 
-// realOSProvider uses the os package to lookup env vars
+// realOSProvider uses the os package to lookup env vars.
 type realOSProvider struct{}
 
 func (realOSProvider) LookupEnv(env string) (string, bool) {

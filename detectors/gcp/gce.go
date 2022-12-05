@@ -28,22 +28,22 @@ func (d *Detector) onGCE() bool {
 	return err == nil
 }
 
-// GCEHostType returns the machine type of the instance on which this program is running
+// GCEHostType returns the machine type of the instance on which this program is running.
 func (d *Detector) GCEHostType() (string, error) {
 	return d.metadata.Get(machineTypeMetadataAttr)
 }
 
-// GCEHostID returns the instance ID of the instance on which this program is running
+// GCEHostID returns the instance ID of the instance on which this program is running.
 func (d *Detector) GCEHostID() (string, error) {
 	return d.metadata.InstanceID()
 }
 
-// GCEHostName returns the instance name of the instance on which this program is running
+// GCEHostName returns the instance name of the instance on which this program is running.
 func (d *Detector) GCEHostName() (string, error) {
 	return d.metadata.InstanceName()
 }
 
-// GCEAvailabilityZoneAndRegion returns the zone and region in which this program is running
+// GCEAvailabilityZoneAndRegion returns the zone and region in which this program is running.
 func (d *Detector) GCEAvailabilityZoneAndRegion() (string, string, error) {
 	zone, err := d.metadata.Zone()
 	if err != nil {

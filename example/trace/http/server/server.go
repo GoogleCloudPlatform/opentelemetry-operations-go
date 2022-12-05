@@ -17,6 +17,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -33,14 +34,14 @@ import (
 	gcppropagator "github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator"
 )
 
-func initTracer() func() {
+func initTracer() (func(), error) {
 	projectID := os.Getenv("PROJECT_ID")
 
 	// Create Google Cloud Trace exporter to be able to retrieve
 	// the collected spans.
 	exporter, err := cloudtrace.New(cloudtrace.WithProjectID(projectID))
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	tp := sdktrace.NewTracerProvider(
 		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
@@ -49,7 +50,12 @@ func initTracer() func() {
 		sdktrace.WithBatcher(exporter))
 
 	otel.SetTracerProvider(tp)
-	return func() { tp.Shutdown(context.Background()) }
+	return func() {
+		err := tp.Shutdown(context.Background())
+		if err != nil {
+			fmt.Printf("error shutting down trace provider: %+v", err)
+		}
+	}, nil
 }
 
 func installPropagators() {
@@ -65,7 +71,10 @@ func installPropagators() {
 
 func main() {
 	installPropagators()
-	shutdown := initTracer()
+	shutdown, err := initTracer()
+	if err != nil {
+		log.Fatal(err)
+	}
 	defer shutdown()
 
 	helloHandler := func(w http.ResponseWriter, req *http.Request) {
@@ -77,7 +86,7 @@ func main() {
 	}
 	otelHandler := otelhttp.NewHandler(http.HandlerFunc(helloHandler), "Hello")
 	http.Handle("/hello", otelHandler)
-	err := http.ListenAndServe(":7777", nil)
+	err = http.ListenAndServe(":7777", nil)
 	if err != nil {
 		panic(err)
 	}
