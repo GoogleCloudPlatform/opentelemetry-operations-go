@@ -26,6 +26,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
@@ -1010,4 +1011,34 @@ func TestMetricTypeToDisplayName(t *testing.T) {
 			require.Equal(t, tc.expected, metricTypeToDisplayName(tc.input))
 		})
 	}
+}
+
+func deltaSelector(metric.InstrumentKind) metricdata.Temporality {
+	return metricdata.DeltaTemporality
+}
+
+func TestTemporalitySelector(t *testing.T) {
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithTemporalitySelector(deltaSelector),
+	)
+	require.NoError(t, err)
+
+	var unknownKind metric.InstrumentKind
+	assert.Equal(t, metricdata.DeltaTemporality, exporter.Temporality(unknownKind))
+}
+
+func dropSelector(metric.InstrumentKind) aggregation.Aggregation {
+	return aggregation.Drop{}
+}
+
+func TestAggregationSelector(t *testing.T) {
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithAggregationSelector(dropSelector),
+	)
+	require.NoError(t, err)
+
+	var unknownKind metric.InstrumentKind
+	assert.Equal(t, aggregation.Drop{}, exporter.Aggregation(unknownKind))
 }
