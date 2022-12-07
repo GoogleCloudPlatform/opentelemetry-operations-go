@@ -30,6 +30,8 @@ func New(opts ...Option) (metric.Exporter, error) {
 	o := options{
 		context:                 context.Background(),
 		resourceAttributeFilter: DefaultResourceAttributesFilter,
+		temporalitySelector:     metric.DefaultTemporalitySelector,
+		aggregationSelector:     metric.DefaultAggregationSelector,
 	}
 	for _, opt := range opts {
 		opt(&o)

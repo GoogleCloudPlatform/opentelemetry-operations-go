@@ -27,6 +27,8 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
 
@@ -70,6 +72,18 @@ type metricExporter struct {
 	client       *monitoring.MetricClient
 	mdLock       sync.RWMutex
 	shutdownOnce sync.Once
+}
+
+var _ metric.Exporter = (*metricExporter)(nil)
+
+// Temporality returns the Temporality to use for an instrument kind.
+func (e *metricExporter) Temporality(kind metric.InstrumentKind) metricdata.Temporality {
+	return e.o.temporalitySelector(kind)
+}
+
+// Aggregation returns the Aggregation to use for an instrument kind.
+func (e *metricExporter) Aggregation(kind metric.InstrumentKind) aggregation.Aggregation {
+	return e.o.aggregationSelector(kind)
 }
 
 // ForceFlush does nothing, the exporter holds no state.
