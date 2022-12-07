@@ -20,6 +20,8 @@ import (
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 
@@ -47,6 +49,14 @@ type options struct {
 	// add to metrics as metric labels. By default, it adds service.name,
 	// service.namespace, and service.instance.id.
 	resourceAttributeFilter attribute.Filter
+
+	// temporalitySelector selects the temporality to use based on the InstrumentKind.
+	temporalitySelector metric.TemporalitySelector
+
+	// aggregationSelector selects the aggregation and the parameters to use for
+	// that aggregation based on the InstrumentKind.
+	aggregationSelector metric.AggregationSelector
+
 	// projectID is the identifier of the Cloud Monitoring
 	// project the user is uploading the stats data to.
 	// If not set, this will default to your "Application Default Credentials".
@@ -103,6 +113,36 @@ func WithMetricDescriptorTypeFormatter(f func(metricdata.Metrics) string) func(o
 func WithFilteredResourceAttributes(filter attribute.Filter) func(o *options) {
 	return func(o *options) {
 		o.resourceAttributeFilter = filter
+	}
+}
+
+// WithTemporalitySelector sets the TemporalitySelector the exporter will use
+// to determine the Temporality of an instrument based on its kind. If this
+// option is not used, the exporter will use the metric.DefaultTemporalitySelector.
+func WithTemporalitySelector(selector metric.TemporalitySelector) func(o *options) {
+	return func(o *options) {
+		o.temporalitySelector = selector
+	}
+}
+
+// WithAggregationSelector sets the AggregationSelector the exporter will use
+// to determine the aggregation to use for an instrument based on its kind. If
+// this option is not used, the exporter will use the metric.DefaultAggregationSelector
+// or the aggregation explicitly passed for a view matching an instrument.
+func WithAggregationSelector(selector metric.AggregationSelector) func(o *options) {
+	// Deep copy and validate before using.
+	wrapped := func(ik metric.InstrumentKind) aggregation.Aggregation {
+		a := selector(ik)
+		copyed := a.Copy()
+		if err := copyed.Err(); err != nil {
+			// fallback to sdkmetric.DefaultAggregationSelector
+			copyed = metric.DefaultAggregationSelector(ik)
+		}
+		return copyed
+	}
+
+	return func(o *options) {
+		o.aggregationSelector = wrapped
 	}
 }
 
