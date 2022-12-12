@@ -41,7 +41,7 @@ cp -a ./example ${DIR_TMP}
 # Update go.mod files
 printf "Update go.mod: rename module and remove replace\n"
 
-PACKAGE_DIRS=$(find . -mindepth 2 -type f -name 'go.mod' -exec dirname {} \; | egrep 'example' | sed 's/^\.\///' | sort)
+PACKAGE_DIRS=$(find . -mindepth 2 -type f -name 'go.mod' -exec dirname {} \; | grep -E 'example' | sed 's/^\.\///' | sort)
 
 for dir in $PACKAGE_DIRS; do
 	printf "  Update go.mod for $dir\n"
