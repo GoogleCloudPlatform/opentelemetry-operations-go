@@ -5,14 +5,14 @@ ALL_DOCS := $(shell find . -name '*.md' -type f | sort)
 # All directories with go.mod files related to exporters. Used for building, testing and linting.
 ALL_GO_MOD_DIRS := $(filter-out $(TOOLS_MOD_DIR), $(shell find . -type f -name 'go.mod' -exec dirname {} \; | sort))
 ALL_GO_FILES_DIRS := $(filter-out $(TOOLS_MOD_DIR), $(shell find . -type f -name '*.go' -exec dirname {} \; | sort | uniq))
-ALL_COVERAGE_MOD_DIRS := $(shell find . -type f -name 'go.mod' -exec dirname {} \; | egrep -v '^./example|^$(TOOLS_MOD_DIR)' | sort)
+ALL_COVERAGE_MOD_DIRS := $(shell find . -type f -name 'go.mod' -exec dirname {} \; | grep -E -v '^./example|^$(TOOLS_MOD_DIR)' | sort)
 
 # Mac OS Catalina 10.5.x doesn't support 386. Hence skip 386 test
 SKIP_386_TEST = false
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
 	SW_VERS := $(shell sw_vers -productVersion)
-	ifeq ($(shell echo $(SW_VERS) | egrep '^(10.1[5-9]|1[1-9]|[2-9])'), $(SW_VERS))
+	ifeq ($(shell echo $(SW_VERS) | grep -E '^(10.1[5-9]|1[1-9]|[2-9])'), $(SW_VERS))
 		SKIP_386_TEST = true
 	endif
 endif
