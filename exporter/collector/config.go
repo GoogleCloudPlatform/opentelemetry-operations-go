@@ -54,6 +54,9 @@ type ClientConfig struct {
 	// GetClientOptions returns additional options to be passed
 	// to the underlying Google Cloud API client.
 	// Must be set programmatically (no support via declarative config).
+	// If GetClientOptions returns any options, the exporter will not add the
+	// default credentials, as those could conflict with options provided via
+	// GetClientOptions.
 	// Optional.
 	GetClientOptions func() []option.ClientOption
 
@@ -256,7 +259,12 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 		if err != nil {
 			return nil, fmt.Errorf("error finding default application credentials: %v", err)
 		}
-		copts = append(copts, option.WithCredentials(creds))
+		if clientCfg.GetClientOptions == nil || len(clientCfg.GetClientOptions()) == 0 {
+			// Only add default credentials if GetClientOptions does not
+			// provide additional options since GetClientOptions could pass
+			// credentials which conflict with the default creds.
+			copts = append(copts, option.WithCredentials(creds))
+		}
 		if cfg.ProjectID == "" {
 			if creds.ProjectID == "" {
 				return nil, errors.New("no project found with application default credentials")
