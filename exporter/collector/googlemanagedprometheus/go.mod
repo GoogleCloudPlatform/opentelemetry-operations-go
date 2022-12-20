@@ -7,7 +7,7 @@ require (
 	github.com/stretchr/testify v1.8.1
 	go.opentelemetry.io/collector/featuregate v0.68.0
 	go.opentelemetry.io/collector/pdata v1.0.0-rc2
-	go.opentelemetry.io/collector/semconv v0.66.0
+	go.opentelemetry.io/collector/semconv v0.68.0
 	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55
 )
 

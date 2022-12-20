@@ -57,8 +57,9 @@ func defaultResourceToMonitoredResource(resource pcommon.Resource) *monitoredres
 }
 
 // resourceToLabels converts the Resource attributes into labels.
-//nolint:revive
 // TODO(@damemi): Refactor to pass control-coupling lint check.
+//
+//nolint:revive
 func resourceToLabels(
 	resource pcommon.Resource,
 	serviceResourceLabels bool,

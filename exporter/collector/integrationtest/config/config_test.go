@@ -21,9 +21,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/config"
-	"go.opentelemetry.io/collector/service/servicetest"
+	"go.opentelemetry.io/collector/exporter"
+	"go.opentelemetry.io/collector/otelcol/otelcoltest"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
@@ -33,12 +33,12 @@ const (
 )
 
 func TestLoadConfig(t *testing.T) {
-	factories, err := componenttest.NopFactories()
+	factories, err := otelcoltest.NopFactories()
 	assert.Nil(t, err)
 
 	factory := newFactory()
 	factories.Exporters[typeStr] = factory
-	cfg, err := servicetest.LoadConfigAndValidate(path.Join("..", "testdata", "config.yaml"), factories)
+	cfg, err := otelcoltest.LoadConfigAndValidate(path.Join("..", "testdata", "config.yaml"), factories)
 
 	require.NoError(t, err)
 	require.NotNil(t, cfg)
@@ -52,7 +52,6 @@ func TestLoadConfig(t *testing.T) {
 	r1 := cfg.Exporters[component.NewIDWithName(typeStr, "customname")].(*testExporterConfig)
 	assert.Equal(t, sanitize(r1),
 		&testExporterConfig{
-			ExporterSettings: config.NewExporterSettings(component.NewIDWithName(typeStr, "customname")),
 			Config: collector.Config{
 				ProjectID: "my-project",
 				UserAgent: "opentelemetry-collector-contrib {{version}}",
@@ -95,10 +94,10 @@ func sanitize(cfg *testExporterConfig) *testExporterConfig {
 	return cfg
 }
 
-func newFactory() component.ExporterFactory {
-	return component.NewExporterFactory(
+func newFactory() exporter.Factory {
+	return exporter.NewFactory(
 		typeStr,
-		func() component.ExporterConfig { return defaultConfig() },
+		func() component.Config { return defaultConfig() },
 	)
 }
 
@@ -110,7 +109,6 @@ type testExporterConfig struct {
 
 func defaultConfig() *testExporterConfig {
 	return &testExporterConfig{
-		ExporterSettings: config.NewExporterSettings(component.NewID(typeStr)),
-		Config:           collector.DefaultConfig(),
+		Config: collector.DefaultConfig(),
 	}
 }
