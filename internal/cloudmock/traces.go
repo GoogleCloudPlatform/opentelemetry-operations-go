@@ -57,7 +57,7 @@ func (f *fakeTraceServiceServer) BatchWriteSpans(
 	time.Sleep(f.cfg.delay)
 	if f.cfg.responseErr != nil {
 		f.tracesTestServer.Retries++
-		return &emptypb.Empty{},f.cfg.responseErr
+		return &emptypb.Empty{}, f.cfg.responseErr
 	}
 	f.tracesTestServer.appendBatchWriteSpansRequest(request)
 	return &emptypb.Empty{}, nil
@@ -106,8 +106,8 @@ type TraceServerOption interface {
 }
 
 type config struct {
-	delay       time.Duration
 	responseErr error
+	delay       time.Duration
 }
 
 type optionFunc func(config) config
