@@ -32,6 +32,7 @@ type TracesTestServer struct {
 	Endpoint                string
 	batchWriteSpansRequests []*tracepb.BatchWriteSpansRequest
 	mu                      sync.Mutex
+	Retries                 int
 }
 
 func (t *TracesTestServer) Shutdown() {
@@ -54,6 +55,10 @@ func (f *fakeTraceServiceServer) BatchWriteSpans(
 	request *tracepb.BatchWriteSpansRequest,
 ) (*emptypb.Empty, error) {
 	time.Sleep(f.cfg.delay)
+	if f.cfg.responseErr != nil {
+		f.tracesTestServer.Retries++
+		return &emptypb.Empty{},f.cfg.responseErr
+	}
 	f.tracesTestServer.appendBatchWriteSpansRequest(request)
 	return &emptypb.Empty{}, nil
 }
@@ -80,6 +85,7 @@ func NewTracesTestServer(opts ...TraceServerOption) (*TracesTestServer, error) {
 	}
 	testServer := &TracesTestServer{
 		Endpoint: lis.Addr().String(),
+		Retries:  0,
 		lis:      lis,
 		srv:      srv,
 	}
@@ -100,7 +106,8 @@ type TraceServerOption interface {
 }
 
 type config struct {
-	delay time.Duration
+	delay       time.Duration
+	responseErr error
 }
 
 type optionFunc func(config) config
@@ -113,6 +120,13 @@ func (fn optionFunc) apply(cfg config) config {
 func WithDelay(t time.Duration) TraceServerOption {
 	return optionFunc(func(cfg config) config {
 		cfg.delay = t
+		return cfg
+	})
+}
+
+func WithErrorResponse(err error) TraceServerOption {
+	return optionFunc(func(cfg config) config {
+		cfg.responseErr = err
 		return cfg
 	})
 }
