@@ -22,6 +22,7 @@ require (
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.34.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.2
+	github.com/googleapis/gax-go/v2 v2.6.0
 	go.uber.org/multierr v1.8.0
 )
 
@@ -32,7 +33,6 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.0 // indirect
-	github.com/googleapis/gax-go/v2 v2.6.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.10.0 // indirect

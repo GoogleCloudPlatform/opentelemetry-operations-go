@@ -22,6 +22,7 @@ import (
 	"time"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
+	gax "github.com/googleapis/gax-go/v2"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/multierr"
 	"google.golang.org/api/option"
@@ -46,6 +47,13 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	if err != nil {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
 	}
+
+	if o.batchRetryer != nil {
+		client.CallOptions.BatchWriteSpans = []gax.CallOption{
+			gax.WithRetry(func() gax.Retryer { return o.batchRetryer }),
+		}
+	}
+
 	e := &traceExporter{
 		projectID:      o.projectID,
 		client:         client,

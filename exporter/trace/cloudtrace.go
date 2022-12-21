@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	gax "github.com/googleapis/gax-go/v2"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -62,6 +63,8 @@ type options struct {
 	// resource if the resource does not inherently belong to a specific
 	// project, e.g. on-premise resource like k8s_container or generic_task.
 	projectID string
+	// batchRetry is the gax.retryer for BatchWriteSpans requests
+	batchRetryer gax.Retryer
 	// traceClientOptions are additional options to be passed
 	// to the underlying Stackdriver Trace API client.
 	// Optional.
@@ -134,6 +137,13 @@ type AttributeMapping func(attribute.Key) attribute.Key
 func WithAttributeMapping(mapping AttributeMapping) func(o *options) {
 	return func(o *options) {
 		o.mapAttribute = mapping
+	}
+}
+
+// WithBatchRetry sets a retry function for BatchWriteSpans requests.
+func WithBatchRetry(retry gax.Retryer) func(o *options) {
+	return func(o *options) {
+		o.batchRetryer = retry
 	}
 }
 
