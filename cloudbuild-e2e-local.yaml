@@ -34,5 +34,5 @@ steps:
 
 logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs
 substitutions:
-  _TEST_RUNNER_IMAGE: gcr.io/${PROJECT_ID}/opentelemetry-operations-e2e-testing:0.11.0
+  _TEST_RUNNER_IMAGE: gcr.io/${PROJECT_ID}/opentelemetry-operations-e2e-testing:0.15.0
   _TEST_SERVER_IMAGE: gcr.io/${PROJECT_ID}/opentelemetry-operations-go-e2e-test-server:${SHORT_SHA}
