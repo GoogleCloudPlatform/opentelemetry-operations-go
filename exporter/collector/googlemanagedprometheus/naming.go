@@ -18,26 +18,33 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
 func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
+	// First, build a name that is compliant with prometheus conventions
+	compliantName := prometheus.BuildPromCompliantName(metric, "")
+	// Second, ad the GMP-specific suffix
 	switch metric.Type() {
 	case pmetric.MetricTypeSum:
-		return baseName + "/counter", nil
+		return compliantName + "/counter", nil
 	case pmetric.MetricTypeGauge:
-		return baseName + "/gauge", nil
+		return compliantName + "/gauge", nil
 	case pmetric.MetricTypeSummary:
 		// summaries are sent as the following series:
 		// * Sum: prometheus.googleapis.com/<baseName>_sum/summary:counter
 		// * Count: prometheus.googleapis.com/<baseName>_count/summary
 		// * Quantiles: prometheus.googleapis.com/<baseName>/summary
 		if strings.HasSuffix(baseName, "_sum") {
-			return baseName + "/summary:counter", nil
+			return compliantName + "_sum/summary:counter", nil
 		}
-		return baseName + "/summary", nil
+		if strings.HasSuffix(baseName, "_count") {
+			return compliantName + "_count/summary", nil
+		}
+		return compliantName + "/summary", nil
 	case pmetric.MetricTypeHistogram:
-		return baseName + "/histogram", nil
+		return compliantName + "/histogram", nil
 	default:
 		return "", fmt.Errorf("unsupported metric datatype: %v", metric.Type())
 	}

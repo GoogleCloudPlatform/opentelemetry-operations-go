@@ -17,93 +17,124 @@ package googlemanagedprometheus
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
+const promFeatureGate = "pkg.translator.prometheus.NormalizeName"
+
 func TestGetMetricName(t *testing.T) {
-	baseName := "my_metric_name"
+	// Enable the prometheus naming feature-gate during the test
+	originalValue := featuregate.GetRegistry().IsEnabled(promFeatureGate)
+	require.NoError(t, featuregate.GetRegistry().Apply(map[string]bool{promFeatureGate: true}))
+	defer func() {
+		require.NoError(t, featuregate.GetRegistry().Apply(map[string]bool{promFeatureGate: originalValue}))
+	}()
 	for _, tc := range []struct {
 		desc      string
 		baseName  string
+		metric    func(pmetric.Metric)
 		expected  string
-		datatype  pmetric.MetricType
 		expectErr bool
 	}{
 		{
-			desc:     "sum",
-			baseName: "foo_total",
-			datatype: pmetric.MetricTypeSum,
+			desc:     "sum without total",
+			baseName: "foo",
+			metric: func(m pmetric.Metric) {
+				m.SetName("foo")
+				sum := m.SetEmptySum()
+				sum.SetIsMonotonic(true)
+			},
 			expected: "foo_total/counter",
+		},
+		{
+			desc:     "sum with total",
+			baseName: "foo_total",
+			metric: func(m pmetric.Metric) {
+				m.SetName("foo_total")
+				sum := m.SetEmptySum()
+				sum.SetIsMonotonic(true)
+			},
+			expected: "foo_total/counter",
+		},
+		{
+			desc:     "sum with unit",
+			baseName: "foo",
+			metric: func(m pmetric.Metric) {
+				m.SetName("foo_total")
+				m.SetUnit("s")
+				sum := m.SetEmptySum()
+				sum.SetIsMonotonic(true)
+			},
+			expected: "foo_seconds_total/counter",
 		},
 		{
 			desc:     "gauge",
 			baseName: "bar",
-			datatype: pmetric.MetricTypeGauge,
+			metric: func(m pmetric.Metric) {
+				m.SetName("bar")
+				m.SetEmptyGauge()
+			},
 			expected: "bar/gauge",
 		},
 		{
 			desc:     "summary sum",
 			baseName: "baz_sum",
-			datatype: pmetric.MetricTypeSummary,
+			metric: func(m pmetric.Metric) {
+				m.SetName("baz")
+				m.SetEmptySummary()
+			},
 			expected: "baz_sum/summary:counter",
 		},
 		{
 			desc:     "summary count",
 			baseName: "baz_count",
-			datatype: pmetric.MetricTypeSummary,
+			metric: func(m pmetric.Metric) {
+				m.SetName("baz")
+				m.SetEmptySummary()
+			},
 			expected: "baz_count/summary",
 		},
 		{
 			desc:     "summary quantile",
 			baseName: "baz",
-			datatype: pmetric.MetricTypeSummary,
+			metric: func(m pmetric.Metric) {
+				m.SetName("baz")
+				m.SetEmptySummary()
+			},
 			expected: "baz/summary",
 		},
 		{
-			desc:     "histogram sum",
-			baseName: "hello_sum",
-			datatype: pmetric.MetricTypeHistogram,
-			expected: "hello_sum/histogram",
-		},
-		{
-			desc:     "histogram count",
-			baseName: "hello_count",
-			datatype: pmetric.MetricTypeHistogram,
-			expected: "hello_count/histogram",
-		},
-		{
-			desc:     "histogram bucket",
+			desc:     "histogram",
 			baseName: "hello",
-			datatype: pmetric.MetricTypeHistogram,
+			metric: func(m pmetric.Metric) {
+				m.SetName("hello")
+				m.SetEmptyHistogram()
+			},
 			expected: "hello/histogram",
 		},
 		{
-			desc:      "other",
-			baseName:  "other",
-			datatype:  pmetric.MetricTypeExponentialHistogram,
+			desc:     "other",
+			baseName: "other",
+			metric: func(m pmetric.Metric) {
+				m.SetName("other")
+				m.SetEmptyExponentialHistogram()
+			},
 			expectErr: true,
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
+			assert.True(t, featuregate.GetRegistry().IsEnabled(promFeatureGate))
 			metric := pmetric.NewMetric()
-			switch tc.datatype {
-			case pmetric.MetricTypeSum:
-				metric.SetEmptySum()
-			case pmetric.MetricTypeGauge:
-				metric.SetEmptyGauge()
-			case pmetric.MetricTypeSummary:
-				metric.SetEmptySummary()
-			case pmetric.MetricTypeHistogram:
-				metric.SetEmptyHistogram()
-			case pmetric.MetricTypeExponentialHistogram:
-				metric.SetEmptyExponentialHistogram()
-			}
+			tc.metric(metric)
 			got, err := GetMetricName(tc.baseName, metric)
 			if tc.expectErr == (err == nil) {
-				t.Errorf("MetricName(%v, %v)=err(%v); want err: %v", baseName, tc.datatype, err, tc.expectErr)
+				t.Errorf("MetricName(%v, %+v)=err(%v); want err: %v", tc.baseName, metric, err, tc.expectErr)
 			}
 			if got != tc.expected {
-				t.Errorf("MetricName(%v, %v)=%v; want %v", baseName, tc.datatype, got, tc.expected)
+				t.Errorf("MetricName(%v, %+v)=%v; want %v", tc.baseName, metric, got, tc.expected)
 			}
 		})
 	}
