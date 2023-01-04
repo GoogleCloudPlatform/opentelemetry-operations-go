@@ -17,9 +17,13 @@ package endtoendserver
 import (
 	"context"
 	"fmt"
+	"log"
+	"strconv"
 
+	"cloud.google.com/go/pubsub"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/genproto/googleapis/rpc/code"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -27,7 +31,7 @@ import (
 // Server is an end-to-end test service.
 type Server interface {
 	Run(context.Context) error
-	Shutdown(ctx context.Context)
+	Shutdown(ctx context.Context) error
 }
 
 // New instantiates a new end-to-end test service.
@@ -63,4 +67,69 @@ func shutdownTraceProvider(ctx context.Context, tracerProvider *sdktrace.TracerP
 		return fmt.Errorf("traceProvider.Shutdown(): %v", err)
 	}
 	return nil
+}
+
+func handleMessage(ctx context.Context, client *pubsub.Client, m *pubsub.Message) {
+	testID := m.Attributes[testIDKey]
+	scenario := m.Attributes[scenarioKey]
+	if scenario == "" {
+		log.Printf("could not find required attribute %q in message %+v", scenarioKey, m)
+		err := respond(ctx, client, testID, &response{
+			statusCode: code.Code_INVALID_ARGUMENT,
+			data:       []byte(fmt.Sprintf("required %q is missing", scenarioKey)),
+		})
+		if err != nil {
+			log.Printf("could not publish response: %v", err)
+		}
+		return
+	}
+
+	handler := scenarioHandlers[scenario]
+	if handler == nil {
+		handler = &unimplementedHandler{}
+	}
+
+	tracerProvider, err := handler.tracerProvider()
+	if err != nil {
+		log.Printf("could not initialize a tracer-provider: %v", err)
+		return
+	}
+
+	req := request{
+		scenario: scenario,
+		testID:   testID,
+	}
+
+	res := handler.handle(ctx, req, tracerProvider)
+
+	if err := shutdownTraceProvider(ctx, tracerProvider); err != nil {
+		log.Printf("could not shutdown tracer-provider: %v", err)
+		if respondErr := respond(ctx, client, testID, &response{
+			statusCode: code.Code_INTERNAL,
+			data:       []byte(fmt.Sprintf("could not shutdown tracer-provider: %v", err)),
+		}); respondErr != nil {
+			log.Printf("could not publish response: %v", respondErr)
+		}
+		return
+	}
+
+	if err := respond(ctx, client, testID, res); err != nil {
+		log.Printf("could not publish response: %v", err)
+	}
+}
+
+// respond to the test runner that we finished executing the scenario by sending
+// a message to the response pubsub topic.
+func respond(ctx context.Context, client *pubsub.Client, testID string, res *response) error {
+	m := &pubsub.Message{
+		Data: res.data,
+		Attributes: map[string]string{
+			testIDKey:     testID,
+			statusCodeKey: strconv.Itoa(int(res.statusCode)),
+			traceIDKey:    res.traceID.String(),
+		},
+	}
+	publishResult := client.Topic(responseTopicName).Publish(ctx, m)
+	_, err := publishResult.Get(ctx)
+	return err
 }
