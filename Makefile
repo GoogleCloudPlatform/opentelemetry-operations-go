@@ -17,39 +17,46 @@ ifeq ($(UNAME_S),Darwin)
 	endif
 endif
 
-GOTEST_MIN = go test -v -timeout 70s
-GOTEST = $(GOTEST_MIN) -race
-GOTEST_WITH_COVERAGE = $(GOTEST) -coverprofile=coverage.txt -covermode=atomic
+GOTEST = go test -v -timeout 70s
+GOTEST_SHORT = $(GOTEST) -short
+GOTEST_RACE = $(GOTEST) -race
+GOTEST_WITH_COVERAGE = $(GOTEST_RACE) -coverprofile=coverage.txt -covermode=atomic
 
 .DEFAULT_GOAL := precommit
 
 .PHONY: precommit
 
-TOOLS_DIR := $(abspath ./.tools)
+TOOLS = $(CURDIR)/.tools
 
-$(TOOLS_DIR)/golangci-lint: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
+$(TOOLS):
+	@mkdir -p $@
+$(TOOLS)/%: | $(TOOLS)
 	cd $(TOOLS_MOD_DIR) && \
-	go build -o $(TOOLS_DIR)/golangci-lint github.com/golangci/golangci-lint/cmd/golangci-lint
+	go build -o $@ $(PACKAGE)
 
-$(TOOLS_DIR)/misspell: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
-	cd $(TOOLS_MOD_DIR) && \
-	go build -o $(TOOLS_DIR)/misspell github.com/client9/misspell/cmd/misspell
+GOLANGCI_LINT = $(TOOLS)/golangci-lint
+$(TOOLS)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/cmd/golangci-lint
 
-$(TOOLS_DIR)/stringer: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
-	cd $(TOOLS_MOD_DIR) && \
-	go build -o $(TOOLS_DIR)/stringer golang.org/x/tools/cmd/stringer
+MISSPELL = $(TOOLS)/misspell
+$(TOOLS)/misspell: PACKAGE=github.com/client9/misspell/cmd/misspell
 
-$(TOOLS_DIR)/gojq: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
-	cd $(TOOLS_MOD_DIR) && \
-	go build -o $(TOOLS_DIR)/gojq github.com/itchyny/gojq/cmd/gojq
+STRINGER = $(TOOLS)/stringer
+$(TOOLS)/stringer: PACKAGE=golang.org/x/tools/cmd/stringer
 
-$(TOOLS_DIR)/protoc-gen-go: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
-	cd $(TOOLS_MOD_DIR) && \
-	go build -o $(TOOLS_DIR)/protoc-gen-go google.golang.org/protobuf/cmd/protoc-gen-go
+GOJQ = $(TOOLS)/gojq
+$(TOOLS)/gojq: PACKAGE=github.com/itchyny/gojq/cmd/gojq
 
-$(TOOLS_DIR)/fieldalignment: $(TOOLS_MOD_DIR)/go.mod $(TOOLS_MOD_DIR)/go.sum $(TOOLS_MOD_DIR)/tools.go
-	cd $(TOOLS_MOD_DIR) && \
-	go build -o $(TOOLS_DIR)/fieldalignment golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment
+PROTOC_GEN_GO = $(TOOLS)/protoc-gen-go
+$(TOOLS)/protoc-gen-go: PACKAGE=google.golang.org/protobuf/cmd/protoc-gen-go
+
+FIELDALIGNMENT = $(TOOLS)/fieldalignment
+$(TOOLS)/fieldalignment: PACKAGE=golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment
+
+GOCOVMERGE = $(TOOLS)/gocovmerge
+$(TOOLS)/gocovmerge: PACKAGE=github.com/wadey/gocovmerge
+
+.PHONY: tools
+tools: $(GOLANGCI_LINT) $(MISSPELL) $(GOCOVMERGE) $(STRINGER) $(GOJQ) $(FIELDALIGNMENT) $(PROTOC_GEN_GO)
 
 PROTOBUF_VERSION = 3.19.0
 PROTOBUF_OS = linux
@@ -57,28 +64,37 @@ ifeq ($(UNAME_S),Darwin)
 	PROTOBUF_OS = osx
 endif
 
-$(TOOLS_DIR)/protoc: $(TOOLS_DIR)/protoc-gen-go
+PROTOC = $(TOOLS)/protoc
+$(TOOLS)/protoc: $(PROTOC_GEN_GO)
 	tmpdir=$$(mktemp -d) && \
 	cd $$tmpdir && \
 	curl -L https://github.com/protocolbuffers/protobuf/releases/download/v$(PROTOBUF_VERSION)/protoc-$(PROTOBUF_VERSION)-$(PROTOBUF_OS)-x86_64.zip \
 		-o protoc.zip && \
 	unzip protoc.zip bin/protoc && \
-	cp bin/protoc $(TOOLS_DIR)/ ; \
+	cp bin/protoc $(TOOLS)/ ; \
 	rm -rf $$tmpdir
 
-precommit: generate build lint test fixtures
+precommit: generate build lint test-race fixtures
 
-.PHONY: test-with-coverage
-test-with-coverage:
-	set -e; for dir in $(ALL_COVERAGE_MOD_DIRS); do \
-	  echo "go test ./... + coverage in $${dir}"; \
+COVERAGE_MODE    = atomic
+COVERAGE_PROFILE = coverage.out
+.PHONY: test-coverage
+test-coverage: | $(GOCOVMERGE)
+	@set -e; \
+	printf "" > coverage.txt; \
+	for dir in $(ALL_COVERAGE_MOD_DIRS); do \
+	  echo "go test -coverpkg=go.opentelemetry.io/otel/... -covermode=$(COVERAGE_MODE) -coverprofile="$(COVERAGE_PROFILE)" $${dir}/..."; \
 	  (cd "$${dir}" && \
-	    $(GOTEST_WITH_COVERAGE) ./... && \
-	    go tool cover -html=coverage.txt -o coverage.html); \
-	done
+	    go list ./... \
+	    | grep -v third_party \
+	    | grep -v 'semconv/v.*' \
+	    | xargs go test -coverpkg=./... -covermode=$(COVERAGE_MODE) -coverprofile="$(COVERAGE_PROFILE)" && \
+	  go tool cover -html=coverage.out -o coverage.html); \
+	done; \
+	$(GOCOVMERGE) $$(find . -name coverage.out) > coverage.txt
 
 .PHONY: ci
-ci: precommit check-clean-work-tree test-with-coverage test-386
+ci: precommit check-clean-work-tree test-coverage test-race
 
 .PHONY: check-clean-work-tree
 check-clean-work-tree:
@@ -101,12 +117,12 @@ build:
 	    go test -run xxxxxMatchNothingxxxxx ./... >/dev/null); \
 	done
 
-.PHONY: test
-test:
+.PHONY: test-race
+test-race:
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "go test ./... + race in $${dir}"; \
 	  (cd "$${dir}" && \
-	    $(GOTEST) ./...); \
+	    $(GOTEST_RACE) ./...); \
 	done
 
 .PHONY: integrationtest
@@ -114,41 +130,43 @@ integrationtest:
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "go test ./... + race in $${dir}"; \
 	  (cd "$${dir}" && \
-	    $(GOTEST) -tags=integrationtest -run=TestIntegration ./...); \
+	    $(GOTEST_RACE) -tags=integrationtest -run=TestIntegration ./...); \
 	done
 
-.PHONY: test-386
-test-386:
-	if [ $(SKIP_386_TEST) = true ] ; then \
-	  echo "skipping the test for GOARCH 386 as it is not supported on the current OS"; \
-	else \
-	  set -e; for dir in $(ALL_GO_MOD_DIRS); do \
-	  echo "go test ./... GOARCH 386 in $${dir}"; \
-	    (cd "$${dir}" && \
-	      GOARCH=386 $(GOTEST_MIN) ./...); \
-	  done; \
-	fi
+.PHONY: test-short
+test-short:
+	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
+	echo "go test ./... in $${dir}"; \
+	(cd "$${dir}" && $(GOTEST_SHORT) ./...); \
+	done
+
+.PHONY: test
+test:
+	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
+	echo "go test ./... in $${dir}"; \
+	(cd "$${dir}" && $(GOTEST) ./...); \
+	done
 
 .PHONY: lint
-lint: $(TOOLS_DIR)/golangci-lint $(TOOLS_DIR)/misspell
+lint: $(GOLANGCI_LINT) $(MISSPELL)
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "golangci-lint in $${dir}"; \
 	  (cd "$${dir}" && \
-	    $(TOOLS_DIR)/golangci-lint --config $(CURDIR)/golangci.yml run --fix && \
-	    $(TOOLS_DIR)/golangci-lint --config $(CURDIR)/golangci.yml run); \
+	    $(GOLANGCI_LINT) --config $(CURDIR)/golangci.yml run --fix && \
+	    $(GOLANGCI_LINT) --config $(CURDIR)/golangci.yml run); \
 	done
-	$(TOOLS_DIR)/misspell -w $(ALL_DOCS)
+	$(MISSPELL) -w $(ALL_DOCS)
 	set -e; for dir in $(ALL_GO_MOD_DIRS) $(TOOLS_MOD_DIR); do \
 	  echo "go mod tidy -compat=1.18 in $${dir}"; \
 	  (cd "$${dir}" && \
 	    go mod tidy -compat=1.18); \
 	done
 
-generate: $(TOOLS_DIR)/stringer $(TOOLS_DIR)/protoc
-	$(MAKE) for-all-mod PATH="$(TOOLS_DIR):$${PATH}" CMD="go generate ./..."
+generate: $(STRINGER) $(PROTOC)
+	$(MAKE) for-all-mod PATH="$(TOOLS):$${PATH}" CMD="go generate ./..."
 
 .PHONY: fieldalignment
-fieldalignment: $(TOOLS_DIR)/fieldalignment
+fieldalignment: $(FIELDALIGNMENT)
 	$(MAKE) for-all-package CMD="fieldalignment -fix ."
 
 
