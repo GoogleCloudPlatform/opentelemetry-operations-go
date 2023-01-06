@@ -80,7 +80,7 @@ type MetricsExporter struct {
 // requestInfo is meant to abstract info from CreateMetricsDescriptorRequests and
 // CreateTimeSeriesRequests that is shared by requestOpts functions.
 type requestInfo struct {
-	name string
+	projectName string
 }
 
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
@@ -173,7 +173,7 @@ func NewGoogleCloudMetricsExporter(
 	mExp.requestOpts = make([]func(*context.Context, requestInfo), 0)
 	if cfg.DestinationProjectQuota {
 		mExp.requestOpts = append(mExp.requestOpts, func(ctx *context.Context, ri requestInfo) {
-			*ctx = metadata.NewOutgoingContext(*ctx, metadata.New(map[string]string{"x-goog-user-project": strings.TrimPrefix(ri.name, "projects/")}))
+			*ctx = metadata.NewOutgoingContext(*ctx, metadata.New(map[string]string{"x-goog-user-project": strings.TrimPrefix(ri.projectName, "projects/")}))
 		})
 	}
 
@@ -331,7 +331,7 @@ func (me *MetricsExporter) exportMetricDescriptor(req *monitoringpb.CreateMetric
 	defer cancel()
 
 	for _, opt := range me.requestOpts {
-		opt(&ctx, requestInfo{name: req.Name})
+		opt(&ctx, requestInfo{projectName: req.Name})
 	}
 	_, err := me.client.CreateMetricDescriptor(ctx, req)
 	if err != nil {
@@ -349,7 +349,7 @@ func (me *MetricsExporter) createTimeSeries(ctx context.Context, req *monitoring
 	ctx, cancel := context.WithTimeout(ctx, me.timeout)
 	defer cancel()
 	for _, opt := range me.requestOpts {
-		opt(&ctx, requestInfo{name: req.Name})
+		opt(&ctx, requestInfo{projectName: req.Name})
 	}
 	return me.client.CreateTimeSeries(ctx, req)
 }
@@ -359,7 +359,7 @@ func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, req *mon
 	ctx, cancel := context.WithTimeout(ctx, me.timeout)
 	defer cancel()
 	for _, opt := range me.requestOpts {
-		opt(&ctx, requestInfo{name: req.Name})
+		opt(&ctx, requestInfo{projectName: req.Name})
 	}
 	return me.client.CreateServiceTimeSeries(ctx, req)
 }

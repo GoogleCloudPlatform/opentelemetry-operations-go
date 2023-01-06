@@ -85,7 +85,7 @@ func WithProjectID(projectID string) func(o *options) {
 }
 
 // WithDestinationProjectQuota enables per-request usage of the destination
-// project's quota. For example, when setting gcp.project.id on a span.
+// project's quota. For example, when setting the gcp.project.id resource attribute.
 func WithDestinationProjectQuota() func(o *options) {
 	return func(o *options) {
 		o.destinationProjectQuota = true
