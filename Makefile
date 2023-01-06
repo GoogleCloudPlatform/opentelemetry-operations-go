@@ -17,9 +17,10 @@ ifeq ($(UNAME_S),Darwin)
 	endif
 endif
 
-GOTEST_MIN = go test -v -timeout 70s
-GOTEST = $(GOTEST_MIN) -race
-GOTEST_WITH_COVERAGE = $(GOTEST) -coverprofile=coverage.txt -covermode=atomic
+GOTEST = go test -v -timeout 70s
+GOTEST_SHORT = $(GOTEST) -short
+GOTEST_RACE = $(GOTEST) -race
+GOTEST_WITH_COVERAGE = $(GOTEST_RACE) -coverprofile=coverage.txt -covermode=atomic
 
 .DEFAULT_GOAL := precommit
 
@@ -66,7 +67,7 @@ $(TOOLS_DIR)/protoc: $(TOOLS_DIR)/protoc-gen-go
 	cp bin/protoc $(TOOLS_DIR)/ ; \
 	rm -rf $$tmpdir
 
-precommit: generate build lint test fixtures
+precommit: generate build lint test-race fixtures
 
 .PHONY: test-with-coverage
 test-with-coverage:
@@ -78,7 +79,7 @@ test-with-coverage:
 	done
 
 .PHONY: ci
-ci: precommit check-clean-work-tree test-with-coverage test-386
+ci: precommit check-clean-work-tree test-with-coverage test-race
 
 .PHONY: check-clean-work-tree
 check-clean-work-tree:
@@ -101,12 +102,12 @@ build:
 	    go test -run xxxxxMatchNothingxxxxx ./... >/dev/null); \
 	done
 
-.PHONY: test
-test:
+.PHONY: test-race
+test-race:
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "go test ./... + race in $${dir}"; \
 	  (cd "$${dir}" && \
-	    $(GOTEST) ./...); \
+	    $(GOTEST_RACE) ./...); \
 	done
 
 .PHONY: integrationtest
@@ -114,20 +115,22 @@ integrationtest:
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "go test ./... + race in $${dir}"; \
 	  (cd "$${dir}" && \
-	    $(GOTEST) -tags=integrationtest -run=TestIntegration ./...); \
+	    $(GOTEST_RACE) -tags=integrationtest -run=TestIntegration ./...); \
 	done
 
-.PHONY: test-386
-test-386:
-	if [ $(SKIP_386_TEST) = true ] ; then \
-	  echo "skipping the test for GOARCH 386 as it is not supported on the current OS"; \
-	else \
-	  set -e; for dir in $(ALL_GO_MOD_DIRS); do \
-	  echo "go test ./... GOARCH 386 in $${dir}"; \
-	    (cd "$${dir}" && \
-	      GOARCH=386 $(GOTEST_MIN) ./...); \
-	  done; \
-	fi
+.PHONY: test-short
+test:
+	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
+	echo "go test ./... in $${dir}"; \
+	(cd "$${dir}" && $(GOTEST_SHORT) ./...); \
+	done
+
+.PHONY: test
+test:
+	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
+	echo "go test ./... in $${dir}"; \
+	(cd "$${dir}" && $(GOTEST) ./...); \
+	done
 
 .PHONY: lint
 lint: $(TOOLS_DIR)/golangci-lint $(TOOLS_DIR)/misspell
