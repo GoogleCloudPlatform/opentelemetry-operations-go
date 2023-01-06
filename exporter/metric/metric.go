@@ -27,6 +27,8 @@ import (
 
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
 
@@ -124,6 +126,16 @@ func (me *metricExporter) Export(ctx context.Context, rm metricdata.ResourceMetr
 		me.exportMetricDescriptor(ctx, rm),
 		me.exportTimeSeries(ctx, rm),
 	)
+}
+
+// Temporality returns the Temporality to use for an instrument kind.
+func (me *metricExporter) Temporality(ik metric.InstrumentKind) metricdata.Temporality {
+	return metric.DefaultTemporalitySelector(ik)
+}
+
+// Aggregation returns the Aggregation to use for an instrument kind.
+func (me *metricExporter) Aggregation(ik metric.InstrumentKind) aggregation.Aggregation {
+	return metric.DefaultAggregationSelector(ik)
 }
 
 // exportMetricDescriptor create MetricDescriptor from the record
