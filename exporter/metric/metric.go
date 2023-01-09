@@ -40,6 +40,7 @@ import (
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
@@ -121,6 +122,10 @@ func (me *metricExporter) Export(ctx context.Context, rm metricdata.ResourceMetr
 	case <-me.shutdown:
 		return errShutdown
 	default:
+	}
+
+	if me.o.destinationProjectQuota {
+		ctx = metadata.NewOutgoingContext(ctx, metadata.New(map[string]string{"x-goog-user-project": strings.TrimPrefix(me.o.projectID, "projects/")}))
 	}
 	return multierr.Combine(
 		me.exportMetricDescriptor(ctx, rm),

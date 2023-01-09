@@ -18,6 +18,7 @@ package trace
 import (
 	"context"
 	"fmt"
+	"strings"
 	"time"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
@@ -25,6 +26,7 @@ import (
 	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
+	"google.golang.org/grpc/metadata"
 )
 
 // traceExporter is an implementation of trace.Exporter and trace.BatchExporter
@@ -104,6 +106,10 @@ func (e *traceExporter) uploadSpans(ctx context.Context, req *tracepb.BatchWrite
 	// )
 	// defer span.End()
 	// span.SetAttributes(kv.Int64("num_spans", int64(len(spans))))
+
+	if e.o.destinationProjectQuota {
+		ctx = metadata.NewOutgoingContext(ctx, metadata.New(map[string]string{"x-goog-user-project": strings.TrimPrefix(req.Name, "projects/")}))
+	}
 
 	err := e.client.BatchWriteSpans(ctx, req)
 	if err != nil {

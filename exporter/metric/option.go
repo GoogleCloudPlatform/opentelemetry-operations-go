@@ -60,6 +60,9 @@ type options struct {
 	// to the underlying Stackdriver Monitoring API client.
 	// Optional.
 	monitoringClientOptions []apioption.ClientOption
+	// destinationProjectQuota sets whether the request should use quota from
+	// the destination project for the request.
+	destinationProjectQuota bool
 
 	// disableCreateMetricDescriptors disables automatic MetricDescriptor creation
 	disableCreateMetricDescriptors bool
@@ -73,6 +76,14 @@ type options struct {
 func WithProjectID(id string) func(o *options) {
 	return func(o *options) {
 		o.projectID = id
+	}
+}
+
+// WithDestinationProjectQuota enables per-request usage of the destination
+// project's quota. For example, when setting gcp.project.id on a metric.
+func WithDestinationProjectQuota() func(o *options) {
+	return func(o *options) {
+		o.destinationProjectQuota = true
 	}
 }
 

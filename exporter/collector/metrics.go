@@ -42,6 +42,7 @@ import (
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -59,7 +60,6 @@ type selfObservability struct {
 
 // MetricsExporter is the GCM exporter that uses pdata directly.
 type MetricsExporter struct {
-	mapper metricMapper
 	// A channel that receives metric descriptor and sends them to GCM once
 	metricDescriptorC chan *monitoringpb.CreateMetricDescriptorRequest
 	client            *monitoring.MetricClient
@@ -68,10 +68,19 @@ type MetricsExporter struct {
 	shutdownC chan struct{}
 	// mdCache tracks the metric descriptors that have already been sent to GCM
 	mdCache map[string]*monitoringpb.CreateMetricDescriptorRequest
-	cfg     Config
+	// requestOpts applies options to the context for requests, such as additional headers.
+	requestOpts []func(*context.Context, requestInfo)
+	mapper      metricMapper
+	cfg         Config
 	// goroutines tracks the currently running child tasks
 	goroutines sync.WaitGroup
 	timeout    time.Duration
+}
+
+// requestInfo is meant to abstract info from CreateMetricsDescriptorRequests and
+// CreateTimeSeriesRequests that is shared by requestOpts functions.
+type requestInfo struct {
+	projectName string
 }
 
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
@@ -159,6 +168,13 @@ func NewGoogleCloudMetricsExporter(
 		mdCache:           make(map[string]*monitoringpb.CreateMetricDescriptorRequest),
 		shutdownC:         shutdown,
 		timeout:           timeout,
+	}
+
+	mExp.requestOpts = make([]func(*context.Context, requestInfo), 0)
+	if cfg.DestinationProjectQuota {
+		mExp.requestOpts = append(mExp.requestOpts, func(ctx *context.Context, ri requestInfo) {
+			*ctx = metadata.NewOutgoingContext(*ctx, metadata.New(map[string]string{"x-goog-user-project": strings.TrimPrefix(ri.projectName, "projects/")}))
+		})
 	}
 
 	// Fire up the metric descriptor exporter.
@@ -313,6 +329,10 @@ func (me *MetricsExporter) exportMetricDescriptor(req *monitoringpb.CreateMetric
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), me.timeout)
 	defer cancel()
+
+	for _, opt := range me.requestOpts {
+		opt(&ctx, requestInfo{projectName: req.Name})
+	}
 	_, err := me.client.CreateMetricDescriptor(ctx, req)
 	if err != nil {
 		// TODO: Log-once on error, per metric descriptor?
@@ -328,6 +348,9 @@ func (me *MetricsExporter) exportMetricDescriptor(req *monitoringpb.CreateMetric
 func (me *MetricsExporter) createTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
 	ctx, cancel := context.WithTimeout(ctx, me.timeout)
 	defer cancel()
+	for _, opt := range me.requestOpts {
+		opt(&ctx, requestInfo{projectName: req.Name})
+	}
 	return me.client.CreateTimeSeries(ctx, req)
 }
 
@@ -335,6 +358,9 @@ func (me *MetricsExporter) createTimeSeries(ctx context.Context, req *monitoring
 func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
 	ctx, cancel := context.WithTimeout(ctx, me.timeout)
 	defer cancel()
+	for _, opt := range me.requestOpts {
+		opt(&ctx, requestInfo{projectName: req.Name})
+	}
 	return me.client.CreateServiceTimeSeries(ctx, req)
 }
 

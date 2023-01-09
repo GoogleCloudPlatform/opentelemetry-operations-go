@@ -68,6 +68,9 @@ type options struct {
 	traceClientOptions []option.ClientOption
 	// timeout for all API calls. If not set, defaults to 12 seconds.
 	timeout time.Duration
+	// destinationProjectQuota sets whether the request should use quota from
+	// the destination project for the request.
+	destinationProjectQuota bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -78,6 +81,14 @@ type options struct {
 func WithProjectID(projectID string) func(o *options) {
 	return func(o *options) {
 		o.projectID = projectID
+	}
+}
+
+// WithDestinationProjectQuota enables per-request usage of the destination
+// project's quota. For example, when setting the gcp.project.id resource attribute.
+func WithDestinationProjectQuota() func(o *options) {
+	return func(o *options) {
+		o.destinationProjectQuota = true
 	}
 }
 
