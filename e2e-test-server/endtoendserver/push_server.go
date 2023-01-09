@@ -48,6 +48,8 @@ func NewPushServer() (Server, error) {
 // cancel, or an unrecoverable error is encountered.
 func (s *pushServer) Run(ctx context.Context) error {
 	http.HandleFunc("/", s.handle)
+	http.HandleFunc("/ready", handleReady)
+	http.HandleFunc("/alive", handleAlive)
 	go func() {
 		if err := s.srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			// Error starting or closing listener:
@@ -97,4 +99,12 @@ func (s *pushServer) handle(w http.ResponseWriter, r *http.Request) {
 	handleMessage(r.Context(), s.pubsubClient, m.toPubSubMessage())
 	// Ack the message
 	fmt.Fprint(w, "OK")
+}
+
+func handleReady(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Server Ready")
+}
+
+func handleAlive(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprint(w, "Server Alive")
 }
