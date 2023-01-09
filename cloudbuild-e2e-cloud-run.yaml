@@ -26,6 +26,7 @@ steps:
   - name: $_TEST_RUNNER_IMAGE
     id: run-tests-cloudrun
     dir: /
+    timeout: 10m
     env: ["PROJECT_ID=$PROJECT_ID"]
     args:
       - cloud-run
