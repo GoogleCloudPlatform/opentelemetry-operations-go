@@ -29,53 +29,52 @@ import (
 )
 
 // Server is an end-to-end test service.
-type Server struct {
-	pubsubClient *pubsub.Client
-	// traceProvider *sdktrace.TracerProvider
+type Server interface {
+	Run(context.Context) error
+	Shutdown(ctx context.Context) error
 }
 
 // New instantiates a new end-to-end test service.
-func New() (*Server, error) {
-	if subscriptionMode != "pull" {
+func New() (Server, error) {
+	switch subscriptionMode {
+	case "pull":
+		return NewPullServer()
+	case "push":
+		return NewPushServer()
+	default:
 		return nil, fmt.Errorf("server does not support subscription mode %v", subscriptionMode)
 	}
+}
 
-	pubsubClient, err := pubsub.NewClient(context.Background(), projectID)
+func newTracerProvider(res *resource.Resource) (*sdktrace.TracerProvider, error) {
+	exporter, err := texporter.New(texporter.WithProjectID(projectID))
 	if err != nil {
 		return nil, err
 	}
 
-	return &Server{
-		pubsubClient: pubsubClient,
-		// traceProvider: traceProvider,
-	}, nil
+	traceProvider := sdktrace.NewTracerProvider(
+		sdktrace.WithBatcher(exporter, sdktrace.WithBatchTimeout(traceBatchTimeout)),
+		sdktrace.WithResource(res))
+
+	return traceProvider, nil
 }
 
-// Run the end-to-end test service. This method will block until the context is
-// cancel, or an unrecoverable error is encountered.
-func (s *Server) Run(ctx context.Context) error {
-	sub := s.pubsubClient.Subscription(requestSubscriptionName)
-	log.Printf("End-to-end test service listening on %s", sub)
-	return sub.Receive(ctx, func(ctx context.Context, m *pubsub.Message) { s.onReceive(ctx, m) })
-}
-
-// Shutdown gracefully shuts down the service, flushing and closing resources as
-// appropriate.
-func (s *Server) Shutdown(ctx context.Context) {
-	if err := s.pubsubClient.Close(); err != nil {
-		log.Printf("pubsubClient.Close(): %v", err)
+func shutdownTraceProvider(ctx context.Context, tracerProvider *sdktrace.TracerProvider) error {
+	if err := tracerProvider.ForceFlush(ctx); err != nil {
+		return fmt.Errorf("traceProvider.ForceFlush(): %v", err)
 	}
+	if err := tracerProvider.Shutdown(ctx); err != nil {
+		return fmt.Errorf("traceProvider.Shutdown(): %v", err)
+	}
+	return nil
 }
 
-// onReceive executes a scenario based on the incoming message from the test runner.
-func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
-	defer m.Ack()
-
+func handleMessage(ctx context.Context, client *pubsub.Client, m *pubsub.Message) {
 	testID := m.Attributes[testIDKey]
 	scenario := m.Attributes[scenarioKey]
 	if scenario == "" {
 		log.Printf("could not find required attribute %q in message %+v", scenarioKey, m)
-		err := s.respond(ctx, testID, &response{
+		err := respond(ctx, client, testID, &response{
 			statusCode: code.Code_INVALID_ARGUMENT,
 			data:       []byte(fmt.Sprintf("required %q is missing", scenarioKey)),
 		})
@@ -105,7 +104,7 @@ func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
 
 	if err := shutdownTraceProvider(ctx, tracerProvider); err != nil {
 		log.Printf("could not shutdown tracer-provider: %v", err)
-		if respondErr := s.respond(ctx, testID, &response{
+		if respondErr := respond(ctx, client, testID, &response{
 			statusCode: code.Code_INTERNAL,
 			data:       []byte(fmt.Sprintf("could not shutdown tracer-provider: %v", err)),
 		}); respondErr != nil {
@@ -114,14 +113,14 @@ func (s *Server) onReceive(ctx context.Context, m *pubsub.Message) {
 		return
 	}
 
-	if err := s.respond(ctx, testID, res); err != nil {
+	if err := respond(ctx, client, testID, res); err != nil {
 		log.Printf("could not publish response: %v", err)
 	}
 }
 
 // respond to the test runner that we finished executing the scenario by sending
 // a message to the response pubsub topic.
-func (s *Server) respond(ctx context.Context, testID string, res *response) error {
+func respond(ctx context.Context, client *pubsub.Client, testID string, res *response) error {
 	m := &pubsub.Message{
 		Data: res.data,
 		Attributes: map[string]string{
@@ -130,30 +129,7 @@ func (s *Server) respond(ctx context.Context, testID string, res *response) erro
 			traceIDKey:    res.traceID.String(),
 		},
 	}
-	publishResult := s.pubsubClient.Topic(responseTopicName).Publish(ctx, m)
+	publishResult := client.Topic(responseTopicName).Publish(ctx, m)
 	_, err := publishResult.Get(ctx)
 	return err
-}
-
-func newTracerProvider(res *resource.Resource) (*sdktrace.TracerProvider, error) {
-	exporter, err := texporter.New(texporter.WithProjectID(projectID))
-	if err != nil {
-		return nil, err
-	}
-
-	traceProvider := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exporter, sdktrace.WithBatchTimeout(traceBatchTimeout)),
-		sdktrace.WithResource(res))
-
-	return traceProvider, nil
-}
-
-func shutdownTraceProvider(ctx context.Context, tracerProvider *sdktrace.TracerProvider) error {
-	if err := tracerProvider.ForceFlush(ctx); err != nil {
-		return fmt.Errorf("traceProvider.ForceFlush(): %v", err)
-	}
-	if err := tracerProvider.Shutdown(ctx); err != nil {
-		return fmt.Errorf("traceProvider.Shutdown(): %v", err)
-	}
-	return nil
 }
