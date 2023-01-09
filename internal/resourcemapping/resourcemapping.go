@@ -198,17 +198,23 @@ func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResourc
 	case semconv.CloudPlatformAWSEC2.Value.AsString():
 		mr = createMonitoredResource(awsEc2Instance, attrs)
 	default:
-		// Fallback to generic_task
-		_, hasServiceName := attrs.GetString(string(semconv.ServiceNameKey))
-		_, hasServiceInstanceID := attrs.GetString(string(semconv.ServiceInstanceIDKey))
-		if hasServiceName && hasServiceInstanceID {
-			mr = createMonitoredResource(genericTask, attrs)
-		} else {
-			// If not possible, fallback to generic_node
-			mr = createMonitoredResource(genericNode, attrs)
-		}
+		mr = ResourceAttributesToGenericMonitoredResource(attrs)
 	}
 	return mr
+}
+
+// ResourceAttributesToGenericMonitoredResource converts from a set of OTEL
+// resource attributes into a GCP monitored resource type and label set.
+// However, this function will only return generic_node or generic_task
+// resources.
+func ResourceAttributesToGenericMonitoredResource(attrs ReadOnlyAttributes) *GceResource {
+	// Fallback to generic_task
+	_, hasServiceName := attrs.GetString(string(semconv.ServiceNameKey))
+	_, hasServiceInstanceID := attrs.GetString(string(semconv.ServiceInstanceIDKey))
+	if hasServiceName && hasServiceInstanceID {
+		return createMonitoredResource(genericTask, attrs)
+	}
+	return createMonitoredResource(genericNode, attrs)
 }
 
 func createMonitoredResource(

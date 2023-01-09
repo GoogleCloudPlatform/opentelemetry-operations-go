@@ -31,6 +31,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"go.uber.org/multierr"
@@ -337,9 +338,19 @@ func (attrs *attributes) GetString(key string) (string, bool) {
 //
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
 func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
-	gmr := resourcemapping.ResourceAttributesToMonitoredResource(&attributes{
-		attrs: attribute.NewSet(res.Attributes()...),
-	})
+	attrs := &attributes{attrs: attribute.NewSet(res.Attributes()...)}
+	cloudPlatform, _ := attrs.GetString(string(semconv.CloudPlatformKey))
+	var gmr *resourcemapping.GceResource
+	switch cloudPlatform {
+	case semconv.CloudPlatformGCPCloudRun.Value.AsString():
+		fallthrough
+	case semconv.CloudPlatformGCPCloudFunctions.Value.AsString():
+		// On Cloud Run and Cloud Functions, we can't write to their monitored resources.
+		// Fall-back to generic monitored resources in that case.
+		gmr = resourcemapping.ResourceAttributesToGenericMonitoredResource(attrs)
+	default:
+		gmr = resourcemapping.ResourceAttributesToMonitoredResource(attrs)
+	}
 	newLabels := make(map[string]string, len(gmr.Labels))
 	for k, v := range gmr.Labels {
 		newLabels[k] = sanitizeUTF8(v)
