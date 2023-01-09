@@ -21,28 +21,37 @@ import (
 const (
 	ProjectIDAttributeKey = "gcp.project.id"
 
-	awsAccount     = "aws_account"
-	awsEc2Instance = "aws_ec2_instance"
-	clusterName    = "cluster_name"
-	containerName  = "container_name"
-	gceInstance    = "gce_instance"
-	genericNode    = "generic_node"
-	genericTask    = "generic_task"
-	instanceID     = "instance_id"
-	job            = "job"
-	k8sCluster     = "k8s_cluster"
-	k8sContainer   = "k8s_container"
-	k8sNode        = "k8s_node"
-	k8sPod         = "k8s_pod"
-	location       = "location"
-	namespace      = "namespace"
-	namespaceName  = "namespace_name"
-	nodeID         = "node_id"
-	nodeName       = "node_name"
-	podName        = "pod_name"
-	region         = "region"
-	taskID         = "task_id"
-	zone           = "zone"
+	awsAccount        = "aws_account"
+	awsEc2Instance    = "aws_ec2_instance"
+	clusterName       = "cluster_name"
+	containerName     = "container_name"
+	gceInstance       = "gce_instance"
+	genericNode       = "generic_node"
+	genericTask       = "generic_task"
+	instanceID        = "instance_id"
+	job               = "job"
+	k8sCluster        = "k8s_cluster"
+	k8sContainer      = "k8s_container"
+	k8sNode           = "k8s_node"
+	k8sPod            = "k8s_pod"
+	location          = "location"
+	namespace         = "namespace"
+	namespaceName     = "namespace_name"
+	nodeID            = "node_id"
+	nodeName          = "node_name"
+	podName           = "pod_name"
+	region            = "region"
+	taskID            = "task_id"
+	zone              = "zone"
+	gaeInstance       = "gae_instance"
+	gaeModuleID       = "module_id"
+	gaeVersionID      = "version_id"
+	cloudRunRevision  = "cloud_run_revision"
+	cloudFunction     = "cloud_function"
+	cloudFunctionName = "function_name"
+	serviceName       = "service_name"
+	configurationName = "configuration_name"
+	revisionName      = "revision_name"
 )
 
 var (
@@ -93,6 +102,25 @@ var (
 				string(semconv.CloudRegionKey),
 			}},
 			clusterName: {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
+		},
+		gaeInstance: {
+			location: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
+			gaeModuleID:  {otelKeys: []string{string(semconv.FaaSNameKey)}},
+			gaeVersionID: {otelKeys: []string{string(semconv.FaaSVersionKey)}},
+			instanceID:   {otelKeys: []string{string(semconv.FaaSIDKey)}},
+		},
+		cloudFunction: {
+			region:            {otelKeys: []string{string(semconv.CloudRegionKey)}},
+			cloudFunctionName: {otelKeys: []string{string(semconv.FaaSNameKey)}},
+		},
+		cloudRunRevision: {
+			location:          {otelKeys: []string{string(semconv.CloudRegionKey)}},
+			serviceName:       {otelKeys: []string{string(semconv.FaaSNameKey)}},
+			configurationName: {otelKeys: []string{string(semconv.FaaSNameKey)}},
+			revisionName:      {otelKeys: []string{string(semconv.FaaSVersionKey)}},
 		},
 		awsEc2Instance: {
 			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
@@ -161,6 +189,12 @@ func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResourc
 		} else {
 			mr = createMonitoredResource(k8sCluster, attrs)
 		}
+	case semconv.CloudPlatformGCPCloudRun.Value.AsString():
+		mr = createMonitoredResource(cloudRunRevision, attrs)
+	case semconv.CloudPlatformGCPAppEngine.Value.AsString():
+		mr = createMonitoredResource(gaeInstance, attrs)
+	case semconv.CloudPlatformGCPCloudFunctions.Value.AsString():
+		mr = createMonitoredResource(cloudFunction, attrs)
 	case semconv.CloudPlatformAWSEC2.Value.AsString():
 		mr = createMonitoredResource(awsEc2Instance, attrs)
 	default:
