@@ -529,7 +529,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			},
 		},
 		{
-			desc: "Cloud Run",
+			desc: "Cloud Run Via Service",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
@@ -545,6 +545,63 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				"namespace": "cloud-run-managed",
 				"job":       "x-service",
 				"task_id":   "bar",
+			},
+		},
+		{
+			desc: "Cloud Run From Detector",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_cloud_run"),
+				attribute.String("cloud.region", "utopia"),
+				attribute.String("faas.id", "bar"),
+				attribute.String("faas.name", "x-service"),
+				attribute.String("faas.version", "v1"),
+			),
+			expectedType: "generic_task",
+			expectedLabels: map[string]string{
+				"location":  "utopia",
+				"namespace": "",
+				"job":       "x-service",
+				"task_id":   "bar",
+			},
+		},
+		{
+			desc: "Cloud Functions",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_cloud_functions"),
+				attribute.String("cloud.region", "utopia"),
+				attribute.String("faas.id", "bar"),
+				attribute.String("faas.name", "x-service"),
+				attribute.String("faas.version", "v1"),
+			),
+			expectedType: "generic_task",
+			expectedLabels: map[string]string{
+				"location":  "utopia",
+				"namespace": "",
+				"job":       "x-service",
+				"task_id":   "bar",
+			},
+		},
+		{
+			desc: "AppEngine",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_app_engine"),
+				attribute.String("cloud.availability_zone", "utopia"),
+				attribute.String("faas.id", "bar"),
+				attribute.String("faas.name", "x-service"),
+				attribute.String("faas.version", "v1"),
+			),
+			expectedType: "gae_instance",
+			expectedLabels: map[string]string{
+				"location":    "utopia",
+				"instance_id": "bar",
+				"module_id":   "x-service",
+				"version_id":  "v1",
 			},
 		},
 		{
