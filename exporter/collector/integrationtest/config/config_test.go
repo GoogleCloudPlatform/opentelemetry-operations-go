@@ -82,7 +82,8 @@ func TestLoadConfig(t *testing.T) {
 					ClientConfig: collector.ClientConfig{
 						GRPCPoolSize: 1,
 					},
-					DefaultLogName: "foo-log",
+					DefaultLogName:        "foo-log",
+					ServiceResourceLabels: true,
 				},
 			},
 		})

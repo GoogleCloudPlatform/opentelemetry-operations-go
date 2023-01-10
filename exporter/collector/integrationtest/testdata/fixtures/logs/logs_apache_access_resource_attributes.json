@@ -14,6 +14,24 @@
             "value": {
               "stringValue": "baz"
             }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "my_service_name"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": "my_service_namespace"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "my_service_instance_id"
+            }
           }
         ]
       },

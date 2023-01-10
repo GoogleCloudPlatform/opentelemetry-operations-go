@@ -159,6 +159,10 @@ type LogConfig struct {
 	// Defaults to empty, which won't include any additional resource labels.
 	ResourceFilters []ResourceFilter `mapstructure:"resource_filters"`
 	ClientConfig    ClientConfig     `mapstructure:",squash"`
+	// ServiceResourceLabels, if true, causes the exporter to copy OTel's
+	// service.name, service.namespace, and service.instance.id resource attributes into the Cloud Logging LogEntry labels.
+	// Disabling this option does not prevent resource_filters from adding those labels. Default is true.
+	ServiceResourceLabels bool `mapstructure:"service_resource_labels"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.
@@ -168,6 +172,9 @@ var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.d
 func DefaultConfig() Config {
 	return Config{
 		UserAgent: "opentelemetry-collector-contrib {{version}}",
+		LogConfig: LogConfig{
+			ServiceResourceLabels: true,
+		},
 		MetricConfig: MetricConfig{
 			KnownDomains:                     domains,
 			Prefix:                           "workload.googleapis.com",
