@@ -36,6 +36,7 @@ var (
 	projectID               string
 	requestSubscriptionName string
 	responseTopicName       string
+	port                    string
 )
 
 func init() {
@@ -54,5 +55,9 @@ func init() {
 	responseTopicName = os.Getenv("RESPONSE_TOPIC_NAME")
 	if responseTopicName == "" {
 		log.Fatalf("environment variable RESPONSE_TOPIC_NAME must be set")
+	}
+	port = os.Getenv("PORT")
+	if port == "" && subscriptionMode == "push" {
+		log.Fatalf("environment variable PORT must be set for push subscription")
 	}
 }

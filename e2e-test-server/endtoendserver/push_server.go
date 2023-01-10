@@ -39,7 +39,7 @@ func NewPushServer() (Server, error) {
 	}
 
 	return &pushServer{
-		srv:          http.Server{Addr: ":8080"},
+		srv:          http.Server{Addr: ":" + port},
 		pubsubClient: pubsubClient,
 	}, nil
 }
@@ -84,19 +84,21 @@ func (p *PubSubMessage) toPubSubMessage() *pubsub.Message {
 // handle receives and processes a Pub/Sub push message.
 func (s *pushServer) handle(w http.ResponseWriter, r *http.Request) {
 	var m PubSubMessage
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		log.Printf("io.ReadAll: %v", err)
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
+	if r.Method == "POST" {
+		body, err := io.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("io.ReadAll: %v", err)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+		// byte slice unmarshalling handles base64 decoding.
+		if err := json.Unmarshal(body, &m); err != nil {
+			log.Printf("json.Unmarshal: %v", err)
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+		handleMessage(r.Context(), s.pubsubClient, m.toPubSubMessage())
 	}
-	// byte slice unmarshalling handles base64 decoding.
-	if err := json.Unmarshal(body, &m); err != nil {
-		log.Printf("json.Unmarshal: %v", err)
-		http.Error(w, "Bad Request", http.StatusBadRequest)
-		return
-	}
-	handleMessage(r.Context(), s.pubsubClient, m.toPubSubMessage())
 	// Ack the message
 	fmt.Fprint(w, "OK")
 }
