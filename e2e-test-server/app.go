@@ -41,13 +41,14 @@ func main() {
 		log.Fatalf("Could not initialize server: %v", err)
 	}
 
-	err = server.Run(runCtx)
-	if err != nil {
+	if err = server.Run(runCtx); err != nil {
 		log.Printf("Unexpected error occurred: %v", err)
 	}
 
 	log.Print("Shutting down")
 	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancelShutdown()
-	server.Shutdown(shutdownCtx)
+	if err = server.Shutdown(shutdownCtx); err != nil {
+		log.Printf("Unexpected error occurred: %v", err)
+	}
 }
