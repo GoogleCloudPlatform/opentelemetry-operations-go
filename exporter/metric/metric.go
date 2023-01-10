@@ -342,9 +342,7 @@ func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) 
 	cloudPlatform, _ := attrs.GetString(string(semconv.CloudPlatformKey))
 	var gmr *resourcemapping.GceResource
 	switch cloudPlatform {
-	case semconv.CloudPlatformGCPCloudRun.Value.AsString():
-		fallthrough
-	case semconv.CloudPlatformGCPCloudFunctions.Value.AsString():
+	case semconv.CloudPlatformGCPCloudRun.Value.AsString(), semconv.CloudPlatformGCPCloudFunctions.Value.AsString():
 		// On Cloud Run and Cloud Functions, we can't write to their monitored resources.
 		// Fall-back to generic monitored resources in that case.
 		gmr = resourcemapping.ResourceAttributesToGenericMonitoredResource(attrs)
