@@ -186,6 +186,11 @@ func NewGoogleCloudMetricsExporter(
 
 // PushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary.
 func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) error {
+	// call customize extension point (used by GMP exporter to add target_info metric)
+	if me.cfg.MetricConfig.ModifyMetrics != nil {
+		me.cfg.MetricConfig.ModifyMetrics(m)
+	}
+
 	// map from project -> []timeseries. This groups timeseries by the project
 	// they need to be sent to. Each project's timeseries are sent in a
 	// separate request later.

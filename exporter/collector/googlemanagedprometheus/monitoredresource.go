@@ -16,6 +16,7 @@ package googlemanagedprometheus
 
 import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	semconv "go.opentelemetry.io/collector/semconv/v1.8.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
@@ -49,6 +50,27 @@ func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResour
 			"job":       job,
 			"instance":  getStringOrEmpty(attrs, semconv.AttributeServiceInstanceID),
 		},
+	}
+}
+
+// AddTargetInfo extracts the target_info metric from each ResourceMetric associated with the input pmetric.Metrics
+// and inserts it into each ScopeMetric for that resource, with the matching "job" and "instance" labels as specified in
+// https://github.com/open-telemetry/opentelemetry-specification/blob/v1.16.0/specification/compatibility/prometheus_and_openmetrics.md#resource-attributes-1
+func AddTargetInfo(m pmetric.Metrics) {
+	rms := m.ResourceMetrics()
+	for i := 0; i < rms.Len(); i++ {
+		rm := rms.At(i)
+		monitoredResource := MapToPrometheusTarget(rm.Resource())
+
+		sms := rm.ScopeMetrics()
+		for j := 0; j < sms.Len(); j++ {
+			sm := sms.At(j)
+			targetInfoMetric := sm.Metrics().AppendEmpty()
+			targetInfoMetric.SetName("target_info")
+			targetInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+			targetInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("job", monitoredResource.Labels["job"])
+			targetInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("instance", monitoredResource.Labels["instance"])
+		}
 	}
 }
 
