@@ -23,6 +23,8 @@ import (
 	"net/http"
 
 	"cloud.google.com/go/pubsub"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-server/scenarios"
 )
 
 // pushServer is an end-to-end test service.
@@ -70,15 +72,11 @@ func (s *pushServer) Shutdown(ctx context.Context) error {
 	return pubsubErr
 }
 
-// pubSubMessage is the payload of a Pub/Sub event.
+// PubSubMessage is the payload of a Pub/Sub event.
 type PubSubMessage struct {
 	Message struct {
 		Attributes map[string]string `json:"attributes,omitempty"`
 	} `json:"message"`
-}
-
-func (p *PubSubMessage) toPubSubMessage() *pubsub.Message {
-	return &pubsub.Message{Attributes: p.Message.Attributes}
 }
 
 // handle receives and processes a Pub/Sub push message.
@@ -87,17 +85,19 @@ func (s *pushServer) handle(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "POST" {
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			log.Printf("io.ReadAll: %v", err)
+			log.Printf("io.ReadAll: %v\n", err)
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
 		// byte slice unmarshalling handles base64 decoding.
 		if err := json.Unmarshal(body, &m); err != nil {
-			log.Printf("json.Unmarshal: %v", err)
+			log.Printf("json.Unmarshal: %v\n", err)
 			http.Error(w, "Bad Request", http.StatusBadRequest)
 			return
 		}
-		handleMessage(r.Context(), s.pubsubClient, m.toPubSubMessage())
+		if err := scenarios.HandleMessage(r.Context(), s.pubsubClient, m.Message.Attributes); err != nil {
+			log.Println(err)
+		}
 	}
 	// Ack the message
 	fmt.Fprint(w, "OK")

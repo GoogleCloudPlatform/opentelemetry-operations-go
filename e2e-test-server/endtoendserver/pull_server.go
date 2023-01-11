@@ -19,6 +19,8 @@ import (
 	"log"
 
 	"cloud.google.com/go/pubsub"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-server/scenarios"
 )
 
 // pullServer is an end-to-end test service.
@@ -55,5 +57,7 @@ func (s *pullServer) Shutdown(ctx context.Context) error {
 // onReceive executes a scenario based on the incoming message from the test runner.
 func (s *pullServer) onReceive(ctx context.Context, m *pubsub.Message) {
 	defer m.Ack()
-	handleMessage(ctx, s.pubsubClient, m)
+	if err := scenarios.HandleMessage(ctx, s.pubsubClient, m.Attributes); err != nil {
+		log.Println(err)
+	}
 }
