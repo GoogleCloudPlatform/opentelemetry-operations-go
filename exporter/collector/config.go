@@ -96,10 +96,10 @@ type MetricConfig struct {
 	// exporter. It allows overriding the function used to map otel resource to
 	// monitored resource.
 	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource
-	// ModifyMetrics is an extension point for exporters to directly modify the set
-	// of ResourceMetrics during the call to PushMetrics.
-	ModifyMetrics func(pmetric.Metrics)
-	Prefix        string `mapstructure:"prefix"`
+	// ExtraMetrics is an extension point for exporters to add to the set
+	// of ResourceMetrics during a call to PushMetrics.
+	ExtraMetrics func(pmetric.Metrics) pmetric.ResourceMetricsSlice
+	Prefix       string `mapstructure:"prefix"`
 	// KnownDomains contains a list of prefixes. If a metric already has one
 	// of these prefixes, the prefix is not added.
 	KnownDomains []string `mapstructure:"known_domains"`

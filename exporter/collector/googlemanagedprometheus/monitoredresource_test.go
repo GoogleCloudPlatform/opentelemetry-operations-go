@@ -22,6 +22,16 @@ import (
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
+func TestAddTargetInfo(t *testing.T) {
+	for _, tc := range []struct{
+		name string
+	}{} {
+		t.Run(tc.name, func(t *testing.T) {
+
+		})
+	}
+}
+
 func TestMapToPrometheusTarget(t *testing.T) {
 	for _, tc := range []struct {
 		resourceLabels map[string]string

@@ -32,46 +32,95 @@ const (
 	namespaceLabel = "namespace"
 )
 
+// promTargetKeys are attribute keys which are used in the prometheus_target monitored resource.
+// It is also used by GMP to exclude these keys from the target_info metric.
+var promTargetKeys = map[string][]string{
+	locationLabel:       {locationLabel, semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion},
+	clusterLabel:        {clusterLabel, semconv.AttributeK8SClusterName},
+	namespaceLabel:      {namespaceLabel, semconv.AttributeK8SNamespaceName},
+	"job":               {semconv.AttributeServiceName},
+	"service_namespace": {semconv.AttributeServiceNamespace},
+	"instance":          {semconv.AttributeServiceInstanceID},
+}
+
 func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
 	attrs := res.Attributes()
 	// Prepend namespace if it exists to match what is specified in
 	// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/datamodel.md#resource-attributes-1
-	job := getStringOrEmpty(attrs, semconv.AttributeServiceName)
-	serviceNamespace := getStringOrEmpty(attrs, semconv.AttributeServiceNamespace)
+	job := getStringOrEmpty(attrs, promTargetKeys["job"]...)
+	serviceNamespace := getStringOrEmpty(attrs, promTargetKeys["service_namespace"]...)
 	if serviceNamespace != "" {
 		job = serviceNamespace + "/" + job
 	}
 	return &monitoredrespb.MonitoredResource{
 		Type: "prometheus_target",
 		Labels: map[string]string{
-			"location":  getStringOrEmpty(attrs, locationLabel, semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion),
-			"cluster":   getStringOrEmpty(attrs, clusterLabel, semconv.AttributeK8SClusterName),
-			"namespace": getStringOrEmpty(attrs, namespaceLabel, semconv.AttributeK8SNamespaceName),
-			"job":       job,
-			"instance":  getStringOrEmpty(attrs, semconv.AttributeServiceInstanceID),
+			locationLabel:  getStringOrEmpty(attrs, promTargetKeys[locationLabel]...),
+			clusterLabel:   getStringOrEmpty(attrs, promTargetKeys[clusterLabel]...),
+			namespaceLabel: getStringOrEmpty(attrs, promTargetKeys[namespaceLabel]...),
+			"job":          job,
+			"instance":     getStringOrEmpty(attrs, promTargetKeys["instance"]...),
 		},
 	}
 }
 
 // AddTargetInfo extracts the target_info metric from each ResourceMetric associated with the input pmetric.Metrics
-// and inserts it into each ScopeMetric for that resource, with the matching "job" and "instance" labels as specified in
+// and inserts it into each ScopeMetric for that resource, as specified in
 // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.16.0/specification/compatibility/prometheus_and_openmetrics.md#resource-attributes-1
-func AddTargetInfo(m pmetric.Metrics) {
+func AddTargetInfo(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+	// initialize a new ResourceMetricSlice, which will hold our target_info metrics for each RM/Scope
+	resourceMetricSlice := pmetric.NewResourceMetricsSlice()
 	rms := m.ResourceMetrics()
+	// loop over input (original) resource metrics
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
-		monitoredResource := MapToPrometheusTarget(rm.Resource())
 
+		// store the attributes for this resource that will be added as metric labels to target_info
+		nonSpecialResourceAttributes := make(map[string]string)
+		for attributeKey := range rm.Resource().Attributes().AsRaw() {
+			special := false
+			for _, keys := range promTargetKeys {
+				for _, specialKey := range keys {
+					if attributeKey == specialKey {
+						special = true
+						break
+					}
+				}
+				if special {
+					break
+				}
+			}
+			if !special {
+				value, _ := rm.Resource().Attributes().Get(attributeKey)
+				nonSpecialResourceAttributes[attributeKey] = value.AsString()
+			}
+		}
+
+		// copy the Resource to a new ResourceMetric in our target_info slice, so we don't lose its attributes
+		rm.Resource().CopyTo(resourceMetricSlice.AppendEmpty().Resource())
+
+		// loop over this resource's scopeMetrics and copy the scope info to our target_info slice
+		scopeMetricSlice := resourceMetricSlice.At(i).ScopeMetrics()
 		sms := rm.ScopeMetrics()
 		for j := 0; j < sms.Len(); j++ {
 			sm := sms.At(j)
-			targetInfoMetric := sm.Metrics().AppendEmpty()
+
+			// copy the scope info to our new slice, so the new target_info metric will be associated with it
+			// (same reason we copied the Resource above)
+			sm.Scope().CopyTo(scopeMetricSlice.AppendEmpty().Scope())
+			targetInfoMetric := scopeMetricSlice.At(j).Metrics().AppendEmpty()
+
+			// create the target_info metric as a Gauge with value 1
 			targetInfoMetric.SetName("target_info")
 			targetInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
-			targetInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("job", monitoredResource.Labels["job"])
-			targetInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("instance", monitoredResource.Labels["instance"])
+
+			// copy Resource attributes to the metric except for attributes which will already be present in the MonitoredResource labels
+			for key, value := range nonSpecialResourceAttributes {
+				targetInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr(key, value)
+			}
 		}
 	}
+	return resourceMetricSlice
 }
 
 // getStringOrEmpty returns the value of the first key found, or the empty string.

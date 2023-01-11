@@ -186,16 +186,21 @@ func NewGoogleCloudMetricsExporter(
 
 // PushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary.
 func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) error {
-	// call customize extension point (used by GMP exporter to add target_info metric)
-	if me.cfg.MetricConfig.ModifyMetrics != nil {
-		me.cfg.MetricConfig.ModifyMetrics(m)
-	}
-
 	// map from project -> []timeseries. This groups timeseries by the project
 	// they need to be sent to. Each project's timeseries are sent in a
 	// separate request later.
 	pendingTimeSeries := map[string][]*monitoringpb.TimeSeries{}
-	rms := m.ResourceMetrics()
+
+	rms := pmetric.NewResourceMetricsSlice()
+	m.ResourceMetrics().CopyTo(rms)
+
+	// add extra metrics from the ExtraMetrics() extension point, combine into a new copy
+	extraResourceMetrics := pmetric.NewResourceMetricsSlice()
+	if me.cfg.MetricConfig.ExtraMetrics != nil {
+		extraResourceMetrics = me.cfg.MetricConfig.ExtraMetrics(m)
+	}
+	extraResourceMetrics.MoveAndAppendTo(rms)
+
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		monitoredResource := me.cfg.MetricConfig.MapMonitoredResource(rm.Resource())
@@ -239,6 +244,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 			}
 		}
 	}
+
 	var errs []error
 	// timeseries for each project are batched and exported separately
 	for projectID, projectTS := range pendingTimeSeries {
