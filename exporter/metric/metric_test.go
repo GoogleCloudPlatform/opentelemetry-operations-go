@@ -869,6 +869,10 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 
 			// Channel to shove user agent strings from createTimeSeries
 			ch := make(chan []string, 1)
+			defer close(ch)
+			var wg sync.WaitGroup
+			// wait for 2 calls to be processed
+			wg.Add(2)
 
 			m := mock{
 				createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
@@ -885,9 +889,9 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 			// Make sure all the calls have the right user agents.
 			// We have to run this in parallel because BOTH calls happen seamlessly when exporting metrics.
 			go func() {
-				for {
-					ua := <-ch
+				for ua := range ch {
 					require.Regexp(t, tc.expectedUserAgentRegex, ua[0])
+					wg.Done()
 				}
 			}()
 			monitoringpb.RegisterMetricServiceServer(server, &m)
@@ -929,6 +933,7 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 			counter.Add(ctx, 1)
 			require.NoError(t, provider.ForceFlush(ctx))
 			// User agent checking happens above in parallel to this flow.
+			wg.Wait()
 		})
 	}
 }
