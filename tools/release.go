@@ -47,7 +47,7 @@ var versions = map[string]string{
 	"internal/resourcemapping/": unstable,
 	"internal/cloudmock/":       unstable,
 
-	"detectors/gcp/": unstable,
+	"detectors/gcp/": stable,
 
 	"propagator/": unstable,
 }
