@@ -32,9 +32,16 @@ func TestAddTargetInfo(t *testing.T) {
 			input: func() pmetric.Metrics {
 				metrics := pmetric.NewMetrics()
 				rm := metrics.ResourceMetrics().AppendEmpty()
+
+				// foo-label should be copied to target_info, not locationLabel
 				rm.Resource().Attributes().PutStr(locationLabel, "us-east")
 				rm.Resource().Attributes().PutStr("foo-label", "bar")
+
+				// scope should not be copied to target_info
 				sm := rm.ScopeMetrics().AppendEmpty()
+				sm.Scope().SetName("myscope")
+
+				// other metrics should not be copied to target_info
 				metric := sm.Metrics().AppendEmpty()
 				metric.SetName("baz-metric")
 				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(2112)
@@ -43,6 +50,9 @@ func TestAddTargetInfo(t *testing.T) {
 			expected: func() pmetric.ResourceMetricsSlice {
 				rms := pmetric.NewResourceMetricsSlice()
 				rm := rms.AppendEmpty()
+
+				// resource attributes will be changed to a MonitoredResource on export, not in AddTargetInfo
+				// therefore they should still be present here
 				rm.Resource().Attributes().PutStr(locationLabel, "us-east")
 				rm.Resource().Attributes().PutStr("foo-label", "bar")
 				sm := rm.ScopeMetrics().AppendEmpty()

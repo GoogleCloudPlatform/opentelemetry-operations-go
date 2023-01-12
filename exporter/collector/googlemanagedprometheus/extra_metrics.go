@@ -30,19 +30,7 @@ func AddTargetInfo(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 		// store the attributes for this resource that will be added as metric labels to target_info
 		nonSpecialResourceAttributes := make(map[string]string)
 		for attributeKey := range rm.Resource().Attributes().AsRaw() {
-			special := false
-			for _, keys := range promTargetKeys {
-				for _, specialKey := range keys {
-					if attributeKey == specialKey {
-						special = true
-						break
-					}
-				}
-				if special {
-					break
-				}
-			}
-			if !special {
+			if !isSpecialAttribute(attributeKey) {
 				value, _ := rm.Resource().Attributes().Get(attributeKey)
 				nonSpecialResourceAttributes[attributeKey] = value.AsString()
 			}
@@ -51,26 +39,26 @@ func AddTargetInfo(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 		// copy the Resource to a new ResourceMetric in our target_info slice, so we don't lose its attributes
 		rm.Resource().CopyTo(resourceMetricSlice.AppendEmpty().Resource())
 
-		// loop over this resource's scopeMetrics and copy the scope info to our target_info slice
-		scopeMetricSlice := resourceMetricSlice.At(i).ScopeMetrics()
-		sms := rm.ScopeMetrics()
-		for j := 0; j < sms.Len(); j++ {
-			sm := sms.At(j)
+		// create the target_info metric as a Gauge with value 1
+		targetInfoMetric := resourceMetricSlice.At(i).ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+		targetInfoMetric.SetName("target_info")
+		targetInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
 
-			// copy the scope info to our new slice, so the new target_info metric will be associated with it
-			// (same reason we copied the Resource above)
-			sm.Scope().CopyTo(scopeMetricSlice.AppendEmpty().Scope())
-			targetInfoMetric := scopeMetricSlice.At(j).Metrics().AppendEmpty()
-
-			// create the target_info metric as a Gauge with value 1
-			targetInfoMetric.SetName("target_info")
-			targetInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
-
-			// copy Resource attributes to the metric except for attributes which will already be present in the MonitoredResource labels
-			for key, value := range nonSpecialResourceAttributes {
-				targetInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr(key, value)
-			}
+		// copy Resource attributes to the metric except for attributes which will already be present in the MonitoredResource labels
+		for key, value := range nonSpecialResourceAttributes {
+			targetInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr(key, value)
 		}
 	}
 	return resourceMetricSlice
+}
+
+func isSpecialAttribute(attributeKey string) bool {
+	for _, keys := range promTargetKeys {
+		for _, specialKey := range keys {
+			if attributeKey == specialKey {
+				return true
+			}
+		}
+	}
+	return false
 }
