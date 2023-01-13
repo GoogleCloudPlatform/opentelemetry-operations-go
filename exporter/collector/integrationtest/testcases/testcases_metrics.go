@@ -133,6 +133,7 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.SkipCreateMetricDescriptor = true
 			cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName
 			cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
+			cfg.MetricConfig.ExtraMetrics = googlemanagedprometheus.AddTargetInfo
 			cfg.MetricConfig.InstrumentationLibraryLabels = false
 			cfg.MetricConfig.ServiceResourceLabels = false
 			cfg.MetricConfig.EnableSumOfSquaredDeviation = true

@@ -191,6 +191,15 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 	// separate request later.
 	pendingTimeSeries := map[string][]*monitoringpb.TimeSeries{}
 	rms := m.ResourceMetrics()
+
+	// add extra metrics from the ExtraMetrics() extension point, combine into a new copy
+	if me.cfg.MetricConfig.ExtraMetrics != nil {
+		extraResourceMetrics := me.cfg.MetricConfig.ExtraMetrics(m)
+		rms = pmetric.NewResourceMetricsSlice()
+		m.ResourceMetrics().CopyTo(rms)
+		extraResourceMetrics.MoveAndAppendTo(rms)
+	}
+
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		monitoredResource := me.cfg.MetricConfig.MapMonitoredResource(rm.Resource())
@@ -234,6 +243,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 			}
 		}
 	}
+
 	var errs []error
 	// timeseries for each project are batched and exported separately
 	for projectID, projectTS := range pendingTimeSeries {
