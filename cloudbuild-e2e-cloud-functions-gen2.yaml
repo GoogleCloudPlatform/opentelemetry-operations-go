@@ -1,0 +1,43 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+steps:
+  # Vendor dependencies, and zip the code.
+  - name: golang:1.18
+    id: zip-code
+    entrypoint: /bin/bash
+    args:
+      - '-c'
+      - |
+         apt-get update && \
+         apt-get install zip --assume-yes && \
+         cd e2e-test-server/cloud_functions/ && \
+         go mod vendor && \
+         zip -r function-source *
+
+  # Run the test
+  - name: $_TEST_RUNNER_IMAGE
+    id: run-tests-cloudfunction
+    dir: /
+    env: ["PROJECT_ID=$PROJECT_ID"]
+    args:
+      - cloud-functions-gen2
+      - --runtime=go118
+      - --functionsource=/workspace/e2e-test-server/cloud_functions/function-source.zip
+      - --entrypoint=HandleCloudFunction
+
+logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs
+substitutions:
+  _TEST_RUNNER_IMAGE: gcr.io/${PROJECT_ID}/opentelemetry-operations-e2e-testing:0.16.0
+  _TEST_SERVER_IMAGE: gcr.io/${PROJECT_ID}/opentelemetry-operations-go-e2e-test-server:${SHORT_SHA}

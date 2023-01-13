@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2023 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,35 +12,37 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package endtoendserver
+package scenarios
 
 import (
 	"log"
 	"os"
+	"time"
+)
+
+const (
+	instrumentingModuleName = "opentelemetry-ops-e2e-test-server"
+	scenarioKey             = "scenario"
+	testIDKey               = "test_id"
+	statusCodeKey           = "status_code"
+	traceIDKey              = "trace_id"
+
+	// This is set small to reduce the latency in sending traces so that the tests finish faster.
+	traceBatchTimeout = 100 * time.Millisecond
 )
 
 var (
-	subscriptionMode        string
-	projectID               string
-	requestSubscriptionName string
-	port                    string
+	projectID         string
+	responseTopicName string
 )
 
 func init() {
-	subscriptionMode = os.Getenv("SUBSCRIPTION_MODE")
-	if subscriptionMode == "" {
-		log.Fatalf("environment variable SUBSCRIPTION_MODE must be set")
-	}
 	projectID = os.Getenv("PROJECT_ID")
 	if projectID == "" {
 		log.Fatalf("environment variable PROJECT_ID must be set")
 	}
-	requestSubscriptionName = os.Getenv("REQUEST_SUBSCRIPTION_NAME")
-	if requestSubscriptionName == "" {
-		log.Fatalf("environment variable REQUEST_SUBSCRIPTION_NAME must be set")
-	}
-	port = os.Getenv("PORT")
-	if port == "" && subscriptionMode == "push" {
-		log.Fatalf("environment variable PORT must be set for push subscription")
+	responseTopicName = os.Getenv("RESPONSE_TOPIC_NAME")
+	if responseTopicName == "" {
+		log.Fatalf("environment variable RESPONSE_TOPIC_NAME must be set")
 	}
 }

@@ -28,6 +28,7 @@ RUN go mod download
 
 # Copy the go source
 COPY e2e-test-server/app.go ./
+COPY e2e-test-server/scenarios/ scenarios/
 COPY e2e-test-server/endtoendserver/ endtoendserver/
 
 # Build

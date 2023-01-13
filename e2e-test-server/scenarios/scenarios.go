@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package endtoendserver
+package scenarios
 
 import (
 	"context"
@@ -158,6 +158,7 @@ func (*detectResourceHandler) tracerProvider() (*sdktrace.TracerProvider, error)
 	if err != nil {
 		return nil, err
 	}
+	log.Printf("Detected Resource: %+v\n", res.String())
 	return newTracerProvider(res)
 }
 
