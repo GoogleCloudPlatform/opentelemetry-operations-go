@@ -14,7 +14,10 @@
 
 package googlemanagedprometheus
 
-import "go.opentelemetry.io/collector/pdata/pmetric"
+import (
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/pmetric"
+)
 
 // AddTargetInfo extracts the target_info metric from each ResourceMetric associated with the input pmetric.Metrics
 // and inserts it into each ScopeMetric for that resource, as specified in
@@ -27,15 +30,6 @@ func AddTargetInfo(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 
-		// store the attributes for this resource that will be added as metric labels to target_info
-		nonSpecialResourceAttributes := make(map[string]string)
-		for attributeKey := range rm.Resource().Attributes().AsRaw() {
-			if !isSpecialAttribute(attributeKey) {
-				value, _ := rm.Resource().Attributes().Get(attributeKey)
-				nonSpecialResourceAttributes[attributeKey] = value.AsString()
-			}
-		}
-
 		// copy the Resource to a new ResourceMetric in our target_info slice, so we don't lose its attributes
 		rm.Resource().CopyTo(resourceMetricSlice.AppendEmpty().Resource())
 
@@ -47,9 +41,12 @@ func AddTargetInfo(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 		dataPoint.SetIntValue(1)
 
 		// copy Resource attributes to the metric except for attributes which will already be present in the MonitoredResource labels
-		for key, value := range nonSpecialResourceAttributes {
-			dataPoint.Attributes().PutStr(key, value)
-		}
+		rm.Resource().Attributes().Range(func(k string, v pcommon.Value) bool {
+			if !isSpecialAttribute(k) {
+				dataPoint.Attributes().PutStr(k, v.AsString())
+			}
+			return true
+		})
 	}
 	return resourceMetricSlice
 }
