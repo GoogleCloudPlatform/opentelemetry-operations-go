@@ -112,16 +112,6 @@ var (
 			gaeVersionID: {otelKeys: []string{string(semconv.FaaSVersionKey)}},
 			instanceID:   {otelKeys: []string{string(semconv.FaaSIDKey)}},
 		},
-		cloudFunction: {
-			region:            {otelKeys: []string{string(semconv.CloudRegionKey)}},
-			cloudFunctionName: {otelKeys: []string{string(semconv.FaaSNameKey)}},
-		},
-		cloudRunRevision: {
-			location:          {otelKeys: []string{string(semconv.CloudRegionKey)}},
-			serviceName:       {otelKeys: []string{string(semconv.FaaSNameKey)}},
-			configurationName: {otelKeys: []string{string(semconv.FaaSNameKey)}},
-			revisionName:      {otelKeys: []string{string(semconv.FaaSVersionKey)}},
-		},
 		awsEc2Instance: {
 			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
 			region: {
@@ -189,34 +179,23 @@ func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResourc
 		} else {
 			mr = createMonitoredResource(k8sCluster, attrs)
 		}
-	case semconv.CloudPlatformGCPCloudRun.Value.AsString():
-		mr = createMonitoredResource(cloudRunRevision, attrs)
 	case semconv.CloudPlatformGCPAppEngine.Value.AsString():
 		mr = createMonitoredResource(gaeInstance, attrs)
-	case semconv.CloudPlatformGCPCloudFunctions.Value.AsString():
-		mr = createMonitoredResource(cloudFunction, attrs)
 	case semconv.CloudPlatformAWSEC2.Value.AsString():
 		mr = createMonitoredResource(awsEc2Instance, attrs)
 	default:
-		mr = ResourceAttributesToGenericMonitoredResource(attrs)
+		// Fallback to generic_task
+		_, hasServiceName := attrs.GetString(string(semconv.ServiceNameKey))
+		_, hasFaaSName := attrs.GetString(string(semconv.FaaSNameKey))
+		_, hasServiceInstanceID := attrs.GetString(string(semconv.ServiceInstanceIDKey))
+		_, hasFaaSID := attrs.GetString(string(semconv.FaaSIDKey))
+		if (hasServiceName && hasServiceInstanceID) || (hasFaaSID && hasFaaSName) {
+			mr = createMonitoredResource(genericTask, attrs)
+		} else {
+			mr = createMonitoredResource(genericNode, attrs)
+		}
 	}
 	return mr
-}
-
-// ResourceAttributesToGenericMonitoredResource converts from a set of OTEL
-// resource attributes into a GCP monitored resource type and label set.
-// However, this function will only return generic_node or generic_task
-// resources.
-func ResourceAttributesToGenericMonitoredResource(attrs ReadOnlyAttributes) *GceResource {
-	// Fallback to generic_task
-	_, hasServiceName := attrs.GetString(string(semconv.ServiceNameKey))
-	_, hasFaaSName := attrs.GetString(string(semconv.FaaSNameKey))
-	_, hasServiceInstanceID := attrs.GetString(string(semconv.ServiceInstanceIDKey))
-	_, hasFaaSID := attrs.GetString(string(semconv.FaaSIDKey))
-	if (hasServiceName && hasServiceInstanceID) || (hasFaaSID && hasFaaSName) {
-		return createMonitoredResource(genericTask, attrs)
-	}
-	return createMonitoredResource(genericNode, attrs)
 }
 
 func createMonitoredResource(
