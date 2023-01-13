@@ -42,11 +42,13 @@ func AddTargetInfo(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 		// create the target_info metric as a Gauge with value 1
 		targetInfoMetric := resourceMetricSlice.At(i).ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		targetInfoMetric.SetName("target_info")
-		targetInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+
+		dataPoint := targetInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty()
+		dataPoint.SetIntValue(1)
 
 		// copy Resource attributes to the metric except for attributes which will already be present in the MonitoredResource labels
 		for key, value := range nonSpecialResourceAttributes {
-			targetInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr(key, value)
+			dataPoint.Attributes().PutStr(key, value)
 		}
 	}
 	return resourceMetricSlice

@@ -26,28 +26,31 @@ const (
 	// replicate that behavior in the collector, we expect these labels
 	// to be moved from metric labels to resource labels using the groupbyattrs
 	// processor. If these resource labels are present, use them to set the MR.
-	locationLabel  = "location"
-	clusterLabel   = "cluster"
-	namespaceLabel = "namespace"
+	locationLabel         = "location"
+	clusterLabel          = "cluster"
+	namespaceLabel        = "namespace"
+	jobLabel              = "job"
+	serviceNamespaceLabel = "service_namespace"
+	instanceLabel         = "instance"
 )
 
 // promTargetKeys are attribute keys which are used in the prometheus_target monitored resource.
 // It is also used by GMP to exclude these keys from the target_info metric.
 var promTargetKeys = map[string][]string{
-	locationLabel:       {locationLabel, semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion},
-	clusterLabel:        {clusterLabel, semconv.AttributeK8SClusterName},
-	namespaceLabel:      {namespaceLabel, semconv.AttributeK8SNamespaceName},
-	"job":               {semconv.AttributeServiceName},
-	"service_namespace": {semconv.AttributeServiceNamespace},
-	"instance":          {semconv.AttributeServiceInstanceID},
+	locationLabel:         {locationLabel, semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion},
+	clusterLabel:          {clusterLabel, semconv.AttributeK8SClusterName},
+	namespaceLabel:        {namespaceLabel, semconv.AttributeK8SNamespaceName},
+	jobLabel:              {semconv.AttributeServiceName},
+	serviceNamespaceLabel: {semconv.AttributeServiceNamespace},
+	instanceLabel:         {semconv.AttributeServiceInstanceID},
 }
 
 func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
 	attrs := res.Attributes()
 	// Prepend namespace if it exists to match what is specified in
 	// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/datamodel.md#resource-attributes-1
-	job := getStringOrEmpty(attrs, promTargetKeys["job"]...)
-	serviceNamespace := getStringOrEmpty(attrs, promTargetKeys["service_namespace"]...)
+	job := getStringOrEmpty(attrs, promTargetKeys[jobLabel]...)
+	serviceNamespace := getStringOrEmpty(attrs, promTargetKeys[serviceNamespaceLabel]...)
 	if serviceNamespace != "" {
 		job = serviceNamespace + "/" + job
 	}
@@ -57,8 +60,8 @@ func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResour
 			locationLabel:  getStringOrEmpty(attrs, promTargetKeys[locationLabel]...),
 			clusterLabel:   getStringOrEmpty(attrs, promTargetKeys[clusterLabel]...),
 			namespaceLabel: getStringOrEmpty(attrs, promTargetKeys[namespaceLabel]...),
-			"job":          job,
-			"instance":     getStringOrEmpty(attrs, promTargetKeys["instance"]...),
+			jobLabel:       job,
+			instanceLabel:  getStringOrEmpty(attrs, promTargetKeys[instanceLabel]...),
 		},
 	}
 }
