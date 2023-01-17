@@ -19,10 +19,11 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-// AddTargetInfo extracts the target_info metric from each ResourceMetric associated with the input pmetric.Metrics
+// AddTargetInfoMetric inserts target_info for each resource.
+// First, it extracts the target_info metric from each ResourceMetric associated with the input pmetric.Metrics
 // and inserts it into each ScopeMetric for that resource, as specified in
 // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.16.0/specification/compatibility/prometheus_and_openmetrics.md#resource-attributes-1
-func AddTargetInfo(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+func AddTargetInfoMetric(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 	// initialize a new ResourceMetricSlice, which will hold our target_info metrics for each RM/Scope
 	resourceMetricSlice := pmetric.NewResourceMetricsSlice()
 	rms := m.ResourceMetrics()
@@ -47,6 +48,36 @@ func AddTargetInfo(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 			}
 			return true
 		})
+	}
+	return resourceMetricSlice
+}
+
+// AddScopeInfoMetric adds the otel_scope_info metric to a Metrics slice as specified in
+// https://github.com/open-telemetry/opentelemetry-specification/blob/v1.16.0/specification/compatibility/prometheus_and_openmetrics.md#instrumentation-scope-1
+func AddScopeInfoMetric(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+	resourceMetricSlice := pmetric.NewResourceMetricsSlice()
+	rms := m.ResourceMetrics()
+	for i := 0; i < rms.Len(); i++ {
+		rm := rms.At(i)
+		rm.Resource().CopyTo(resourceMetricSlice.AppendEmpty().Resource())
+
+		sms := rms.At(i).ScopeMetrics()
+		for j := 0; j < sms.Len(); j++ {
+			sm := sms.At(j)
+
+			scopeInfoMetric := resourceMetricSlice.At(i).ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
+			scopeInfoMetric.SetName("otel_scope_info")
+
+			dataPoint := scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty()
+			dataPoint.SetIntValue(1)
+
+			dataPoint.Attributes().PutStr("otel_scope_name", sm.Scope().Name())
+			dataPoint.Attributes().PutStr("otel_scope_version", sm.Scope().Version())
+			sm.Scope().Attributes().Range(func(k string, v pcommon.Value) bool {
+				dataPoint.Attributes().PutStr(k, v.AsString())
+				return true
+			})
+		}
 	}
 	return resourceMetricSlice
 }
