@@ -224,6 +224,12 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 			logLabels := mergeLogLabels(sl.Scope().Name(), sl.Scope().Version(), extraResourceLabels)
 
 			for k := 0; k < sl.LogRecords().Len(); k++ {
+				// make a copy of logLabels so that shared attributes (scope/resource) are copied across LogRecords,
+				// but that individual LogRecord attributes don't copy over to other Records via map reference.
+				entryLabels := make(map[string]string)
+				for k, v := range logLabels {
+					entryLabels[k] = v
+				}
 				log := sl.LogRecords().At(k)
 
 				// We can't just set logName on these entries otherwise the conversion to internal will fail
@@ -238,7 +244,7 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 				splitEntries, err := l.logToSplitEntries(
 					log,
 					mr,
-					logLabels,
+					entryLabels,
 					time.Now(),
 					logName,
 					projectID,

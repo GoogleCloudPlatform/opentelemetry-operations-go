@@ -28,6 +28,12 @@
                   }
                 },
                 {
+                  "key": "single-attribute",
+                  "value": {
+                    "stringValue": "foobar"
+                  }
+                },
+                {
                   "key": "gcp.http_request",
                   "value": {
                     "kvlistValue": {
