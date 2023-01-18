@@ -58,8 +58,7 @@ func AddScopeInfoMetric(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 	resourceMetricSlice := pmetric.NewResourceMetricsSlice()
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
-		rm := rms.At(i)
-		rm.Resource().CopyTo(resourceMetricSlice.AppendEmpty().Resource())
+		resourceMetricSlice.AppendEmpty()
 
 		sms := rms.At(i).ScopeMetrics()
 		for j := 0; j < sms.Len(); j++ {

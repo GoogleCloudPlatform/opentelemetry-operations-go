@@ -92,11 +92,6 @@ func TestAddExtraMetrics(t *testing.T) {
 				rms := pmetric.NewResourceMetricsSlice()
 				rm := rms.AppendEmpty()
 
-				// resource attributes will be changed to a MonitoredResource on export, not in AddTargetInfo
-				// therefore they should still be present here
-				rm.Resource().Attributes().PutStr(locationLabel, "us-east")
-				rm.Resource().Attributes().PutStr("foo-label", "bar")
-
 				scopeInfo := rm.ScopeMetrics().AppendEmpty()
 				scopeInfoMetric := scopeInfo.Metrics().AppendEmpty()
 				scopeInfoMetric.SetName("otel_scope_info")
@@ -110,7 +105,10 @@ func TestAddExtraMetrics(t *testing.T) {
 			name: "add both scope info and target info",
 			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 				extraMetrics := AddTargetInfoMetric(m)
-				AddScopeInfoMetric(m).MoveAndAppendTo(extraMetrics)
+				scopeInfoMetrics := AddScopeInfoMetric(m)
+				for i := 0; i < scopeInfoMetrics.Len(); i++ {
+					scopeInfoMetrics.At(i).ScopeMetrics().MoveAndAppendTo(extraMetrics.At(i).ScopeMetrics())
+				}
 				return extraMetrics
 			},
 			input: func() pmetric.Metrics {
@@ -147,11 +145,7 @@ func TestAddExtraMetrics(t *testing.T) {
 				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
 				metric.Gauge().DataPoints().At(0).Attributes().PutStr("foo-label", "bar")
 
-				rm2 := rms.AppendEmpty()
-				rm2.Resource().Attributes().PutStr(locationLabel, "us-east")
-				rm2.Resource().Attributes().PutStr("foo-label", "bar")
-
-				scopeInfo := rm2.ScopeMetrics().AppendEmpty()
+				scopeInfo := rm.ScopeMetrics().AppendEmpty()
 				scopeInfoMetric := scopeInfo.Metrics().AppendEmpty()
 				scopeInfoMetric.SetName("otel_scope_info")
 				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
