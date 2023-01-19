@@ -135,12 +135,9 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName
 			cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
 			cfg.MetricConfig.ExtraMetrics = func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				extraMetrics := googlemanagedprometheus.AddTargetInfoMetric(m)
-				scopeInfoMetrics := googlemanagedprometheus.AddScopeInfoMetric(m)
-				for i := 0; i < scopeInfoMetrics.Len(); i++ {
-					scopeInfoMetrics.At(i).ScopeMetrics().MoveAndAppendTo(extraMetrics.At(i).ScopeMetrics())
-				}
-				return extraMetrics
+				googlemanagedprometheus.AddScopeInfoMetric(m)
+				googlemanagedprometheus.AddTargetInfoMetric(m)
+				return m.ResourceMetrics()
 			}
 			cfg.MetricConfig.InstrumentationLibraryLabels = false
 			cfg.MetricConfig.ServiceResourceLabels = false
