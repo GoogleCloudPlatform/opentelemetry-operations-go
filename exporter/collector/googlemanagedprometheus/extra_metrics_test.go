@@ -21,14 +21,16 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-func TestAddTargetInfo(t *testing.T) {
+func TestAddExtraMetrics(t *testing.T) {
 	for _, tc := range []struct {
+		testFunc func(pmetric.Metrics) pmetric.ResourceMetricsSlice
 		input    pmetric.Metrics
 		expected pmetric.ResourceMetricsSlice
 		name     string
 	}{
 		{
-			name: "add target info from resource metric",
+			name:     "add target info from resource metric",
+			testFunc: AddTargetInfoMetric,
 			input: func() pmetric.Metrics {
 				metrics := pmetric.NewMetrics()
 				rm := metrics.ResourceMetrics().AppendEmpty()
@@ -40,6 +42,7 @@ func TestAddTargetInfo(t *testing.T) {
 				// scope should not be copied to target_info
 				sm := rm.ScopeMetrics().AppendEmpty()
 				sm.Scope().SetName("myscope")
+				sm.Scope().SetVersion("v0.0.1")
 
 				// other metrics should not be copied to target_info
 				metric := sm.Metrics().AppendEmpty()
@@ -63,9 +66,97 @@ func TestAddTargetInfo(t *testing.T) {
 				return rms
 			}(),
 		},
+		{
+			name:     "add scope info from scope metrics",
+			testFunc: AddScopeInfoMetric,
+			input: func() pmetric.Metrics {
+				metrics := pmetric.NewMetrics()
+				rm := metrics.ResourceMetrics().AppendEmpty()
+
+				// foo-label should be copied to target_info, not locationLabel
+				rm.Resource().Attributes().PutStr(locationLabel, "us-east")
+				rm.Resource().Attributes().PutStr("foo-label", "bar")
+
+				// scope should not be copied to target_info
+				sm := rm.ScopeMetrics().AppendEmpty()
+				sm.Scope().SetName("myscope")
+				sm.Scope().SetVersion("v0.0.1")
+
+				// other metrics should not be copied to target_info
+				metric := sm.Metrics().AppendEmpty()
+				metric.SetName("baz-metric")
+				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(2112)
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				rms := pmetric.NewResourceMetricsSlice()
+				rm := rms.AppendEmpty()
+
+				scopeInfo := rm.ScopeMetrics().AppendEmpty()
+				scopeInfoMetric := scopeInfo.Metrics().AppendEmpty()
+				scopeInfoMetric.SetName("otel_scope_info")
+				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+				scopeInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+				scopeInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+				return rms
+			}(),
+		},
+		{
+			name: "add both scope info and target info",
+			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				extraMetrics := AddTargetInfoMetric(m)
+				scopeInfoMetrics := AddScopeInfoMetric(m)
+				for i := 0; i < scopeInfoMetrics.Len(); i++ {
+					scopeInfoMetrics.At(i).ScopeMetrics().MoveAndAppendTo(extraMetrics.At(i).ScopeMetrics())
+				}
+				return extraMetrics
+			},
+			input: func() pmetric.Metrics {
+				metrics := pmetric.NewMetrics()
+				rm := metrics.ResourceMetrics().AppendEmpty()
+
+				// foo-label should be copied to target_info, not locationLabel
+				rm.Resource().Attributes().PutStr(locationLabel, "us-east")
+				rm.Resource().Attributes().PutStr("foo-label", "bar")
+
+				// scope should not be copied to target_info
+				sm := rm.ScopeMetrics().AppendEmpty()
+				sm.Scope().SetName("myscope")
+				sm.Scope().SetVersion("v0.0.1")
+
+				// other metrics should not be copied to target_info
+				metric := sm.Metrics().AppendEmpty()
+				metric.SetName("baz-metric")
+				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(2112)
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				rms := pmetric.NewResourceMetricsSlice()
+				rm := rms.AppendEmpty()
+
+				// resource attributes will be changed to a MonitoredResource on export, not in AddTargetInfo
+				// therefore they should still be present here
+				rm.Resource().Attributes().PutStr(locationLabel, "us-east")
+				rm.Resource().Attributes().PutStr("foo-label", "bar")
+
+				sm := rm.ScopeMetrics().AppendEmpty()
+				metric := sm.Metrics().AppendEmpty()
+				metric.SetName("target_info")
+				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+				metric.Gauge().DataPoints().At(0).Attributes().PutStr("foo-label", "bar")
+
+				scopeInfo := rm.ScopeMetrics().AppendEmpty()
+				scopeInfoMetric := scopeInfo.Metrics().AppendEmpty()
+				scopeInfoMetric.SetName("otel_scope_info")
+				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+				scopeInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+				scopeInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+				return rms
+			}(),
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			rms := AddTargetInfo(tc.input)
+			rms := tc.testFunc(tc.input)
 			assert.EqualValues(t, tc.expected, rms)
 		})
 	}
