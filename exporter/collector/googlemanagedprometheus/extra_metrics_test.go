@@ -93,6 +93,37 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
+			name: "add scope info with attributes",
+			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				AddScopeInfoMetric(m)
+				return m.ResourceMetrics()
+			},
+			input: func() pmetric.Metrics {
+				metrics := testMetric()
+				metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Scope().Attributes().PutStr("foo_attribute", "bar")
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := testMetric().ResourceMetrics()
+				metrics.At(0).ScopeMetrics().At(0).Scope().Attributes().PutStr("foo_attribute", "bar")
+
+				// Insert the scope_info metric into the existing ScopeMetricsSlice
+				sm := metrics.At(0).ScopeMetrics().At(0)
+				scopeInfoMetric := sm.Metrics().AppendEmpty()
+				scopeInfoMetric.SetName("otel_scope_info")
+				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+				scopeInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("foo_attribute", "bar")
+
+				// add otel_scope_* attributes to all metrics in this scope (including otel_scope_info)
+				for i := 0; i < sm.Metrics().Len(); i++ {
+					metric := sm.Metrics().At(i)
+					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+				}
+				return metrics
+			}(),
+		},
+		{
 			name: "add both scope info and target info",
 			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 				AddScopeInfoMetric(m)
@@ -163,6 +194,80 @@ func TestAddExtraMetrics(t *testing.T) {
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
 				}
 
+				return metrics
+			}(),
+		},
+		{
+			name: "scope info for other metric types",
+			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				AddScopeInfoMetric(m)
+				return m.ResourceMetrics()
+			},
+			input: func() pmetric.Metrics {
+				metrics := testMetric()
+				sum := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				sum.SetName("sum-metric")
+				sum.SetEmptySum().DataPoints().AppendEmpty().SetIntValue(1234)
+
+				summary := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				summary.SetName("summary-metric")
+				summary.SetEmptySummary().DataPoints().AppendEmpty().SetSum(float64(1.0))
+
+				histogram := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				histogram.SetName("histogram-metric")
+				histogram.SetEmptyHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+
+				expHistogram := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				expHistogram.SetName("exponential-histogram")
+				expHistogram.SetEmptyExponentialHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				testMetrics := testMetric()
+				sum := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				sum.SetName("sum-metric")
+				sum.SetEmptySum().DataPoints().AppendEmpty().SetIntValue(1234)
+
+				summary := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				summary.SetName("summary-metric")
+				summary.SetEmptySummary().DataPoints().AppendEmpty().SetSum(float64(1.0))
+
+				histogram := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				histogram.SetName("histogram-metric")
+				histogram.SetEmptyHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+
+				expHistogram := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				expHistogram.SetName("exponential-histogram")
+				expHistogram.SetEmptyExponentialHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+
+				metrics := testMetrics.ResourceMetrics()
+				// Insert the scope_info metric into the existing ScopeMetricsSlice
+				sm := metrics.At(0).ScopeMetrics().At(0)
+				scopeInfoMetric := sm.Metrics().AppendEmpty()
+				scopeInfoMetric.SetName("otel_scope_info")
+				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+
+				// add otel_scope_* attributes to all metrics in this scope (including otel_scope_info)
+				for i := 0; i < sm.Metrics().Len(); i++ {
+					metric := sm.Metrics().At(i)
+					switch metric.Type() {
+					case pmetric.MetricTypeSum:
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					case pmetric.MetricTypeGauge:
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					case pmetric.MetricTypeSummary:
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					case pmetric.MetricTypeHistogram:
+						metric.Histogram().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Histogram().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					case pmetric.MetricTypeExponentialHistogram:
+						metric.ExponentialHistogram().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.ExponentialHistogram().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					}
+				}
 				return metrics
 			}(),
 		},
