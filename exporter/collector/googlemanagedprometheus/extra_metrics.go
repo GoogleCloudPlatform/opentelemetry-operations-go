@@ -56,6 +56,10 @@ func AddScopeInfoMetric(m pmetric.Metrics) {
 		sms := rms.At(i).ScopeMetrics()
 		for j := 0; j < sms.Len(); j++ {
 			sm := sms.At(j)
+			// If not present, skip this scope
+			if len(sm.Scope().Name()) == 0 && len(sm.Scope().Version()) == 0 {
+				continue
+			}
 
 			// Add otel_scope_info metric
 			scopeInfoMetric := sm.Metrics().AppendEmpty()
@@ -67,10 +71,6 @@ func AddScopeInfoMetric(m pmetric.Metrics) {
 				return true
 			})
 
-			// If present, add scope_name and scope_version attributes to each datapoint (including otel_scope_info)
-			if len(sm.Scope().Name()) == 0 && len(sm.Scope().Version()) == 0 {
-				continue
-			}
 			for k := 0; k < sm.Metrics().Len(); k++ {
 				metric := sm.Metrics().At(k)
 				switch metric.Type() {

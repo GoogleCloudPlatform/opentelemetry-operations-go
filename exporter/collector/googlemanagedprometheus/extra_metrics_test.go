@@ -129,6 +129,43 @@ func TestAddExtraMetrics(t *testing.T) {
 				return metrics
 			}(),
 		},
+		{
+			name: "ordering of scope/target should not matter",
+			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				AddTargetInfoMetric(m)
+				AddScopeInfoMetric(m)
+				return m.ResourceMetrics()
+			},
+			input: testMetric(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := testMetric().ResourceMetrics()
+				scopeMetrics := metrics.At(0).ScopeMetrics()
+
+				// Insert a new, empty ScopeMetricsSlice for this resource that will hold target_info
+				sm := scopeMetrics.AppendEmpty()
+				metric := sm.Metrics().AppendEmpty()
+				metric.SetName("target_info")
+				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+				metric.Gauge().DataPoints().At(0).Attributes().PutStr("foo-label", "bar")
+
+				// Insert the scope_info metric into the existing ScopeMetricsSlice
+				sm = scopeMetrics.At(0)
+				scopeInfoMetric := sm.Metrics().AppendEmpty()
+				scopeInfoMetric.SetName("otel_scope_info")
+				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+
+				// add otel_scope_* attributes to all metrics in all scopes
+				// this includes otel_scope_info for the existing (input) ScopeMetrics,
+				// and target_info (which will have an empty scope)
+				for i := 0; i < sm.Metrics().Len(); i++ {
+					metric := sm.Metrics().At(i)
+					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+				}
+
+				return metrics
+			}(),
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			rms := tc.testFunc(tc.input)

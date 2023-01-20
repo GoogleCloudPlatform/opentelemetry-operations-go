@@ -79,6 +79,26 @@
          },
          "scopeMetrics":[
             {
+               "scope":{
+                  "name":"very_real_scope",
+                  "version":"0.0.2"
+               },
+               "metrics":[
+                  {
+                     "name":"metric_with_a_scope",
+                     "description":"This metric was added to the fixture manually to test that scope attributes are applied when present",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":2112
+                           }
+                        ]
+                     }
+                  }
+               ]
+            },
+            {
                "scope":{},
                "metrics":[
                   {
