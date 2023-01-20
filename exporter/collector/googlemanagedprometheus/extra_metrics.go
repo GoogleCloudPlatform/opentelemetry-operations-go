@@ -52,7 +52,6 @@ func AddTargetInfoMetric(m pmetric.Metrics) {
 func AddScopeInfoMetric(m pmetric.Metrics) {
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
-
 		sms := rms.At(i).ScopeMetrics()
 		for j := 0; j < sms.Len(); j++ {
 			sm := sms.At(j)

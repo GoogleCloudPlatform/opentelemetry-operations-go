@@ -194,9 +194,9 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 
 	// add extra metrics from the ExtraMetrics() extension point, combine into a new copy
 	if me.cfg.MetricConfig.ExtraMetrics != nil {
-		copy := pmetric.NewMetrics()
-		m.ResourceMetrics().CopyTo(copy.ResourceMetrics())
-		rms = me.cfg.MetricConfig.ExtraMetrics(copy)
+		metricsCopy := pmetric.NewMetrics()
+		m.ResourceMetrics().CopyTo(metricsCopy.ResourceMetrics())
+		rms = me.cfg.MetricConfig.ExtraMetrics(metricsCopy)
 	}
 
 	for i := 0; i < rms.Len(); i++ {
