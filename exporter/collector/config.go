@@ -35,6 +35,8 @@ import (
 
 const (
 	DefaultTimeout = 12 * time.Second // Consistent with Cloud Monitoring's timeout
+
+	CompressionGzip = "gzip"
 )
 
 // Config defines configuration for Google Cloud exporter.
@@ -62,6 +64,9 @@ type ClientConfig struct {
 	GetClientOptions func() []option.ClientOption
 
 	Endpoint string `mapstructure:"endpoint"`
+	// Compression specifies the compression format for Metrics and Logging gRPC requests.
+	// Supported values: gzip.
+	Compression string `mapstructure:"compression"`
 	// Only has effect if Endpoint is not ""
 	UseInsecure bool `mapstructure:"use_insecure"`
 	// GRPCPoolSize sets the size of the connection pool in the GCP client
@@ -211,6 +216,14 @@ func ValidateConfig(cfg Config) error {
 			return fmt.Errorf("unable to parse resource filter regex: %s", err.Error())
 		}
 	}
+
+	if len(cfg.LogConfig.ClientConfig.Compression) > 0 && cfg.LogConfig.ClientConfig.Compression != CompressionGzip {
+		return fmt.Errorf("unknown compression option '%s', allowed values: '', 'gzip'")
+	}
+	if len(cfg.MetricConfig.ClientConfig.Compression) > 0 && cfg.MetricConfig.ClientConfig.Compression != CompressionGzip {
+		return fmt.Errorf("unknown compression option '%s', allowed values: '', 'gzip'")
+	}
+
 	return nil
 }
 

@@ -40,8 +40,12 @@ import (
 	"google.golang.org/genproto/googleapis/api/label"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/googleapis/gax-go/v2"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 )
@@ -102,6 +106,15 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 	client, err := monitoring.NewMetricClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
+	}
+
+	if o.compression == "gzip" {
+		client.CallOptions.GetMetricDescriptor = append(client.CallOptions.CreateMetricDescriptor,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+		client.CallOptions.CreateMetricDescriptor = append(client.CallOptions.CreateMetricDescriptor,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+		client.CallOptions.CreateTimeSeries = append(client.CallOptions.CreateTimeSeries,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
 	}
 
 	cache := map[key]*googlemetricpb.MetricDescriptor{}

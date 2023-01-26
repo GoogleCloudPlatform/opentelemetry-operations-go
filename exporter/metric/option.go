@@ -56,6 +56,8 @@ type options struct {
 	// resource if the resource does not inherently belong to a specific
 	// project, e.g. on-premise resource like k8s_container or generic_task.
 	projectID string
+	// compression enables gzip compression on gRPC calls.
+	compression string
 	// monitoringClientOptions are additional options to be passed
 	// to the underlying Stackdriver Monitoring API client.
 	// Optional.
@@ -136,5 +138,12 @@ func NoAttributes(attribute.KeyValue) bool {
 func WithDisableCreateMetricDescriptors() func(o *options) {
 	return func(o *options) {
 		o.disableCreateMetricDescriptors = true
+	}
+}
+
+// WithCompression sets the compression to use for gRPC requests.
+func WithCompression(c string) func(o *options) {
+	return func(o *options) {
+		o.compression = c
 	}
 }

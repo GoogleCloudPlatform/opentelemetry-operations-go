@@ -21,6 +21,7 @@ require (
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.34.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.2
+	github.com/googleapis/gax-go/v2 v2.6.0
 	github.com/stretchr/testify v1.8.1
 	go.uber.org/multierr v1.8.0
 )
