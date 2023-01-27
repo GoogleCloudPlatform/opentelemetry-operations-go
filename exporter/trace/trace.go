@@ -22,7 +22,6 @@ import (
 	"time"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
-	gax "github.com/googleapis/gax-go/v2"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/multierr"
 	"google.golang.org/api/option"

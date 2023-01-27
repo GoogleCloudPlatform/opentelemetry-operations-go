@@ -27,7 +27,6 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
-	"github.com/googleapis/gax-go/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/googleapi"
@@ -124,14 +123,6 @@ func TestExporter_Retry(t *testing.T) {
 		WithTraceClientOptions(clientOpt),
 		// handle bundle as soon as span is received
 		WithErrorHandler(handler),
-		WithBatchRetry(gax.OnCodes([]grpccodes.Code{
-			grpccodes.Unavailable,
-			grpccodes.DeadlineExceeded,
-		}, gax.Backoff{
-			Initial:    100 * time.Millisecond,
-			Max:        1000 * time.Millisecond,
-			Multiplier: 1.20,
-		})),
 	)
 	assert.NoError(t, err)
 	tp := sdktrace.NewTracerProvider(
@@ -170,14 +161,6 @@ func TestExporter_RetryEnabled_NoRetries(t *testing.T) {
 	exporter, err := New(
 		WithProjectID("PROJECT_ID_NOT_REAL"),
 		WithTraceClientOptions(clientOpt),
-		WithBatchRetry(gax.OnCodes([]grpccodes.Code{
-			grpccodes.Unavailable,
-			grpccodes.DeadlineExceeded,
-		}, gax.Backoff{
-			Initial:    100 * time.Millisecond,
-			Max:        1000 * time.Millisecond,
-			Multiplier: 1.20,
-		})),
 	)
 	assert.NoError(t, err)
 	tp := sdktrace.NewTracerProvider(
@@ -257,7 +240,7 @@ func TestExporter_Timeout(t *testing.T) {
 	if got, want := len(handler.errs), 1; got != want {
 		t.Fatalf("len(exportErrors) = %q; want %q", got, want)
 	}
-	got, want := handler.errs[0].Error(), "rpc error: code = (DeadlineExceeded|Unknown) desc = context deadline exceeded"
+	got, want := handler.errs[0].Error(), "failed to export to Google Cloud Trace: context deadline exceeded"
 	if match, _ := regexp.MatchString(want, got); !match {
 		t.Fatalf("err.Error() = %q; want %q", got, want)
 	}
