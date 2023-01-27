@@ -31,6 +31,7 @@ import (
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/encoding/gzip"
 )
 
 const (
@@ -62,6 +63,9 @@ type ClientConfig struct {
 	GetClientOptions func() []option.ClientOption
 
 	Endpoint string `mapstructure:"endpoint"`
+	// Compression specifies the compression format for Metrics and Logging gRPC requests.
+	// Supported values: gzip.
+	Compression string `mapstructure:"compression"`
 	// Only has effect if Endpoint is not ""
 	UseInsecure bool `mapstructure:"use_insecure"`
 	// GRPCPoolSize sets the size of the connection pool in the GCP client
@@ -211,6 +215,17 @@ func ValidateConfig(cfg Config) error {
 			return fmt.Errorf("unable to parse resource filter regex: %s", err.Error())
 		}
 	}
+
+	if len(cfg.LogConfig.ClientConfig.Compression) > 0 && cfg.LogConfig.ClientConfig.Compression != gzip.Name {
+		return fmt.Errorf("unknown compression option '%s', allowed values: '', 'gzip'", cfg.LogConfig.ClientConfig.Compression)
+	}
+	if len(cfg.MetricConfig.ClientConfig.Compression) > 0 && cfg.MetricConfig.ClientConfig.Compression != gzip.Name {
+		return fmt.Errorf("unknown compression option '%s', allowed values: '', 'gzip'", cfg.MetricConfig.ClientConfig.Compression)
+	}
+	if len(cfg.TraceConfig.ClientConfig.Compression) > 0 {
+		return fmt.Errorf("traces.compression invalid: compression is only available for logs and metrics")
+	}
+
 	return nil
 }
 

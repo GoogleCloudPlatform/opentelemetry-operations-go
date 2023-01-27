@@ -29,7 +29,11 @@ import (
 	loggingv2 "cloud.google.com/go/logging/apiv2"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/googleapis/gax-go/v2"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 
@@ -138,6 +142,11 @@ func NewGoogleCloudLogsExporter(
 	loggingClient, err := loggingv2.NewClient(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
+	}
+
+	if cfg.LogConfig.ClientConfig.Compression == gzip.Name {
+		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
 	}
 
 	obs := selfObservability{

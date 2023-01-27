@@ -123,6 +123,7 @@ The following configuration options are supported:
 - `user_agent` (optional): Override the user agent string sent on requests to Cloud Monitoring (currently only applies to metrics). Specify `{{version}}` to include the application version number. Defaults to `opentelemetry-collector-contrib {{version}}`.
 - `use_insecure` (optional): If true. use gRPC as their communication transport. Only has effect if Endpoint is not "".
 - `timeout` (optional): Timeout for all API calls. If not set, defaults to 12 seconds.
+- `compression` (optional): Enable gzip compression on gRPC calls for Metrics or Logs. Valid values: `gzip`.
 - `resource_mappings` (optional): ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).
   - `label_mappings` (optional): Optional flag signals whether we can proceed with transformation if a label is missing in the resource.
 - `retry_on_failure` (optional): Configuration for how to handle retries when sending data to Google Cloud fails.
@@ -185,6 +186,7 @@ exporters:
     metric:
       prefix: prefix
       skip_create_descriptor: true
+      compression: gzip
 
     log:
       default_log_name: my-app

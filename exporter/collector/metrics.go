@@ -42,10 +42,14 @@ import (
 	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/googleapis/gax-go/v2"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/datapointstorage"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/normalization"
@@ -145,6 +149,16 @@ func NewGoogleCloudMetricsExporter(
 	if err != nil {
 		return nil, err
 	}
+
+	if cfg.MetricConfig.ClientConfig.Compression == gzip.Name {
+		client.CallOptions.CreateMetricDescriptor = append(client.CallOptions.CreateMetricDescriptor,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+		client.CallOptions.CreateTimeSeries = append(client.CallOptions.CreateTimeSeries,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+		client.CallOptions.CreateServiceTimeSeries = append(client.CallOptions.CreateServiceTimeSeries,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+	}
+
 	obs := selfObservability{log: log}
 	shutdown := make(chan struct{})
 	normalizer := normalization.NewDisabledNormalizer()
