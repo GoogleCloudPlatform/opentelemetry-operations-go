@@ -218,5 +218,13 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_empty_buckets_expected.json",
 		SkipForSDK:           true,
 	},
+	{
+		Name:                 "Basic Counter with gzip compression",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.ClientConfig.Compression = "gzip"
+		},
+	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }
