@@ -22,13 +22,11 @@ import (
 	"time"
 
 	traceapi "cloud.google.com/go/trace/apiv2"
-	gax "github.com/googleapis/gax-go/v2"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"google.golang.org/grpc/codes"
 
 	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -55,19 +53,6 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 
 	if cfg.DestinationProjectQuota {
 		topts = append(topts, cloudtrace.WithDestinationProjectQuota())
-	}
-
-	if cfg.TraceConfig.BatchRetry {
-		topts = append(topts, cloudtrace.WithBatchRetry(
-			gax.OnCodes([]codes.Code{
-				codes.Unavailable,
-				codes.DeadlineExceeded,
-			}, gax.Backoff{
-				Initial:    100 * time.Millisecond,
-				Max:        1000 * time.Millisecond,
-				Multiplier: 1.20,
-			}),
-		))
 	}
 
 	if cfg.TraceConfig.AttributeMappings != nil {

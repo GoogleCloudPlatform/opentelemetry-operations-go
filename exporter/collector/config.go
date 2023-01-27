@@ -75,9 +75,6 @@ type TraceConfig struct {
 	AttributeMappings []AttributeMapping `mapstructure:"attribute_mappings"`
 
 	ClientConfig ClientConfig `mapstructure:",squash"`
-
-	// BatchRetry enables retrying BatchWriteSpans requests on certain failures.
-	BatchRetry bool `mapstructure:"batch_retry"`
 }
 
 // AttributeMapping maps from an OpenTelemetry key to a Google Cloud Trace key.

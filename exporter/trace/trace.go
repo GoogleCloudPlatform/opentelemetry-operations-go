@@ -48,12 +48,6 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
 	}
 
-	if o.batchRetryer != nil {
-		client.CallOptions.BatchWriteSpans = []gax.CallOption{
-			gax.WithRetry(func() gax.Retryer { return o.batchRetryer }),
-		}
-	}
-
 	e := &traceExporter{
 		projectID:      o.projectID,
 		client:         client,
