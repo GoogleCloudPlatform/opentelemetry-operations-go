@@ -3,6 +3,9 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/colle
 go 1.18
 
 require (
+	cloud.google.com/go/logging v1.6.1
+	cloud.google.com/go/monitoring v1.12.0
+	cloud.google.com/go/trace v1.8.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.34.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.34.2
@@ -30,10 +33,7 @@ require (
 	cloud.google.com/go v0.107.0 // indirect
 	cloud.google.com/go/compute v1.14.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
-	cloud.google.com/go/logging v1.6.1 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
-	cloud.google.com/go/monitoring v1.8.0 // indirect
-	cloud.google.com/go/trace v1.8.0 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.10.2 // indirect
 	github.com/aws/aws-sdk-go v1.44.117 // indirect

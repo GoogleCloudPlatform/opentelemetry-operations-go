@@ -23,12 +23,12 @@ import (
 	"time"
 
 	"cloud.google.com/go/logging"
+	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 	"google.golang.org/genproto/googleapis/api/monitoredres"
-	logpb "google.golang.org/genproto/googleapis/logging/v2"
 )
 
 func newTestLogMapper(entrySize int) logMapper {

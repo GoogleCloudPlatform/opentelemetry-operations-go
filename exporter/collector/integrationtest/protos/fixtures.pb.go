@@ -21,9 +21,9 @@
 package protos
 
 import (
-	v21 "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
-	v2 "google.golang.org/genproto/googleapis/logging/v2"
-	v3 "google.golang.org/genproto/googleapis/monitoring/v3"
+	loggingpb "cloud.google.com/go/logging/apiv2/loggingpb"
+	monitoringpb "cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
+	tracepb "cloud.google.com/go/trace/apiv2/tracepb"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -42,10 +42,10 @@ type MetricExpectFixture struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CreateTimeSeriesRequests        []*v3.CreateTimeSeriesRequest       `protobuf:"bytes,1,rep,name=create_time_series_requests,json=createTimeSeriesRequests,proto3" json:"create_time_series_requests,omitempty"`
-	CreateMetricDescriptorRequests  []*v3.CreateMetricDescriptorRequest `protobuf:"bytes,2,rep,name=create_metric_descriptor_requests,json=createMetricDescriptorRequests,proto3" json:"create_metric_descriptor_requests,omitempty"`
-	CreateServiceTimeSeriesRequests []*v3.CreateTimeSeriesRequest       `protobuf:"bytes,3,rep,name=create_service_time_series_requests,json=createServiceTimeSeriesRequests,proto3" json:"create_service_time_series_requests,omitempty"`
-	SelfObservabilityMetrics        *SelfObservabilityMetric            `protobuf:"bytes,4,opt,name=self_observability_metrics,json=selfObservabilityMetrics,proto3" json:"self_observability_metrics,omitempty"`
+	CreateTimeSeriesRequests        []*monitoringpb.CreateTimeSeriesRequest       `protobuf:"bytes,1,rep,name=create_time_series_requests,json=createTimeSeriesRequests,proto3" json:"create_time_series_requests,omitempty"`
+	CreateMetricDescriptorRequests  []*monitoringpb.CreateMetricDescriptorRequest `protobuf:"bytes,2,rep,name=create_metric_descriptor_requests,json=createMetricDescriptorRequests,proto3" json:"create_metric_descriptor_requests,omitempty"`
+	CreateServiceTimeSeriesRequests []*monitoringpb.CreateTimeSeriesRequest       `protobuf:"bytes,3,rep,name=create_service_time_series_requests,json=createServiceTimeSeriesRequests,proto3" json:"create_service_time_series_requests,omitempty"`
+	SelfObservabilityMetrics        *SelfObservabilityMetric                      `protobuf:"bytes,4,opt,name=self_observability_metrics,json=selfObservabilityMetrics,proto3" json:"self_observability_metrics,omitempty"`
 }
 
 func (x *MetricExpectFixture) Reset() {
@@ -80,21 +80,21 @@ func (*MetricExpectFixture) Descriptor() ([]byte, []int) {
 	return file_fixtures_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *MetricExpectFixture) GetCreateTimeSeriesRequests() []*v3.CreateTimeSeriesRequest {
+func (x *MetricExpectFixture) GetCreateTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
 	if x != nil {
 		return x.CreateTimeSeriesRequests
 	}
 	return nil
 }
 
-func (x *MetricExpectFixture) GetCreateMetricDescriptorRequests() []*v3.CreateMetricDescriptorRequest {
+func (x *MetricExpectFixture) GetCreateMetricDescriptorRequests() []*monitoringpb.CreateMetricDescriptorRequest {
 	if x != nil {
 		return x.CreateMetricDescriptorRequests
 	}
 	return nil
 }
 
-func (x *MetricExpectFixture) GetCreateServiceTimeSeriesRequests() []*v3.CreateTimeSeriesRequest {
+func (x *MetricExpectFixture) GetCreateServiceTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
 	if x != nil {
 		return x.CreateServiceTimeSeriesRequests
 	}
@@ -113,8 +113,8 @@ type SelfObservabilityMetric struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	CreateTimeSeriesRequests       []*v3.CreateTimeSeriesRequest       `protobuf:"bytes,1,rep,name=create_time_series_requests,json=createTimeSeriesRequests,proto3" json:"create_time_series_requests,omitempty"`
-	CreateMetricDescriptorRequests []*v3.CreateMetricDescriptorRequest `protobuf:"bytes,2,rep,name=create_metric_descriptor_requests,json=createMetricDescriptorRequests,proto3" json:"create_metric_descriptor_requests,omitempty"`
+	CreateTimeSeriesRequests       []*monitoringpb.CreateTimeSeriesRequest       `protobuf:"bytes,1,rep,name=create_time_series_requests,json=createTimeSeriesRequests,proto3" json:"create_time_series_requests,omitempty"`
+	CreateMetricDescriptorRequests []*monitoringpb.CreateMetricDescriptorRequest `protobuf:"bytes,2,rep,name=create_metric_descriptor_requests,json=createMetricDescriptorRequests,proto3" json:"create_metric_descriptor_requests,omitempty"`
 }
 
 func (x *SelfObservabilityMetric) Reset() {
@@ -149,14 +149,14 @@ func (*SelfObservabilityMetric) Descriptor() ([]byte, []int) {
 	return file_fixtures_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *SelfObservabilityMetric) GetCreateTimeSeriesRequests() []*v3.CreateTimeSeriesRequest {
+func (x *SelfObservabilityMetric) GetCreateTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
 	if x != nil {
 		return x.CreateTimeSeriesRequests
 	}
 	return nil
 }
 
-func (x *SelfObservabilityMetric) GetCreateMetricDescriptorRequests() []*v3.CreateMetricDescriptorRequest {
+func (x *SelfObservabilityMetric) GetCreateMetricDescriptorRequests() []*monitoringpb.CreateMetricDescriptorRequest {
 	if x != nil {
 		return x.CreateMetricDescriptorRequests
 	}
@@ -168,7 +168,7 @@ type LogExpectFixture struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	WriteLogEntriesRequests []*v2.WriteLogEntriesRequest `protobuf:"bytes,1,rep,name=write_log_entries_requests,json=writeLogEntriesRequests,proto3" json:"write_log_entries_requests,omitempty"`
+	WriteLogEntriesRequests []*loggingpb.WriteLogEntriesRequest `protobuf:"bytes,1,rep,name=write_log_entries_requests,json=writeLogEntriesRequests,proto3" json:"write_log_entries_requests,omitempty"`
 }
 
 func (x *LogExpectFixture) Reset() {
@@ -203,7 +203,7 @@ func (*LogExpectFixture) Descriptor() ([]byte, []int) {
 	return file_fixtures_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *LogExpectFixture) GetWriteLogEntriesRequests() []*v2.WriteLogEntriesRequest {
+func (x *LogExpectFixture) GetWriteLogEntriesRequests() []*loggingpb.WriteLogEntriesRequest {
 	if x != nil {
 		return x.WriteLogEntriesRequests
 	}
@@ -215,7 +215,7 @@ type TraceExpectFixture struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BatchWriteSpansRequest []*v21.BatchWriteSpansRequest `protobuf:"bytes,1,rep,name=batch_write_spans_request,json=batchWriteSpansRequest,proto3" json:"batch_write_spans_request,omitempty"`
+	BatchWriteSpansRequest []*tracepb.BatchWriteSpansRequest `protobuf:"bytes,1,rep,name=batch_write_spans_request,json=batchWriteSpansRequest,proto3" json:"batch_write_spans_request,omitempty"`
 }
 
 func (x *TraceExpectFixture) Reset() {
@@ -250,7 +250,7 @@ func (*TraceExpectFixture) Descriptor() ([]byte, []int) {
 	return file_fixtures_proto_rawDescGZIP(), []int{3}
 }
 
-func (x *TraceExpectFixture) GetBatchWriteSpansRequest() []*v21.BatchWriteSpansRequest {
+func (x *TraceExpectFixture) GetBatchWriteSpansRequest() []*tracepb.BatchWriteSpansRequest {
 	if x != nil {
 		return x.BatchWriteSpansRequest
 	}
@@ -352,14 +352,14 @@ func file_fixtures_proto_rawDescGZIP() []byte {
 
 var file_fixtures_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_fixtures_proto_goTypes = []interface{}{
-	(*MetricExpectFixture)(nil),              // 0: fixtures.MetricExpectFixture
-	(*SelfObservabilityMetric)(nil),          // 1: fixtures.SelfObservabilityMetric
-	(*LogExpectFixture)(nil),                 // 2: fixtures.LogExpectFixture
-	(*TraceExpectFixture)(nil),               // 3: fixtures.TraceExpectFixture
-	(*v3.CreateTimeSeriesRequest)(nil),       // 4: google.monitoring.v3.CreateTimeSeriesRequest
-	(*v3.CreateMetricDescriptorRequest)(nil), // 5: google.monitoring.v3.CreateMetricDescriptorRequest
-	(*v2.WriteLogEntriesRequest)(nil),        // 6: google.logging.v2.WriteLogEntriesRequest
-	(*v21.BatchWriteSpansRequest)(nil),       // 7: google.tracing.v2.BatchWriteSpansRequest
+	(*MetricExpectFixture)(nil),                        // 0: fixtures.MetricExpectFixture
+	(*SelfObservabilityMetric)(nil),                    // 1: fixtures.SelfObservabilityMetric
+	(*LogExpectFixture)(nil),                           // 2: fixtures.LogExpectFixture
+	(*TraceExpectFixture)(nil),                         // 3: fixtures.TraceExpectFixture
+	(*monitoringpb.CreateTimeSeriesRequest)(nil),       // 4: google.monitoring.v3.CreateTimeSeriesRequest
+	(*monitoringpb.CreateMetricDescriptorRequest)(nil), // 5: google.monitoring.v3.CreateMetricDescriptorRequest
+	(*loggingpb.WriteLogEntriesRequest)(nil),           // 6: google.logging.v2.WriteLogEntriesRequest
+	(*tracepb.BatchWriteSpansRequest)(nil),             // 7: google.tracing.v2.BatchWriteSpansRequest
 }
 var file_fixtures_proto_depIdxs = []int32{
 	4, // 0: fixtures.MetricExpectFixture.create_time_series_requests:type_name -> google.monitoring.v3.CreateTimeSeriesRequest

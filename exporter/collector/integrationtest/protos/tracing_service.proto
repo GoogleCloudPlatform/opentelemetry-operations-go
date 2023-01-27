@@ -18,6 +18,6 @@
 
 syntax = "proto3";
 package google.tracing.v2;
-option go_package = "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2;tracing";
+option go_package = "cloud.google.com/go/trace/apiv2/tracepb;tracing";
 
 message BatchWriteSpansRequest {}

@@ -27,11 +27,11 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/trace"
 
+	"cloud.google.com/go/trace/apiv2/tracepb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
-	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	codepb "google.golang.org/genproto/googleapis/rpc/code"
 	"google.golang.org/grpc"
 	grpccodes "google.golang.org/grpc/codes"

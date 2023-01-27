@@ -10,7 +10,6 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.34.2
 	github.com/census-instrumentation/opencensus-proto v0.4.1
 	github.com/google/go-cmp v0.5.9
-	github.com/googleapis/gax-go/v2 v2.7.0
 	github.com/stretchr/testify v1.8.1
 	go.opencensus.io v0.24.0
 	go.opentelemetry.io/collector/pdata v1.0.0-rc2
@@ -41,6 +40,7 @@ require (
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.1 // indirect
+	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/kr/pretty v0.3.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect

@@ -20,11 +20,11 @@ import (
 	"testing"
 	"time"
 
+	cloudtracepb "cloud.google.com/go/trace/apiv2/tracepb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	cloudtracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
