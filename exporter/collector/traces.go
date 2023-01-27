@@ -50,9 +50,11 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 		cloudtrace.WithProjectID(cfg.ProjectID),
 		cloudtrace.WithTimeout(timeout),
 	}
+
 	if cfg.DestinationProjectQuota {
 		topts = append(topts, cloudtrace.WithDestinationProjectQuota())
 	}
+
 	if cfg.TraceConfig.AttributeMappings != nil {
 		topts = append(topts, cloudtrace.WithAttributeMapping(mappingFuncFromAKM(cfg.TraceConfig.AttributeMappings)))
 	}

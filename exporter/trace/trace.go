@@ -22,10 +22,10 @@ import (
 	"time"
 
 	traceclient "cloud.google.com/go/trace/apiv2"
+	"cloud.google.com/go/trace/apiv2/tracepb"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.uber.org/multierr"
 	"google.golang.org/api/option"
-	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -46,6 +46,7 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	if err != nil {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
 	}
+
 	e := &traceExporter{
 		projectID:      o.projectID,
 		client:         client,

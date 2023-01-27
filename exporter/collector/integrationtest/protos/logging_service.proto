@@ -18,6 +18,6 @@
 
 syntax = "proto3";
 package google.logging.v2;
-option go_package = "google.golang.org/genproto/googleapis/logging/v2;logging";
+option go_package = "cloud.google.com/go/logging/apiv2/loggingpb;logging";
 
 message WriteLogEntriesRequest{}
