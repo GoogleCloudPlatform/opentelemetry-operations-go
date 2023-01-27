@@ -144,7 +144,7 @@ func NewGoogleCloudLogsExporter(
 		return nil, err
 	}
 
-	if cfg.LogConfig.ClientConfig.Compression == CompressionGzip {
+	if cfg.LogConfig.ClientConfig.Compression == gzip.Name {
 		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries,
 			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
 	}

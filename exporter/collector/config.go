@@ -31,12 +31,11 @@ import (
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/encoding/gzip"
 )
 
 const (
 	DefaultTimeout = 12 * time.Second // Consistent with Cloud Monitoring's timeout
-
-	CompressionGzip = "gzip"
 )
 
 // Config defines configuration for Google Cloud exporter.
@@ -217,11 +216,14 @@ func ValidateConfig(cfg Config) error {
 		}
 	}
 
-	if len(cfg.LogConfig.ClientConfig.Compression) > 0 && cfg.LogConfig.ClientConfig.Compression != CompressionGzip {
-		return fmt.Errorf("unknown compression option '%s', allowed values: '', 'gzip'")
+	if len(cfg.LogConfig.ClientConfig.Compression) > 0 && cfg.LogConfig.ClientConfig.Compression != gzip.Name {
+		return fmt.Errorf("unknown compression option '%s', allowed values: '', 'gzip'", cfg.LogConfig.ClientConfig.Compression)
 	}
-	if len(cfg.MetricConfig.ClientConfig.Compression) > 0 && cfg.MetricConfig.ClientConfig.Compression != CompressionGzip {
-		return fmt.Errorf("unknown compression option '%s', allowed values: '', 'gzip'")
+	if len(cfg.MetricConfig.ClientConfig.Compression) > 0 && cfg.MetricConfig.ClientConfig.Compression != gzip.Name {
+		return fmt.Errorf("unknown compression option '%s', allowed values: '', 'gzip'", cfg.MetricConfig.ClientConfig.Compression)
+	}
+	if len(cfg.TraceConfig.ClientConfig.Compression) > 0 {
+		return fmt.Errorf("traces.compression invalid: compression is only available for logs and metrics")
 	}
 
 	return nil

@@ -150,7 +150,7 @@ func NewGoogleCloudMetricsExporter(
 		return nil, err
 	}
 
-	if cfg.MetricConfig.ClientConfig.Compression == CompressionGzip {
+	if cfg.MetricConfig.ClientConfig.Compression == gzip.Name {
 		client.CallOptions.CreateMetricDescriptor = append(client.CallOptions.CreateMetricDescriptor,
 			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
 		client.CallOptions.CreateTimeSeries = append(client.CallOptions.CreateTimeSeries,
