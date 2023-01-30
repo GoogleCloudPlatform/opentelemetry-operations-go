@@ -50,6 +50,8 @@ var versions = map[string]string{
 	"detectors/gcp/": stable,
 
 	"propagator/": unstable,
+
+	"e2e-test-server/": unstable,
 }
 
 type module string
