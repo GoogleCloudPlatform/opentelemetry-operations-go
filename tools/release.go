@@ -29,8 +29,8 @@ import (
 const (
 	prefix = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
 
-	stable   = "1.10.2"
-	unstable = "0.34.2"
+	stable   = "1.11.0"
+	unstable = "0.35.0"
 )
 
 var versions = map[string]string{
@@ -50,6 +50,8 @@ var versions = map[string]string{
 	"detectors/gcp/": stable,
 
 	"propagator/": unstable,
+
+	"e2e-test-server/": unstable,
 }
 
 type module string
