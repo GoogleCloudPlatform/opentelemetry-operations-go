@@ -31,6 +31,7 @@ import (
 	"google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding/gzip"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/googleapis/gax-go/v2"
@@ -171,42 +172,49 @@ func (l *LogsExporter) Shutdown(ctx context.Context) error {
 }
 
 func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
-	entries, err := l.mapper.createEntries(ld)
+	projectEntries, err := l.mapper.createEntries(ld)
 	if err != nil {
 		return err
 	}
 
 	errors := []error{}
-	entry := 0
-	currentBatchSize := 0
-	// Send entries in WriteRequest chunks
-	// TODO(damemi): Add integration test for batch request processing
-	for len(entries) > 0 {
-		// default to max int so that when we are at index=len we skip the size check to avoid panic
-		// (index=len is the break condition when we reassign entries=entries[len:])
-		entrySize := defaultMaxRequestSize
-		if entry < len(entries) {
-			entrySize = proto.Size(entries[entry])
-		}
+	for project, entries := range projectEntries {
+		entry := 0
+		currentBatchSize := 0
+		// Send entries in WriteRequest chunks
+		// TODO(damemi): Add integration test for batch request processing
+		for len(entries) > 0 {
+			// default to max int so that when we are at index=len we skip the size check to avoid panic
+			// (index=len is the break condition when we reassign entries=entries[len:])
+			entrySize := defaultMaxRequestSize
+			if entry < len(entries) {
+				entrySize = proto.Size(entries[entry])
+			}
 
-		// this block gets skipped if we are out of entries to check
-		if currentBatchSize+entrySize < defaultMaxRequestSize {
-			// if adding the current entry to the current batch doesn't go over the request size,
-			// increase the index and account for the new request size, then continue
-			currentBatchSize += entrySize
-			entry++
-			continue
-		}
+			// this block gets skipped if we are out of entries to check
+			if currentBatchSize+entrySize < defaultMaxRequestSize {
+				// if adding the current entry to the current batch doesn't go over the request size,
+				// increase the index and account for the new request size, then continue
+				currentBatchSize += entrySize
+				entry++
+				continue
+			}
 
-		// if the current entry goes over the request size (or we have gone over every entry, i.e. index=len),
-		// write the list up to but not including the current entry's index
-		_, err := l.writeLogEntries(ctx, entries[:entry])
-		if err != nil {
-			errors = append(errors, err)
-		}
+			// override destination project quota for this write request, if applicable
+			if l.cfg.DestinationProjectQuota {
+				ctx = metadata.NewOutgoingContext(ctx, metadata.New(map[string]string{"x-goog-user-project": strings.TrimPrefix(project, "projects/")}))
+			}
 
-		entries = entries[entry:]
-		entry = 0
+			// if the current entry goes over the request size (or we have gone over every entry, i.e. index=len),
+			// write the list up to but not including the current entry's index
+			_, err := l.writeLogEntries(ctx, entries[:entry])
+			if err != nil {
+				errors = append(errors, err)
+			}
+
+			entries = entries[entry:]
+			entry = 0
+		}
 	}
 
 	if len(errors) > 0 {
@@ -215,9 +223,12 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 	return nil
 }
 
-func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
+func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, error) {
+	// if destination_project_quota is enabled, projectMapKey will be the name of the project for each batch of entries
+	// otherwise, we can mix project entries for more efficient batching and store all entries in a single list
+	projectMapKey := "google-destination-quota-disabled"
 	errors := []error{}
-	entries := make([]*logpb.LogEntry, 0)
+	entries := make(map[string][]*logpb.LogEntry)
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr := defaultResourceToMonitoredResource(rl.Resource())
@@ -269,7 +280,13 @@ func (l logMapper) createEntries(ld plog.Logs) ([]*logpb.LogEntry, error) {
 						errors = append(errors, err)
 						continue
 					}
-					entries = append(entries, internalLogEntry)
+					if l.cfg.DestinationProjectQuota {
+						projectMapKey = projectID
+					}
+					if _, ok := entries[projectMapKey]; !ok {
+						entries[projectMapKey] = make([]*logpb.LogEntry, 0)
+					}
+					entries[projectMapKey] = append(entries[projectMapKey], internalLogEntry)
 				}
 			}
 		}
