@@ -33,6 +33,14 @@ var LogsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/logs/logs_multi_project_expected.json",
 	},
 	{
+		Name:                 "Multi-project logs with destination_project_quota enabled",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_multi_project.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_multi_project_destination_quota_expected.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.DestinationProjectQuota = true
+		},
+	},
+	{
 		Name:                 "Logs with scope information",
 		OTLPInputFixturePath: "testdata/fixtures/logs/logs_apache_error_scope.json",
 		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_error_scope_expected.json",
