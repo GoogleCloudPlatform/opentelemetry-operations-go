@@ -16,6 +16,7 @@ package integrationtest
 
 import (
 	"context"
+	"sort"
 	"testing"
 	"time"
 
@@ -53,12 +54,20 @@ func TestLogs(t *testing.T) {
 				t,
 				timestamp,
 			)
+			sort.Slice(expectFixture.WriteLogEntriesRequests, func(i, j int) bool {
+				return expectFixture.WriteLogEntriesRequests[i].LogName < expectFixture.WriteLogEntriesRequests[j].LogName
+			})
+
+			fixture := &protos.LogExpectFixture{
+				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
+			}
+			sort.Slice(fixture.WriteLogEntriesRequests, func(i, j int) bool {
+				return fixture.WriteLogEntriesRequests[i].LogName < fixture.WriteLogEntriesRequests[j].LogName
+			})
 
 			diff := DiffLogProtos(
 				t,
-				&protos.LogExpectFixture{
-					WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
-				},
+				fixture,
 				expectFixture,
 			)
 
