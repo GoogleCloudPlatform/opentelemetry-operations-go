@@ -3,7 +3,7 @@
     {
       "entries": [
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -26,7 +26,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -49,7 +49,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -72,7 +72,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -95,7 +95,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -118,7 +118,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -141,7 +141,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -164,7 +164,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -187,7 +187,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -210,7 +210,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -233,7 +233,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -256,7 +256,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -279,7 +279,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -302,7 +302,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -325,7 +325,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -348,7 +348,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -371,7 +371,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -391,7 +391,7 @@
     {
       "entries": [
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -414,7 +414,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -437,7 +437,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -460,7 +460,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -483,7 +483,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -506,7 +506,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -529,7 +529,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -552,7 +552,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -575,7 +575,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -598,7 +598,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -621,7 +621,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -644,7 +644,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -667,7 +667,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -690,7 +690,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -713,7 +713,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -736,7 +736,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -759,7 +759,7 @@
           }
         },
         {
-          "logName": "projects/fake-other-project/logs/multi-project",
+          "logName": "projects/fakeprojectid/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {

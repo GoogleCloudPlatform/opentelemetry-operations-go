@@ -3,214 +3,7 @@
     {
       "entries": [
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:36 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /lamp.png HTTP/1.1\" 200 51164",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/lamp.png",
-            "status": 200,
-            "responseSize": "51164",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /favicon.ico HTTP/1.1\" 200 3990",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/favicon.ico",
-            "status": 200,
-            "responseSize": "3990",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:51 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:52 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -233,7 +26,7 @@
           }
         },
         {
-          "logName": "projects/fakeprojectid/logs/multi-project",
+          "logName": "projects/fake-other-project/logs/multi-project",
           "resource": {
             "type": "gce_instance",
             "labels": {
@@ -251,136 +44,6 @@
             "remoteIp": "127.0.0.1",
             "protocol": "HTTP/1.1"
           },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.2 - - [26/Apr/2022:22:54:38 +0800] \"GET / HTTP/1.1\" 200 4429",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "4429",
-            "remoteIp": "127.0.0.2",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:54:43 +0800] \"-\" 408 -",
-          "timestamp": "1970-01-01T00:00:00Z",
           "labels": {
             "log.file.name": "test.log"
           }
@@ -417,145 +80,7 @@
               "zone": ""
             }
           },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /lamp.png HTTP/1.1\" 200 51164",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/lamp.png",
-            "status": 200,
-            "responseSize": "51164",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fake-other-project/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /favicon.ico HTTP/1.1\" 200 3990",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/favicon.ico",
-            "status": 200,
-            "responseSize": "3990",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fake-other-project/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:51 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fake-other-project/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:52 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fake-other-project/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fake-other-project/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fake-other-project/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
           "timestamp": "1970-01-01T00:00:00Z",
           "httpRequest": {
             "requestMethod": "GET",
@@ -647,76 +172,7 @@
               "zone": ""
             }
           },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fake-other-project/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fake-other-project/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
-          "timestamp": "1970-01-01T00:00:00Z",
-          "httpRequest": {
-            "requestMethod": "GET",
-            "requestUrl": "/",
-            "status": 200,
-            "responseSize": "1247",
-            "remoteIp": "127.0.0.1",
-            "protocol": "HTTP/1.1"
-          },
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fake-other-project/logs/multi-project",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
           "timestamp": "1970-01-01T00:00:00Z",
           "httpRequest": {
             "requestMethod": "GET",
@@ -764,6 +220,550 @@
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:54:43 +0800] \"-\" 408 -",
           "timestamp": "1970-01-01T00:00:00Z",
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fake-other-project/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fake-other-project/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fake-other-project/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fake-other-project/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:52 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fake-other-project/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:51 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fake-other-project/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /favicon.ico HTTP/1.1\" 200 3990",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/favicon.ico",
+            "status": 200,
+            "responseSize": "3990",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fake-other-project/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /lamp.png HTTP/1.1\" 200 51164",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/lamp.png",
+            "status": 200,
+            "responseSize": "51164",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:54:43 +0800] \"-\" 408 -",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.2 - - [26/Apr/2022:22:54:38 +0800] \"GET / HTTP/1.1\" 200 4429",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "4429",
+            "remoteIp": "127.0.0.2",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:36 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:52 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:51 +0800] \"GET / HTTP/1.1\" 200 1247",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/",
+            "status": 200,
+            "responseSize": "1247",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /favicon.ico HTTP/1.1\" 200 3990",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/favicon.ico",
+            "status": 200,
+            "responseSize": "3990",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/multi-project",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /lamp.png HTTP/1.1\" 200 51164",
+          "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "GET",
+            "requestUrl": "/lamp.png",
+            "status": 200,
+            "responseSize": "51164",
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
           "labels": {
             "log.file.name": "test.log"
           }

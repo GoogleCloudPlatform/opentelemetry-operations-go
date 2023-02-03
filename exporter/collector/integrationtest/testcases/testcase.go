@@ -236,7 +236,11 @@ func (tc *TestCase) SaveRecordedLogFixtures(
 // Normalizes timestamps which create noise in the fixture because they can
 // vary each test run.
 func NormalizeLogFixture(t testing.TB, fixture *protos.LogExpectFixture) {
-	for _, req := range fixture.WriteLogEntriesRequests {
+	for listIndex, req := range fixture.WriteLogEntriesRequests {
+		// sort the entries in each request
+		sort.Slice(fixture.WriteLogEntriesRequests[listIndex].Entries, func(i, j int) bool {
+			return fixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < fixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName
+		})
 		for _, entry := range req.Entries {
 			// Normalize timestamps if they are set
 			if entry.GetTimestamp() != nil {
@@ -244,6 +248,14 @@ func NormalizeLogFixture(t testing.TB, fixture *protos.LogExpectFixture) {
 			}
 		}
 	}
+	// sort each request. if the requests have the same name (or just as likely, they both have no name set at the request level),
+	// peek at the first entry's logname in the request
+	sort.Slice(fixture.WriteLogEntriesRequests, func(i, j int) bool {
+		if fixture.WriteLogEntriesRequests[i].LogName != fixture.WriteLogEntriesRequests[j].LogName {
+			return fixture.WriteLogEntriesRequests[i].LogName < fixture.WriteLogEntriesRequests[j].LogName
+		}
+		return fixture.WriteLogEntriesRequests[i].Entries[0].LogName < fixture.WriteLogEntriesRequests[j].Entries[0].LogName
+	})
 }
 
 // Load OTLP metric fixture, test expectation fixtures and modify them so they're suitable for

@@ -54,15 +54,38 @@ func TestLogs(t *testing.T) {
 				t,
 				timestamp,
 			)
+
+			// sort the entries in each request
+			for listIndex := 0; listIndex < len(expectFixture.WriteLogEntriesRequests); listIndex++ {
+				sort.Slice(expectFixture.WriteLogEntriesRequests[listIndex].Entries, func(i, j int) bool {
+					return expectFixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < expectFixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName
+				})
+			}
+			// sort each request. if the requests have the same name (or just as likely, they both have no name set at the request level),
+			// peek at the first entry's logname in the request
 			sort.Slice(expectFixture.WriteLogEntriesRequests, func(i, j int) bool {
-				return expectFixture.WriteLogEntriesRequests[i].LogName < expectFixture.WriteLogEntriesRequests[j].LogName
+				if expectFixture.WriteLogEntriesRequests[i].LogName != expectFixture.WriteLogEntriesRequests[j].LogName {
+					return expectFixture.WriteLogEntriesRequests[i].LogName < expectFixture.WriteLogEntriesRequests[j].LogName
+				}
+				return expectFixture.WriteLogEntriesRequests[i].Entries[0].LogName < expectFixture.WriteLogEntriesRequests[j].Entries[0].LogName
 			})
 
 			fixture := &protos.LogExpectFixture{
 				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
 			}
+			// sort the entries in each request
+			for listIndex := 0; listIndex < len(fixture.WriteLogEntriesRequests); listIndex++ {
+				sort.Slice(fixture.WriteLogEntriesRequests[listIndex].Entries, func(i, j int) bool {
+					return fixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < fixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName
+				})
+			}
+			// sort each request. if the requests have the same name (or just as likely, they both have no name set at the request level),
+			// peek at the first entry's logname in the request
 			sort.Slice(fixture.WriteLogEntriesRequests, func(i, j int) bool {
-				return fixture.WriteLogEntriesRequests[i].LogName < fixture.WriteLogEntriesRequests[j].LogName
+				if fixture.WriteLogEntriesRequests[i].LogName != fixture.WriteLogEntriesRequests[j].LogName {
+					return fixture.WriteLogEntriesRequests[i].LogName < fixture.WriteLogEntriesRequests[j].LogName
+				}
+				return fixture.WriteLogEntriesRequests[i].Entries[0].LogName < fixture.WriteLogEntriesRequests[j].Entries[0].LogName
 			})
 
 			diff := DiffLogProtos(
