@@ -226,7 +226,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, error) {
 	// if destination_project_quota is enabled, projectMapKey will be the name of the project for each batch of entries
 	// otherwise, we can mix project entries for more efficient batching and store all entries in a single list
-	projectMapKey := "google-destination-quota-disabled"
+	projectMapKey := ""
 	errors := []error{}
 	entries := make(map[string][]*logpb.LogEntry)
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
