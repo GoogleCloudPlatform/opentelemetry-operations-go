@@ -58,7 +58,10 @@ func TestLogs(t *testing.T) {
 			// sort the entries in each request
 			for listIndex := 0; listIndex < len(expectFixture.WriteLogEntriesRequests); listIndex++ {
 				sort.Slice(expectFixture.WriteLogEntriesRequests[listIndex].Entries, func(i, j int) bool {
-					return expectFixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < expectFixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName
+					if expectFixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName != expectFixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName {
+						return expectFixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < expectFixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName
+					}
+					return expectFixture.WriteLogEntriesRequests[listIndex].Entries[i].String() < expectFixture.WriteLogEntriesRequests[listIndex].Entries[j].String()
 				})
 			}
 			// sort each request. if the requests have the same name (or just as likely, they both have no name set at the request level),
@@ -76,7 +79,10 @@ func TestLogs(t *testing.T) {
 			// sort the entries in each request
 			for listIndex := 0; listIndex < len(fixture.WriteLogEntriesRequests); listIndex++ {
 				sort.Slice(fixture.WriteLogEntriesRequests[listIndex].Entries, func(i, j int) bool {
-					return fixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < fixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName
+					if fixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < fixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName {
+						return fixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < fixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName
+					}
+					return fixture.WriteLogEntriesRequests[listIndex].Entries[i].String() < fixture.WriteLogEntriesRequests[listIndex].Entries[j].String()
 				})
 			}
 			// sort each request. if the requests have the same name (or just as likely, they both have no name set at the request level),

@@ -239,7 +239,10 @@ func NormalizeLogFixture(t testing.TB, fixture *protos.LogExpectFixture) {
 	for listIndex, req := range fixture.WriteLogEntriesRequests {
 		// sort the entries in each request
 		sort.Slice(fixture.WriteLogEntriesRequests[listIndex].Entries, func(i, j int) bool {
-			return fixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < fixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName
+			if fixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < fixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName {
+				return fixture.WriteLogEntriesRequests[listIndex].Entries[i].LogName < fixture.WriteLogEntriesRequests[listIndex].Entries[j].LogName
+			}
+			return fixture.WriteLogEntriesRequests[listIndex].Entries[i].String() < fixture.WriteLogEntriesRequests[listIndex].Entries[j].String()
 		})
 		for _, entry := range req.Entries {
 			// Normalize timestamps if they are set
