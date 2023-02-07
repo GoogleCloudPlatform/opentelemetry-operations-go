@@ -119,7 +119,7 @@ integrationtest:
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "go test ./... + race in $${dir}"; \
 	  (cd "$${dir}" && \
-	    $(GOTEST_RACE) -tags=integrationtest -run=TestIntegration ./...); \
+	    $(GOTEST_RACE) -tags=integrationtest -run=TestIntegration -timeout 300s ./...); \
 	done
 
 .PHONY: test-short

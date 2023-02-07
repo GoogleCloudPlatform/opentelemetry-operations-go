@@ -65,9 +65,10 @@ func TestIntegrationCollectorMetrics(t *testing.T) {
 		startTime := now.Add(-test.StartTimeOffset)
 		if test.StartTimeOffset == 0 {
 			startTime.Add(-time.Second)
+		} else {
 			// we must be working with metrics that will be written multiple times.
 			// Make sure we don't exceed the writing frequency.
-			time.Sleep(5*time.Second)
+			time.Sleep(5 * time.Second)
 		}
 
 		t.Run(test.Name, func(t *testing.T) {
@@ -97,10 +98,11 @@ func TestIntegrationSDKMetrics(t *testing.T) {
 		startTime := now.Add(-test.StartTimeOffset)
 		if test.StartTimeOffset == 0 {
 			startTime.Add(-time.Second)
+		} else {
+			// we must be working with metrics that will be written multiple times.
+			// Make sure we don't exceed the writing frequency.
+			time.Sleep(5 * time.Second)
 		}
-		// we must be working with metrics that will be written multiple times.
-		// Make sure we don't exceed the writing frequency.
-		time.Sleep(5*time.Second)
 
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeededForSDK(t)
