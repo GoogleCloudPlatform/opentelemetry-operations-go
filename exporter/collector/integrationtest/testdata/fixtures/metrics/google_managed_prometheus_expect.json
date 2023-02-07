@@ -5,7 +5,11 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/metric_with_a_scope/gauge"
+            "type": "prometheus.googleapis.com/metric_with_a_scope/gauge",
+            "labels": {
+              "otel_scope_name": "very_real_scope",
+              "otel_scope_version": "0.0.2"
+            }
           },
           "resource": {
             "type": "prometheus_target",
@@ -26,6 +30,37 @@
               },
               "value": {
                 "doubleValue": 2112
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_scope_info/gauge",
+            "labels": {
+              "otel_scope_name": "very_real_scope",
+              "otel_scope_version": "0.0.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
               }
             }
           ]
@@ -668,6 +703,42 @@
               }
             }
           ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/target_info/gauge",
+            "labels": {
+              "cloud_platform": "gcp_kubernetes_engine",
+              "http_scheme": "http",
+              "k8s_container_name": "rabbitmq",
+              "k8s_node_name": "10.92.5.2",
+              "k8s_pod_name": "rabbitmq-server-0",
+              "net_host_ip": "10.92.5.2",
+              "net_host_port": "15692"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
         }
       ]
     }
@@ -694,7 +765,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "20"
+                  "int64Value": "22"
                 }
               }
             ]
