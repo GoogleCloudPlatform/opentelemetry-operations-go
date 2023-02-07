@@ -1,0 +1,84 @@
+
+  {
+    "resourceMetrics": [
+      {
+        "resource": {
+          "attributes": [
+            {
+              "key": "host.name",
+              "value": {
+                "stringValue": "big-fish.izibook.com"
+              }
+            },
+            {
+              "key": "os.type",
+              "value": {
+                "stringValue": "linux"
+              }
+            }
+          ]
+        },
+        "scopeMetrics": [
+          {
+            "scope": {
+              "name": "otelcol/hostmetricsreceiver/network",
+              "version": "1.0.0"
+            },
+            "metrics": [
+              {
+                "name": "system.network.io",
+                "description": "The number of bytes transmitted and received. (Deprecated)",
+                "unit": "By",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "device",
+                          "value": {
+                            "stringValue": "enp1s0f0"
+                          }
+                        },
+                        {
+                          "key": "direction",
+                          "value": {
+                            "stringValue": "transmit"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1590447652000000000",
+                      "timeUnixNano": "1674725100519488209",
+                      "asInt": "60276535203604"
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "device",
+                          "value": {
+                            "stringValue": "enp1s0f0"
+                          }
+                        },
+                        {
+                          "key": "direction",
+                          "value": {
+                            "stringValue": "receive"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1590447652000000000",
+                      "timeUnixNano": "1674725100519488209",
+                      "asInt": "1845251608565"
+                    }
+                  ],
+                  "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
+                  "isMonotonic": true
+                }
+              }
+            ]
+          }
+        ],
+        "schemaUrl": "https://opentelemetry.io/schemas/1.9.0"
+      }
+    ]
+  }
+  

@@ -226,5 +226,35 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.ClientConfig.Compression = "gzip"
 		},
 	},
+	{
+		Name:                 "Network IO metrics from the hostmetrics receiver 1",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/network_io_metrics_1.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/network_io_metrics_1_expect.json",
+	},
+	{
+		Name:                 "Network IO metrics from the hostmetrics receiver 2",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/network_io_metrics_2.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/network_io_metrics_2_expect.json",
+	},
+	{
+		Name:                 "Network IO metrics from the hostmetrics receiver 3",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/network_io_metrics_3.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/network_io_metrics_3_expect.json",
+	},
+	{
+		Name:                 "Network IO metrics from the hostmetrics receiver 4",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/network_io_metrics_4.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/network_io_metrics_4_expect.json",
+	},
+	{
+		Name:                 "Network IO metrics from the hostmetrics receiver 5",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/network_io_metrics_5.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/network_io_metrics_5_expect.json",
+	},
+	{
+		Name:                 "Network IO metrics from the hostmetrics receiver 6",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/network_io_metrics_6.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/network_io_metrics_6_expect.json",
+	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }
