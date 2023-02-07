@@ -56,11 +56,19 @@ func createMetricsExporter(
 
 func TestIntegrationCollectorMetrics(t *testing.T) {
 	ctx := context.Background()
-	endTime := time.Now()
-	startTime := endTime.Add(-time.Second)
+	now := time.Now()
 
 	for _, test := range testcases.MetricsTestCases {
 		test := test
+
+		endTime := now.Add(-test.TimeOffset)
+		startTime := now.Add(-test.StartTimeOffset)
+		if test.StartTimeOffset == 0 {
+			startTime.Add(-time.Second)
+			// we must be working with metrics that will be written multiple times.
+			// Make sure we don't exceed the writing frequency.
+			time.Sleep(5*time.Second)
+		}
 
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeeded(t)
@@ -80,11 +88,19 @@ func TestIntegrationCollectorMetrics(t *testing.T) {
 
 func TestIntegrationSDKMetrics(t *testing.T) {
 	ctx := context.Background()
-	endTime := time.Now()
-	startTime := endTime.Add(-time.Second)
+	now := time.Now()
 
 	for _, test := range testcases.MetricsTestCases {
 		test := test
+
+		endTime := now.Add(-test.TimeOffset)
+		startTime := now.Add(-test.StartTimeOffset)
+		if test.StartTimeOffset == 0 {
+			startTime.Add(-time.Second)
+		}
+		// we must be working with metrics that will be written multiple times.
+		// Make sure we don't exceed the writing frequency.
+		time.Sleep(5*time.Second)
 
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeededForSDK(t)

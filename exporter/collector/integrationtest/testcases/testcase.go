@@ -72,6 +72,12 @@ type TestCase struct {
 	SkipForSDK bool
 	// ExpectErr sets whether the test is expected to fail
 	ExpectErr bool
+	// StartTimeOffset is the amount of time to subtract from Now() to use for the
+	// start time for integration tests. Defaults to 1 second
+	StartTimeOffset time.Duration
+	// TimeOffset is the amount of time to subtract from Now() to use for the
+	// end time for integration tests. Defaults to 0
+	TimeOffset time.Duration
 }
 
 func (tc *TestCase) LoadOTLPTracesInput(
