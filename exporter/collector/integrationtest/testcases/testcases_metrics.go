@@ -17,7 +17,6 @@ package testcases
 import (
 	"strings"
 
-	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 
@@ -134,11 +133,12 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.SkipCreateMetricDescriptor = true
 			cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName
 			cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
-			cfg.MetricConfig.ExtraMetrics = func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				googlemanagedprometheus.AddScopeInfoMetric(m)
-				googlemanagedprometheus.AddTargetInfoMetric(m)
-				return m.ResourceMetrics()
-			}
+			// TODO(#584): re-enable this portion of the test.
+			// cfg.MetricConfig.ExtraMetrics = func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+			// 	googlemanagedprometheus.AddScopeInfoMetric(m)
+			// 	googlemanagedprometheus.AddTargetInfoMetric(m)
+			// 	return m.ResourceMetrics()
+			// }
 			cfg.MetricConfig.InstrumentationLibraryLabels = false
 			cfg.MetricConfig.ServiceResourceLabels = false
 			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
