@@ -15,6 +15,8 @@
 package googlemanagedprometheus
 
 import (
+	"time"
+
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
@@ -35,6 +37,7 @@ func AddTargetInfoMetric(m pmetric.Metrics) {
 
 		dataPoint := targetInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty()
 		dataPoint.SetIntValue(1)
+		dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
 		// copy Resource attributes to the metric except for attributes which will already be present in the MonitoredResource labels
 		rm.Resource().Attributes().Range(func(k string, v pcommon.Value) bool {
@@ -65,6 +68,7 @@ func AddScopeInfoMetric(m pmetric.Metrics) {
 			scopeInfoMetric.SetName("otel_scope_info")
 			dataPoint := scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty()
 			dataPoint.SetIntValue(1)
+			dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 			sm.Scope().Attributes().Range(func(k string, v pcommon.Value) bool {
 				dataPoint.Attributes().PutStr(k, v.AsString())
 				return true
