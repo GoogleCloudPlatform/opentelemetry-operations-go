@@ -54,7 +54,7 @@ func createMetricsExporter(
 	return exporter
 }
 
-func TestCollectorIntegrationMetrics(t *testing.T) {
+func TestIntegrationCollectorMetrics(t *testing.T) {
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
@@ -78,7 +78,7 @@ func TestCollectorIntegrationMetrics(t *testing.T) {
 	}
 }
 
-func TestSDKIntegrationMetrics(t *testing.T) {
+func TestIntegrationSDKMetrics(t *testing.T) {
 	ctx := context.Background()
 	endTime := time.Now()
 	startTime := endTime.Add(-time.Second)
