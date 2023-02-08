@@ -48,7 +48,7 @@
                       ],
                       "startTimeUnixNano": "1590447652000000000",
                       "timeUnixNano": "1674724920520484033",
-                      "asInt": "60276373149927"
+                      "asInt": "59659895"
                     },
                     {
                       "attributes": [
@@ -67,7 +67,7 @@
                       ],
                       "startTimeUnixNano": "1590447652000000000",
                       "timeUnixNano": "1674724920520484033",
-                      "asInt": "1845246406833"
+                      "asInt": "2563084"
                     }
                   ],
                   "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE",
