@@ -16,12 +16,14 @@ package googlemanagedprometheus
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-func testMetric() pmetric.Metrics {
+func testMetric(timestamp time.Time) pmetric.Metrics {
 	metrics := pmetric.NewMetrics()
 	rm := metrics.ResourceMetrics().AppendEmpty()
 
@@ -38,10 +40,12 @@ func testMetric() pmetric.Metrics {
 	metric := sm.Metrics().AppendEmpty()
 	metric.SetName("baz-metric")
 	metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(2112)
+	metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 	return metrics
 }
 
 func TestAddExtraMetrics(t *testing.T) {
+	timestamp := time.Now()
 	for _, tc := range []struct {
 		testFunc func(pmetric.Metrics) pmetric.ResourceMetricsSlice
 		input    pmetric.Metrics
@@ -54,9 +58,9 @@ func TestAddExtraMetrics(t *testing.T) {
 				AddTargetInfoMetric(m)
 				return m.ResourceMetrics()
 			},
-			input: testMetric(),
+			input: testMetric(timestamp),
 			expected: func() pmetric.ResourceMetricsSlice {
-				metrics := testMetric().ResourceMetrics()
+				metrics := testMetric(timestamp).ResourceMetrics()
 
 				// Insert a new, empty ScopeMetricsSlice for this resource that will hold target_info
 				sm := metrics.At(0).ScopeMetrics().AppendEmpty()
@@ -64,6 +68,7 @@ func TestAddExtraMetrics(t *testing.T) {
 				metric.SetName("target_info")
 				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
 				metric.Gauge().DataPoints().At(0).Attributes().PutStr("foo-label", "bar")
+				metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 				return metrics
 			}(),
 		},
@@ -73,9 +78,9 @@ func TestAddExtraMetrics(t *testing.T) {
 				AddScopeInfoMetric(m)
 				return m.ResourceMetrics()
 			},
-			input: testMetric(),
+			input: testMetric(timestamp),
 			expected: func() pmetric.ResourceMetricsSlice {
-				metrics := testMetric().ResourceMetrics()
+				metrics := testMetric(timestamp).ResourceMetrics()
 
 				// Insert the scope_info metric into the existing ScopeMetricsSlice
 				sm := metrics.At(0).ScopeMetrics().At(0)
@@ -88,6 +93,7 @@ func TestAddExtraMetrics(t *testing.T) {
 					metric := sm.Metrics().At(i)
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 				}
 				return metrics
 			}(),
@@ -99,12 +105,12 @@ func TestAddExtraMetrics(t *testing.T) {
 				return m.ResourceMetrics()
 			},
 			input: func() pmetric.Metrics {
-				metrics := testMetric()
+				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Scope().Attributes().PutStr("foo_attribute", "bar")
 				return metrics
 			}(),
 			expected: func() pmetric.ResourceMetricsSlice {
-				metrics := testMetric().ResourceMetrics()
+				metrics := testMetric(timestamp).ResourceMetrics()
 				metrics.At(0).ScopeMetrics().At(0).Scope().Attributes().PutStr("foo_attribute", "bar")
 
 				// Insert the scope_info metric into the existing ScopeMetricsSlice
@@ -119,6 +125,7 @@ func TestAddExtraMetrics(t *testing.T) {
 					metric := sm.Metrics().At(i)
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					scopeInfoMetric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 				}
 				return metrics
 			}(),
@@ -130,9 +137,9 @@ func TestAddExtraMetrics(t *testing.T) {
 				AddTargetInfoMetric(m)
 				return m.ResourceMetrics()
 			},
-			input: testMetric(),
+			input: testMetric(timestamp),
 			expected: func() pmetric.ResourceMetricsSlice {
-				metrics := testMetric().ResourceMetrics()
+				metrics := testMetric(timestamp).ResourceMetrics()
 				scopeMetrics := metrics.At(0).ScopeMetrics()
 
 				// Insert a new, empty ScopeMetricsSlice for this resource that will hold target_info
@@ -141,6 +148,7 @@ func TestAddExtraMetrics(t *testing.T) {
 				metric.SetName("target_info")
 				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
 				metric.Gauge().DataPoints().At(0).Attributes().PutStr("foo-label", "bar")
+				metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				// Insert the scope_info metric into the existing ScopeMetricsSlice
 				sm = scopeMetrics.At(0)
@@ -155,6 +163,7 @@ func TestAddExtraMetrics(t *testing.T) {
 					metric := sm.Metrics().At(i)
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 				}
 
 				return metrics
@@ -167,9 +176,9 @@ func TestAddExtraMetrics(t *testing.T) {
 				AddScopeInfoMetric(m)
 				return m.ResourceMetrics()
 			},
-			input: testMetric(),
+			input: testMetric(timestamp),
 			expected: func() pmetric.ResourceMetricsSlice {
-				metrics := testMetric().ResourceMetrics()
+				metrics := testMetric(timestamp).ResourceMetrics()
 				scopeMetrics := metrics.At(0).ScopeMetrics()
 
 				// Insert a new, empty ScopeMetricsSlice for this resource that will hold target_info
@@ -178,6 +187,7 @@ func TestAddExtraMetrics(t *testing.T) {
 				metric.SetName("target_info")
 				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
 				metric.Gauge().DataPoints().At(0).Attributes().PutStr("foo-label", "bar")
+				metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				// Insert the scope_info metric into the existing ScopeMetricsSlice
 				sm = scopeMetrics.At(0)
@@ -192,6 +202,7 @@ func TestAddExtraMetrics(t *testing.T) {
 					metric := sm.Metrics().At(i)
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 				}
 
 				return metrics
@@ -204,41 +215,49 @@ func TestAddExtraMetrics(t *testing.T) {
 				return m.ResourceMetrics()
 			},
 			input: func() pmetric.Metrics {
-				metrics := testMetric()
+				metrics := testMetric(timestamp)
 				sum := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				sum.SetName("sum-metric")
 				sum.SetEmptySum().DataPoints().AppendEmpty().SetIntValue(1234)
+				sum.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				summary := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				summary.SetName("summary-metric")
 				summary.SetEmptySummary().DataPoints().AppendEmpty().SetSum(float64(1.0))
+				summary.Summary().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				histogram := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				histogram.SetName("histogram-metric")
 				histogram.SetEmptyHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+				histogram.Histogram().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				expHistogram := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				expHistogram.SetName("exponential-histogram")
 				expHistogram.SetEmptyExponentialHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+				expHistogram.ExponentialHistogram().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 				return metrics
 			}(),
 			expected: func() pmetric.ResourceMetricsSlice {
-				testMetrics := testMetric()
+				testMetrics := testMetric(timestamp)
 				sum := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				sum.SetName("sum-metric")
 				sum.SetEmptySum().DataPoints().AppendEmpty().SetIntValue(1234)
+				sum.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				summary := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				summary.SetName("summary-metric")
 				summary.SetEmptySummary().DataPoints().AppendEmpty().SetSum(float64(1.0))
+				summary.Summary().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				histogram := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				histogram.SetName("histogram-metric")
 				histogram.SetEmptyHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+				histogram.Histogram().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				expHistogram := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				expHistogram.SetName("exponential-histogram")
 				expHistogram.SetEmptyExponentialHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+				expHistogram.ExponentialHistogram().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				metrics := testMetrics.ResourceMetrics()
 				// Insert the scope_info metric into the existing ScopeMetricsSlice
@@ -246,6 +265,7 @@ func TestAddExtraMetrics(t *testing.T) {
 				scopeInfoMetric := sm.Metrics().AppendEmpty()
 				scopeInfoMetric.SetName("otel_scope_info")
 				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+				scopeInfoMetric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				// add otel_scope_* attributes to all metrics in this scope (including otel_scope_info)
 				for i := 0; i < sm.Metrics().Len(); i++ {

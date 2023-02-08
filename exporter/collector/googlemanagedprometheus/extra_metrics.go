@@ -15,6 +15,8 @@
 package googlemanagedprometheus
 
 import (
+	"time"
+
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
@@ -29,12 +31,65 @@ func AddTargetInfoMetric(m pmetric.Metrics) {
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 
+		// Keep track of the most recent time in this resource's metrics
+		// Use that time for the timestamp of the new metric
+		latestTime := time.Time{}
+		for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+			for k := 0; k < rm.ScopeMetrics().At(j).Metrics().Len(); k++ {
+				metric := rm.ScopeMetrics().At(j).Metrics().At(k)
+
+				switch metric.Type() {
+				case pmetric.MetricTypeSum:
+					sum := metric.Sum()
+					points := sum.DataPoints()
+					for x := 0; x < points.Len(); x++ {
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
+					}
+				case pmetric.MetricTypeGauge:
+					gauge := metric.Gauge()
+					points := gauge.DataPoints()
+					for x := 0; x < points.Len(); x++ {
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
+					}
+				case pmetric.MetricTypeSummary:
+					summary := metric.Summary()
+					points := summary.DataPoints()
+					for x := 0; x < points.Len(); x++ {
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
+					}
+				case pmetric.MetricTypeHistogram:
+					hist := metric.Histogram()
+					points := hist.DataPoints()
+					for x := 0; x < points.Len(); x++ {
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
+					}
+				case pmetric.MetricTypeExponentialHistogram:
+					eh := metric.ExponentialHistogram()
+					points := eh.DataPoints()
+					for x := 0; x < points.Len(); x++ {
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
+					}
+				}
+			}
+		}
+
 		// create the target_info metric as a Gauge with value 1
 		targetInfoMetric := rm.ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		targetInfoMetric.SetName("target_info")
 
 		dataPoint := targetInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty()
 		dataPoint.SetIntValue(1)
+		dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(latestTime))
 
 		// copy Resource attributes to the metric except for attributes which will already be present in the MonitoredResource labels
 		rm.Resource().Attributes().Range(func(k string, v pcommon.Value) bool {
@@ -70,6 +125,9 @@ func AddScopeInfoMetric(m pmetric.Metrics) {
 				return true
 			})
 
+			// Keep track of the most recent time in this scope's metrics
+			// Use that time for the timestamp of the new metric
+			latestTime := time.Time{}
 			for k := 0; k < sm.Metrics().Len(); k++ {
 				metric := sm.Metrics().At(k)
 				switch metric.Type() {
@@ -80,6 +138,9 @@ func AddScopeInfoMetric(m pmetric.Metrics) {
 						point := points.At(x)
 						point.Attributes().PutStr("otel_scope_name", sm.Scope().Name())
 						point.Attributes().PutStr("otel_scope_version", sm.Scope().Version())
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
 					}
 				case pmetric.MetricTypeGauge:
 					gauge := metric.Gauge()
@@ -88,6 +149,9 @@ func AddScopeInfoMetric(m pmetric.Metrics) {
 						point := points.At(x)
 						point.Attributes().PutStr("otel_scope_name", sm.Scope().Name())
 						point.Attributes().PutStr("otel_scope_version", sm.Scope().Version())
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
 					}
 				case pmetric.MetricTypeSummary:
 					summary := metric.Summary()
@@ -96,6 +160,9 @@ func AddScopeInfoMetric(m pmetric.Metrics) {
 						point := points.At(x)
 						point.Attributes().PutStr("otel_scope_name", sm.Scope().Name())
 						point.Attributes().PutStr("otel_scope_version", sm.Scope().Version())
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
 					}
 				case pmetric.MetricTypeHistogram:
 					hist := metric.Histogram()
@@ -104,6 +171,9 @@ func AddScopeInfoMetric(m pmetric.Metrics) {
 						point := points.At(x)
 						point.Attributes().PutStr("otel_scope_name", sm.Scope().Name())
 						point.Attributes().PutStr("otel_scope_version", sm.Scope().Version())
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
 					}
 				case pmetric.MetricTypeExponentialHistogram:
 					eh := metric.ExponentialHistogram()
@@ -112,9 +182,14 @@ func AddScopeInfoMetric(m pmetric.Metrics) {
 						point := points.At(x)
 						point.Attributes().PutStr("otel_scope_name", sm.Scope().Name())
 						point.Attributes().PutStr("otel_scope_version", sm.Scope().Version())
+						if latestTime.Before(points.At(x).Timestamp().AsTime()) {
+							latestTime = points.At(x).Timestamp().AsTime()
+						}
 					}
 				}
 			}
+
+			dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(latestTime))
 		}
 	}
 }
