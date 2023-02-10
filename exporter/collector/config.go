@@ -265,9 +265,6 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 			if err != nil {
 				return nil, fmt.Errorf("error finding default application credentials: %v", err)
 			}
-			if creds.ProjectID == "" {
-				return nil, errors.New("no project found with application default credentials")
-			}
 			cfg.ProjectID = creds.ProjectID
 		}
 		tokenSource, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
@@ -280,21 +277,16 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 			return nil, err
 		}
 		copts = append(copts, option.WithTokenSource(tokenSource))
-	} else if !clientCfg.UseInsecure {
+	} else if !clientCfg.UseInsecure && (clientCfg.GetClientOptions == nil || len(clientCfg.GetClientOptions()) == 0) {
+		// Only add default credentials if GetClientOptions does not
+		// provide additional options since GetClientOptions could pass
+		// credentials which conflict with the default creds.
 		creds, err := google.FindDefaultCredentials(ctx, scopes...)
 		if err != nil {
 			return nil, fmt.Errorf("error finding default application credentials: %v", err)
 		}
-		if clientCfg.GetClientOptions == nil || len(clientCfg.GetClientOptions()) == 0 {
-			// Only add default credentials if GetClientOptions does not
-			// provide additional options since GetClientOptions could pass
-			// credentials which conflict with the default creds.
-			copts = append(copts, option.WithCredentials(creds))
-		}
+		copts = append(copts, option.WithCredentials(creds))
 		if cfg.ProjectID == "" {
-			if creds.ProjectID == "" {
-				return nil, errors.New("no project found with application default credentials")
-			}
 			cfg.ProjectID = creds.ProjectID
 		}
 	}
@@ -303,6 +295,9 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 	}
 	if clientCfg.GetClientOptions != nil {
 		copts = append(copts, clientCfg.GetClientOptions()...)
+	}
+	if cfg.ProjectID == "" {
+		return nil, errors.New("no project set in config, or found with application default credentials")
 	}
 	return copts, nil
 }
