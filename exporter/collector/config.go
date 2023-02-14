@@ -46,9 +46,9 @@ type Config struct {
 	ProjectID               string            `mapstructure:"project"`
 	UserAgent               string            `mapstructure:"user_agent"`
 	ImpersonateConfig       ImpersonateConfig `mapstructure:"impersonate"`
-	LogConfig               LogConfig         `mapstructure:"log"`
 	TraceConfig             TraceConfig       `mapstructure:"trace"`
 	MetricConfig            MetricConfig      `mapstructure:"metric"`
+	LogConfig               LogConfig         `mapstructure:"log"`
 	DestinationProjectQuota bool              `mapstructure:"destination_project_quota"`
 }
 
@@ -163,6 +163,12 @@ type LogConfig struct {
 	// Defaults to empty, which won't include any additional resource labels.
 	ResourceFilters []ResourceFilter `mapstructure:"resource_filters"`
 	ClientConfig    ClientConfig     `mapstructure:",squash"`
+	// MaxEntrySize defines the maximum size of an individual LogEntry in bytes. If a LogEntry
+	// is larger than this size, it will be split and sent as multiple entries. Default: 256000 (256KB).
+	MaxEntrySize int `mapstructure:"max_entry_size"`
+	// MaxRequestSize defines the maximum size of a batch WriteLogEntriesRequest in bytes. If a request
+	// is larger than this size, it will be split into multiple requests. Default: 10000000 (10MB).
+	MaxRequestSize int `mapstructure:"max_request_size"`
 	// ServiceResourceLabels, if true, causes the exporter to copy OTel's
 	// service.name, service.namespace, and service.instance.id resource attributes into the Cloud Logging LogEntry labels.
 	// Disabling this option does not prevent resource_filters from adding those labels. Default is true.

@@ -60,4 +60,13 @@ var LogsTestCases = []TestCase{
 			}
 		},
 	},
+	{
+		Name:                 "Logs with multiple batches",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_apache_access.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_access_batches_expected.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.LogConfig.MaxEntrySize = 50
+			cfg.LogConfig.MaxRequestSize = 500
+		},
+	},
 }

@@ -125,9 +125,10 @@ type LogsExporter struct {
 }
 
 type logMapper struct {
-	obs          selfObservability
-	cfg          Config
-	maxEntrySize int
+	obs            selfObservability
+	cfg            Config
+	maxEntrySize   int
+	maxRequestSize int
 }
 
 func NewGoogleCloudLogsExporter(
@@ -154,13 +155,23 @@ func NewGoogleCloudLogsExporter(
 		log: log,
 	}
 
+	maxEntrySize := defaultMaxEntrySize
+	if cfg.LogConfig.MaxEntrySize > 0 {
+		maxEntrySize = cfg.LogConfig.MaxEntrySize
+	}
+	maxRequestSize := defaultMaxRequestSize
+	if cfg.LogConfig.MaxRequestSize > 0 {
+		maxRequestSize = cfg.LogConfig.MaxRequestSize
+	}
+
 	return &LogsExporter{
 		cfg: cfg,
 		obs: obs,
 		mapper: logMapper{
-			obs:          obs,
-			cfg:          cfg,
-			maxEntrySize: defaultMaxEntrySize,
+			obs:            obs,
+			cfg:            cfg,
+			maxEntrySize:   maxEntrySize,
+			maxRequestSize: maxRequestSize,
 		},
 
 		loggingClient: loggingClient,
@@ -182,17 +193,16 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 		entry := 0
 		currentBatchSize := 0
 		// Send entries in WriteRequest chunks
-		// TODO(damemi): Add integration test for batch request processing
 		for len(entries) > 0 {
 			// default to max int so that when we are at index=len we skip the size check to avoid panic
 			// (index=len is the break condition when we reassign entries=entries[len:])
-			entrySize := defaultMaxRequestSize
+			entrySize := l.mapper.maxRequestSize
 			if entry < len(entries) {
 				entrySize = proto.Size(entries[entry])
 			}
 
 			// this block gets skipped if we are out of entries to check
-			if currentBatchSize+entrySize < defaultMaxRequestSize {
+			if currentBatchSize+entrySize < l.mapper.maxRequestSize {
 				// if adding the current entry to the current batch doesn't go over the request size,
 				// increase the index and account for the new request size, then continue
 				currentBatchSize += entrySize
@@ -214,6 +224,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 
 			entries = entries[entry:]
 			entry = 0
+			currentBatchSize = 0
 		}
 	}
 
