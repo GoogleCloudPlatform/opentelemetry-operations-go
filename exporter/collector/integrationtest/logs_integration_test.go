@@ -46,9 +46,7 @@ func createLogsExporter(
 		cfg,
 		logger,
 	)
-	if test.ConfigureLogsExporter != nil {
-		exporter.ConfigureExporter(test.ConfigureLogsExporter)
-	}
+	exporter.ConfigureExporter(test.ConfigureLogsExporter)
 	require.NoError(t, err)
 	t.Log("Collector logs exporter started")
 	return exporter

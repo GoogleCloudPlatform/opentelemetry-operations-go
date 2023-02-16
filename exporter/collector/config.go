@@ -46,8 +46,8 @@ type Config struct {
 	ProjectID               string            `mapstructure:"project"`
 	UserAgent               string            `mapstructure:"user_agent"`
 	ImpersonateConfig       ImpersonateConfig `mapstructure:"impersonate"`
-	TraceConfig             TraceConfig       `mapstructure:"trace"`
 	LogConfig               LogConfig         `mapstructure:"log"`
+	TraceConfig             TraceConfig       `mapstructure:"trace"`
 	MetricConfig            MetricConfig      `mapstructure:"metric"`
 	DestinationProjectQuota bool              `mapstructure:"destination_project_quota"`
 }

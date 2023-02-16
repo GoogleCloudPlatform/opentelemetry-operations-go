@@ -191,9 +191,7 @@ func NewLogTestExporter(
 	)
 	require.NoError(t, err)
 
-	if extraConfig != nil {
-		exporter.ConfigureExporter(extraConfig)
-	}
+	exporter.ConfigureExporter(extraConfig)
 	t.Logf("Collector LogsTestServer exporter started, pointing at %v", cfg.LogConfig.ClientConfig.Endpoint)
 	return exporter
 }
