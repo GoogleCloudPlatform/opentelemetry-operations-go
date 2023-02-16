@@ -38,6 +38,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
 )
 
 var (
@@ -56,6 +57,8 @@ const SecondProjectEnv = "SECOND_PROJECT_ID"
 type TestCase struct {
 	// ConfigureCollector will be called to modify the default configuration for this test case. Optional.
 	ConfigureCollector func(cfg *collector.Config)
+	// ConfigureLogsExporter uses internal types to add extra post-init config to an exporter object.
+	ConfigureLogsExporter *logsutil.ExporterConfig
 	// Name of the test case
 	Name string
 	// OTLPInputFixturePath is the path to the JSON encoded OTLP

@@ -31,6 +31,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
@@ -174,6 +175,7 @@ func NewLogTestExporter(
 	t testing.TB,
 	l *cloudmock.LogsTestServer,
 	cfg collector.Config,
+	extraConfig *logsutil.ExporterConfig,
 ) *collector.LogsExporter {
 	cfg.LogConfig.ClientConfig.Endpoint = l.Endpoint
 	cfg.LogConfig.ClientConfig.UseInsecure = true
@@ -188,6 +190,10 @@ func NewLogTestExporter(
 		logger,
 	)
 	require.NoError(t, err)
+
+	if extraConfig != nil {
+		exporter.ConfigureExporter(extraConfig)
+	}
 	t.Logf("Collector LogsTestServer exporter started, pointing at %v", cfg.LogConfig.ClientConfig.Endpoint)
 	return exporter
 }

@@ -36,6 +36,7 @@ import (
 
 	"github.com/googleapis/gax-go/v2"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -155,27 +156,31 @@ func NewGoogleCloudLogsExporter(
 		log: log,
 	}
 
-	maxEntrySize := defaultMaxEntrySize
-	if cfg.LogConfig.MaxEntrySize > 0 {
-		maxEntrySize = cfg.LogConfig.MaxEntrySize
-	}
-	maxRequestSize := defaultMaxRequestSize
-	if cfg.LogConfig.MaxRequestSize > 0 {
-		maxRequestSize = cfg.LogConfig.MaxRequestSize
-	}
-
 	return &LogsExporter{
 		cfg: cfg,
 		obs: obs,
 		mapper: logMapper{
 			obs:            obs,
 			cfg:            cfg,
-			maxEntrySize:   maxEntrySize,
-			maxRequestSize: maxRequestSize,
+			maxEntrySize:   defaultMaxEntrySize,
+			maxRequestSize: defaultMaxRequestSize,
 		},
 
 		loggingClient: loggingClient,
 	}, nil
+}
+
+// ConfigureExporter is used by integration tests to set exporter settings not visible to users.
+func (l *LogsExporter) ConfigureExporter(config *logsutil.ExporterConfig) {
+	if config == nil {
+		return
+	}
+	if config.MaxEntrySize > 0 {
+		l.mapper.maxEntrySize = config.MaxEntrySize
+	}
+	if config.MaxRequestSize > 0 {
+		l.mapper.maxRequestSize = config.MaxRequestSize
+	}
 }
 
 func (l *LogsExporter) Shutdown(ctx context.Context) error {
