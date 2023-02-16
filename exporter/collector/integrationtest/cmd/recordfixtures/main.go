@@ -103,7 +103,7 @@ func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
 		}
 		func() {
 			logs := test.LoadOTLPLogsInput(t, timestamp)
-			testServerExporter := integrationtest.NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig())
+			testServerExporter := integrationtest.NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig(), test.ConfigureLogsExporter)
 
 			require.NoError(t, testServerExporter.PushLogs(ctx, logs), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))

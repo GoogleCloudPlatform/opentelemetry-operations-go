@@ -36,6 +36,7 @@ import (
 
 	"github.com/googleapis/gax-go/v2"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -125,9 +126,10 @@ type LogsExporter struct {
 }
 
 type logMapper struct {
-	obs          selfObservability
-	cfg          Config
-	maxEntrySize int
+	obs            selfObservability
+	cfg            Config
+	maxEntrySize   int
+	maxRequestSize int
 }
 
 func NewGoogleCloudLogsExporter(
@@ -158,13 +160,27 @@ func NewGoogleCloudLogsExporter(
 		cfg: cfg,
 		obs: obs,
 		mapper: logMapper{
-			obs:          obs,
-			cfg:          cfg,
-			maxEntrySize: defaultMaxEntrySize,
+			obs:            obs,
+			cfg:            cfg,
+			maxEntrySize:   defaultMaxEntrySize,
+			maxRequestSize: defaultMaxRequestSize,
 		},
 
 		loggingClient: loggingClient,
 	}, nil
+}
+
+// ConfigureExporter is used by integration tests to set exporter settings not visible to users.
+func (l *LogsExporter) ConfigureExporter(config *logsutil.ExporterConfig) {
+	if config == nil {
+		return
+	}
+	if config.MaxEntrySize > 0 {
+		l.mapper.maxEntrySize = config.MaxEntrySize
+	}
+	if config.MaxRequestSize > 0 {
+		l.mapper.maxRequestSize = config.MaxRequestSize
+	}
 }
 
 func (l *LogsExporter) Shutdown(ctx context.Context) error {
@@ -182,17 +198,16 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 		entry := 0
 		currentBatchSize := 0
 		// Send entries in WriteRequest chunks
-		// TODO(damemi): Add integration test for batch request processing
 		for len(entries) > 0 {
 			// default to max int so that when we are at index=len we skip the size check to avoid panic
 			// (index=len is the break condition when we reassign entries=entries[len:])
-			entrySize := defaultMaxRequestSize
+			entrySize := l.mapper.maxRequestSize
 			if entry < len(entries) {
 				entrySize = proto.Size(entries[entry])
 			}
 
 			// this block gets skipped if we are out of entries to check
-			if currentBatchSize+entrySize < defaultMaxRequestSize {
+			if currentBatchSize+entrySize < l.mapper.maxRequestSize {
 				// if adding the current entry to the current batch doesn't go over the request size,
 				// increase the index and account for the new request size, then continue
 				currentBatchSize += entrySize
@@ -214,6 +229,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 
 			entries = entries[entry:]
 			entry = 0
+			currentBatchSize = 0
 		}
 	}
 

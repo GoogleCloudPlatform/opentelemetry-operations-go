@@ -14,7 +14,10 @@
 
 package testcases
 
-import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+import (
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
+)
 
 var LogsTestCases = []TestCase{
 	{
@@ -58,6 +61,15 @@ var LogsTestCases = []TestCase{
 			cfg.LogConfig.ResourceFilters = []collector.ResourceFilter{
 				{Prefix: "custom."},
 			}
+		},
+	},
+	{
+		Name:                 "Logs with multiple batches",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_apache_access.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_access_batches_expected.json",
+		ConfigureLogsExporter: &logsutil.ExporterConfig{
+			MaxEntrySize:   50,
+			MaxRequestSize: 500,
 		},
 	},
 }
