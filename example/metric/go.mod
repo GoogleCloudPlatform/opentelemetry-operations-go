@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric
 
-go 1.18
+go 1.19
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric => ../../exporter/metric
 
