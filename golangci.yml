@@ -281,6 +281,9 @@ linters-settings:
       - name: useless-break
         disabled: false
       # https://github.com/mgechev/revive/blob/master/RULES_DESCRIPTIONS.md#waitgroup-by-value
+      - name: unhandled-error
+        disabled: true
+        # this is redundant to the errcheck linter and we need to skip that in certain spots
       - name: waitgroup-by-value
         disabled: false
 
