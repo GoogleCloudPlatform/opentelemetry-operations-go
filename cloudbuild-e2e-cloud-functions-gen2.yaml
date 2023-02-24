@@ -14,7 +14,7 @@
 
 steps:
   # Vendor dependencies, and zip the code.
-  - name: golang:1.18
+  - name: golang:1.19
     id: zip-code
     entrypoint: /bin/bash
     args:
@@ -33,7 +33,7 @@ steps:
     env: ["PROJECT_ID=$PROJECT_ID"]
     args:
       - cloud-functions-gen2
-      - --runtime=go118
+      - --runtime=go119
       - --functionsource=/workspace/e2e-test-server/cloud_functions/function-source.zip
       - --entrypoint=HandleCloudFunction
 
