@@ -81,7 +81,7 @@ func TestExportMetrics(t *testing.T) {
 	)
 
 	meter := provider.Meter("test")
-	counter, err := meter.SyncInt64().Counter("name.lastvalue")
+	counter, err := meter.Int64Counter("name.lastvalue")
 	require.NoError(t, err)
 
 	counter.Add(ctx, 1)
@@ -124,7 +124,7 @@ func TestExportCounter(t *testing.T) {
 	meter := provider.Meter("cloudmonitoring/test")
 
 	// Register counter value
-	counter, err := meter.SyncInt64().Counter("counter-a")
+	counter, err := meter.Int64Counter("counter-a")
 	assert.NoError(t, err)
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
 	counter.Add(ctx, 100, clabels...)
@@ -168,7 +168,7 @@ func TestExportHistogram(t *testing.T) {
 	meter := provider.Meter("cloudmonitoring/test")
 
 	// Register counter value
-	counter, err := meter.SyncInt64().Histogram("counter-a")
+	counter, err := meter.Int64Histogram("counter-a")
 	assert.NoError(t, err)
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
 	counter.Record(ctx, 100, clabels...)
@@ -836,7 +836,7 @@ func TestExportWithDisableCreateMetricDescriptors(t *testing.T) {
 
 			meter := provider.Meter("test")
 
-			counter, err := meter.SyncInt64().Counter("name.lastvalue")
+			counter, err := meter.Int64Counter("name.lastvalue")
 			require.NoError(t, err)
 
 			counter.Add(ctx, 1)
@@ -927,7 +927,7 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 
 			meter := provider.Meter("test")
 
-			counter, err := meter.SyncInt64().Counter("name.lastvalue")
+			counter, err := meter.Int64Counter("name.lastvalue")
 			require.NoError(t, err)
 
 			counter.Add(ctx, 1)

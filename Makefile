@@ -185,12 +185,13 @@ gotidy:
 update-dep:
 	$(MAKE) for-all-mod CMD="$(PWD)/internal/buildscripts/update-dep"
 
-STABLE_OTEL_VERSION=v1.11.2
-UNSTABLE_OTEL_VERSION=v0.34.0
-UNSTABLE_CONTRIB_OTEL_VERSION=v0.36.4
-STABLE_CONTRIB_OTEL_VERSION=v1.12.0
-UNSTABLE_COLLECTOR_VERSION=v0.68.0
-STABLE_COLLECTOR_VERSION=v1.0.0-rc2
+STABLE_OTEL_VERSION=v1.13.0
+UNSTABLE_OTEL_VERSION=v0.36.0
+UNSTABLE_CONTRIB_OTEL_VERSION=v0.40.0
+STABLE_CONTRIB_OTEL_VERSION=v1.15.0
+UNSTABLE_COLLECTOR_VERSION=v0.72.0
+STABLE_COLLECTOR_VERSION=v1.0.0-rc6
+UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.72.0
 
 .PHONY: update-otel
 update-otel:
@@ -201,11 +202,14 @@ update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/export/metric VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/metric VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/trace VERSION=$(STABLE_OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/exporters/prometheus VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/detectors/gcp VERSION=$(STABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector VERSION=$(UNSTABLE_COLLECTOR_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/featuregate VERSION=$(UNSTABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/semconv VERSION=$(UNSTABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/pdata VERSION=$(STABLE_COLLECTOR_VERSION)
+	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus VERSION=$(UNSTABLE_COLLECTOR_CONTRIB_VERSION)
 	$(MAKE) gotidy
 	$(MAKE) build
 

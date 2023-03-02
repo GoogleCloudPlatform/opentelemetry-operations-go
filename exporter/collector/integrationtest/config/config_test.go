@@ -21,7 +21,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
-	"go.opentelemetry.io/collector/config"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/otelcol/otelcoltest"
 
@@ -104,8 +103,7 @@ func newFactory() exporter.Factory {
 
 // testExporterConfig implements exporter.Config so we can test parsing of configuration.
 type testExporterConfig struct {
-	config.ExporterSettings `mapstructure:",squash"`
-	collector.Config        `mapstructure:",squash"`
+	collector.Config `mapstructure:",squash"`
 }
 
 func defaultConfig() *testExporterConfig {

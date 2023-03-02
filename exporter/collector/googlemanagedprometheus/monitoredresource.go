@@ -16,7 +16,7 @@ package googlemanagedprometheus
 
 import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	semconv "go.opentelemetry.io/collector/semconv/v1.8.0"
+	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
