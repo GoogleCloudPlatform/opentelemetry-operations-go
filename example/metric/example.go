@@ -24,8 +24,8 @@ import (
 	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric/instrument"
-	"go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/metric"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 )
 
 type observedFloat struct {
@@ -61,8 +61,8 @@ func main() {
 	}
 
 	// initialize a MeterProvider with that periodically exports to the GCP exporter.
-	provider := metric.NewMeterProvider(
-		metric.WithReader(metric.NewPeriodicReader(exporter)),
+	provider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exporter)),
 	)
 	ctx := context.Background()
 	defer func() {
@@ -75,14 +75,14 @@ func main() {
 	meter := provider.Meter("github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric")
 
 	// Register counter value
-	counter, err := meter.SyncInt64().Counter("counter-a")
+	counter, err := meter.Int64Counter("counter-a")
 	if err != nil {
 		log.Fatalf("Failed to create counter: %v", err)
 	}
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
 	counter.Add(ctx, 100, clabels...)
 
-	histogram, err := meter.SyncFloat64().Histogram("histogram-b")
+	histogram, err := meter.Float64Histogram("histogram-b")
 	if err != nil {
 		log.Fatalf("Failed to create histogram: %v", err)
 	}
@@ -94,14 +94,15 @@ func main() {
 	}
 	of := newObservedFloat(12.34)
 
-	gaugeObserver, err := meter.AsyncFloat64().Gauge("observer-a")
+	gaugeObserver, err := meter.Float64ObservableGauge("observer-a")
 	if err != nil {
 		log.Fatalf("failed to initialize instrument: %v", err)
 	}
-	err = meter.RegisterCallback([]instrument.Asynchronous{gaugeObserver}, func(ctx context.Context) {
+	_, err = meter.RegisterCallback(func(ctx context.Context, o metric.Observer) error {
 		v := of.get()
-		gaugeObserver.Observe(ctx, v, olabels...)
-	})
+		o.ObserveFloat64(gaugeObserver, v, olabels...)
+		return nil
+	}, gaugeObserver)
 	if err != nil {
 		log.Fatalf("failed to register callback: %v", err)
 	}

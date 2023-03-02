@@ -27,10 +27,16 @@ const promFeatureGate = "pkg.translator.prometheus.NormalizeName"
 
 func TestGetMetricName(t *testing.T) {
 	// Enable the prometheus naming feature-gate during the test
-	originalValue := featuregate.GetRegistry().IsEnabled(promFeatureGate)
-	require.NoError(t, featuregate.GetRegistry().Apply(map[string]bool{promFeatureGate: true}))
+	registry := featuregate.NewRegistry()
+	gate := registry.MustRegister(
+		promFeatureGate,
+		featuregate.StageAlpha,
+		featuregate.WithRegisterDescription("Controls whether metrics names are automatically normalized to follow Prometheus naming convention"),
+		featuregate.WithRegisterReferenceURL("https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/8950"),
+	)
+	require.NoError(t, registry.Set(promFeatureGate, true))
 	defer func() {
-		require.NoError(t, featuregate.GetRegistry().Apply(map[string]bool{promFeatureGate: originalValue}))
+		require.NoError(t, registry.Set(promFeatureGate, false))
 	}()
 	for _, tc := range []struct {
 		desc      string
@@ -47,7 +53,7 @@ func TestGetMetricName(t *testing.T) {
 				sum := m.SetEmptySum()
 				sum.SetIsMonotonic(true)
 			},
-			expected: "foo_total/counter",
+			expected: "foo/counter",
 		},
 		{
 			desc:     "sum with total",
@@ -68,7 +74,7 @@ func TestGetMetricName(t *testing.T) {
 				sum := m.SetEmptySum()
 				sum.SetIsMonotonic(true)
 			},
-			expected: "foo_seconds_total/counter",
+			expected: "foo_total/counter",
 		},
 		{
 			desc:     "gauge",
@@ -126,7 +132,7 @@ func TestGetMetricName(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
-			assert.True(t, featuregate.GetRegistry().IsEnabled(promFeatureGate))
+			assert.True(t, gate.IsEnabled())
 			metric := pmetric.NewMetric()
 			tc.metric(metric)
 			got, err := GetMetricName(tc.baseName, metric)

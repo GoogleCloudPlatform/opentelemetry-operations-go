@@ -44,7 +44,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -223,7 +223,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -402,7 +402,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -581,7 +581,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -745,7 +745,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -875,7 +875,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -1005,7 +1005,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -1135,7 +1135,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -1251,7 +1251,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -1347,7 +1347,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -1443,7 +1443,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -1539,7 +1539,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -1664,7 +1664,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -1843,7 +1843,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -2022,7 +2022,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -2186,7 +2186,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -2316,7 +2316,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -2446,7 +2446,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -2576,7 +2576,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
@@ -2692,7 +2692,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.11.2; google-cloud-trace-exporter 1.11.2"
+                  "value": "opentelemetry-go 1.13.0; google-cloud-trace-exporter 1.11.2"
                 }
               },
               "g.co/gae/app/module": {
