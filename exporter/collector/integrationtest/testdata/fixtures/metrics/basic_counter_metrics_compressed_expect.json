@@ -7,9 +7,7 @@
           "metric": {
             "type": "workload.googleapis.com/testcounter",
             "labels": {
-              "foo": "bar",
-              "instrumentation_source": "",
-              "instrumentation_version": ""
+              "foo": "bar"
             }
           },
           "resource": {
@@ -47,12 +45,6 @@
         "labels": [
           {
             "key": "foo"
-          },
-          {
-            "key": "instrumentation_source"
-          },
-          {
-            "key": "instrumentation_version"
           }
         ],
         "metricKind": "CUMULATIVE",

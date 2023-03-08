@@ -31,6 +31,9 @@ var MetricsTestCases = []TestCase{
 		Name:                 "Basic Counter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.InstrumentationLibraryLabels = true
+		},
 	},
 	{
 		Name:                 "Basic Counter with not found return code",
@@ -221,7 +224,7 @@ var MetricsTestCases = []TestCase{
 	{
 		Name:                 "Basic Counter with gzip compression",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_expect.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_compressed_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.ClientConfig.Compression = "gzip"
 		},
