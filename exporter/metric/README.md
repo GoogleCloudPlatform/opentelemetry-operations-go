@@ -19,8 +19,10 @@ After you import the metric exporter package, then register the exporter to the 
 package main
 
 import (
+	"context"
+	"log"
+
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric/instrument"
 	"go.opentelemetry.io/otel/sdk/metric"
 
 	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
@@ -41,14 +43,14 @@ func main() {
 	// Start meter
 	meter := provider.Meter("github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric")
 
-	counter, err := meter.SyncInt64().Counter("counter-foo")
+	counter, err := meter.Int64Counter("counter-foo")
 	if err != nil {
 		log.Fatalf("Failed to create counter: %v", err)
 	}
-	labels := []label.KeyValue{
-		label.Key("key").String("value"),
+	attrs := []attribute.KeyValue{
+		attribute.Key("key").String("value"),
 	}
-	counter.Add(ctx, 123, labels...)
+	counter.Add(ctx, 123, attrs...)
 }
 ```
 
