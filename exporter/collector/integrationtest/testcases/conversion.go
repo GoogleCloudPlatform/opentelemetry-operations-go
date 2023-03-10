@@ -18,7 +18,6 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric/unit"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -61,7 +60,7 @@ func convertMetrics(ms pmetric.MetricSlice) []metricdata.Metrics {
 		metric := metricdata.Metrics{
 			Name:        m.Name(),
 			Description: m.Description(),
-			Unit:        unit.Unit(m.Unit()),
+			Unit:        m.Unit(),
 		}
 
 		switch m.Type() {

@@ -2,17 +2,11 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric
 
 go 1.19
 
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric => ../../exporter/metric
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../internal/cloudmock
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../internal/resourcemapping
-
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.36.0
-	go.opentelemetry.io/otel v1.13.0
-	go.opentelemetry.io/otel/metric v0.36.0
-	go.opentelemetry.io/otel/sdk/metric v0.36.0
+	go.opentelemetry.io/otel v1.15.0-rc.1
+	go.opentelemetry.io/otel/metric v1.15.0-rc.1
+	go.opentelemetry.io/otel/sdk/metric v0.38.0-rc.1
 )
 
 require (
@@ -28,8 +22,8 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.1 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.opentelemetry.io/otel/sdk v1.13.0 // indirect
-	go.opentelemetry.io/otel/trace v1.13.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.15.0-rc.1 // indirect
+	go.opentelemetry.io/otel/trace v1.15.0-rc.1 // indirect
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.8.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
@@ -42,3 +36,9 @@ require (
 	google.golang.org/grpc v1.51.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
+
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric => ../../exporter/metric
+
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../internal/cloudmock
+
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../internal/resourcemapping
