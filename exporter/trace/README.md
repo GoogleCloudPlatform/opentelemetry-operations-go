@@ -59,13 +59,8 @@ When running code locally, you may need to specify a Google Project ID in additi
 
 ```go
 projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-_, shutdown, err := texporter.InstallNewPipeline(
-    []texporter.Option {
-        texporter.WithProjectID(projectID),
-        // other optional exporter options
-    },
-    ...
-)
+exporter, err := texporter.New(texporter.WithProjectID(projectID))
+...
 ```
 
 ## Useful links
