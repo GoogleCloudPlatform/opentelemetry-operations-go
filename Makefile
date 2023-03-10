@@ -179,7 +179,7 @@ for-all-package:
 
 .PHONY: gotidy
 gotidy:
-	$(MAKE) for-all-mod CMD="go mod tidy -compat=1.18"
+	$(MAKE) for-all-mod CMD="go mod tidy -compat=1.19"
 
 .PHONY: update-dep
 update-dep:
