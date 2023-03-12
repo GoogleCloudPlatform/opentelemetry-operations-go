@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus
 
-go 1.19
+go 1.20
 
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus v0.73.0

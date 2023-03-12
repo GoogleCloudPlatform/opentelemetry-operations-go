@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go
 
-go 1.19
+go 1.20
 
 retract (
 	v1.8.0
