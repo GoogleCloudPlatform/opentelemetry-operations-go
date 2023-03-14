@@ -70,6 +70,12 @@
             }
           },
           {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": ""
+            }
+          },
+          {
             "key": "telemetry.sdk.language",
             "value": {
               "stringValue": "go"
