@@ -134,12 +134,11 @@ func pdataAttributesToOTAttributes(attrs pcommon.Map, resource pcommon.Resource)
 	otAttrs := make([]attribute.KeyValue, 0, attrs.Len())
 	appendAttrs := func(m pcommon.Map) {
 		m.Range(func(k string, v pcommon.Value) bool {
-			if k == semconv.AttributeServiceName ||
+			if (k == semconv.AttributeServiceName ||
 				k == semconv.AttributeServiceNamespace ||
-				k == semconv.AttributeServiceInstanceID {
-				if len(v.AsString()) == 0 {
-					return true
-				}
+				k == semconv.AttributeServiceInstanceID) &&
+				len(v.AsString()) == 0 {
+				return true
 			}
 			switch v.Type() {
 			case pcommon.ValueTypeStr:
