@@ -23,6 +23,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
+            "service_name": "apache_service",
             "single-attribute": "foobar"
           }
         },
@@ -46,7 +47,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -69,7 +71,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -92,7 +95,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -115,7 +119,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -138,7 +143,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -161,7 +167,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -184,7 +191,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -207,7 +215,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -230,7 +239,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -253,7 +263,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -276,7 +287,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -299,7 +311,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -322,7 +335,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -345,7 +359,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -360,7 +375,8 @@
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:54:43 +0800] \"-\" 408 -",
           "timestamp": "1970-01-01T00:00:00Z",
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         },
         {
@@ -383,7 +399,8 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "log.file.name": "test.log"
+            "log.file.name": "test.log",
+            "service_name": "apache_service"
           }
         }
       ],
