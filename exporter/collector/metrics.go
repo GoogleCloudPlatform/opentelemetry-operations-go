@@ -388,13 +388,19 @@ func (me *MetricsExporter) createServiceTimeSeries(ctx context.Context, req *mon
 }
 
 func (m *metricMapper) instrumentationScopeToLabels(is pcommon.InstrumentationScope) labels {
+	isLabels := make(labels)
 	if !m.cfg.MetricConfig.InstrumentationLibraryLabels {
-		return labels{}
+		return isLabels
 	}
-	return labels{
-		"instrumentation_source":  sanitizeUTF8(is.Name()),
-		"instrumentation_version": sanitizeUTF8(is.Version()),
+	instrumentationSource := sanitizeUTF8(is.Name())
+	if len(instrumentationSource) > 0 {
+		isLabels["instrumentation_source"] = instrumentationSource
 	}
+	instrumentationVersion := sanitizeUTF8(is.Version())
+	if len(instrumentationVersion) > 0 {
+		isLabels["instrumentation_version"] = instrumentationVersion
+	}
+	return isLabels
 }
 
 func (m *metricMapper) metricToTimeSeries(
