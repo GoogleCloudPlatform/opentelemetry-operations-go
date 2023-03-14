@@ -48,6 +48,16 @@ func (t *FakeTesting) FailNow() {
 func (t *FakeTesting) Helper()      {}
 func (t *FakeTesting) Name() string { return "record fixtures" }
 
+type fixtureRecorder map[string]string
+
+func (fr fixtureRecorder) checkDuplicate(test testcases.TestCase) error {
+	if duplicate, ok := fr[test.ExpectFixturePath]; ok {
+		return fmt.Errorf("test %s writes to the same fixture %s as test %s", test.Name, test.ExpectFixturePath, duplicate)
+	}
+	fr[test.ExpectFixturePath] = test.Name
+	return nil
+}
+
 func main() {
 	ctx := context.Background()
 	endTime := time.Now()
@@ -55,22 +65,14 @@ func main() {
 	t := &FakeTesting{}
 
 	// track the output fixtures to catch tests overwriting another test's fixtures
-	outputFixtures := make(map[string]string)
+	ft := make(fixtureRecorder)
 
-	recordLogs(ctx, t, endTime, outputFixtures)
-	recordMetrics(ctx, t, startTime, endTime, outputFixtures)
-	recordTraces(ctx, t, startTime, endTime, outputFixtures)
+	ft.recordLogs(ctx, t, endTime)
+	ft.recordMetrics(ctx, t, startTime, endTime)
+	ft.recordTraces(ctx, t, startTime, endTime)
 }
 
-func checkDuplicate(test testcases.TestCase, outputFixtures map[string]string) error {
-	if duplicate, ok := outputFixtures[test.ExpectFixturePath]; ok {
-		return fmt.Errorf("test %s writes to the same fixture %s as test %s", test.Name, test.ExpectFixturePath, duplicate)
-	}
-	outputFixtures[test.ExpectFixturePath] = test.Name
-	return nil
-}
-
-func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.Time, outputFixtures map[string]string) {
+func (fr fixtureRecorder) recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
 	testServer, err := cloudmock.NewTracesTestServer()
 	if err != nil {
 		panic(err)
@@ -84,7 +86,7 @@ func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.T
 			continue
 		}
 
-		require.NoError(t, checkDuplicate(test, outputFixtures))
+		require.NoError(t, fr.checkDuplicate(test))
 
 		func() {
 			traces := test.LoadOTLPTracesInput(t, startTime, endTime)
@@ -102,7 +104,7 @@ func recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.T
 	}
 }
 
-func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time, outputFixtures map[string]string) {
+func (fr fixtureRecorder) recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time) {
 	testServer, err := cloudmock.NewLoggingTestServer()
 	if err != nil {
 		panic(err)
@@ -115,7 +117,7 @@ func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time, output
 			continue
 		}
 
-		require.NoError(t, checkDuplicate(test, outputFixtures))
+		require.NoError(t, fr.checkDuplicate(test))
 
 		func() {
 			logs := test.LoadOTLPLogsInput(t, timestamp)
@@ -133,7 +135,7 @@ func recordLogs(ctx context.Context, t *FakeTesting, timestamp time.Time, output
 	}
 }
 
-func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.Time, outputFixtures map[string]string) {
+func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
 	testServer, err := cloudmock.NewMetricTestServer()
 	if err != nil {
 		panic(err)
@@ -147,7 +149,7 @@ func recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.
 			continue
 		}
 
-		require.NoError(t, checkDuplicate(test, outputFixtures))
+		require.NoError(t, fr.checkDuplicate(test))
 
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
