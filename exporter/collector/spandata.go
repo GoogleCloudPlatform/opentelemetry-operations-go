@@ -81,15 +81,23 @@ func pdataSpanToOTSpanData(
 		droppedMessageEvents: int(span.DroppedEventsCount()),
 		droppedLinks:         int(span.DroppedLinksCount()),
 		resource:             r,
-		instrumentationLibrary: instrumentation.Scope{
-			Name:    is.Name(),
-			Version: is.Version(),
-		},
+		instrumentationLibrary: instrumentationScopeLabels(is),
 		status: sdktrace.Status{
 			Code:        pdataStatusCodeToOTCode(status.Code()),
 			Description: status.Message(),
 		},
 	}
+}
+
+func instrumentationScopeLabels(is pcommon.InstrumentationScope) instrumentation.Scope {
+	scope := instrumentation.Scope{}
+	if len(is.Name()) > 0 {
+		scope.Name = is.Name()
+	}
+	if len(is.Version()) > 0 {
+		scope.Version = is.Version()
+	}
+	return scope
 }
 
 func pdataSpanKindToOTSpanKind(k ptrace.SpanKind) apitrace.SpanKind {
