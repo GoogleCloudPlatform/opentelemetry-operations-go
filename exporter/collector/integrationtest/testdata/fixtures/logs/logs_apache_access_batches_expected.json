@@ -113,12 +113,7 @@
             "log.file.name": "test.log",
             "service_name": "apache_service"
           }
-        }
-      ],
-      "partialSuccess": true
-    },
-    {
-      "entries": [
+        },
         {
           "logName": "projects/fakeprojectid/logs/my-log-name-foo",
           "resource": {
@@ -171,12 +166,7 @@
             "log.file.name": "test.log",
             "service_name": "apache_service"
           }
-        }
-      ],
-      "partialSuccess": true
-    },
-    {
-      "entries": [
+        },
         {
           "logName": "projects/fakeprojectid/logs/my-log-name-foo",
           "resource": {
@@ -229,12 +219,7 @@
             "log.file.name": "test.log",
             "service_name": "apache_service"
           }
-        }
-      ],
-      "partialSuccess": true
-    },
-    {
-      "entries": [
+        },
         {
           "logName": "projects/fakeprojectid/logs/my-log-name-foo",
           "resource": {
@@ -287,12 +272,7 @@
             "log.file.name": "test.log",
             "service_name": "apache_service"
           }
-        }
-      ],
-      "partialSuccess": true
-    },
-    {
-      "entries": [
+        },
         {
           "logName": "projects/fakeprojectid/logs/my-log-name-foo",
           "resource": {
@@ -345,12 +325,7 @@
             "log.file.name": "test.log",
             "service_name": "apache_service"
           }
-        }
-      ],
-      "partialSuccess": true
-    },
-    {
-      "entries": [
+        },
         {
           "logName": "projects/fakeprojectid/logs/my-log-name-foo",
           "resource": {
@@ -403,12 +378,7 @@
             "log.file.name": "test.log",
             "service_name": "apache_service"
           }
-        }
-      ],
-      "partialSuccess": true
-    },
-    {
-      "entries": [
+        },
         {
           "logName": "projects/fakeprojectid/logs/my-log-name-foo",
           "resource": {
