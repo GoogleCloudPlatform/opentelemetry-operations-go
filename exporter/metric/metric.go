@@ -223,29 +223,48 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.ResourceMetrics) error {
 	tss := []*monitoringpb.TimeSeries{}
 	mr := me.resourceToMonitoredResourcepb(rm.Resource)
-	var aggError error
 
+	var aggErrors []error
 	extraLabels := me.extraLabelsFromResource(rm.Resource)
 	for _, scope := range rm.ScopeMetrics {
 		for _, metrics := range scope.Metrics {
 			ts, err := me.recordToTspb(metrics, mr, scope.Scope, extraLabels)
-			aggError = multierr.Append(aggError, err)
+			if err != nil {
+				aggErrors = append(aggErrors, err)
+			}
+
 			tss = append(tss, ts...)
 		}
 	}
 
 	if len(tss) == 0 {
-		return aggError
+		return multierr.Combine(aggErrors...)
 	}
 
-	// TODO: When this exporter is rewritten, support writing to multiple
-	// projects based on the "gcp.project.id" resource.
-	req := &monitoringpb.CreateTimeSeriesRequest{
-		Name:       fmt.Sprintf("projects/%s", me.o.projectID),
-		TimeSeries: tss,
+	name := fmt.Sprintf("projects/%s", me.o.projectID)
+
+	const batchSize = 200
+	var createErrors []error
+	for i := 0; i < len(tss); i += batchSize {
+		j := i + batchSize
+		if j >= len(tss) {
+			j = len(tss)
+		}
+
+		// TODO: When this exporter is rewritten, support writing to multiple
+		// projects based on the "gcp.project.id" resource.
+		req := &monitoringpb.CreateTimeSeriesRequest{
+			Name:       name,
+			TimeSeries: tss[i:j],
+		}
+
+		err := me.client.CreateTimeSeries(ctx, req)
+		if err != nil {
+			createErrors = append(createErrors, err)
+		}
 	}
 
-	return multierr.Append(aggError, me.client.CreateTimeSeries(ctx, req))
+	return multierr.Combine(append(aggErrors, createErrors...)...)
 }
 
 func (me *metricExporter) extraLabelsFromResource(res *resource.Resource) *attribute.Set {
