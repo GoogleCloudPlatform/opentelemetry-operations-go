@@ -65,11 +65,11 @@ func main() {
 	t := &FakeTesting{}
 
 	// track the output fixtures to catch tests overwriting another test's fixtures
-	ft := make(fixtureRecorder)
+	fr := make(fixtureRecorder)
 
-	ft.recordLogs(ctx, t, endTime)
-	ft.recordMetrics(ctx, t, startTime, endTime)
-	ft.recordTraces(ctx, t, startTime, endTime)
+	fr.recordLogs(ctx, t, endTime)
+	fr.recordMetrics(ctx, t, startTime, endTime)
+	fr.recordTraces(ctx, t, startTime, endTime)
 }
 
 func (fr fixtureRecorder) recordTraces(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
