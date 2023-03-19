@@ -3,11 +3,11 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/colle
 go 1.19
 
 require (
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus v0.72.0
-	github.com/stretchr/testify v1.8.1
-	go.opentelemetry.io/collector/featuregate v0.72.0
-	go.opentelemetry.io/collector/pdata v1.0.0-rc6
-	go.opentelemetry.io/collector/semconv v0.72.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus v0.73.0
+	github.com/stretchr/testify v1.8.2
+	go.opentelemetry.io/collector/featuregate v0.73.0
+	go.opentelemetry.io/collector/pdata v1.0.0-rc7
+	go.opentelemetry.io/collector/semconv v0.73.0
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f
 )
 
@@ -24,8 +24,8 @@ require (
 	go.uber.org/atomic v1.10.0 // indirect
 	go.uber.org/multierr v1.9.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	google.golang.org/grpc v1.53.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect

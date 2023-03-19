@@ -228,12 +228,12 @@ func TestAddExtraMetrics(t *testing.T) {
 
 				histogram := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				histogram.SetName("histogram-metric")
-				histogram.SetEmptyHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+				_ = histogram.SetEmptyHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
 				histogram.Histogram().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				expHistogram := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				expHistogram.SetName("exponential-histogram")
-				expHistogram.SetEmptyExponentialHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+				_ = expHistogram.SetEmptyExponentialHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
 				expHistogram.ExponentialHistogram().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 				return metrics
 			}(),
@@ -251,12 +251,12 @@ func TestAddExtraMetrics(t *testing.T) {
 
 				histogram := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				histogram.SetName("histogram-metric")
-				histogram.SetEmptyHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+				_ = histogram.SetEmptyHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
 				histogram.Histogram().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				expHistogram := testMetrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				expHistogram.SetName("exponential-histogram")
-				expHistogram.SetEmptyExponentialHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
+				_ = expHistogram.SetEmptyExponentialHistogram().DataPoints().AppendEmpty().StartTimestamp().AsTime().Year()
 				expHistogram.ExponentialHistogram().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 
 				metrics := testMetrics.ResourceMetrics()
