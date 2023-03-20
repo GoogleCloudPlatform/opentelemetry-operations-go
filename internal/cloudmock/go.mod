@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock
 
-go 1.19
+go 1.20
 
 require (
 	google.golang.org/genproto v0.0.0-20221018160656-63c7b68cfc55

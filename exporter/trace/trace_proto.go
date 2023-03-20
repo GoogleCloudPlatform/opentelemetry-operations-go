@@ -344,11 +344,10 @@ func trunc(s string, limit int) *tracepb.TruncatableString {
 		b := []byte(s[:limit])
 		for {
 			r, size := utf8.DecodeLastRune(b)
-			if r == utf8.RuneError && size == 1 {
-				b = b[:len(b)-1]
-			} else {
+			if r != utf8.RuneError || size != 1 {
 				break
 			}
+			b = b[:len(b)-1]
 		}
 		return &tracepb.TruncatableString{
 			Value:              string(b),

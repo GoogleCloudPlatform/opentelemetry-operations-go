@@ -109,14 +109,13 @@ func main() {
 
 	// Add measurement once an every 10 second.
 	timer := time.NewTicker(10 * time.Second)
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for range timer.C {
-		rand.Seed(time.Now().UnixNano())
-
-		r := rand.Int63n(100)
+		r := rng.Int63n(100)
 		cv := 100 + r
 		counter.Add(ctx, cv, clabels...)
 
-		r2 := rand.Int63n(100)
+		r2 := rng.Int63n(100)
 		hv := float64(r2) / 20.0
 		histogram.Record(ctx, hv, clabels...)
 		ov := 12.34 + hv
