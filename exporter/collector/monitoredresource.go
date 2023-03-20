@@ -73,7 +73,9 @@ func resourceToLabels(
 			(k == semconv.AttributeServiceName ||
 				k == semconv.AttributeServiceNamespace ||
 				k == semconv.AttributeServiceInstanceID) {
-			v.CopyTo(attrs.PutEmpty(k))
+			if len(v.AsString()) > 0 {
+				v.CopyTo(attrs.PutEmpty(k))
+			}
 			return true
 		}
 		// Matches one of the resource filters

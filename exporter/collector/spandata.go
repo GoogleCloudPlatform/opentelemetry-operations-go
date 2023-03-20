@@ -20,6 +20,7 @@ import (
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
@@ -67,28 +68,36 @@ func pdataSpanToOTSpanData(
 
 	status := span.Status()
 	return spanSnapshot{
-		spanContext:          apitrace.NewSpanContext(sc),
-		parent:               apitrace.NewSpanContext(parentSc),
-		spanKind:             pdataSpanKindToOTSpanKind(span.Kind()),
-		startTime:            startTime,
-		endTime:              endTime,
-		name:                 span.Name(),
-		attributes:           pdataAttributesToOTAttributes(span.Attributes(), resource),
-		links:                pdataLinksToOTLinks(span.Links()),
-		events:               pdataEventsToOTMessageEvents(span.Events()),
-		droppedAttributes:    int(span.DroppedAttributesCount()),
-		droppedMessageEvents: int(span.DroppedEventsCount()),
-		droppedLinks:         int(span.DroppedLinksCount()),
-		resource:             r,
-		instrumentationLibrary: instrumentation.Scope{
-			Name:    is.Name(),
-			Version: is.Version(),
-		},
+		spanContext:            apitrace.NewSpanContext(sc),
+		parent:                 apitrace.NewSpanContext(parentSc),
+		spanKind:               pdataSpanKindToOTSpanKind(span.Kind()),
+		startTime:              startTime,
+		endTime:                endTime,
+		name:                   span.Name(),
+		attributes:             pdataAttributesToOTAttributes(span.Attributes(), resource),
+		links:                  pdataLinksToOTLinks(span.Links()),
+		events:                 pdataEventsToOTMessageEvents(span.Events()),
+		droppedAttributes:      int(span.DroppedAttributesCount()),
+		droppedMessageEvents:   int(span.DroppedEventsCount()),
+		droppedLinks:           int(span.DroppedLinksCount()),
+		resource:               r,
+		instrumentationLibrary: instrumentationScopeLabels(is),
 		status: sdktrace.Status{
 			Code:        pdataStatusCodeToOTCode(status.Code()),
 			Description: status.Message(),
 		},
 	}
+}
+
+func instrumentationScopeLabels(is pcommon.InstrumentationScope) instrumentation.Scope {
+	scope := instrumentation.Scope{}
+	if len(is.Name()) > 0 {
+		scope.Name = is.Name()
+	}
+	if len(is.Version()) > 0 {
+		scope.Version = is.Version()
+	}
+	return scope
 }
 
 func pdataSpanKindToOTSpanKind(k ptrace.SpanKind) apitrace.SpanKind {
@@ -125,6 +134,12 @@ func pdataAttributesToOTAttributes(attrs pcommon.Map, resource pcommon.Resource)
 	otAttrs := make([]attribute.KeyValue, 0, attrs.Len())
 	appendAttrs := func(m pcommon.Map) {
 		m.Range(func(k string, v pcommon.Value) bool {
+			if (k == semconv.AttributeServiceName ||
+				k == semconv.AttributeServiceNamespace ||
+				k == semconv.AttributeServiceInstanceID) &&
+				len(v.AsString()) == 0 {
+				return true
+			}
 			switch v.Type() {
 			case pcommon.ValueTypeStr:
 				otAttrs = append(otAttrs, attribute.String(k, v.Str()))

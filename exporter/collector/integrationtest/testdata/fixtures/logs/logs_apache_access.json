@@ -8,6 +8,18 @@
             "value": {
               "stringValue": "gcp_compute_engine"
             }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "apache_service"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": ""
+            }
           }
         ]
       },

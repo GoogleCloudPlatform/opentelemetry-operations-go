@@ -1961,7 +1961,7 @@ func TestInstrumentationScopeToLabels(t *testing.T) {
 		name:                 "notSetInInstrumentationScope",
 		metricConfig:         MetricConfig{InstrumentationLibraryLabels: true},
 		InstrumentationScope: pcommon.NewInstrumentationScope(),
-		output:               labels{"instrumentation_source": "", "instrumentation_version": ""},
+		output:               labels{},
 	}}
 
 	for _, test := range tests {

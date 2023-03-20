@@ -791,11 +791,6 @@
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
                 }
               },
-              "otel.scope.version": {
-                "stringValue": {
-                  "value": "semver:0.33.0"
-                }
-              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -919,11 +914,6 @@
               "otel.scope.name": {
                 "stringValue": {
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-                }
-              },
-              "otel.scope.version": {
-                "stringValue": {
-                  "value": "semver:0.33.0"
                 }
               },
               "process.executable.name": {
@@ -1051,11 +1041,6 @@
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
                 }
               },
-              "otel.scope.version": {
-                "stringValue": {
-                  "value": "semver:0.33.0"
-                }
-              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1179,11 +1164,6 @@
               "otel.scope.name": {
                 "stringValue": {
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
-                }
-              },
-              "otel.scope.version": {
-                "stringValue": {
-                  "value": "semver:0.33.0"
                 }
               },
               "process.executable.name": {

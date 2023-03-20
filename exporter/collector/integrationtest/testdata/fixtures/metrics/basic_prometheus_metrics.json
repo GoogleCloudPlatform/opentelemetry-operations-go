@@ -16,6 +16,12 @@
                    }
                 },
                 {
+                  "key":"service.namespace",
+                  "value":{
+                     "stringValue":""
+                  }
+                },
+                {
                    "key":"net.host.port",
                    "value":{
                       "stringValue":"2222"

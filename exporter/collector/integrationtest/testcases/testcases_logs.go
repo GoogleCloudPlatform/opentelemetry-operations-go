@@ -69,7 +69,7 @@ var LogsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_access_batches_expected.json",
 		ConfigureLogsExporter: &logsutil.ExporterConfig{
 			MaxEntrySize:   50,
-			MaxRequestSize: 500,
+			MaxRequestSize: 550,
 		},
 	},
 }

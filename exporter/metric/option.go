@@ -122,9 +122,9 @@ func WithFilteredResourceAttributes(filter attribute.Filter) func(o *options) {
 // DefaultResourceAttributesFilter is the default filter applied to resource
 // attributes.
 func DefaultResourceAttributesFilter(kv attribute.KeyValue) bool {
-	return kv.Key == semconv.ServiceNameKey ||
+	return (kv.Key == semconv.ServiceNameKey ||
 		kv.Key == semconv.ServiceNamespaceKey ||
-		kv.Key == semconv.ServiceInstanceIDKey
+		kv.Key == semconv.ServiceInstanceIDKey) && len(kv.Value.AsString()) > 0
 }
 
 // NoAttributes can be passed to WithFilteredResourceAttributes to disable
