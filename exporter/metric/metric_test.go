@@ -1073,3 +1073,99 @@ func TestMetricTypeToDisplayName(t *testing.T) {
 		})
 	}
 }
+
+func TestBatchingExport(t *testing.T) {
+	setup := func(t *testing.T) (metric.Exporter, *cloudmock.MetricsTestServer) {
+		testServer, err := cloudmock.NewMetricTestServer()
+		//nolint:errcheck
+		go testServer.Serve()
+		t.Cleanup(testServer.Shutdown)
+
+		assert.NoError(t, err)
+
+		clientOpts := []option.ClientOption{
+			option.WithEndpoint(testServer.Endpoint),
+			option.WithoutAuthentication(),
+			option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		}
+
+		exporter, err := New(
+			WithProjectID("PROJECT_ID_NOT_REAL"),
+			WithMonitoringClientOptions(clientOpts...),
+			WithMetricDescriptorTypeFormatter(formatter),
+		)
+		assert.NoError(t, err)
+
+		t.Cleanup(func() {
+			ctx := context.Background()
+			err := exporter.Shutdown(ctx)
+			assert.NoError(t, err)
+		})
+
+		return exporter, testServer
+	}
+
+	createMetrics := func(n int) []metricdata.Metrics {
+		inputMetrics := make([]metricdata.Metrics, n)
+		for i := 0; i < n; i++ {
+			inputMetrics[i] = metricdata.Metrics{Name: "testing", Data: metricdata.Histogram{
+				DataPoints: []metricdata.HistogramDataPoint{
+					{},
+				},
+			}}
+		}
+
+		return inputMetrics
+	}
+
+	for _, tc := range []struct {
+		desc                  string
+		numMetrics            int
+		expectedCreateTSCalls int
+	}{
+		{desc: "0 metrics"},
+		{
+			desc:                  "150 metrics",
+			numMetrics:            150,
+			expectedCreateTSCalls: 1,
+		},
+		{
+			desc:                  "200 metrics",
+			numMetrics:            200,
+			expectedCreateTSCalls: 1,
+		},
+		{
+			desc:                  "201 metrics",
+			numMetrics:            201,
+			expectedCreateTSCalls: 2,
+		},
+		{
+			desc:                  "500 metrics",
+			numMetrics:            500,
+			expectedCreateTSCalls: 3,
+		},
+		{
+			desc:                  "1199 metrics",
+			numMetrics:            1199,
+			expectedCreateTSCalls: 6,
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			exporter, testServer := setup(t)
+			input := createMetrics(tc.numMetrics)
+			ctx := context.Background()
+
+			err := exporter.Export(ctx, metricdata.ResourceMetrics{
+				ScopeMetrics: []metricdata.ScopeMetrics{
+					{
+						Metrics: input,
+					},
+				},
+			})
+			assert.NoError(t, err)
+
+			gotCalls := testServer.CreateTimeSeriesRequests()
+			assert.Equal(t, tc.expectedCreateTSCalls, len(gotCalls))
+		})
+	}
+}

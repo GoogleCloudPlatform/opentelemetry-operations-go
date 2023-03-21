@@ -51,6 +51,10 @@ import (
 )
 
 const (
+	// The number of timeserieses to send to GCM in a single request. This
+	// is a hard limit in the GCM API, so we never want to exceed 200.
+	sendBatchSize = 200
+
 	cloudMonitoringMetricDescriptorNameFormat = "workload.googleapis.com/%s"
 )
 
@@ -221,31 +225,34 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 // exportTimeSeries create TimeSeries from the records in cps.
 // res should be the common resource among all TimeSeries, such as instance id, application name and so on.
 func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.ResourceMetrics) error {
-	tss := []*monitoringpb.TimeSeries{}
-	mr := me.resourceToMonitoredResourcepb(rm.Resource)
-	var aggError error
+	tss, aggErr := me.recordsToTspbs(rm)
+	if len(tss) == 0 {
+		return aggErr
+	}
 
-	extraLabels := me.extraLabelsFromResource(rm.Resource)
-	for _, scope := range rm.ScopeMetrics {
-		for _, metrics := range scope.Metrics {
-			ts, err := me.recordToTspb(metrics, mr, scope.Scope, extraLabels)
-			aggError = multierr.Append(aggError, err)
-			tss = append(tss, ts...)
+	name := fmt.Sprintf("projects/%s", me.o.projectID)
+
+	var createErrors []error
+	for i := 0; i < len(tss); i += sendBatchSize {
+		j := i + sendBatchSize
+		if j >= len(tss) {
+			j = len(tss)
+		}
+
+		// TODO: When this exporter is rewritten, support writing to multiple
+		// projects based on the "gcp.project.id" resource.
+		req := &monitoringpb.CreateTimeSeriesRequest{
+			Name:       name,
+			TimeSeries: tss[i:j],
+		}
+
+		err := me.client.CreateTimeSeries(ctx, req)
+		if err != nil {
+			createErrors = append(createErrors, err)
 		}
 	}
 
-	if len(tss) == 0 {
-		return aggError
-	}
-
-	// TODO: When this exporter is rewritten, support writing to multiple
-	// projects based on the "gcp.project.id" resource.
-	req := &monitoringpb.CreateTimeSeriesRequest{
-		Name:       fmt.Sprintf("projects/%s", me.o.projectID),
-		TimeSeries: tss,
-	}
-
-	return multierr.Append(aggError, me.client.CreateTimeSeries(ctx, req))
+	return multierr.Append(aggErr, multierr.Combine(createErrors...))
 }
 
 func (me *metricExporter) extraLabelsFromResource(res *resource.Resource) *attribute.Set {
@@ -493,6 +500,28 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		aggErr = multierr.Append(aggErr, errUnexpectedAggregationKind{kind: reflect.TypeOf(m.Data).String()})
 	}
 	return tss, aggErr
+}
+
+func (me *metricExporter) recordsToTspbs(rm metricdata.ResourceMetrics) ([]*monitoringpb.TimeSeries, error) {
+	mr := me.resourceToMonitoredResourcepb(rm.Resource)
+	extraLabels := me.extraLabelsFromResource(rm.Resource)
+
+	var (
+		tss    []*monitoringpb.TimeSeries
+		errors []error
+	)
+	for _, scope := range rm.ScopeMetrics {
+		for _, metrics := range scope.Metrics {
+			ts, err := me.recordToTspb(metrics, mr, scope.Scope, extraLabels)
+			if err != nil {
+				errors = append(errors, err)
+			}
+
+			tss = append(tss, ts...)
+		}
+	}
+
+	return tss, multierr.Combine(errors...)
 }
 
 func sanitizeUTF8(s string) string {
