@@ -1,0 +1,17 @@
+go 1.20
+
+use (
+	.
+	./e2e-test-server
+	./e2e-test-server/cloud_functions
+	./example/metric
+	./exporter/collector
+	./exporter/collector/googlemanagedprometheus
+	./exporter/collector/integrationtest
+	./exporter/metric
+	./exporter/trace
+	./internal/cloudmock
+	./internal/resourcemapping
+	./propagator
+	./tools
+)

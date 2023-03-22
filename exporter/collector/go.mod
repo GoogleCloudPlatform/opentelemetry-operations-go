@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	cloud.google.com/go/logging v1.6.1
-	cloud.google.com/go/monitoring v1.8.0
+	cloud.google.com/go/monitoring v1.12.0
 	cloud.google.com/go/trace v1.8.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.12.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.36.0
@@ -20,8 +20,8 @@ require (
 	go.opentelemetry.io/otel/trace v1.14.0
 	go.uber.org/atomic v1.10.0
 	go.uber.org/multierr v1.9.0
-	go.uber.org/zap v1.23.0
-	golang.org/x/oauth2 v0.4.0
+	go.uber.org/zap v1.24.0
+	golang.org/x/oauth2 v0.5.0
 	google.golang.org/api v0.108.0
 	google.golang.org/genproto v0.0.0-20230125152338-dcaf20b6aeaa
 	google.golang.org/grpc v1.53.0
@@ -47,17 +47,13 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	golang.org/x/net v0.7.0 // indirect
+	github.com/rogpeppe/go-internal v1.9.0 // indirect
+	go.uber.org/goleak v1.2.0 // indirect
+	golang.org/x/net v0.8.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
-	golang.org/x/text v0.7.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
+	golang.org/x/text v0.8.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../trace
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../internal/resourcemapping
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../internal/cloudmock

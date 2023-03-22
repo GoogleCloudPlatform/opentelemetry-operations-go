@@ -39,16 +39,6 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 )
 
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go => ../../..
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../../../exporter/trace
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../../internal/resourcemapping
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator => ../../../propagator
-
-replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../../internal/cloudmock
-
 retract (
 	v1.0.0
 	v1.0.0-RC2
