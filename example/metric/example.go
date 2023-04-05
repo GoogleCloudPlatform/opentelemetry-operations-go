@@ -80,7 +80,7 @@ func main() {
 		log.Fatalf("Failed to create counter: %v", err)
 	}
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
-	counter.Add(ctx, 100, clabels...)
+	counter.Add(ctx, 100, metric.WithAttributes(clabels...))
 
 	histogram, err := meter.Float64Histogram("histogram-b")
 	if err != nil {
@@ -100,7 +100,7 @@ func main() {
 	}
 	_, err = meter.RegisterCallback(func(ctx context.Context, o metric.Observer) error {
 		v := of.get()
-		o.ObserveFloat64(gaugeObserver, v, olabels...)
+		o.ObserveFloat64(gaugeObserver, v, metric.WithAttributes(olabels...))
 		return nil
 	}, gaugeObserver)
 	if err != nil {
@@ -113,11 +113,11 @@ func main() {
 	for range timer.C {
 		r := rng.Int63n(100)
 		cv := 100 + r
-		counter.Add(ctx, cv, clabels...)
+		counter.Add(ctx, cv, metric.WithAttributes(clabels...))
 
 		r2 := rng.Int63n(100)
 		hv := float64(r2) / 20.0
-		histogram.Record(ctx, hv, clabels...)
+		histogram.Record(ctx, hv, metric.WithAttributes(clabels...))
 		ov := 12.34 + hv
 		of.set(ov)
 		log.Printf("Most recent data: counter %v, observer %v; histogram %v", cv, ov, hv)
