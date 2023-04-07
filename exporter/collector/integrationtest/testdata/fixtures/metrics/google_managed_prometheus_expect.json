@@ -706,6 +706,202 @@
         },
         {
           "metric": {
+            "type": "prometheus.googleapis.com/otlp_test_gauge/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.00699415
+              }
+            }
+          ],
+          "unit": "seconds"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/workload_googleapis_com_otlp_test_prefix1/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.00699415
+              }
+            }
+          ],
+          "unit": "seconds"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/invalid_googleapis_com_otlp_test_prefix2/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.00699415
+              }
+            }
+          ],
+          "unit": "seconds"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otlp_test_prefix3_workload_googleapis_com_abc/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.00699415
+              }
+            }
+          ],
+          "unit": "seconds"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/WORKLOAD_GOOGLEAPIS_COM_otlp_test_prefix4/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.00699415
+              }
+            }
+          ],
+          "unit": "seconds"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/WORKLOAD_googleapis_com_otlp_test_prefix5/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.00699415
+              }
+            }
+          ],
+          "unit": "seconds"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/prometheus_googleapis_com_otlp_test_prefix6_gauge/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.00699415
+              }
+            }
+          ],
+          "unit": "seconds"
+        },
+        {
+          "metric": {
             "type": "prometheus.googleapis.com/target_info/gauge",
             "labels": {
               "cloud_platform": "gcp_kubernetes_engine",
@@ -765,7 +961,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "22"
+                  "int64Value": "29"
                 }
               }
             ]

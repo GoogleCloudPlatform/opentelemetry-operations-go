@@ -379,6 +379,97 @@
                            }
                         ]
                      }
+                  },
+                  {
+                     "name":"otlp.test.gauge",
+                     "description":"Normal metric name",
+                     "unit":"seconds",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":0.00699415
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "name":"workload.googleapis.com/otlp.test.prefix1",
+                     "description":"URI-style metric name",
+                     "unit":"seconds",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":0.00699415
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "name":".invalid.googleapis.com/otlp.test.prefix2",
+                     "description":"URI-style metric name with invalid domain",
+                     "unit":"seconds",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":0.00699415
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "name":"otlp.test.prefix3/workload.googleapis.com/abc",
+                     "description":"Broken URI-style metric name",
+                     "unit":"seconds",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":0.00699415
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "name":"WORKLOAD.GOOGLEAPIS.COM/otlp.test.prefix4",
+                     "description":"Uppercase URI-style metric name",
+                     "unit":"seconds",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":0.00699415
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "name":"WORKLOAD.googleapis.com/otlp.test.prefix5",
+                     "description":"Partial uppercase URI-style metric name",
+                     "unit":"seconds",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":0.00699415
+                           }
+                        ]
+                     }
+                  },
+                  {
+                     "name":"prometheus.googleapis.com/otlp_test_prefix6/gauge",
+                     "description":"GMP metric names are not special",
+                     "unit":"seconds",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":0.00699415
+                           }
+                        ]
+                     }
                   }
                ]
             }
