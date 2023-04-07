@@ -457,6 +457,19 @@
                            }
                         ]
                      }
+                  },
+                  {
+                     "name":"prometheus.googleapis.com/otlp.test.prefix6",
+                     "description":"GMP metric names are not special",
+                     "unit":"seconds",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":0.00699415
+                           }
+                        ]
+                     }
                   }
                ]
             }
