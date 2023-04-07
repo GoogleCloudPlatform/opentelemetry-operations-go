@@ -874,7 +874,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/prometheus_googleapis_com_otlp_test_prefix6/gauge"
+            "type": "prometheus.googleapis.com/prometheus_googleapis_com_otlp_test_prefix6_gauge/gauge"
           },
           "resource": {
             "type": "prometheus_target",

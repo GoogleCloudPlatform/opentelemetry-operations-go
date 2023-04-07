@@ -459,7 +459,7 @@
                      }
                   },
                   {
-                     "name":"prometheus.googleapis.com/otlp.test.prefix6",
+                     "name":"prometheus.googleapis.com/otlp_test_prefix6/gauge",
                      "description":"GMP metric names are not special",
                      "unit":"seconds",
                      "gauge":{
