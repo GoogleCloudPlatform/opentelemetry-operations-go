@@ -929,7 +929,7 @@ func (m *metricMapper) metricNameToType(name string, metric pmetric.Metric) (str
 	if err != nil {
 		return "", err
 	}
-	return path.Join(m.getMetricNamePrefix(name), metricName), nil
+	return path.Join(m.getMetricNamePrefix(metricName), metricName), nil
 }
 
 // defaultGetMetricName does not (further) customize the baseName.
