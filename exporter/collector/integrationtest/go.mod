@@ -7,11 +7,11 @@ require (
 	cloud.google.com/go/monitoring v1.12.0
 	cloud.google.com/go/trace v1.8.0
 	contrib.go.opencensus.io/exporter/stackdriver v0.13.14
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.37.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.37.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.37.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.37.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.37.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.37.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.37.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.37.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.37.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.37.1
 	github.com/google/go-cmp v0.5.9
 	github.com/stretchr/testify v1.8.2
 	go.opencensus.io v0.24.0
@@ -35,7 +35,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/longrunning v0.3.0 // indirect
 	contrib.go.opencensus.io/exporter/prometheus v0.4.2 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.13.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.13.1 // indirect
 	github.com/aws/aws-sdk-go v1.44.117 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.4.1 // indirect

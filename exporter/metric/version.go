@@ -17,5 +17,5 @@ package metric
 // Version is the current release version of the OpenTelemetry
 // Operations Metric Exporter in use.
 func Version() string {
-	return "0.37.0"
+	return "0.37.1"
 }
