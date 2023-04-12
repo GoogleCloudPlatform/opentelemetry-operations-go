@@ -29,8 +29,8 @@ import (
 const (
 	prefix = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
 
-	stable   = "1.13.0"
-	unstable = "0.37.0"
+	stable   = "1.13.1"
+	unstable = "0.37.1"
 )
 
 var versions = map[string]string{
