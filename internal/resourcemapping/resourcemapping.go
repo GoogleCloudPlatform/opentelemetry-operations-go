@@ -21,37 +21,48 @@ import (
 const (
 	ProjectIDAttributeKey = "gcp.project.id"
 
-	awsAccount        = "aws_account"
-	awsEc2Instance    = "aws_ec2_instance"
-	clusterName       = "cluster_name"
-	containerName     = "container_name"
-	gceInstance       = "gce_instance"
-	genericNode       = "generic_node"
-	genericTask       = "generic_task"
-	instanceID        = "instance_id"
-	job               = "job"
-	k8sCluster        = "k8s_cluster"
-	k8sContainer      = "k8s_container"
-	k8sNode           = "k8s_node"
-	k8sPod            = "k8s_pod"
-	location          = "location"
-	namespace         = "namespace"
-	namespaceName     = "namespace_name"
-	nodeID            = "node_id"
-	nodeName          = "node_name"
-	podName           = "pod_name"
-	region            = "region"
-	taskID            = "task_id"
-	zone              = "zone"
-	gaeInstance       = "gae_instance"
-	gaeModuleID       = "module_id"
-	gaeVersionID      = "version_id"
-	cloudRunRevision  = "cloud_run_revision"
-	cloudFunction     = "cloud_function"
-	cloudFunctionName = "function_name"
-	serviceName       = "service_name"
-	configurationName = "configuration_name"
-	revisionName      = "revision_name"
+	awsAccount          = "aws_account"
+	awsEc2Instance      = "aws_ec2_instance"
+	clusterName         = "cluster_name"
+	containerName       = "container_name"
+	gceInstance         = "gce_instance"
+	genericNode         = "generic_node"
+	genericTask         = "generic_task"
+	instanceID          = "instance_id"
+	job                 = "job"
+	managedK8sContainer = "internal_managed_k8s_container"
+	managedK8sNode      = "internal_managed_k8s_node"
+	managedK8sPod       = "internal_managed_k8s_pod"
+	k8sCluster          = "k8s_cluster"
+	k8sContainer        = "k8s_container"
+	k8sNode             = "k8s_node"
+	k8sPod              = "k8s_pod"
+	location            = "location"
+	namespace           = "namespace"
+	namespaceName       = "namespace_name"
+	nodeID              = "node_id"
+	nodeName            = "node_name"
+	podName             = "pod_name"
+	region              = "region"
+	taskID              = "task_id"
+	zone                = "zone"
+	gaeInstance         = "gae_instance"
+	gaeModuleID         = "module_id"
+	gaeVersionID        = "version_id"
+	cloudRunRevision    = "cloud_run_revision"
+	cloudFunction       = "cloud_function"
+	cloudFunctionName   = "function_name"
+	serviceName         = "service_name"
+	configurationName   = "configuration_name"
+	revisionName        = "revision_name"
+
+	// Anthos managed monitored resource labels
+	consumerProjectID       = "consumer_project_id"
+	instanceLocation        = "instance_location"
+	clusterHash             = "cluster_hash"
+	distribution            = "distribution"
+	distributionVersion     = "distribution_version"
+	distributionClusterType = "distribution_cluster_type"
 )
 
 var (
@@ -68,6 +79,63 @@ var (
 		gceInstance: {
 			zone:       {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
 			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
+		},
+		managedK8sContainer: {
+			consumerProjectID: {otelKeys: []string{"consumer.project.id"}},
+			location: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
+			instanceLocation: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
+			clusterHash:             {otelKeys: []string{"cluster.hash"}},
+			clusterName:             {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
+			podName:                 {otelKeys: []string{string(semconv.K8SPodNameKey)}},
+			containerName:           {otelKeys: []string{string(semconv.K8SContainerNameKey)}},
+			instanceID:              {otelKeys: []string{string(semconv.K8SNodeNameKey)}},
+			namespaceName:           {otelKeys: []string{string(semconv.K8SNamespaceNameKey)}},
+			distribution:            {otelKeys: []string{"distribution"}},
+			distributionVersion:     {otelKeys: []string{"distribution.version"}},
+			distributionClusterType: {otelKeys: []string{"distribution.cluster.type"}},
+		},
+		managedK8sNode: {
+			consumerProjectID: {otelKeys: []string{"consumer.project.id"}},
+			location: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
+			instanceLocation: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
+			clusterHash:             {otelKeys: []string{"cluster.hash"}},
+			clusterName:             {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
+			instanceID:              {otelKeys: []string{string(semconv.K8SNodeNameKey)}},
+			namespaceName:           {otelKeys: []string{string(semconv.K8SNamespaceNameKey)}},
+			distribution:            {otelKeys: []string{"distribution"}},
+			distributionVersion:     {otelKeys: []string{"distribution.version"}},
+			distributionClusterType: {otelKeys: []string{"distribution.cluster.type"}},
+		},
+		managedK8sPod: {
+			consumerProjectID: {otelKeys: []string{"consumer.project.id"}},
+			location: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
+			instanceLocation: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
+			clusterHash:             {otelKeys: []string{"cluster.hash"}},
+			clusterName:             {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
+			podName:                 {otelKeys: []string{string(semconv.K8SPodNameKey)}},
+			instanceID:              {otelKeys: []string{string(semconv.K8SNodeNameKey)}},
+			namespaceName:           {otelKeys: []string{string(semconv.K8SNamespaceNameKey)}},
+			distribution:            {otelKeys: []string{"distribution"}},
+			distributionVersion:     {otelKeys: []string{"distribution.version"}},
+			distributionClusterType: {otelKeys: []string{"distribution.cluster.type"}},
 		},
 		k8sContainer: {
 			location: {otelKeys: []string{
@@ -169,8 +237,14 @@ func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResourc
 	case semconv.CloudPlatformGCPComputeEngine.Value.AsString():
 		mr = createMonitoredResource(gceInstance, attrs)
 	case semconv.CloudPlatformGCPKubernetesEngine.Value.AsString():
-		// Try for most to least specific k8s_container, k8s_pod, etc
-		if _, ok := attrs.GetString(string(semconv.K8SContainerNameKey)); ok {
+		// Try for most to least specific internal_managed_k8s_container, k8s_container, k8s_pod, etc
+		if _, ok := attrs.GetString("internal.managed.k8s.container"); ok {
+			mr = createMonitoredResource(managedK8sContainer, attrs)
+		} else if _, ok := attrs.GetString("internal.managed.k8s.pod"); ok {
+			mr = createMonitoredResource(managedK8sPod, attrs)
+		} else if _, ok := attrs.GetString("internal.managed.k8s.node"); ok {
+			mr = createMonitoredResource(managedK8sNode, attrs)
+		} else if _, ok := attrs.GetString(string(semconv.K8SContainerNameKey)); ok {
 			mr = createMonitoredResource(k8sContainer, attrs)
 		} else if _, ok := attrs.GetString(string(semconv.K8SPodNameKey)); ok {
 			mr = createMonitoredResource(k8sPod, attrs)
