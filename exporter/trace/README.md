@@ -41,6 +41,7 @@ func main() {
 	otel.SetTracerProvider(tp)
 
 	tracer := tp.Tracer("example.com/trace")
+	ctx := context.TODO()
 	ctx, span := tracer.Start(ctx, "foo")
 	defer span.End()
 
