@@ -339,6 +339,10 @@ func labelDescriptors(metrics metricdata.Metrics, extraLabels *attribute.Set) []
 		for _, pt := range a.DataPoints {
 			addAttributes(&pt.Attributes)
 		}
+	case metricdata.Histogram[int64]:
+		for _, pt := range a.DataPoints {
+			addAttributes(&pt.Attributes)
+		}
 	}
 	return labels
 }
@@ -487,6 +491,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			tss = append(tss, ts)
 		}
 	case metricdata.Histogram[float64]:
+	case metricdata.Histogram[int64]:
 		for _, point := range a.DataPoints {
 			ts, err := histogramToTimeSeries(point, m, mr)
 			if err != nil {
@@ -566,7 +571,7 @@ func sumToTimeSeries[N int64 | float64](point metricdata.DataPoint[N], metrics m
 	}, nil
 }
 
-func histogramToTimeSeries(point metricdata.HistogramDataPoint[float64], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
+func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
 	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
 	if err != nil {
 		return nil, err
@@ -606,20 +611,20 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 	}, nil
 }
 
-func histToTypedValue(hist metricdata.HistogramDataPoint[float64]) *monitoringpb.TypedValue {
+func histToTypedValue[N int64 | float64](hist metricdata.HistogramDataPoint[N]) *monitoringpb.TypedValue {
 	counts := make([]int64, len(hist.BucketCounts))
 	for i, v := range hist.BucketCounts {
 		counts[i] = int64(v)
 	}
-	var mean float64
-	if !math.IsNaN(hist.Sum) && hist.Count > 0 { // Avoid divide-by-zero
-		mean = hist.Sum / float64(hist.Count)
+	var mean N
+	if !math.IsNaN(float64(hist.Sum)) && hist.Count > 0 { // Avoid divide-by-zero
+		mean = hist.Sum / N(hist.Count)
 	}
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distribution.Distribution{
 				Count:        int64(hist.Count),
-				Mean:         mean,
+				Mean:         float64(mean),
 				BucketCounts: counts,
 				BucketOptions: &distribution.Distribution_BucketOptions{
 					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
