@@ -9,9 +9,11 @@ require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.15.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.39.0
 	github.com/census-instrumentation/opencensus-proto v0.4.1
+	github.com/fsnotify/fsnotify v1.6.0
 	github.com/google/go-cmp v0.5.9
 	github.com/googleapis/gax-go/v2 v2.7.0
 	github.com/stretchr/testify v1.8.3
+	github.com/tidwall/wal v1.1.7
 	go.opencensus.io v0.24.0
 	go.opentelemetry.io/collector/pdata v1.0.0-rcv0012
 	go.opentelemetry.io/collector/semconv v0.78.0
@@ -47,6 +49,10 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/tidwall/gjson v1.10.2 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
+	github.com/tidwall/tinylru v1.1.0 // indirect
 	go.opentelemetry.io/otel/metric v1.16.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect

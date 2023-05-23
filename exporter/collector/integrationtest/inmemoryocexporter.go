@@ -162,6 +162,7 @@ func NewMetricTestExporter(
 		ctx,
 		cfg,
 		zap.NewNop(),
+		//zap.NewExample(),
 		"latest",
 		collector.DefaultTimeout,
 	)

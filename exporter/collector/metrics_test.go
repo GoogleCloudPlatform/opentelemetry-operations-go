@@ -15,8 +15,10 @@
 package collector
 
 import (
+	"context"
 	"fmt"
 	"math"
+	"os"
 	"testing"
 	"time"
 
@@ -30,6 +32,9 @@ import (
 	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/testing/protocmp"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -972,10 +977,10 @@ func TestExemplarOnlyTraceId(t *testing.T) {
 	assert.Equal(t, timestamppb.New(start), result.Timestamp)
 	assert.Len(t, result.Attachments, 1)
 
-	context := &monitoringpb.SpanContext{}
-	err := result.Attachments[0].UnmarshalTo(context)
+	spanContext := &monitoringpb.SpanContext{}
+	err := result.Attachments[0].UnmarshalTo(spanContext)
 	assert.Nil(t, err)
-	assert.Equal(t, "projects/p/traces/00000000000000000000000000000001/spans/0000000000000002", context.SpanName)
+	assert.Equal(t, "projects/p/traces/00000000000000000000000000000001/spans/0000000000000002", spanContext.SpanName)
 }
 
 func TestSumPointToTimeSeries(t *testing.T) {
@@ -2032,4 +2037,268 @@ func TestInstrumentationScopeToLabelsUTF8(t *testing.T) {
 			assert.Equal(t, out, test.output)
 		})
 	}
+}
+
+func TestSetupWAL(t *testing.T) {
+	tmpDir, _ := os.MkdirTemp("", "wal-test-")
+	mExp := &MetricsExporter{
+		cfg: Config{
+			MetricConfig: MetricConfig{
+				WALConfig: &WALConfig{
+					Directory:  tmpDir,
+					MaxBackoff: time.Duration(2112 * time.Second),
+				},
+			},
+		},
+	}
+	firstIndex, lastIndex, err := mExp.setupWAL()
+	require.NoError(t, err)
+	require.Zero(t, firstIndex)
+	require.Zero(t, lastIndex)
+	require.Equal(t, time.Duration(2112*time.Second), mExp.wal.maxBackoff)
+
+	err = mExp.wal.Write(uint64(1), []byte("foo"))
+	require.NoError(t, err)
+	err = mExp.wal.Write(uint64(2), []byte("bar"))
+	require.NoError(t, err)
+	firstIndex, lastIndex, err = mExp.setupWAL()
+	require.NoError(t, err)
+	require.Equal(t, uint64(1), firstIndex)
+	require.Equal(t, uint64(2), lastIndex)
+	require.Equal(t, time.Duration(2112*time.Second), mExp.wal.maxBackoff)
+}
+
+func TestCloseWAL(t *testing.T) {
+	tmpDir, _ := os.MkdirTemp("", "wal-test-")
+	mExp := &MetricsExporter{
+		cfg: Config{
+			MetricConfig: MetricConfig{
+				WALConfig: &WALConfig{
+					Directory: tmpDir,
+				},
+			},
+		},
+	}
+	_, _, err := mExp.setupWAL()
+	require.NoError(t, err)
+
+	err = mExp.closeWAL()
+	require.NoError(t, err)
+
+	// check multiple closes are safe
+	err = mExp.closeWAL()
+	require.NoError(t, err)
+}
+
+func TestReadWALAndExport(t *testing.T) {
+	tmpDir, _ := os.MkdirTemp("", "wal-test-")
+	mExp := &MetricsExporter{
+		cfg: Config{
+			MetricConfig: MetricConfig{
+				WALConfig: &WALConfig{
+					Directory: tmpDir,
+				},
+			},
+		},
+		exportFunc: func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
+			return nil
+		},
+	}
+
+	_, _, err := mExp.setupWAL()
+	require.NoError(t, err)
+
+	req := &monitoringpb.CreateTimeSeriesRequest{Name: "foo"}
+	bytes, err := proto.Marshal(req)
+	require.NoError(t, err)
+	err = mExp.wal.Write(1, bytes)
+	require.NoError(t, err)
+
+	err = mExp.readWALAndExport(context.Background())
+	require.NoError(t, err)
+}
+
+func TestReadWALAndExportRetry(t *testing.T) {
+	tmpDir, _ := os.MkdirTemp("", "wal-test-")
+	mExp := &MetricsExporter{
+		obs: selfObservability{zap.NewNop()},
+		cfg: Config{
+			MetricConfig: MetricConfig{
+				WALConfig: &WALConfig{
+					Directory:  tmpDir,
+					MaxBackoff: time.Duration(3 * time.Second),
+				},
+			},
+		},
+		exportFunc: func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
+			statusResp := status.New(codes.Unavailable, "unavailable")
+			statusResp, _ = statusResp.WithDetails(&monitoringpb.CreateTimeSeriesSummary{
+				TotalPointCount:   int32(len(req.TimeSeries)),
+				SuccessPointCount: 0,
+			})
+			return statusResp.Err()
+		},
+	}
+
+	_, _, err := mExp.setupWAL()
+	require.NoError(t, err)
+
+	req := &monitoringpb.CreateTimeSeriesRequest{Name: "foo"}
+	bytes, err := proto.Marshal(req)
+	require.NoError(t, err)
+	err = mExp.wal.Write(1, bytes)
+	require.NoError(t, err)
+
+	// exponential backoff, max time is 3 seconds
+	// total attempts should be <=6 seconds but >= 2 seconds (with forced retries)
+	startTime := time.Now()
+	err = mExp.readWALAndExport(context.Background())
+	endTime := time.Now()
+	require.NoError(t, err)
+	require.LessOrEqual(t, endTime.Sub(startTime), time.Duration(6*time.Second))
+	require.GreaterOrEqual(t, endTime.Sub(startTime), time.Duration(2*time.Second))
+}
+
+func TestWatchWALFile(t *testing.T) {
+	tmpDir, _ := os.MkdirTemp("", "wal-test-")
+	mExp := &MetricsExporter{
+		obs: selfObservability{zap.NewExample()},
+		cfg: Config{
+			MetricConfig: MetricConfig{
+				WALConfig: &WALConfig{
+					Directory: tmpDir,
+				},
+			},
+		},
+	}
+	_, _, err := mExp.setupWAL()
+	require.NoError(t, err)
+
+	watchChan := make(chan error)
+	go func() {
+		watchChan <- mExp.watchWALFile(context.Background())
+	}()
+
+	// continuously write to test WAL until watch returns or timeout
+	// avoids racing or manual sleeps to make sure the watch is started before we write
+	i := 1
+writeLoop:
+	for {
+		err = mExp.wal.Write(uint64(i), []byte("foo"))
+		require.NoError(t, err)
+		select {
+		case err := <-watchChan:
+			require.NoError(t, err)
+			break writeLoop
+		default:
+			i++
+		}
+	}
+}
+
+func TestRunWALReadAndExportLoop(t *testing.T) {
+	requestsReceived := 0
+	doneChan := make(chan bool)
+
+	tmpDir, _ := os.MkdirTemp("", "wal-test-")
+	shutdown := make(chan struct{})
+	mExp := &MetricsExporter{
+		obs:       selfObservability{zap.NewNop()},
+		shutdownC: shutdown,
+		cfg: Config{
+			MetricConfig: MetricConfig{
+				WALConfig: &WALConfig{
+					Directory: tmpDir,
+				},
+			},
+		},
+		exportFunc: func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
+			if len(req.String()) == 0 {
+				return nil
+			}
+			requestsReceived++
+			if requestsReceived == 10 {
+				doneChan <- true
+			}
+			return nil
+		},
+	}
+	_, _, err := mExp.setupWAL()
+	require.NoError(t, err)
+
+	ctx := context.Background()
+	mExp.goroutines.Add(1)
+	go func() {
+		mExp.runWALReadAndExportLoop(ctx)
+	}()
+
+	for i := 0; i < 10; i++ {
+		mExp.wal.mutex.Lock()
+		req := &monitoringpb.CreateTimeSeriesRequest{Name: "foo"}
+		bytes, err := proto.Marshal(req)
+		require.NoError(t, err)
+
+		writeIndex, err := mExp.wal.LastIndex()
+		require.NoError(t, err)
+		err = mExp.wal.Write(writeIndex+1, bytes)
+		require.NoError(t, err)
+		mExp.wal.mutex.Unlock()
+	}
+
+	// wait until all requests have been received by the fake exporter
+	<-doneChan
+	// give the loop a second to realize it's at the end of the WAL
+	time.Sleep(time.Duration(1 * time.Second))
+
+	close(mExp.shutdownC)
+	mExp.goroutines.Wait()
+}
+
+func TestPushMetricsOntoWAL(t *testing.T) {
+	tmpDir, _ := os.MkdirTemp("", "wal-test-")
+	shutdown := make(chan struct{})
+	obs := selfObservability{zap.NewNop()}
+	cfg := Config{
+		MetricConfig: MetricConfig{
+			MapMonitoredResource: defaultResourceToMonitoredResource,
+			GetMetricName:        defaultGetMetricName,
+			WALConfig: &WALConfig{
+				Directory: tmpDir,
+			},
+		},
+	}
+	mExp := &MetricsExporter{
+		obs:       obs,
+		shutdownC: shutdown,
+		cfg:       cfg,
+		mapper: metricMapper{
+			obs:        obs,
+			cfg:        cfg,
+			normalizer: normalization.NewDisabledNormalizer(),
+		},
+	}
+
+	_, _, err := mExp.setupWAL()
+	require.NoError(t, err)
+
+	metrics := pmetric.NewMetrics()
+	rm := metrics.ResourceMetrics().AppendEmpty()
+	rm.Resource().Attributes().PutStr("foo-label", "bar")
+	sm := rm.ScopeMetrics().AppendEmpty()
+	sm.Scope().SetName("myscope")
+	sm.Scope().SetVersion("v0.0.1")
+	metric := sm.Metrics().AppendEmpty()
+	metric.SetName("baz-metric")
+	metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(2112)
+	metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
+
+	err = mExp.PushMetrics(context.Background(), metrics)
+	require.NoError(t, err)
+
+	close(mExp.shutdownC)
+	bytes, err := mExp.wal.Read(1)
+	require.NoError(t, err)
+	req := new(monitoringpb.CreateTimeSeriesRequest)
+	err = proto.Unmarshal(bytes, req)
+	require.NoError(t, err)
 }

@@ -67,6 +67,9 @@ type TestCase struct {
 	// ExpectFixturePath is the path to the JSON encoded MetricExpectFixture
 	// (see fixtures.proto) that contains request messages the exporter is expected to send.
 	ExpectFixturePath string
+	// CompareFixturePath is a second output fixture that should be equal to this test's output fixture.
+	// Used for cross-referencing multiple tests that should have the same output, without overwriting the same fixtures.
+	CompareFixturePath string
 	// When testing the SDK metrics exporter (not collector), this is the options to use. Optional.
 	MetricSDKExporterOptions []metric.Option
 	// Skip, if true, skips this test case
@@ -75,6 +78,8 @@ type TestCase struct {
 	SkipForSDK bool
 	// ExpectErr sets whether the test is expected to fail
 	ExpectErr bool
+	// ExpectRetries sets whether the test expects the server to report multiple attempts
+	ExpectRetries bool
 }
 
 func (tc *TestCase) LoadOTLPTracesInput(
@@ -329,12 +334,13 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 	return metrics
 }
 
-func (tc *TestCase) LoadMetricExpectFixture(
+func (tc *TestCase) LoadMetricFixture(
 	t testing.TB,
+	path string,
 	startTime time.Time,
 	endTime time.Time,
 ) *protos.MetricExpectFixture {
-	fixtureBytes, err := os.ReadFile(tc.ExpectFixturePath)
+	fixtureBytes, err := os.ReadFile(path)
 	require.NoError(t, err)
 	fixture := &protos.MetricExpectFixture{}
 	require.NoError(t, protojson.Unmarshal(fixtureBytes, fixture))

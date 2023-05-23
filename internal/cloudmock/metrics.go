@@ -36,6 +36,7 @@ type MetricsTestServer struct {
 	createTimeSeriesReqs        []*monitoringpb.CreateTimeSeriesRequest
 	createServiceTimeSeriesReqs []*monitoringpb.CreateTimeSeriesRequest
 	mu                          sync.Mutex
+	RetryCount                  int
 }
 
 func (m *MetricsTestServer) Shutdown() {
@@ -95,24 +96,38 @@ type fakeMetricServiceServer struct {
 	metricsTestServer *MetricsTestServer
 }
 
+// CreateTimeSeries simulates a call to GCM.
+// Failed calls can be simulated by putting error codes in the project name for the request,
+// such as "notfound", "unavailable", and "deadline_exceeded".
+// For WAL testing, unavailable and deadline exceeded calls will retry once, failing the first
+// time but succeeding on the second call (eg, network outage).
 func (f *fakeMetricServiceServer) CreateTimeSeries(
 	ctx context.Context,
 	req *monitoringpb.CreateTimeSeriesRequest,
 ) (*emptypb.Empty, error) {
-	f.metricsTestServer.appendCreateTimeSeriesReq(req)
-
-	var code codes.Code
+	code := codes.OK
 	if strings.Contains(req.Name, "notfound") {
 		code = codes.NotFound
+	} else if strings.Contains(req.Name, "unavailable") && f.metricsTestServer.RetryCount == 0 {
+		f.metricsTestServer.RetryCount++
+		code = codes.Unavailable
+	} else if strings.Contains(req.Name, "deadline_exceeded") && f.metricsTestServer.RetryCount == 0 {
+		f.metricsTestServer.RetryCount++
+		code = codes.DeadlineExceeded
 	}
 
-	statusResp := status.New(code, "FORCED_TEST_ERROR")
-	if code == codes.NotFound {
-		statusResp, _ = statusResp.WithDetails(&monitoringpb.CreateTimeSeriesSummary{
-			TotalPointCount:   int32(len(req.TimeSeries)),
-			SuccessPointCount: 0,
-		})
+	successPointCount := int32(len(req.TimeSeries))
+	if code == codes.NotFound || code == codes.Unavailable || code == codes.DeadlineExceeded {
+		successPointCount = 0
+	} else {
+		f.metricsTestServer.appendCreateTimeSeriesReq(req)
 	}
+
+	statusResp, _ := status.New(code, "").WithDetails(
+		&monitoringpb.CreateTimeSeriesSummary{
+			TotalPointCount:   int32(len(req.TimeSeries)),
+			SuccessPointCount: successPointCount,
+		})
 
 	return &emptypb.Empty{}, statusResp.Err()
 }
