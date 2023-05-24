@@ -16,6 +16,7 @@ package integrationtest
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"testing"
 	"time"
@@ -203,10 +204,11 @@ func TestSDKMetrics(t *testing.T) {
 				expectFixture,
 			)
 			if diff != "" {
+				fmt.Printf("%s", diff)
 				require.Fail(
 					t,
 					"Expected requests fixture and actual GCM requests differ",
-					diff,
+					"",
 				)
 			}
 		})

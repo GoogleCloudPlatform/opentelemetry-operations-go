@@ -490,8 +490,17 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
-	case metricdata.Histogram[float64]:
 	case metricdata.Histogram[int64]:
+		for _, point := range a.DataPoints {
+			ts, err := histogramToTimeSeries(point, m, mr)
+			if err != nil {
+				aggErr = multierr.Append(aggErr, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			tss = append(tss, ts)
+		}
+	case metricdata.Histogram[float64]:
 		for _, point := range a.DataPoints {
 			ts, err := histogramToTimeSeries(point, m, mr)
 			if err != nil {
@@ -616,9 +625,9 @@ func histToTypedValue[N int64 | float64](hist metricdata.HistogramDataPoint[N]) 
 	for i, v := range hist.BucketCounts {
 		counts[i] = int64(v)
 	}
-	var mean N
+	var mean float64
 	if !math.IsNaN(float64(hist.Sum)) && hist.Count > 0 { // Avoid divide-by-zero
-		mean = hist.Sum / N(hist.Count)
+		mean = float64(hist.Sum) / float64(hist.Count)
 	}
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
