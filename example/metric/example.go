@@ -18,6 +18,7 @@ import (
 	"context"
 	"log"
 	"math/rand"
+	"os"
 	"sync"
 	"time"
 
@@ -55,7 +56,7 @@ func main() {
 	// Initialization. In order to pass the credentials to the exporter,
 	// prepare credential file following the instruction described in this doc.
 	// https://pkg.go.dev/golang.org/x/oauth2/google?tab=doc#FindDefaultCredentials
-	exporter, err := mexporter.New()
+	exporter, err := mexporter.New(mexporter.WithProjectID(os.Getenv("GOOGLE_PROJECT_ID")))
 	if err != nil {
 		log.Fatalf("Failed to create exporter: %v", err)
 	}
