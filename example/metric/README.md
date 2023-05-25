@@ -16,6 +16,12 @@ foo-project-214354
 
 In this case, the project ID is `foo-project-214354`.
 
+Next, set this project ID to the environment variable `GOOGLE_PROJECT_ID` using the following command:
+
+```
+export GOOGLE_PROJECT_ID=$(gcloud config get-value project)
+```
+
 Once you ensure the API is enabled, then build the example application and run the executable.
 
 ```
