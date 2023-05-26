@@ -134,7 +134,7 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 var errShutdown = fmt.Errorf("exporter is shutdown")
 
 // Export exports OpenTelemetry Metrics to Google Cloud Monitoring.
-func (me *metricExporter) Export(ctx context.Context, rm metricdata.ResourceMetrics) error {
+func (me *metricExporter) Export(ctx context.Context, rm *metricdata.ResourceMetrics) error {
 	select {
 	case <-me.shutdown:
 		return errShutdown
@@ -162,7 +162,7 @@ func (me *metricExporter) Aggregation(ik metric.InstrumentKind) aggregation.Aggr
 
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registered in Cloud Monitoring yet.
-func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm metricdata.ResourceMetrics) error {
+func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm *metricdata.ResourceMetrics) error {
 	if me.o.disableCreateMetricDescriptors {
 		return nil
 	}
@@ -224,7 +224,7 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 
 // exportTimeSeries create TimeSeries from the records in cps.
 // res should be the common resource among all TimeSeries, such as instance id, application name and so on.
-func (me *metricExporter) exportTimeSeries(ctx context.Context, rm metricdata.ResourceMetrics) error {
+func (me *metricExporter) exportTimeSeries(ctx context.Context, rm *metricdata.ResourceMetrics) error {
 	tss, aggErr := me.recordsToTspbs(rm)
 	if len(tss) == 0 {
 		return aggErr
@@ -335,7 +335,11 @@ func labelDescriptors(metrics metricdata.Metrics, extraLabels *attribute.Set) []
 		for _, pt := range a.DataPoints {
 			addAttributes(&pt.Attributes)
 		}
-	case metricdata.Histogram:
+	case metricdata.Histogram[float64]:
+		for _, pt := range a.DataPoints {
+			addAttributes(&pt.Attributes)
+		}
+	case metricdata.Histogram[int64]:
 		for _, pt := range a.DataPoints {
 			addAttributes(&pt.Attributes)
 		}
@@ -389,7 +393,7 @@ func recordToMdpbKindType(a metricdata.Aggregation) (googlemetricpb.MetricDescri
 			return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DOUBLE
 		}
 		return googlemetricpb.MetricDescriptor_GAUGE, googlemetricpb.MetricDescriptor_DOUBLE
-	case metricdata.Histogram:
+	case metricdata.Histogram[int64], metricdata.Histogram[float64]:
 		return googlemetricpb.MetricDescriptor_CUMULATIVE, googlemetricpb.MetricDescriptor_DISTRIBUTION
 	default:
 		return googlemetricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED, googlemetricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
@@ -486,7 +490,17 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
-	case metricdata.Histogram:
+	case metricdata.Histogram[int64]:
+		for _, point := range a.DataPoints {
+			ts, err := histogramToTimeSeries(point, m, mr)
+			if err != nil {
+				aggErr = multierr.Append(aggErr, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			tss = append(tss, ts)
+		}
+	case metricdata.Histogram[float64]:
 		for _, point := range a.DataPoints {
 			ts, err := histogramToTimeSeries(point, m, mr)
 			if err != nil {
@@ -502,7 +516,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 	return tss, aggErr
 }
 
-func (me *metricExporter) recordsToTspbs(rm metricdata.ResourceMetrics) ([]*monitoringpb.TimeSeries, error) {
+func (me *metricExporter) recordsToTspbs(rm *metricdata.ResourceMetrics) ([]*monitoringpb.TimeSeries, error) {
 	mr := me.resourceToMonitoredResourcepb(rm.Resource)
 	extraLabels := me.extraLabelsFromResource(rm.Resource)
 
@@ -566,7 +580,7 @@ func sumToTimeSeries[N int64 | float64](point metricdata.DataPoint[N], metrics m
 	}, nil
 }
 
-func histogramToTimeSeries(point metricdata.HistogramDataPoint, metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
+func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
 	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
 	if err != nil {
 		return nil, err
@@ -606,20 +620,20 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 	}, nil
 }
 
-func histToTypedValue(hist metricdata.HistogramDataPoint) *monitoringpb.TypedValue {
+func histToTypedValue[N int64 | float64](hist metricdata.HistogramDataPoint[N]) *monitoringpb.TypedValue {
 	counts := make([]int64, len(hist.BucketCounts))
 	for i, v := range hist.BucketCounts {
 		counts[i] = int64(v)
 	}
 	var mean float64
-	if !math.IsNaN(hist.Sum) && hist.Count > 0 { // Avoid divide-by-zero
-		mean = hist.Sum / float64(hist.Count)
+	if !math.IsNaN(float64(hist.Sum)) && hist.Count > 0 { // Avoid divide-by-zero
+		mean = float64(hist.Sum) / float64(hist.Count)
 	}
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
 			DistributionValue: &distribution.Distribution{
 				Count:        int64(hist.Count),
-				Mean:         mean,
+				Mean:         float64(mean),
 				BucketCounts: counts,
 				BucketOptions: &distribution.Distribution_BucketOptions{
 					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{

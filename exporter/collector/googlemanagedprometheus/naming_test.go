@@ -46,14 +46,14 @@ func TestGetMetricName(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			desc:     "sum without total",
+			desc:     "sum without total gets added",
 			baseName: "foo",
 			metric: func(m pmetric.Metric) {
 				m.SetName("foo")
 				sum := m.SetEmptySum()
 				sum.SetIsMonotonic(true)
 			},
-			expected: "foo/counter",
+			expected: "foo_total/counter",
 		},
 		{
 			desc:     "sum with total",
@@ -74,7 +74,7 @@ func TestGetMetricName(t *testing.T) {
 				sum := m.SetEmptySum()
 				sum.SetIsMonotonic(true)
 			},
-			expected: "foo_total/counter",
+			expected: "foo_seconds_total/counter",
 		},
 		{
 			desc:     "gauge",

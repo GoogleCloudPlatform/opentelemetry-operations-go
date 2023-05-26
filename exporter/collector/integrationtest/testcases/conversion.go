@@ -25,11 +25,11 @@ import (
 
 // ConvertResourceMetrics converts a (collector) pdata metrics to an SDK ResourceMetrics
 // This is useful for testing the SDK with the same data used to test the collector.
-func ConvertResourceMetrics(pdataMetrics pmetric.Metrics) []metricdata.ResourceMetrics {
-	resourceMetrics := make([]metricdata.ResourceMetrics, pdataMetrics.ResourceMetrics().Len())
+func ConvertResourceMetrics(pdataMetrics pmetric.Metrics) []*metricdata.ResourceMetrics {
+	resourceMetrics := make([]*metricdata.ResourceMetrics, pdataMetrics.ResourceMetrics().Len())
 	for i := 0; i < pdataMetrics.ResourceMetrics().Len(); i++ {
 		rm := pdataMetrics.ResourceMetrics().At(i)
-		resourceMetrics[i] = metricdata.ResourceMetrics{
+		resourceMetrics[i] = &metricdata.ResourceMetrics{
 			Resource:     resource.NewSchemaless(convertAttributes(rm.Resource().Attributes())...),
 			ScopeMetrics: convertScopeMetrics(rm.ScopeMetrics()),
 		}
@@ -152,13 +152,13 @@ func convertHistogram(h pmetric.Histogram) metricdata.Aggregation {
 	if h.DataPoints().Len() == 0 {
 		return nil
 	}
-	agg := metricdata.Histogram{
+	agg := metricdata.Histogram[float64]{
 		Temporality: convertTemporality(h.AggregationTemporality()),
-		DataPoints:  make([]metricdata.HistogramDataPoint, h.DataPoints().Len()),
+		DataPoints:  make([]metricdata.HistogramDataPoint[float64], h.DataPoints().Len()),
 	}
 	for i := 0; i < h.DataPoints().Len(); i++ {
 		pt := h.DataPoints().At(i)
-		agg.DataPoints[i] = metricdata.HistogramDataPoint{
+		agg.DataPoints[i] = metricdata.HistogramDataPoint[float64]{
 			Attributes:   attribute.NewSet(convertAttributes(pt.Attributes())...),
 			StartTime:    pt.StartTimestamp().AsTime(),
 			Time:         pt.Timestamp().AsTime(),

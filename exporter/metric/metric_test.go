@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
+	otelmetric "go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
@@ -127,7 +128,7 @@ func TestExportCounter(t *testing.T) {
 	counter, err := meter.Int64Counter("counter-a")
 	assert.NoError(t, err)
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
-	counter.Add(ctx, 100, clabels...)
+	counter.Add(ctx, 100, otelmetric.WithAttributes(clabels...))
 }
 
 func TestExportHistogram(t *testing.T) {
@@ -171,9 +172,9 @@ func TestExportHistogram(t *testing.T) {
 	counter, err := meter.Int64Histogram("counter-a")
 	assert.NoError(t, err)
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
-	counter.Record(ctx, 100, clabels...)
-	counter.Record(ctx, 50, clabels...)
-	counter.Record(ctx, 200, clabels...)
+	counter.Record(ctx, 100, otelmetric.WithAttributes(clabels...))
+	counter.Record(ctx, 50, otelmetric.WithAttributes(clabels...))
+	counter.Record(ctx, 200, otelmetric.WithAttributes(clabels...))
 }
 
 func TestDescToMetricType(t *testing.T) {
@@ -189,8 +190,8 @@ func TestDescToMetricType(t *testing.T) {
 	}
 
 	inDesc := []metricdata.Metrics{
-		{Name: "testing", Data: metricdata.Histogram{}},
-		{Name: "test/of/path", Data: metricdata.Histogram{}},
+		{Name: "testing", Data: metricdata.Histogram[float64]{}},
+		{Name: "test/of/path", Data: metricdata.Histogram[float64]{}},
 	}
 
 	wants := []string{
@@ -976,7 +977,7 @@ func TestConcurrentCallsAfterShutdown(t *testing.T) {
 		wg.Done()
 	}()
 	go func() {
-		err := exporter.Export(ctx, metricdata.ResourceMetrics{})
+		err := exporter.Export(ctx, &metricdata.ResourceMetrics{})
 		assert.ErrorIs(t, err, errShutdown)
 		wg.Done()
 	}()
@@ -1014,12 +1015,12 @@ func TestConcurrentExport(t *testing.T) {
 	wg.Add(2)
 
 	go func() {
-		err := exporter.Export(ctx, metricdata.ResourceMetrics{
+		err := exporter.Export(ctx, &metricdata.ResourceMetrics{
 			ScopeMetrics: []metricdata.ScopeMetrics{
 				{
 					Metrics: []metricdata.Metrics{
-						{Name: "testing", Data: metricdata.Histogram{}},
-						{Name: "test/of/path", Data: metricdata.Histogram{}},
+						{Name: "testing", Data: metricdata.Histogram[float64]{}},
+						{Name: "test/of/path", Data: metricdata.Histogram[float64]{}},
 					},
 				},
 			},
@@ -1028,12 +1029,12 @@ func TestConcurrentExport(t *testing.T) {
 		wg.Done()
 	}()
 	go func() {
-		err := exporter.Export(ctx, metricdata.ResourceMetrics{
+		err := exporter.Export(ctx, &metricdata.ResourceMetrics{
 			ScopeMetrics: []metricdata.ScopeMetrics{
 				{
 					Metrics: []metricdata.Metrics{
-						{Name: "testing", Data: metricdata.Histogram{}},
-						{Name: "test/of/path", Data: metricdata.Histogram{}},
+						{Name: "testing", Data: metricdata.Histogram[float64]{}},
+						{Name: "test/of/path", Data: metricdata.Histogram[float64]{}},
 					},
 				},
 			},
@@ -1108,8 +1109,8 @@ func TestBatchingExport(t *testing.T) {
 	createMetrics := func(n int) []metricdata.Metrics {
 		inputMetrics := make([]metricdata.Metrics, n)
 		for i := 0; i < n; i++ {
-			inputMetrics[i] = metricdata.Metrics{Name: "testing", Data: metricdata.Histogram{
-				DataPoints: []metricdata.HistogramDataPoint{
+			inputMetrics[i] = metricdata.Metrics{Name: "testing", Data: metricdata.Histogram[float64]{
+				DataPoints: []metricdata.HistogramDataPoint[float64]{
 					{},
 				},
 			}}
@@ -1155,7 +1156,7 @@ func TestBatchingExport(t *testing.T) {
 			input := createMetrics(tc.numMetrics)
 			ctx := context.Background()
 
-			err := exporter.Export(ctx, metricdata.ResourceMetrics{
+			err := exporter.Export(ctx, &metricdata.ResourceMetrics{
 				ScopeMetrics: []metricdata.ScopeMetrics{
 					{
 						Metrics: input,

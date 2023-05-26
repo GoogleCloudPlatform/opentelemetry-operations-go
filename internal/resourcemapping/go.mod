@@ -2,4 +2,4 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resou
 
 go 1.20
 
-require go.opentelemetry.io/otel v1.14.0
+require go.opentelemetry.io/otel v1.15.1
