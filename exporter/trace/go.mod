@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	cloud.google.com/go/trace v1.8.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.37.1
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.37.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.38.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.38.0
 	github.com/golang/protobuf v1.5.2
 	github.com/stretchr/testify v1.8.2
 	go.opentelemetry.io/otel v1.15.1

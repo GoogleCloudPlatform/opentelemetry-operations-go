@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric
 go 1.20
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.0.0-00010101000000-000000000000
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.38.0
 	go.opentelemetry.io/otel v1.15.1
 	go.opentelemetry.io/otel/metric v0.38.1
 	go.opentelemetry.io/otel/sdk/metric v0.38.1
@@ -13,7 +13,7 @@ require (
 	cloud.google.com/go/compute v1.14.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/monitoring v1.12.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.37.1 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.38.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
