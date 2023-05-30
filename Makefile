@@ -185,18 +185,18 @@ gotidy:
 update-dep:
 	$(MAKE) for-all-mod CMD="$(PWD)/internal/buildscripts/update-dep"
 
-STABLE_OTEL_VERSION=v1.15.1
-UNSTABLE_OTEL_VERSION=v0.38.1
-STABLE_CONTRIB_OTEL_VERSION=v1.16.0
-UNSTABLE_CONTRIB_OTEL_VERSION=v0.41.0
-STABLE_COLLECTOR_VERSION=v1.0.0-rcv0011
-UNSTABLE_COLLECTOR_VERSION=v0.77.0
-UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.77.0
+STABLE_OTEL_VERSION=v1.16.0
+UNSTABLE_OTEL_VERSION=v0.39.0
+STABLE_CONTRIB_OTEL_VERSION=v1.17.0
+UNSTABLE_CONTRIB_OTEL_VERSION=v0.42.0
+STABLE_COLLECTOR_VERSION=v1.0.0-rcv0012
+UNSTABLE_COLLECTOR_VERSION=v0.78.0
+UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.78.0
 
 .PHONY: update-otel
 update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/metric VERSION=$(UNSTABLE_OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/metric VERSION=$(STABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/metric/instrument VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk VERSION=$(STABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/export/metric VERSION=$(UNSTABLE_OTEL_VERSION)
@@ -206,7 +206,7 @@ update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/detectors/gcp VERSION=$(STABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector VERSION=$(UNSTABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/featuregate VERSION=$(UNSTABLE_COLLECTOR_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/featuregate VERSION=$(STABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/semconv VERSION=$(UNSTABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/pdata VERSION=$(STABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus VERSION=$(UNSTABLE_COLLECTOR_CONTRIB_VERSION)
