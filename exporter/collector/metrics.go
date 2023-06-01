@@ -207,8 +207,6 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 	// map from project -> []timeseries. This groups timeseries by the project
 	// they need to be sent to. Each project's timeseries are sent in a
 	// separate request later.
-	// TODO: Remove this log line
-	fmt.Println("Pushing Metrics")
 	pendingTimeSeries := map[string][]*monitoringpb.TimeSeries{}
 	rms := m.ResourceMetrics()
 
@@ -423,7 +421,6 @@ func (m *metricMapper) metricToTimeSeries(
 		points := sum.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
-			//fmt.Printf("Exporting TimeSeries for SUM:\n %s \n", ts)
 			timeSeries = append(timeSeries, ts...)
 		}
 	case pmetric.MetricTypeGauge:
@@ -431,7 +428,6 @@ func (m *metricMapper) metricToTimeSeries(
 		points := gauge.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
-			fmt.Printf("Exporting TimeSeries for GAUGE:\n %s \n", ts)
 			timeSeries = append(timeSeries, ts...)
 		}
 	case pmetric.MetricTypeSummary:
@@ -899,7 +895,6 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	}
 	metricKind := metricpb.MetricDescriptor_GAUGE
 	value, valueType := numberDataPointToValue(point, metricKind)
-	fmt.Printf("Metric Kind is GAUGE, name: %s, unit:  %s, value: %s, valueType: %s \n", metric.Name(), metric.Unit(), value, valueType)
 
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
@@ -946,16 +941,11 @@ func defaultGetMetricName(baseName string, _ pmetric.Metric) (string, error) {
 	return baseName, nil
 }
 
-// probably this is relevant
 // this function converts the OTEL spec metric to cloud monitoring
 func numberDataPointToValue(
 	point pmetric.NumberDataPoint,
 	metricKind metricpb.MetricDescriptor_MetricKind,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	// check the label attached to point,
-	// based on the label attached, assign type
-	// metricpb.MetricDescriptor_BOOL is valid
-	// metricpb.MetricDescriptor_STRING is valid
 	supportedTypedValue, supportedValueType := convertMetricKindToSupportedGCMTypes(metricKind, point.Attributes().AsRaw())
 	if supportedValueType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
 		return supportedTypedValue, supportedValueType
@@ -978,28 +968,22 @@ func numberDataPointToValue(
 func convertMetricKindToSupportedGCMTypes(metricKind metricpb.MetricDescriptor_MetricKind, pointLabels map[string]any) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
 	customType, customTypeOk := pointLabels[gcpCustomType]
 	customValue, customValueOk := pointLabels[gcpCustomValue]
-	fmt.Printf("\n CONVERTING customType: %s, customTypeOk: %t, customValue: %s, customValueOk: %t \n", customType, customTypeOk, customValue, customValueOk)
 	if customTypeOk && customValueOk && metricKind == metricpb.MetricDescriptor_GAUGE {
-		fmt.Println("Required labels for supported GCM types were found")
 		switch customType {
 		case "BOOL":
-			fmt.Println("Exporting as BOOL")
 			boolVal, _ := strconv.ParseBool(customValue.(string))
 			return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
 					BoolValue: boolVal,
 				}},
 				metricpb.MetricDescriptor_BOOL
 		case "STRING":
-			fmt.Printf("Exporting as STRING %s\n", customValue)
 			return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_StringValue{
 					StringValue: customValue.(string),
 				}},
 				metricpb.MetricDescriptor_STRING
 		}
-		fmt.Printf("Unable to map metric to unsupported type %s\n", customType)
 		return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 	}
-	fmt.Printf("Required labels for supported GCM types not found or metricKind: %s is not GAUGE\n", metricKind)
 	return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 }
 
@@ -1210,8 +1194,6 @@ func (m *metricMapper) metricDescriptor(
 	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
 		return nil
 	}
-	// TODO: Debug log remove
-	fmt.Printf("CREATED Metric Descriptor, labels: %s, type: %s,  kind: %s", labels, typ, kind)
 	return []*metricpb.MetricDescriptor{
 		{
 			Name:        pm.Name(),
