@@ -1479,6 +1479,50 @@ func TestNumberDataPointToValue(t *testing.T) {
 	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
 }
 
+func TestConvertMetricKindToSupportedGCMTypes(t *testing.T) {
+	var typedValue *monitoringpb.TypedValue
+	var valueType metricpb.MetricDescriptor_ValueType
+
+	// Map contains required labels
+	mapSpecialLabel := make(map[string]any)
+	mapSpecialLabel[gcpCustomType] = "BOOL"
+	mapSpecialLabel[gcpCustomValue] = "true"
+	typedValue, valueType = convertMetricKindToSupportedGCMTypes(metricpb.MetricDescriptor_GAUGE, mapSpecialLabel)
+	assert.EqualValues(t, typedValue.GetBoolValue(), true)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
+
+	// Map does not contain required labels - Missing gcpCustomValue
+	mapMissingValue := make(map[string]any)
+	mapMissingValue[gcpCustomType] = "BOOL"
+	typedValue, valueType = convertMetricKindToSupportedGCMTypes(metricpb.MetricDescriptor_GAUGE, mapMissingValue)
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
+
+	// Map does not contain required labels - Missing gcpCustomType
+	mapMissingType := make(map[string]any)
+	mapMissingType[gcpCustomValue] = "true"
+	typedValue, valueType = convertMetricKindToSupportedGCMTypes(metricpb.MetricDescriptor_GAUGE, mapMissingType)
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
+
+	// Map does not contain required labels - Missing both
+	mapMissingValueType := make(map[string]any)
+	mapMissingValueType["other"] = "true"
+	typedValue, valueType = convertMetricKindToSupportedGCMTypes(metricpb.MetricDescriptor_GAUGE, mapMissingType)
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
+
+	// metric kind is not gauge - (DELTA)
+	typedValue, valueType = convertMetricKindToSupportedGCMTypes(metricpb.MetricDescriptor_DELTA, mapSpecialLabel)
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
+
+	// metric kind is not gauge - (CUMULATIVE)
+	typedValue, valueType = convertMetricKindToSupportedGCMTypes(metricpb.MetricDescriptor_CUMULATIVE, mapSpecialLabel)
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
+}
+
 type metricDescriptorTest struct {
 	name          string
 	metricCreator func() pmetric.Metric

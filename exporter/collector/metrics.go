@@ -107,8 +107,11 @@ const (
 	sendBatchSize = 200
 )
 
-const gcpCustomType string = "gcp.cloud_monitoring.custom.type"
-const gcpCustomValue string = "gcp.cloud_monitoring.custom.value"
+const (
+	// These are special keys that can be used to export custom supported types for google cloud metrics.
+	gcpCustomType  string = "gcp.cloud_monitoring.custom.type"
+	gcpCustomValue string = "gcp.cloud_monitoring.custom.value"
+)
 
 type labels map[string]string
 
