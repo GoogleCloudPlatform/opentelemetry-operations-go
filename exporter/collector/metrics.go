@@ -116,7 +116,6 @@ const (
 type labels map[string]string
 
 func (me *MetricsExporter) Shutdown(ctx context.Context) error {
-	fmt.Println("Shutting down metrics exporter")
 	// TODO: pass ctx to goroutines so that we can use its deadline
 	close(me.shutdownC)
 	c := make(chan struct{})
