@@ -107,9 +107,13 @@ const (
 	sendBatchSize = 200
 )
 
+const gcpCustomType string = "gcp.cloud_monitoring.custom.type"
+const gcpCustomValue string = "gcp.cloud_monitoring.custom.value"
+
 type labels map[string]string
 
 func (me *MetricsExporter) Shutdown(ctx context.Context) error {
+	fmt.Println("Shutting down metrics exporter")
 	// TODO: pass ctx to goroutines so that we can use its deadline
 	close(me.shutdownC)
 	c := make(chan struct{})
@@ -203,6 +207,8 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 	// map from project -> []timeseries. This groups timeseries by the project
 	// they need to be sent to. Each project's timeseries are sent in a
 	// separate request later.
+	// TODO: Remove this log line
+	fmt.Println("Pushing Metrics")
 	pendingTimeSeries := map[string][]*monitoringpb.TimeSeries{}
 	rms := m.ResourceMetrics()
 
@@ -417,6 +423,7 @@ func (m *metricMapper) metricToTimeSeries(
 		points := sum.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.sumPointToTimeSeries(resource, extraLabels, metric, sum, points.At(i))
+			//fmt.Printf("Exporting TimeSeries for SUM:\n %s \n", ts)
 			timeSeries = append(timeSeries, ts...)
 		}
 	case pmetric.MetricTypeGauge:
@@ -424,6 +431,7 @@ func (m *metricMapper) metricToTimeSeries(
 		points := gauge.DataPoints()
 		for i := 0; i < points.Len(); i++ {
 			ts := m.gaugePointToTimeSeries(resource, extraLabels, metric, gauge, points.At(i))
+			fmt.Printf("Exporting TimeSeries for GAUGE:\n %s \n", ts)
 			timeSeries = append(timeSeries, ts...)
 		}
 	case pmetric.MetricTypeSummary:
@@ -849,7 +857,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 		metricKind = metricpb.MetricDescriptor_GAUGE
 		startTime = nil
 	}
-	value, valueType := numberDataPointToValue(point)
+	value, valueType := numberDataPointToValue(point, metricKind)
 
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
@@ -890,7 +898,8 @@ func (m *metricMapper) gaugePointToTimeSeries(
 		return nil
 	}
 	metricKind := metricpb.MetricDescriptor_GAUGE
-	value, valueType := numberDataPointToValue(point)
+	value, valueType := numberDataPointToValue(point, metricKind)
+	fmt.Printf("Metric Kind is GAUGE, name: %s, unit:  %s, value: %s, valueType: %s \n", metric.Name(), metric.Unit(), value, valueType)
 
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
@@ -937,9 +946,20 @@ func defaultGetMetricName(baseName string, _ pmetric.Metric) (string, error) {
 	return baseName, nil
 }
 
+// probably this is relevant
+// this function converts the OTEL spec metric to cloud monitoring
 func numberDataPointToValue(
 	point pmetric.NumberDataPoint,
+	metricKind metricpb.MetricDescriptor_MetricKind,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
+	// check the label attached to point,
+	// based on the label attached, assign type
+	// metricpb.MetricDescriptor_BOOL is valid
+	// metricpb.MetricDescriptor_STRING is valid
+	supportedTypedValue, supportedValueType := convertMetricKindToSupportedGCMTypes(metricKind, point.Attributes().AsRaw())
+	if supportedValueType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
+		return supportedTypedValue, supportedValueType
+	}
 	if point.ValueType() == pmetric.NumberDataPointValueTypeInt {
 		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
 				Int64Value: point.IntValue(),
@@ -950,6 +970,37 @@ func numberDataPointToValue(
 			DoubleValue: point.DoubleValue(),
 		}},
 		metricpb.MetricDescriptor_DOUBLE
+}
+
+// This function maps the values of the metric to certain types which are supported in Google Cloud Monitoring, but not in OTEL.
+// Such types includes STRING and BOOL. The conversion only happens for metric kind GAUGE and only under presence of certain attributes in the metric attributes.
+// The function returns the converted value and type if conditions are met, otherwise a nil value with value type MetricDescriptor_VALUE_TYPE_UNSPECIFIED is returned.
+func convertMetricKindToSupportedGCMTypes(metricKind metricpb.MetricDescriptor_MetricKind, pointLabels map[string]any) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
+	customType, customTypeOk := pointLabels[gcpCustomType]
+	customValue, customValueOk := pointLabels[gcpCustomValue]
+	fmt.Printf("\n CONVERTING customType: %s, customTypeOk: %t, customValue: %s, customValueOk: %t \n", customType, customTypeOk, customValue, customValueOk)
+	if customTypeOk && customValueOk && metricKind == metricpb.MetricDescriptor_GAUGE {
+		fmt.Println("Required labels for supported GCM types were found")
+		switch customType {
+		case "BOOL":
+			fmt.Println("Exporting as BOOL")
+			boolVal, _ := strconv.ParseBool(customValue.(string))
+			return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
+					BoolValue: boolVal,
+				}},
+				metricpb.MetricDescriptor_BOOL
+		case "STRING":
+			fmt.Printf("Exporting as STRING %s\n", customValue)
+			return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_StringValue{
+					StringValue: customValue.(string),
+				}},
+				metricpb.MetricDescriptor_STRING
+		}
+		fmt.Printf("Unable to map metric to unsupported type %s\n", customType)
+		return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	}
+	fmt.Printf("Required labels for supported GCM types not found or metricKind: %s is not GAUGE\n", metricKind)
+	return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 }
 
 func attributesToLabels(attrs pcommon.Map) labels {
@@ -1159,6 +1210,8 @@ func (m *metricMapper) metricDescriptor(
 	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
 		return nil
 	}
+	// TODO: Debug log remove
+	fmt.Printf("CREATED Metric Descriptor, labels: %s, type: %s,  kind: %s", labels, typ, kind)
 	return []*metricpb.MetricDescriptor{
 		{
 			Name:        pm.Name(),
@@ -1191,7 +1244,12 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 	case pmetric.MetricTypeGauge:
 		kind = metricpb.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
-			typ = metricPointValueType(m.Gauge().DataPoints().At(0).ValueType())
+			_, supportedType := convertMetricKindToSupportedGCMTypes(kind, m.Gauge().DataPoints().At(0).Attributes().AsRaw())
+			if supportedType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
+				typ = supportedType
+			} else {
+				typ = metricPointValueType(m.Gauge().DataPoints().At(0).ValueType())
+			}
 		}
 	case pmetric.MetricTypeSum:
 		if !m.Sum().IsMonotonic() {
@@ -1200,7 +1258,12 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
 		if m.Sum().DataPoints().Len() > 0 {
-			typ = metricPointValueType(m.Sum().DataPoints().At(0).ValueType())
+			_, supportedType := convertMetricKindToSupportedGCMTypes(kind, m.Sum().DataPoints().At(0).Attributes().AsRaw())
+			if supportedType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
+				typ = supportedType
+			} else {
+				typ = metricPointValueType(m.Sum().DataPoints().At(0).ValueType())
+			}
 		}
 	case pmetric.MetricTypeSummary:
 		kind = metricpb.MetricDescriptor_GAUGE

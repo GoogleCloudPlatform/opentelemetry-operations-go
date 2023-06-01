@@ -1469,12 +1469,12 @@ func TestNumberDataPointToValue(t *testing.T) {
 	point := pmetric.NewNumberDataPoint()
 
 	point.SetIntValue(12)
-	value, valueType := numberDataPointToValue(point)
+	value, valueType := numberDataPointToValue(point, metricpb.MetricDescriptor_DELTA)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_INT64)
 	assert.EqualValues(t, value.GetInt64Value(), 12)
 
 	point.SetDoubleValue(12.3)
-	value, valueType = numberDataPointToValue(point)
+	value, valueType = numberDataPointToValue(point, metricpb.MetricDescriptor_GAUGE)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
 }
