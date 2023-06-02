@@ -5,8 +5,9 @@ can be written to the real GCP APIs. Separately, the tests also mock the real AP
 and compare requests against recorded expectation fixtures. You can write tests for metrics,
 traces, and logs.
 
-<a id="testcasefiles"></a>The fixtures are located in the [`integrationtest/testdata/fixtures`](integrationtest/testdata/fixtures) directories and registered in
-signal dependent test case files:
+<a id="testcasefiles"></a>The fixtures are located in the
+[`integrationtest/testdata/fixtures`](integrationtest/testdata/fixtures) directories and
+registered in signal dependent test case files:
 
 - [`integrationtest/testcases/testcases_metrics.go`](integrationtest/testcases/testcases_metrics.go).
 - [`integrationtest/testcases/testcases_traces.go`](integrationtest/testcases/testcases_traces.go).
