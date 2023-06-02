@@ -63,8 +63,7 @@ go test -tags=integrationtest -run=TestIntegration
 
 To add a new test, using metrics as an example:
 
-1. Create an OTLP fixture. The tests fixtures should be
-    JSON encoded OTLP messages of type:
+1. Create an OTLP fixture. The test fixtures should be JSON encoded OTLP messages of type:
     - [`ExportMetricsServiceRequest`](https://github.com/open-telemetry/opentelemetry-proto/blob/v0.19.0/opentelemetry/proto/collector/metrics/v1/metrics_service.proto#L36) for metrics
     - [`ExportTraceServiceRequest`](https://github.com/open-telemetry/opentelemetry-proto/blob/v0.19.0/opentelemetry/proto/collector/trace/v1/trace_service.proto#L36) for traces.
     - [`ExportLogsServiceRequest`](https://github.com/open-telemetry/opentelemetry-proto/blob/v0.19.0/opentelemetry/proto/collector/logs/v1/logs_service.proto#L36) for logs.
