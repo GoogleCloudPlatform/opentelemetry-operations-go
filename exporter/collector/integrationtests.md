@@ -2,18 +2,23 @@
 
 The `googlecloud` exporter has fixture based integration tests which can verify that telemetry
 can be written to the real GCP APIs. Separately, the tests also mock the real APIs to capture
-and compare requests against recorded expectation fixtures. Currently, these tests only support
-metrics.
+and compare requests against recorded expectation fixtures. You can write tests for metrics,
+traces, and logs.
 
-The fixtures are located in the [`integrationtest/testdata/fixtures`](integrationtest/testdata/fixtures) directory and registered in
-[`integrationtest/testcases.go`][testcases].
+<a id="testcasefiles"></a>The fixtures are located in the [`integrationtest/testdata/fixtures`](integrationtest/testdata/fixtures) directories and registered in
+signal dependent test case files:
+
+- [`integrationtest/testcases/testcases_metrics.go`](integrationtest/testcases/testcases_metrics.go).
+- [`integrationtest/testcases/testcases_traces.go`](integrationtest/testcases/testcases_traces.go).
+- [`integrationtest/testcases/testcases_logs.go`](integrationtest/testcases/testcases_logs.go).
 
 ## Running Tests
 
-The actual Go test files are [`metrics_test.go`](integrationtest/metrics_test.go) (use a mocked server to
-compare the GCP requests against recorded fixtures) and
-[`metrics_integration_test.go`](integrationtest/metrics_integration_test.go) (send the actual fixtures to GCP
-and expect OK responses).
+The actual Go test files are in the `integrationtest/` directory, e.g. for metrics
+[`metrics_test.go`](integrationtest/metrics_test.go) (use a mocked server to compare the GCP
+requests against recorded fixtures) and
+[`metrics_integration_test.go`](integrationtest/metrics_integration_test.go) (send the actual
+fixtures to GCP and expect OK responses).
 
 ### Expectation Only
 
@@ -56,17 +61,21 @@ go test -tags=integrationtest -run=TestIntegration
 
 ## Adding New Tests
 
-To add a new test:
+To add a new test, using metrics as an example:
 
-1. Create an OTLP fixture. Currently, the tests only support metrics fixtures which should be
-    JSON encoded OTLP
-    [`ExportMetricsServiceRequest`](https://github.com/open-telemetry/opentelemetry-proto/blob/b43e9b18b76abf3ee040164b55b9c355217151f3/opentelemetry/proto/collector/metrics/v1/metrics_service.proto#L35)
-    message. Put the fixture in the [`testdata/fixtures`](integrationtest/testdata/fixtures) directory. As an example,
-    see
+1. Create an OTLP fixture. The tests fixtures should be
+    JSON encoded OTLP messages of type:
+    - [`ExportMetricsServiceRequest`](https://github.com/open-telemetry/opentelemetry-proto/blob/v0.19.0/opentelemetry/proto/collector/metrics/v1/metrics_service.proto#L36) for metrics
+    - [`ExportTraceServiceRequest`](https://github.com/open-telemetry/opentelemetry-proto/blob/v0.19.0/opentelemetry/proto/collector/trace/v1/trace_service.proto#L36) for traces.
+    - [`ExportLogsServiceRequest`](https://github.com/open-telemetry/opentelemetry-proto/blob/v0.19.0/opentelemetry/proto/collector/logs/v1/logs_service.proto#L36) for logs.
+    
+    Put the fixture in the signal specific
+    [`testdata/fixtures`](integrationtest/testdata/fixtures) directory. As an example, see
     [`testdata/fixtures/basic_counter_metrics.json`](integrationtest/testdata/fixtures/metrics/basic_counter_metrics.json).
 
-    One easy way to generate these fixtures is by using the collector's `file` exporter in a
-    collector pipeline to dump OTLP. For example, update the collector config to:
+    One easy way to generate these fixtures from a live system is by using the collector's
+    `file` exporter in a collector pipeline to dump OTLP. For example, update the collector
+    config to:
   
     ```diff
     exporters:
@@ -84,7 +93,7 @@ To add a new test:
 
     This is how the Ops Agent fixtures were generated.
 
-1. Add an entry in [`integrationtest/testcases.go`][testcases].
+1. Add an entry in the corresponding [testcase file](#testcasefiles). For metrics, that is [`integrationtest/testcases/testcases_metrics.go`][testcases].
 1. Run the script to record the expectation fixture. This will contain the expected requests
     that the exporter makes to GCP services:
 
@@ -99,7 +108,7 @@ To add a new test:
     ```
 
     The generated file is a JSON encoded
-    [`MetricExpectFixture`](integrationtest/protos/fixtures.proto#L21) protobuf message.
+    [`MetricExpectFixture`](integrationtest/protos/fixtures.proto#L23) protobuf message.
 
 See [#229](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/229) for an
 example PR.
