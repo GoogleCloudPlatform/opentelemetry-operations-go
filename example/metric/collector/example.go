@@ -54,7 +54,6 @@ func newObservedFloat(v float64) *observedFloat {
 // Export OTLP metrtics using the otlpmetrichttp exporter.
 // This example is used to demostrate how to use the collector approach to export metrics to Google Cloud.
 func main() {
-
 	ctx := context.Background()
 	exp, err := otlpmetrichttp.New(ctx, otlpmetrichttp.WithInsecure())
 	if err != nil {
