@@ -992,6 +992,10 @@ func convertMetricKindToSupportedGCMTypes(metricKind metricpb.MetricDescriptor_M
 func attributesToLabels(attrs pcommon.Map) labels {
 	ls := make(labels, attrs.Len())
 	attrs.Range(func(k string, v pcommon.Value) bool {
+		// Skip special keys - used to map to custom type
+		if k == gcpCustomType || k == gcpCustomValue {
+			return true
+		}
 		ls[sanitizeKey(k)] = sanitizeUTF8(v.AsString())
 		return true
 	})
@@ -1067,6 +1071,10 @@ func (m *metricMapper) labelDescriptors(
 		attr.Range(func(key string, _ pcommon.Value) bool {
 			// Skip keys that have already been set
 			if _, ok := seenKeys[sanitizeKey(key)]; ok {
+				return true
+			}
+			// Skip special keys - used to map to custom type
+			if key == gcpCustomType || key == gcpCustomValue {
 				return true
 			}
 			result = append(result, &label.LabelDescriptor{
