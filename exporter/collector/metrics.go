@@ -970,21 +970,21 @@ func numberDataPointToValue(
 func convertMetricKindToSupportedGCMTypes(metricKind metricpb.MetricDescriptor_MetricKind, pointLabels map[string]any) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
 	customType, customTypeOk := pointLabels[gcpCustomType]
 	customValue, customValueOk := pointLabels[gcpCustomValue]
-	if customTypeOk && customValueOk && metricKind == metricpb.MetricDescriptor_GAUGE {
-		switch customType {
-		case "BOOL":
-			boolVal, _ := strconv.ParseBool(customValue.(string))
-			return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
-					BoolValue: boolVal,
-				}},
-				metricpb.MetricDescriptor_BOOL
-		case "STRING":
-			return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_StringValue{
-					StringValue: customValue.(string),
-				}},
-				metricpb.MetricDescriptor_STRING
-		}
+	if !customTypeOk || !customValueOk || metricKind != metricpb.MetricDescriptor_GAUGE {
 		return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	}
+	switch customType {
+	case "BOOL":
+		boolVal, _ := strconv.ParseBool(customValue.(string))
+		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
+				BoolValue: boolVal,
+			}},
+			metricpb.MetricDescriptor_BOOL
+	case "STRING":
+		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_StringValue{
+				StringValue: customValue.(string),
+			}},
+			metricpb.MetricDescriptor_STRING
 	}
 	return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 }
