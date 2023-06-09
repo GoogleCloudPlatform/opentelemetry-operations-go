@@ -46,10 +46,10 @@ func (d *Detector) CloudPlatform() Platform {
 	switch {
 	case d.onGKE():
 		return GKE
-	case d.onCloudRun():
-		return CloudRun
 	case d.onCloudFunctions():
 		return CloudFunctions
+	case d.onCloudRun():
+		return CloudRun
 	case d.onAppEngineStandard():
 		return AppEngineStandard
 	case d.onAppEngine():
