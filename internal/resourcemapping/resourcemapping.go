@@ -52,6 +52,7 @@ const (
 	serviceName       = "service_name"
 	configurationName = "configuration_name"
 	revisionName      = "revision_name"
+	bmsInstance       = "baremetalsolution.googleapis.com/Instance"
 )
 
 var (
@@ -122,6 +123,10 @@ var (
 			},
 			awsAccount: {otelKeys: []string{string(semconv.CloudAccountIDKey)}},
 		},
+		bmsInstance: {
+			location:   {otelKeys: []string{string(semconv.CloudRegionKey)}},
+			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
+		},
 		genericTask: {
 			location: {
 				otelKeys: []string{
@@ -183,6 +188,11 @@ func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResourc
 		mr = createMonitoredResource(gaeInstance, attrs)
 	case semconv.CloudPlatformAWSEC2.Value.AsString():
 		mr = createMonitoredResource(awsEc2Instance, attrs)
+	// TODO(alex-basinov): replace this string literal with semconv.CloudPlatformGCPBareMetalSolution
+	// once https://github.com/open-telemetry/semantic-conventions/pull/64 makes its way
+	// into the semconv module.
+	case "gcp_bare_metal_solution":
+		mr = createMonitoredResource(bmsInstance, attrs)
 	default:
 		// Fallback to generic_task
 		_, hasServiceName := attrs.GetString(string(semconv.ServiceNameKey))
