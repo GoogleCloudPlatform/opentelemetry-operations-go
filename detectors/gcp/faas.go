@@ -34,17 +34,17 @@ const (
 	regionMetadataAttr       = "instance/region"
 )
 
+func (d *Detector) onCloudFunctions() bool {
+	_, found := d.os.LookupEnv(cloudFunctionsTargetEnv)
+	return found
+}
+
 func (d *Detector) onCloudRun() bool {
 	if _, found := d.os.LookupEnv(cloudRunConfigurationEnv); found {
 		return found
 	}
 
 	_, found := d.os.LookupEnv(cloudRunJobsEnv)
-	return found
-}
-
-func (d *Detector) onCloudFunctions() bool {
-	_, found := d.os.LookupEnv(cloudFunctionsTargetEnv)
 	return found
 }
 
