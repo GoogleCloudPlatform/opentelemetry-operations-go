@@ -21,21 +21,21 @@ import (
 
 const (
 	// See the Cloud Run env vars:
-	// https://cloud.google.com/run/docs/reference/container-contract
+	// https://cloud.google.com/run/docs/container-contract#services-env-vars
 	// and the Cloud Functions env vars:
-	// https://cloud.google.com/functions/docs/configuring/env-var#runtime_environment_variables_set_automatically
-	cloudRunConfigEnv      = "K_CONFIGURATION"
-	cloudRunJobsEnv        = "CLOUD_RUN_JOB"
-	cloudFunctionTargetEnv = "FUNCTION_TARGET"
-	faasServiceEnv         = "K_SERVICE"
-	faasRevisionEnv        = "K_REVISION"
-	jobsRevisionEnv        = "CLOUD_RUN_EXECUTION"
-	jobsTaskIndexEnv       = "CLOUD_RUN_TASK_INDEX"
-	regionMetadataAttr     = "instance/region"
+	// https://cloud.google.com/functions/docs/configuring/env-var#python_37_and_go_111
+	cloudFunctionsTargetEnv  = "FUNCTION_TARGET"
+	cloudRunConfigurationEnv = "K_CONFIGURATION"
+	cloudRunJobsEnv          = "CLOUD_RUN_JOB"
+	faasServiceEnv           = "K_SERVICE"
+	faasRevisionEnv          = "K_REVISION"
+	jobsRevisionEnv          = "CLOUD_RUN_EXECUTION"
+	jobsTaskIndexEnv         = "CLOUD_RUN_TASK_INDEX"
+	regionMetadataAttr       = "instance/region"
 )
 
 func (d *Detector) onCloudRun() bool {
-	if _, found := d.os.LookupEnv(cloudRunConfigEnv); found {
+	if _, found := d.os.LookupEnv(cloudRunConfigurationEnv); found {
 		return found
 	}
 
@@ -44,7 +44,7 @@ func (d *Detector) onCloudRun() bool {
 }
 
 func (d *Detector) onCloudFunctions() bool {
-	_, found := d.os.LookupEnv(cloudFunctionTargetEnv)
+	_, found := d.os.LookupEnv(cloudFunctionsTargetEnv)
 	return found
 }
 
