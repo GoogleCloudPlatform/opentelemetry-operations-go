@@ -63,18 +63,6 @@ func TestFaaSVersion(t *testing.T) {
 	assert.Equal(t, version, "version-123")
 }
 
-func TestFaaSJobsVersion(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
-		Vars: map[string]string{
-			jobsExecutionEnv: "version-123",
-			jobsTaskIndexEnv: "0",
-		},
-	})
-	version, err := d.FaaSVersion()
-	assert.NoError(t, err)
-	assert.Equal(t, version, "version-123/0")
-}
-
 func TestFaaSVersionErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
@@ -82,6 +70,46 @@ func TestFaaSVersionErr(t *testing.T) {
 	version, err := d.FaaSVersion()
 	assert.Error(t, err)
 	assert.Equal(t, version, "")
+}
+
+func TestFaaSJobExecution(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{
+			jobsExecutionEnv: "version-123",
+		},
+	})
+	version, err := d.FaaSJobExecution()
+	assert.NoError(t, err)
+	assert.Equal(t, version, "version-123")
+}
+
+func TestFaaSJobExecutionErr(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{},
+	})
+	name, err := d.FaaSJobExecution()
+	assert.Error(t, err)
+	assert.Equal(t, name, "")
+}
+
+func TestFaaSJobTaskIndex(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{
+			jobsTaskIndexEnv: "5",
+		},
+	})
+	version, err := d.FaaSJobTaskIndex()
+	assert.NoError(t, err)
+	assert.Equal(t, version, "5")
+}
+
+func TestFaaSJobTaskIndexErr(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{},
+	})
+	name, err := d.FaaSJobTaskIndex()
+	assert.Error(t, err)
+	assert.Equal(t, name, "")
 }
 
 func TestFaaSInstanceID(t *testing.T) {
