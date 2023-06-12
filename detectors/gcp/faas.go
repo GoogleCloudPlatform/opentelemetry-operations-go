@@ -40,10 +40,11 @@ func (d *Detector) onCloudFunctions() bool {
 }
 
 func (d *Detector) onCloudRun() bool {
-	if _, found := d.os.LookupEnv(cloudRunConfigurationEnv); found {
-		return found
-	}
+	_, found := d.os.LookupEnv(cloudRunConfigurationEnv)
+	return found
+}
 
+func (d *Detector) onCloudRunJob() bool {
 	_, found := d.os.LookupEnv(cloudRunJobsEnv)
 	return found
 }

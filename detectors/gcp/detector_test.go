@@ -77,7 +77,7 @@ func TestCloudPlatformCloudRunJobs(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, CloudRun)
+	assert.Equal(t, platform, CloudRunJob)
 }
 
 func TestCloudPlatformCloudFunctions(t *testing.T) {
