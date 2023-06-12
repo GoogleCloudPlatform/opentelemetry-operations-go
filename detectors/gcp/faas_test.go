@@ -112,7 +112,7 @@ func TestFaaSJobTaskIndexErr(t *testing.T) {
 	assert.Equal(t, name, "")
 }
 
-func TestFaaSInstanceID(t *testing.T) {
+func TestFaaSID(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		FakeInstanceID: "instance-id-123",
 	}, &FakeOSProvider{})
@@ -121,7 +121,7 @@ func TestFaaSInstanceID(t *testing.T) {
 	assert.Equal(t, instance, "instance-id-123")
 }
 
-func TestFaaSInstanceIDErr(t *testing.T) {
+func TestFaaSIDErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
