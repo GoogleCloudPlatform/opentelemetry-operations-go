@@ -19,10 +19,14 @@ import (
 )
 
 const (
-	// See the Cloud Run env vars:
+	// Cloud Functions env vars:
+	// https://cloud.google.com/functions/docs/configuring/env-var#newer_runtimes
+	//
+	// Cloud Run env vars:
 	// https://cloud.google.com/run/docs/container-contract#services-env-vars
-	// and the Cloud Functions env vars:
-	// https://cloud.google.com/functions/docs/configuring/env-var#python_37_and_go_111
+	//
+	// Cloud Run jobs env vars:
+	// https://cloud.google.com/run/docs/container-contract#jobs-env-vars
 	cloudFunctionsTargetEnv  = "FUNCTION_TARGET"
 	cloudRunConfigurationEnv = "K_CONFIGURATION"
 	cloudRunJobsEnv          = "CLOUD_RUN_JOB"
@@ -48,7 +52,7 @@ func (d *Detector) onCloudRunJob() bool {
 	return found
 }
 
-// FaaSName returns the name of the cloud run, cloud run jobs or cloud functions service.
+// FaaSName returns the name of the Cloud Run, Cloud Run jobs or Cloud Functions service.
 func (d *Detector) FaaSName() (string, error) {
 	if name, found := d.os.LookupEnv(faasServiceEnv); found {
 		return name, nil
@@ -59,7 +63,7 @@ func (d *Detector) FaaSName() (string, error) {
 	return "", errEnvVarNotFound
 }
 
-// FaaSVersion returns the revision of the cloud run or cloud functions service.
+// FaaSVersion returns the revision of the Cloud Run or Cloud Functions service.
 func (d *Detector) FaaSVersion() (string, error) {
 	if version, found := d.os.LookupEnv(faasRevisionEnv); found {
 		return version, nil
@@ -67,7 +71,7 @@ func (d *Detector) FaaSVersion() (string, error) {
 	return "", errEnvVarNotFound
 }
 
-// FaaSJobExecution returns the execution id of the cloud run jobs.
+// FaaSJobExecution returns the execution id of the Cloud Run jobs.
 func (d *Detector) FaaSJobExecution() (string, error) {
 	if version, found := d.os.LookupEnv(jobsExecutionEnv); found {
 		return version, nil
@@ -75,7 +79,7 @@ func (d *Detector) FaaSJobExecution() (string, error) {
 	return "", errEnvVarNotFound
 }
 
-// FaaSJobTaskIndex returns the task index for the execution of the cloud run jobs.
+// FaaSJobTaskIndex returns the task index for the execution of the Cloud Run jobs.
 func (d *Detector) FaaSJobTaskIndex() (string, error) {
 	if version, found := d.os.LookupEnv(jobsTaskIndexEnv); found {
 		return version, nil
@@ -83,13 +87,14 @@ func (d *Detector) FaaSJobTaskIndex() (string, error) {
 	return "", errEnvVarNotFound
 }
 
-// FaaSID returns the instance id of the cloud run instance or cloud function.
+// FaaSID returns the instance id of the Cloud Run or Cloud Function.
 func (d *Detector) FaaSID() (string, error) {
 	return d.metadata.InstanceID()
 }
 
-// FaaSCloudRegion detects region from the metadata server.  It is in the
-// format /projects/<project_number>/regions/<region>.
+// FaaSCloudRegion detects region from the metadata server.
+// It is in the format /projects/<project_number>/regions/<region>.
+//
 // https://cloud.google.com/run/docs/reference/container-contract#metadata-server
 func (d *Detector) FaaSCloudRegion() (string, error) {
 	region, err := d.metadata.Get(regionMetadataAttr)
