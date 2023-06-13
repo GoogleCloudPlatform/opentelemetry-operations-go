@@ -32,8 +32,8 @@ const (
 	cloudRunJobsEnv          = "CLOUD_RUN_JOB"
 	faasServiceEnv           = "K_SERVICE"
 	faasRevisionEnv          = "K_REVISION"
-	jobsExecutionEnv         = "CLOUD_RUN_EXECUTION"
-	jobsTaskIndexEnv         = "CLOUD_RUN_TASK_INDEX"
+	cloudRunJobExecutionEnv  = "CLOUD_RUN_EXECUTION"
+	cloudRunJobTaskIndexEnv  = "CLOUD_RUN_TASK_INDEX"
 	regionMetadataAttr       = "instance/region"
 )
 
@@ -71,17 +71,17 @@ func (d *Detector) FaaSVersion() (string, error) {
 	return "", errEnvVarNotFound
 }
 
-// FaaSJobExecution returns the execution id of the Cloud Run jobs.
-func (d *Detector) FaaSJobExecution() (string, error) {
-	if version, found := d.os.LookupEnv(jobsExecutionEnv); found {
+// CloudRunJobbExecution returns the execution id of the Cloud Run jobs.
+func (d *Detector) CloudRunJobbExecution() (string, error) {
+	if version, found := d.os.LookupEnv(cloudRunJobExecutionEnv); found {
 		return version, nil
 	}
 	return "", errEnvVarNotFound
 }
 
-// FaaSJobTaskIndex returns the task index for the execution of the Cloud Run jobs.
-func (d *Detector) FaaSJobTaskIndex() (string, error) {
-	if version, found := d.os.LookupEnv(jobsTaskIndexEnv); found {
+// CloudRunJobTaskIndex returns the task index for the execution of the Cloud Run jobs.
+func (d *Detector) CloudRunJobTaskIndex() (string, error) {
+	if version, found := d.os.LookupEnv(cloudRunJobTaskIndexEnv); found {
 		return version, nil
 	}
 	return "", errEnvVarNotFound
