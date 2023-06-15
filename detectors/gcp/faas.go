@@ -71,8 +71,8 @@ func (d *Detector) FaaSVersion() (string, error) {
 	return "", errEnvVarNotFound
 }
 
-// CloudRunJobbExecution returns the execution id of the Cloud Run jobs.
-func (d *Detector) CloudRunJobbExecution() (string, error) {
+// CloudRunJobExecution returns the execution id of the Cloud Run jobs.
+func (d *Detector) CloudRunJobExecution() (string, error) {
 	if version, found := d.os.LookupEnv(cloudRunJobExecutionEnv); found {
 		return version, nil
 	}

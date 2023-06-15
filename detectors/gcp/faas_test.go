@@ -78,7 +78,7 @@ func TestFaaSJobExecution(t *testing.T) {
 			cloudRunJobExecutionEnv: "version-123",
 		},
 	})
-	version, err := d.CloudRunJobbExecution()
+	version, err := d.CloudRunJobExecution()
 	assert.NoError(t, err)
 	assert.Equal(t, version, "version-123")
 }
@@ -87,7 +87,7 @@ func TestFaaSJobExecutionErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
-	name, err := d.CloudRunJobbExecution()
+	name, err := d.CloudRunJobExecution()
 	assert.Error(t, err)
 	assert.Equal(t, name, "")
 }
