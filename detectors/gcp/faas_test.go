@@ -32,6 +32,17 @@ func TestFaaSName(t *testing.T) {
 	assert.Equal(t, name, "my-service")
 }
 
+func TestFaaSJobsName(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{
+			cloudRunJobsEnv: "my-service",
+		},
+	})
+	name, err := d.FaaSName()
+	assert.NoError(t, err)
+	assert.Equal(t, name, "my-service")
+}
+
 func TestFaaSNameErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
@@ -61,7 +72,47 @@ func TestFaaSVersionErr(t *testing.T) {
 	assert.Equal(t, version, "")
 }
 
-func TestFaaSInstanceID(t *testing.T) {
+func TestFaaSJobExecution(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{
+			cloudRunJobExecutionEnv: "version-123",
+		},
+	})
+	version, err := d.CloudRunJobExecution()
+	assert.NoError(t, err)
+	assert.Equal(t, version, "version-123")
+}
+
+func TestFaaSJobExecutionErr(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{},
+	})
+	name, err := d.CloudRunJobExecution()
+	assert.Error(t, err)
+	assert.Equal(t, name, "")
+}
+
+func TestFaaSJobTaskIndex(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{
+			cloudRunJobTaskIndexEnv: "5",
+		},
+	})
+	version, err := d.CloudRunJobTaskIndex()
+	assert.NoError(t, err)
+	assert.Equal(t, version, "5")
+}
+
+func TestFaaSJobTaskIndexErr(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{},
+	})
+	name, err := d.CloudRunJobTaskIndex()
+	assert.Error(t, err)
+	assert.Equal(t, name, "")
+}
+
+func TestFaaSID(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		FakeInstanceID: "instance-id-123",
 	}, &FakeOSProvider{})
@@ -70,7 +121,7 @@ func TestFaaSInstanceID(t *testing.T) {
 	assert.Equal(t, instance, "instance-id-123")
 }
 
-func TestFaaSInstanceIDErr(t *testing.T) {
+func TestFaaSIDErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
