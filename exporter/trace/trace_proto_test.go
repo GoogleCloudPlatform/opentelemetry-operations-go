@@ -19,8 +19,6 @@ import (
 	"testing"
 	"time"
 
-	"cloud.google.com/go/trace/apiv2/tracepb"
-	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
@@ -28,6 +26,9 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"go.opentelemetry.io/otel/sdk/trace/tracetest"
 	"go.opentelemetry.io/otel/trace"
+
+	"cloud.google.com/go/trace/apiv2/tracepb"
+	"github.com/stretchr/testify/assert"
 )
 
 func testExporter() *traceExporter {

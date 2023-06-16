@@ -28,12 +28,12 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
-	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
 
 // TraceExporter is a wrapper struct of OT cloud trace exporter.
 type TraceExporter struct {
-	texporter *cloudtrace.Exporter
+	texporter *texporter.Exporter
 }
 
 func (te *TraceExporter) Shutdown(ctx context.Context) error {
@@ -46,26 +46,26 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
 
-	topts := []cloudtrace.Option{
-		cloudtrace.WithProjectID(cfg.ProjectID),
-		cloudtrace.WithTimeout(timeout),
+	topts := []texporter.Option{
+		texporter.WithProjectID(cfg.ProjectID),
+		texporter.WithTimeout(timeout),
 	}
 
 	if cfg.DestinationProjectQuota {
-		topts = append(topts, cloudtrace.WithDestinationProjectQuota())
+		topts = append(topts, texporter.WithDestinationProjectQuota())
 	}
 
 	if cfg.TraceConfig.AttributeMappings != nil {
-		topts = append(topts, cloudtrace.WithAttributeMapping(mappingFuncFromAKM(cfg.TraceConfig.AttributeMappings)))
+		topts = append(topts, texporter.WithAttributeMapping(mappingFuncFromAKM(cfg.TraceConfig.AttributeMappings)))
 	}
 
 	copts, err := generateClientOptions(ctx, &cfg.TraceConfig.ClientConfig, &cfg, traceapi.DefaultAuthScopes())
 	if err != nil {
 		return nil, err
 	}
-	topts = append(topts, cloudtrace.WithTraceClientOptions(copts))
+	topts = append(topts, texporter.WithTraceClientOptions(copts))
 
-	exp, err := cloudtrace.New(topts...)
+	exp, err := texporter.New(topts...)
 	if err != nil {
 		return nil, fmt.Errorf("error creating GoogleCloud Trace exporter: %w", err)
 	}

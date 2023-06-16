@@ -20,7 +20,7 @@ import (
 	"testing"
 	"time"
 
-	cloudtracepb "cloud.google.com/go/trace/apiv2/tracepb"
+	"cloud.google.com/go/trace/apiv2/tracepb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -31,16 +31,16 @@ import (
 )
 
 type testServer struct {
-	reqCh chan *cloudtracepb.BatchWriteSpansRequest
+	reqCh chan *tracepb.BatchWriteSpansRequest
 }
 
-func (ts *testServer) BatchWriteSpans(ctx context.Context, req *cloudtracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
+func (ts *testServer) BatchWriteSpans(ctx context.Context, req *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
 	go func() { ts.reqCh <- req }()
 	return &emptypb.Empty{}, nil
 }
 
 // Creates a new span.
-func (ts *testServer) CreateSpan(context.Context, *cloudtracepb.Span) (*cloudtracepb.Span, error) {
+func (ts *testServer) CreateSpan(context.Context, *tracepb.Span) (*tracepb.Span, error) {
 	return nil, nil
 }
 
@@ -86,8 +86,8 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			ctx := context.Background()
 			srv := grpc.NewServer()
-			reqCh := make(chan *cloudtracepb.BatchWriteSpansRequest)
-			cloudtracepb.RegisterTraceServiceServer(srv, &testServer{reqCh: reqCh})
+			reqCh := make(chan *tracepb.BatchWriteSpansRequest)
+			tracepb.RegisterTraceServiceServer(srv, &testServer{reqCh: reqCh})
 
 			lis, err := net.Listen("tcp", "localhost:8080")
 			require.NoError(t, err)

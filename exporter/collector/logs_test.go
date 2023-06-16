@@ -28,7 +28,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
-	"google.golang.org/genproto/googleapis/api/monitoredres"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 func newTestLogMapper(entrySize int) logMapper {
@@ -54,7 +54,7 @@ func TestLogMapping(t *testing.T) {
 
 	testCases := []struct {
 		log             func() plog.LogRecord
-		mr              func() *monitoredres.MonitoredResource
+		mr              func() *monitoredrespb.MonitoredResource
 		name            string
 		expectedEntries []logging.Entry
 		maxEntrySize    int
@@ -78,7 +78,7 @@ func TestLogMapping(t *testing.T) {
 					Timestamp: testObservedTime,
 				},
 			},
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 		},
@@ -87,7 +87,7 @@ func TestLogMapping(t *testing.T) {
 			log: func() plog.LogRecord {
 				return plog.NewLogRecord()
 			},
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			expectedEntries: []logging.Entry{{
@@ -102,7 +102,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetEmptyBytes().FromRaw([]byte(`{"this": "is json"}`))
 				return log
 			},
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			expectedEntries: []logging.Entry{
@@ -135,7 +135,7 @@ func TestLogMapping(t *testing.T) {
 					}`))
 				return log
 			},
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			expectedEntries: []logging.Entry{
@@ -165,7 +165,7 @@ func TestLogMapping(t *testing.T) {
 				log.SetTimestamp(pcommon.NewTimestampFromTime(testSampleTime))
 				return log
 			},
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			expectedEntries: []logging.Entry{
@@ -182,7 +182,7 @@ func TestLogMapping(t *testing.T) {
 				log.SetObservedTimestamp(pcommon.NewTimestampFromTime(testSampleTime))
 				return log
 			},
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			expectedEntries: []logging.Entry{
@@ -194,7 +194,7 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log body with string value",
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			log: func() plog.LogRecord {
@@ -213,7 +213,7 @@ func TestLogMapping(t *testing.T) {
 		{
 			// TODO(damemi): parse/test sourceLocation from more than just bytes values
 			name: "log with sourceLocation (bytes)",
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			log: func() plog.LogRecord {
@@ -237,7 +237,7 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log with traceSampled (bool)",
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			log: func() plog.LogRecord {
@@ -255,7 +255,7 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log with trace and span id",
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			log: func() plog.LogRecord {
@@ -275,7 +275,7 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log with severity number",
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			log: func() plog.LogRecord {
@@ -293,7 +293,7 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log with invalid severity number",
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			log: func() plog.LogRecord {
@@ -306,7 +306,7 @@ func TestLogMapping(t *testing.T) {
 		},
 		{
 			name: "log with severity text",
-			mr: func() *monitoredres.MonitoredResource {
+			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			log: func() plog.LogRecord {
