@@ -621,7 +621,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			},
 		},
 		{
-			desc: "BMS instance",
+			desc: "Bare Metal Solution",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
