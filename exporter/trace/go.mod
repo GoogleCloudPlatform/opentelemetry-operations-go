@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go/trace v1.8.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.39.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.39.0
-	github.com/golang/protobuf v1.5.2
 	github.com/stretchr/testify v1.8.3
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/sdk v1.16.0
@@ -29,6 +28,7 @@ require (
 	github.com/go-logr/logr v1.2.4 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/googleapis/enterprise-certificate-proxy v0.2.1 // indirect
 	github.com/googleapis/gax-go/v2 v2.7.0 // indirect

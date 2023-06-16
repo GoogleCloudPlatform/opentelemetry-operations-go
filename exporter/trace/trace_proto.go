@@ -30,10 +30,10 @@ import (
 	"go.opentelemetry.io/otel/trace"
 
 	"cloud.google.com/go/trace/apiv2/tracepb"
-	timestamppb "github.com/golang/protobuf/ptypes/timestamp"
-	wrapperspb "github.com/golang/protobuf/ptypes/wrappers"
 	codepb "google.golang.org/genproto/googleapis/rpc/code"
 	statuspb "google.golang.org/genproto/googleapis/rpc/status"
+	timestamppb "google.golang.org/protobuf/types/known/timestamppb"
+	wrapperspb "google.golang.org/protobuf/types/known/wrapperspb"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 )
