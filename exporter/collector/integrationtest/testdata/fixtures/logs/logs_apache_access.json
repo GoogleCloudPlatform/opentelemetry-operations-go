@@ -28,7 +28,7 @@
           "scope": {},
           "logRecords": [
             {
-              "timeUnixNano": "1650984816000000000",
+              "observedTimeUnixNano": "1650984816000000000",
               "body": {
                 "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:36 +0800] \"GET / HTTP/1.1\" 200 1247"
               },

@@ -176,6 +176,23 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log with empty timestamp, but set observed_time",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetObservedTimestamp(pcommon.NewTimestampFromTime(testSampleTime))
+				return log
+			},
+			mr: func() *monitoredres.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []logging.Entry{
+				{
+					Timestamp: testSampleTime,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
 			name: "log body with string value",
 			mr: func() *monitoredres.MonitoredResource {
 				return nil

@@ -381,12 +381,16 @@ func (l logMapper) logToSplitEntries(
 		Resource: mr,
 	}
 
-	// if timestamp has not been explicitly initialized, default to current time
-	// TODO: figure out how to fall back to observed_time_unix_nano as recommended
-	//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
 	entry.Timestamp = log.Timestamp().AsTime()
 	if log.Timestamp() == 0 {
-		entry.Timestamp = processTime
+		// if timestamp is unset, fall back to observed_time_unix_nano as recommended
+		//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
+		if log.ObservedTimestamp() != 0 {
+			entry.Timestamp = log.ObservedTimestamp().AsTime()
+		} else {
+			// if observed_time is 0, use the current time
+			entry.Timestamp = processTime
+		}
 	}
 
 	// build our own map off OTel attributes so we don't have to call .Get() for each special case
