@@ -108,9 +108,9 @@ const (
 )
 
 const (
-	// These are special keys that can be used to export custom supported types for google cloud metrics.
-	gcpCustomType  string = "gcp.cloud_monitoring.custom.type"
-	gcpCustomValue string = "gcp.cloud_monitoring.custom.value"
+	// The specific unit that needs to be present in an integer-valued metric so
+	// that it can be treated as a boolean.
+	specialIntToBoolUnit = "{gcp.BOOL}"
 )
 
 type labels map[string]string
@@ -855,7 +855,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 		metricKind = metricpb.MetricDescriptor_GAUGE
 		startTime = nil
 	}
-	value, valueType := numberDataPointToValue(point, metricKind)
+	value, valueType := numberDataPointToValue(point, metricKind, metric.Unit())
 
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
@@ -896,7 +896,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 		return nil
 	}
 	metricKind := metricpb.MetricDescriptor_GAUGE
-	value, valueType := numberDataPointToValue(point, metricKind)
+	value, valueType := numberDataPointToValue(point, metricKind, metric.Unit())
 
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
@@ -947,8 +947,9 @@ func defaultGetMetricName(baseName string, _ pmetric.Metric) (string, error) {
 func numberDataPointToValue(
 	point pmetric.NumberDataPoint,
 	metricKind metricpb.MetricDescriptor_MetricKind,
+	metricUnit string,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	supportedTypedValue, supportedValueType := convertMetricKindToSupportedGCMTypes(metricKind, point.Attributes().AsRaw())
+	supportedTypedValue, supportedValueType := convertMetricKindToBoolIfSupported(point, metricKind, metricUnit)
 	if supportedValueType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
 		return supportedTypedValue, supportedValueType
 	}
@@ -965,37 +966,24 @@ func numberDataPointToValue(
 }
 
 // This function maps the values of the metric to certain types which are supported in Google Cloud Monitoring, but not in OTEL.
-// Such types includes STRING and BOOL. The conversion only happens for metric kind GAUGE and only under presence of certain attributes in the metric attributes.
-// The function returns the converted value and type if conditions are met, otherwise a nil value with value type MetricDescriptor_VALUE_TYPE_UNSPECIFIED is returned.
-func convertMetricKindToSupportedGCMTypes(metricKind metricpb.MetricDescriptor_MetricKind, pointLabels map[string]any) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	customType, customTypeOk := pointLabels[gcpCustomType]
-	customValue, customValueOk := pointLabels[gcpCustomValue]
-	if !customTypeOk || !customValueOk || metricKind != metricpb.MetricDescriptor_GAUGE {
+// Supported types includes BOOL. The conversion only happens for metric kind GAUGE and only if the conversion intent is indicated via the unit.
+// The function returns the converted value and type if conditions are met, otherwise a nil value with value type MetricDescriptor_VALUE_TYPE_UNSPECIFIED is returned - indicating
+// unsupported type or failure to meet constraints for conversion.
+func convertMetricKindToBoolIfSupported(point pmetric.NumberDataPoint, metricKind metricpb.MetricDescriptor_MetricKind, metricUnit string) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
+	boolUnitPresent := metricUnit == specialIntToBoolUnit
+	if !boolUnitPresent || metricKind != metricpb.MetricDescriptor_GAUGE || point.ValueType() != pmetric.NumberDataPointValueTypeInt {
+		// constraints for conversion failed - will not convert to boolean
 		return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 	}
-	switch customType {
-	case "BOOL":
-		boolVal, _ := strconv.ParseBool(customValue.(string))
-		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
-				BoolValue: boolVal,
-			}},
-			metricpb.MetricDescriptor_BOOL
-	case "STRING":
-		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_StringValue{
-				StringValue: customValue.(string),
-			}},
-			metricpb.MetricDescriptor_STRING
-	}
-	return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+	return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
+			BoolValue: point.IntValue() != 0,
+		}},
+		metricpb.MetricDescriptor_BOOL
 }
 
 func attributesToLabels(attrs pcommon.Map) labels {
 	ls := make(labels, attrs.Len())
 	attrs.Range(func(k string, v pcommon.Value) bool {
-		// Skip special keys - used to map to custom type
-		if k == gcpCustomType || k == gcpCustomValue {
-			return true
-		}
 		ls[sanitizeKey(k)] = sanitizeUTF8(v.AsString())
 		return true
 	})
@@ -1071,10 +1059,6 @@ func (m *metricMapper) labelDescriptors(
 		attr.Range(func(key string, _ pcommon.Value) bool {
 			// Skip keys that have already been set
 			if _, ok := seenKeys[sanitizeKey(key)]; ok {
-				return true
-			}
-			// Skip special keys - used to map to custom type
-			if key == gcpCustomType || key == gcpCustomValue {
 				return true
 			}
 			result = append(result, &label.LabelDescriptor{
@@ -1236,7 +1220,7 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 	case pmetric.MetricTypeGauge:
 		kind = metricpb.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
-			_, supportedType := convertMetricKindToSupportedGCMTypes(kind, m.Gauge().DataPoints().At(0).Attributes().AsRaw())
+			_, supportedType := convertMetricKindToBoolIfSupported(m.Gauge().DataPoints().At(0), kind, m.Unit())
 			if supportedType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
 				typ = supportedType
 			} else {
@@ -1250,7 +1234,7 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
 		if m.Sum().DataPoints().Len() > 0 {
-			_, supportedType := convertMetricKindToSupportedGCMTypes(kind, m.Sum().DataPoints().At(0).Attributes().AsRaw())
+			_, supportedType := convertMetricKindToBoolIfSupported(m.Sum().DataPoints().At(0), kind, m.Unit())
 			if supportedType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
 				typ = supportedType
 			} else {
