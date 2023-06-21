@@ -20,8 +20,8 @@ import (
 	_ "github.com/client9/misspell/cmd/misspell"
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "github.com/itchyny/gojq/cmd/gojq"
+	_ "github.com/wadey/gocovmerge"
 	_ "golang.org/x/tools/cmd/stringer"
 	_ "golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment"
 	_ "google.golang.org/protobuf/cmd/protoc-gen-go"
-	_ "github.com/wadey/gocovmerge"
 )

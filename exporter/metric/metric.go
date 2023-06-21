@@ -34,6 +34,7 @@ import (
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
+	"github.com/googleapis/gax-go/v2"
 	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/distribution"
@@ -44,8 +45,6 @@ import (
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/timestamppb"
-
-	"github.com/googleapis/gax-go/v2"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 )

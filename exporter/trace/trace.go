@@ -21,9 +21,10 @@ import (
 	"strings"
 	"time"
 
-	traceclient "cloud.google.com/go/trace/apiv2"
-	"cloud.google.com/go/trace/apiv2/tracepb"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
+	traceapi "cloud.google.com/go/trace/apiv2"
+	"cloud.google.com/go/trace/apiv2/tracepb"
 	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/metadata"
@@ -35,14 +36,14 @@ type traceExporter struct {
 	o *options
 	// uploadFn defaults in uploadSpans; it can be replaced for tests.
 	uploadFn  func(ctx context.Context, req *tracepb.BatchWriteSpansRequest) error
-	client    *traceclient.Client
+	client    *traceapi.Client
 	projectID string
 	overflowLogger
 }
 
 func newTraceExporter(o *options) (*traceExporter, error) {
 	clientOps := append(o.traceClientOptions, option.WithUserAgent(userAgent))
-	client, err := traceclient.NewClient(o.context, clientOps...)
+	client, err := traceapi.NewClient(o.context, clientOps...)
 	if err != nil {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
 	}

@@ -20,7 +20,7 @@ import (
 	"strings"
 	"sync"
 
-	"google.golang.org/genproto/googleapis/api/metric"
+	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -128,9 +128,9 @@ func (f *fakeMetricServiceServer) CreateServiceTimeSeries(
 func (f *fakeMetricServiceServer) CreateMetricDescriptor(
 	ctx context.Context,
 	req *monitoringpb.CreateMetricDescriptorRequest,
-) (*metric.MetricDescriptor, error) {
+) (*metricpb.MetricDescriptor, error) {
 	f.metricsTestServer.appendCreateMetricDescriptorReq(req)
-	return &metric.MetricDescriptor{}, nil
+	return &metricpb.MetricDescriptor{}, nil
 }
 
 func NewMetricTestServer() (*MetricsTestServer, error) {

@@ -28,21 +28,20 @@ import (
 	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
-	"google.golang.org/genproto/googleapis/api/monitoredres"
+	"github.com/googleapis/gax-go/v2"
+	"go.uber.org/multierr"
+	"go.uber.org/zap"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/googleapis/gax-go/v2"
+	"go.opentelemetry.io/collector/pdata/pcommon"
+	"go.opentelemetry.io/collector/pdata/plog"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
-
-	"go.opentelemetry.io/collector/pdata/pcommon"
-	"go.opentelemetry.io/collector/pdata/plog"
-	"go.uber.org/multierr"
-	"go.uber.org/zap"
 )
 
 const (
@@ -327,7 +326,7 @@ func (l logMapper) logEntryToInternal(
 	entry logging.Entry,
 	logName string,
 	projectID string,
-	mr *monitoredres.MonitoredResource,
+	mr *monitoredrespb.MonitoredResource,
 	splits int,
 	splitIndex int,
 ) (*logpb.LogEntry, error) {
@@ -371,7 +370,7 @@ func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
 
 func (l logMapper) logToSplitEntries(
 	log plog.LogRecord,
-	mr *monitoredres.MonitoredResource,
+	mr *monitoredrespb.MonitoredResource,
 	logLabels map[string]string,
 	processTime time.Time,
 	logName string,
