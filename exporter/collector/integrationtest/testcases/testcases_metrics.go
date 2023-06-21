@@ -70,6 +70,12 @@ var MetricsTestCases = []TestCase{
 		},
 	},
 	{
+		Name:                 "Boolean valued gauge metrics represented through int gauges",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/boolean_gauge_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/boolean_gauge_metrics_expect.json",
+		SkipForSDK:           true, // Boolean valued metrics not implemented in SDK
+	},
+	{
 		Name:                 "Delta Counter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/delta_counter_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/delta_counter_metrics_expect.json",
