@@ -1466,20 +1466,24 @@ func TestAttributesToLabels(t *testing.T) {
 }
 
 func TestNumberDataPointToValue(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	point := pmetric.NewNumberDataPoint()
 
 	point.SetIntValue(12)
-	value, valueType := numberDataPointToValue(point, metricpb.MetricDescriptor_DELTA, "{1}")
+	value, valueType := mapper.numberDataPointToValue(point, metricpb.MetricDescriptor_DELTA, "{1}")
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_INT64)
 	assert.EqualValues(t, value.GetInt64Value(), 12)
 
 	point.SetDoubleValue(12.3)
-	value, valueType = numberDataPointToValue(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
+	value, valueType = mapper.numberDataPointToValue(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
 }
 
 func TestConvertMetricKindToSupportedGCMTypes(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	var typedValue *monitoringpb.TypedValue
 	var valueType metricpb.MetricDescriptor_ValueType
 
@@ -1487,49 +1491,49 @@ func TestConvertMetricKindToSupportedGCMTypes(t *testing.T) {
 
 	// Negative integer value for a Gauge with correct unit
 	point.SetIntValue(-1)
-	typedValue, valueType = convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
+	typedValue, valueType = mapper.convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
 	assert.EqualValues(t, typedValue.GetBoolValue(), true)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
 
 	// Zero valued integer for a Gauge with the correct unit
 	point.SetIntValue(0)
-	typedValue, valueType = convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
+	typedValue, valueType = mapper.convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
 	assert.EqualValues(t, typedValue.GetBoolValue(), false)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
 
 	// Positive integer value for a Gauge with the correct unit
 	point.SetIntValue(10)
-	typedValue, valueType = convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
+	typedValue, valueType = mapper.convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
 	assert.EqualValues(t, typedValue.GetBoolValue(), true)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
 
 	// Integer value for a gauge but with an incorrect unit
 	point.SetIntValue(1)
-	typedValue, valueType = convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, "{1}")
+	typedValue, valueType = mapper.convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, "{1}")
 	assert.EqualValues(t, typedValue.GetValue(), nil)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
 
 	// Double value for a gauge with the correct unit
 	point.SetDoubleValue(4.2)
-	typedValue, valueType = convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
+	typedValue, valueType = mapper.convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
 	assert.EqualValues(t, typedValue.GetValue(), nil)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
 
 	// Incorrect metric kind, value type & unit for conversion to Boolean
 	point.SetDoubleValue(3.2)
-	typedValue, valueType = convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_DELTA, "{1}")
+	typedValue, valueType = mapper.convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_DELTA, "{1}")
 	assert.EqualValues(t, typedValue.GetValue(), nil)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
 
 	// metric kind is not gauge - (DELTA)
 	point.SetIntValue(1)
-	typedValue, valueType = convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_DELTA, specialIntToBoolUnit)
+	typedValue, valueType = mapper.convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_DELTA, specialIntToBoolUnit)
 	assert.EqualValues(t, typedValue.GetValue(), nil)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
 
 	// metric kind is not gauge - (CUMULATIVE)
 	point.SetIntValue(2)
-	typedValue, valueType = convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_CUMULATIVE, specialIntToBoolUnit)
+	typedValue, valueType = mapper.convertMetricKindToBoolIfSupported(point, metricpb.MetricDescriptor_CUMULATIVE, specialIntToBoolUnit)
 	assert.EqualValues(t, typedValue.GetValue(), nil)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
 }

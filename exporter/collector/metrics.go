@@ -855,7 +855,7 @@ func (m *metricMapper) sumPointToTimeSeries(
 		metricKind = metricpb.MetricDescriptor_GAUGE
 		startTime = nil
 	}
-	value, valueType := numberDataPointToValue(point, metricKind, metric.Unit())
+	value, valueType := m.numberDataPointToValue(point, metricKind, metric.Unit())
 
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
@@ -896,7 +896,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 		return nil
 	}
 	metricKind := metricpb.MetricDescriptor_GAUGE
-	value, valueType := numberDataPointToValue(point, metricKind, metric.Unit())
+	value, valueType := m.numberDataPointToValue(point, metricKind, metric.Unit())
 
 	return []*monitoringpb.TimeSeries{{
 		Resource:   resource,
@@ -944,12 +944,12 @@ func defaultGetMetricName(baseName string, _ pmetric.Metric) (string, error) {
 }
 
 // this function converts the OTEL spec metric to cloud monitoring.
-func numberDataPointToValue(
+func (m *metricMapper) numberDataPointToValue(
 	point pmetric.NumberDataPoint,
 	metricKind metricpb.MetricDescriptor_MetricKind,
 	metricUnit string,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	supportedTypedValue, supportedValueType := convertMetricKindToBoolIfSupported(point, metricKind, metricUnit)
+	supportedTypedValue, supportedValueType := m.convertMetricKindToBoolIfSupported(point, metricKind, metricUnit)
 	if supportedValueType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
 		return supportedTypedValue, supportedValueType
 	}
@@ -969,10 +969,14 @@ func numberDataPointToValue(
 // Supported types includes BOOL. The conversion only happens for metric kind GAUGE and only if the conversion intent is indicated via the unit.
 // The function returns the converted value and type if conditions are met, otherwise a nil value with value type MetricDescriptor_VALUE_TYPE_UNSPECIFIED is returned - indicating
 // unsupported type or failure to meet constraints for conversion.
-func convertMetricKindToBoolIfSupported(point pmetric.NumberDataPoint, metricKind metricpb.MetricDescriptor_MetricKind, metricUnit string) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
+func (me *metricMapper) convertMetricKindToBoolIfSupported(point pmetric.NumberDataPoint, metricKind metricpb.MetricDescriptor_MetricKind, metricUnit string) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
 	boolUnitPresent := metricUnit == specialIntToBoolUnit
 	if !boolUnitPresent || metricKind != metricpb.MetricDescriptor_GAUGE || point.ValueType() != pmetric.NumberDataPointValueTypeInt {
 		// constraints for conversion failed - will not convert to boolean
+		if boolUnitPresent {
+			// indicates the user intentionally tried to convert to BOOL and failed
+			me.obs.log.Warn("Failed to interpret metric as BOOL. Attempted conversion on BOOL metrics are only supported on integer valued gauges", zap.Any("metric_kind", metricKind), zap.Any("value_type", point.ValueType()))
+		}
 		return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 	}
 	return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
@@ -1169,7 +1173,7 @@ func (m *metricMapper) metricDescriptor(
 	if pm.Type() == pmetric.MetricTypeSummary {
 		return m.summaryMetricDescriptors(pm, extraLabels)
 	}
-	kind, typ := mapMetricPointKind(pm)
+	kind, typ := m.mapMetricPointKind(pm)
 	if kind == metricpb.MetricDescriptor_METRIC_KIND_UNSPECIFIED {
 		m.obs.log.Debug("Failed to get metric kind (i.e. aggregation) for metric descriptor. Dropping the metric descriptor.", zap.Any("metric", pm))
 		return nil
@@ -1213,14 +1217,14 @@ func metricPointValueType(pt pmetric.NumberDataPointValueType) metricpb.MetricDe
 	}
 }
 
-func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind, metricpb.MetricDescriptor_ValueType) {
+func (me *metricMapper) mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind, metricpb.MetricDescriptor_ValueType) {
 	var kind metricpb.MetricDescriptor_MetricKind
 	var typ metricpb.MetricDescriptor_ValueType
 	switch m.Type() {
 	case pmetric.MetricTypeGauge:
 		kind = metricpb.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
-			_, supportedType := convertMetricKindToBoolIfSupported(m.Gauge().DataPoints().At(0), kind, m.Unit())
+			_, supportedType := me.convertMetricKindToBoolIfSupported(m.Gauge().DataPoints().At(0), kind, m.Unit())
 			if supportedType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
 				typ = supportedType
 			} else {
@@ -1234,7 +1238,7 @@ func mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind,
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
 		if m.Sum().DataPoints().Len() > 0 {
-			_, supportedType := convertMetricKindToBoolIfSupported(m.Sum().DataPoints().At(0), kind, m.Unit())
+			_, supportedType := me.convertMetricKindToBoolIfSupported(m.Sum().DataPoints().At(0), kind, m.Unit())
 			if supportedType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
 				typ = supportedType
 			} else {
