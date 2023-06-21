@@ -1479,6 +1479,16 @@ func TestNumberDataPointToValue(t *testing.T) {
 	value, valueType = mapper.numberDataPointToValue(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
+
+	point.SetIntValue(13)
+	value, valueType = mapper.numberDataPointToValue(point, metricpb.MetricDescriptor_GAUGE, "{gcp.BOOL}")
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
+	assert.EqualValues(t, value.GetBoolValue(), true)
+
+	point.SetIntValue(0)
+	value, valueType = mapper.numberDataPointToValue(point, metricpb.MetricDescriptor_GAUGE, "{gcp.BOOL}")
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
+	assert.EqualValues(t, value.GetBoolValue(), false)
 }
 
 func TestConvertMetricKindToSupportedGCMTypes(t *testing.T) {
@@ -1578,6 +1588,36 @@ func TestMetricDescriptorMapping(t *testing.T) {
 			},
 		},
 		{
+			name: "Boolean Gauge",
+			metricCreator: func() pmetric.Metric {
+				metric := pmetric.NewMetric()
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("{gcp.BOOL}")
+				gauge := metric.SetEmptyGauge()
+				point := gauge.DataPoints().AppendEmpty()
+				point.SetIntValue(10)
+				point.Attributes().PutStr("test.label", "test_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_BOOL,
+					Unit:        "{gcp.BOOL}",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
 			name: "Cumulative Monotonic Sum",
 			metricCreator: func() pmetric.Metric {
 				metric := pmetric.NewMetric()
@@ -1664,6 +1704,38 @@ func TestMetricDescriptorMapping(t *testing.T) {
 					MetricKind:  metricpb.MetricDescriptor_GAUGE,
 					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Non-Monotonic Sum Boolean",
+			metricCreator: func() pmetric.Metric {
+				metric := pmetric.NewMetric()
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("{gcp.BOOL}")
+				sum := metric.SetEmptySum()
+				sum.SetIsMonotonic(false)
+				sum.SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+				point := sum.DataPoints().AppendEmpty()
+				point.SetIntValue(10)
+				point.Attributes().PutStr("test.label", "test_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_BOOL,
+					Unit:        "{gcp.BOOL}",
 					Description: "Description",
 					Labels: []*label.LabelDescriptor{
 						{
