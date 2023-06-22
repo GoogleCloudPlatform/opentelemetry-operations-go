@@ -52,6 +52,19 @@
                       }
                    },
                    {
+                     "name":"scrape_series_added",
+                     "description":"The approximate number of new series in this scrape",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "timeUnixNano":"1649443516286000001",
+                              "asDouble":23,
+                              "flags":1
+                           }
+                        ]
+                     }
+                  },
+                   {
                       "name":"ex_com_one",
                       "gauge":{
                          "dataPoints":[
