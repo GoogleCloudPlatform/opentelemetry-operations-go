@@ -229,5 +229,16 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.ClientConfig.Compression = "gzip"
 		},
 	},
+	{
+		Name:                 "BMS Ops Agent Host Metrics",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/bms_ops_agent_host_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/bms_ops_agent_host_metrics_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			// Metric descriptors should not be created under agent.googleapis.com
+			cfg.MetricConfig.SkipCreateMetricDescriptor = true
+		},
+		// We don't support disabling metric descriptor creation for the SDK exporter
+		SkipForSDK: true,
+	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }

@@ -620,6 +620,21 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				"zone":        "us-central1-a",
 			},
 		},
+		{
+			desc: "Bare Metal Solution",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("cloud.provider", "gcp"),
+				attribute.String("cloud.platform", "gcp_bare_metal_solution"),
+				attribute.String("cloud.region", "us-west2"),
+				attribute.String("host.id", "123"),
+			),
+			expectedType: "baremetalsolution.googleapis.com/Instance",
+			expectedLabels: map[string]string{
+				"instance_id": "123",
+				"location":    "us-west2",
+			},
+		},
 	}
 
 	md := &googlemetricpb.MetricDescriptor{
