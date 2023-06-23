@@ -64,8 +64,15 @@ func TestCollectorMetrics(t *testing.T) {
 			}
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
-			expectFixture := test.LoadMetricExpectFixture(
+			if !test.ExpectRetries {
+				require.Zero(t, testServer.RetryCount, "Server returned >0 retries when not expected")
+			} else {
+				require.NotZero(t, testServer.RetryCount, "Server returned 0 retries when expected >0")
+			}
+
+			expectFixture := test.LoadMetricFixture(
 				t,
+				test.ExpectFixturePath,
 				startTime,
 				endTime,
 			)
@@ -114,6 +121,40 @@ func TestCollectorMetrics(t *testing.T) {
 					diff,
 				)
 			}
+
+			if len(test.CompareFixturePath) > 0 {
+				compareFixture := test.LoadMetricFixture(
+					t,
+					test.CompareFixturePath,
+					startTime,
+					endTime,
+				)
+				sort.Slice(compareFixture.CreateTimeSeriesRequests, func(i, j int) bool {
+					return compareFixture.CreateTimeSeriesRequests[i].Name < compareFixture.CreateTimeSeriesRequests[j].Name
+				})
+				sort.Slice(compareFixture.CreateMetricDescriptorRequests, func(i, j int) bool {
+					if compareFixture.CreateMetricDescriptorRequests[i].Name != compareFixture.CreateMetricDescriptorRequests[j].Name {
+						return compareFixture.CreateMetricDescriptorRequests[i].Name < compareFixture.CreateMetricDescriptorRequests[j].Name
+					}
+					return compareFixture.CreateMetricDescriptorRequests[i].MetricDescriptor.Name < compareFixture.CreateMetricDescriptorRequests[j].MetricDescriptor.Name
+				})
+				sort.Slice(compareFixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
+					return compareFixture.CreateServiceTimeSeriesRequests[i].Name < compareFixture.CreateServiceTimeSeriesRequests[j].Name
+				})
+
+				diff := DiffMetricProtos(
+					t,
+					fixture,
+					compareFixture,
+				)
+				if diff != "" {
+					require.Fail(
+						t,
+						"Expected requests fixture and actual GCM requests differ",
+						diff,
+					)
+				}
+			}
 		})
 	}
 }
@@ -158,8 +199,9 @@ func TestSDKMetrics(t *testing.T) {
 			}
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
-			expectFixture := test.LoadMetricExpectFixture(
+			expectFixture := test.LoadMetricFixture(
 				t,
+				test.ExpectFixturePath,
 				startTime,
 				endTime,
 			)
@@ -208,6 +250,40 @@ func TestSDKMetrics(t *testing.T) {
 					"Expected requests fixture and actual GCM requests differ",
 					diff,
 				)
+			}
+
+			if len(test.CompareFixturePath) > 0 {
+				compareFixture := test.LoadMetricFixture(
+					t,
+					test.CompareFixturePath,
+					startTime,
+					endTime,
+				)
+				sort.Slice(compareFixture.CreateTimeSeriesRequests, func(i, j int) bool {
+					return compareFixture.CreateTimeSeriesRequests[i].Name < compareFixture.CreateTimeSeriesRequests[j].Name
+				})
+				sort.Slice(compareFixture.CreateMetricDescriptorRequests, func(i, j int) bool {
+					if compareFixture.CreateMetricDescriptorRequests[i].Name != compareFixture.CreateMetricDescriptorRequests[j].Name {
+						return compareFixture.CreateMetricDescriptorRequests[i].Name < compareFixture.CreateMetricDescriptorRequests[j].Name
+					}
+					return compareFixture.CreateMetricDescriptorRequests[i].MetricDescriptor.Name < compareFixture.CreateMetricDescriptorRequests[j].MetricDescriptor.Name
+				})
+				sort.Slice(compareFixture.CreateServiceTimeSeriesRequests, func(i, j int) bool {
+					return compareFixture.CreateServiceTimeSeriesRequests[i].Name < compareFixture.CreateServiceTimeSeriesRequests[j].Name
+				})
+
+				diff := DiffMetricProtos(
+					t,
+					fixture,
+					compareFixture,
+				)
+				if diff != "" {
+					require.Fail(
+						t,
+						"Expected requests fixture and actual GCM requests differ",
+						diff,
+					)
+				}
 			}
 		})
 	}

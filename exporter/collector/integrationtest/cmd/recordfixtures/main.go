@@ -136,18 +136,17 @@ func (fr fixtureRecorder) recordLogs(ctx context.Context, t *FakeTesting, timest
 }
 
 func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, startTime, endTime time.Time) {
-	testServer, err := cloudmock.NewMetricTestServer()
-	if err != nil {
-		panic(err)
-	}
-	//nolint:errcheck
-	go testServer.Serve()
-	defer testServer.Shutdown()
-
 	for _, test := range testcases.MetricsTestCases {
 		if test.Skip {
 			continue
 		}
+
+		testServer, err := cloudmock.NewMetricTestServer()
+		if err != nil {
+			panic(err)
+		}
+		//nolint:errcheck
+		go testServer.Serve()
 
 		require.NoError(t, fr.checkDuplicate(test))
 
@@ -177,5 +176,7 @@ func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, sta
 			}
 			test.SaveRecordedMetricFixtures(t, fixture)
 		}()
+
+		testServer.Shutdown()
 	}
 }

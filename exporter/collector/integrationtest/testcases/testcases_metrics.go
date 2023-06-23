@@ -15,7 +15,9 @@
 package testcases
 
 import (
+	"os"
 	"strings"
+	"time"
 
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
@@ -238,6 +240,79 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.SkipCreateMetricDescriptor = true
 		},
 		// We don't support disabling metric descriptor creation for the SDK exporter
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Write ahead log enabled",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_wal_expect.json",
+		CompareFixturePath:   "testdata/fixtures/metrics/basic_counter_metrics_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			dir, _ := os.MkdirTemp("", "test-wal-")
+			cfg.MetricConfig.WALConfig = &collector.WALConfig{
+				Directory:  dir,
+				MaxBackoff: time.Duration(1 * time.Second),
+			}
+		},
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Write ahead log enabled, basic prometheus metrics",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_prometheus_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/basic_prometheus_metrics_wal_expect.json",
+		CompareFixturePath:   "testdata/fixtures/metrics/basic_prometheus_metrics_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			dir, _ := os.MkdirTemp("", "test-wal-")
+			cfg.MetricConfig.WALConfig = &collector.WALConfig{
+				Directory:  dir,
+				MaxBackoff: time.Duration(1 * time.Second),
+			}
+		},
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Write ahead log enabled, basic Counter with unavailable return code",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_wal_unavailable_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.ProjectID = "unavailableproject"
+			dir, _ := os.MkdirTemp("", "test-wal-")
+			cfg.MetricConfig.WALConfig = &collector.WALConfig{
+				Directory:  dir,
+				MaxBackoff: time.Duration(2 * time.Second),
+			}
+		},
+		SkipForSDK:    true,
+		ExpectRetries: true,
+	},
+	{
+		Name:                 "Write ahead log enabled, basic Counter with deadline_exceeded return code",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_wal_deadline_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.ProjectID = "deadline_exceededproject"
+			dir, _ := os.MkdirTemp("", "test-wal-")
+			cfg.MetricConfig.WALConfig = &collector.WALConfig{
+				Directory:  dir,
+				MaxBackoff: time.Duration(2 * time.Second),
+			}
+		},
+		SkipForSDK:    true,
+		ExpectRetries: true,
+	},
+	{
+		Name:                 "Write ahead log enabled, CreateServiceTimeSeries",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/create_service_timeseries_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/create_service_timeseries_metrics_wal_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.CreateServiceTimeSeries = true
+			dir, _ := os.MkdirTemp("", "test-wal-")
+			cfg.MetricConfig.WALConfig = &collector.WALConfig{
+				Directory:  dir,
+				MaxBackoff: time.Duration(1 * time.Second),
+			}
+		},
+		// SDK exporter does not support CreateServiceTimeSeries
 		SkipForSDK: true,
 	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent

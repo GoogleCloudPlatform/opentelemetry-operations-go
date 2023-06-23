@@ -178,7 +178,11 @@ Note: These `retry_on_failure` and `sending_queue` are provided (and documented)
 Additional configuration for the metric exporter:
 
 - `metric.prefix` (optional): MetricPrefix overrides the prefix / namespace of the Google Cloud metric type identifier. If not set, defaults to "custom.googleapis.com/opencensus/"
-- `metric.skip_create_descriptor` (optional): Whether to skip creating the metric descriptor.
+- `metric.skip_create_descriptor` (optional): Whether to skip creating the
+  metric descriptor.
+- `metric.experimental_wal.experimental_directory` (optional): Path to local write-ahead-log file.
+- `metric.experimental_wal.experimental_max_backoff` (optional): Maximum duration to retry entries from
+  the WAL on network errors.
 
 Addition configuration for the logging exporter:
 
