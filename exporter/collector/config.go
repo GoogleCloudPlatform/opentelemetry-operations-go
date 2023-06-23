@@ -148,9 +148,9 @@ type MetricConfig struct {
 // it preserves both the data on disk and the order of the data points.
 type WALConfig struct {
 	// Directory is the location to store WAL files.
-	Directory string `mapstructure:"experimental_directory"`
+	Directory string `mapstructure:"directory"`
 	// MaxBackoff sets the length of time to exponentially re-try failed exports.
-	MaxBackoff time.Duration `mapstructure:"experimental_max_backoff"`
+	MaxBackoff time.Duration `mapstructure:"emax_backoff"`
 }
 
 // ImpersonateConfig defines configuration for service account impersonation.
