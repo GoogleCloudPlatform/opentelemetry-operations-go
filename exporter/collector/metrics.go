@@ -81,7 +81,8 @@ type MetricsExporter struct {
 	// A channel that receives metric descriptor and sends them to GCM once
 	metricDescriptorC chan *monitoringpb.CreateMetricDescriptorRequest
 	client            *monitoring.MetricClient
-	exportFunc        func(context.Context, *monitoringpb.CreateTimeSeriesRequest) error
+	// Only used for testing purposes in lieu of initializing a fake client
+	exportFunc func(context.Context, *monitoringpb.CreateTimeSeriesRequest) error
 	// requestOpts applies options to the context for requests, such as additional headers.
 	requestOpts []func(*context.Context, requestInfo)
 	mapper      metricMapper
@@ -138,12 +139,6 @@ func (me *MetricsExporter) Shutdown(ctx context.Context) error {
 	go func() {
 		// Wait until all goroutines are done
 		me.goroutines.Wait()
-		// Close the WAL if open
-		if me.wal != nil {
-			if err := me.wal.Close(); err != nil {
-				me.obs.log.Error(fmt.Sprintf("error closing WAL: %+v\n", err))
-			}
-		}
 		close(c)
 	}()
 	select {
@@ -573,8 +568,11 @@ func (me *MetricsExporter) watchWALFile(ctx context.Context) error {
 
 func (me *MetricsExporter) runWALReadAndExportLoop(ctx context.Context) {
 	defer me.goroutines.Done()
-	runCtx, cancel := context.WithCancel(ctx)
-	defer cancel()
+	defer func() {
+		if err := me.wal.Close(); err != nil {
+			me.obs.log.Error(fmt.Sprintf("error closing WAL: %+v\n", err))
+		}
+	}()
 	for {
 		select {
 		case <-ctx.Done():
@@ -583,7 +581,7 @@ func (me *MetricsExporter) runWALReadAndExportLoop(ctx context.Context) {
 			// do one last final read/export then return
 			// otherwise the runner goroutine could leave some hanging metrics unexported
 			for {
-				err := me.readWALAndExport(runCtx)
+				err := me.readWALAndExport(ctx)
 				if err != nil {
 					if !errors.Is(err, wal.ErrOutOfRange) {
 						me.obs.log.Error(fmt.Sprintf("error flushing remaining WAL entries: %+v", err))

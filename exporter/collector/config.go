@@ -104,7 +104,7 @@ type MetricConfig struct {
 	// suffixes for summary metrics, but does not (yet) include the domain prefix
 	GetMetricName func(baseName string, metric pmetric.Metric) (string, error)
 	// WALConfig holds configuration settings for the write ahead log.
-	WALConfig *WALConfig `mapstructure:"wal_config"`
+	WALConfig *WALConfig `mapstructure:"experimental_wal_config"`
 	Prefix    string     `mapstructure:"prefix"`
 	// KnownDomains contains a list of prefixes. If a metric already has one
 	// of these prefixes, the prefix is not added.
@@ -148,9 +148,9 @@ type MetricConfig struct {
 // it preserves both the data on disk and the order of the data points.
 type WALConfig struct {
 	// Directory is the location to store WAL files.
-	Directory string `mapstructure:"directory"`
+	Directory string `mapstructure:"experimental_directory"`
 	// MaxBackoff sets the length of time to exponentially re-try failed exports.
-	MaxBackoff time.Duration `mapstructure:"max_backoff"`
+	MaxBackoff time.Duration `mapstructure:"experimental_max_backoff"`
 }
 
 // ImpersonateConfig defines configuration for service account impersonation.
