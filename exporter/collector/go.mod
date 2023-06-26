@@ -67,3 +67,5 @@ replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trac
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping => ../../internal/resourcemapping
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock => ../../internal/cloudmock
+
+retract v0.39.1
