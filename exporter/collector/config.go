@@ -150,7 +150,7 @@ type WALConfig struct {
 	// Directory is the location to store WAL files.
 	Directory string `mapstructure:"directory"`
 	// MaxBackoff sets the length of time to exponentially re-try failed exports.
-	MaxBackoff time.Duration `mapstructure:"emax_backoff"`
+	MaxBackoff time.Duration `mapstructure:"max_backoff"`
 }
 
 // ImpersonateConfig defines configuration for service account impersonation.
