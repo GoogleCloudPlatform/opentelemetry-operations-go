@@ -53,6 +53,13 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/basic_prometheus_metrics_expect.json",
 	},
 	{
+		Name:                 "Basic Prometheus metrics with stale data point",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_prometheus_metrics_stale.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/basic_prometheus_metrics_stale_expect.json",
+		CompareFixturePath:   "testdata/fixtures/metrics/basic_prometheus_metrics_expect.json",
+		SkipForSDK:           true,
+	},
+	{
 		Name:                 "Modified prefix unknown domain",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/unknown_domain_metrics_expect.json",
