@@ -483,11 +483,10 @@ func (me *MetricsExporter) readWALAndExport(ctx context.Context) error {
 			time.Sleep(time.Duration(backoff) * time.Second)
 		}
 
-		lastIndex, indexErr := me.wal.LastIndex()
-		if indexErr != nil {
-			return indexErr
-		}
-		if readIndex == lastIndex && len(req.String()) > 0 {
+		// If we are at the last index, and this last index is not an empty request
+		// (we use empty requests to fill out the end of a log, and if we didn't check for them
+		// this would loop constantly adding empty requests onto the end)
+		if readIndex == writeIndex && len(req.String()) > 0 {
 			// This indicates that we are trying to truncate the last item in the WAL.
 			// If that is the case, write an empty request so we can truncate the last real request
 			// (the WAL library requires at least 1 entry).
@@ -498,17 +497,28 @@ func (me *MetricsExporter) readWALAndExport(ctx context.Context) error {
 				return bytesErr
 			}
 
-			err = me.wal.Write(writeIndex+1, bytes)
+			writeIndex++
+			err = me.wal.Write(writeIndex, bytes)
 			if err != nil {
 				return err
 			}
 		}
-		// move read index forward if non retryable error (or exported successfully)
+
+		// Truncate if readIndex < writeIndex.
+		// This only happens if there are more entries in the WAL
+		// OR, we are at the last real entry and added an "empty" entry above, in which we also increment writeIndex.
+		// otherwise, we've reached the end of the WAL and should be at an empty entry, which the export drops.
+		// If that's the case, and we try to truncate (ie, move readIndex+1), the library returns ErrOutOfRange.
+		if readIndex >= writeIndex {
+			// wal.ErrNotFound is used by wal.Read() to indicate the end of the WAL, but
+			// the wal library doesn't know about our hackery around empty entries.
+			// So it's used by us to indicate the same.
+			return wal.ErrNotFound
+		}
 		err = me.wal.TruncateFront(readIndex + 1)
 		if err != nil {
 			return err
 		}
-		return nil
 	}
 	return err
 }
