@@ -122,13 +122,13 @@ func TestGetMetricName(t *testing.T) {
 			expected: "hello/histogram",
 		},
 		{
-			desc:     "other",
-			baseName: "other",
+			desc:     "exponential histogram",
+			baseName: "hello",
 			metric: func(m pmetric.Metric) {
-				m.SetName("other")
+				m.SetName("hello")
 				m.SetEmptyExponentialHistogram()
 			},
-			expectErr: true,
+			expected: "hello/histogram",
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
