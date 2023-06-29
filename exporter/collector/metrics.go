@@ -970,19 +970,16 @@ func (m *metricMapper) numberDataPointToValue(
 // The function returns the converted value and type if conditions are met, otherwise a nil value with value type MetricDescriptor_VALUE_TYPE_UNSPECIFIED is returned - indicating
 // unsupported type or failure to meet constraints for conversion.
 func (me *metricMapper) convertMetricKindToBoolIfSupported(point pmetric.NumberDataPoint, metricKind metricpb.MetricDescriptor_MetricKind, metricUnit string) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	boolUnitPresent := metricUnit == specialIntToBoolUnit
-	if !boolUnitPresent || metricKind != metricpb.MetricDescriptor_GAUGE || point.ValueType() != pmetric.NumberDataPointValueTypeInt {
-		// constraints for conversion failed - will not convert to boolean
-		if boolUnitPresent {
-			// indicates the user intentionally tried to convert to BOOL and failed
-			me.obs.log.Warn("Failed to interpret metric as BOOL. Attempted conversion on BOOL metrics are only supported on integer valued gauges", zap.Any("metric_kind", metricKind), zap.Any("value_type", point.ValueType()))
+	if metricUnit == specialIntToBoolUnit {
+		if metricKind == metricpb.MetricDescriptor_GAUGE && point.ValueType() == pmetric.NumberDataPointValueTypeInt {
+			return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
+					BoolValue: point.IntValue() != 0,
+				}},
+				metricpb.MetricDescriptor_BOOL
 		}
-		return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
+		me.obs.log.Warn("Failed to interpret metric as BOOL. Attempted conversion on BOOL metrics are only supported on integer valued gauges", zap.Any("metric_kind", metricKind), zap.Any("value_type", point.ValueType()))
 	}
-	return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
-			BoolValue: point.IntValue() != 0,
-		}},
-		metricpb.MetricDescriptor_BOOL
+	return nil, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 }
 
 func attributesToLabels(attrs pcommon.Map) labels {
