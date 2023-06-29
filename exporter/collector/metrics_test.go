@@ -26,6 +26,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/tidwall/wal"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -2116,6 +2117,11 @@ func TestReadWALAndExport(t *testing.T) {
 
 	err = mExp.readWALAndExport(context.Background())
 	require.NoError(t, err)
+
+	// second export attempt returns ErrNotFound for end of WAL
+	err = mExp.readWALAndExport(context.Background())
+	require.Error(t, err)
+	require.EqualError(t, err, wal.ErrNotFound.Error())
 }
 
 func TestReadWALAndExportRetry(t *testing.T) {
