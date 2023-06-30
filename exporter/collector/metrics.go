@@ -943,7 +943,7 @@ func defaultGetMetricName(baseName string, _ pmetric.Metric) (string, error) {
 	return baseName, nil
 }
 
-// this function converts the OTEL spec metric to cloud monitoring.
+// this function converts the pdata metric to cloud monitoring.
 func (m *metricMapper) numberDataPointToValue(
 	point pmetric.NumberDataPoint,
 	metricKind metricpb.MetricDescriptor_MetricKind,
