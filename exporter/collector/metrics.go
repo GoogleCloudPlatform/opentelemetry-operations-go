@@ -949,7 +949,7 @@ func (m *metricMapper) numberDataPointToValue(
 	metricKind metricpb.MetricDescriptor_MetricKind,
 	metricUnit string,
 ) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
-	supportedTypedValue, supportedValueType := m.convertMetricKindToBoolIfSupported(point, metricKind, metricUnit)
+	supportedTypedValue, supportedValueType := m.convertToBoolIfMetricKindSupported(point, metricKind, metricUnit)
 	if supportedValueType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
 		return supportedTypedValue, supportedValueType
 	}
@@ -969,7 +969,7 @@ func (m *metricMapper) numberDataPointToValue(
 // Supported types includes BOOL. The conversion only happens for metric kind GAUGE and only if the conversion intent is indicated via the unit.
 // The function returns the converted value and type if conditions are met, otherwise a nil value with value type MetricDescriptor_VALUE_TYPE_UNSPECIFIED is returned - indicating
 // unsupported type or failure to meet constraints for conversion.
-func (me *metricMapper) convertMetricKindToBoolIfSupported(
+func (me *metricMapper) convertToBoolIfMetricKindSupported(
 	point pmetric.NumberDataPoint,
 	metricKind metricpb.MetricDescriptor_MetricKind,
 	metricUnit string,
@@ -1225,7 +1225,7 @@ func (me *metricMapper) mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDes
 	case pmetric.MetricTypeGauge:
 		kind = metricpb.MetricDescriptor_GAUGE
 		if m.Gauge().DataPoints().Len() > 0 {
-			_, supportedType := me.convertMetricKindToBoolIfSupported(m.Gauge().DataPoints().At(0), kind, m.Unit())
+			_, supportedType := me.convertToBoolIfMetricKindSupported(m.Gauge().DataPoints().At(0), kind, m.Unit())
 			if supportedType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
 				typ = supportedType
 			} else {
