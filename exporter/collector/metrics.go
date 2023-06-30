@@ -1239,12 +1239,7 @@ func (me *metricMapper) mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDes
 			kind = metricpb.MetricDescriptor_CUMULATIVE
 		}
 		if m.Sum().DataPoints().Len() > 0 {
-			_, supportedType := me.convertMetricKindToBoolIfSupported(m.Sum().DataPoints().At(0), kind, m.Unit())
-			if supportedType != metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED {
-				typ = supportedType
-			} else {
-				typ = metricPointValueType(m.Sum().DataPoints().At(0).ValueType())
-			}
+			typ = metricPointValueType(m.Sum().DataPoints().At(0).ValueType())
 		}
 	case pmetric.MetricTypeSummary:
 		kind = metricpb.MetricDescriptor_GAUGE

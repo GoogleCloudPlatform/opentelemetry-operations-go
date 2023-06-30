@@ -1734,7 +1734,7 @@ func TestMetricDescriptorMapping(t *testing.T) {
 					DisplayName: "test.metric",
 					Type:        "workload.googleapis.com/test.metric",
 					MetricKind:  metricpb.MetricDescriptor_GAUGE,
-					ValueType:   metricpb.MetricDescriptor_BOOL,
+					ValueType:   metricpb.MetricDescriptor_INT64,
 					Unit:        "{gcp.BOOL}",
 					Description: "Description",
 					Labels: []*label.LabelDescriptor{
