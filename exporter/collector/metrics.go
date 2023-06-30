@@ -969,7 +969,11 @@ func (m *metricMapper) numberDataPointToValue(
 // Supported types includes BOOL. The conversion only happens for metric kind GAUGE and only if the conversion intent is indicated via the unit.
 // The function returns the converted value and type if conditions are met, otherwise a nil value with value type MetricDescriptor_VALUE_TYPE_UNSPECIFIED is returned - indicating
 // unsupported type or failure to meet constraints for conversion.
-func (me *metricMapper) convertMetricKindToBoolIfSupported(point pmetric.NumberDataPoint, metricKind metricpb.MetricDescriptor_MetricKind, metricUnit string) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
+func (me *metricMapper) convertMetricKindToBoolIfSupported(
+	point pmetric.NumberDataPoint,
+	metricKind metricpb.MetricDescriptor_MetricKind,
+	metricUnit string,
+) (*monitoringpb.TypedValue, metricpb.MetricDescriptor_ValueType) {
 	if metricUnit == specialIntToBoolUnit {
 		if metricKind == metricpb.MetricDescriptor_GAUGE && point.ValueType() == pmetric.NumberDataPointValueTypeInt {
 			return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_BoolValue{
