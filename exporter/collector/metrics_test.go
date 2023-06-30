@@ -1472,17 +1472,86 @@ func TestAttributesToLabels(t *testing.T) {
 }
 
 func TestNumberDataPointToValue(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
 	point := pmetric.NewNumberDataPoint()
 
 	point.SetIntValue(12)
-	value, valueType := numberDataPointToValue(point)
+	value, valueType := mapper.numberDataPointToValue(point, metricpb.MetricDescriptor_DELTA, "{1}")
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_INT64)
 	assert.EqualValues(t, value.GetInt64Value(), 12)
 
 	point.SetDoubleValue(12.3)
-	value, valueType = numberDataPointToValue(point)
+	value, valueType = mapper.numberDataPointToValue(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
 	assert.Equal(t, valueType, metricpb.MetricDescriptor_DOUBLE)
 	assert.EqualValues(t, value.GetDoubleValue(), 12.3)
+
+	point.SetIntValue(13)
+	value, valueType = mapper.numberDataPointToValue(point, metricpb.MetricDescriptor_GAUGE, "{gcp.BOOL}")
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
+	assert.EqualValues(t, value.GetBoolValue(), true)
+
+	point.SetIntValue(0)
+	value, valueType = mapper.numberDataPointToValue(point, metricpb.MetricDescriptor_GAUGE, "{gcp.BOOL}")
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
+	assert.EqualValues(t, value.GetBoolValue(), false)
+}
+
+func TestConvertMetricKindToSupportedGCMTypes(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	var typedValue *monitoringpb.TypedValue
+	var valueType metricpb.MetricDescriptor_ValueType
+
+	point := pmetric.NewNumberDataPoint()
+
+	// Negative integer value for a Gauge with correct unit
+	point.SetIntValue(-1)
+	typedValue, valueType = mapper.convertToBoolIfMetricKindSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
+	assert.EqualValues(t, typedValue.GetBoolValue(), true)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
+
+	// Zero valued integer for a Gauge with the correct unit
+	point.SetIntValue(0)
+	typedValue, valueType = mapper.convertToBoolIfMetricKindSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
+	assert.EqualValues(t, typedValue.GetBoolValue(), false)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
+
+	// Positive integer value for a Gauge with the correct unit
+	point.SetIntValue(10)
+	typedValue, valueType = mapper.convertToBoolIfMetricKindSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
+	assert.EqualValues(t, typedValue.GetBoolValue(), true)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_BOOL)
+
+	// Integer value for a gauge but with an incorrect unit
+	point.SetIntValue(1)
+	typedValue, valueType = mapper.convertToBoolIfMetricKindSupported(point, metricpb.MetricDescriptor_GAUGE, "{1}")
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
+
+	// Double value for a gauge with the correct unit
+	point.SetDoubleValue(4.2)
+	typedValue, valueType = mapper.convertToBoolIfMetricKindSupported(point, metricpb.MetricDescriptor_GAUGE, specialIntToBoolUnit)
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
+
+	// Incorrect metric kind, value type & unit for conversion to Boolean
+	point.SetDoubleValue(3.2)
+	typedValue, valueType = mapper.convertToBoolIfMetricKindSupported(point, metricpb.MetricDescriptor_DELTA, "{1}")
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
+
+	// metric kind is not gauge - (DELTA)
+	point.SetIntValue(1)
+	typedValue, valueType = mapper.convertToBoolIfMetricKindSupported(point, metricpb.MetricDescriptor_DELTA, specialIntToBoolUnit)
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
+
+	// metric kind is not gauge - (CUMULATIVE)
+	point.SetIntValue(2)
+	typedValue, valueType = mapper.convertToBoolIfMetricKindSupported(point, metricpb.MetricDescriptor_CUMULATIVE, specialIntToBoolUnit)
+	assert.EqualValues(t, typedValue.GetValue(), nil)
+	assert.Equal(t, valueType, metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED)
 }
 
 type metricDescriptorTest struct {
@@ -1515,6 +1584,36 @@ func TestMetricDescriptorMapping(t *testing.T) {
 					MetricKind:  metricpb.MetricDescriptor_GAUGE,
 					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Boolean Gauge",
+			metricCreator: func() pmetric.Metric {
+				metric := pmetric.NewMetric()
+				metric.SetName("custom.googleapis.com/test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("{gcp.BOOL}")
+				gauge := metric.SetEmptyGauge()
+				point := gauge.DataPoints().AppendEmpty()
+				point.SetIntValue(10)
+				point.Attributes().PutStr("test.label", "test_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "custom.googleapis.com/test.metric",
+					DisplayName: "test.metric",
+					Type:        "custom.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_BOOL,
+					Unit:        "{gcp.BOOL}",
 					Description: "Description",
 					Labels: []*label.LabelDescriptor{
 						{
@@ -1611,6 +1710,38 @@ func TestMetricDescriptorMapping(t *testing.T) {
 					MetricKind:  metricpb.MetricDescriptor_GAUGE,
 					ValueType:   metricpb.MetricDescriptor_DOUBLE,
 					Unit:        "1",
+					Description: "Description",
+					Labels: []*label.LabelDescriptor{
+						{
+							Key: "test_label",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "Non-Monotonic Sum Boolean",
+			metricCreator: func() pmetric.Metric {
+				metric := pmetric.NewMetric()
+				metric.SetName("test.metric")
+				metric.SetDescription("Description")
+				metric.SetUnit("{gcp.BOOL}")
+				sum := metric.SetEmptySum()
+				sum.SetIsMonotonic(false)
+				sum.SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+				point := sum.DataPoints().AppendEmpty()
+				point.SetIntValue(10)
+				point.Attributes().PutStr("test.label", "test_value")
+				return metric
+			},
+			expected: []*metricpb.MetricDescriptor{
+				{
+					Name:        "test.metric",
+					DisplayName: "test.metric",
+					Type:        "workload.googleapis.com/test.metric",
+					MetricKind:  metricpb.MetricDescriptor_GAUGE,
+					ValueType:   metricpb.MetricDescriptor_INT64,
+					Unit:        "{gcp.BOOL}",
 					Description: "Description",
 					Labels: []*label.LabelDescriptor{
 						{

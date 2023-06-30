@@ -1,0 +1,91 @@
+{
+    "resourceMetrics": [
+        {
+            "resource": {
+                "attributes": [
+                    {
+                        "key": "service.name",
+                        "value": {
+                            "stringValue": "unknown_service:sample"
+                        }
+                    },
+                    {
+                        "key": "telemetry.sdk.language",
+                        "value": {
+                            "stringValue": "go"
+                        }
+                    },
+                    {
+                        "key": "telemetry.sdk.name",
+                        "value": {
+                            "stringValue": "opentelemetry"
+                        }
+                    },
+                    {
+                        "key": "telemetry.sdk.version",
+                        "value": {
+                            "stringValue": "1.16.0"
+                        }
+                    }
+                ]
+            },
+            "scopeMetrics": [
+                {
+                    "scope": {
+                        "name": "github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/collector/metric"
+                    },
+                    "metrics": [
+                        {
+                            "name": "observer-boolean-collector",
+                            "unit": "{gcp.BOOL}",
+                            "gauge": {
+                                "dataPoints": [
+                                    {
+                                        "attributes": [
+                                            {
+                                                "key": "key",
+                                                "value": {
+                                                    "stringValue": "value-1"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "11651379494838206464",
+                                        "timeUnixNano": "1687377293673694987",
+                                        "asInt": "0"
+                                    },
+                                    {
+                                        "attributes": [
+                                            {
+                                                "key": "key",
+                                                "value": {
+                                                    "stringValue": "value-2"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1688083417576000000",                                           
+                                        "timeUnixNano": "1688083820000000000",
+                                        "asInt": "393"
+                                    },
+                                    {
+                                        "attributes": [
+                                            {
+                                                "key": "key",
+                                                "value": {
+                                                    "stringValue": "value-3"
+                                                }
+                                            }
+                                        ],
+                                        "startTimeUnixNano": "1688083940000000000",                                        
+                                        "timeUnixNano": "1688084000000000000",
+                                        "asInt": "-272"
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            ],
+            "schemaUrl": "https://opentelemetry.io/schemas/1.17.0"
+        }
+    ]
+}
