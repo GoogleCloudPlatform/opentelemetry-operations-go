@@ -7,7 +7,7 @@
           "metric": {
             "type": "workload.googleapis.com/observer-boolean-collector",
             "labels": {
-              "key": "value",
+              "key": "value-1",
               "service_name": "unknown_service:sample"
             }
           },
@@ -28,6 +28,66 @@
               },
               "value": {
                 "boolValue": false
+              }
+            }
+          ],
+          "unit": "{gcp.BOOL}"
+        },
+        {
+          "metric": {
+            "type": "workload.googleapis.com/observer-boolean-collector",
+            "labels": {
+              "key": "value-2",
+              "service_name": "unknown_service:sample"
+            }
+          },
+          "resource": {
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "BOOL",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "boolValue": true
+              }
+            }
+          ],
+          "unit": "{gcp.BOOL}"
+        },
+        {
+          "metric": {
+            "type": "workload.googleapis.com/observer-boolean-collector",
+            "labels": {
+              "key": "value-3",
+              "service_name": "unknown_service:sample"
+            }
+          },
+          "resource": {
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "BOOL",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "boolValue": true
               }
             }
           ],
@@ -79,7 +139,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "1"
+                  "int64Value": "3"
                 }
               }
             ]
