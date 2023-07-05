@@ -1,0 +1,56 @@
+# This is a sample config file which can be used with an opentelemetry collector
+# This sample is configured to recieve OTLP metrics over HTTP on localhost:4318
+# and export the recieved metrics to a Google Cloud project.
+receivers:
+  otlp:
+    protocols:      
+      http:
+        endpoint: "localhost:4318"
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 65
+    spike_limit_percentage: 20
+  filter:
+    metrics:
+      include:
+        match_type: regexp
+        metric_names:
+          - .*error_code.*
+
+exporters:
+  googlecloud:
+    project: my-awesom-gcp-project    
+    retry_on_failure:
+      enabled: false
+  # Optional: for debugging, can be removed
+  logging:
+    loglevel: debug
+  # Optional: for debugging, can be removed
+  file:
+    path: ./otlp-output.json
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:
+  telemetry:
+    metrics:
+      address: ":8888"
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [googlecloud, logging, file]
+    metrics/2:
+      receivers: [otlp]
+      processors: [filter, memory_limiter, batch]
+      exporters: [logging, file]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [googlecloud, logging]
