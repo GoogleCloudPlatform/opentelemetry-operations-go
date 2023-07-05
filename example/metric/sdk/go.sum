@@ -10,6 +10,11 @@ cloud.google.com/go/monitoring v1.12.0 h1:+X79DyOP/Ny23XIqSIb37AvFWSxDN15w/ktklV
 cloud.google.com/go/monitoring v1.12.0/go.mod h1:yx8Jj2fZNEkL/GYZyTLS4ZtZEZN8WtDEiEqG4kLK50w=
 cloud.google.com/go/trace v1.4.0 h1:qO9eLn2esajC9sxpqp1YKX37nXC3L4BfGnPS0Cx9dYo=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.40.0 h1:9+y9fngTLV5Ojuq1rbnBSIMU3FUt9mUXI/nWB2tc6Kc=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.40.0/go.mod h1:9sRd9fvAdShL9OBRMjCGMUk+eMxvHRU7TrTTK4lBMZE=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.40.0 h1:mCPe3K9TIXzKl/YGh9XANM6m9XUbEZ8gJMyniXUKEKQ=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.40.0 h1:pjHa4+QZPUtXKINV2idw9U57iKDv865Yu1OR7hScFJA=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.40.0/go.mod h1:lz6DEePTxmjvYMtusOoS3qDAErC0STi/wmvqJucKY28=
 github.com/census-instrumentation/opencensus-proto v0.2.1/go.mod h1:f6KPmirojxKA12rnyqOA5BBL4O983OfeGPqjHWSTneU=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
 github.com/cncf/udpa/go v0.0.0-20191209042840-269d4d468f6f/go.mod h1:M8M6+tZqaGXZJjfX53e64911xZQV5JYwmTeXPW+k8Sc=
