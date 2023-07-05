@@ -19,7 +19,7 @@
                     "crossSeriesReducer": "REDUCE_SUM",
                     "perSeriesAligner": "ALIGN_DELTA"
                   },
-                  "filter": "metric.type=\"custom.googleapis.com/opentelemetry/counter-a\" resource.type=\"global\"",
+                  "filter": "metric.type=\"workload.googleapis.com/counter-a\"",
                   "secondaryAggregation": {}
                 },
                 "unitOverride": "1"
@@ -48,7 +48,7 @@
                   "aggregation": {
                     "perSeriesAligner": "ALIGN_MEAN"
                   },
-                  "filter": "metric.type=\"custom.googleapis.com/opentelemetry/observer-a\" resource.type=\"global\"",
+                  "filter": "metric.type=\"workload.googleapis.com/observer-a\"",
                   "secondaryAggregation": {}
                 },
                 "unitOverride": "1"
