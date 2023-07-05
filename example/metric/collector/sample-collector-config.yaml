@@ -12,16 +12,10 @@ processors:
     check_interval: 1s
     limit_percentage: 65
     spike_limit_percentage: 20
-  filter:
-    metrics:
-      include:
-        match_type: regexp
-        metric_names:
-          - .*error_code.*
+  batch:
 
 exporters:
-  googlecloud:
-    project: my-awesom-gcp-project    
+  googlecloud:    
     retry_on_failure:
       enabled: false
   # Optional: for debugging, can be removed
@@ -45,11 +39,7 @@ service:
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [googlecloud, logging, file]
-    metrics/2:
-      receivers: [otlp]
-      processors: [filter, memory_limiter, batch]
-      exporters: [logging, file]
+      exporters: [googlecloud, logging, file]  
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
