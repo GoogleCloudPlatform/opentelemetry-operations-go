@@ -26,7 +26,7 @@ Once you ensure the API is enabled, then build the example application and run t
 1. Exporting metrics via the SDK.
 2. Exporting metrics via the OpenTelemetry Collector.
 
-Change the current directory to the example you wish to run - either to `sdk` directory or `collector` directory and then run the example using following commands:
+Change the current directory to the example you wish to run - either to [sdk](./sdk/) directory or [collector](./collector/) directory and then run the example using following commands:
 
 ```
 $ go build -o metrics
