@@ -20,7 +20,7 @@ import (
 	"sync"
 	"time"
 
-	tracepb "google.golang.org/genproto/googleapis/devtools/cloudtrace/v2"
+	"cloud.google.com/go/trace/apiv2/tracepb"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
