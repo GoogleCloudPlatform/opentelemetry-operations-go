@@ -19,7 +19,7 @@ import (
 	"net"
 	"sync"
 
-	logpb "google.golang.org/genproto/googleapis/logging/v2"
+	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
 	"google.golang.org/grpc"
 )
 
