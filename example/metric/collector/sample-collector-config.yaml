@@ -17,13 +17,7 @@ processors:
 exporters:
   googlecloud:    
     retry_on_failure:
-      enabled: false
-  # Optional: for debugging, can be removed
-  logging:
-    loglevel: debug
-  # Optional: for debugging, can be removed
-  file:
-    path: ./otlp-output.json
+      enabled: false  
 
 extensions:
   health_check:
@@ -39,8 +33,8 @@ service:
     metrics:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [googlecloud, logging, file]  
+      exporters: [googlecloud]  
     logs:
       receivers: [otlp]
       processors: [memory_limiter, batch]
-      exporters: [googlecloud, logging]
+      exporters: [googlecloud]
