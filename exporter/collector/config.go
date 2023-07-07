@@ -180,6 +180,9 @@ type LogConfig struct {
 	// service.name, service.namespace, and service.instance.id resource attributes into the Cloud Logging LogEntry labels.
 	// Disabling this option does not prevent resource_filters from adding those labels. Default is true.
 	ServiceResourceLabels bool `mapstructure:"service_resource_labels"`
+	// ErrorReportingType enables automatically parsing error logs to a json payload containing the
+	// type value for GCP Error Reporting. See https://cloud.google.com/error-reporting/docs/formatting-error-messages#log-text.
+	ErrorReportingType bool `mapstructure:"error_reporting_type"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.

@@ -31,10 +31,17 @@ import (
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
-func newTestLogMapper(entrySize int) logMapper {
+type Option func(*Config)
+
+func newTestLogMapper(entrySize int, opts ...Option) logMapper {
 	obs := selfObservability{log: zap.NewNop()}
 	cfg := DefaultConfig()
 	cfg.LogConfig.DefaultLogName = "default-log"
+	for _, opt := range opts {
+		if opt != nil {
+			opt(&cfg)
+		}
+	}
 	return logMapper{
 		cfg:          cfg,
 		obs:          obs,
@@ -55,6 +62,7 @@ func TestLogMapping(t *testing.T) {
 	testCases := []struct {
 		log             func() plog.LogRecord
 		mr              func() *monitoredrespb.MonitoredResource
+		config          Option
 		name            string
 		expectedEntries []logging.Entry
 		maxEntrySize    int
@@ -211,6 +219,32 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log body with string value and error converted to json payload",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityNumber(18)
+				log.Body().SetStr("{\"message\": \"hello!\"}")
+				return log
+			},
+			expectedEntries: []logging.Entry{
+				{
+					Payload: map[string]interface{}{
+						"@type":   "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+						"message": `{"message": "hello!"}`,
+					},
+					Timestamp: testObservedTime,
+					Severity:  logging.Error,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			config: func(cfg *Config) {
+				cfg.LogConfig.ErrorReportingType = true
+			},
+		},
+		{
 			// TODO(damemi): parse/test sourceLocation from more than just bytes values
 			name: "log with sourceLocation (bytes)",
 			mr: func() *monitoredrespb.MonitoredResource {
@@ -328,7 +362,7 @@ func TestLogMapping(t *testing.T) {
 		t.Run(testCase.name, func(t *testing.T) {
 			log := testCase.log()
 			mr := testCase.mr()
-			mapper := newTestLogMapper(testCase.maxEntrySize)
+			mapper := newTestLogMapper(testCase.maxEntrySize, testCase.config)
 			logName, _ := mapper.getLogName(log)
 			entries, err := mapper.logToSplitEntries(
 				log,

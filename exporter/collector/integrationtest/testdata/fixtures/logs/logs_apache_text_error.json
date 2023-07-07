@@ -1,0 +1,69 @@
+{
+  "resourceLogs": [
+    {
+      "resource": {
+        "attributes": [
+          {
+            "key": "cloud.platform",
+            "value": {
+              "stringValue": "gcp_compute_engine"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "apache_service"
+            }
+          },
+          {
+            "key": "service.namespace",
+            "value": {
+              "stringValue": ""
+            }
+          }
+        ]
+      },
+      "scopeLogs": [
+        {
+          "scope": {},
+          "logRecords": [
+            {
+              "observedTimeUnixNano": "1650984816000000000",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:36 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "severity_number": 17,
+              "attributes": [
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            },
+            {
+              "observedTimeUnixNano": "1650984816000000000",
+              "body": {
+                "stringValue": "127.0.0.1 - - [26/Apr/2022:22:53:36 +0800] \"GET / HTTP/1.1\" 200 1247"
+              },
+              "severity_text": "ERROR",
+              "attributes": [
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "my-log-name-foo"
+                  }
+                }
+              ],
+              "traceId": "",
+              "spanId": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

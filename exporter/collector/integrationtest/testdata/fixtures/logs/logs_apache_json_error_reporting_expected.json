@@ -12,6 +12,27 @@
             }
           },
           "jsonPayload": {
+            "@type": "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
+            "message": "[pid 769:tid 140159306111872] AH01873: Init: Session Cache is not configured [hint: SSLSessionCache]",
+            "severity": "error",
+            "time": "Tue Apr 26 22:48:34.740290 2022"
+          },
+          "timestamp": "1970-01-01T00:00:00Z",
+          "severity": "ERROR",
+          "labels": {
+            "log.file.name": "test.log"
+          }
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/apache-error-fixture",
+          "resource": {
+            "type": "gce_instance",
+            "labels": {
+              "instance_id": "",
+              "zone": ""
+            }
+          },
+          "jsonPayload": {
             "message": "[pid 417652:tid 139808755448704] AH01232: suEXEC mechanism enabled (wrapper: /usr/local/apache/bin/suexec)",
             "severity": "notice",
             "time": "Tue Apr 26 00:46:21.412645 2022"
@@ -151,26 +172,6 @@
             "time": "Tue Apr 26 22:48:35.606223 2022"
           },
           "timestamp": "1970-01-01T00:00:00Z",
-          "labels": {
-            "log.file.name": "test.log"
-          }
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/apache-error-fixture",
-          "resource": {
-            "type": "gce_instance",
-            "labels": {
-              "instance_id": "",
-              "zone": ""
-            }
-          },
-          "jsonPayload": {
-            "message": "[pid 769:tid 140159306111872] AH01873: Init: Session Cache is not configured [hint: SSLSessionCache]",
-            "severity": "error",
-            "time": "Tue Apr 26 22:48:34.740290 2022"
-          },
-          "timestamp": "1970-01-01T00:00:00Z",
-          "severity": "ERROR",
           "labels": {
             "log.file.name": "test.log"
           }

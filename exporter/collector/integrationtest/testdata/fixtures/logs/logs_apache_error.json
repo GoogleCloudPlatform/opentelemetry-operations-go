@@ -277,8 +277,8 @@
             },
             {
               "timeUnixNano": "1651013314740290000",
-              "severityNumber": "SEVERITY_NUMBER_WARN",
-              "severityText": "Warn",
+              "severityNumber": "SEVERITY_NUMBER_ERROR",
+              "severityText": "Error",
               "body": {
                 "kvlistValue": {
                   "values": [
@@ -291,7 +291,7 @@
                     {
                       "key": "severity",
                       "value": {
-                        "stringValue": "warn"
+                        "stringValue": "error"
                       }
                     },
                     {

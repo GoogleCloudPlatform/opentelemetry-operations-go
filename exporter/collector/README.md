@@ -188,6 +188,10 @@ Addition configuration for the logging exporter:
 
 - `log.default_log_name` (optional): Defines a default name for log entries. If left unset, and a log entry does not have the `gcp.log_name` 
 attribute set, the exporter will return an error processing that entry.
+- `log.error_reporting_type` (option, default = false): If `true`, log records with a severity of `error` or higher will be converted to
+JSON payloads with the `@type` field set for [GCP Error Reporting](https://cloud.google.com/error-reporting/docs/formatting-error-messages#log-text).
+If the body is currently a string, it will be converted to a `message` field in the new JSON payload. If the body is already a map, the `@type`
+field will be added to the map. Other body types (such as byte) are undefined for this behavior.
 
 Example:
 
