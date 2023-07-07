@@ -9,4 +9,5 @@ Thumbs.db
 *.so
 coverage.*
 
-/example/metric/metric
+/example/metric/collector/metrics
+/example/metric/sdk/metrics
