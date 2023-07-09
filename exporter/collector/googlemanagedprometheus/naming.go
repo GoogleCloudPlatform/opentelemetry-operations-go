@@ -43,7 +43,7 @@ func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
 			return compliantName + "_count/summary", nil
 		}
 		return compliantName + "/summary", nil
-	case pmetric.MetricTypeHistogram:
+	case pmetric.MetricTypeHistogram, pmetric.MetricTypeExponentialHistogram:
 		return compliantName + "/histogram", nil
 	default:
 		return "", fmt.Errorf("unsupported metric datatype: %v", metric.Type())
