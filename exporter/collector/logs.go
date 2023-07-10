@@ -52,6 +52,9 @@ const (
 	LogNameAttributeKey        = "gcp.log_name"
 	SourceLocationAttributeKey = "gcp.source_location"
 	TraceSampledAttributeKey   = "gcp.trace_sampled"
+
+	GCPTypeKey                 = "@type"
+	GCPErrorReportingTypeValue = "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
 )
 
 // severityMapping maps the integer severity level values from OTel [0-24]
@@ -462,7 +465,7 @@ func (l logMapper) logToSplitEntries(
 			logRecord.Body().SetEmptyMap()
 			logRecord.Body().Map().PutStr("message", strValue)
 		}
-		logRecord.Body().Map().PutStr("@type", "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent")
+		logRecord.Body().Map().PutStr(GCPTypeKey, GCPErrorReportingTypeValue)
 	}
 
 	entry.Labels = logLabels

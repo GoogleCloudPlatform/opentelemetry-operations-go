@@ -232,8 +232,83 @@ func TestLogMapping(t *testing.T) {
 			expectedEntries: []logging.Entry{
 				{
 					Payload: map[string]interface{}{
-						"@type":   "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent",
-						"message": `{"message": "hello!"}`,
+						GCPTypeKey: GCPErrorReportingTypeValue,
+						"message":  `{"message": "hello!"}`,
+					},
+					Timestamp: testObservedTime,
+					Severity:  logging.Error,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			config: func(cfg *Config) {
+				cfg.LogConfig.ErrorReportingType = true
+			},
+		},
+		{
+			name: "log body with simple string value and error converted to json payload",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityNumber(18)
+				log.Body().SetStr("test string message")
+				return log
+			},
+			expectedEntries: []logging.Entry{
+				{
+					Payload: map[string]interface{}{
+						GCPTypeKey: GCPErrorReportingTypeValue,
+						"message":  "test string message",
+					},
+					Timestamp: testObservedTime,
+					Severity:  logging.Error,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			config: func(cfg *Config) {
+				cfg.LogConfig.ErrorReportingType = true
+			},
+		},
+		{
+			name: "log body with simple string value and non-error is not converted to json payload",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityNumber(16)
+				log.Body().SetStr("test string message")
+				return log
+			},
+			expectedEntries: []logging.Entry{
+				{
+					Payload:   "test string message",
+					Timestamp: testObservedTime,
+					Severity:  logging.Warning,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			config: func(cfg *Config) {
+				cfg.LogConfig.ErrorReportingType = true
+			},
+		},
+		{
+			name: "log body with map value and error converted to json payload",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityNumber(18)
+				log.Body().SetEmptyMap().PutStr("msg", "test map value")
+				return log
+			},
+			expectedEntries: []logging.Entry{
+				{
+					Payload: map[string]interface{}{
+						GCPTypeKey: GCPErrorReportingTypeValue,
+						"msg":      "test map value",
 					},
 					Timestamp: testObservedTime,
 					Severity:  logging.Error,
