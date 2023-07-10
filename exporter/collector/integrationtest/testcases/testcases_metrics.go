@@ -60,6 +60,12 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK:           true,
 	},
 	{
+		Name:                 "Basic Prometheus metrics with untyped metric from Ops Agent",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_prometheus_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_prometheus_metrics_expect.json",
+		SkipForSDK:           true,
+	},
+	{
 		Name:                 "Modified prefix unknown domain",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/unknown_domain_metrics_expect.json",

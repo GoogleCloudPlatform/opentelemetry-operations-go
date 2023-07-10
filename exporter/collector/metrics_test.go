@@ -1175,6 +1175,18 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	assert.Len(t, tsl, 1)
 	ts = tsl[0]
 	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
+
+	// Add ops agent untyped prometheus metric attribute
+	// Should double-export as gauge+cumulative and drop untyped metric label
+	point.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+	tsl = mapper.gaugePointToTimeSeries(mr, extraLabels, metric, gauge, point)
+	assert.Len(t, tsl, 2)
+	ts = tsl[0]
+	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
+	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
+	ts = tsl[1]
+	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
+	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 }
 
 func TestSummaryPointToTimeSeries(t *testing.T) {
