@@ -19,13 +19,14 @@ func NewTestDetector(metadata *FakeMetadataProvider, os *FakeOSProvider) *Detect
 }
 
 type FakeMetadataProvider struct {
-	Err                error
-	Attributes         map[string]string
-	InstanceAttributes map[string]string
-	FakeInstanceID     string
-	FakeInstanceName   string
-	FakeZone           string
-	Project            string
+	Err                  error
+	Attributes           map[string]string
+	InstanceAttributes   map[string]string
+	FakeInstanceID       string
+	FakeInstanceName     string
+	FakeInstanceHostname string
+	FakeZone             string
+	Project              string
 }
 
 func (f *FakeMetadataProvider) ProjectID() (string, error) {
@@ -51,6 +52,12 @@ func (f *FakeMetadataProvider) InstanceName() (string, error) {
 		return "", f.Err
 	}
 	return f.FakeInstanceName, nil
+}
+func (f *FakeMetadataProvider) Hostname() (string, error) {
+	if f.Err != nil {
+		return "", f.Err
+	}
+	return f.FakeInstanceHostname, nil
 }
 func (f *FakeMetadataProvider) Zone() (string, error) {
 	if f.Err != nil {

@@ -66,6 +66,25 @@ func TestGCEHostName(t *testing.T) {
 	assert.Equal(t, hostName, "my-host-123")
 }
 
+func TestGCEInstanceName(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{
+		FakeInstanceName: "my-host-123",
+	}, &FakeOSProvider{})
+	hostName, err := d.GCEInstanceName()
+	assert.NoError(t, err)
+	assert.Equal(t, hostName, "my-host-123")
+}
+
+func TestGCEInstanceHostname(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{
+		FakeInstanceName:     "my-host-123",
+		FakeInstanceHostname: "custom-dns.fakevm.example",
+	}, &FakeOSProvider{})
+	hostName, err := d.GCEInstanceHostname()
+	assert.NoError(t, err)
+	assert.Equal(t, hostName, "custom-dns.fakevm.example")
+}
+
 func TestGCEHostNameErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Err: fmt.Errorf("fake error"),
