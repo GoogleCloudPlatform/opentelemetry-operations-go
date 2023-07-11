@@ -19,6 +19,7 @@ import (
 	"strings"
 	"time"
 
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
@@ -64,6 +65,10 @@ var MetricsTestCases = []TestCase{
 		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_prometheus_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_prometheus_metrics_expect.json",
 		SkipForSDK:           true,
+		ConfigureCollector: func(cfg *collector.Config) {
+			//nolint:errcheck
+			featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
+		},
 	},
 	{
 		Name:                 "Modified prefix unknown domain",
