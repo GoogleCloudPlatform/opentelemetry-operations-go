@@ -28,9 +28,9 @@ func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
 	// Second, ad the GMP-specific suffix
 	switch metric.Type() {
 	case pmetric.MetricTypeSum:
-		return compliantName + "/counter", nil
+		return compliantName + getUnknownMetricSuffix(metric.Sum().DataPoints(), "/counter", "counter"), nil
 	case pmetric.MetricTypeGauge:
-		return compliantName + "/gauge", nil
+		return compliantName + getUnknownMetricSuffix(metric.Gauge().DataPoints(), "/gauge", ""), nil
 	case pmetric.MetricTypeSummary:
 		// summaries are sent as the following series:
 		// * Sum: prometheus.googleapis.com/<baseName>_sum/summary:counter
@@ -48,4 +48,27 @@ func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
 	default:
 		return "", fmt.Errorf("unsupported metric datatype: %v", metric.Type())
 	}
+}
+
+// getUnknownMetricSuffix will set the metric suffix for untyped metrics to
+// "/unknown" (eg, for Gauge) or "/unknown:{secondarySuffix}" (eg, "/unknown:counter" for Sum).
+// It is based on the untyped_prometheus_metric data point attribute, and behind a feature gate.
+func getUnknownMetricSuffix(points pmetric.NumberDataPointSlice, suffix, secondarySuffix string) string {
+	if !untypedDoubleExportFeatureGate.IsEnabled() {
+		return suffix
+	}
+	newSuffix := suffix
+	for i := 0; i < points.Len(); i++ {
+		point := points.At(i)
+		if val, ok := point.Attributes().Get(GCPOpsAgentUntypedMetricKey); ok && val.AsString() == "true" {
+			// delete the special Ops Agent untyped attribute
+			point.Attributes().Remove(GCPOpsAgentUntypedMetricKey)
+			newSuffix = "/unknown"
+			if len(secondarySuffix) > 0 {
+				newSuffix = newSuffix + ":" + secondarySuffix
+			}
+			// even though we have the suffix, keep looping to remove the attribute from other points, if any
+		}
+	}
+	return newSuffix
 }

@@ -27,7 +27,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/wal"
-	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
@@ -1175,20 +1174,6 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	tsl = mapper.gaugePointToTimeSeries(mr, extraLabels, metric, gauge, point)
 	assert.Len(t, tsl, 1)
 	ts = tsl[0]
-	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
-
-	// Add ops agent untyped prometheus metric attribute
-	// Should double-export as gauge+cumulative and drop untyped metric label
-	err := featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
-	assert.NoError(t, err)
-	point.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
-	tsl = mapper.gaugePointToTimeSeries(mr, extraLabels, metric, gauge, point)
-	assert.Len(t, tsl, 2)
-	ts = tsl[0]
-	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
-	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
-	ts = tsl[1]
-	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
 	assert.Equal(t, ts.Metric.Labels, map[string]string{"foo": "bar", "baz": "bar"})
 }
 

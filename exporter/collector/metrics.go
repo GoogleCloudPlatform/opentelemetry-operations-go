@@ -50,7 +50,6 @@ import (
 
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
-	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 
@@ -135,18 +134,7 @@ const (
 	// The specific unit that needs to be present in an integer-valued metric so
 	// that it can be treated as a boolean.
 	specialIntToBoolUnit = "{gcp.BOOL}"
-
-	// Special attribute key used by Ops Agent prometheus receiver to denote untyped
-	// prometheus metric. Internal use only.
-	GCPOpsAgentUntypedMetricKey = "prometheus_untyped_metric"
 )
-
-var untypedDoubleExportFeatureGate = featuregate.GlobalRegistry().MustRegister(
-	"gcp.untyped_double_export",
-	featuregate.StageAlpha,
-	featuregate.WithRegisterFromVersion("v0.77.0"),
-	featuregate.WithRegisterDescription("Enable automatically exporting untyped Prometheus metrics as both gauge and cumulative to GCP."),
-	featuregate.WithRegisterReferenceURL("https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/668"))
 
 type labels map[string]string
 
@@ -1221,57 +1209,27 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	metricKind := metricpb.MetricDescriptor_GAUGE
 	value, valueType := m.numberDataPointToValue(point, metricKind, metric.Unit())
 
-	series := make([]*monitoringpb.TimeSeries, 0)
-	series = append(series, &monitoringpb.TimeSeries{
-		Resource:   resource,
-		Unit:       metric.Unit(),
-		MetricKind: metricKind,
-		ValueType:  valueType,
-		Points: []*monitoringpb.Point{{
-			Interval: &monitoringpb.TimeInterval{
-				EndTime: timestamppb.New(point.Timestamp().AsTime()),
-			},
-			Value: value,
-		}},
-		Metric: &metricpb.Metric{
-			Type: t,
-			Labels: mergeLabels(
-				attributesToLabels(point.Attributes()),
-				extraLabels,
-			),
-		},
-	})
-
-	// if an untyped prometheus metric from ops agent, double-export as gauge and cumulative
-	// to match GMP exporter behavior. Only for internal use.
-	if untypedDoubleExportFeatureGate.IsEnabled() {
-		val, ok := point.Attributes().Get(GCPOpsAgentUntypedMetricKey)
-		if ok && val.AsString() == "true" {
-			metricKind := metricpb.MetricDescriptor_CUMULATIVE
-			value, valueType := m.numberDataPointToValue(point, metricKind, metric.Unit())
-			series = append(series, &monitoringpb.TimeSeries{
-				Resource:   resource,
-				Unit:       metric.Unit(),
-				MetricKind: metricKind,
-				ValueType:  valueType,
-				Points: []*monitoringpb.Point{{
-					Interval: &monitoringpb.TimeInterval{
-						EndTime: timestamppb.New(point.Timestamp().AsTime()),
-					},
-					Value: value,
-				}},
-				Metric: &metricpb.Metric{
-					Type: t,
-					Labels: mergeLabels(
-						attributesToLabels(point.Attributes()),
-						extraLabels,
-					),
+	return []*monitoringpb.TimeSeries{
+		{
+			Resource:   resource,
+			Unit:       metric.Unit(),
+			MetricKind: metricKind,
+			ValueType:  valueType,
+			Points: []*monitoringpb.Point{{
+				Interval: &monitoringpb.TimeInterval{
+					EndTime: timestamppb.New(point.Timestamp().AsTime()),
 				},
-			})
-		}
+				Value: value,
+			}},
+			Metric: &metricpb.Metric{
+				Type: t,
+				Labels: mergeLabels(
+					attributesToLabels(point.Attributes()),
+					extraLabels,
+				),
+			},
+		},
 	}
-
-	return series
 }
 
 // Returns any configured prefix to add to unknown metric name.
@@ -1344,9 +1302,7 @@ func (me *metricMapper) convertToBoolIfMetricKindSupported(
 func attributesToLabels(attrs pcommon.Map) labels {
 	ls := make(labels, attrs.Len())
 	attrs.Range(func(k string, v pcommon.Value) bool {
-		if k != GCPOpsAgentUntypedMetricKey {
-			ls[sanitizeKey(k)] = sanitizeUTF8(v.AsString())
-		}
+		ls[sanitizeKey(k)] = sanitizeUTF8(v.AsString())
 		return true
 	})
 	return ls

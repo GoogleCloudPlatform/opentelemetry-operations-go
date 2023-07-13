@@ -61,14 +61,10 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK:           true,
 	},
 	{
-		Name:                 "Basic Prometheus metrics with untyped metric from Ops Agent",
+		Name:                 "Basic Prometheus metrics with untyped metric does nothing without GMP feature gate",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_prometheus_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_prometheus_metrics_expect.json",
 		SkipForSDK:           true,
-		ConfigureCollector: func(cfg *collector.Config) {
-			//nolint:errcheck
-			featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
-		},
 	},
 	{
 		Name:                 "Modified prefix unknown domain",
@@ -164,6 +160,32 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName
 			cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
 			cfg.MetricConfig.ExtraMetrics = func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				// This should not add any change without the featuregate enabled (from Ops Agent)
+				googlemanagedprometheus.AddUntypedMetrics(m)
+				googlemanagedprometheus.AddScopeInfoMetric(m)
+				googlemanagedprometheus.AddTargetInfoMetric(m)
+				return m.ResourceMetrics()
+			}
+			cfg.MetricConfig.InstrumentationLibraryLabels = false
+			cfg.MetricConfig.ServiceResourceLabels = false
+			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
+		},
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Google Managed Prometheus with Double Export for Untyped",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/google_managed_prometheus.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/google_managed_prometheus_untyped_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.Prefix = "prometheus.googleapis.com/"
+			cfg.MetricConfig.SkipCreateMetricDescriptor = true
+			cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName
+			cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
+			cfg.MetricConfig.ExtraMetrics = func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
+				googlemanagedprometheus.AddUntypedMetrics(m)
 				googlemanagedprometheus.AddScopeInfoMetric(m)
 				googlemanagedprometheus.AddTargetInfoMetric(m)
 				return m.ResourceMetrics()
