@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
@@ -288,6 +289,70 @@ func TestAddExtraMetrics(t *testing.T) {
 						metric.ExponentialHistogram().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
 					}
 				}
+				return metrics
+			}(),
+		},
+		{
+			name: "add untyped Sum metric from Gauge",
+			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
+				AddUntypedMetrics(m)
+				return m.ResourceMetrics()
+			},
+			input: func() pmetric.Metrics {
+				metrics := testMetric(timestamp)
+				metrics.ResourceMetrics().At(0).
+					ScopeMetrics().At(0).
+					Metrics().At(0).
+					Gauge().DataPoints().At(0).
+					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := testMetric(timestamp).ResourceMetrics()
+
+				dataPoint := metrics.At(0).
+					ScopeMetrics().At(0).
+					Metrics().At(0).
+					Gauge().DataPoints().At(0)
+				dataPoint.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+
+				metric := metrics.At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				metric.SetName("baz-metric")
+				metric.SetEmptySum().DataPoints().AppendEmpty().SetIntValue(2112)
+				metric.Sum().SetIsMonotonic(true)
+				metric.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+				metric.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+				metric.Sum().DataPoints().At(0).Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+
+				return metrics
+			}(),
+		},
+		{
+			name: "untyped Gauge does nothing if feature gate is disabled",
+			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, false)
+				AddUntypedMetrics(m)
+				return m.ResourceMetrics()
+			},
+			input: func() pmetric.Metrics {
+				metrics := testMetric(timestamp)
+				metrics.ResourceMetrics().At(0).
+					ScopeMetrics().At(0).
+					Metrics().At(0).
+					Gauge().DataPoints().At(0).
+					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := testMetric(timestamp).ResourceMetrics()
+				dataPoint := metrics.At(0).
+					ScopeMetrics().At(0).
+					Metrics().At(0).
+					Gauge().DataPoints().At(0)
+				dataPoint.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
 				return metrics
 			}(),
 		},

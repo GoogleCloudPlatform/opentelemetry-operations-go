@@ -130,6 +130,54 @@ func TestGetMetricName(t *testing.T) {
 			},
 			expectErr: true,
 		},
+		{
+			desc:     "untyped gauge with feature gate disabled does nothing",
+			baseName: "bar",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, false)
+				m.SetName("bar")
+				m.SetEmptyGauge()
+				m.Gauge().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+			},
+			expected: "bar/gauge",
+		},
+		{
+			desc:     "untyped sum with feature gate disabled does nothing",
+			baseName: "bar",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, false)
+				m.SetName("bar")
+				m.SetEmptySum()
+				m.Sum().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+			},
+			expected: "bar/counter",
+		},
+		{
+			desc:     "untyped gauge with feature gate enabled returns unknown",
+			baseName: "bar",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
+				m.SetName("bar")
+				m.SetEmptyGauge()
+				m.Gauge().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+			},
+			expected: "bar/unknown",
+		},
+		{
+			desc:     "untyped sum with feature gate enabled returns unknown:counter",
+			baseName: "bar",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
+				m.SetName("bar")
+				m.SetEmptySum()
+				m.Sum().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+			},
+			expected: "bar/unknown:counter",
+		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			assert.True(t, gate.IsEnabled())

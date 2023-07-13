@@ -38,6 +38,7 @@
             "type": "workload.googleapis.com/fake_untyped_metric",
             "labels": {
               "ex_com_lemons_untyped": "13",
+              "prometheus_untyped_metric": "true",
               "service_instance_id": "localhost:2222",
               "service_name": "demo",
               "telemetry_sdk_language": "go",
@@ -55,40 +56,6 @@
             }
           },
           "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 3
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "workload.googleapis.com/fake_untyped_metric",
-            "labels": {
-              "ex_com_lemons_untyped": "13",
-              "service_instance_id": "localhost:2222",
-              "service_name": "demo",
-              "telemetry_sdk_language": "go",
-              "telemetry_sdk_name": "opentelemetry",
-              "telemetry_sdk_version": "1.6.2"
-            }
-          },
-          "resource": {
-            "type": "generic_task",
-            "labels": {
-              "job": "demo",
-              "location": "global",
-              "namespace": "",
-              "task_id": "localhost:2222"
-            }
-          },
-          "metricKind": "CUMULATIVE",
           "valueType": "DOUBLE",
           "points": [
             {
@@ -651,7 +618,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "11"
+                  "int64Value": "10"
                 }
               }
             ]

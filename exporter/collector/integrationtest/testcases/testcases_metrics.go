@@ -195,7 +195,8 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 		},
 		// prometheus_target is not supported by the SDK
-		SkipForSDK: true,
+		SkipForSDK:          true,
+		SkipTimestampUpdate: true,
 	},
 	{
 		Name:                 "GKE Metrics Agent",

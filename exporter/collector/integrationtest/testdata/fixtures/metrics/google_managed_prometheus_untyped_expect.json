@@ -94,10 +94,9 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/fake_untyped_metric/gauge",
+            "type": "prometheus.googleapis.com/fake_untyped_metric/unknown",
             "labels": {
               "ex_com_lemons_untyped": "13",
-              "prometheus_untyped_metric": "true",
               "telemetry_sdk_language": "go",
               "telemetry_sdk_name": "opentelemetry",
               "telemetry_sdk_version": "1.6.2"
@@ -128,10 +127,9 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/fake_untyped_metric/gauge",
+            "type": "prometheus.googleapis.com/fake_untyped_metric/unknown",
             "labels": {
               "ex_com_lemons_untyped": "13",
-              "prometheus_untyped_metric": "true",
               "telemetry_sdk_language": "go",
               "telemetry_sdk_name": "opentelemetry",
               "telemetry_sdk_version": "1.6.2"
@@ -219,446 +217,6 @@
               },
               "value": {
                 "doubleValue": 13
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_two/histogram",
-            "labels": {
-              "ex_com_lemons": "13"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "CUMULATIVE",
-          "valueType": "DISTRIBUTION",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z",
-                "startTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "distributionValue": {
-                  "count": "1",
-                  "mean": 2,
-                  "sumOfSquaredDeviation": 2.25,
-                  "bucketOptions": {
-                    "explicitBuckets": {
-                      "bounds": [
-                        1,
-                        2,
-                        5,
-                        10,
-                        20,
-                        50
-                      ]
-                    }
-                  },
-                  "bucketCounts": [
-                    "0",
-                    "0",
-                    "1",
-                    "0",
-                    "0",
-                    "0",
-                    "0"
-                  ]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_two/histogram",
-            "labels": {
-              "A": "1",
-              "B": "2",
-              "C": "3",
-              "ex_com_lemons": "10"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "CUMULATIVE",
-          "valueType": "DISTRIBUTION",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z",
-                "startTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "distributionValue": {
-                  "count": "2",
-                  "mean": 7,
-                  "sumOfSquaredDeviation": 76.25,
-                  "bucketOptions": {
-                    "explicitBuckets": {
-                      "bounds": [
-                        1,
-                        2,
-                        5,
-                        10,
-                        20,
-                        50
-                      ]
-                    }
-                  },
-                  "bucketCounts": [
-                    "0",
-                    "0",
-                    "1",
-                    "0",
-                    "1",
-                    "0",
-                    "0"
-                  ]
-                }
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three_sum/summary:counter",
-            "labels": {
-              "ex_com_lemons": "13"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "CUMULATIVE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z",
-                "startTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 2
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three_count/summary",
-            "labels": {
-              "ex_com_lemons": "13"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "CUMULATIVE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z",
-                "startTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 1
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three/summary",
-            "labels": {
-              "ex_com_lemons": "13",
-              "quantile": "0.5"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 10.2
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three/summary",
-            "labels": {
-              "ex_com_lemons": "13",
-              "quantile": "0.75"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 25.5
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three/summary",
-            "labels": {
-              "ex_com_lemons": "13",
-              "quantile": "0.9"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 100.2
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three_sum/summary:counter",
-            "labels": {
-              "A": "1",
-              "B": "2",
-              "C": "3",
-              "ex_com_lemons": "10"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "CUMULATIVE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z",
-                "startTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 14
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three_count/summary",
-            "labels": {
-              "A": "1",
-              "B": "2",
-              "C": "3",
-              "ex_com_lemons": "10"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "CUMULATIVE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z",
-                "startTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 2
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three/summary",
-            "labels": {
-              "A": "1",
-              "B": "2",
-              "C": "3",
-              "ex_com_lemons": "10",
-              "quantile": "0.5"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 9.3
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three/summary",
-            "labels": {
-              "A": "1",
-              "B": "2",
-              "C": "3",
-              "ex_com_lemons": "10",
-              "quantile": "0.75"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 12.4
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "prometheus.googleapis.com/ex_com_three/summary",
-            "labels": {
-              "A": "1",
-              "B": "2",
-              "C": "3",
-              "ex_com_lemons": "10",
-              "quantile": "0.9"
-            }
-          },
-          "resource": {
-            "type": "prometheus_target",
-            "labels": {
-              "cluster": "rabbitmq-test-dev",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "default"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 300.2
               }
             }
           ]
@@ -970,6 +528,40 @@
         },
         {
           "metric": {
+            "type": "prometheus.googleapis.com/fake_untyped_metric_total/unknown:counter",
+            "labels": {
+              "ex_com_lemons_untyped": "13",
+              "telemetry_sdk_language": "go",
+              "telemetry_sdk_name": "opentelemetry",
+              "telemetry_sdk_version": "1.6.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "rabbitmq-test-dev",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "default"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
             "type": "prometheus.googleapis.com/target_info/gauge",
             "labels": {
               "cloud_platform": "gcp_kubernetes_engine",
@@ -1029,7 +621,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "31"
+                  "int64Value": "20"
                 }
               }
             ]

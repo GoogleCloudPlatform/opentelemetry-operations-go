@@ -151,7 +151,7 @@ func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, sta
 		require.NoError(t, fr.checkDuplicate(test))
 
 		func() {
-			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
+			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime, test.SkipTimestampUpdate)
 			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig())
 			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
 			require.NoError(t, err)

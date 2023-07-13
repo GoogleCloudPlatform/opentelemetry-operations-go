@@ -64,7 +64,7 @@ func TestIntegrationCollectorMetrics(t *testing.T) {
 
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeeded(t)
-			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
+			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime, false)
 			setSecondProjectInMetrics(t, metrics)
 			exporter := createMetricsExporter(ctx, t, &test)
 			defer func() { require.NoError(t, exporter.Shutdown(ctx)) }()
@@ -88,7 +88,7 @@ func TestIntegrationSDKMetrics(t *testing.T) {
 
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeededForSDK(t)
-			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
+			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime, false)
 			setSecondProjectInMetrics(t, metrics)
 			exporter, err := metric.New(
 				metric.WithProjectID(os.Getenv("PROJECT_ID")),
