@@ -53,7 +53,7 @@ func TestGetMetricName(t *testing.T) {
 				sum := m.SetEmptySum()
 				sum.SetIsMonotonic(true)
 			},
-			expected: "foo_total/counter",
+			expected: "foo/counter",
 		},
 		{
 			desc:     "sum with total",
@@ -74,7 +74,7 @@ func TestGetMetricName(t *testing.T) {
 				sum := m.SetEmptySum()
 				sum.SetIsMonotonic(true)
 			},
-			expected: "foo_seconds_total/counter",
+			expected: "foo_total/counter",
 		},
 		{
 			desc:     "gauge",
