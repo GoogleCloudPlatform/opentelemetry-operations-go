@@ -91,6 +91,7 @@ func AddUntypedMetrics(m pmetric.Metrics) {
 					}
 					newDataPoint.SetFlags(point.Flags())
 					newDataPoint.SetTimestamp(point.Timestamp())
+					newDataPoint.SetStartTimestamp(point.StartTimestamp())
 				}
 			}
 		}
