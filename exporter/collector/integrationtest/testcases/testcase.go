@@ -271,6 +271,8 @@ func NormalizeLogFixture(t testing.TB, fixture *protos.LogExpectFixture) {
 
 // Load OTLP metric fixture, test expectation fixtures and modify them so they're suitable for
 // testing. Currently, this just updates the timestamps.
+//
+//nolint:revive
 func (tc *TestCase) LoadOTLPMetricsInput(
 	t testing.TB,
 	startTime time.Time,

@@ -17,9 +17,86 @@ package googlemanagedprometheus
 import (
 	"time"
 
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
+
+const (
+	// Special attribute key used by Ops Agent prometheus receiver to denote untyped
+	// prometheus metric. Internal use only.
+	GCPOpsAgentUntypedMetricKey = "prometheus_untyped_metric"
+
+	gcpUntypedDoubleExportGateKey = "gcp.untyped_double_export"
+)
+
+var untypedDoubleExportFeatureGate = featuregate.GlobalRegistry().MustRegister(
+	gcpUntypedDoubleExportGateKey,
+	featuregate.StageAlpha,
+	featuregate.WithRegisterFromVersion("v0.77.0"),
+	featuregate.WithRegisterDescription("Enable automatically exporting untyped Prometheus metrics as both gauge and cumulative to GCP."),
+	featuregate.WithRegisterReferenceURL("https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/668"))
+
+// AddUntypedMetrics looks for any Gauge data point with the special Ops Agent untyped metric
+// attribute and duplicates that data point to a matching Sum.
+func AddUntypedMetrics(m pmetric.Metrics) {
+	if !untypedDoubleExportFeatureGate.IsEnabled() {
+		return
+	}
+	rms := m.ResourceMetrics()
+	for i := 0; i < rms.Len(); i++ {
+		rm := rms.At(i)
+		sms := rm.ScopeMetrics()
+		for j := 0; j < sms.Len(); j++ {
+			sm := sms.At(j)
+			mes := sm.Metrics()
+
+			// only iterate up to the current length. new untyped sum metrics
+			// will be added to this slice inline.
+			mLen := mes.Len()
+			for k := 0; k < mLen; k++ {
+				metric := mes.At(k)
+
+				// only applies to gauges
+				if metric.Type() != pmetric.MetricTypeGauge {
+					continue
+				}
+
+				// attribute is set on the data point
+				gauge := metric.Gauge()
+				points := gauge.DataPoints()
+				for l := 0; l < points.Len(); l++ {
+					point := points.At(l)
+					val, ok := point.Attributes().Get(GCPOpsAgentUntypedMetricKey)
+					if !(ok && val.AsString() == "true") {
+						continue
+					}
+
+					// Add the new Sum metric and copy values over from this Gauge
+					newMetric := mes.AppendEmpty()
+					newMetric.SetName(metric.Name())
+					newMetric.SetDescription(metric.Description())
+					newMetric.SetUnit(metric.Unit())
+
+					newSum := newMetric.SetEmptySum()
+					newSum.SetIsMonotonic(true)
+					newSum.SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+
+					newDataPoint := newSum.DataPoints().AppendEmpty()
+					point.Attributes().CopyTo(newDataPoint.Attributes())
+					if point.ValueType() == pmetric.NumberDataPointValueTypeInt {
+						newDataPoint.SetIntValue(point.IntValue())
+					} else if point.ValueType() == pmetric.NumberDataPointValueTypeDouble {
+						newDataPoint.SetDoubleValue(point.DoubleValue())
+					}
+					newDataPoint.SetFlags(point.Flags())
+					newDataPoint.SetTimestamp(point.Timestamp())
+					newDataPoint.SetStartTimestamp(point.StartTimestamp())
+				}
+			}
+		}
+	}
+}
 
 // AddTargetInfoMetric inserts target_info for each resource.
 // First, it extracts the target_info metric from each ResourceMetric associated with the input pmetric.Metrics

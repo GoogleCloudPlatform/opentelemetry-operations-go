@@ -114,6 +114,50 @@
                      }
                   },
                   {
+                     "name":"fake_untyped_metric",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "attributes":[
+                                 {
+                                    "key":"ex_com_lemons_untyped",
+                                    "value":{
+                                       "stringValue":"13"
+                                    }
+                                 },
+                                 {
+                                    "key":"telemetry_sdk_language",
+                                    "value":{
+                                       "stringValue":"go"
+                                    }
+                                 },
+                                 {
+                                    "key":"telemetry_sdk_name",
+                                    "value":{
+                                       "stringValue":"opentelemetry"
+                                    }
+                                 },
+                                 {
+                                    "key":"telemetry_sdk_version",
+                                    "value":{
+                                       "stringValue":"1.6.2"
+                                    }
+                                 },
+                                 {
+                                    "key":"prometheus_untyped_metric",
+                                    "value":{
+                                       "stringValue":"true"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano":"1649443416286000000",
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":3
+                           }
+                        ]
+                     }
+                  },
+                  {
                      "name":"ex_com_one",
                      "gauge":{
                         "dataPoints":[
