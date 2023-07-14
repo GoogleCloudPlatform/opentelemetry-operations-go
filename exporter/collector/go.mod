@@ -4,35 +4,35 @@ go 1.20
 
 require (
 	cloud.google.com/go/logging v1.7.0
-	cloud.google.com/go/monitoring v1.12.0
-	cloud.google.com/go/trace v1.8.0
+	cloud.google.com/go/monitoring v1.13.0
+	cloud.google.com/go/trace v1.9.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.16.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.40.1
 	github.com/census-instrumentation/opencensus-proto v0.4.1
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/google/go-cmp v0.5.9
-	github.com/googleapis/gax-go/v2 v2.7.0
-	github.com/stretchr/testify v1.8.3
+	github.com/googleapis/gax-go/v2 v2.7.1
+	github.com/stretchr/testify v1.8.4
 	github.com/tidwall/wal v1.1.7
 	go.opencensus.io v0.24.0
-	go.opentelemetry.io/collector/pdata v1.0.0-rcv0012
-	go.opentelemetry.io/collector/semconv v0.78.0
+	go.opentelemetry.io/collector/pdata v1.0.0-rcv0013
+	go.opentelemetry.io/collector/semconv v0.81.0
 	go.opentelemetry.io/otel v1.16.0
 	go.opentelemetry.io/otel/sdk v1.16.0
 	go.opentelemetry.io/otel/trace v1.16.0
 	go.uber.org/atomic v1.10.0
 	go.uber.org/multierr v1.11.0
 	go.uber.org/zap v1.23.0
-	golang.org/x/oauth2 v0.6.0
-	google.golang.org/api v0.110.0
-	google.golang.org/genproto v0.0.0-20230306155012-7f2fa6fef1f4
-	google.golang.org/grpc v1.55.0
+	golang.org/x/oauth2 v0.7.0
+	google.golang.org/api v0.114.0
+	google.golang.org/genproto v0.0.0-20230410155749-daa745c078e1
+	google.golang.org/grpc v1.56.0
 	google.golang.org/protobuf v1.30.0
 )
 
 require (
 	cloud.google.com/go v0.110.0 // indirect
-	cloud.google.com/go/compute v1.18.0 // indirect
+	cloud.google.com/go/compute v1.19.1 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/longrunning v0.4.1 // indirect
 	github.com/benbjohnson/clock v1.3.0 // indirect
@@ -54,10 +54,10 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tidwall/tinylru v1.1.0 // indirect
 	go.opentelemetry.io/otel/metric v1.16.0 // indirect
-	golang.org/x/net v0.10.0 // indirect
+	golang.org/x/net v0.11.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
-	golang.org/x/text v0.9.0 // indirect
+	golang.org/x/sys v0.9.0 // indirect
+	golang.org/x/text v0.10.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
