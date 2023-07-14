@@ -193,10 +193,13 @@ var MetricsTestCases = []TestCase{
 			cfg.MetricConfig.InstrumentationLibraryLabels = false
 			cfg.MetricConfig.ServiceResourceLabels = false
 			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
+			// disable cumulative normalization so we can see the counter without having to send 2 data points.
+			// with normalization enabled, the first data point would get dropped.
+			// but trying to send 2 data points causes the GCM integration test to fail for duplicate timeseries.
+			cfg.MetricConfig.CumulativeNormalization = false
 		},
 		// prometheus_target is not supported by the SDK
-		SkipForSDK:          true,
-		SkipTimestampUpdate: true,
+		SkipForSDK: true,
 	},
 	{
 		Name:                 "GKE Metrics Agent",

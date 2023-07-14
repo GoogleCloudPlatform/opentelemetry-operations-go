@@ -76,10 +76,6 @@ type TestCase struct {
 	Skip bool
 	// SkipForSDK, if true, skips this test case when testing the SDK
 	SkipForSDK bool
-	// SkipTimestampUpdate will not update fixture timestamps to the current time.
-	// Useful for testing cumulative normlization that requires different timestamps.
-	// Will not work with API integration testing.
-	SkipTimestampUpdate bool
 	// ExpectErr sets whether the test is expected to fail
 	ExpectErr bool
 	// ExpectRetries sets whether the test expects the server to report multiple attempts
@@ -281,7 +277,6 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 	t testing.TB,
 	startTime time.Time,
 	endTime time.Time,
-	skipTimestampUpdate bool,
 ) pmetric.Metrics {
 	fixtureBytes, err := os.ReadFile(tc.OTLPInputFixturePath)
 	require.NoError(t, err)
@@ -297,9 +292,6 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 		SetTimestamp(pcommon.Timestamp)
 	}
 	updatePoint := func(p point) {
-		if skipTimestampUpdate {
-			return
-		}
 		if p.StartTimestamp() != 0 {
 			p.SetStartTimestamp(pcommon.NewTimestampFromTime(startTime))
 		}

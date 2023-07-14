@@ -42,7 +42,7 @@ func TestCollectorMetrics(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeeded(t)
 
-			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime, test.SkipTimestampUpdate)
+			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 
 			testServer, err := cloudmock.NewMetricTestServer()
 			require.NoError(t, err)
@@ -170,7 +170,7 @@ func TestSDKMetrics(t *testing.T) {
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeededForSDK(t)
 
-			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime, false)
+			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 
 			testServer, err := cloudmock.NewMetricTestServer()
 			require.NoError(t, err)
