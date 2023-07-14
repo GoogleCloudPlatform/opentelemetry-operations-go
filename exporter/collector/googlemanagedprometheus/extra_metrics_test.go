@@ -330,6 +330,49 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
+			name: "add untyped Sum metric from Gauge (double value)",
+			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
+				AddUntypedMetrics(m)
+				return m.ResourceMetrics()
+			},
+			input: func() pmetric.Metrics {
+				metrics := testMetric(timestamp)
+				metrics.ResourceMetrics().At(0).
+					ScopeMetrics().At(0).
+					Metrics().At(0).
+					Gauge().DataPoints().At(0).
+					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+				metrics.ResourceMetrics().At(0).
+					ScopeMetrics().At(0).
+					Metrics().At(0).
+					Gauge().DataPoints().At(0).
+					SetDoubleValue(123.5)
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := testMetric(timestamp).ResourceMetrics()
+
+				dataPoint := metrics.At(0).
+					ScopeMetrics().At(0).
+					Metrics().At(0).
+					Gauge().DataPoints().At(0)
+				dataPoint.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+				dataPoint.SetDoubleValue(123.5)
+
+				metric := metrics.At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
+				metric.SetName("baz-metric")
+				metric.SetEmptySum().DataPoints().AppendEmpty().SetDoubleValue(123.5)
+				metric.Sum().SetIsMonotonic(true)
+				metric.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+				metric.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+				metric.Sum().DataPoints().At(0).Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+
+				return metrics
+			}(),
+		},
+		{
 			name: "untyped Gauge does nothing if feature gate is disabled",
 			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
 				//nolint:errcheck
@@ -353,6 +396,58 @@ func TestAddExtraMetrics(t *testing.T) {
 					Metrics().At(0).
 					Gauge().DataPoints().At(0)
 				dataPoint.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+				return metrics
+			}(),
+		},
+		{
+			name: "untyped Gauge does nothing if feature gate is enabled and key!=true",
+			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
+				AddUntypedMetrics(m)
+				return m.ResourceMetrics()
+			},
+			input: func() pmetric.Metrics {
+				metrics := testMetric(timestamp)
+				metrics.ResourceMetrics().At(0).
+					ScopeMetrics().At(0).
+					Metrics().At(0).
+					Gauge().DataPoints().At(0).
+					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "foo")
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := testMetric(timestamp).ResourceMetrics()
+				dataPoint := metrics.At(0).
+					ScopeMetrics().At(0).
+					Metrics().At(0).
+					Gauge().DataPoints().At(0)
+				dataPoint.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "foo")
+				return metrics
+			}(),
+		},
+		{
+			name: "untyped non-Gauge does nothing if feature gate is enabled",
+			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
+				AddUntypedMetrics(m)
+				return m.ResourceMetrics()
+			},
+			input: func() pmetric.Metrics {
+				metrics := testMetric(timestamp)
+				metrics.ResourceMetrics().At(0).
+					ScopeMetrics().At(0).
+					Metrics().AppendEmpty().SetEmptyHistogram().DataPoints().AppendEmpty().
+					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := testMetric(timestamp).ResourceMetrics()
+				metrics.At(0).
+					ScopeMetrics().At(0).
+					Metrics().AppendEmpty().SetEmptyHistogram().DataPoints().AppendEmpty().
+					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
 				return metrics
 			}(),
 		},

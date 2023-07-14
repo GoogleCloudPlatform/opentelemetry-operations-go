@@ -1209,27 +1209,25 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	metricKind := metricpb.MetricDescriptor_GAUGE
 	value, valueType := m.numberDataPointToValue(point, metricKind, metric.Unit())
 
-	return []*monitoringpb.TimeSeries{
-		{
-			Resource:   resource,
-			Unit:       metric.Unit(),
-			MetricKind: metricKind,
-			ValueType:  valueType,
-			Points: []*monitoringpb.Point{{
-				Interval: &monitoringpb.TimeInterval{
-					EndTime: timestamppb.New(point.Timestamp().AsTime()),
-				},
-				Value: value,
-			}},
-			Metric: &metricpb.Metric{
-				Type: t,
-				Labels: mergeLabels(
-					attributesToLabels(point.Attributes()),
-					extraLabels,
-				),
+	return []*monitoringpb.TimeSeries{{
+		Resource:   resource,
+		Unit:       metric.Unit(),
+		MetricKind: metricKind,
+		ValueType:  valueType,
+		Points: []*monitoringpb.Point{{
+			Interval: &monitoringpb.TimeInterval{
+				EndTime: timestamppb.New(point.Timestamp().AsTime()),
 			},
+			Value: value,
+		}},
+		Metric: &metricpb.Metric{
+			Type: t,
+			Labels: mergeLabels(
+				attributesToLabels(point.Attributes()),
+				extraLabels,
+			),
 		},
-	}
+	}}
 }
 
 // Returns any configured prefix to add to unknown metric name.
