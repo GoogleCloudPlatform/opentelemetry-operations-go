@@ -739,7 +739,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/otlp_test_gauge_seconds/gauge"
+            "type": "prometheus.googleapis.com/otlp_test_gauge/gauge"
           },
           "resource": {
             "type": "prometheus_target",
@@ -767,7 +767,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/workload_googleapis_com_otlp_test_prefix1_seconds/gauge"
+            "type": "prometheus.googleapis.com/workload_googleapis_com_otlp_test_prefix1/gauge"
           },
           "resource": {
             "type": "prometheus_target",
@@ -795,7 +795,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/invalid_googleapis_com_otlp_test_prefix2_seconds/gauge"
+            "type": "prometheus.googleapis.com/invalid_googleapis_com_otlp_test_prefix2/gauge"
           },
           "resource": {
             "type": "prometheus_target",
@@ -823,7 +823,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/otlp_test_prefix3_workload_googleapis_com_abc_seconds/gauge"
+            "type": "prometheus.googleapis.com/otlp_test_prefix3_workload_googleapis_com_abc/gauge"
           },
           "resource": {
             "type": "prometheus_target",
@@ -851,7 +851,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/WORKLOAD_GOOGLEAPIS_COM_otlp_test_prefix4_seconds/gauge"
+            "type": "prometheus.googleapis.com/WORKLOAD_GOOGLEAPIS_COM_otlp_test_prefix4/gauge"
           },
           "resource": {
             "type": "prometheus_target",
@@ -879,7 +879,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/WORKLOAD_googleapis_com_otlp_test_prefix5_seconds/gauge"
+            "type": "prometheus.googleapis.com/WORKLOAD_googleapis_com_otlp_test_prefix5/gauge"
           },
           "resource": {
             "type": "prometheus_target",
@@ -907,7 +907,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/prometheus_googleapis_com_otlp_test_prefix6_gauge_seconds/gauge"
+            "type": "prometheus.googleapis.com/prometheus_googleapis_com_otlp_test_prefix6_gauge/gauge"
           },
           "resource": {
             "type": "prometheus_target",
@@ -935,7 +935,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/fake_untyped_metric_total/unknown:counter",
+            "type": "prometheus.googleapis.com/fake_untyped_metric/unknown:counter",
             "labels": {
               "ex_com_lemons_untyped": "13",
               "telemetry_sdk_language": "go",
