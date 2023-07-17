@@ -288,6 +288,7 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_gauge_gmp_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			configureGMPCollector(cfg)
+			//nolint:errcheck
 			featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
 		},
 		// prometheus_target is not supported by the SDK
