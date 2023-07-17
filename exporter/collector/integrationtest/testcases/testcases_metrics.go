@@ -32,16 +32,16 @@ import (
 var MetricsTestCases = []TestCase{
 	{
 		Name:                 "Basic Counter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.InstrumentationLibraryLabels = true
 		},
 	},
 	{
 		Name:                 "Basic Counter with not found return code",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_notfound_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_notfound_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.ProjectID = "notfoundproject"
 		},
@@ -50,26 +50,26 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Basic Prometheus metrics",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_prometheus_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_prometheus_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_expect.json",
 	},
 	{
 		Name:                 "Basic Prometheus metrics with stale data point",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_prometheus_metrics_stale.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_prometheus_metrics_stale_expect.json",
-		CompareFixturePath:   "testdata/fixtures/metrics/basic_prometheus_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus_stale.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_stale_expect.json",
+		CompareFixturePath:   "testdata/fixtures/metrics/prometheus_expect.json",
 		SkipForSDK:           true,
 	},
 	{
 		Name:                 "Basic Prometheus metrics with untyped metric does nothing without GMP feature gate",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_prometheus_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_prometheus_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_prometheus.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_prometheus_expect.json",
 		SkipForSDK:           true,
 	},
 	{
 		Name:                 "Modified prefix unknown domain",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/unknown_domain_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_unknown_domain_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.Prefix = "custom.googleapis.com/foobar.org"
 		},
@@ -79,39 +79,39 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Modified prefix workload.googleapis.com",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/workloadgoogleapis_prefix_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_workloadgoogleapis_prefix_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.Prefix = "workload.googleapis.com"
 		},
 	},
 	{
 		Name:                 "Boolean valued gauge metrics represented through int gauges",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/boolean_gauge_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/boolean_gauge_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/boolean_gauge.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/boolean_gauge_expect.json",
 		SkipForSDK:           true, // Boolean valued metrics not implemented in SDK
 	},
 	{
 		Name:                 "Delta Counter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/delta_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/delta_counter_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/delta_counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/delta_counter_expect.json",
 	},
 	{
 		Name:                 "Non-monotonic Counter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_expect.json",
 	},
 	{
 		Name:                 "Summary",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/summary_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/summary_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/summary_expect.json",
 		// Summary metrics are not possible with the SDK.
 		SkipForSDK: true,
 	},
 	{
 		Name:                 "Batching",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/batching_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/batching_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/batching.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/batching_expect.json",
 		// Summary metrics are not possible with the SDK.
 		SkipForSDK: true,
 	},
@@ -171,32 +171,32 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Google Managed Prometheus Counter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_gmp_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,
 	},
 	{
 		Name:                 "Google Managed Prometheus Non-Monotonic Counter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_metrics_gmp_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,
 	},
 	{
 		Name:                 "Google Managed Prometheus Summary",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/summary_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/summary_metrics_gmp_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/summary_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,
 	},
 	{
 		Name:                 "GKE Metrics Agent",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/gke_metrics_agent_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/gke_metrics_agent_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/gke_metrics_agent.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/gke_metrics_agent_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.CreateServiceTimeSeries = true
 		},
@@ -205,8 +205,8 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "GKE Control Plane Metrics Agent",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/gke_control_plane_metrics_agent_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/gke_control_plane_metrics_agent_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/gke_control_plane.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/gke_control_plane_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.CreateServiceTimeSeries = true
 			cfg.MetricConfig.ServiceResourceLabels = false
@@ -216,16 +216,16 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Exponential Histogram",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_expect.json",
 		// Blocked on upstream support for exponential histograms:
 		// https://github.com/open-telemetry/opentelemetry-go/issues/2966
 		SkipForSDK: true,
 	},
 	{
 		Name:                 "CreateServiceTimeSeries",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/create_service_timeseries_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/create_service_timeseries_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/create_service_timeseries.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/create_service_timeseries_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.CreateServiceTimeSeries = true
 		},
@@ -234,8 +234,8 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "WithResourceFilter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/with_resource_filter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/with_resource_filter_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/with_resource_filter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/with_resource_filter_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.ResourceFilters = []collector.ResourceFilter{
 				{Prefix: "telemetry.sdk."},
@@ -253,8 +253,8 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Multi-project metrics",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/metrics_multi_project.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/metrics_multi_project_expected.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/multi_project.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/multi_project_expected.json",
 		// Multi-project exporting is not supported in the SDK exporter
 		SkipForSDK: true,
 	},
@@ -267,8 +267,8 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Basic Counter with gzip compression",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_compressed_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_compressed_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.ClientConfig.Compression = "gzip"
 		},
@@ -286,9 +286,9 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Write ahead log enabled",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_wal_expect.json",
-		CompareFixturePath:   "testdata/fixtures/metrics/basic_counter_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_wal_expect.json",
+		CompareFixturePath:   "testdata/fixtures/metrics/counter_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			dir, _ := os.MkdirTemp("", "test-wal-")
 			cfg.MetricConfig.WALConfig = &collector.WALConfig{
@@ -300,9 +300,9 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Write ahead log enabled, basic prometheus metrics",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_prometheus_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_prometheus_metrics_wal_expect.json",
-		CompareFixturePath:   "testdata/fixtures/metrics/basic_prometheus_metrics_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_wal_expect.json",
+		CompareFixturePath:   "testdata/fixtures/metrics/prometheus_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			dir, _ := os.MkdirTemp("", "test-wal-")
 			cfg.MetricConfig.WALConfig = &collector.WALConfig{
@@ -314,8 +314,8 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Write ahead log enabled, basic Counter with unavailable return code",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_wal_unavailable_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_wal_unavailable_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.ProjectID = "unavailableproject"
 			dir, _ := os.MkdirTemp("", "test-wal-")
@@ -329,8 +329,8 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Write ahead log enabled, basic Counter with deadline_exceeded return code",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/basic_counter_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/basic_counter_metrics_wal_deadline_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_wal_deadline_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.ProjectID = "deadline_exceededproject"
 			dir, _ := os.MkdirTemp("", "test-wal-")
@@ -344,8 +344,8 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "Write ahead log enabled, CreateServiceTimeSeries",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/create_service_timeseries_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/create_service_timeseries_metrics_wal_expect.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/create_service_timeseries.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/create_service_timeseries_wal_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.CreateServiceTimeSeries = true
 			dir, _ := os.MkdirTemp("", "test-wal-")
