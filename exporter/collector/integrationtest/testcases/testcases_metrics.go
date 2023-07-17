@@ -30,8 +30,9 @@ import (
 )
 
 var MetricsTestCases = []TestCase{
+	// Tests for the basic exporter
 	{
-		Name:                 "Basic Counter",
+		Name:                 "Counter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/counter_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -39,17 +40,24 @@ var MetricsTestCases = []TestCase{
 		},
 	},
 	{
-		Name:                 "Basic Counter with not found return code",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/counter_notfound_expect.json",
-		ConfigureCollector: func(cfg *collector.Config) {
-			cfg.ProjectID = "notfoundproject"
-		},
-		MetricSDKExporterOptions: []metric.Option{metric.WithProjectID("notfoundproject")},
-		ExpectErr:                true,
+		Name:                 "Delta Counter",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/delta_counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/delta_counter_expect.json",
 	},
 	{
-		Name:                 "Basic Gauge",
+		Name:                 "Non-monotonic Counter",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_expect.json",
+	},
+	{
+		Name:                 "Summary",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/summary_expect.json",
+		// Summary metrics are not possible with the SDK.
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Gauge",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/gauge.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/gauge_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -57,7 +65,19 @@ var MetricsTestCases = []TestCase{
 		},
 	},
 	{
-		Name:                 "Basic Histogram",
+		Name:                 "Boolean valued Gauge metrics becomes an int Gauge",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/boolean_gauge.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/boolean_gauge_expect.json",
+		SkipForSDK:           true, // Boolean valued metrics not implemented in SDK
+	},
+	{
+		Name:                 "Gauge with Untyped label does nothing without GMP",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_gauge.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_gauge_expect.json",
+		SkipForSDK:           true,
+	},
+	{
+		Name:                 "Histogram",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -65,22 +85,35 @@ var MetricsTestCases = []TestCase{
 		},
 	},
 	{
-		Name:                 "Basic Prometheus metrics",
+		Name:                 "Exponential Histogram",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_expect.json",
+		// Blocked on upstream support for exponential histograms:
+		// https://github.com/open-telemetry/opentelemetry-go/issues/2966
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Metrics from the Prometheus receiver",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_expect.json",
 	},
 	{
-		Name:                 "Basic Prometheus metrics with stale data point",
+		Name:                 "Metrics from the Prometheus receiver with a stale data point",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus_stale.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_stale_expect.json",
 		CompareFixturePath:   "testdata/fixtures/metrics/prometheus_expect.json",
 		SkipForSDK:           true,
 	},
+	// Tests with special configuration options
 	{
-		Name:                 "Basic Prometheus metrics with untyped metric does nothing without GMP feature gate",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_prometheus.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_prometheus_expect.json",
-		SkipForSDK:           true,
+		Name:                 "Project not found return code",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_notfound_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.ProjectID = "notfoundproject"
+		},
+		MetricSDKExporterOptions: []metric.Option{metric.WithProjectID("notfoundproject")},
+		ExpectErr:                true,
 	},
 	{
 		Name:                 "Modified prefix unknown domain",
@@ -102,168 +135,14 @@ var MetricsTestCases = []TestCase{
 		},
 	},
 	{
-		Name:                 "Boolean valued gauge metrics represented through int gauges",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/boolean_gauge.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/boolean_gauge_expect.json",
-		SkipForSDK:           true, // Boolean valued metrics not implemented in SDK
-	},
-	{
-		Name:                 "Delta Counter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/delta_counter.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/delta_counter_expect.json",
-	},
-	{
-		Name:                 "Non-monotonic Counter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_expect.json",
-	},
-	{
-		Name:                 "Summary",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/summary_expect.json",
-		// Summary metrics are not possible with the SDK.
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Batching",
+		Name:                 "Batching only sends 200 timeseries per-batch",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/batching.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/batching_expect.json",
 		// Summary metrics are not possible with the SDK.
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Ops Agent Self-Reported metrics",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/ops_agent_self_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/ops_agent_self_metrics_expect.json",
-		ConfigureCollector: func(cfg *collector.Config) {
-			// Metric descriptors should not be created under agent.googleapis.com
-			cfg.MetricConfig.SkipCreateMetricDescriptor = true
-			cfg.MetricConfig.ServiceResourceLabels = false
-		},
-		// We don't support disabling metric descriptor creation for the SDK exporter
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Ops Agent Host Metrics",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/ops_agent_host_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/ops_agent_host_metrics_expect.json",
-		ConfigureCollector: func(cfg *collector.Config) {
-			// Metric descriptors should not be created under agent.googleapis.com
-			cfg.MetricConfig.SkipCreateMetricDescriptor = true
-		},
-		// We don't support disabling metric descriptor creation for the SDK exporter
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "GKE Workload Metrics",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/workload_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/workload_metrics_expect.json",
-		ConfigureCollector: func(cfg *collector.Config) {
-			cfg.MetricConfig.Prefix = "workload.googleapis.com/"
-			cfg.MetricConfig.SkipCreateMetricDescriptor = true
-			cfg.MetricConfig.ServiceResourceLabels = false
-		},
-		// We don't support disabling metric descriptor creation for the SDK exporter
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Google Managed Prometheus",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/google_managed_prometheus.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/google_managed_prometheus_expect.json",
-		ConfigureCollector:   configureGMPCollector,
-		// prometheus_target is not supported by the SDK
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Google Managed Prometheus with Double Export for Untyped",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/google_managed_prometheus.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/google_managed_prometheus_untyped_expect.json",
-		ConfigureCollector: func(cfg *collector.Config) {
-			configureGMPCollector(cfg)
-			featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
-		},
-		// prometheus_target is not supported by the SDK
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Google Managed Prometheus Gauge",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/gauge.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/gauge_gmp_expect.json",
-		ConfigureCollector:   configureGMPCollector,
-	},
-	{
-		Name:                 "Google Managed Prometheus Counter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/counter_gmp_expect.json",
-		ConfigureCollector:   configureGMPCollector,
-		// prometheus_target is not supported by the SDK
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Google Managed Prometheus Non-Monotonic Counter",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_gmp_expect.json",
-		ConfigureCollector:   configureGMPCollector,
-		// prometheus_target is not supported by the SDK
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Google Managed Prometheus Histogram",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_gmp_expect.json",
-		ConfigureCollector:   configureGMPCollector,
-		// prometheus_target is not supported by the SDK
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Google Managed Prometheus Summary",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/summary_gmp_expect.json",
-		ConfigureCollector:   configureGMPCollector,
-		// prometheus_target is not supported by the SDK
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "GKE Metrics Agent",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/gke_metrics_agent.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/gke_metrics_agent_expect.json",
-		ConfigureCollector: func(cfg *collector.Config) {
-			cfg.MetricConfig.CreateServiceTimeSeries = true
-		},
-		// SDK exporter does not support CreateServiceTimeSeries
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "GKE Control Plane Metrics Agent",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/gke_control_plane.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/gke_control_plane_expect.json",
-		ConfigureCollector: func(cfg *collector.Config) {
-			cfg.MetricConfig.CreateServiceTimeSeries = true
-			cfg.MetricConfig.ServiceResourceLabels = false
-		},
-		// SDK exporter does not support CreateServiceTimeSeries
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Exponential Histogram",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_expect.json",
-		// Blocked on upstream support for exponential histograms:
-		// https://github.com/open-telemetry/opentelemetry-go/issues/2966
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "CreateServiceTimeSeries",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/create_service_timeseries.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/create_service_timeseries_expect.json",
-		ConfigureCollector: func(cfg *collector.Config) {
-			cfg.MetricConfig.CreateServiceTimeSeries = true
-		},
-		// SDK exporter does not support CreateServiceTimeSeries
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "WithResourceFilter",
+		Name:                 "WithResourceFilter adds the appropriate resource attributes",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/with_resource_filter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/with_resource_filter_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -296,7 +175,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK:           true,
 	},
 	{
-		Name:                 "Basic Counter with gzip compression",
+		Name:                 "Gzip compression enabled",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/counter_compressed_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -304,14 +183,13 @@ var MetricsTestCases = []TestCase{
 		},
 	},
 	{
-		Name:                 "BMS Ops Agent Host Metrics",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/bms_ops_agent_host_metrics.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/bms_ops_agent_host_metrics_expect.json",
+		Name:                 "CreateServiceTimeSeries option enabled",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/create_service_timeseries.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/create_service_timeseries_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
-			// Metric descriptors should not be created under agent.googleapis.com
-			cfg.MetricConfig.SkipCreateMetricDescriptor = true
+			cfg.MetricConfig.CreateServiceTimeSeries = true
 		},
-		// We don't support disabling metric descriptor creation for the SDK exporter
+		// SDK exporter does not support CreateServiceTimeSeries
 		SkipForSDK: true,
 	},
 	{
@@ -387,37 +265,133 @@ var MetricsTestCases = []TestCase{
 		// SDK exporter does not support CreateServiceTimeSeries
 		SkipForSDK: true,
 	},
+	// Tests for the GMP exporter
 	{
-		// https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/issues/677
-		Name:                 "Google Managed Prometheus with Double Export for Untyped with name normalization enabled",
+		Name:                 "Google Managed Prometheus Exporter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/google_managed_prometheus.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/google_managed_prometheus_untyped_name_normalized_expect.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/google_managed_prometheus_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Google Managed Prometheus Gauge",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/gauge.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/gauge_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Google Managed Prometheus Untyped Gauge",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_gauge.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_gauge_gmp_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
-			cfg.MetricConfig.Prefix = "prometheus.googleapis.com/"
-			cfg.MetricConfig.SkipCreateMetricDescriptor = true
-			cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName
-			cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
-			cfg.MetricConfig.ExtraMetrics = func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				//nolint:errcheck
-				featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
-				//nolint:errcheck
-				featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", true)
-				googlemanagedprometheus.AddUntypedMetrics(m)
-				googlemanagedprometheus.AddScopeInfoMetric(m)
-				googlemanagedprometheus.AddTargetInfoMetric(m)
-				return m.ResourceMetrics()
-			}
-			cfg.MetricConfig.InstrumentationLibraryLabels = false
-			cfg.MetricConfig.ServiceResourceLabels = false
-			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
-			// disable cumulative normalization so we can see the counter without having to send 2 data points.
-			// with normalization enabled, the first data point would get dropped.
-			// but trying to send 2 data points causes the GCM integration test to fail for duplicate timeseries.
-			cfg.MetricConfig.CumulativeNormalization = false
+			configureGMPCollector(cfg)
+			featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
 		},
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,
-		Skip:       true,
+	},
+	{
+		Name:                 "Google Managed Prometheus Counter",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Google Managed Prometheus Non-Monotonic Counter",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Google Managed Prometheus Histogram",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Google Managed Prometheus Summary",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/summary_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	// Tests for specific distributions of the collector
+	{
+		Name:                 "Ops Agent Self-Reported metrics",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/ops_agent_self_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/ops_agent_self_metrics_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			// Metric descriptors should not be created under agent.googleapis.com
+			cfg.MetricConfig.SkipCreateMetricDescriptor = true
+			cfg.MetricConfig.ServiceResourceLabels = false
+		},
+		// We don't support disabling metric descriptor creation for the SDK exporter
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Ops Agent Host Metrics",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/ops_agent_host_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/ops_agent_host_metrics_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			// Metric descriptors should not be created under agent.googleapis.com
+			cfg.MetricConfig.SkipCreateMetricDescriptor = true
+		},
+		// We don't support disabling metric descriptor creation for the SDK exporter
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "GKE Workload Metrics",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/workload_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/workload_metrics_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.Prefix = "workload.googleapis.com/"
+			cfg.MetricConfig.SkipCreateMetricDescriptor = true
+			cfg.MetricConfig.ServiceResourceLabels = false
+		},
+		// We don't support disabling metric descriptor creation for the SDK exporter
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "GKE Metrics Agent",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/gke_metrics_agent.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/gke_metrics_agent_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.CreateServiceTimeSeries = true
+		},
+		// SDK exporter does not support CreateServiceTimeSeries
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "GKE Control Plane Metrics Agent",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/gke_control_plane.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/gke_control_plane_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.CreateServiceTimeSeries = true
+			cfg.MetricConfig.ServiceResourceLabels = false
+		},
+		// SDK exporter does not support CreateServiceTimeSeries
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "BMS Ops Agent Host Metrics",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/bms_ops_agent_host_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/bms_ops_agent_host_metrics_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			// Metric descriptors should not be created under agent.googleapis.com
+			cfg.MetricConfig.SkipCreateMetricDescriptor = true
+		},
+		// We don't support disabling metric descriptor creation for the SDK exporter
+		SkipForSDK: true,
 	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }
