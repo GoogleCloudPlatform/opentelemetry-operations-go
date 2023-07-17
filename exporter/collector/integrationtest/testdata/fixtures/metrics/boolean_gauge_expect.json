@@ -5,10 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/observer-boolean-collector",
+            "type": "workload.googleapis.com/observer.boolean.collector",
             "labels": {
-              "key": "value-1",
-              "service_name": "unknown_service:sample"
+              "key": "value-1"
             }
           },
           "resource": {
@@ -35,10 +34,9 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/observer-boolean-collector",
+            "type": "workload.googleapis.com/observer.boolean.collector",
             "labels": {
-              "key": "value-2",
-              "service_name": "unknown_service:sample"
+              "key": "value-2"
             }
           },
           "resource": {
@@ -65,10 +63,9 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/observer-boolean-collector",
+            "type": "workload.googleapis.com/observer.boolean.collector",
             "labels": {
-              "key": "value-3",
-              "service_name": "unknown_service:sample"
+              "key": "value-3"
             }
           },
           "resource": {
@@ -100,20 +97,17 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "observer-boolean-collector",
-        "type": "workload.googleapis.com/observer-boolean-collector",
+        "name": "observer.boolean.collector",
+        "type": "workload.googleapis.com/observer.boolean.collector",
         "labels": [
           {
             "key": "key"
-          },
-          {
-            "key": "service_name"
           }
         ],
         "metricKind": "GAUGE",
         "valueType": "BOOL",
         "unit": "{gcp.BOOL}",
-        "displayName": "observer-boolean-collector"
+        "displayName": "observer.boolean.collector"
       }
     }
   ],

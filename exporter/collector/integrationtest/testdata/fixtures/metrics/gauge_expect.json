@@ -5,9 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/ex_com_one",
+            "type": "workload.googleapis.com/simple.gauge",
             "labels": {
-              "ex_com_lemons": "13"
+              "some_lemons": "13"
             }
           },
           "resource": {
@@ -29,11 +29,12 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/ex_com_one",
+            "type": "workload.googleapis.com/simple.gauge",
             "labels": {
               "A": "1"
             }
@@ -57,7 +58,8 @@
                 "doubleValue": 13
               }
             }
-          ]
+          ],
+          "unit": "s"
         }
       ]
     }
@@ -66,19 +68,20 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "ex_com_one",
-        "type": "workload.googleapis.com/ex_com_one",
+        "name": "simple.gauge",
+        "type": "workload.googleapis.com/simple.gauge",
         "labels": [
           {
             "key": "A"
           },
           {
-            "key": "ex_com_lemons"
+            "key": "some_lemons"
           }
         ],
         "metricKind": "GAUGE",
         "valueType": "DOUBLE",
-        "displayName": "ex_com_one"
+        "unit": "s",
+        "displayName": "simple.gauge"
       }
     }
   ],

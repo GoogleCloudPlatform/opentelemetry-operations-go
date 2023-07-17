@@ -5,9 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/testsummary_sum/summary:counter",
+            "type": "prometheus.googleapis.com/test_summary_sum/summary:counter",
             "labels": {
-              "foo": "bar"
+              "foo_bar": "baz"
             }
           },
           "resource": {
@@ -33,13 +33,13 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/testsummary_count/summary",
+            "type": "prometheus.googleapis.com/test_summary_count/summary",
             "labels": {
-              "foo": "bar"
+              "foo_bar": "baz"
             }
           },
           "resource": {
@@ -65,13 +65,13 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/testsummary/summary",
+            "type": "prometheus.googleapis.com/test_summary/summary",
             "labels": {
-              "foo": "bar",
+              "foo_bar": "baz",
               "quantile": "0.5"
             }
           },
@@ -97,13 +97,13 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/testsummary/summary",
+            "type": "prometheus.googleapis.com/test_summary/summary",
             "labels": {
-              "foo": "bar",
+              "foo_bar": "baz",
               "quantile": "0.75"
             }
           },
@@ -129,13 +129,13 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/testsummary/summary",
+            "type": "prometheus.googleapis.com/test_summary/summary",
             "labels": {
-              "foo": "bar",
+              "foo_bar": "baz",
               "quantile": "0.9"
             }
           },
@@ -161,7 +161,7 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {

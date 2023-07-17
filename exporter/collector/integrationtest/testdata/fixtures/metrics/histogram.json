@@ -7,13 +7,14 @@
             "scope": {},
             "metrics": [
               {
-                "name": "ex_com_two",
+                "name": "simple.histogram",
+                "unit": "s",
                 "histogram": {
                   "dataPoints": [
                     {
                       "attributes": [
                         {
-                          "key": "ex_com_lemons",
+                          "key": "some.lemons",
                           "value": {
                             "stringValue": "13"
                           }
@@ -44,25 +45,7 @@
                     {
                       "attributes": [
                         {
-                          "key": "A",
-                          "value": {
-                            "stringValue": "1"
-                          }
-                        },
-                        {
-                          "key": "B",
-                          "value": {
-                            "stringValue": "2"
-                          }
-                        },
-                        {
-                          "key": "C",
-                          "value": {
-                            "stringValue": "3"
-                          }
-                        },
-                        {
-                          "key": "ex_com_lemons",
+                          "key": "some.lemons",
                           "value": {
                             "stringValue": "10"
                           }

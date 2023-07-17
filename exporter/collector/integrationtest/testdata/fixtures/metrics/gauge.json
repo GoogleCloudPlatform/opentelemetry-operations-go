@@ -7,13 +7,14 @@
             "scope": {},
             "metrics": [
               {
-                "name": "ex_com_one",
+                "name": "simple.gauge",
+                "unit": "s",
                 "gauge": {
                   "dataPoints": [
                     {
                       "attributes": [
                         {
-                          "key": "ex_com_lemons",
+                          "key": "some.lemons",
                           "value": {
                             "stringValue": "13"
                           }

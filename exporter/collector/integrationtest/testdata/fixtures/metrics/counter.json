@@ -7,17 +7,17 @@
           "scope": {},
           "metrics": [
             {
-              "name": "testcounter",
+              "name": "test.counter",
               "description": "This is a test counter",
-              "unit": "1",
+              "unit": "s",
               "sum": {
                 "dataPoints": [
                   {
                     "attributes": [
                       {
-                        "key": "foo",
+                        "key": "foo.bar",
                         "value": {
-                          "stringValue": "bar"
+                          "stringValue": "baz"
                         }
                       }
                     ],

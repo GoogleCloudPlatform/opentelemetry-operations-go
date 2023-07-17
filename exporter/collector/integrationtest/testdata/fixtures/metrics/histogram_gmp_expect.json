@@ -5,9 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/ex_com_two/histogram",
+            "type": "prometheus.googleapis.com/simple_histogram/histogram",
             "labels": {
-              "ex_com_lemons": "13"
+              "some_lemons": "13"
             }
           },
           "resource": {
@@ -57,16 +57,14 @@
                 }
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/ex_com_two/histogram",
+            "type": "prometheus.googleapis.com/simple_histogram/histogram",
             "labels": {
-              "A": "1",
-              "B": "2",
-              "C": "3",
-              "ex_com_lemons": "10"
+              "some_lemons": "10"
             }
           },
           "resource": {
@@ -116,7 +114,8 @@
                 }
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {

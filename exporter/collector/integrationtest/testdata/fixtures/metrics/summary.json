@@ -7,17 +7,17 @@
           "scope": {},
           "metrics": [
             {
-              "name": "testsummary",
+              "name": "test.summary",
               "description": "This is a test summary",
-              "unit": "1",
+              "unit": "s",
               "summary": {
                 "dataPoints": [
                   {
                     "attributes": [
                       {
-                        "key": "foo",
+                        "key": "foo.bar",
                         "value": {
-                          "stringValue": "bar"
+                          "stringValue": "baz"
                         }
                       }
                     ],

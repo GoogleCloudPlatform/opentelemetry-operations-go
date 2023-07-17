@@ -5,9 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/ex_com_two",
+            "type": "workload.googleapis.com/simple.histogram",
             "labels": {
-              "ex_com_lemons": "13"
+              "some_lemons": "13"
             }
           },
           "resource": {
@@ -54,16 +54,14 @@
                 }
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/ex_com_two",
+            "type": "workload.googleapis.com/simple.histogram",
             "labels": {
-              "A": "1",
-              "B": "2",
-              "C": "3",
-              "ex_com_lemons": "10"
+              "some_lemons": "10"
             }
           },
           "resource": {
@@ -110,7 +108,8 @@
                 }
               }
             }
-          ]
+          ],
+          "unit": "s"
         }
       ]
     }
@@ -119,25 +118,17 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "ex_com_two",
-        "type": "workload.googleapis.com/ex_com_two",
+        "name": "simple.histogram",
+        "type": "workload.googleapis.com/simple.histogram",
         "labels": [
           {
-            "key": "A"
-          },
-          {
-            "key": "B"
-          },
-          {
-            "key": "C"
-          },
-          {
-            "key": "ex_com_lemons"
+            "key": "some_lemons"
           }
         ],
         "metricKind": "CUMULATIVE",
         "valueType": "DISTRIBUTION",
-        "displayName": "ex_com_two"
+        "unit": "s",
+        "displayName": "simple.histogram"
       }
     }
   ],

@@ -5,9 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "custom.googleapis.com/foobar.org/testcounter",
+            "type": "custom.googleapis.com/foobar.org/test.counter",
             "labels": {
-              "foo": "bar"
+              "foo_bar": "baz"
             }
           },
           "resource": {
@@ -31,7 +31,7 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         }
       ]
     }
@@ -40,18 +40,18 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "testcounter",
-        "type": "custom.googleapis.com/foobar.org/testcounter",
+        "name": "test.counter",
+        "type": "custom.googleapis.com/foobar.org/test.counter",
         "labels": [
           {
-            "key": "foo"
+            "key": "foo_bar"
           }
         ],
         "metricKind": "CUMULATIVE",
         "valueType": "INT64",
-        "unit": "1",
+        "unit": "s",
         "description": "This is a test counter",
-        "displayName": "foobar.org/testcounter"
+        "displayName": "foobar.org/test.counter"
       }
     }
   ],

@@ -5,9 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/testcounter/counter",
+            "type": "prometheus.googleapis.com/test_counter/counter",
             "labels": {
-              "foo": "bar"
+              "foo_bar": "baz"
             }
           },
           "resource": {
@@ -33,7 +33,7 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {

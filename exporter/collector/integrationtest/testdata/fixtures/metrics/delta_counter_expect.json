@@ -5,9 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/deltacounter",
+            "type": "workload.googleapis.com/delta.counter",
             "labels": {
-              "foo": "bar"
+              "foo_bar": "baz"
             }
           },
           "resource": {
@@ -31,7 +31,7 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         }
       ]
     }
@@ -40,18 +40,18 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "deltacounter",
-        "type": "workload.googleapis.com/deltacounter",
+        "name": "delta.counter",
+        "type": "workload.googleapis.com/delta.counter",
         "labels": [
           {
-            "key": "foo"
+            "key": "foo_bar"
           }
         ],
         "metricKind": "CUMULATIVE",
         "valueType": "INT64",
-        "unit": "1",
+        "unit": "s",
         "description": "This is a test counter with delta temporality",
-        "displayName": "deltacounter"
+        "displayName": "delta.counter"
       }
     }
   ],

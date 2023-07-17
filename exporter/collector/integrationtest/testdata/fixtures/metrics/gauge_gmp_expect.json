@@ -5,9 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/ex_com_one/gauge",
+            "type": "prometheus.googleapis.com/simple_gauge/gauge",
             "labels": {
-              "ex_com_lemons": "13"
+              "some_lemons": "13"
             }
           },
           "resource": {
@@ -31,11 +31,12 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/ex_com_one/gauge",
+            "type": "prometheus.googleapis.com/simple_gauge/gauge",
             "labels": {
               "A": "1"
             }
@@ -61,7 +62,8 @@
                 "doubleValue": 13
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {

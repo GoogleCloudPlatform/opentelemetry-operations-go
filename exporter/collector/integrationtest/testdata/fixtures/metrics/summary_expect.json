@@ -5,9 +5,9 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary_sum",
+            "type": "workload.googleapis.com/test.summary_sum",
             "labels": {
-              "foo": "bar"
+              "foo_bar": "baz"
             }
           },
           "resource": {
@@ -31,13 +31,13 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary_count",
+            "type": "workload.googleapis.com/test.summary_count",
             "labels": {
-              "foo": "bar"
+              "foo_bar": "baz"
             }
           },
           "resource": {
@@ -61,13 +61,13 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary",
+            "type": "workload.googleapis.com/test.summary",
             "labels": {
-              "foo": "bar",
+              "foo_bar": "baz",
               "quantile": "0.5"
             }
           },
@@ -91,13 +91,13 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary",
+            "type": "workload.googleapis.com/test.summary",
             "labels": {
-              "foo": "bar",
+              "foo_bar": "baz",
               "quantile": "0.75"
             }
           },
@@ -121,13 +121,13 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/testsummary",
+            "type": "workload.googleapis.com/test.summary",
             "labels": {
-              "foo": "bar",
+              "foo_bar": "baz",
               "quantile": "0.9"
             }
           },
@@ -151,7 +151,7 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "s"
         }
       ]
     }
@@ -160,42 +160,42 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary_sum",
+        "type": "workload.googleapis.com/test.summary_sum",
         "labels": [
           {
-            "key": "foo"
+            "key": "foo_bar"
           }
         ],
         "metricKind": "CUMULATIVE",
         "valueType": "DOUBLE",
-        "unit": "1",
+        "unit": "s",
         "description": "This is a test summary",
-        "displayName": "testsummary_sum"
+        "displayName": "test.summary_sum"
       }
     },
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary_count",
+        "type": "workload.googleapis.com/test.summary_count",
         "labels": [
           {
-            "key": "foo"
+            "key": "foo_bar"
           }
         ],
         "metricKind": "CUMULATIVE",
         "valueType": "DOUBLE",
-        "unit": "1",
+        "unit": "s",
         "description": "This is a test summary",
-        "displayName": "testsummary_count"
+        "displayName": "test.summary_count"
       }
     },
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "type": "workload.googleapis.com/testsummary",
+        "type": "workload.googleapis.com/test.summary",
         "labels": [
           {
-            "key": "foo"
+            "key": "foo_bar"
           },
           {
             "key": "quantile",
@@ -204,9 +204,9 @@
         ],
         "metricKind": "GAUGE",
         "valueType": "DOUBLE",
-        "unit": "1",
+        "unit": "s",
         "description": "This is a test summary",
-        "displayName": "testsummary"
+        "displayName": "test.summary"
       }
     }
   ],
