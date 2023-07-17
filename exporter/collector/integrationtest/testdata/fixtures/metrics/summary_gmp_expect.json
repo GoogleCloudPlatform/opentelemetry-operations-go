@@ -5,7 +5,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/test_summary_sum/summary:counter",
+            "type": "prometheus.googleapis.com/test_summary_seconds_sum/summary:counter",
             "labels": {
               "foo_bar": "baz"
             }
@@ -37,7 +37,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/test_summary_count/summary",
+            "type": "prometheus.googleapis.com/test_summary_seconds_count/summary",
             "labels": {
               "foo_bar": "baz"
             }
@@ -69,7 +69,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/test_summary/summary",
+            "type": "prometheus.googleapis.com/test_summary_seconds/summary",
             "labels": {
               "foo_bar": "baz",
               "quantile": "0.5"
@@ -101,7 +101,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/test_summary/summary",
+            "type": "prometheus.googleapis.com/test_summary_seconds/summary",
             "labels": {
               "foo_bar": "baz",
               "quantile": "0.75"
@@ -133,7 +133,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/test_summary/summary",
+            "type": "prometheus.googleapis.com/test_summary_seconds/summary",
             "labels": {
               "foo_bar": "baz",
               "quantile": "0.9"

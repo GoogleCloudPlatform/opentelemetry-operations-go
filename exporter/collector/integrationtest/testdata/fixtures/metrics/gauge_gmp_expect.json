@@ -5,7 +5,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/simple_gauge/gauge",
+            "type": "prometheus.googleapis.com/simple_gauge_seconds/gauge",
             "labels": {
               "some_lemons": "13"
             }
@@ -36,7 +36,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/simple_gauge/gauge",
+            "type": "prometheus.googleapis.com/simple_gauge_seconds/gauge",
             "labels": {
               "A": "1"
             }

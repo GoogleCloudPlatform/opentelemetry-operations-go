@@ -414,6 +414,8 @@ var MetricsTestCases = []TestCase{
 }
 
 func configureGMPCollector(cfg *collector.Config) {
+	//nolint:errcheck
+	featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", true)
 	cfg.MetricConfig.Prefix = "prometheus.googleapis.com/"
 	cfg.MetricConfig.SkipCreateMetricDescriptor = true
 	cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName

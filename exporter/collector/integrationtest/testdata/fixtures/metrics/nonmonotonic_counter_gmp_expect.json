@@ -5,7 +5,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/system_memory_usage/counter",
+            "type": "prometheus.googleapis.com/system_memory_usage_bytes/counter",
             "labels": {
               "state": "used"
             }

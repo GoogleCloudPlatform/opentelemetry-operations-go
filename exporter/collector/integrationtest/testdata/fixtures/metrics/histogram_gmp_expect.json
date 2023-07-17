@@ -5,7 +5,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/simple_histogram/histogram",
+            "type": "prometheus.googleapis.com/simple_histogram_seconds/histogram",
             "labels": {
               "some_lemons": "13"
             }
@@ -62,7 +62,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/simple_histogram/histogram",
+            "type": "prometheus.googleapis.com/simple_histogram_seconds/histogram",
             "labels": {
               "some_lemons": "10"
             }
