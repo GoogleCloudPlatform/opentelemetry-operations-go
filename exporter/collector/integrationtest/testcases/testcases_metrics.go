@@ -49,6 +49,14 @@ var MetricsTestCases = []TestCase{
 		ExpectErr:                true,
 	},
 	{
+		Name:                 "Basic Gauge",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/gauge.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/gauge_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.InstrumentationLibraryLabels = true
+		},
+	},
+	{
 		Name:                 "Basic Prometheus metrics",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_expect.json",
@@ -168,6 +176,12 @@ var MetricsTestCases = []TestCase{
 		},
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,
+	},
+	{
+		Name:                 "Google Managed Prometheus Gauge",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/gauge.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/gauge_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
 	},
 	{
 		Name:                 "Google Managed Prometheus Counter",

@@ -1,0 +1,45 @@
+{
+    "resourceMetrics": [
+      {
+        "resource": {},
+        "scopeMetrics": [
+          {
+            "scope": {},
+            "metrics": [
+              {
+                "name": "ex_com_one",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "ex_com_lemons",
+                          "value": {
+                            "stringValue": "13"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1649443516286000000",
+                      "asDouble": 1
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "A",
+                          "value": {
+                            "stringValue": "1"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1649443516286000000",
+                      "asDouble": 13
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
