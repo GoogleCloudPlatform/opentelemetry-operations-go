@@ -35,6 +35,37 @@
         },
         {
           "metric": {
+            "type": "prometheus.googleapis.com/fake_untyped_metric/unknown:counter",
+            "labels": {
+              "ex_com_lemons_untyped": "13"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "",
+              "job": "",
+              "location": "",
+              "namespace": ""
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 3
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
             "type": "prometheus.googleapis.com/target_info/gauge"
           },
           "resource": {
@@ -85,7 +116,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "2"
+                  "int64Value": "3"
                 }
               }
             ]
