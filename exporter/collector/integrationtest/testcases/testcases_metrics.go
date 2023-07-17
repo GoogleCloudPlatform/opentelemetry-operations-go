@@ -186,6 +186,14 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
+		Name:                 "Google Managed Prometheus Summary",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/summary_metrics.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/summary_metrics_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	{
 		Name:                 "GKE Metrics Agent",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/gke_metrics_agent_metrics.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/gke_metrics_agent_metrics_expect.json",
