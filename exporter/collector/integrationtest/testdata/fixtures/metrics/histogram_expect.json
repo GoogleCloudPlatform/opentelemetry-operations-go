@@ -11,11 +11,12 @@
             }
           },
           "resource": {
-            "type": "generic_node",
+            "type": "generic_task",
             "labels": {
-              "location": "global",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": "",
-              "node_id": ""
+              "task_id": "10.92.5.2:15692"
             }
           },
           "metricKind": "CUMULATIVE",
@@ -65,11 +66,12 @@
             }
           },
           "resource": {
-            "type": "generic_node",
+            "type": "generic_task",
             "labels": {
-              "location": "global",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": "",
-              "node_id": ""
+              "task_id": "10.92.5.2:15692"
             }
           },
           "metricKind": "CUMULATIVE",

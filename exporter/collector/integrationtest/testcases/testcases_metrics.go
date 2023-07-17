@@ -37,22 +37,35 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/counter_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.InstrumentationLibraryLabels = true
+			cfg.MetricConfig.ServiceResourceLabels = false
 		},
+		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
 		Name:                 "Delta Counter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/delta_counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/delta_counter_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.ServiceResourceLabels = false
+		},
+		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
 		Name:                 "Non-monotonic Counter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.ServiceResourceLabels = false
+		},
+		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
 		Name:                 "Summary",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/summary_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.ServiceResourceLabels = false
+		},
 		// Summary metrics are not possible with the SDK.
 		SkipForSDK: true,
 	},
@@ -62,32 +75,46 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/gauge_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.InstrumentationLibraryLabels = true
+			cfg.MetricConfig.ServiceResourceLabels = false
 		},
+		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
 		Name:                 "Boolean valued Gauge metrics becomes an int Gauge",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/boolean_gauge.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/boolean_gauge_expect.json",
-		SkipForSDK:           true, // Boolean valued metrics not implemented in SDK
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.ServiceResourceLabels = false
+		},
+		SkipForSDK: true, // Boolean valued metrics not implemented in SDK
 	},
 	{
 		Name:                 "Gauge with Untyped label does nothing without GMP",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_gauge.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_gauge_expect.json",
-		SkipForSDK:           true,
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.ServiceResourceLabels = false
+		},
+		SkipForSDK: true,
 	},
 	{
 		Name:                 "Histogram",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_expect.json",
+		// TODO(dashpole): implement sum of squared deviation in the SDK exporter and enable here.
 		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.ServiceResourceLabels = false
 			cfg.MetricConfig.InstrumentationLibraryLabels = true
 		},
+		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
 		Name:                 "Exponential Histogram",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.ServiceResourceLabels = false
+		},
 		// Blocked on upstream support for exponential histograms:
 		// https://github.com/open-telemetry/opentelemetry-go/issues/2966
 		SkipForSDK: true,
@@ -111,8 +138,9 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/counter_notfound_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.ProjectID = "notfoundproject"
+			cfg.MetricConfig.ServiceResourceLabels = false
 		},
-		MetricSDKExporterOptions: []metric.Option{metric.WithProjectID("notfoundproject")},
+		MetricSDKExporterOptions: []metric.Option{metric.WithProjectID("notfoundproject"), metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 		ExpectErr:                true,
 	},
 	{
@@ -121,10 +149,14 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/counter_unknown_domain_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.Prefix = "custom.googleapis.com/foobar.org"
+			cfg.MetricConfig.ServiceResourceLabels = false
 		},
-		MetricSDKExporterOptions: []metric.Option{metric.WithMetricDescriptorTypeFormatter(func(m metricdata.Metrics) string {
-			return "custom.googleapis.com/foobar.org/" + m.Name
-		})},
+		MetricSDKExporterOptions: []metric.Option{
+			metric.WithMetricDescriptorTypeFormatter(func(m metricdata.Metrics) string {
+				return "custom.googleapis.com/foobar.org/" + m.Name
+			}),
+			metric.WithFilteredResourceAttributes(metric.NoAttributes),
+		},
 	},
 	{
 		Name:                 "Modified prefix workload.googleapis.com",
@@ -132,7 +164,9 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/counter_workloadgoogleapis_prefix_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.Prefix = "workload.googleapis.com"
+			cfg.MetricConfig.ServiceResourceLabels = false
 		},
+		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
 		Name:                 "Batching only sends 200 timeseries per-batch",
@@ -180,7 +214,9 @@ var MetricsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/metrics/counter_compressed_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.ClientConfig.Compression = "gzip"
+			cfg.MetricConfig.ServiceResourceLabels = false
 		},
+		SkipForSDK: true,
 	},
 	{
 		Name:                 "CreateServiceTimeSeries option enabled",
@@ -203,6 +239,7 @@ var MetricsTestCases = []TestCase{
 				Directory:  dir,
 				MaxBackoff: time.Duration(1 * time.Second),
 			}
+			cfg.MetricConfig.ServiceResourceLabels = false
 		},
 		SkipForSDK: true,
 	},
@@ -231,6 +268,7 @@ var MetricsTestCases = []TestCase{
 				Directory:  dir,
 				MaxBackoff: time.Duration(2 * time.Second),
 			}
+			cfg.MetricConfig.ServiceResourceLabels = false
 		},
 		SkipForSDK:    true,
 		ExpectRetries: true,
@@ -246,6 +284,7 @@ var MetricsTestCases = []TestCase{
 				Directory:  dir,
 				MaxBackoff: time.Duration(2 * time.Second),
 			}
+			cfg.MetricConfig.ServiceResourceLabels = false
 		},
 		SkipForSDK:    true,
 		ExpectRetries: true,
@@ -330,14 +369,6 @@ var MetricsTestCases = []TestCase{
 		Name:                 "Google Managed Prometheus Summary",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/summary_gmp_expect.json",
-		ConfigureCollector:   configureGMPCollector,
-		// prometheus_target is not supported by the SDK
-		SkipForSDK: true,
-	},
-	{
-		Name:                 "Google Managed Prometheus Exponential Histogram",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram.json",
-		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,

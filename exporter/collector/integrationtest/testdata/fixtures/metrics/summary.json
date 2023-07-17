@@ -1,7 +1,28 @@
 {
   "resourceMetrics": [
     {
-      "resource": {},
+      "resource": {
+        "attributes": [
+          {
+            "key": "cloud.availability_zone",
+            "value": {
+              "stringValue": "us-central1-c"
+            }
+          },
+          {
+            "key": "service.name",
+            "value": {
+              "stringValue": "demo"
+            }
+          },
+          {
+            "key": "service.instance.id",
+            "value": {
+              "stringValue": "10.92.5.2:15692"
+            }
+          }
+        ]
+      },
       "scopeMetrics": [
         {
           "scope": {},

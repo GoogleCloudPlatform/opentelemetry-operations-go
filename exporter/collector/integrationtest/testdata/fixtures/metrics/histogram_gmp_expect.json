@@ -14,9 +14,9 @@
             "type": "prometheus_target",
             "labels": {
               "cluster": "",
-              "instance": "",
-              "job": "",
-              "location": "",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -71,9 +71,9 @@
             "type": "prometheus_target",
             "labels": {
               "cluster": "",
-              "instance": "",
-              "job": "",
-              "location": "",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -125,9 +125,9 @@
             "type": "prometheus_target",
             "labels": {
               "cluster": "",
-              "instance": "",
-              "job": "",
-              "location": "",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
