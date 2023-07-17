@@ -334,6 +334,14 @@ var MetricsTestCases = []TestCase{
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,
 	},
+	{
+		Name:                 "Google Managed Prometheus Exponential Histogram",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
 	// Tests for specific distributions of the collector
 	{
 		Name:                 "Ops Agent Self-Reported metrics",
