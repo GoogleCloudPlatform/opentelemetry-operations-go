@@ -77,6 +77,16 @@ func TestGetMetricName(t *testing.T) {
 			expected: "foo_total/counter",
 		},
 		{
+			desc:     "non-monotonic sum",
+			baseName: "foo_total",
+			metric: func(m pmetric.Metric) {
+				m.SetName("foo_total")
+				sum := m.SetEmptySum()
+				sum.SetIsMonotonic(false)
+			},
+			expected: "foo_total/gauge",
+		},
+		{
 			desc:     "gauge",
 			baseName: "bar",
 			metric: func(m pmetric.Metric) {
@@ -150,6 +160,7 @@ func TestGetMetricName(t *testing.T) {
 				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, false)
 				m.SetName("bar")
 				m.SetEmptySum()
+				m.Sum().SetIsMonotonic(true)
 				m.Sum().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
 			},
 			expected: "bar/counter",
@@ -174,6 +185,7 @@ func TestGetMetricName(t *testing.T) {
 				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
 				m.SetName("bar")
 				m.SetEmptySum()
+				m.Sum().SetIsMonotonic(true)
 				m.Sum().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
 			},
 			expected: "bar/unknown:counter",

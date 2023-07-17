@@ -28,6 +28,10 @@ func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
 	// Second, ad the GMP-specific suffix
 	switch metric.Type() {
 	case pmetric.MetricTypeSum:
+		if !metric.Sum().IsMonotonic() {
+			// Non-monotonic sums are converted to GCM gauges
+			return compliantName + "/gauge", nil
+		}
 		return compliantName + getUnknownMetricSuffix(metric.Sum().DataPoints(), "/counter", "counter"), nil
 	case pmetric.MetricTypeGauge:
 		return compliantName + getUnknownMetricSuffix(metric.Gauge().DataPoints(), "/gauge", ""), nil
