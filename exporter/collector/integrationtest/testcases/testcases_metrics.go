@@ -57,6 +57,14 @@ var MetricsTestCases = []TestCase{
 		},
 	},
 	{
+		Name:                 "Basic Histogram",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.InstrumentationLibraryLabels = true
+		},
+	},
+	{
 		Name:                 "Basic Prometheus metrics",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_expect.json",
@@ -195,6 +203,14 @@ var MetricsTestCases = []TestCase{
 		Name:                 "Google Managed Prometheus Non-Monotonic Counter",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Google Managed Prometheus Histogram",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,

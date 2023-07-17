@@ -1,0 +1,102 @@
+{
+    "resourceMetrics": [
+      {
+        "resource": {},
+        "scopeMetrics": [
+          {
+            "scope": {},
+            "metrics": [
+              {
+                "name": "ex_com_two",
+                "histogram": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "ex_com_lemons",
+                          "value": {
+                            "stringValue": "13"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "1",
+                      "sum": 2,
+                      "bucketCounts": [
+                        "0",
+                        "0",
+                        "1",
+                        "0",
+                        "0",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "A",
+                          "value": {
+                            "stringValue": "1"
+                          }
+                        },
+                        {
+                          "key": "B",
+                          "value": {
+                            "stringValue": "2"
+                          }
+                        },
+                        {
+                          "key": "C",
+                          "value": {
+                            "stringValue": "3"
+                          }
+                        },
+                        {
+                          "key": "ex_com_lemons",
+                          "value": {
+                            "stringValue": "10"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "2",
+                      "sum": 14,
+                      "bucketCounts": [
+                        "0",
+                        "0",
+                        "1",
+                        "0",
+                        "1",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    }
+                  ],
+                  "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
