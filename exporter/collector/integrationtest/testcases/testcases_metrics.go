@@ -395,6 +395,7 @@ var MetricsTestCases = []TestCase{
 		},
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,
+		Skip:       true,
 	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }
