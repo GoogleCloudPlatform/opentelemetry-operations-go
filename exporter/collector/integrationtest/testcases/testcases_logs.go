@@ -31,6 +31,22 @@ var LogsTestCases = []TestCase{
 		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_error_expected.json",
 	},
 	{
+		Name:                 "Apache error log (text payload) with severity converted to Error Reporting type",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_apache_text_error.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_text_error_reporting_expected.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.LogConfig.ErrorReportingType = true
+		},
+	},
+	{
+		Name:                 "Apache error log (json payload) with severity converted to Error Reporting type",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_apache_error.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_json_error_reporting_expected.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.LogConfig.ErrorReportingType = true
+		},
+	},
+	{
 		Name:                 "Multi-project logs",
 		OTLPInputFixturePath: "testdata/fixtures/logs/logs_multi_project.json",
 		ExpectFixturePath:    "testdata/fixtures/logs/logs_multi_project_expected.json",

@@ -52,6 +52,9 @@ const (
 	LogNameAttributeKey        = "gcp.log_name"
 	SourceLocationAttributeKey = "gcp.source_location"
 	TraceSampledAttributeKey   = "gcp.trace_sampled"
+
+	GCPTypeKey                 = "@type"
+	GCPErrorReportingTypeValue = "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
 )
 
 // severityMapping maps the integer severity level values from OTel [0-24]
@@ -376,16 +379,20 @@ func (l logMapper) logToSplitEntries(
 	logName string,
 	projectID string,
 ) ([]logging.Entry, error) {
+	// make a copy in case we mutate the record
+	logRecord := plog.NewLogRecord()
+	log.CopyTo(logRecord)
+
 	entry := logging.Entry{
 		Resource: mr,
 	}
 
-	entry.Timestamp = log.Timestamp().AsTime()
-	if log.Timestamp() == 0 {
+	entry.Timestamp = logRecord.Timestamp().AsTime()
+	if logRecord.Timestamp() == 0 {
 		// if timestamp is unset, fall back to observed_time_unix_nano as recommended
 		//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
-		if log.ObservedTimestamp() != 0 {
-			entry.Timestamp = log.ObservedTimestamp().AsTime()
+		if logRecord.ObservedTimestamp() != 0 {
+			entry.Timestamp = logRecord.ObservedTimestamp().AsTime()
 		} else {
 			// if observed_time is 0, use the current time
 			entry.Timestamp = processTime
@@ -395,7 +402,7 @@ func (l logMapper) logToSplitEntries(
 	// build our own map off OTel attributes so we don't have to call .Get() for each special case
 	// (.Get() ranges over all attributes each time)
 	attrsMap := make(map[string]pcommon.Value)
-	log.Attributes().Range(func(k string, v pcommon.Value) bool {
+	logRecord.Attributes().Range(func(k string, v pcommon.Value) bool {
 		attrsMap[k] = v
 		return true
 	})
@@ -418,10 +425,10 @@ func (l logMapper) logToSplitEntries(
 	}
 
 	// parse TraceID and SpanID, if present
-	if traceID := log.TraceID(); !traceID.IsEmpty() {
+	if traceID := logRecord.TraceID(); !traceID.IsEmpty() {
 		entry.Trace = fmt.Sprintf("projects/%s/traces/%s", projectID, hex.EncodeToString(traceID[:]))
 	}
-	if spanID := log.SpanID(); !spanID.IsEmpty() {
+	if spanID := logRecord.SpanID(); !spanID.IsEmpty() {
 		entry.SpanID = hex.EncodeToString(spanID[:])
 	}
 
@@ -435,10 +442,10 @@ func (l logMapper) logToSplitEntries(
 		delete(attrsMap, HTTPRequestAttributeKey)
 	}
 
-	if log.SeverityNumber() < 0 || int(log.SeverityNumber()) > len(severityMapping)-1 {
-		return []logging.Entry{entry}, fmt.Errorf("unknown SeverityNumber %v", log.SeverityNumber())
+	if logRecord.SeverityNumber() < 0 || int(logRecord.SeverityNumber()) > len(severityMapping)-1 {
+		return []logging.Entry{entry}, fmt.Errorf("unknown SeverityNumber %v", logRecord.SeverityNumber())
 	}
-	severityNumber := log.SeverityNumber()
+	severityNumber := logRecord.SeverityNumber()
 	// Log severity levels are based on numerical values defined by Otel/GCP, which are informally mapped to generic text values such as "ALERT", "Debug", etc.
 	// In some cases, a SeverityText value can be automatically mapped to a matching SeverityNumber.
 	// If not (for example, when directly setting the SeverityText on a Log entry with the Transform processor), then the
@@ -446,10 +453,20 @@ func (l logMapper) logToSplitEntries(
 	// In this case, we will attempt to map the text ourselves to one of the defined Otel SeverityNumbers.
 	// We do this by checking that the SeverityText is NOT "default" (ie, it exists in our map) and that the SeverityNumber IS "0".
 	// (This also excludes other unknown/custom severity text values, which may have user-defined mappings in the collector)
-	if severityForText, ok := otelSeverityForText[strings.ToLower(log.SeverityText())]; ok && severityNumber == 0 {
+	if severityForText, ok := otelSeverityForText[strings.ToLower(logRecord.SeverityText())]; ok && severityNumber == 0 {
 		severityNumber = severityForText
 	}
 	entry.Severity = severityMapping[severityNumber]
+
+	// Parse severityNumber > 17 (error) to a GCP Error Reporting entry if enabled
+	if severityNumber >= 17 && l.cfg.LogConfig.ErrorReportingType {
+		if logRecord.Body().Type() != pcommon.ValueTypeMap {
+			strValue := logRecord.Body().AsString()
+			logRecord.Body().SetEmptyMap()
+			logRecord.Body().Map().PutStr("message", strValue)
+		}
+		logRecord.Body().Map().PutStr(GCPTypeKey, GCPErrorReportingTypeValue)
+	}
 
 	entry.Labels = logLabels
 
@@ -478,7 +495,7 @@ func (l logMapper) logToSplitEntries(
 	overheadClone := proto.Clone(logOverhead)
 	overheadBytes := proto.Size(overheadClone)
 
-	payload, splits, err := parseEntryPayload(log.Body(), l.maxEntrySize-overheadBytes)
+	payload, splits, err := parseEntryPayload(logRecord.Body(), l.maxEntrySize-overheadBytes)
 	if err != nil {
 		return []logging.Entry{entry}, err
 	}
