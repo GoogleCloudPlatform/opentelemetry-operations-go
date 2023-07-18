@@ -190,6 +190,21 @@ func TestGetMetricName(t *testing.T) {
 			},
 			expected: "bar/unknown:counter",
 		},
+		{
+			desc:     "untyped sum with feature gate enabled + name normalization returns unknown:counter",
+			baseName: "bar",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", true)
+				m.SetName("bar")
+				m.SetEmptySum()
+				m.Sum().SetIsMonotonic(true)
+				m.Sum().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+			},
+			expected: "bar/unknown:counter",
+		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			assert.True(t, gate.IsEnabled())

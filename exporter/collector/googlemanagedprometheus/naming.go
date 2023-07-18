@@ -17,6 +17,7 @@ package googlemanagedprometheus
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus"
 	"go.opentelemetry.io/collector/pdata/pmetric"
@@ -32,9 +33,9 @@ func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
 			// Non-monotonic sums are converted to GCM gauges
 			return compliantName + "/gauge", nil
 		}
-		return compliantName + getUnknownMetricSuffix(metric.Sum().DataPoints(), "/counter", "counter"), nil
+		return getUnknownMetricName(metric.Sum().DataPoints(), "/counter", "counter", metric.Name(), compliantName), nil
 	case pmetric.MetricTypeGauge:
-		return compliantName + getUnknownMetricSuffix(metric.Gauge().DataPoints(), "/gauge", ""), nil
+		return getUnknownMetricName(metric.Gauge().DataPoints(), "/gauge", "", metric.Name(), compliantName), nil
 	case pmetric.MetricTypeSummary:
 		// summaries are sent as the following series:
 		// * Sum: prometheus.googleapis.com/<baseName>_sum/summary:counter
@@ -56,11 +57,23 @@ func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
 
 // getUnknownMetricSuffix will set the metric suffix for untyped metrics to
 // "/unknown" (eg, for Gauge) or "/unknown:{secondarySuffix}" (eg, "/unknown:counter" for Sum).
+// It also removes the "_total" suffix on an unknown counter, if this suffix was not present in
+// the original metric name before calling prometheus.BuildCompliantName(), which is hacky.
 // It is based on the untyped_prometheus_metric data point attribute, and behind a feature gate.
-func getUnknownMetricSuffix(points pmetric.NumberDataPointSlice, suffix, secondarySuffix string) string {
+func getUnknownMetricName(points pmetric.NumberDataPointSlice, suffix, secondarySuffix, originalName, compliantName string) string {
 	if !untypedDoubleExportFeatureGate.IsEnabled() {
-		return suffix
+		return compliantName + suffix
 	}
+
+	// de-normalize "_total" suffix for counters where not present on original metric name
+	nameTokens := strings.FieldsFunc(
+		originalName,
+		func(r rune) bool { return !unicode.IsLetter(r) && !unicode.IsDigit(r) },
+	)
+	if nameTokens[len(nameTokens)-1] != "total" && strings.HasSuffix(compliantName, "_total") {
+		compliantName = strings.TrimSuffix(compliantName, "_total")
+	}
+
 	newSuffix := suffix
 	for i := 0; i < points.Len(); i++ {
 		point := points.At(i)
@@ -74,5 +87,5 @@ func getUnknownMetricSuffix(points pmetric.NumberDataPointSlice, suffix, seconda
 			// even though we have the suffix, keep looping to remove the attribute from other points, if any
 		}
 	}
-	return newSuffix
+	return compliantName + newSuffix
 }
