@@ -35,7 +35,7 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/fake_untyped_metric_total/unknown:counter",
+            "type": "prometheus.googleapis.com/fake_untyped_metric/unknown:counter",
             "labels": {
               "ex_com_lemons_untyped": "13"
             }
