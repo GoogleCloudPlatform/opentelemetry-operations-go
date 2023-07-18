@@ -365,5 +365,36 @@ var MetricsTestCases = []TestCase{
 		// SDK exporter does not support CreateServiceTimeSeries
 		SkipForSDK: true,
 	},
+	{
+		// https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/issues/677
+		Name:                 "Google Managed Prometheus with Double Export for Untyped with name normalization enabled",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/google_managed_prometheus.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/google_managed_prometheus_untyped_name_normalized_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.Prefix = "prometheus.googleapis.com/"
+			cfg.MetricConfig.SkipCreateMetricDescriptor = true
+			cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName
+			cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
+			cfg.MetricConfig.ExtraMetrics = func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", true)
+				googlemanagedprometheus.AddUntypedMetrics(m)
+				googlemanagedprometheus.AddScopeInfoMetric(m)
+				googlemanagedprometheus.AddTargetInfoMetric(m)
+				return m.ResourceMetrics()
+			}
+			cfg.MetricConfig.InstrumentationLibraryLabels = false
+			cfg.MetricConfig.ServiceResourceLabels = false
+			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
+			// disable cumulative normalization so we can see the counter without having to send 2 data points.
+			// with normalization enabled, the first data point would get dropped.
+			// but trying to send 2 data points causes the GCM integration test to fail for duplicate timeseries.
+			cfg.MetricConfig.CumulativeNormalization = false
+		},
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }
