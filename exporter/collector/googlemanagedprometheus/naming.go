@@ -70,24 +70,25 @@ func getUnknownMetricName(points pmetric.NumberDataPointSlice, suffix, secondary
 		func(r rune) bool { return !unicode.IsLetter(r) && !unicode.IsDigit(r) },
 	)
 
+	untyped := false
 	newSuffix := suffix
 	for i := 0; i < points.Len(); i++ {
 		point := points.At(i)
 		if val, ok := point.Attributes().Get(GCPOpsAgentUntypedMetricKey); ok && val.AsString() == "true" {
+			untyped = true
 			// delete the special Ops Agent untyped attribute
 			point.Attributes().Remove(GCPOpsAgentUntypedMetricKey)
-
-			// de-normalize "_total" suffix for counters where not present on original metric name
-			if nameTokens[len(nameTokens)-1] != "total" && strings.HasSuffix(compliantName, "_total") {
-				compliantName = strings.TrimSuffix(compliantName, "_total")
-			}
-
 			newSuffix = "/unknown"
 			if len(secondarySuffix) > 0 {
 				newSuffix = newSuffix + ":" + secondarySuffix
 			}
 			// even though we have the suffix, keep looping to remove the attribute from other points, if any
 		}
+	}
+
+	// de-normalize "_total" suffix for counters where not present on original metric name
+	if untyped && nameTokens[len(nameTokens)-1] != "total" && strings.HasSuffix(compliantName, "_total") {
+		compliantName = strings.TrimSuffix(compliantName, "_total")
 	}
 	return compliantName + newSuffix
 }

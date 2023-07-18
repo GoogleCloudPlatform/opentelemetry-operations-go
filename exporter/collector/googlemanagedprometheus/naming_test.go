@@ -206,6 +206,23 @@ func TestGetMetricName(t *testing.T) {
 			expected: "bar/unknown:counter",
 		},
 		{
+			desc:     "untyped sum with multiple data points and preexisting 'total' suffix and feature gate enabled and name normalization returns unknown:counter with _total",
+			baseName: "bar.total.total.total.total",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", true)
+				m.SetName("bar.total.total.total.total")
+				m.SetEmptySum()
+				m.Sum().SetIsMonotonic(true)
+				m.Sum().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+				m.Sum().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+			},
+			// prometheus name normalization removes all preexisting "total"s before appending its own
+			expected: "bar_total/unknown:counter",
+		},
+		{
 			desc:     "normal sum without total and feature gate enabled + name normalization adds _total",
 			baseName: "foo",
 			metric: func(m pmetric.Metric) {
