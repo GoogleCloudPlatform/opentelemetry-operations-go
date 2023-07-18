@@ -46,7 +46,7 @@ func TestGetMetricName(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			desc:     "sum without total gets added",
+			desc:     "sum without total is unaffected",
 			baseName: "foo",
 			metric: func(m pmetric.Metric) {
 				m.SetName("foo")
@@ -191,7 +191,7 @@ func TestGetMetricName(t *testing.T) {
 			expected: "bar/unknown:counter",
 		},
 		{
-			desc:     "untyped sum with feature gate enabled + name normalization returns unknown:counter",
+			desc:     "untyped sum with feature gate enabled + name normalization returns unknown:counter without _total",
 			baseName: "bar",
 			metric: func(m pmetric.Metric) {
 				//nolint:errcheck
@@ -204,6 +204,20 @@ func TestGetMetricName(t *testing.T) {
 				m.Sum().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
 			},
 			expected: "bar/unknown:counter",
+		},
+		{
+			desc:     "normal sum without total and feature gate enabled + name normalization adds _total",
+			baseName: "foo",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", true)
+				m.SetName("foo")
+				sum := m.SetEmptySum()
+				sum.SetIsMonotonic(true)
+			},
+			expected: "foo_total/counter",
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
