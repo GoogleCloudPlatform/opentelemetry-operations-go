@@ -1,57 +1,20 @@
 {
-  "createTimeSeriesRequests": [
-    {
-      "name": "projects/fakeprojectid",
-      "timeSeries": [
-        {
-          "metric": {
-            "type": "workload.googleapis.com/testcounter",
-            "labels": {
-              "foo": "bar"
-            }
-          },
-          "resource": {
-            "type": "generic_node",
-            "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
-            }
-          },
-          "metricKind": "CUMULATIVE",
-          "valueType": "INT64",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z",
-                "startTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "int64Value": "253"
-              }
-            }
-          ],
-          "unit": "1"
-        }
-      ]
-    }
-  ],
   "createMetricDescriptorRequests": [
     {
-      "name": "projects/fakeprojectid",
+      "name": "projects/notfoundproject",
       "metricDescriptor": {
-        "name": "testcounter",
-        "type": "workload.googleapis.com/testcounter",
+        "name": "test.counter",
+        "type": "workload.googleapis.com/test.counter",
         "labels": [
           {
-            "key": "foo"
+            "key": "foo_bar"
           }
         ],
         "metricKind": "CUMULATIVE",
         "valueType": "INT64",
-        "unit": "1",
+        "unit": "s",
         "description": "This is a test counter",
-        "displayName": "testcounter"
+        "displayName": "test.counter"
       }
     }
   ],
@@ -60,6 +23,28 @@
       {
         "name": "projects/myproject",
         "timeSeries": [
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+              "labels": {
+                "status": "NOT_FOUND"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "1"
+                }
+              }
+            ]
+          },
           {
             "metric": {
               "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
@@ -77,7 +62,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "1"
+                  "int64Value": "0"
                 }
               }
             ]
@@ -110,7 +95,7 @@
               "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
               "labels": {
                 "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries",
-                "grpc_client_status": "OK"
+                "grpc_client_status": "NOT_FOUND"
               }
             },
             "resource": {

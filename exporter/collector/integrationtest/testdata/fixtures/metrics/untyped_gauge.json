@@ -1,0 +1,61 @@
+{
+    "resourceMetrics":[
+       {
+         "resource": {
+           "attributes": [
+             {
+               "key": "cloud.availability_zone",
+               "value": {
+                 "stringValue": "us-central1-c"
+               }
+             },
+             {
+               "key": "service.name",
+               "value": {
+                 "stringValue": "demo"
+               }
+             },
+             {
+               "key": "service.instance.id",
+               "value": {
+                 "stringValue": "10.92.5.2:15692"
+               }
+             }
+           ]
+         },
+          "scopeMetrics":[
+             {
+                "scope":{},
+                "metrics":[
+                   {
+                     "name":"fake_untyped_metric",
+                     "gauge":{
+                        "dataPoints":[
+                           {
+                              "attributes":[
+                                 {
+                                    "key":"ex_com_lemons_untyped",
+                                    "value":{
+                                       "stringValue":"13"
+                                    }
+                                 },
+                                 {
+                                    "key":"prometheus_untyped_metric",
+                                    "value":{
+                                       "stringValue":"true"
+                                    }
+                                 }
+                              ],
+                              "startTimeUnixNano":"1649443416286000000",
+                              "timeUnixNano":"1649443516286000000",
+                              "asDouble":3
+                           }
+                        ]
+                     }
+                   }
+                ]
+             }
+          ]
+       }
+    ]
+ }

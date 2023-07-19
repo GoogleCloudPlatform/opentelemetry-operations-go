@@ -1,0 +1,106 @@
+{
+    "resourceMetrics": [
+      {
+        "resource": {
+          "attributes": [
+            {
+              "key": "cloud.availability_zone",
+              "value": {
+                "stringValue": "us-central1-c"
+              }
+            },
+            {
+              "key": "service.name",
+              "value": {
+                "stringValue": "demo"
+              }
+            },
+            {
+              "key": "service.instance.id",
+              "value": {
+                "stringValue": "10.92.5.2:15692"
+              }
+            }
+          ]
+        },
+        "scopeMetrics": [
+          {
+            "scope": {},
+            "metrics": [
+              {
+                "name": "simple.histogram",
+                "unit": "s",
+                "histogram": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "some.lemons",
+                          "value": {
+                            "stringValue": "13"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "1",
+                      "sum": 2,
+                      "bucketCounts": [
+                        "0",
+                        "0",
+                        "1",
+                        "0",
+                        "0",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "some.lemons",
+                          "value": {
+                            "stringValue": "10"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "2",
+                      "sum": 14,
+                      "bucketCounts": [
+                        "0",
+                        "0",
+                        "1",
+                        "0",
+                        "1",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    }
+                  ],
+                  "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
