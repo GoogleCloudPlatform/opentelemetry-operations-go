@@ -68,6 +68,10 @@ type options struct {
 
 	// disableCreateMetricDescriptors disables automatic MetricDescriptor creation
 	disableCreateMetricDescriptors bool
+
+	// enableSumOfSquaredDeviation enables calculation of an estimated sum of squared
+	// deviation.  It isn't correct, so we don't send it by default.
+	enableSumOfSquaredDeviation bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -145,5 +149,13 @@ func WithDisableCreateMetricDescriptors() func(o *options) {
 func WithCompression(c string) func(o *options) {
 	return func(o *options) {
 		o.compression = c
+	}
+}
+
+// WithSumOfSquaredDeviation sets the SumOfSquaredDeviation field on histograms.
+// It is an estimate, and is not the actual sum of squared deviations.
+func WithSumOfSquaredDeviation() func(o *options) {
+	return func(o *options) {
+		o.enableSumOfSquaredDeviation = true
 	}
 }

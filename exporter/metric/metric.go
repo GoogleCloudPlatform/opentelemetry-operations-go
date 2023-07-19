@@ -491,7 +491,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		}
 	case metricdata.Histogram[int64]:
 		for _, point := range a.DataPoints {
-			ts, err := histogramToTimeSeries(point, m, mr)
+			ts, err := histogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
 			if err != nil {
 				aggErr = multierr.Append(aggErr, err)
 				continue
@@ -501,7 +501,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		}
 	case metricdata.Histogram[float64]:
 		for _, point := range a.DataPoints {
-			ts, err := histogramToTimeSeries(point, m, mr)
+			ts, err := histogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
 			if err != nil {
 				aggErr = multierr.Append(aggErr, err)
 				continue
@@ -579,10 +579,15 @@ func sumToTimeSeries[N int64 | float64](point metricdata.DataPoint[N], metrics m
 	}, nil
 }
 
-func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource) (*monitoringpb.TimeSeries, error) {
+//nolint:revive
+func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource, enableSOSD bool) (*monitoringpb.TimeSeries, error) {
 	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
 	if err != nil {
 		return nil, err
+	}
+	distributionValue := histToDistribution(point)
+	if enableSOSD {
+		setSumOfSquaredDeviation(point, distributionValue)
 	}
 	return &monitoringpb.TimeSeries{
 		Resource:   mr,
@@ -591,7 +596,11 @@ func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoin
 		ValueType:  googlemetricpb.MetricDescriptor_DISTRIBUTION,
 		Points: []*monitoringpb.Point{{
 			Interval: interval,
-			Value:    histToTypedValue(point),
+			Value: &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_DistributionValue{
+					DistributionValue: distributionValue,
+				},
+			},
 		}},
 	}, nil
 }
@@ -619,7 +628,7 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 	}, nil
 }
 
-func histToTypedValue[N int64 | float64](hist metricdata.HistogramDataPoint[N]) *monitoringpb.TypedValue {
+func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]) *distribution.Distribution {
 	counts := make([]int64, len(hist.BucketCounts))
 	for i, v := range hist.BucketCounts {
 		counts[i] = int64(v)
@@ -628,22 +637,35 @@ func histToTypedValue[N int64 | float64](hist metricdata.HistogramDataPoint[N]) 
 	if !math.IsNaN(float64(hist.Sum)) && hist.Count > 0 { // Avoid divide-by-zero
 		mean = float64(hist.Sum) / float64(hist.Count)
 	}
-	return &monitoringpb.TypedValue{
-		Value: &monitoringpb.TypedValue_DistributionValue{
-			DistributionValue: &distribution.Distribution{
-				Count:        int64(hist.Count),
-				Mean:         float64(mean),
-				BucketCounts: counts,
-				BucketOptions: &distribution.Distribution_BucketOptions{
-					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
-						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
-							Bounds: hist.Bounds,
-						},
-					},
+	return &distribution.Distribution{
+		Count:        int64(hist.Count),
+		Mean:         mean,
+		BucketCounts: counts,
+		BucketOptions: &distribution.Distribution_BucketOptions{
+			Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
+				ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
+					Bounds: hist.Bounds,
 				},
-				// TODO: support exemplars
 			},
 		},
+		// TODO: support exemplars
+	}
+}
+
+func setSumOfSquaredDeviation[N int64 | float64](hist metricdata.HistogramDataPoint[N], dist *distribution.Distribution) {
+	var prevBound float64
+	// Calculate the sum of squared deviation.
+	for i := 0; i < len(hist.Bounds); i++ {
+		// Assume all points in the bucket occur at the middle of the bucket range
+		middleOfBucket := (prevBound + hist.Bounds[i]) / 2
+		dist.SumOfSquaredDeviation += float64(dist.BucketCounts[i]) * (middleOfBucket - dist.Mean) * (middleOfBucket - dist.Mean)
+		prevBound = hist.Bounds[i]
+	}
+	// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
+	// Assume points in the infinity bucket are at the top of the previous bucket
+	middleOfInfBucket := prevBound
+	if len(dist.BucketCounts) > 0 {
+		dist.SumOfSquaredDeviation += float64(dist.BucketCounts[len(dist.BucketCounts)-1]) * (middleOfInfBucket - dist.Mean) * (middleOfInfBucket - dist.Mean)
 	}
 }
 
