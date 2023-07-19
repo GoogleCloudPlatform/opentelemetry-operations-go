@@ -32,17 +32,18 @@ import (
 var MetricsTestCases = []TestCase{
 	// Tests for the basic exporter
 	{
-		Name:                 "Counter",
+		Name:                 "Sum becomes a GCM Cumulative",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/counter_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.InstrumentationLibraryLabels = true
+			// Disable service resource labels here and below to keep output examples simpler.
 			cfg.MetricConfig.ServiceResourceLabels = false
 		},
 		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
-		Name:                 "Delta Counter",
+		Name:                 "Delta Sum becomes a GCM cumulative",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/delta_counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/delta_counter_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -51,7 +52,7 @@ var MetricsTestCases = []TestCase{
 		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
-		Name:                 "Non-monotonic Counter",
+		Name:                 "Non-monotonic Sum becomes a GCM Gauge",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -60,7 +61,7 @@ var MetricsTestCases = []TestCase{
 		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
-		Name:                 "Summary",
+		Name:                 "Summary becomes a GCM Cumulative for sum/count, Gauges for quantiles",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/summary_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -70,7 +71,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Gauge",
+		Name:                 "Gauge becomes a GCM Gauge",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/gauge.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/gauge_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -80,7 +81,7 @@ var MetricsTestCases = []TestCase{
 		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
-		Name:                 "Boolean valued Gauge metrics becomes an int Gauge",
+		Name:                 "Boolean-valued Gauge metric becomes an Int Gauge",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/boolean_gauge.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/boolean_gauge_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -89,7 +90,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true, // Boolean valued metrics not implemented in SDK
 	},
 	{
-		Name:                 "Gauge with Untyped label does nothing without GMP",
+		Name:                 "Gauge with Untyped label is a standard GCM Gauge without GMP",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_gauge.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_gauge_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -98,7 +99,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Histogram",
+		Name:                 "Histogram becomes a GCM Distribution",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_expect.json",
 		// TODO(dashpole): implement sum of squared deviation in the SDK exporter and enable here.
@@ -109,7 +110,7 @@ var MetricsTestCases = []TestCase{
 		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
 	},
 	{
-		Name:                 "Exponential Histogram",
+		Name:                 "Exponential Histogram becomes a GCM Distribution with exponential bucketOptions",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -120,16 +121,16 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Metrics from the Prometheus receiver",
+		Name:                 "Metrics from the Prometheus receiver can be successfully delivered",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_expect.json",
 	},
 	{
-		Name:                 "Metrics from the Prometheus receiver with a stale data point",
+		Name:                 "Prometheus stale data point is dropped",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus_stale.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_stale_expect.json",
 		CompareFixturePath:   "testdata/fixtures/metrics/prometheus_expect.json",
-		SkipForSDK:           true,
+		SkipForSDK:           true, // Stale point handling is not required for the SDK.
 	},
 	// Tests with special configuration options
 	{
@@ -195,7 +196,7 @@ var MetricsTestCases = []TestCase{
 		},
 	},
 	{
-		Name:                 "Multi-project metrics",
+		Name:                 "Multi-project metrics splits into multiple requests to different projects",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/multi_project.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/multi_project_expected.json",
 		// Multi-project exporting is not supported in the SDK exporter
@@ -203,7 +204,7 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		// see https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/issues/525
-		Name:                 "Metrics with only one +inf bucket",
+		Name:                 "Metrics with only one +inf bucket can be sent",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus_empty_buckets.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_empty_buckets_expected.json",
 		SkipForSDK:           true,
@@ -219,7 +220,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "CreateServiceTimeSeries option enabled",
+		Name:                 "CreateServiceTimeSeries option enabled makes CreateServiceTimeSeries calls",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/create_service_timeseries.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/create_service_timeseries_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -306,7 +307,7 @@ var MetricsTestCases = []TestCase{
 	},
 	// Tests for the GMP exporter
 	{
-		Name:                 "Google Managed Prometheus Exporter",
+		Name:                 "[GMP] prometheus receiver metrics",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/google_managed_prometheus.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/google_managed_prometheus_expect.json",
 		ConfigureCollector:   configureGMPCollector,
@@ -314,7 +315,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Google Managed Prometheus Gauge",
+		Name:                 "[GMP] Gauge becomes a GCM Gauge with /gauge suffix",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/gauge.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/gauge_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
@@ -322,7 +323,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Google Managed Prometheus Untyped Gauge",
+		Name:                 "[GMP] Untyped Gauge becomes a GCM Gauge and a Cumulative with /unknown and /unknown:counter suffixes",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_gauge.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_gauge_gmp_expect.json",
 		ConfigureCollector: func(cfg *collector.Config) {
@@ -334,7 +335,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Google Managed Prometheus Counter",
+		Name:                 "[GMP] Sum becomes a GCM Cumulative with /counter suffix",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/counter_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
@@ -342,7 +343,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Google Managed Prometheus Delta Counter",
+		Name:                 "[GMP] Delta Sum becomes a GCM Cumulative with a /counter suffix",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/delta_counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/delta_counter_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
@@ -350,7 +351,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Google Managed Prometheus Non-Monotonic Counter",
+		Name:                 "[GMP] Non-Monotonic Sum becomes a GCM Gauge with a /gauge suffix",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/nonmonotonic_counter.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/nonmonotonic_counter_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
@@ -358,7 +359,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Google Managed Prometheus Histogram",
+		Name:                 "[GMP] Histogram becomes a GCM Histogram with a /histogram suffix",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
@@ -366,7 +367,7 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
-		Name:                 "Google Managed Prometheus Summary",
+		Name:                 "[GMP] Summary becomes a GCM Cumulative for sum/count, Gauges for quantiles",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/summary_gmp_expect.json",
 		ConfigureCollector:   configureGMPCollector,
