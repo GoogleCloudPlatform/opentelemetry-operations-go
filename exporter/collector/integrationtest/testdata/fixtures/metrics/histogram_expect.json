@@ -31,6 +31,7 @@
                 "distributionValue": {
                   "count": "1",
                   "mean": 2,
+                  "sumOfSquaredDeviation": 2.25,
                   "bucketOptions": {
                     "explicitBuckets": {
                       "bounds": [
@@ -86,6 +87,7 @@
                 "distributionValue": {
                   "count": "2",
                   "mean": 7,
+                  "sumOfSquaredDeviation": 76.25,
                   "bucketOptions": {
                     "explicitBuckets": {
                       "bounds": [

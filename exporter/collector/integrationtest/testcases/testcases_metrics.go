@@ -102,12 +102,15 @@ var MetricsTestCases = []TestCase{
 		Name:                 "Histogram becomes a GCM Distribution",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_expect.json",
-		// TODO(dashpole): implement sum of squared deviation in the SDK exporter and enable here.
 		ConfigureCollector: func(cfg *collector.Config) {
 			cfg.MetricConfig.ServiceResourceLabels = false
 			cfg.MetricConfig.InstrumentationLibraryLabels = true
+			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 		},
-		MetricSDKExporterOptions: []metric.Option{metric.WithFilteredResourceAttributes(metric.NoAttributes)},
+		MetricSDKExporterOptions: []metric.Option{
+			metric.WithFilteredResourceAttributes(metric.NoAttributes),
+			metric.WithSumOfSquaredDeviation(),
+		},
 	},
 	{
 		Name:                 "Exponential Histogram becomes a GCM Distribution with exponential bucketOptions",
@@ -124,13 +127,22 @@ var MetricsTestCases = []TestCase{
 		Name:                 "Metrics from the Prometheus receiver can be successfully delivered",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
+		},
+		MetricSDKExporterOptions: []metric.Option{
+			metric.WithSumOfSquaredDeviation(),
+		},
 	},
 	{
 		Name:                 "Prometheus stale data point is dropped",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/prometheus_stale.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/prometheus_stale_expect.json",
 		CompareFixturePath:   "testdata/fixtures/metrics/prometheus_expect.json",
-		SkipForSDK:           true, // Stale point handling is not required for the SDK.
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
+		},
+		SkipForSDK: true, // Stale point handling is not required for the SDK.
 	},
 	// Tests with special configuration options
 	{
@@ -255,6 +267,7 @@ var MetricsTestCases = []TestCase{
 				Directory:  dir,
 				MaxBackoff: time.Duration(1 * time.Second),
 			}
+			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
 		},
 		SkipForSDK: true,
 	},
