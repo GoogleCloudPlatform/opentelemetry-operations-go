@@ -579,6 +579,8 @@ func sumToTimeSeries[N int64 | float64](point metricdata.DataPoint[N], metrics m
 	}, nil
 }
 
+// TODO(@dashpole): Refactor to pass control-coupling lint check.
+//
 //nolint:revive
 func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource, enableSOSD bool) (*monitoringpb.TimeSeries, error) {
 	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
