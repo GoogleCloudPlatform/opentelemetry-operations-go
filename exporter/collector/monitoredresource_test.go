@@ -128,6 +128,220 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 			},
 		},
 		{
+			name: "EKS cluster",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "aws_eks",
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "mycluster",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_cluster",
+				Labels: map[string]string{
+					"cluster_name": "mycluster",
+					"location":     "us-central1",
+				},
+			},
+		},
+		{
+			name: "AKS cluster",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "azure_aks",
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "mycluster",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_cluster",
+				Labels: map[string]string{
+					"cluster_name": "mycluster",
+					"location":     "us-central1",
+				},
+			},
+		},
+		{
+			name: "EKS pod",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "aws_eks",
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.pod.name":            "mypod",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_pod",
+				Labels: map[string]string{
+					"cluster_name":   "mycluster",
+					"namespace_name": "mynamespace",
+					"pod_name":       "mypod",
+					"location":       "us-central1",
+				},
+			},
+		},
+		{
+			name: "AKS pod",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "azure_aks",
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.pod.name":            "mypod",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_pod",
+				Labels: map[string]string{
+					"cluster_name":   "mycluster",
+					"namespace_name": "mynamespace",
+					"pod_name":       "mypod",
+					"location":       "us-central1",
+				},
+			},
+		},
+		{
+			name: "EKS node",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "aws_eks",
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.node.name":           "mynode",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_node",
+				Labels: map[string]string{
+					"cluster_name": "mycluster",
+					"node_name":    "mynode",
+					"location":     "us-central1",
+				},
+			},
+		},
+		{
+			name: "AKS node",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "azure_aks",
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.node.name":           "mynode",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_node",
+				Labels: map[string]string{
+					"cluster_name": "mycluster",
+					"node_name":    "mynode",
+					"location":     "us-central1",
+				},
+			},
+		},
+		{
+			name: "EKS container",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "aws_eks",
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_container",
+				Labels: map[string]string{
+					"cluster_name":   "mycluster",
+					"namespace_name": "mynamespace",
+					"pod_name":       "mypod",
+					"container_name": "mycontainer",
+					"location":       "us-central1",
+				},
+			},
+		},
+		{
+			name: "AKS container",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "azure_aks",
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_container",
+				Labels: map[string]string{
+					"cluster_name":   "mycluster",
+					"namespace_name": "mynamespace",
+					"pod_name":       "mypod",
+					"container_name": "mycontainer",
+					"location":       "us-central1",
+				},
+			},
+		},
+		{
+			name: "Non-cloud k8s cluster",
+			resourceLabels: map[string]string{
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "minikube",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_cluster",
+				Labels: map[string]string{
+					"location":     "us-central1",
+					"cluster_name": "minikube",
+				},
+			},
+		},
+		{
+			name: "Non-cloud k8s node",
+			resourceLabels: map[string]string{
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "minikube",
+				"k8s.node.name":           "mynode",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_node",
+				Labels: map[string]string{
+					"location":     "us-central1",
+					"cluster_name": "minikube",
+					"node_name":    "mynode",
+				},
+			},
+		},
+		{
+			name: "Non-cloud k8s pod",
+			resourceLabels: map[string]string{
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "minikube",
+				"k8s.node.name":           "mynode",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.pod.name":            "mypod",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_pod",
+				Labels: map[string]string{
+					"location":       "us-central1",
+					"cluster_name":   "minikube",
+					"namespace_name": "mynamespace",
+					"pod_name":       "mypod",
+				},
+			},
+		},
+		{
+			name: "Non-cloud k8s container",
+			resourceLabels: map[string]string{
+				"cloud.availability_zone": "us-central1",
+				"k8s.cluster.name":        "minikube",
+				"k8s.node.name":           "mynode",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_container",
+				Labels: map[string]string{
+					"location":       "us-central1",
+					"cluster_name":   "minikube",
+					"namespace_name": "mynamespace",
+					"pod_name":       "mypod",
+					"container_name": "mycontainer",
+				},
+			},
+		},
+		{
 			name: "AWS ec2 instance",
 			resourceLabels: map[string]string{
 				"cloud.platform":          "aws_ec2",

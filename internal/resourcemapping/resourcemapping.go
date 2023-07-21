@@ -168,12 +168,12 @@ type ReadOnlyAttributes interface {
 // E.g.
 // This may output `gce_instance` type with appropriate labels.
 func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResource {
-	cloudPlatform, _ := attrs.GetString(string(semconv.CloudPlatformKey))
+	cloudPlatform := getK8sClusterOrCloudPlatform(attrs)
 	var mr *GceResource
 	switch cloudPlatform {
 	case semconv.CloudPlatformGCPComputeEngine.Value.AsString():
 		mr = createMonitoredResource(gceInstance, attrs)
-	case semconv.CloudPlatformGCPKubernetesEngine.Value.AsString():
+	case k8sCluster:
 		// Try for most to least specific k8s_container, k8s_pod, etc
 		if _, ok := attrs.GetString(string(semconv.K8SContainerNameKey)); ok {
 			mr = createMonitoredResource(k8sContainer, attrs)
@@ -206,6 +206,17 @@ func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResourc
 		}
 	}
 	return mr
+}
+
+// getK8sClusterOrCloudPlatform returns "k8s_cluster" if K8SClusterNameKey is set
+// (which identifies cloud provider clusters like GKE, EKS, AKS, or non-cloud clusters like minikube)
+// Otherwise, it returns the cloud.platform value.
+func getK8sClusterOrCloudPlatform(attrs ReadOnlyAttributes) string {
+	if _, cluster := attrs.GetString(string(semconv.K8SClusterNameKey)); cluster {
+		return k8sCluster
+	}
+	cloudPlatform, _ := attrs.GetString(string(semconv.CloudPlatformKey))
+	return cloudPlatform
 }
 
 func createMonitoredResource(
