@@ -25,7 +25,7 @@ import (
 const (
 	// Special attribute key used by Ops Agent prometheus receiver to denote untyped
 	// prometheus metric. Internal use only.
-	GCPOpsAgentUntypedMetricKey = "prometheus_untyped_metric"
+	GCPOpsAgentUntypedMetricKey = "prometheus.googleapis.com/internal/untyped_metric"
 
 	gcpUntypedDoubleExportGateKey = "gcp.untyped_double_export"
 )
