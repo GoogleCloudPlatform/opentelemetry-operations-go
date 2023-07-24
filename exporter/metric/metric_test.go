@@ -479,7 +479,25 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			},
 		},
 		{
-			desc: "nonexisting resource types",
+			desc: "nonexisting resource types (no k8s.cluster.name)",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("cloud.provider", "none"),
+				attribute.String("cloud.platform", "gcp_foobar"),
+				attribute.String("cloud.availability_zone", "us-central1-a"),
+				attribute.String("k8s.namespace.name", "default"),
+				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
+				attribute.String("k8s.container.name", "opentelemetry"),
+			),
+			expectedType: "generic_node",
+			expectedLabels: map[string]string{
+				"location":  "us-central1-a",
+				"namespace": "",
+				"node_id":   "",
+			},
+		},
+		{
+			desc: "non-cloud k8s platform",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "none"),
@@ -490,11 +508,13 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
 				attribute.String("k8s.container.name", "opentelemetry"),
 			),
-			expectedType: "generic_node",
+			expectedType: "k8s_container",
 			expectedLabels: map[string]string{
-				"location":  "us-central1-a",
-				"namespace": "",
-				"node_id":   "",
+				"location":       "us-central1-a",
+				"cluster_name":   "opentelemetry-cluster",
+				"namespace_name": "default",
+				"pod_name":       "opentelemetry-pod-autoconf",
+				"container_name": "opentelemetry",
 			},
 		},
 		{
