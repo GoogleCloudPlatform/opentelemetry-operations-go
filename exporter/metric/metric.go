@@ -112,7 +112,7 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 	}
 
 	if o.compression == "gzip" {
-		client.CallOptions.GetMetricDescriptor = append(client.CallOptions.CreateMetricDescriptor,
+		client.CallOptions.GetMetricDescriptor = append(client.CallOptions.GetMetricDescriptor,
 			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
 		client.CallOptions.CreateMetricDescriptor = append(client.CallOptions.CreateMetricDescriptor,
 			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
