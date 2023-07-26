@@ -169,43 +169,46 @@ type ReadOnlyAttributes interface {
 // This may output `gce_instance` type with appropriate labels.
 func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResource {
 	cloudPlatform, _ := attrs.GetString(string(semconv.CloudPlatformKey))
-	var mr *GceResource
 	switch cloudPlatform {
 	case semconv.CloudPlatformGCPComputeEngine.Value.AsString():
-		mr = createMonitoredResource(gceInstance, attrs)
-	case semconv.CloudPlatformGCPKubernetesEngine.Value.AsString():
-		// Try for most to least specific k8s_container, k8s_pod, etc
-		if _, ok := attrs.GetString(string(semconv.K8SContainerNameKey)); ok {
-			mr = createMonitoredResource(k8sContainer, attrs)
-		} else if _, ok := attrs.GetString(string(semconv.K8SPodNameKey)); ok {
-			mr = createMonitoredResource(k8sPod, attrs)
-		} else if _, ok := attrs.GetString(string(semconv.K8SNodeNameKey)); ok {
-			mr = createMonitoredResource(k8sNode, attrs)
-		} else {
-			mr = createMonitoredResource(k8sCluster, attrs)
-		}
+		return createMonitoredResource(gceInstance, attrs)
 	case semconv.CloudPlatformGCPAppEngine.Value.AsString():
-		mr = createMonitoredResource(gaeInstance, attrs)
+		return createMonitoredResource(gaeInstance, attrs)
 	case semconv.CloudPlatformAWSEC2.Value.AsString():
-		mr = createMonitoredResource(awsEc2Instance, attrs)
+		return createMonitoredResource(awsEc2Instance, attrs)
 	// TODO(alex-basinov): replace this string literal with semconv.CloudPlatformGCPBareMetalSolution
 	// once https://github.com/open-telemetry/semantic-conventions/pull/64 makes its way
 	// into the semconv module.
 	case "gcp_bare_metal_solution":
-		mr = createMonitoredResource(bmsInstance, attrs)
+		return createMonitoredResource(bmsInstance, attrs)
 	default:
+		// if k8s.cluster.name is set, pattern match for various k8s resources.
+		// this will also match non-cloud k8s platforms like minikube.
+		if _, ok := attrs.GetString(string(semconv.K8SClusterNameKey)); ok {
+			// Try for most to least specific k8s_container, k8s_pod, etc
+			if _, ok := attrs.GetString(string(semconv.K8SContainerNameKey)); ok {
+				return createMonitoredResource(k8sContainer, attrs)
+			} else if _, ok := attrs.GetString(string(semconv.K8SPodNameKey)); ok {
+				return createMonitoredResource(k8sPod, attrs)
+			} else if _, ok := attrs.GetString(string(semconv.K8SNodeNameKey)); ok {
+				return createMonitoredResource(k8sNode, attrs)
+			} else {
+				return createMonitoredResource(k8sCluster, attrs)
+			}
+		}
+
 		// Fallback to generic_task
 		_, hasServiceName := attrs.GetString(string(semconv.ServiceNameKey))
 		_, hasFaaSName := attrs.GetString(string(semconv.FaaSNameKey))
 		_, hasServiceInstanceID := attrs.GetString(string(semconv.ServiceInstanceIDKey))
 		_, hasFaaSID := attrs.GetString(string(semconv.FaaSIDKey))
 		if (hasServiceName && hasServiceInstanceID) || (hasFaaSID && hasFaaSName) {
-			mr = createMonitoredResource(genericTask, attrs)
-		} else {
-			mr = createMonitoredResource(genericNode, attrs)
+			return createMonitoredResource(genericTask, attrs)
 		}
+
+		// Everything else fallback to generic_node
+		return createMonitoredResource(genericNode, attrs)
 	}
-	return mr
 }
 
 func createMonitoredResource(
