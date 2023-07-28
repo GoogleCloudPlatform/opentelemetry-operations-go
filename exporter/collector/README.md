@@ -197,12 +197,6 @@ If the body is currently a string, it will be converted to a `message` field in
 the new JSON payload. If the body is already a map, the `@type` field will be
 added to the map. Other body types (such as byte) are undefined for this
 behavior.
-- `log.invalid_json_byte_strings` (optional, default = false): If `true`, any
-  log with a body of type byte will be converted to a string payload, if the
-  original byte body does not marshal to valid JSON. Cloud Logging requires
-  non-string payloads to marshal to JSON, but it is possible to have a byte body
-  in OTLP that is not a valid JSON object. Enabling this setting allows such
-  OTLP byte bodies to be exported to Cloud Logging as raw strings.
 
 Example:
 

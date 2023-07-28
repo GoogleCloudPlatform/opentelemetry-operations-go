@@ -128,9 +128,6 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetEmptyBytes().FromRaw([]byte(`"this is not json"`))
 				return log
 			},
-			config: func(cfg *Config) {
-				cfg.LogConfig.InvalidJSONByteStrings = true
-			},
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -140,22 +137,6 @@ func TestLogMapping(t *testing.T) {
 					Timestamp: testObservedTime,
 				},
 			},
-			maxEntrySize: defaultMaxEntrySize,
-		},
-		{
-			name: "log with invalid json byte body and flag disabled returns error",
-			log: func() plog.LogRecord {
-				log := plog.NewLogRecord()
-				log.Body().SetEmptyBytes().FromRaw([]byte(`"this is not json"`))
-				return log
-			},
-			config: func(cfg *Config) {
-				cfg.LogConfig.InvalidJSONByteStrings = false
-			},
-			mr: func() *monitoredrespb.MonitoredResource {
-				return nil
-			},
-			expectError:  true,
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{

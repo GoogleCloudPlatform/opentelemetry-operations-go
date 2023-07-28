@@ -183,11 +183,6 @@ type LogConfig struct {
 	// ErrorReportingType enables automatically parsing error logs to a json payload containing the
 	// type value for GCP Error Reporting. See https://cloud.google.com/error-reporting/docs/formatting-error-messages#log-text.
 	ErrorReportingType bool `mapstructure:"error_reporting_type"`
-	// InvalidJsonByteStrings exports any Log body of type byte as a raw byte string, when the
-	// byte body does not marshal to valid JSON. Cloud Logging requires byte payloads to marshal to
-	// valid JSON via the encoding/json package. When byte payloads do not translate to valid JSON,
-	// this allows them to still be passed to Cloud Logging as a raw string payload.
-	InvalidJSONByteStrings bool `mapstructure:"invalid_json_byte_strings"`
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.

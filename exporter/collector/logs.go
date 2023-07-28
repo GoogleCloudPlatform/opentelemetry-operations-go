@@ -543,11 +543,8 @@ func (l logMapper) parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (i
 	case pcommon.ValueTypeBytes:
 		var verify map[string]interface{}
 		if err := json.Unmarshal(logBody.Bytes().AsRaw(), &verify); err != nil {
-			if l.cfg.LogConfig.InvalidJSONByteStrings {
-				l.obs.log.Warn("byte payload does not marshal to valid json, exporting as raw string")
-				return logBody.AsString(), payloads, nil
-			}
-			return nil, 0, fmt.Errorf("error marshaling byte payload to json: %+v", err)
+			l.obs.log.Warn(fmt.Sprintf("byte payload does not marshal to valid json, exporting as raw string: %+v", err))
+			return logBody.AsString(), payloads, nil
 		}
 		return logBody.Bytes().AsRaw(), 1, nil
 	case pcommon.ValueTypeStr:
