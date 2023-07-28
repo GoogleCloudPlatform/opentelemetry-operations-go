@@ -122,6 +122,43 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log with invalid json byte body returns raw byte string",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyBytes().FromRaw([]byte(`"this is not json"`))
+				return log
+			},
+			config: func(cfg *Config) {
+				cfg.LogConfig.InvalidJSONByteStrings = true
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []logging.Entry{
+				{
+					Payload:   "InRoaXMgaXMgbm90IGpzb24i", // "this is not json" as raw bytes body
+					Timestamp: testObservedTime,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with invalid json byte body and flag disabled returns error",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyBytes().FromRaw([]byte(`"this is not json"`))
+				return log
+			},
+			config: func(cfg *Config) {
+				cfg.LogConfig.InvalidJSONByteStrings = false
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectError:  true,
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
 			name: "log with json and httpRequest, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()

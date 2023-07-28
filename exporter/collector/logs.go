@@ -495,7 +495,7 @@ func (l logMapper) logToSplitEntries(
 	overheadClone := proto.Clone(logOverhead)
 	overheadBytes := proto.Size(overheadClone)
 
-	payload, splits, err := parseEntryPayload(logRecord.Body(), l.maxEntrySize-overheadBytes)
+	payload, splits, err := l.parseEntryPayload(logRecord.Body(), l.maxEntrySize-overheadBytes)
 	if err != nil {
 		return []logging.Entry{entry}, err
 	}
@@ -531,15 +531,27 @@ func (l logMapper) logToSplitEntries(
 	return []logging.Entry{entry}, nil
 }
 
-func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, int, error) {
+func (l logMapper) parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, int, error) {
 	if len(logBody.AsString()) == 0 {
 		return nil, 0, nil
 	}
+
+	// number of payloads calculation, used when returning a string payload
+	payloads := int(math.Ceil(float64(len([]byte(logBody.AsString()))) / float64(maxEntrySize)))
+
 	switch logBody.Type() {
 	case pcommon.ValueTypeBytes:
+		var verify map[string]interface{}
+		if err := json.Unmarshal(logBody.Bytes().AsRaw(), &verify); err != nil {
+			if l.cfg.LogConfig.InvalidJSONByteStrings {
+				l.obs.log.Warn("byte payload does not marshal to valid json, exporting as raw string")
+				return logBody.AsString(), payloads, nil
+			}
+			return nil, 0, fmt.Errorf("error marshaling byte payload to json: %+v", err)
+		}
 		return logBody.Bytes().AsRaw(), 1, nil
 	case pcommon.ValueTypeStr:
-		return logBody.AsString(), int(math.Ceil(float64(len([]byte(logBody.AsString()))) / float64(maxEntrySize))), nil
+		return logBody.AsString(), payloads, nil
 	case pcommon.ValueTypeMap:
 		return logBody.Map().AsRaw(), 1, nil
 
