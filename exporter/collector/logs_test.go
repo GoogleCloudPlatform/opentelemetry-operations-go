@@ -363,6 +363,24 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log with IsSampled",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetFlags(log.Flags().WithIsSampled(true))
+				return log
+			},
+			expectedEntries: []logging.Entry{
+				{
+					TraceSampled: true,
+					Timestamp:    testObservedTime,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
 			name: "log with trace and span id",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
