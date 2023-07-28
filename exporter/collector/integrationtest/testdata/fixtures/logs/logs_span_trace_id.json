@@ -31,7 +31,7 @@
                             {
                               "key": "msg",
                               "value": {
-                                "stringValue": "hello world 0"
+                                "stringValue": "this log has IsSampled=0"
                               }
                             }
                           ]
@@ -41,6 +41,7 @@
                   ]
                 }
               },
+              "flags": 0,
               "attributes": [
                 {
                   "key": "file.name",
@@ -83,7 +84,7 @@
                             {
                               "key": "msg",
                               "value": {
-                                "stringValue": "hello world 1"
+                                "stringValue": "this log has IsSampled=1"
                               }
                             }
                           ]
@@ -93,6 +94,7 @@
                   ]
                 }
               },
+              "flags": 1,
               "attributes": [
                 {
                   "key": "file.name",
@@ -129,7 +131,7 @@
                             {
                               "key": "msg",
                               "value": {
-                                "stringValue": "hello world 2"
+                                "stringValue": "this log has neither flag nor gcp.trace_sampled"
                               }
                             },
                             {
@@ -187,7 +189,7 @@
                             {
                               "key": "msg",
                               "value": {
-                                "stringValue": "hello world 3"
+                                "stringValue": "this log has gcp.trace_sampled=false"
                               }
                             }
                           ]
@@ -208,6 +210,12 @@
                   "key": "gcp.log_name",
                   "value": {
                     "stringValue": "my-log-name-foo"
+                  }
+                },
+                {
+                  "key": "gcp.trace_sampled",
+                  "value": {
+                    "boolValue": false
                   }
                 }
               ],
@@ -239,7 +247,7 @@
                             {
                               "key": "msg",
                               "value": {
-                                "stringValue": "hello world 4"
+                                "stringValue": "this log has gcp.trace_sampled=true"
                               }
                             }
                           ]
@@ -260,6 +268,12 @@
                   "key": "gcp.log_name",
                   "value": {
                     "stringValue": "my-log-name-foo"
+                  }
+                },
+                {
+                  "key": "gcp.trace_sampled",
+                  "value": {
+                    "boolValue": true
                   }
                 }
               ],

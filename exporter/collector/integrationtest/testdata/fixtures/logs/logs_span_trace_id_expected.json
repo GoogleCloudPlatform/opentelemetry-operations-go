@@ -15,7 +15,7 @@
           "jsonPayload": {
             "body": {
               "level": "info",
-              "msg": "hello world 0",
+              "msg": "this log has IsSampled=0",
               "time": "2022-06-22T16:13:19Z"
             }
           },
@@ -39,7 +39,7 @@
           "jsonPayload": {
             "body": {
               "level": "info",
-              "msg": "hello world 1",
+              "msg": "this log has IsSampled=1",
               "time": "2022-06-22T16:13:19Z"
             }
           },
@@ -48,7 +48,8 @@
             "file.name": "apache.log"
           },
           "trace": "projects/fakeprojectid/traces/ad57e7b40d6f172d04f8a0e1b80cafe4",
-          "spanId": "97c0f2f642dd1306"
+          "spanId": "97c0f2f642dd1306",
+          "traceSampled": true
         },
         {
           "logName": "projects/fakeprojectid/logs/my-log-name-foo",
@@ -63,31 +64,7 @@
           "jsonPayload": {
             "body": {
               "level": "info",
-              "msg": "hello world 2",
-              "time": "2022-06-22T16:13:19Z"
-            }
-          },
-          "timestamp": "1970-01-01T00:00:00Z",
-          "labels": {
-            "file.name": "apache.log"
-          },
-          "trace": "projects/fakeprojectid/traces/ad57e7b40d6f172d04f8a0e1b80cafe4",
-          "spanId": "fded437fb39abed9"
-        },
-        {
-          "logName": "projects/fakeprojectid/logs/my-log-name-foo",
-          "resource": {
-            "type": "generic_node",
-            "labels": {
-              "location": "global",
-              "namespace": "",
-              "node_id": ""
-            }
-          },
-          "jsonPayload": {
-            "body": {
-              "level": "info",
-              "msg": "hello world 3",
+              "msg": "this log has gcp.trace_sampled=false",
               "time": "2022-06-22T16:13:19Z"
             }
           },
@@ -111,7 +88,7 @@
           "jsonPayload": {
             "body": {
               "level": "info",
-              "msg": "hello world 4",
+              "msg": "this log has gcp.trace_sampled=true",
               "time": "2022-06-22T16:13:19Z"
             }
           },
@@ -120,7 +97,32 @@
             "file.name": "apache.log"
           },
           "trace": "projects/fakeprojectid/traces/ad57e7b40d6f172d04f8a0e1b80cafe4",
-          "spanId": "d9ae3a7b26ef239f"
+          "spanId": "d9ae3a7b26ef239f",
+          "traceSampled": true
+        },
+        {
+          "logName": "projects/fakeprojectid/logs/my-log-name-foo",
+          "resource": {
+            "type": "generic_node",
+            "labels": {
+              "location": "global",
+              "namespace": "",
+              "node_id": ""
+            }
+          },
+          "jsonPayload": {
+            "body": {
+              "level": "info",
+              "msg": "this log has neither flag nor gcp.trace_sampled",
+              "time": "2022-06-22T16:13:19Z"
+            }
+          },
+          "timestamp": "1970-01-01T00:00:00Z",
+          "labels": {
+            "file.name": "apache.log"
+          },
+          "trace": "projects/fakeprojectid/traces/ad57e7b40d6f172d04f8a0e1b80cafe4",
+          "spanId": "fded437fb39abed9"
         }
       ],
       "partialSuccess": true

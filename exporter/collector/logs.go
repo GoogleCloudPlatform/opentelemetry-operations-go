@@ -418,9 +418,9 @@ func (l logMapper) logToSplitEntries(
 		delete(attrsMap, SourceLocationAttributeKey)
 	}
 
-	// parse TraceSampled boolean from OTel attribute
-	if traceSampled, ok := attrsMap[TraceSampledAttributeKey]; ok {
-		entry.TraceSampled = traceSampled.Bool()
+	// parse TraceSampled boolean from OTel attribute or IsSampled OTLP flag
+	if traceSampled, ok := attrsMap[TraceSampledAttributeKey]; ok || logRecord.Flags().IsSampled() {
+		entry.TraceSampled = (traceSampled.Bool() || logRecord.Flags().IsSampled())
 		delete(attrsMap, TraceSampledAttributeKey)
 	}
 
