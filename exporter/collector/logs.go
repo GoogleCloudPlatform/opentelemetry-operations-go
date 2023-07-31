@@ -20,7 +20,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math"
-	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -28,14 +27,18 @@ import (
 	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
+	structpb "github.com/golang/protobuf/ptypes/struct"
 	"github.com/googleapis/gax-go/v2"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+	logtypepb "google.golang.org/genproto/googleapis/logging/type"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -292,19 +295,14 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 					continue
 				}
 
-				for splitIndex, entry := range splitEntries {
-					internalLogEntry, err := l.logEntryToInternal(entry, logName, projectID, mr, len(splitEntries), splitIndex)
-					if err != nil {
-						errors = append(errors, err)
-						continue
-					}
+				for _, entry := range splitEntries {
 					if l.cfg.DestinationProjectQuota {
 						projectMapKey = projectID
 					}
 					if _, ok := entries[projectMapKey]; !ok {
 						entries[projectMapKey] = make([]*logpb.LogEntry, 0)
 					}
-					entries[projectMapKey] = append(entries[projectMapKey], internalLogEntry)
+					entries[projectMapKey] = append(entries[projectMapKey], &entry)
 				}
 			}
 		}
@@ -323,31 +321,6 @@ func mergeLogLabels(instrumentationSource, instrumentationVersion string, resour
 		labelsMap["instrumentation_version"] = instrumentationVersion
 	}
 	return mergeLabels(labelsMap, resourceLabels)
-}
-
-func (l logMapper) logEntryToInternal(
-	entry logging.Entry,
-	logName string,
-	projectID string,
-	mr *monitoredrespb.MonitoredResource,
-	splits int,
-	splitIndex int,
-) (*logpb.LogEntry, error) {
-	internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", projectID))
-	if err != nil {
-		return nil, err
-	}
-
-	internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", projectID, url.PathEscape(logName))
-	internalLogEntry.Resource = mr
-	if splits > 1 {
-		internalLogEntry.Split = &logpb.LogSplit{
-			Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.String()),
-			Index:       int32(splitIndex),
-			TotalSplits: int32(splits),
-		}
-	}
-	return internalLogEntry, nil
 }
 
 func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEntry) (*logpb.WriteLogEntriesResponse, error) {
@@ -378,24 +351,25 @@ func (l logMapper) logToSplitEntries(
 	processTime time.Time,
 	logName string,
 	projectID string,
-) ([]logging.Entry, error) {
+) ([]logpb.LogEntry, error) {
 	// make a copy in case we mutate the record
 	logRecord := plog.NewLogRecord()
 	log.CopyTo(logRecord)
 
-	entry := logging.Entry{
+	entry := logpb.LogEntry{
+		LogName:  fmt.Sprintf("projects/%s/logs/%s", projectID, url.PathEscape(logName)),
 		Resource: mr,
 	}
 
-	entry.Timestamp = logRecord.Timestamp().AsTime()
+	entry.Timestamp = timestamppb.New(logRecord.Timestamp().AsTime())
 	if logRecord.Timestamp() == 0 {
 		// if timestamp is unset, fall back to observed_time_unix_nano as recommended
 		//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
 		if logRecord.ObservedTimestamp() != 0 {
-			entry.Timestamp = logRecord.ObservedTimestamp().AsTime()
+			entry.Timestamp = timestamppb.New(logRecord.ObservedTimestamp().AsTime())
 		} else {
 			// if observed_time is 0, use the current time
-			entry.Timestamp = processTime
+			entry.Timestamp = timestamppb.New(processTime)
 		}
 	}
 
@@ -412,7 +386,7 @@ func (l logMapper) logToSplitEntries(
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
 		err := json.Unmarshal(sourceLocation.Bytes().AsRaw(), &logEntrySourceLocation)
 		if err != nil {
-			return []logging.Entry{entry}, err
+			return []logpb.LogEntry{entry}, err
 		}
 		entry.SourceLocation = &logEntrySourceLocation
 		delete(attrsMap, SourceLocationAttributeKey)
@@ -429,21 +403,21 @@ func (l logMapper) logToSplitEntries(
 		entry.Trace = fmt.Sprintf("projects/%s/traces/%s", projectID, hex.EncodeToString(traceID[:]))
 	}
 	if spanID := logRecord.SpanID(); !spanID.IsEmpty() {
-		entry.SpanID = hex.EncodeToString(spanID[:])
+		entry.SpanId = hex.EncodeToString(spanID[:])
 	}
 
 	if httpRequestAttr, ok := attrsMap[HTTPRequestAttributeKey]; ok {
-		var httpRequest *logging.HTTPRequest
+		var httpRequest *logtypepb.HttpRequest
 		httpRequest, err := l.parseHTTPRequest(httpRequestAttr)
 		if err != nil {
 			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
 		}
-		entry.HTTPRequest = httpRequest
+		entry.HttpRequest = httpRequest
 		delete(attrsMap, HTTPRequestAttributeKey)
 	}
 
 	if logRecord.SeverityNumber() < 0 || int(logRecord.SeverityNumber()) > len(severityMapping)-1 {
-		return []logging.Entry{entry}, fmt.Errorf("unknown SeverityNumber %v", logRecord.SeverityNumber())
+		return []logpb.LogEntry{entry}, fmt.Errorf("unknown SeverityNumber %v", logRecord.SeverityNumber())
 	}
 	severityNumber := logRecord.SeverityNumber()
 	// Log severity levels are based on numerical values defined by Otel/GCP, which are informally mapped to generic text values such as "ALERT", "Debug", etc.
@@ -456,7 +430,7 @@ func (l logMapper) logToSplitEntries(
 	if severityForText, ok := otelSeverityForText[strings.ToLower(logRecord.SeverityText())]; ok && severityNumber == 0 {
 		severityNumber = severityForText
 	}
-	entry.Severity = severityMapping[severityNumber]
+	entry.Severity = logtypepb.LogSeverity(severityMapping[severityNumber])
 
 	// Parse severityNumber > 17 (error) to a GCP Error Reporting entry if enabled
 	if severityNumber >= 17 && l.cfg.LogConfig.ErrorReportingType {
@@ -484,25 +458,19 @@ func (l logMapper) logToSplitEntries(
 		}
 	}
 
-	// Calculate the size of the internal log entry so this overhead can be accounted
-	// for when determining the need to split based on payload size
-	// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
-	logOverhead, err := l.logEntryToInternal(entry, logName, projectID, mr, 0, 0)
-	if err != nil {
-		return []logging.Entry{entry}, err
-	}
+	// calculate the size of the entry proto for payload split sizing
 	// make a copy so the proto initialization doesn't modify the original entry
-	overheadClone := proto.Clone(logOverhead)
+	overheadClone := proto.Clone(&entry)
 	overheadBytes := proto.Size(overheadClone)
 
 	payload, splits, err := parseEntryPayload(logRecord.Body(), l.maxEntrySize-overheadBytes)
 	if err != nil {
-		return []logging.Entry{entry}, err
+		return []logpb.LogEntry{entry}, err
 	}
 
 	// Split log entries with a string payload into fewer entries
 	if splits > 1 {
-		entries := make([]logging.Entry, splits)
+		entries := make([]logpb.LogEntry, splits)
 		payloadString := payload.(string)
 
 		// Start by assuming all splits will be even (this may not be the case)
@@ -518,7 +486,13 @@ func (l logMapper) logToSplitEntries(
 				currentSplit = payloadString[startIndex:endIndex]
 			}
 			entries[i-1] = entry
-			entries[i-1].Payload = currentSplit
+			entries[i-1].Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
+
+			entry.Split = &logpb.LogSplit{
+				Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.String()),
+				Index:       int32(i - 1),
+				TotalSplits: int32(splits),
+			}
 
 			// Update slice indices to the next chunk
 			startIndex = endIndex
@@ -527,8 +501,54 @@ func (l logMapper) logToSplitEntries(
 		return entries, nil
 	}
 
-	entry.Payload = payload
-	return []logging.Entry{entry}, nil
+	switch p := payload.(type) {
+	case string:
+		entry.Payload = &logpb.LogEntry_TextPayload{TextPayload: p}
+	case *anypb.Any:
+		entry.Payload = &logpb.LogEntry_ProtoPayload{ProtoPayload: p}
+	default:
+		jb, err := json.Marshal(p)
+		if err != nil {
+			return nil, fmt.Errorf("logging: json.Marshal: %w", err)
+		}
+		var verify map[string]interface{}
+		if err := json.Unmarshal(jb, &verify); err == nil {
+			entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: jsonMapToProtoStruct(verify)}
+		}
+	}
+
+	return []logpb.LogEntry{entry}, nil
+}
+
+func jsonMapToProtoStruct(m map[string]interface{}) *structpb.Struct {
+	fields := map[string]*structpb.Value{}
+	for k, v := range m {
+		fields[k] = jsonValueToStructValue(v)
+	}
+	return &structpb.Struct{Fields: fields}
+}
+
+func jsonValueToStructValue(v interface{}) *structpb.Value {
+	switch x := v.(type) {
+	case bool:
+		return &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: x}}
+	case float64:
+		return &structpb.Value{Kind: &structpb.Value_NumberValue{NumberValue: x}}
+	case string:
+		return &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: x}}
+	case nil:
+		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
+	case map[string]interface{}:
+		return &structpb.Value{Kind: &structpb.Value_StructValue{StructValue: jsonMapToProtoStruct(x)}}
+	case []interface{}:
+		var vals []*structpb.Value
+		for _, e := range x {
+			vals = append(vals, jsonValueToStructValue(e))
+		}
+		return &structpb.Value{Kind: &structpb.Value_ListValue{ListValue: &structpb.ListValue{Values: vals}}}
+	default:
+		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
+	}
 }
 
 func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, int, error) {
@@ -548,27 +568,7 @@ func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, in
 	}
 }
 
-// JSON keys derived from:
-// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#httprequest
-type httpRequestLog struct {
-	RemoteIP                       string `json:"remoteIp"`
-	RequestURL                     string `json:"requestUrl"`
-	Latency                        string `json:"latency"`
-	Referer                        string `json:"referer"`
-	ServerIP                       string `json:"serverIp"`
-	UserAgent                      string `json:"userAgent"`
-	RequestMethod                  string `json:"requestMethod"`
-	Protocol                       string `json:"protocol"`
-	ResponseSize                   int64  `json:"responseSize,string"`
-	RequestSize                    int64  `json:"requestSize,string"`
-	CacheFillBytes                 int64  `json:"cacheFillBytes,string"`
-	Status                         int    `json:"status,string"`
-	CacheLookup                    bool   `json:"cacheLookup"`
-	CacheHit                       bool   `json:"cacheHit"`
-	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer"`
-}
-
-func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTTPRequest, error) {
+func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.HttpRequest, error) {
 	var bytes []byte
 	switch httpRequestAttr.Type() {
 	case pcommon.ValueTypeBytes:
@@ -577,39 +577,11 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTT
 		bytes = []byte(httpRequestAttr.AsString())
 	}
 
-	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
-	// instead of a slice of bytes could do, but would need a lot of type casting and checking
-	// assertions with it.
-	var parsedHTTPRequest httpRequestLog
-	if err := json.Unmarshal(bytes, &parsedHTTPRequest); err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest(parsedHTTPRequest.RequestMethod, parsedHTTPRequest.RequestURL, nil)
+	var pb logtypepb.HttpRequest
+	err := proto.Unmarshal(bytes, &pb)
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Set("Referer", parsedHTTPRequest.Referer)
-	req.Header.Set("User-Agent", parsedHTTPRequest.UserAgent)
 
-	httpRequest := &logging.HTTPRequest{
-		Request:                        req,
-		RequestSize:                    parsedHTTPRequest.RequestSize,
-		Status:                         parsedHTTPRequest.Status,
-		ResponseSize:                   parsedHTTPRequest.ResponseSize,
-		LocalIP:                        parsedHTTPRequest.ServerIP,
-		RemoteIP:                       parsedHTTPRequest.RemoteIP,
-		CacheHit:                       parsedHTTPRequest.CacheHit,
-		CacheValidatedWithOriginServer: parsedHTTPRequest.CacheValidatedWithOriginServer,
-		CacheFillBytes:                 parsedHTTPRequest.CacheFillBytes,
-		CacheLookup:                    parsedHTTPRequest.CacheLookup,
-	}
-	if parsedHTTPRequest.Latency != "" {
-		latency, err := time.ParseDuration(parsedHTTPRequest.Latency)
-		if err == nil {
-			httpRequest.Latency = latency
-		}
-	}
-
-	return httpRequest, nil
+	return &pb, nil
 }
