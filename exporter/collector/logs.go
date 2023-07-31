@@ -458,12 +458,15 @@ func (l logMapper) logToSplitEntries(
 	}
 	entry.Severity = severityMapping[severityNumber]
 
+	// log.Body().AsString() can be expensive, and we use it several times below this, so
+	// do it once and save that as a variable.
+	logBodyString := logRecord.Body().AsString()
+
 	// Parse severityNumber > 17 (error) to a GCP Error Reporting entry if enabled
 	if severityNumber >= 17 && l.cfg.LogConfig.ErrorReportingType {
 		if logRecord.Body().Type() != pcommon.ValueTypeMap {
-			strValue := logRecord.Body().AsString()
 			logRecord.Body().SetEmptyMap()
-			logRecord.Body().Map().PutStr("message", strValue)
+			logRecord.Body().Map().PutStr("message", logBodyString)
 		}
 		logRecord.Body().Map().PutStr(GCPTypeKey, GCPErrorReportingTypeValue)
 	}
@@ -495,7 +498,7 @@ func (l logMapper) logToSplitEntries(
 	overheadClone := proto.Clone(logOverhead)
 	overheadBytes := proto.Size(overheadClone)
 
-	payload, splits, err := l.parseEntryPayload(logRecord.Body(), l.maxEntrySize-overheadBytes)
+	payload, splits, err := l.parseEntryPayload(logRecord.Body(), logBodyString, l.maxEntrySize-overheadBytes)
 	if err != nil {
 		return []logging.Entry{entry}, err
 	}
@@ -531,24 +534,24 @@ func (l logMapper) logToSplitEntries(
 	return []logging.Entry{entry}, nil
 }
 
-func (l logMapper) parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, int, error) {
-	if len(logBody.AsString()) == 0 {
+func (l logMapper) parseEntryPayload(logBody pcommon.Value, logBodyString string, maxEntrySize int) (interface{}, int, error) {
+	if len(logBodyString) == 0 {
 		return nil, 0, nil
 	}
 
 	// number of payloads calculation, used when returning a string payload
-	payloads := int(math.Ceil(float64(len([]byte(logBody.AsString()))) / float64(maxEntrySize)))
+	payloads := int(math.Ceil(float64(len([]byte(logBodyString))) / float64(maxEntrySize)))
 
 	switch logBody.Type() {
 	case pcommon.ValueTypeBytes:
 		var verify map[string]interface{}
 		if err := json.Unmarshal(logBody.Bytes().AsRaw(), &verify); err != nil {
 			l.obs.log.Warn(fmt.Sprintf("byte payload does not marshal to valid json, exporting as raw string: %+v", err))
-			return logBody.AsString(), payloads, nil
+			return logBodyString, payloads, nil
 		}
 		return logBody.Bytes().AsRaw(), 1, nil
 	case pcommon.ValueTypeStr:
-		return logBody.AsString(), payloads, nil
+		return logBodyString, payloads, nil
 	case pcommon.ValueTypeMap:
 		return logBody.Map().AsRaw(), 1, nil
 
