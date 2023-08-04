@@ -367,11 +367,11 @@ func toLogEntryInternal(e logging.Entry, parent string, skipLevels int) (*logpb.
 	if e.LogName != "" {
 		return nil, errors.New("logging: Entry.LogName should be not be set when writing")
 	}
-	t := e.Timestamp
-	if t.IsZero() {
-		t = time.Now()
-	}
-	ts := timestamppb.New(t)
+	// t := e.Timestamp
+	// if t.IsZero() {
+	// 	t = time.Now()
+	// }
+	// ts := timestamppb.New(t)
 	if e.Trace == "" {
 		populateTraceInfo(&e, nil)
 		// format trace
@@ -384,15 +384,15 @@ func toLogEntryInternal(e logging.Entry, parent string, skipLevels int) (*logpb.
 		return nil, err
 	}
 	ent := &logpb.LogEntry{
-		Timestamp:      ts,
-		Severity:       logtypepb.LogSeverity(e.Severity),
-		InsertId:       e.InsertID,
-		HttpRequest:    req,
-		Operation:      e.Operation,
-		Labels:         e.Labels,
-		Trace:          e.Trace,
-		SpanId:         e.SpanID,
-		Resource:       e.Resource,
+		// Timestamp:      ts,
+		Severity:    logtypepb.LogSeverity(e.Severity),
+		InsertId:    e.InsertID,
+		HttpRequest: req,
+		Operation:   e.Operation,
+		Labels:      e.Labels,
+		Trace:       e.Trace,
+		SpanId:      e.SpanID,
+		// Resource:       e.Resource,
 		SourceLocation: e.SourceLocation,
 		TraceSampled:   e.TraceSampled,
 	}
@@ -655,17 +655,21 @@ func (l logMapper) logToSplitEntries(
 		Resource: mr,
 	}
 
-	entry.Timestamp = logRecord.Timestamp().AsTime()
+	ts := logRecord.Timestamp().AsTime()
 	if logRecord.Timestamp() == 0 {
 		// if timestamp is unset, fall back to observed_time_unix_nano as recommended
 		//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
 		if logRecord.ObservedTimestamp() != 0 {
-			entry.Timestamp = logRecord.ObservedTimestamp().AsTime()
+			ts = logRecord.ObservedTimestamp().AsTime()
 		} else {
 			// if observed_time is 0, use the current time
-			entry.Timestamp = processTime
+			ts = processTime
 		}
 	}
+	if ts.IsZero() {
+		ts = time.Now()
+	}
+	entry.Timestamp = timestamppb.New(ts)
 
 	// build our own map off OTel attributes so we don't have to call .Get() for each special case
 	// (.Get() ranges over all attributes each time)
