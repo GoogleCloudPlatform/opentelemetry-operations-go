@@ -390,8 +390,8 @@ func toLogEntryInternal(e logging.Entry, parent string, skipLevels int) (*logpb.
 		HttpRequest: req,
 		Operation:   e.Operation,
 		Labels:      e.Labels,
-		Trace:       e.Trace,
-		SpanId:      e.SpanID,
+		// Trace:       e.Trace,
+		// SpanId:      e.SpanID,
 		// Resource:       e.Resource,
 		SourceLocation: e.SourceLocation,
 		TraceSampled:   e.TraceSampled,
@@ -701,7 +701,7 @@ func (l logMapper) logToSplitEntries(
 		entry.Trace = fmt.Sprintf("projects/%s/traces/%s", projectID, hex.EncodeToString(traceID[:]))
 	}
 	if spanID := logRecord.SpanID(); !spanID.IsEmpty() {
-		entry.SpanID = hex.EncodeToString(spanID[:])
+		entry.SpanId = hex.EncodeToString(spanID[:])
 	}
 
 	if httpRequestAttr, ok := attrsMap[HTTPRequestAttributeKey]; ok {
