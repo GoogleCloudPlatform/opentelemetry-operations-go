@@ -338,7 +338,7 @@ func (l logMapper) logEntryToInternal(
 	splits int,
 	splitIndex int,
 ) (*logpb.LogEntry, error) {
-	internalLogEntry, err := toLogEntry(entry, fmt.Sprintf("projects/%s", projectID))
+	internalLogEntry, err := toLogEntryInternal(entry)
 	if err != nil {
 		return nil, err
 	}
@@ -353,15 +353,7 @@ func (l logMapper) logEntryToInternal(
 	return internalLogEntry, nil
 }
 
-func toLogEntry(e logging.Entry, parent string) (*logpb.LogEntry, error) {
-	parent, err := makeParent(parent)
-	if err != nil {
-		return nil, err
-	}
-	return toLogEntryInternal(e, parent, 1)
-}
-
-func toLogEntryInternal(e logging.Entry, parent string, skipLevels int) (*logpb.LogEntry, error) {
+func toLogEntryInternal(e logging.Entry, skipLevels int) (*logpb.LogEntry, error) {
 	if e.LogName != "" {
 		return nil, errors.New("logging: Entry.LogName should be not be set when writing")
 	}
@@ -370,13 +362,15 @@ func toLogEntryInternal(e logging.Entry, parent string, skipLevels int) (*logpb.
 	// 	t = time.Now()
 	// }
 	// ts := timestamppb.New(t)
-	if e.Trace == "" {
-		populateTraceInfo(&e, nil)
-		// format trace
-		if e.Trace != "" && !strings.Contains(e.Trace, "/traces/") {
-			e.Trace = fmt.Sprintf("%s/traces/%s", parent, e.Trace)
-		}
-	}
+	// if e.Trace == "" {
+	//  // populateTraceInfo is GUARANTEED never to add trace info because we
+	//  // don't set trace context http headers on our "fake" http request.
+	// 	populateTraceInfo(&e, nil)
+	// 	// format trace
+	// 	if e.Trace != "" && !strings.Contains(e.Trace, "/traces/") {
+	// 		e.Trace = fmt.Sprintf("%s/traces/%s", parent, e.Trace)
+	// 	}
+	// }
 	// req, err := fromHTTPRequest(e.HTTPRequest)
 	// if err != nil {
 	// 	return nil, err
@@ -468,39 +462,6 @@ func jsonValueToStructValue(v interface{}) *structpb.Value {
 	default:
 		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
 	}
-}
-
-func populateTraceInfo(e *logging.Entry, req *http.Request) bool {
-	if req == nil {
-		if e.HTTPRequest != nil && e.HTTPRequest.Request != nil {
-			req = e.HTTPRequest.Request
-		} else {
-			return false
-		}
-	}
-	header := req.Header.Get("Traceparent")
-	if header != "" {
-		// do not use traceSampled flag defined by traceparent because
-		// flag's definition differs from expected by Cloud Tracing
-		traceID, spanID, _ := deconstructTraceParent(header)
-		if traceID != "" {
-			e.Trace = traceID
-			e.SpanID = spanID
-			return true
-		}
-	}
-	header = req.Header.Get("X-Cloud-Trace-Context")
-	if header != "" {
-		traceID, spanID, traceSampled := deconstructXCloudTraceContext(header)
-		if traceID != "" {
-			e.Trace = traceID
-			e.SpanID = spanID
-			// enforce sampling if required
-			e.TraceSampled = e.TraceSampled || traceSampled
-			return true
-		}
-	}
-	return false
 }
 
 var validXCloudTraceContext = regexp.MustCompile(
