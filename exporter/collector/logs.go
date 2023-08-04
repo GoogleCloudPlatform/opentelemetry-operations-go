@@ -43,7 +43,6 @@ import (
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -394,18 +393,18 @@ func toLogEntryInternal(e logging.Entry, skipLevels int) (*logpb.LogEntry, error
 		// // We already set this above.
 		// TraceSampled:   e.TraceSampled,
 	}
-	switch p := e.Payload.(type) {
-	case string:
-		ent.Payload = &logpb.LogEntry_TextPayload{TextPayload: p}
-	case *anypb.Any:
-		ent.Payload = &logpb.LogEntry_ProtoPayload{ProtoPayload: p}
-	default:
-		s, err := toProtoStruct(p)
-		if err != nil {
-			return nil, err
-		}
-		ent.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
-	}
+	// switch p := e.Payload.(type) {
+	// case string:
+	// 	ent.Payload = &logpb.LogEntry_TextPayload{TextPayload: p}
+	// case *anypb.Any:
+	// 	ent.Payload = &logpb.LogEntry_ProtoPayload{ProtoPayload: p}
+	// default:
+	// 	s, err := toProtoStruct(p)
+	// 	if err != nil {
+	// 		return nil, err
+	// 	}
+	// 	ent.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
+	// }
 	return ent, nil
 }
 
@@ -737,16 +736,30 @@ func (l logMapper) logToSplitEntries(
 	overheadClone := proto.Clone(logOverhead)
 	overheadBytes := proto.Size(overheadClone)
 
-	payload, splits, err := parseEntryPayload(logRecord.Body(), l.maxEntrySize-overheadBytes)
-	if err != nil {
-		return nil, err
+	if len(logRecord.Body().AsString()) == 0 {
+		return []*logpb.LogEntry{entry}, nil
 	}
 
-	// Split log entries with a string payload into fewer entries
-	if splits > 1 {
-		entries := make([]*logpb.LogEntry, splits)
-		payloadString := payload.(string)
+	var splits int
 
+	switch logRecord.Body().Type() {
+	case pcommon.ValueTypeBytes:
+		s, err := toProtoStruct(logRecord.Body().Bytes().AsRaw())
+		if err != nil {
+			return nil, err
+		}
+		entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
+	case pcommon.ValueTypeMap:
+		s, err := toProtoStruct(logRecord.Body().Map().AsRaw())
+		if err != nil {
+			return nil, err
+		}
+		entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
+	case pcommon.ValueTypeStr:
+		// Split log entries with a string payload into fewer entries
+		splits = int(math.Ceil(float64(len([]byte(logRecord.Body().AsString()))) / float64(l.maxEntrySize-overheadBytes)))
+		entries := make([]*logpb.LogEntry, splits)
+		payloadString := logRecord.Body().AsString()
 		// Start by assuming all splits will be even (this may not be the case)
 		startIndex := 0
 		endIndex := int(math.Floor((1.0 / float64(splits)) * float64(len(payloadString))))
@@ -760,7 +773,7 @@ func (l logMapper) logToSplitEntries(
 				currentSplit = payloadString[startIndex:endIndex]
 			}
 			entryCopy := entry
-			entryCopy.Payload = currentSplit
+			entryCopy.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
 			e, err := l.logEntryToInternal(entryCopy, logName, projectID, mr, splits, i-1)
 			if err != nil {
 				return nil, err
@@ -772,31 +785,15 @@ func (l logMapper) logToSplitEntries(
 			endIndex = int(math.Floor((float64(i+1) / float64(splits)) * float64(len(payloadString))))
 		}
 		return entries, nil
+	default:
+		return nil, fmt.Errorf("unknown log body value %v", logRecord.Body().Type().String())
 	}
 
-	entry.Payload = payload
 	e, err := l.logEntryToInternal(entry, logName, projectID, mr, 1, 0)
 	if err != nil {
 		return nil, err
 	}
 	return []*logpb.LogEntry{e}, nil
-}
-
-func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, int, error) {
-	if len(logBody.AsString()) == 0 {
-		return nil, 0, nil
-	}
-	switch logBody.Type() {
-	case pcommon.ValueTypeBytes:
-		return logBody.Bytes().AsRaw(), 1, nil
-	case pcommon.ValueTypeStr:
-		return logBody.AsString(), int(math.Ceil(float64(len([]byte(logBody.AsString()))) / float64(maxEntrySize))), nil
-	case pcommon.ValueTypeMap:
-		return logBody.Map().AsRaw(), 1, nil
-
-	default:
-		return nil, 0, fmt.Errorf("unknown log body value %v", logBody.Type().String())
-	}
 }
 
 // JSON keys derived from:
