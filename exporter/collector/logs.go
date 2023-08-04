@@ -651,7 +651,7 @@ func (l logMapper) logToSplitEntries(
 	logRecord := plog.NewLogRecord()
 	log.CopyTo(logRecord)
 
-	entry := logging.Entry{
+	entry := &logpb.LogEntry{
 		Resource: mr,
 	}
 
