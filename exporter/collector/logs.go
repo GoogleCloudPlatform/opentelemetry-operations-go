@@ -15,27 +15,37 @@
 package collector
 
 import (
+	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/http"
 	"net/url"
+	"regexp"
+	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
+	"github.com/golang/protobuf/ptypes"
 	"github.com/googleapis/gax-go/v2"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
+	logtypepb "google.golang.org/genproto/googleapis/logging/type"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
+	"google.golang.org/protobuf/types/known/structpb"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
@@ -333,7 +343,7 @@ func (l logMapper) logEntryToInternal(
 	splits int,
 	splitIndex int,
 ) (*logpb.LogEntry, error) {
-	internalLogEntry, err := logging.ToLogEntry(entry, fmt.Sprintf("projects/%s", projectID))
+	internalLogEntry, err := toLogEntry(entry, fmt.Sprintf("projects/%s", projectID))
 	if err != nil {
 		return nil, err
 	}
@@ -348,6 +358,268 @@ func (l logMapper) logEntryToInternal(
 		}
 	}
 	return internalLogEntry, nil
+}
+
+func toLogEntry(e logging.Entry, parent string) (*logpb.LogEntry, error) {
+	parent, err := makeParent(parent)
+	if err != nil {
+		return nil, err
+	}
+	return toLogEntryInternal(e, parent, 1)
+}
+
+func toLogEntryInternal(e logging.Entry, parent string, skipLevels int) (*logpb.LogEntry, error) {
+	if e.LogName != "" {
+		return nil, errors.New("logging: Entry.LogName should be not be set when writing")
+	}
+	t := e.Timestamp
+	if t.IsZero() {
+		t = time.Now()
+	}
+	ts := timestamppb.New(t)
+	if e.Trace == "" {
+		populateTraceInfo(&e, nil)
+		// format trace
+		if e.Trace != "" && !strings.Contains(e.Trace, "/traces/") {
+			e.Trace = fmt.Sprintf("%s/traces/%s", parent, e.Trace)
+		}
+	}
+	req, err := fromHTTPRequest(e.HTTPRequest)
+	if err != nil {
+		return nil, err
+	}
+	ent := &logpb.LogEntry{
+		Timestamp:      ts,
+		Severity:       logtypepb.LogSeverity(e.Severity),
+		InsertId:       e.InsertID,
+		HttpRequest:    req,
+		Operation:      e.Operation,
+		Labels:         e.Labels,
+		Trace:          e.Trace,
+		SpanId:         e.SpanID,
+		Resource:       e.Resource,
+		SourceLocation: e.SourceLocation,
+		TraceSampled:   e.TraceSampled,
+	}
+	switch p := e.Payload.(type) {
+	case string:
+		ent.Payload = &logpb.LogEntry_TextPayload{TextPayload: p}
+	case *anypb.Any:
+		ent.Payload = &logpb.LogEntry_ProtoPayload{ProtoPayload: p}
+	default:
+		s, err := toProtoStruct(p)
+		if err != nil {
+			return nil, err
+		}
+		ent.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
+	}
+	return ent, nil
+}
+
+// toProtoStruct converts v, which must marshal into a JSON object,
+// into a Google Struct proto.
+func toProtoStruct(v interface{}) (*structpb.Struct, error) {
+	// Fast path: if v is already a *structpb.Struct, nothing to do.
+	if s, ok := v.(*structpb.Struct); ok {
+		return s, nil
+	}
+	// v is a Go value that supports JSON marshalling. We want a Struct
+	// protobuf. Some day we may have a more direct way to get there, but right
+	// now the only way is to marshal the Go value to JSON, unmarshal into a
+	// map, and then build the Struct proto from the map.
+	var jb []byte
+	var err error
+	if raw, ok := v.(json.RawMessage); ok { // needed for Go 1.7 and below
+		jb = []byte(raw)
+	} else {
+		jb, err = json.Marshal(v)
+		if err != nil {
+			return nil, fmt.Errorf("logging: json.Marshal: %w", err)
+		}
+	}
+	var m map[string]interface{}
+	err = json.Unmarshal(jb, &m)
+	if err != nil {
+		return nil, fmt.Errorf("logging: json.Unmarshal: %w", err)
+	}
+	return jsonMapToProtoStruct(m), nil
+}
+
+func jsonMapToProtoStruct(m map[string]interface{}) *structpb.Struct {
+	fields := map[string]*structpb.Value{}
+	for k, v := range m {
+		fields[k] = jsonValueToStructValue(v)
+	}
+	return &structpb.Struct{Fields: fields}
+}
+
+func jsonValueToStructValue(v interface{}) *structpb.Value {
+	switch x := v.(type) {
+	case bool:
+		return &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: x}}
+	case float64:
+		return &structpb.Value{Kind: &structpb.Value_NumberValue{NumberValue: x}}
+	case string:
+		return &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: x}}
+	case nil:
+		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
+	case map[string]interface{}:
+		return &structpb.Value{Kind: &structpb.Value_StructValue{StructValue: jsonMapToProtoStruct(x)}}
+	case []interface{}:
+		var vals []*structpb.Value
+		for _, e := range x {
+			vals = append(vals, jsonValueToStructValue(e))
+		}
+		return &structpb.Value{Kind: &structpb.Value_ListValue{ListValue: &structpb.ListValue{Values: vals}}}
+	default:
+		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
+	}
+}
+
+func populateTraceInfo(e *logging.Entry, req *http.Request) bool {
+	if req == nil {
+		if e.HTTPRequest != nil && e.HTTPRequest.Request != nil {
+			req = e.HTTPRequest.Request
+		} else {
+			return false
+		}
+	}
+	header := req.Header.Get("Traceparent")
+	if header != "" {
+		// do not use traceSampled flag defined by traceparent because
+		// flag's definition differs from expected by Cloud Tracing
+		traceID, spanID, _ := deconstructTraceParent(header)
+		if traceID != "" {
+			e.Trace = traceID
+			e.SpanID = spanID
+			return true
+		}
+	}
+	header = req.Header.Get("X-Cloud-Trace-Context")
+	if header != "" {
+		traceID, spanID, traceSampled := deconstructXCloudTraceContext(header)
+		if traceID != "" {
+			e.Trace = traceID
+			e.SpanID = spanID
+			// enforce sampling if required
+			e.TraceSampled = e.TraceSampled || traceSampled
+			return true
+		}
+	}
+	return false
+}
+
+var validXCloudTraceContext = regexp.MustCompile(
+	// Matches on "TRACE_ID"
+	`([a-f\d]+)?` +
+		// Matches on "/SPAN_ID"
+		`(?:/([a-f\d]+))?` +
+		// Matches on ";0=TRACE_TRUE"
+		`(?:;o=(\d))?`)
+
+func deconstructXCloudTraceContext(s string) (traceID, spanID string, traceSampled bool) {
+	// As per the format described at https://cloud.google.com/trace/docs/setup#force-trace
+	//    "X-Cloud-Trace-Context: TRACE_ID/SPAN_ID;o=TRACE_TRUE"
+	// for example:
+	//    "X-Cloud-Trace-Context: 105445aa7843bc8bf206b120001000/1;o=1"
+	//
+	// We expect:
+	//   * traceID (optional): 			"105445aa7843bc8bf206b120001000"
+	//   * spanID (optional):       	"1"
+	//   * traceSampled (optional): 	true
+	matches := validXCloudTraceContext.FindStringSubmatch(s)
+
+	if matches != nil {
+		traceID, spanID, traceSampled = matches[1], matches[2], matches[3] == "1"
+	}
+
+	if spanID == "0" {
+		spanID = ""
+	}
+
+	return
+}
+
+// As per format described at https://www.w3.org/TR/trace-context/#traceparent-header-field-values
+var validTraceParentExpression = regexp.MustCompile(`^(00)-([a-fA-F\d]{32})-([a-f\d]{16})-([a-fA-F\d]{2})$`)
+
+func deconstructTraceParent(s string) (traceID, spanID string, traceSampled bool) {
+	matches := validTraceParentExpression.FindStringSubmatch(s)
+	if matches != nil {
+		// regexp package does not support negative lookahead preventing all 0 validations
+		if matches[2] == "00000000000000000000000000000000" || matches[3] == "0000000000000000" {
+			return
+		}
+		flags, err := strconv.ParseInt(matches[4], 16, 16)
+		if err == nil {
+			traceSampled = (flags & 0x01) == 1
+		}
+		traceID, spanID = matches[2], matches[3]
+	}
+	return
+}
+
+func fromHTTPRequest(r *logging.HTTPRequest) (*logtypepb.HttpRequest, error) {
+	if r == nil {
+		return nil, nil
+	}
+	if r.Request == nil {
+		return nil, errors.New("logging: HTTPRequest must have a non-nil Request")
+	}
+	u := *r.Request.URL
+	u.Fragment = ""
+	pb := &logtypepb.HttpRequest{
+		RequestMethod:                  r.Request.Method,
+		RequestUrl:                     fixUTF8(u.String()),
+		RequestSize:                    r.RequestSize,
+		Status:                         int32(r.Status),
+		ResponseSize:                   r.ResponseSize,
+		UserAgent:                      r.Request.UserAgent(),
+		ServerIp:                       r.LocalIP,
+		RemoteIp:                       r.RemoteIP, // TODO(jba): attempt to parse http.Request.RemoteAddr?
+		Referer:                        r.Request.Referer(),
+		CacheHit:                       r.CacheHit,
+		CacheValidatedWithOriginServer: r.CacheValidatedWithOriginServer,
+		Protocol:                       r.Request.Proto,
+		CacheFillBytes:                 r.CacheFillBytes,
+		CacheLookup:                    r.CacheLookup,
+	}
+	if r.Latency != 0 {
+		pb.Latency = ptypes.DurationProto(r.Latency)
+	}
+	return pb, nil
+}
+
+// fixUTF8 is a helper that fixes an invalid UTF-8 string by replacing
+// invalid UTF-8 runes with the Unicode replacement character (U+FFFD).
+// See Issue https://github.com/googleapis/google-cloud-go/issues/1383.
+func fixUTF8(s string) string {
+	if utf8.ValidString(s) {
+		return s
+	}
+
+	// Otherwise time to build the sequence.
+	buf := new(bytes.Buffer)
+	buf.Grow(len(s))
+	for _, r := range s {
+		if utf8.ValidRune(r) {
+			buf.WriteRune(r)
+		} else {
+			buf.WriteRune('\uFFFD')
+		}
+	}
+	return buf.String()
+}
+
+func makeParent(parent string) (string, error) {
+	if !strings.ContainsRune(parent, '/') {
+		return "projects/" + parent, nil
+	}
+	prefix := strings.Split(parent, "/")[0]
+	if prefix != "projects" && prefix != "folders" && prefix != "billingAccounts" && prefix != "organizations" {
+		return parent, fmt.Errorf("parent parameter must start with 'projects/' 'folders/' 'billingAccounts/' or 'organizations/'")
+	}
+	return parent, nil
 }
 
 func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEntry) (*logpb.WriteLogEntriesResponse, error) {
