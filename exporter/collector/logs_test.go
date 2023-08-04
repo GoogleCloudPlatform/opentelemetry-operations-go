@@ -61,7 +61,6 @@ func TestLogMapping(t *testing.T) {
 	testSpanID := pcommon.SpanID([8]byte{
 		0, 0, 0, 0, 0, 0, 0, 1,
 	})
-	emptyPayload := &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{}}}
 	logName := "projects/fakeprojectid/logs/default-log"
 
 	testCases := []struct {
@@ -118,7 +117,6 @@ func TestLogMapping(t *testing.T) {
 			expectedEntries: []*logpb.LogEntry{{
 				LogName:   logName,
 				Timestamp: timestamppb.New(testObservedTime),
-				Payload:   emptyPayload,
 			}},
 			maxEntrySize: defaultMaxEntrySize,
 		},
@@ -207,7 +205,6 @@ func TestLogMapping(t *testing.T) {
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testSampleTime),
-					Payload:   emptyPayload,
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
@@ -226,7 +223,6 @@ func TestLogMapping(t *testing.T) {
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testSampleTime),
-					Payload:   emptyPayload,
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
@@ -377,7 +373,6 @@ func TestLogMapping(t *testing.T) {
 						Line:     100,
 						Function: "helloWorld",
 					},
-					Payload: emptyPayload,
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
@@ -397,7 +392,6 @@ func TestLogMapping(t *testing.T) {
 					LogName:      logName,
 					Timestamp:    timestamppb.New(testObservedTime),
 					TraceSampled: true,
-					Payload:      emptyPayload,
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
@@ -419,7 +413,6 @@ func TestLogMapping(t *testing.T) {
 					Timestamp: timestamppb.New(testObservedTime),
 					Trace:     fmt.Sprintf("projects/fakeprojectid/traces/%s", hex.EncodeToString(testTraceID[:])),
 					SpanId:    hex.EncodeToString(testSpanID[:]),
-					Payload:   emptyPayload,
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
@@ -439,7 +432,6 @@ func TestLogMapping(t *testing.T) {
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
 					Severity:  logtypepb.LogSeverity(logging.Critical),
-					Payload:   emptyPayload,
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
@@ -472,7 +464,6 @@ func TestLogMapping(t *testing.T) {
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
 					Severity:  logtypepb.LogSeverity(logging.Alert),
-					Payload:   emptyPayload,
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,

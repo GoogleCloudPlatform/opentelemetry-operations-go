@@ -24,8 +24,6 @@ import (
 	"math"
 	"net/http"
 	"net/url"
-	"regexp"
-	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -329,85 +327,6 @@ func mergeLogLabels(instrumentationSource, instrumentationVersion string, resour
 	return mergeLabels(labelsMap, resourceLabels)
 }
 
-func (l logMapper) logEntryToInternal(
-	entry logging.Entry,
-	logName string,
-	projectID string,
-	mr *monitoredrespb.MonitoredResource,
-	splits int,
-	splitIndex int,
-) (*logpb.LogEntry, error) {
-	internalLogEntry, err := toLogEntryInternal(entry)
-	if err != nil {
-		return nil, err
-	}
-
-	if splits > 1 {
-		internalLogEntry.Split = &logpb.LogSplit{
-			Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.String()),
-			Index:       int32(splitIndex),
-			TotalSplits: int32(splits),
-		}
-	}
-	return internalLogEntry, nil
-}
-
-func toLogEntryInternal(e logging.Entry, skipLevels int) (*logpb.LogEntry, error) {
-	// LogName is always set above.
-	// if e.LogName != "" {
-	// 	return nil, errors.New("logging: Entry.LogName should be not be set when writing")
-	// }
-	// t := e.Timestamp
-	// if t.IsZero() {
-	// 	t = time.Now()
-	// }
-	// ts := timestamppb.New(t)
-	// if e.Trace == "" {
-	//  // populateTraceInfo is GUARANTEED never to add trace info because we
-	//  // don't set trace context http headers on our "fake" http request.
-	// 	populateTraceInfo(&e, nil)
-	// 	// format trace
-	// 	if e.Trace != "" && !strings.Contains(e.Trace, "/traces/") {
-	// 		e.Trace = fmt.Sprintf("%s/traces/%s", parent, e.Trace)
-	// 	}
-	// }
-	// req, err := fromHTTPRequest(e.HTTPRequest)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	ent := &logpb.LogEntry{
-		// Timestamp:      ts,
-		// Severity: logtypepb.LogSeverity(e.Severity),
-		// // We never set InsertID
-		// InsertId: e.InsertID,
-		// HttpRequest: req,
-		// // We never set Operation
-		// Operation: e.Operation,
-		// // We already set this above.
-		// Labels: e.Labels,
-		// Trace:       e.Trace,
-		// SpanId:      e.SpanID,
-		// Resource:       e.Resource,
-		// // We already set this above.
-		// SourceLocation: e.SourceLocation,
-		// // We already set this above.
-		// TraceSampled:   e.TraceSampled,
-	}
-	// switch p := e.Payload.(type) {
-	// case string:
-	// 	ent.Payload = &logpb.LogEntry_TextPayload{TextPayload: p}
-	// case *anypb.Any:
-	// 	ent.Payload = &logpb.LogEntry_ProtoPayload{ProtoPayload: p}
-	// default:
-	// 	s, err := toProtoStruct(p)
-	// 	if err != nil {
-	// 		return nil, err
-	// 	}
-	// 	ent.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
-	// }
-	return ent, nil
-}
-
 // toProtoStruct converts v, which must marshal into a JSON object,
 // into a Google Struct proto.
 func toProtoStruct(v interface{}) (*structpb.Struct, error) {
@@ -469,56 +388,6 @@ func jsonValueToStructValue(v interface{}) *structpb.Value {
 	}
 }
 
-var validXCloudTraceContext = regexp.MustCompile(
-	// Matches on "TRACE_ID"
-	`([a-f\d]+)?` +
-		// Matches on "/SPAN_ID"
-		`(?:/([a-f\d]+))?` +
-		// Matches on ";0=TRACE_TRUE"
-		`(?:;o=(\d))?`)
-
-func deconstructXCloudTraceContext(s string) (traceID, spanID string, traceSampled bool) {
-	// As per the format described at https://cloud.google.com/trace/docs/setup#force-trace
-	//    "X-Cloud-Trace-Context: TRACE_ID/SPAN_ID;o=TRACE_TRUE"
-	// for example:
-	//    "X-Cloud-Trace-Context: 105445aa7843bc8bf206b120001000/1;o=1"
-	//
-	// We expect:
-	//   * traceID (optional): 			"105445aa7843bc8bf206b120001000"
-	//   * spanID (optional):       	"1"
-	//   * traceSampled (optional): 	true
-	matches := validXCloudTraceContext.FindStringSubmatch(s)
-
-	if matches != nil {
-		traceID, spanID, traceSampled = matches[1], matches[2], matches[3] == "1"
-	}
-
-	if spanID == "0" {
-		spanID = ""
-	}
-
-	return
-}
-
-// As per format described at https://www.w3.org/TR/trace-context/#traceparent-header-field-values
-var validTraceParentExpression = regexp.MustCompile(`^(00)-([a-fA-F\d]{32})-([a-f\d]{16})-([a-fA-F\d]{2})$`)
-
-func deconstructTraceParent(s string) (traceID, spanID string, traceSampled bool) {
-	matches := validTraceParentExpression.FindStringSubmatch(s)
-	if matches != nil {
-		// regexp package does not support negative lookahead preventing all 0 validations
-		if matches[2] == "00000000000000000000000000000000" || matches[3] == "0000000000000000" {
-			return
-		}
-		flags, err := strconv.ParseInt(matches[4], 16, 16)
-		if err == nil {
-			traceSampled = (flags & 0x01) == 1
-		}
-		traceID, spanID = matches[2], matches[3]
-	}
-	return
-}
-
 func fromHTTPRequest(r *logging.HTTPRequest) (*logtypepb.HttpRequest, error) {
 	if r == nil {
 		return nil, nil
@@ -569,17 +438,6 @@ func fixUTF8(s string) string {
 		}
 	}
 	return buf.String()
-}
-
-func makeParent(parent string) (string, error) {
-	if !strings.ContainsRune(parent, '/') {
-		return "projects/" + parent, nil
-	}
-	prefix := strings.Split(parent, "/")[0]
-	if prefix != "projects" && prefix != "folders" && prefix != "billingAccounts" && prefix != "organizations" {
-		return parent, fmt.Errorf("parent parameter must start with 'projects/' 'folders/' 'billingAccounts/' or 'organizations/'")
-	}
-	return parent, nil
 }
 
 func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEntry) (*logpb.WriteLogEntriesResponse, error) {
@@ -728,19 +586,14 @@ func (l logMapper) logToSplitEntries(
 	// Calculate the size of the internal log entry so this overhead can be accounted
 	// for when determining the need to split based on payload size
 	// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
-	logOverhead, err := l.logEntryToInternal(entry, logName, projectID, mr, 0, 0)
-	if err != nil {
-		return nil, err
-	}
 	// make a copy so the proto initialization doesn't modify the original entry
-	overheadClone := proto.Clone(logOverhead)
+	// TODO(dashpole): proto clone is modifying the requests...
+	overheadClone := proto.Clone(entry)
 	overheadBytes := proto.Size(overheadClone)
 
 	if len(logRecord.Body().AsString()) == 0 {
 		return []*logpb.LogEntry{entry}, nil
 	}
-
-	var splits int
 
 	switch logRecord.Body().Type() {
 	case pcommon.ValueTypeBytes:
@@ -757,7 +610,7 @@ func (l logMapper) logToSplitEntries(
 		entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
 	case pcommon.ValueTypeStr:
 		// Split log entries with a string payload into fewer entries
-		splits = int(math.Ceil(float64(len([]byte(logRecord.Body().AsString()))) / float64(l.maxEntrySize-overheadBytes)))
+		splits := int(math.Ceil(float64(len([]byte(logRecord.Body().AsString()))) / float64(l.maxEntrySize-overheadBytes)))
 		entries := make([]*logpb.LogEntry, splits)
 		payloadString := logRecord.Body().AsString()
 		// Start by assuming all splits will be even (this may not be the case)
@@ -774,11 +627,14 @@ func (l logMapper) logToSplitEntries(
 			}
 			entryCopy := entry
 			entryCopy.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
-			e, err := l.logEntryToInternal(entryCopy, logName, projectID, mr, splits, i-1)
-			if err != nil {
-				return nil, err
+			if splits > 1 {
+				entryCopy.Split = &logpb.LogSplit{
+					Uid:         fmt.Sprintf("%s-%s", logName, entryCopy.Timestamp.AsTime().String()),
+					Index:       int32(i - 1),
+					TotalSplits: int32(splits),
+				}
 			}
-			entries[i-1] = e
+			entries[i-1] = entryCopy
 
 			// Update slice indices to the next chunk
 			startIndex = endIndex
@@ -788,12 +644,7 @@ func (l logMapper) logToSplitEntries(
 	default:
 		return nil, fmt.Errorf("unknown log body value %v", logRecord.Body().Type().String())
 	}
-
-	e, err := l.logEntryToInternal(entry, logName, projectID, mr, 1, 0)
-	if err != nil {
-		return nil, err
-	}
-	return []*logpb.LogEntry{e}, nil
+	return []*logpb.LogEntry{entry}, nil
 }
 
 // JSON keys derived from:
