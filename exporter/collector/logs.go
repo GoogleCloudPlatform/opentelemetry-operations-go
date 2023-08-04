@@ -379,15 +379,20 @@ func toLogEntryInternal(e logging.Entry, skipLevels int) (*logpb.LogEntry, error
 	ent := &logpb.LogEntry{
 		// Timestamp:      ts,
 		// Severity: logtypepb.LogSeverity(e.Severity),
-		InsertId: e.InsertID,
+		// // We never set InsertID
+		// InsertId: e.InsertID,
 		// HttpRequest: req,
-		Operation: e.Operation,
-		Labels:    e.Labels,
+		// // We never set Operation
+		// Operation: e.Operation,
+		// // We already set this above.
+		// Labels: e.Labels,
 		// Trace:       e.Trace,
 		// SpanId:      e.SpanID,
 		// Resource:       e.Resource,
-		SourceLocation: e.SourceLocation,
-		TraceSampled:   e.TraceSampled,
+		// // We already set this above.
+		// SourceLocation: e.SourceLocation,
+		// // We already set this above.
+		// TraceSampled:   e.TraceSampled,
 	}
 	switch p := e.Payload.(type) {
 	case string:
