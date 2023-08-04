@@ -302,19 +302,14 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 					continue
 				}
 
-				for splitIndex, entry := range splitEntries {
-					internalLogEntry, err := l.logEntryToInternal(entry, logName, projectID, mr, len(splitEntries), splitIndex)
-					if err != nil {
-						errors = append(errors, err)
-						continue
-					}
+				for _, entry := range splitEntries {
 					if l.cfg.DestinationProjectQuota {
 						projectMapKey = projectID
 					}
 					if _, ok := entries[projectMapKey]; !ok {
 						entries[projectMapKey] = make([]*logpb.LogEntry, 0)
 					}
-					entries[projectMapKey] = append(entries[projectMapKey], internalLogEntry)
+					entries[projectMapKey] = append(entries[projectMapKey], entry)
 				}
 			}
 		}
@@ -440,7 +435,8 @@ func toProtoStruct(v interface{}) (*structpb.Struct, error) {
 	var m map[string]interface{}
 	err = json.Unmarshal(jb, &m)
 	if err != nil {
-		return nil, fmt.Errorf("logging: json.Unmarshal: %w", err)
+		// return nil, fmt.Errorf("logging: json.Unmarshal: %w", err)
+		return nil, fmt.Errorf("logging: json.Unmarshal(%v): %w", jb, err)
 	}
 	return jsonMapToProtoStruct(m), nil
 }
@@ -650,7 +646,7 @@ func (l logMapper) logToSplitEntries(
 	processTime time.Time,
 	logName string,
 	projectID string,
-) ([]logging.Entry, error) {
+) ([]*logpb.LogEntry, error) {
 	// make a copy in case we mutate the record
 	logRecord := plog.NewLogRecord()
 	log.CopyTo(logRecord)
@@ -684,7 +680,7 @@ func (l logMapper) logToSplitEntries(
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
 		err := json.Unmarshal(sourceLocation.Bytes().AsRaw(), &logEntrySourceLocation)
 		if err != nil {
-			return []logging.Entry{entry}, err
+			return nil, err
 		}
 		entry.SourceLocation = &logEntrySourceLocation
 		delete(attrsMap, SourceLocationAttributeKey)
@@ -715,7 +711,7 @@ func (l logMapper) logToSplitEntries(
 	}
 
 	if logRecord.SeverityNumber() < 0 || int(logRecord.SeverityNumber()) > len(severityMapping)-1 {
-		return []logging.Entry{entry}, fmt.Errorf("unknown SeverityNumber %v", logRecord.SeverityNumber())
+		return nil, fmt.Errorf("unknown SeverityNumber %v", logRecord.SeverityNumber())
 	}
 	severityNumber := logRecord.SeverityNumber()
 	// Log severity levels are based on numerical values defined by Otel/GCP, which are informally mapped to generic text values such as "ALERT", "Debug", etc.
@@ -761,7 +757,7 @@ func (l logMapper) logToSplitEntries(
 	// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
 	logOverhead, err := l.logEntryToInternal(entry, logName, projectID, mr, 0, 0)
 	if err != nil {
-		return []logging.Entry{entry}, err
+		return nil, err
 	}
 	// make a copy so the proto initialization doesn't modify the original entry
 	overheadClone := proto.Clone(logOverhead)
@@ -769,12 +765,12 @@ func (l logMapper) logToSplitEntries(
 
 	payload, splits, err := parseEntryPayload(logRecord.Body(), l.maxEntrySize-overheadBytes)
 	if err != nil {
-		return []logging.Entry{entry}, err
+		return nil, err
 	}
 
 	// Split log entries with a string payload into fewer entries
 	if splits > 1 {
-		entries := make([]logging.Entry, splits)
+		entries := make([]*logpb.LogEntry, splits)
 		payloadString := payload.(string)
 
 		// Start by assuming all splits will be even (this may not be the case)
@@ -789,8 +785,13 @@ func (l logMapper) logToSplitEntries(
 				endIndex--
 				currentSplit = payloadString[startIndex:endIndex]
 			}
-			entries[i-1] = entry
-			entries[i-1].Payload = currentSplit
+			entryCopy := entry
+			entryCopy.Payload = currentSplit
+			e, err := l.logEntryToInternal(entryCopy, logName, projectID, mr, splits, i-1)
+			if err != nil {
+				return nil, err
+			}
+			entries[i-1] = e
 
 			// Update slice indices to the next chunk
 			startIndex = endIndex
@@ -800,7 +801,11 @@ func (l logMapper) logToSplitEntries(
 	}
 
 	entry.Payload = payload
-	return []logging.Entry{entry}, nil
+	e, err := l.logEntryToInternal(entry, logName, projectID, mr, 1, 0)
+	if err != nil {
+		return nil, err
+	}
+	return []*logpb.LogEntry{e}, nil
 }
 
 func parseEntryPayload(logBody pcommon.Value, maxEntrySize int) (interface{}, int, error) {
