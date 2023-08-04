@@ -354,9 +354,10 @@ func (l logMapper) logEntryToInternal(
 }
 
 func toLogEntryInternal(e logging.Entry, skipLevels int) (*logpb.LogEntry, error) {
-	if e.LogName != "" {
-		return nil, errors.New("logging: Entry.LogName should be not be set when writing")
-	}
+	// LogName is always set above.
+	// if e.LogName != "" {
+	// 	return nil, errors.New("logging: Entry.LogName should be not be set when writing")
+	// }
 	// t := e.Timestamp
 	// if t.IsZero() {
 	// 	t = time.Now()
