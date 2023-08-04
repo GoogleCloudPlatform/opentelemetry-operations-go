@@ -343,8 +343,6 @@ func (l logMapper) logEntryToInternal(
 		return nil, err
 	}
 
-	internalLogEntry.LogName = fmt.Sprintf("projects/%s/logs/%s", projectID, url.PathEscape(logName))
-	internalLogEntry.Resource = mr
 	if splits > 1 {
 		internalLogEntry.Split = &logpb.LogSplit{
 			Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.String()),
@@ -759,6 +757,7 @@ func (l logMapper) logToSplitEntries(
 			entry.Labels[k] = v.AsString()
 		}
 	}
+	entry.LogName = fmt.Sprintf("projects/%s/logs/%s", projectID, url.PathEscape(logName))
 
 	// Calculate the size of the internal log entry so this overhead can be accounted
 	// for when determining the need to split based on payload size
