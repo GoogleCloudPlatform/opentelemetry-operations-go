@@ -385,7 +385,7 @@ func toLogEntryInternal(e logging.Entry, parent string, skipLevels int) (*logpb.
 	// }
 	ent := &logpb.LogEntry{
 		// Timestamp:      ts,
-		Severity: logtypepb.LogSeverity(e.Severity),
+		// Severity: logtypepb.LogSeverity(e.Severity),
 		InsertId: e.InsertID,
 		// HttpRequest: req,
 		Operation: e.Operation,
@@ -732,7 +732,7 @@ func (l logMapper) logToSplitEntries(
 	if severityForText, ok := otelSeverityForText[strings.ToLower(logRecord.SeverityText())]; ok && severityNumber == 0 {
 		severityNumber = severityForText
 	}
-	entry.Severity = severityMapping[severityNumber]
+	entry.Severity = logtypepb.LogSeverity(severityMapping[severityNumber])
 
 	// Parse severityNumber > 17 (error) to a GCP Error Reporting entry if enabled
 	if severityNumber >= 17 && l.cfg.LogConfig.ErrorReportingType {
