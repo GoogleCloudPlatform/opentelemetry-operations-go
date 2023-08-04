@@ -379,17 +379,17 @@ func toLogEntryInternal(e logging.Entry, parent string, skipLevels int) (*logpb.
 			e.Trace = fmt.Sprintf("%s/traces/%s", parent, e.Trace)
 		}
 	}
-	req, err := fromHTTPRequest(e.HTTPRequest)
-	if err != nil {
-		return nil, err
-	}
+	// req, err := fromHTTPRequest(e.HTTPRequest)
+	// if err != nil {
+	// 	return nil, err
+	// }
 	ent := &logpb.LogEntry{
 		// Timestamp:      ts,
-		Severity:    logtypepb.LogSeverity(e.Severity),
-		InsertId:    e.InsertID,
-		HttpRequest: req,
-		Operation:   e.Operation,
-		Labels:      e.Labels,
+		Severity: logtypepb.LogSeverity(e.Severity),
+		InsertId: e.InsertID,
+		// HttpRequest: req,
+		Operation: e.Operation,
+		Labels:    e.Labels,
 		// Trace:       e.Trace,
 		// SpanId:      e.SpanID,
 		// Resource:       e.Resource,
@@ -710,7 +710,11 @@ func (l logMapper) logToSplitEntries(
 		if err != nil {
 			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
 		}
-		entry.HTTPRequest = httpRequest
+		req, err := fromHTTPRequest(httpRequest)
+		if err != nil {
+			return nil, err
+		}
+		entry.HttpRequest = req
 		delete(attrsMap, HTTPRequestAttributeKey)
 	}
 
