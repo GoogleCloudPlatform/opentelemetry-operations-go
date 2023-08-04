@@ -146,6 +146,25 @@ func TestMapToPrometheusTarget(t *testing.T) {
 				},
 			},
 		},
+		{
+			desc: "Attributes from cloud run",
+			resourceLabels: map[string]string{
+				"cloud.region":  "us-central1",
+				"service.name":  "service:unknown",
+				"faas.name":     "my-cloud-run-service",
+				"faas.instance": "1234759430923053489543203",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1",
+					"cluster":   "",
+					"namespace": "",
+					"job":       "my-cloud-run-service",
+					"instance":  "1234759430923053489543203",
+				},
+			},
+		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			r := pcommon.NewResource()

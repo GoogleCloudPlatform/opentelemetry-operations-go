@@ -40,9 +40,9 @@ var promTargetKeys = map[string][]string{
 	locationLabel:         {locationLabel, semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion},
 	clusterLabel:          {clusterLabel, semconv.AttributeK8SClusterName},
 	namespaceLabel:        {namespaceLabel, semconv.AttributeK8SNamespaceName},
-	jobLabel:              {semconv.AttributeServiceName},
+	jobLabel:              {jobLabel, semconv.AttributeFaaSName, semconv.AttributeServiceName},
 	serviceNamespaceLabel: {semconv.AttributeServiceNamespace},
-	instanceLabel:         {semconv.AttributeServiceInstanceID},
+	instanceLabel:         {instanceLabel, semconv.AttributeFaaSInstance, semconv.AttributeServiceInstanceID},
 }
 
 func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
