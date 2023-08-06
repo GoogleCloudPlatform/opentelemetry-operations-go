@@ -30,6 +30,7 @@ import (
 	"go.uber.org/zap"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	logtypepb "google.golang.org/genproto/googleapis/logging/type"
+	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -68,7 +69,7 @@ func TestLogMapping(t *testing.T) {
 		mr              func() *monitoredrespb.MonitoredResource
 		config          Option
 		name            string
-		expectedEntries []*logpb.LogEntry
+		expectedEntries []logpb.LogEntry
 		maxEntrySize    int
 		expectError     bool
 	}{
@@ -80,7 +81,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("abcxyz")
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Payload:   &logpb.LogEntry_TextPayload{TextPayload: "abc"},
@@ -114,7 +115,7 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []*logpb.LogEntry{{
+			expectedEntries: []logpb.LogEntry{{
 				LogName:   logName,
 				Timestamp: timestamppb.New(testObservedTime),
 			}},
@@ -131,7 +132,7 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -166,7 +167,7 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -201,7 +202,7 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testSampleTime),
@@ -219,7 +220,7 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testSampleTime),
@@ -237,7 +238,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("{\"message\": \"hello!\"}")
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -257,7 +258,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("{\"message\": \"hello!\"}")
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -284,7 +285,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("test string message")
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -311,7 +312,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("test string message")
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -335,7 +336,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetEmptyMap().PutStr("msg", "test map value")
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -364,7 +365,7 @@ func TestLogMapping(t *testing.T) {
 				)
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -387,7 +388,7 @@ func TestLogMapping(t *testing.T) {
 				log.Attributes().PutBool(TraceSampledAttributeKey, true)
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:      logName,
 					Timestamp:    timestamppb.New(testObservedTime),
@@ -407,7 +408,7 @@ func TestLogMapping(t *testing.T) {
 				log.SetSpanID(testSpanID)
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -427,7 +428,7 @@ func TestLogMapping(t *testing.T) {
 				log.SetSeverityNumber(plog.SeverityNumberFatal)
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -459,7 +460,7 @@ func TestLogMapping(t *testing.T) {
 				log.SetSeverityText("fatal3")
 				return log
 			},
-			expectedEntries: []*logpb.LogEntry{
+			expectedEntries: []logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -489,7 +490,10 @@ func TestLogMapping(t *testing.T) {
 				assert.NotNil(t, err)
 			} else {
 				assert.Nil(t, err)
-				assert.Equal(t, testCase.expectedEntries, entries)
+				assert.Equal(t, len(testCase.expectedEntries), len(entries))
+				for i := range testCase.expectedEntries {
+					assert.True(t, proto.Equal(&testCase.expectedEntries[i], &entries[i]))
+				}
 			}
 		})
 	}

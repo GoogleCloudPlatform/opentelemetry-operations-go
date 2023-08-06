@@ -306,7 +306,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 					if _, ok := entries[projectMapKey]; !ok {
 						entries[projectMapKey] = make([]*logpb.LogEntry, 0)
 					}
-					entries[projectMapKey] = append(entries[projectMapKey], entry)
+					entries[projectMapKey] = append(entries[projectMapKey], &entry)
 				}
 			}
 		}
@@ -468,12 +468,12 @@ func (l logMapper) logToSplitEntries(
 	processTime time.Time,
 	logName string,
 	projectID string,
-) ([]*logpb.LogEntry, error) {
+) ([]logpb.LogEntry, error) {
 	// make a copy in case we mutate the record
 	logRecord := plog.NewLogRecord()
 	log.CopyTo(logRecord)
 
-	entry := &logpb.LogEntry{
+	entry := logpb.LogEntry{
 		Resource: mr,
 	}
 
@@ -583,16 +583,8 @@ func (l logMapper) logToSplitEntries(
 	}
 	entry.LogName = fmt.Sprintf("projects/%s/logs/%s", projectID, url.PathEscape(logName))
 
-	// Calculate the size of the internal log entry so this overhead can be accounted
-	// for when determining the need to split based on payload size
-	// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
-	// make a copy so the proto initialization doesn't modify the original entry
-	// TODO(dashpole): proto clone is modifying the requests...
-	overheadClone := proto.Clone(entry)
-	overheadBytes := proto.Size(overheadClone)
-
 	if len(logRecord.Body().AsString()) == 0 {
-		return []*logpb.LogEntry{entry}, nil
+		return []logpb.LogEntry{entry}, nil
 	}
 
 	switch logRecord.Body().Type() {
@@ -609,9 +601,13 @@ func (l logMapper) logToSplitEntries(
 		}
 		entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
 	case pcommon.ValueTypeStr:
+		// Calculate the size of the internal log entry so this overhead can be accounted
+		// for when determining the need to split based on payload size
+		// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
+		overheadBytes := proto.Size(&entry)
 		// Split log entries with a string payload into fewer entries
 		splits := int(math.Ceil(float64(len([]byte(logRecord.Body().AsString()))) / float64(l.maxEntrySize-overheadBytes)))
-		entries := make([]*logpb.LogEntry, splits)
+		entries := make([]logpb.LogEntry, splits)
 		payloadString := logRecord.Body().AsString()
 		// Start by assuming all splits will be even (this may not be the case)
 		startIndex := 0
@@ -625,16 +621,15 @@ func (l logMapper) logToSplitEntries(
 				endIndex--
 				currentSplit = payloadString[startIndex:endIndex]
 			}
-			entryCopy := entry
-			entryCopy.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
+			entry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
 			if splits > 1 {
-				entryCopy.Split = &logpb.LogSplit{
-					Uid:         fmt.Sprintf("%s-%s", logName, entryCopy.Timestamp.AsTime().String()),
+				entry.Split = &logpb.LogSplit{
+					Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.AsTime().String()),
 					Index:       int32(i - 1),
 					TotalSplits: int32(splits),
 				}
 			}
-			entries[i-1] = entryCopy
+			entries[i-1] = entry
 
 			// Update slice indices to the next chunk
 			startIndex = endIndex
@@ -644,7 +639,7 @@ func (l logMapper) logToSplitEntries(
 	default:
 		return nil, fmt.Errorf("unknown log body value %v", logRecord.Body().Type().String())
 	}
-	return []*logpb.LogEntry{entry}, nil
+	return []logpb.LogEntry{entry}, nil
 }
 
 // JSON keys derived from:
