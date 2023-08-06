@@ -262,8 +262,8 @@ func TestLogMapping(t *testing.T) {
 					Timestamp: timestamppb.New(testObservedTime),
 					Severity:  logtypepb.LogSeverity(logging.Error),
 					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
-						GCPTypeKey: &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: GCPErrorReportingTypeValue}},
-						"message":  &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: `{"message": "hello!"}`}},
+						GCPTypeKey: {Kind: &structpb.Value_StringValue{StringValue: GCPErrorReportingTypeValue}},
+						"message":  {Kind: &structpb.Value_StringValue{StringValue: `{"message": "hello!"}`}},
 					}}},
 				},
 			},
@@ -289,8 +289,8 @@ func TestLogMapping(t *testing.T) {
 					Timestamp: timestamppb.New(testObservedTime),
 					Severity:  logtypepb.LogSeverity(logging.Error),
 					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
-						GCPTypeKey: &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: GCPErrorReportingTypeValue}},
-						"message":  &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: "test string message"}},
+						GCPTypeKey: {Kind: &structpb.Value_StringValue{StringValue: GCPErrorReportingTypeValue}},
+						"message":  {Kind: &structpb.Value_StringValue{StringValue: "test string message"}},
 					}}},
 				},
 			},
@@ -340,8 +340,8 @@ func TestLogMapping(t *testing.T) {
 					Timestamp: timestamppb.New(testObservedTime),
 					Severity:  logtypepb.LogSeverity(logging.Error),
 					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
-						GCPTypeKey: &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: GCPErrorReportingTypeValue}},
-						"msg":      &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: "test map value"}},
+						GCPTypeKey: {Kind: &structpb.Value_StringValue{StringValue: GCPErrorReportingTypeValue}},
+						"msg":      {Kind: &structpb.Value_StringValue{StringValue: "test map value"}},
 					}}},
 				},
 			},

@@ -332,7 +332,7 @@ func toProtoStruct(v interface{}) (*structpb.Struct, error) {
 	if s, ok := v.(*structpb.Struct); ok {
 		return s, nil
 	}
-	// v is a Go value that supports JSON marshalling. We want a Struct
+	// v is a Go value that supports JSON marshaling. We want a Struct
 	// protobuf. Some day we may have a more direct way to get there, but right
 	// now the only way is to marshal the Go value to JSON, unmarshal into a
 	// map, and then build the Struct proto from the map.
