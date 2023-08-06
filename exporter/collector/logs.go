@@ -304,7 +304,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 					if _, ok := entries[projectMapKey]; !ok {
 						entries[projectMapKey] = make([]*logpb.LogEntry, 0)
 					}
-					entries[projectMapKey] = append(entries[projectMapKey], &entry)
+					entries[projectMapKey] = append(entries[projectMapKey], entry)
 				}
 			}
 		}
@@ -435,12 +435,12 @@ func (l logMapper) logToSplitEntries(
 	processTime time.Time,
 	logName string,
 	projectID string,
-) ([]logpb.LogEntry, error) {
+) ([]*logpb.LogEntry, error) {
 	// make a copy in case we mutate the record
 	logRecord := plog.NewLogRecord()
 	log.CopyTo(logRecord)
 
-	entry := logpb.LogEntry{
+	entry := &logpb.LogEntry{
 		Resource: mr,
 	}
 
@@ -546,7 +546,7 @@ func (l logMapper) logToSplitEntries(
 	entry.LogName = fmt.Sprintf("projects/%s/logs/%s", projectID, url.PathEscape(logName))
 
 	if len(logRecord.Body().AsString()) == 0 {
-		return []logpb.LogEntry{entry}, nil
+		return []*logpb.LogEntry{entry}, nil
 	}
 
 	switch logRecord.Body().Type() {
@@ -566,15 +566,16 @@ func (l logMapper) logToSplitEntries(
 		// Calculate the size of the internal log entry so this overhead can be accounted
 		// for when determining the need to split based on payload size
 		// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
-		overheadBytes := proto.Size(&entry)
+		overheadBytes := proto.Size(entry)
 		// Split log entries with a string payload into fewer entries
 		splits := int(math.Ceil(float64(len([]byte(logRecord.Body().AsString()))) / float64(l.maxEntrySize-overheadBytes)))
-		entries := make([]logpb.LogEntry, splits)
+		entries := make([]*logpb.LogEntry, splits)
 		payloadString := logRecord.Body().AsString()
 		// Start by assuming all splits will be even (this may not be the case)
 		startIndex := 0
 		endIndex := int(math.Floor((1.0 / float64(splits)) * float64(len(payloadString))))
 		for i := 1; i <= splits; i++ {
+			newEntry := proto.Clone(entry).(*logpb.LogEntry)
 			currentSplit := payloadString[startIndex:endIndex]
 
 			// If the current split is larger than the entry size, iterate until it is within the max
@@ -583,15 +584,15 @@ func (l logMapper) logToSplitEntries(
 				endIndex--
 				currentSplit = payloadString[startIndex:endIndex]
 			}
-			entry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
+			newEntry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
 			if splits > 1 {
-				entry.Split = &logpb.LogSplit{
+				newEntry.Split = &logpb.LogSplit{
 					Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.AsTime().String()),
 					Index:       int32(i - 1),
 					TotalSplits: int32(splits),
 				}
 			}
-			entries[i-1] = entry
+			entries[i-1] = newEntry
 
 			// Update slice indices to the next chunk
 			startIndex = endIndex
@@ -601,7 +602,7 @@ func (l logMapper) logToSplitEntries(
 	default:
 		return nil, fmt.Errorf("unknown log body value %v", logRecord.Body().Type().String())
 	}
-	return []logpb.LogEntry{entry}, nil
+	return []*logpb.LogEntry{entry}, nil
 }
 
 // JSON keys derived from:
@@ -625,19 +626,19 @@ type httpRequestLog struct {
 }
 
 func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.HttpRequest, error) {
-	var bytes []byte
+	var httpBytes []byte
 	switch httpRequestAttr.Type() {
 	case pcommon.ValueTypeBytes:
-		bytes = httpRequestAttr.Bytes().AsRaw()
+		httpBytes = httpRequestAttr.Bytes().AsRaw()
 	case pcommon.ValueTypeStr, pcommon.ValueTypeMap:
-		bytes = []byte(httpRequestAttr.AsString())
+		httpBytes = []byte(httpRequestAttr.AsString())
 	}
 
 	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
 	// instead of a slice of bytes could do, but would need a lot of type casting and checking
 	// assertions with it.
 	var parsedHTTPRequest httpRequestLog
-	if err := json.Unmarshal(bytes, &parsedHTTPRequest); err != nil {
+	if err := json.Unmarshal(httpBytes, &parsedHTTPRequest); err != nil {
 		return nil, err
 	}
 

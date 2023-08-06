@@ -17,8 +17,6 @@ package collector
 import (
 	"encoding/hex"
 	"fmt"
-	"io"
-	"net/http"
 	"testing"
 	"time"
 
@@ -69,7 +67,7 @@ func TestLogMapping(t *testing.T) {
 		mr              func() *monitoredrespb.MonitoredResource
 		config          Option
 		name            string
-		expectedEntries []logpb.LogEntry
+		expectedEntries []*logpb.LogEntry
 		maxEntrySize    int
 		expectError     bool
 	}{
@@ -81,7 +79,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("abcxyz")
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Payload:   &logpb.LogEntry_TextPayload{TextPayload: "abc"},
@@ -115,7 +113,7 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []logpb.LogEntry{{
+			expectedEntries: []*logpb.LogEntry{{
 				LogName:   logName,
 				Timestamp: timestamppb.New(testObservedTime),
 			}},
@@ -126,13 +124,13 @@ func TestLogMapping(t *testing.T) {
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				// TODO: This used to be []byte, but that fails to unmarshal. How do we send json?
-				log.Body().FromRaw(`{"this": "is json"}`)
+				log.Body().SetStr(`{"this": "is json"}`)
 				return log
 			},
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -146,7 +144,7 @@ func TestLogMapping(t *testing.T) {
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				// TODO: This used to be []byte, but that fails to unmarshal. How do we send json?
-				log.Body().FromRaw(`{"message": "hello!"}`)
+				log.Body().SetStr(`{"message": "hello!"}`)
 				log.Attributes().PutEmptyBytes(HTTPRequestAttributeKey).FromRaw([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
@@ -167,7 +165,7 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -202,7 +200,7 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testSampleTime),
@@ -220,7 +218,7 @@ func TestLogMapping(t *testing.T) {
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testSampleTime),
@@ -238,7 +236,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("{\"message\": \"hello!\"}")
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -258,7 +256,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("{\"message\": \"hello!\"}")
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -285,7 +283,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("test string message")
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -312,7 +310,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetStr("test string message")
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -336,7 +334,7 @@ func TestLogMapping(t *testing.T) {
 				log.Body().SetEmptyMap().PutStr("msg", "test map value")
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -365,7 +363,7 @@ func TestLogMapping(t *testing.T) {
 				)
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -388,7 +386,7 @@ func TestLogMapping(t *testing.T) {
 				log.Attributes().PutBool(TraceSampledAttributeKey, true)
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:      logName,
 					Timestamp:    timestamppb.New(testObservedTime),
@@ -408,7 +406,7 @@ func TestLogMapping(t *testing.T) {
 				log.SetSpanID(testSpanID)
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -428,7 +426,7 @@ func TestLogMapping(t *testing.T) {
 				log.SetSeverityNumber(plog.SeverityNumberFatal)
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -460,7 +458,7 @@ func TestLogMapping(t *testing.T) {
 				log.SetSeverityText("fatal3")
 				return log
 			},
-			expectedEntries: []logpb.LogEntry{
+			expectedEntries: []*logpb.LogEntry{
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
@@ -492,7 +490,9 @@ func TestLogMapping(t *testing.T) {
 				assert.Nil(t, err)
 				assert.Equal(t, len(testCase.expectedEntries), len(entries))
 				for i := range testCase.expectedEntries {
-					assert.True(t, proto.Equal(&testCase.expectedEntries[i], &entries[i]))
+					if !proto.Equal(testCase.expectedEntries[i], entries[i]) {
+						assert.Equal(t, testCase.expectedEntries[i], entries[i])
+					}
 				}
 			}
 		})
@@ -538,11 +538,4 @@ func TestGetLogName(t *testing.T) {
 			}
 		})
 	}
-}
-
-func makeExpectedHTTPReq(method, url, referer, userAgent string, body io.Reader) *http.Request {
-	req, _ := http.NewRequest(method, url, body)
-	req.Header.Set("Referer", referer)
-	req.Header.Set("User-Agent", userAgent)
-	return req
 }
