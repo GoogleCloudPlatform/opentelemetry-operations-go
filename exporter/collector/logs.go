@@ -19,10 +19,8 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"math"
-	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -31,7 +29,6 @@ import (
 	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/googleapis/gax-go/v2"
 	"go.uber.org/multierr"
 	"go.uber.org/zap"
@@ -41,6 +38,7 @@ import (
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -388,37 +386,6 @@ func jsonValueToStructValue(v interface{}) *structpb.Value {
 	}
 }
 
-func fromHTTPRequest(r *logging.HTTPRequest) (*logtypepb.HttpRequest, error) {
-	if r == nil {
-		return nil, nil
-	}
-	if r.Request == nil {
-		return nil, errors.New("logging: HTTPRequest must have a non-nil Request")
-	}
-	u := *r.Request.URL
-	u.Fragment = ""
-	pb := &logtypepb.HttpRequest{
-		RequestMethod:                  r.Request.Method,
-		RequestUrl:                     fixUTF8(u.String()),
-		RequestSize:                    r.RequestSize,
-		Status:                         int32(r.Status),
-		ResponseSize:                   r.ResponseSize,
-		UserAgent:                      r.Request.UserAgent(),
-		ServerIp:                       r.LocalIP,
-		RemoteIp:                       r.RemoteIP, // TODO(jba): attempt to parse http.Request.RemoteAddr?
-		Referer:                        r.Request.Referer(),
-		CacheHit:                       r.CacheHit,
-		CacheValidatedWithOriginServer: r.CacheValidatedWithOriginServer,
-		Protocol:                       r.Request.Proto,
-		CacheFillBytes:                 r.CacheFillBytes,
-		CacheLookup:                    r.CacheLookup,
-	}
-	if r.Latency != 0 {
-		pb.Latency = ptypes.DurationProto(r.Latency)
-	}
-	return pb, nil
-}
-
 // fixUTF8 is a helper that fixes an invalid UTF-8 string by replacing
 // invalid UTF-8 runes with the Unicode replacement character (U+FFFD).
 // See Issue https://github.com/googleapis/google-cloud-go/issues/1383.
@@ -527,16 +494,11 @@ func (l logMapper) logToSplitEntries(
 	}
 
 	if httpRequestAttr, ok := attrsMap[HTTPRequestAttributeKey]; ok {
-		var httpRequest *logging.HTTPRequest
 		httpRequest, err := l.parseHTTPRequest(httpRequestAttr)
 		if err != nil {
 			l.obs.log.Debug("Unable to parse httpRequest", zap.Error(err))
 		}
-		req, err := fromHTTPRequest(httpRequest)
-		if err != nil {
-			return nil, err
-		}
-		entry.HttpRequest = req
+		entry.HttpRequest = httpRequest
 		delete(attrsMap, HTTPRequestAttributeKey)
 	}
 
@@ -656,13 +618,13 @@ type httpRequestLog struct {
 	ResponseSize                   int64  `json:"responseSize,string"`
 	RequestSize                    int64  `json:"requestSize,string"`
 	CacheFillBytes                 int64  `json:"cacheFillBytes,string"`
-	Status                         int    `json:"status,string"`
+	Status                         int32  `json:"status,string"`
 	CacheLookup                    bool   `json:"cacheLookup"`
 	CacheHit                       bool   `json:"cacheHit"`
 	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer"`
 }
 
-func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTTPRequest, error) {
+func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.HttpRequest, error) {
 	var bytes []byte
 	switch httpRequestAttr.Type() {
 	case pcommon.ValueTypeBytes:
@@ -679,31 +641,27 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logging.HTT
 		return nil, err
 	}
 
-	req, err := http.NewRequest(parsedHTTPRequest.RequestMethod, parsedHTTPRequest.RequestURL, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("Referer", parsedHTTPRequest.Referer)
-	req.Header.Set("User-Agent", parsedHTTPRequest.UserAgent)
-
-	httpRequest := &logging.HTTPRequest{
-		Request:                        req,
+	pb := &logtypepb.HttpRequest{
+		RequestMethod:                  parsedHTTPRequest.RequestMethod,
+		RequestUrl:                     fixUTF8(parsedHTTPRequest.RequestURL),
 		RequestSize:                    parsedHTTPRequest.RequestSize,
 		Status:                         parsedHTTPRequest.Status,
 		ResponseSize:                   parsedHTTPRequest.ResponseSize,
-		LocalIP:                        parsedHTTPRequest.ServerIP,
-		RemoteIP:                       parsedHTTPRequest.RemoteIP,
+		UserAgent:                      parsedHTTPRequest.UserAgent,
+		ServerIp:                       parsedHTTPRequest.ServerIP,
+		RemoteIp:                       parsedHTTPRequest.RemoteIP,
+		Referer:                        parsedHTTPRequest.Referer,
 		CacheHit:                       parsedHTTPRequest.CacheHit,
 		CacheValidatedWithOriginServer: parsedHTTPRequest.CacheValidatedWithOriginServer,
+		Protocol:                       "HTTP/1.1",
 		CacheFillBytes:                 parsedHTTPRequest.CacheFillBytes,
 		CacheLookup:                    parsedHTTPRequest.CacheLookup,
 	}
 	if parsedHTTPRequest.Latency != "" {
 		latency, err := time.ParseDuration(parsedHTTPRequest.Latency)
-		if err == nil {
-			httpRequest.Latency = latency
+		if err == nil && latency != 0 {
+			pb.Latency = durationpb.New(latency)
 		}
 	}
-
-	return httpRequest, nil
+	return pb, nil
 }
