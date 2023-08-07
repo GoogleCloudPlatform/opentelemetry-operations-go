@@ -586,29 +586,18 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.H
 // toProtoStruct converts v, which must marshal into a JSON object,
 // into a Google Struct proto.
 func toProtoStruct(v interface{}) (*structpb.Struct, error) {
-	// Fast path: if v is already a *structpb.Struct, nothing to do.
-	if s, ok := v.(*structpb.Struct); ok {
-		return s, nil
-	}
 	// v is a Go value that supports JSON marshaling. We want a Struct
 	// protobuf. Some day we may have a more direct way to get there, but right
 	// now the only way is to marshal the Go value to JSON, unmarshal into a
 	// map, and then build the Struct proto from the map.
-	var jb []byte
-	var err error
-	if raw, ok := v.(json.RawMessage); ok { // needed for Go 1.7 and below
-		jb = []byte(raw)
-	} else {
-		jb, err = json.Marshal(v)
-		if err != nil {
-			return nil, fmt.Errorf("logging: json.Marshal: %w", err)
-		}
+	jb, err := json.Marshal(v)
+	if err != nil {
+		return nil, fmt.Errorf("logging: json.Marshal: %w", err)
 	}
 	var m map[string]interface{}
 	err = json.Unmarshal(jb, &m)
 	if err != nil {
-		// return nil, fmt.Errorf("logging: json.Unmarshal: %w", err)
-		return nil, fmt.Errorf("logging: json.Unmarshal(%v): %w", jb, err)
+		return nil, fmt.Errorf("logging: json.Unmarshal: %w", err)
 	}
 	return jsonMapToProtoStruct(m), nil
 }
