@@ -581,6 +581,8 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.H
 
 // toProtoStruct converts v, which must marshal into a JSON object,
 // into a Google Struct proto.
+// Mostly copied from
+// https://github.com/googleapis/google-cloud-go/blob/69705144832c715cf23832602ad9338b911dff9a/logging/logging.go#L577
 func toProtoStruct(v interface{}) (*structpb.Struct, error) {
 	// v is a Go value that supports JSON marshaling. We want a Struct
 	// protobuf. Some day we may have a more direct way to get there, but right
@@ -598,6 +600,7 @@ func toProtoStruct(v interface{}) (*structpb.Struct, error) {
 	return jsonMapToProtoStruct(m), nil
 }
 
+// Copied from https://github.com/googleapis/google-cloud-go/blob/69705144832c715cf23832602ad9338b911dff9a/logging/logging.go#L604
 func jsonMapToProtoStruct(m map[string]interface{}) *structpb.Struct {
 	fields := map[string]*structpb.Value{}
 	for k, v := range m {
@@ -606,6 +609,7 @@ func jsonMapToProtoStruct(m map[string]interface{}) *structpb.Struct {
 	return &structpb.Struct{Fields: fields}
 }
 
+// Copied from https://github.com/googleapis/google-cloud-go/blob/69705144832c715cf23832602ad9338b911dff9a/logging/logging.go#L612
 func jsonValueToStructValue(v interface{}) *structpb.Value {
 	switch x := v.(type) {
 	case bool:
@@ -632,6 +636,7 @@ func jsonValueToStructValue(v interface{}) *structpb.Value {
 // fixUTF8 is a helper that fixes an invalid UTF-8 string by replacing
 // invalid UTF-8 runes with the Unicode replacement character (U+FFFD).
 // See Issue https://github.com/googleapis/google-cloud-go/issues/1383.
+// Coped from https://github.com/googleapis/google-cloud-go/blob/69705144832c715cf23832602ad9338b911dff9a/logging/logging.go#L557
 func fixUTF8(s string) string {
 	if utf8.ValidString(s) {
 		return s
