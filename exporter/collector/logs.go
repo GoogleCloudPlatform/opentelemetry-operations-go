@@ -26,7 +26,6 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"cloud.google.com/go/logging"
 	loggingv2 "cloud.google.com/go/logging/apiv2"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
 	"github.com/googleapis/gax-go/v2"
@@ -64,32 +63,32 @@ const (
 
 // severityMapping maps the integer severity level values from OTel [0-24]
 // to matching Cloud Logging severity levels.
-var severityMapping = []logging.Severity{
-	logging.Default,   // Default, 0
-	logging.Debug,     //
-	logging.Debug,     //
-	logging.Debug,     //
-	logging.Debug,     //
-	logging.Debug,     //
-	logging.Debug,     //
-	logging.Debug,     //
-	logging.Debug,     // 1-8 -> Debug
-	logging.Info,      //
-	logging.Info,      // 9-10 -> Info
-	logging.Notice,    //
-	logging.Notice,    // 11-12 -> Notice
-	logging.Warning,   //
-	logging.Warning,   //
-	logging.Warning,   //
-	logging.Warning,   // 13-16 -> Warning
-	logging.Error,     //
-	logging.Error,     //
-	logging.Error,     //
-	logging.Error,     // 17-20 -> Error
-	logging.Critical,  //
-	logging.Critical,  // 21-22 -> Critical
-	logging.Alert,     // 23 -> Alert
-	logging.Emergency, // 24 -> Emergency
+var severityMapping = []logtypepb.LogSeverity{
+	logtypepb.LogSeverity_DEFAULT,   // Default, 0
+	logtypepb.LogSeverity_DEBUG,     //
+	logtypepb.LogSeverity_DEBUG,     //
+	logtypepb.LogSeverity_DEBUG,     //
+	logtypepb.LogSeverity_DEBUG,     //
+	logtypepb.LogSeverity_DEBUG,     //
+	logtypepb.LogSeverity_DEBUG,     //
+	logtypepb.LogSeverity_DEBUG,     //
+	logtypepb.LogSeverity_DEBUG,     // 1-8 -> Debug
+	logtypepb.LogSeverity_INFO,      //
+	logtypepb.LogSeverity_INFO,      // 9-10 -> Info
+	logtypepb.LogSeverity_NOTICE,    //
+	logtypepb.LogSeverity_NOTICE,    // 11-12 -> Notice
+	logtypepb.LogSeverity_WARNING,   //
+	logtypepb.LogSeverity_WARNING,   //
+	logtypepb.LogSeverity_WARNING,   //
+	logtypepb.LogSeverity_WARNING,   // 13-16 -> Warning
+	logtypepb.LogSeverity_ERROR,     //
+	logtypepb.LogSeverity_ERROR,     //
+	logtypepb.LogSeverity_ERROR,     //
+	logtypepb.LogSeverity_ERROR,     // 17-20 -> Error
+	logtypepb.LogSeverity_CRITICAL,  //
+	logtypepb.LogSeverity_CRITICAL,  // 21-22 -> Critical
+	logtypepb.LogSeverity_ALERT,     // 23 -> Alert
+	logtypepb.LogSeverity_EMERGENCY, // 24 -> Emergency
 }
 
 // otelSeverityForText maps the generic aliases of SeverityTexts to SeverityNumbers.
@@ -434,7 +433,7 @@ func (l logMapper) logToSplitEntries(
 	if severityForText, ok := otelSeverityForText[strings.ToLower(logRecord.SeverityText())]; ok && severityNumber == 0 {
 		severityNumber = severityForText
 	}
-	entry.Severity = logtypepb.LogSeverity(severityMapping[severityNumber])
+	entry.Severity = severityMapping[severityNumber]
 
 	// Parse severityNumber > 17 (error) to a GCP Error Reporting entry if enabled
 	if severityNumber >= 17 && l.cfg.LogConfig.ErrorReportingType {
