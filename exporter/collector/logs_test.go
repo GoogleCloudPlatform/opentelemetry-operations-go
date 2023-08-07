@@ -86,8 +86,8 @@ func TestLogMapping(t *testing.T) {
 					Timestamp: timestamppb.New(testObservedTime),
 					Split: &logpb.LogSplit{
 						Uid:         fmt.Sprintf("default-log-%s", testObservedTime.String()),
-						Index:       int32(0),
-						TotalSplits: int32(2),
+						Index:       0,
+						TotalSplits: 2,
 					},
 				},
 				{
@@ -96,8 +96,8 @@ func TestLogMapping(t *testing.T) {
 					Timestamp: timestamppb.New(testObservedTime),
 					Split: &logpb.LogSplit{
 						Uid:         fmt.Sprintf("default-log-%s", testObservedTime.String()),
-						Index:       int32(1),
-						TotalSplits: int32(2),
+						Index:       1,
+						TotalSplits: 2,
 					},
 				},
 			},

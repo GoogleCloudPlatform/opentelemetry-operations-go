@@ -467,7 +467,7 @@ func (l logMapper) logToSplitEntries(
 		}
 		entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
 	case pcommon.ValueTypeMap:
-		s, err := toProtoStruct(logRecord.Body().Map().AsRaw())
+		s, err := structpb.NewStruct(logRecord.Body().Map().AsRaw())
 		if err != nil {
 			return nil, err
 		}
@@ -583,7 +583,7 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.H
 // into a Google Struct proto.
 // Mostly copied from
 // https://github.com/googleapis/google-cloud-go/blob/69705144832c715cf23832602ad9338b911dff9a/logging/logging.go#L577
-func toProtoStruct(v interface{}) (*structpb.Struct, error) {
+func toProtoStruct(v any) (*structpb.Struct, error) {
 	// v is a Go value that supports JSON marshaling. We want a Struct
 	// protobuf. Some day we may have a more direct way to get there, but right
 	// now the only way is to marshal the Go value to JSON, unmarshal into a
@@ -592,45 +592,12 @@ func toProtoStruct(v interface{}) (*structpb.Struct, error) {
 	if err != nil {
 		return nil, fmt.Errorf("logging: json.Marshal: %w", err)
 	}
-	var m map[string]interface{}
+	var m map[string]any
 	err = json.Unmarshal(jb, &m)
 	if err != nil {
 		return nil, fmt.Errorf("logging: json.Unmarshal: %w", err)
 	}
-	return jsonMapToProtoStruct(m), nil
-}
-
-// Copied from https://github.com/googleapis/google-cloud-go/blob/69705144832c715cf23832602ad9338b911dff9a/logging/logging.go#L604
-func jsonMapToProtoStruct(m map[string]interface{}) *structpb.Struct {
-	fields := map[string]*structpb.Value{}
-	for k, v := range m {
-		fields[k] = jsonValueToStructValue(v)
-	}
-	return &structpb.Struct{Fields: fields}
-}
-
-// Copied from https://github.com/googleapis/google-cloud-go/blob/69705144832c715cf23832602ad9338b911dff9a/logging/logging.go#L612
-func jsonValueToStructValue(v interface{}) *structpb.Value {
-	switch x := v.(type) {
-	case bool:
-		return &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: x}}
-	case float64:
-		return &structpb.Value{Kind: &structpb.Value_NumberValue{NumberValue: x}}
-	case string:
-		return &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: x}}
-	case nil:
-		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
-	case map[string]interface{}:
-		return &structpb.Value{Kind: &structpb.Value_StructValue{StructValue: jsonMapToProtoStruct(x)}}
-	case []interface{}:
-		var vals []*structpb.Value
-		for _, e := range x {
-			vals = append(vals, jsonValueToStructValue(e))
-		}
-		return &structpb.Value{Kind: &structpb.Value_ListValue{ListValue: &structpb.ListValue{Values: vals}}}
-	default:
-		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
-	}
+	return structpb.NewStruct(m)
 }
 
 // fixUTF8 is a helper that fixes an invalid UTF-8 string by replacing
