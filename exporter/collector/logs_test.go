@@ -123,7 +123,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetEmptyMap().FromRaw(map[string]any{"this": "is json"})
+				log.Body().SetEmptyMap().PutStr("this", "is json")
 				return log
 			},
 			mr: func() *monitoredrespb.MonitoredResource {
@@ -144,7 +144,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json and httpRequest, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				log.Body().SetEmptyMap().FromRaw(map[string]any{"message": "hello!"})
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
 				log.Attributes().PutEmptyBytes(HTTPRequestAttributeKey).FromRaw([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
