@@ -325,88 +325,6 @@ func mergeLogLabels(instrumentationSource, instrumentationVersion string, resour
 	return mergeLabels(labelsMap, resourceLabels)
 }
 
-// toProtoStruct converts v, which must marshal into a JSON object,
-// into a Google Struct proto.
-func toProtoStruct(v interface{}) (*structpb.Struct, error) {
-	// Fast path: if v is already a *structpb.Struct, nothing to do.
-	if s, ok := v.(*structpb.Struct); ok {
-		return s, nil
-	}
-	// v is a Go value that supports JSON marshaling. We want a Struct
-	// protobuf. Some day we may have a more direct way to get there, but right
-	// now the only way is to marshal the Go value to JSON, unmarshal into a
-	// map, and then build the Struct proto from the map.
-	var jb []byte
-	var err error
-	if raw, ok := v.(json.RawMessage); ok { // needed for Go 1.7 and below
-		jb = []byte(raw)
-	} else {
-		jb, err = json.Marshal(v)
-		if err != nil {
-			return nil, fmt.Errorf("logging: json.Marshal: %w", err)
-		}
-	}
-	var m map[string]interface{}
-	err = json.Unmarshal(jb, &m)
-	if err != nil {
-		// return nil, fmt.Errorf("logging: json.Unmarshal: %w", err)
-		return nil, fmt.Errorf("logging: json.Unmarshal(%v): %w", jb, err)
-	}
-	return jsonMapToProtoStruct(m), nil
-}
-
-func jsonMapToProtoStruct(m map[string]interface{}) *structpb.Struct {
-	fields := map[string]*structpb.Value{}
-	for k, v := range m {
-		fields[k] = jsonValueToStructValue(v)
-	}
-	return &structpb.Struct{Fields: fields}
-}
-
-func jsonValueToStructValue(v interface{}) *structpb.Value {
-	switch x := v.(type) {
-	case bool:
-		return &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: x}}
-	case float64:
-		return &structpb.Value{Kind: &structpb.Value_NumberValue{NumberValue: x}}
-	case string:
-		return &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: x}}
-	case nil:
-		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
-	case map[string]interface{}:
-		return &structpb.Value{Kind: &structpb.Value_StructValue{StructValue: jsonMapToProtoStruct(x)}}
-	case []interface{}:
-		var vals []*structpb.Value
-		for _, e := range x {
-			vals = append(vals, jsonValueToStructValue(e))
-		}
-		return &structpb.Value{Kind: &structpb.Value_ListValue{ListValue: &structpb.ListValue{Values: vals}}}
-	default:
-		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
-	}
-}
-
-// fixUTF8 is a helper that fixes an invalid UTF-8 string by replacing
-// invalid UTF-8 runes with the Unicode replacement character (U+FFFD).
-// See Issue https://github.com/googleapis/google-cloud-go/issues/1383.
-func fixUTF8(s string) string {
-	if utf8.ValidString(s) {
-		return s
-	}
-
-	// Otherwise time to build the sequence.
-	buf := new(bytes.Buffer)
-	buf.Grow(len(s))
-	for _, r := range s {
-		if utf8.ValidRune(r) {
-			buf.WriteRune(r)
-		} else {
-			buf.WriteRune('\uFFFD')
-		}
-	}
-	return buf.String()
-}
-
 func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEntry) (*logpb.WriteLogEntriesResponse, error) {
 	request := &logpb.WriteLogEntriesRequest{
 		PartialSuccess: true,
@@ -669,4 +587,86 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.H
 		}
 	}
 	return pb, nil
+}
+
+// toProtoStruct converts v, which must marshal into a JSON object,
+// into a Google Struct proto.
+func toProtoStruct(v interface{}) (*structpb.Struct, error) {
+	// Fast path: if v is already a *structpb.Struct, nothing to do.
+	if s, ok := v.(*structpb.Struct); ok {
+		return s, nil
+	}
+	// v is a Go value that supports JSON marshaling. We want a Struct
+	// protobuf. Some day we may have a more direct way to get there, but right
+	// now the only way is to marshal the Go value to JSON, unmarshal into a
+	// map, and then build the Struct proto from the map.
+	var jb []byte
+	var err error
+	if raw, ok := v.(json.RawMessage); ok { // needed for Go 1.7 and below
+		jb = []byte(raw)
+	} else {
+		jb, err = json.Marshal(v)
+		if err != nil {
+			return nil, fmt.Errorf("logging: json.Marshal: %w", err)
+		}
+	}
+	var m map[string]interface{}
+	err = json.Unmarshal(jb, &m)
+	if err != nil {
+		// return nil, fmt.Errorf("logging: json.Unmarshal: %w", err)
+		return nil, fmt.Errorf("logging: json.Unmarshal(%v): %w", jb, err)
+	}
+	return jsonMapToProtoStruct(m), nil
+}
+
+func jsonMapToProtoStruct(m map[string]interface{}) *structpb.Struct {
+	fields := map[string]*structpb.Value{}
+	for k, v := range m {
+		fields[k] = jsonValueToStructValue(v)
+	}
+	return &structpb.Struct{Fields: fields}
+}
+
+func jsonValueToStructValue(v interface{}) *structpb.Value {
+	switch x := v.(type) {
+	case bool:
+		return &structpb.Value{Kind: &structpb.Value_BoolValue{BoolValue: x}}
+	case float64:
+		return &structpb.Value{Kind: &structpb.Value_NumberValue{NumberValue: x}}
+	case string:
+		return &structpb.Value{Kind: &structpb.Value_StringValue{StringValue: x}}
+	case nil:
+		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
+	case map[string]interface{}:
+		return &structpb.Value{Kind: &structpb.Value_StructValue{StructValue: jsonMapToProtoStruct(x)}}
+	case []interface{}:
+		var vals []*structpb.Value
+		for _, e := range x {
+			vals = append(vals, jsonValueToStructValue(e))
+		}
+		return &structpb.Value{Kind: &structpb.Value_ListValue{ListValue: &structpb.ListValue{Values: vals}}}
+	default:
+		return &structpb.Value{Kind: &structpb.Value_NullValue{}}
+	}
+}
+
+// fixUTF8 is a helper that fixes an invalid UTF-8 string by replacing
+// invalid UTF-8 runes with the Unicode replacement character (U+FFFD).
+// See Issue https://github.com/googleapis/google-cloud-go/issues/1383.
+func fixUTF8(s string) string {
+	if utf8.ValidString(s) {
+		return s
+	}
+
+	// Otherwise time to build the sequence.
+	buf := new(bytes.Buffer)
+	buf.Grow(len(s))
+	for _, r := range s {
+		if utf8.ValidRune(r) {
+			buf.WriteRune(r)
+		} else {
+			buf.WriteRune('\uFFFD')
+		}
+	}
+	return buf.String()
 }
