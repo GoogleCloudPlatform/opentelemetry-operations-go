@@ -471,6 +471,11 @@ func TestLogMapping(t *testing.T) {
 			} else {
 				assert.Nil(t, err)
 				assert.Equal(t, testCase.expectedEntries, entries)
+				for i, entry := range entries {
+					// Check that the resulting entry can actually be translated to an internal log entry
+					_, err := mapper.logEntryToInternal(entry, logName, "fakeprojectid", mr, len(entries), i)
+					assert.Nil(t, err)
+				}
 			}
 		})
 	}
