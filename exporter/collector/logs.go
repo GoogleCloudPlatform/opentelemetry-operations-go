@@ -568,9 +568,13 @@ func (l logMapper) logToSplitEntries(
 		// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
 		overheadBytes := proto.Size(entry)
 		// Split log entries with a string payload into fewer entries
-		splits := int(math.Ceil(float64(len([]byte(logRecord.Body().AsString()))) / float64(l.maxEntrySize-overheadBytes)))
-		entries := make([]*logpb.LogEntry, splits)
 		payloadString := logRecord.Body().AsString()
+		splits := int(math.Ceil(float64(len([]byte(payloadString))) / float64(l.maxEntrySize-overheadBytes)))
+		if splits == 0 {
+			entry.Payload = &logpb.LogEntry_TextPayload{TextPayload: payloadString}
+			return []*logpb.LogEntry{entry}, nil
+		}
+		entries := make([]*logpb.LogEntry, splits)
 		// Start by assuming all splits will be even (this may not be the case)
 		startIndex := 0
 		endIndex := int(math.Floor((1.0 / float64(splits)) * float64(len(payloadString))))
