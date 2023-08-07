@@ -362,7 +362,7 @@ func (l logMapper) logToSplitEntries(
 	}
 
 	ts := logRecord.Timestamp().AsTime()
-	if logRecord.Timestamp() == 0 {
+	if logRecord.Timestamp() == 0 || ts.IsZero() {
 		// if timestamp is unset, fall back to observed_time_unix_nano as recommended
 		//   (see https://github.com/open-telemetry/opentelemetry-proto/blob/4abbb78/opentelemetry/proto/logs/v1/logs.proto#L176-L179)
 		if logRecord.ObservedTimestamp() != 0 {
@@ -371,9 +371,6 @@ func (l logMapper) logToSplitEntries(
 			// if observed_time is 0, use the current time
 			ts = processTime
 		}
-	}
-	if ts.IsZero() {
-		ts = time.Now()
 	}
 	entry.Timestamp = timestamppb.New(ts)
 
