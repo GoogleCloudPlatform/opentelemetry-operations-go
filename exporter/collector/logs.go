@@ -357,10 +357,6 @@ func (l logMapper) logToSplitEntries(
 	logRecord := plog.NewLogRecord()
 	log.CopyTo(logRecord)
 
-	entry := &logpb.LogEntry{
-		Resource: mr,
-	}
-
 	ts := logRecord.Timestamp().AsTime()
 	if logRecord.Timestamp() == 0 || ts.IsZero() {
 		// if timestamp is unset, fall back to observed_time_unix_nano as recommended
@@ -372,7 +368,13 @@ func (l logMapper) logToSplitEntries(
 			ts = processTime
 		}
 	}
-	entry.Timestamp = timestamppb.New(ts)
+
+	entry := &logpb.LogEntry{
+		Resource:  mr,
+		Timestamp: timestamppb.New(ts),
+		Labels:    logLabels,
+		LogName:   fmt.Sprintf("projects/%s/logs/%s", projectID, url.PathEscape(logName)),
+	}
 
 	// build our own map off OTel attributes so we don't have to call .Get() for each special case
 	// (.Get() ranges over all attributes each time)
@@ -442,22 +444,16 @@ func (l logMapper) logToSplitEntries(
 		logRecord.Body().Map().PutStr(GCPTypeKey, GCPErrorReportingTypeValue)
 	}
 
-	entry.Labels = logLabels
-
 	// parse remaining OTel attributes to GCP labels
 	for k, v := range attrsMap {
 		// skip "gcp.*" attributes since we process these to other fields
 		if strings.HasPrefix(k, "gcp.") {
 			continue
 		}
-		if entry.Labels == nil {
-			entry.Labels = make(map[string]string)
-		}
 		if _, ok := entry.Labels[k]; !ok {
 			entry.Labels[k] = v.AsString()
 		}
 	}
-	entry.LogName = fmt.Sprintf("projects/%s/logs/%s", projectID, url.PathEscape(logName))
 
 	if len(logRecord.Body().AsString()) == 0 {
 		return []*logpb.LogEntry{entry}, nil
