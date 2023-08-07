@@ -484,7 +484,7 @@ func (l logMapper) logToSplitEntries(
 		// Split log entries with a string payload into fewer entries
 		payloadString := logRecord.Body().AsString()
 		splits := int(math.Ceil(float64(len([]byte(payloadString))) / float64(l.maxEntrySize-overheadBytes)))
-		if splits == 0 {
+		if splits <= 1 {
 			entry.Payload = &logpb.LogEntry_TextPayload{TextPayload: payloadString}
 			return []*logpb.LogEntry{entry}, nil
 		}
@@ -492,7 +492,7 @@ func (l logMapper) logToSplitEntries(
 		// Start by assuming all splits will be even (this may not be the case)
 		startIndex := 0
 		endIndex := int(math.Floor((1.0 / float64(splits)) * float64(len(payloadString))))
-		for i := 1; i <= splits; i++ {
+		for i := 0; i < splits; i++ {
 			newEntry := proto.Clone(entry).(*logpb.LogEntry)
 			currentSplit := payloadString[startIndex:endIndex]
 
@@ -503,18 +503,16 @@ func (l logMapper) logToSplitEntries(
 				currentSplit = payloadString[startIndex:endIndex]
 			}
 			newEntry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
-			if splits > 1 {
-				newEntry.Split = &logpb.LogSplit{
-					Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.AsTime().String()),
-					Index:       int32(i - 1),
-					TotalSplits: int32(splits),
-				}
+			newEntry.Split = &logpb.LogSplit{
+				Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.AsTime().String()),
+				Index:       int32(i),
+				TotalSplits: int32(splits),
 			}
-			entries[i-1] = newEntry
+			entries[i] = newEntry
 
 			// Update slice indices to the next chunk
 			startIndex = endIndex
-			endIndex = int(math.Floor((float64(i+1) / float64(splits)) * float64(len(payloadString))))
+			endIndex = int(math.Floor((float64(i+2) / float64(splits)) * float64(len(payloadString))))
 		}
 		return entries, nil
 	default:
