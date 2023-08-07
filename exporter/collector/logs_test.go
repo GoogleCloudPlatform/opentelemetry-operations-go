@@ -123,8 +123,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				// TODO: This used to be []byte, but that fails to unmarshal. How do we send json?
-				log.Body().SetStr(`{"this": "is json"}`)
+				log.Body().SetEmptyMap().FromRaw(map[string]any{"this": "is json"})
 				return log
 			},
 			mr: func() *monitoredrespb.MonitoredResource {
@@ -134,7 +133,9 @@ func TestLogMapping(t *testing.T) {
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
-					Payload:   &logpb.LogEntry_TextPayload{TextPayload: `{"this": "is json"}`},
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"this": {Kind: &structpb.Value_StringValue{StringValue: "is json"}},
+					}}},
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
@@ -143,8 +144,7 @@ func TestLogMapping(t *testing.T) {
 			name: "log with json and httpRequest, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
-				// TODO: This used to be []byte, but that fails to unmarshal. How do we send json?
-				log.Body().SetStr(`{"message": "hello!"}`)
+				log.Body().SetEmptyMap().FromRaw(map[string]any{"message": "hello!"})
 				log.Attributes().PutEmptyBytes(HTTPRequestAttributeKey).FromRaw([]byte(`{
 						"requestMethod": "GET", 
 						"requestURL": "https://www.example.com", 
@@ -169,7 +169,9 @@ func TestLogMapping(t *testing.T) {
 				{
 					LogName:   logName,
 					Timestamp: timestamppb.New(testObservedTime),
-					Payload:   &logpb.LogEntry_TextPayload{TextPayload: `{"message": "hello!"}`},
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
 					HttpRequest: &logtypepb.HttpRequest{
 						RequestMethod:                  "GET",
 						UserAgent:                      "test",
