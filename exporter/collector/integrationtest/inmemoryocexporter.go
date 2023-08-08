@@ -30,7 +30,7 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )

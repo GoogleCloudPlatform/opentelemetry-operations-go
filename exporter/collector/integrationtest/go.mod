@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/integrationtest
+module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest
 
 go 1.20
 
