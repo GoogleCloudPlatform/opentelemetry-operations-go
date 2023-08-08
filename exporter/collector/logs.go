@@ -434,12 +434,15 @@ func (l logMapper) logToSplitEntries(
 	}
 	entry.Severity = severityMapping[severityNumber]
 
+	// log.Body().AsString() can be expensive, and we use it several times below this, so
+	// do it once and save that as a variable.
+	logBodyString := logRecord.Body().AsString()
+
 	// Parse severityNumber > 17 (error) to a GCP Error Reporting entry if enabled
 	if severityNumber >= 17 && l.cfg.LogConfig.ErrorReportingType {
 		if logRecord.Body().Type() != pcommon.ValueTypeMap {
-			strValue := logRecord.Body().AsString()
 			logRecord.Body().SetEmptyMap()
-			logRecord.Body().Map().PutStr("message", strValue)
+			logRecord.Body().Map().PutStr("message", logBodyString)
 		}
 		logRecord.Body().Map().PutStr(GCPTypeKey, GCPErrorReportingTypeValue)
 	}
@@ -455,66 +458,66 @@ func (l logMapper) logToSplitEntries(
 		}
 	}
 
-	if len(logRecord.Body().AsString()) == 0 {
+	if len(logBodyString) == 0 {
 		return []*logpb.LogEntry{entry}, nil
 	}
 
+	// Handle map and bytes as JSON-structured logs if they are successfully converted.
 	switch logRecord.Body().Type() {
-	case pcommon.ValueTypeBytes:
-		s, err := toProtoStruct(logRecord.Body().Bytes().AsRaw())
-		if err != nil {
-			return nil, err
-		}
-		entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
 	case pcommon.ValueTypeMap:
 		s, err := structpb.NewStruct(logRecord.Body().Map().AsRaw())
-		if err != nil {
-			return nil, err
-		}
-		entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
-	case pcommon.ValueTypeStr:
-		// Calculate the size of the internal log entry so this overhead can be accounted
-		// for when determining the need to split based on payload size
-		// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
-		overheadBytes := proto.Size(entry)
-		// Split log entries with a string payload into fewer entries
-		payloadString := logRecord.Body().Str()
-		splits := int(math.Ceil(float64(len([]byte(payloadString))) / float64(l.maxEntrySize-overheadBytes)))
-		if splits <= 1 {
-			entry.Payload = &logpb.LogEntry_TextPayload{TextPayload: payloadString}
+		if err == nil {
+			entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
 			return []*logpb.LogEntry{entry}, nil
 		}
-		entries := make([]*logpb.LogEntry, splits)
-		// Start by assuming all splits will be even (this may not be the case)
-		startIndex := 0
-		endIndex := int(math.Floor((1.0 / float64(splits)) * float64(len(payloadString))))
-		for i := 0; i < splits; i++ {
-			newEntry := proto.Clone(entry).(*logpb.LogEntry)
-			currentSplit := payloadString[startIndex:endIndex]
-
-			// If the current split is larger than the entry size, iterate until it is within the max
-			// (This may happen since not all characters are exactly 1 byte)
-			for len([]byte(currentSplit)) > l.maxEntrySize {
-				endIndex--
-				currentSplit = payloadString[startIndex:endIndex]
-			}
-			newEntry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
-			newEntry.Split = &logpb.LogSplit{
-				Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.AsTime().String()),
-				Index:       int32(i),
-				TotalSplits: int32(splits),
-			}
-			entries[i] = newEntry
-
-			// Update slice indices to the next chunk
-			startIndex = endIndex
-			endIndex = int(math.Floor((float64(i+2) / float64(splits)) * float64(len(payloadString))))
+		l.obs.log.Warn(fmt.Sprintf("map body cannot be converted to a json payload, exporting as raw string: %+v", err))
+	case pcommon.ValueTypeBytes:
+		s, err := toProtoStruct(logRecord.Body().Bytes().AsRaw())
+		if err == nil {
+			entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
+			return []*logpb.LogEntry{entry}, nil
 		}
-		return entries, nil
-	default:
-		return nil, fmt.Errorf("unknown log body value %v", logRecord.Body().Type().String())
+		l.obs.log.Warn(fmt.Sprintf("bytes body cannot be converted to a json payload, exporting as raw string: %+v", err))
 	}
-	return []*logpb.LogEntry{entry}, nil
+	// For all other ValueTypes, export as a string payload.
+
+	// Calculate the size of the internal log entry so this overhead can be accounted
+	// for when determining the need to split based on payload size
+	// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
+	overheadBytes := proto.Size(entry)
+	// Split log entries with a string payload into fewer entries
+	splits := int(math.Ceil(float64(len([]byte(logBodyString))) / float64(l.maxEntrySize-overheadBytes)))
+	if splits <= 1 {
+		entry.Payload = &logpb.LogEntry_TextPayload{TextPayload: logBodyString}
+		return []*logpb.LogEntry{entry}, nil
+	}
+	entries := make([]*logpb.LogEntry, splits)
+	// Start by assuming all splits will be even (this may not be the case)
+	startIndex := 0
+	endIndex := int(math.Floor((1.0 / float64(splits)) * float64(len(logBodyString))))
+	for i := 0; i < splits; i++ {
+		newEntry := proto.Clone(entry).(*logpb.LogEntry)
+		currentSplit := logBodyString[startIndex:endIndex]
+
+		// If the current split is larger than the entry size, iterate until it is within the max
+		// (This may happen since not all characters are exactly 1 byte)
+		for len([]byte(currentSplit)) > l.maxEntrySize {
+			endIndex--
+			currentSplit = logBodyString[startIndex:endIndex]
+		}
+		newEntry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
+		newEntry.Split = &logpb.LogSplit{
+			Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.AsTime().String()),
+			Index:       int32(i),
+			TotalSplits: int32(splits),
+		}
+		entries[i] = newEntry
+
+		// Update slice indices to the next chunk
+		startIndex = endIndex
+		endIndex = int(math.Floor((float64(i+2) / float64(splits)) * float64(len(logBodyString))))
+	}
+	return entries, nil
 }
 
 // JSON keys derived from:

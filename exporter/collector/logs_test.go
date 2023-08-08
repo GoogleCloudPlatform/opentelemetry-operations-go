@@ -139,6 +139,24 @@ func TestLogMapping(t *testing.T) {
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
+		}, {
+			name: "log with invalid json byte body returns raw byte string",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyBytes().FromRaw([]byte(`"this is not json"`))
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Payload:   &logpb.LogEntry_TextPayload{TextPayload: "InRoaXMgaXMgbm90IGpzb24i"},
+					Timestamp: timestamppb.New(testObservedTime),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			name: "log with json and httpRequest, empty monitoredresource",
