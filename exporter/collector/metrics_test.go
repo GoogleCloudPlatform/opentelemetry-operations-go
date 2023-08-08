@@ -2397,7 +2397,7 @@ func TestPushMetricsOntoWAL(t *testing.T) {
 	obs := selfObservability{zap.NewNop()}
 	cfg := Config{
 		MetricConfig: MetricConfig{
-			MapMonitoredResource: defaultResourceToMonitoredResource,
+			MapMonitoredResource: defaultResourceToMonitoringMonitoredResource,
 			GetMetricName:        defaultGetMetricName,
 			WALConfig: &WALConfig{
 				Directory: tmpDir,

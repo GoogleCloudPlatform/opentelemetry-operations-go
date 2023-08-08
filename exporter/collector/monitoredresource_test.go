@@ -22,7 +22,7 @@ import (
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
-func TestResourceMetricsToMonitoredResource(t *testing.T) {
+func TestResourceMetricsToMonitoringMonitoredResource(t *testing.T) {
 	tests := []struct {
 		resourceLabels map[string]string
 		expectMr       *monitoredrespb.MonitoredResource
@@ -497,6 +497,26 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Gae Instance",
+			resourceLabels: map[string]string{
+				"cloud.provider":          "gcp",
+				"cloud.platform":          "gcp_app_engine",
+				"cloud.availability_zone": "my-zone",
+				"faas.id":                 "myinstanceid",
+				"faas.name":               "myhostname",
+				"faas.version":            "v1",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "gae_instance",
+				Labels: map[string]string{
+					"instance_id": "myinstanceid",
+					"location":    "my-zone",
+					"module_id":   "myhostname",
+					"version_id":  "v1",
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {
@@ -505,7 +525,46 @@ func TestResourceMetricsToMonitoredResource(t *testing.T) {
 			for k, v := range test.resourceLabels {
 				r.Attributes().PutStr(k, v)
 			}
-			mr := defaultResourceToMonitoredResource(r)
+			mr := defaultResourceToMonitoringMonitoredResource(r)
+			assert.Equal(t, test.expectMr, mr)
+		})
+	}
+}
+
+func TestResourceMetricsToLoggingMonitoredResource(t *testing.T) {
+	tests := []struct {
+		resourceLabels map[string]string
+		expectMr       *monitoredrespb.MonitoredResource
+		name           string
+	}{
+		{
+			name: "Gae App",
+			resourceLabels: map[string]string{
+				"cloud.provider":          "gcp",
+				"cloud.platform":          "gcp_app_engine",
+				"cloud.availability_zone": "my-zone",
+				"faas.id":                 "myhostid",
+				"faas.name":               "myhostname",
+				"faas.version":            "v1",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "gae_app",
+				Labels: map[string]string{
+					"location":   "my-zone",
+					"module_id":  "myhostname",
+					"version_id": "v1",
+				},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			r := pcommon.NewResource()
+			for k, v := range test.resourceLabels {
+				r.Attributes().PutStr(k, v)
+			}
+			mr := defaultResourceToLoggingMonitoredResource(r)
 			assert.Equal(t, test.expectMr, mr)
 		})
 	}
@@ -749,7 +808,7 @@ func TestResourceMetricsToMonitoredResourceUTF8(t *testing.T) {
 	for k, v := range resourceLabels {
 		r.Attributes().PutStr(k, v)
 	}
-	mr := defaultResourceToMonitoredResource(r)
+	mr := defaultResourceToMonitoringMonitoredResource(r)
 	assert.Equal(t, expectMr, mr)
 	extraLabels := resourceToLabels(r, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters, nil)
 	assert.Equal(t, expectExtraLabels, extraLabels)

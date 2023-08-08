@@ -203,7 +203,7 @@ func DefaultConfig() Config {
 			ServiceResourceLabels:            true,
 			CumulativeNormalization:          true,
 			GetMetricName:                    defaultGetMetricName,
-			MapMonitoredResource:             defaultResourceToMonitoredResource,
+			MapMonitoredResource:             defaultResourceToMonitoringMonitoredResource,
 		},
 	}
 }
