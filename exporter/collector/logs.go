@@ -434,15 +434,12 @@ func (l logMapper) logToSplitEntries(
 	}
 	entry.Severity = severityMapping[severityNumber]
 
-	// log.Body().AsString() can be expensive, and we use it several times below this, so
-	// do it once and save that as a variable.
-	logBodyString := logRecord.Body().AsString()
-
 	// Parse severityNumber > 17 (error) to a GCP Error Reporting entry if enabled
 	if severityNumber >= 17 && l.cfg.LogConfig.ErrorReportingType {
 		if logRecord.Body().Type() != pcommon.ValueTypeMap {
+			strValue := logRecord.Body().AsString()
 			logRecord.Body().SetEmptyMap()
-			logRecord.Body().Map().PutStr("message", logBodyString)
+			logRecord.Body().Map().PutStr("message", strValue)
 		}
 		logRecord.Body().Map().PutStr(GCPTypeKey, GCPErrorReportingTypeValue)
 	}
@@ -456,10 +453,6 @@ func (l logMapper) logToSplitEntries(
 		if _, ok := entry.Labels[k]; !ok {
 			entry.Labels[k] = v.AsString()
 		}
-	}
-
-	if len(logBodyString) == 0 {
-		return []*logpb.LogEntry{entry}, nil
 	}
 
 	// Handle map and bytes as JSON-structured logs if they are successfully converted.
@@ -477,9 +470,16 @@ func (l logMapper) logToSplitEntries(
 			entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
 			return []*logpb.LogEntry{entry}, nil
 		}
-		l.obs.log.Warn(fmt.Sprintf("bytes body cannot be converted to a json payload, exporting as raw string: %+v", err))
+		l.obs.log.Warn(fmt.Sprintf("bytes body cannot be converted to a json payload, exporting as base64 string: %+v", err))
 	}
 	// For all other ValueTypes, export as a string payload.
+
+	// log.Body().AsString() can be expensive, and we use it several times below this, so
+	// do it once and save that as a variable.
+	logBodyString := logRecord.Body().AsString()
+	if len(logBodyString) == 0 {
+		return []*logpb.LogEntry{entry}, nil
+	}
 
 	// Calculate the size of the internal log entry so this overhead can be accounted
 	// for when determining the need to split based on payload size
