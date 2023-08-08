@@ -478,7 +478,7 @@ func (l logMapper) logToSplitEntries(
 		// TODO(damemi): Find an appropriate estimated buffer to account for the LogSplit struct as well
 		overheadBytes := proto.Size(entry)
 		// Split log entries with a string payload into fewer entries
-		payloadString := logRecord.Body().AsString()
+		payloadString := logRecord.Body().Str()
 		splits := int(math.Ceil(float64(len([]byte(payloadString))) / float64(l.maxEntrySize-overheadBytes)))
 		if splits <= 1 {
 			entry.Payload = &logpb.LogEntry_TextPayload{TextPayload: payloadString}
