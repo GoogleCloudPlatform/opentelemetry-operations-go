@@ -15,13 +15,13 @@ The authenticator type has to be set to `googleclientauth`.
 ```yaml
 extensions:
   googleclientauth:
-    
+
 receivers:
   otlp:
     protocols:
       grpc:
 
-exporters:      
+exporters:
   otlp/withauth:
     endpoint: 0.0.0.0:5000
     ca_file: /tmp/certs/ca.pem
