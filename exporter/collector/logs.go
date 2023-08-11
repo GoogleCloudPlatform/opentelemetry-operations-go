@@ -470,7 +470,7 @@ func (l logMapper) logToSplitEntries(
 			entry.Payload = &logpb.LogEntry_JsonPayload{JsonPayload: s}
 			return []*logpb.LogEntry{entry}, nil
 		}
-		l.obs.log.Warn(fmt.Sprintf("bytes body cannot be converted to a json payload, exporting as base64 string: %+v", err))
+		l.obs.log.Debug(fmt.Sprintf("bytes body cannot be converted to a json payload, exporting as base64 string: %+v", err))
 	}
 	// For all other ValueTypes, export as a string payload.
 
