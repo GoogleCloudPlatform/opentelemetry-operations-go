@@ -16,6 +16,7 @@ package metric
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math"
 	"net/url"
@@ -35,7 +36,6 @@ import (
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"github.com/googleapis/gax-go/v2"
-	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
@@ -90,7 +90,7 @@ func (e *metricExporter) Shutdown(ctx context.Context) error {
 	err := errShutdown
 	e.shutdownOnce.Do(func() {
 		close(e.shutdown)
-		err = multierr.Combine(ctx.Err(), e.client.Close())
+		err = errors.Join(ctx.Err(), e.client.Close())
 	})
 	return err
 }
@@ -143,7 +143,7 @@ func (me *metricExporter) Export(ctx context.Context, rm *metricdata.ResourceMet
 	if me.o.destinationProjectQuota {
 		ctx = metadata.NewOutgoingContext(ctx, metadata.New(map[string]string{"x-goog-user-project": strings.TrimPrefix(me.o.projectID, "projects/")}))
 	}
-	return multierr.Combine(
+	return errors.Join(
 		me.exportMetricDescriptor(ctx, rm),
 		me.exportTimeSeries(ctx, rm),
 	)
@@ -190,15 +190,15 @@ func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm *metric
 	// goroutines to send CreateMetricDescriptorRequest asynchronously in the case
 	// the descriptor does not exist in global cache (me.mdCache).
 	// See details in #26.
-	var err error
+	var errs []error
 	for kmd, md := range mds {
-		cmdErr := me.createMetricDescriptorIfNeeded(ctx, md)
-		if cmdErr == nil {
+		err := me.createMetricDescriptorIfNeeded(ctx, md)
+		if err == nil {
 			me.mdCache[kmd] = md
 		}
-		err = multierr.Append(err, cmdErr)
+		errs = append(errs, err)
 	}
-	return err
+	return errors.Join(errs...)
 }
 
 func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md *googlemetricpb.MetricDescriptor) error {
@@ -224,14 +224,14 @@ func (me *metricExporter) createMetricDescriptorIfNeeded(ctx context.Context, md
 // exportTimeSeries create TimeSeries from the records in cps.
 // res should be the common resource among all TimeSeries, such as instance id, application name and so on.
 func (me *metricExporter) exportTimeSeries(ctx context.Context, rm *metricdata.ResourceMetrics) error {
-	tss, aggErr := me.recordsToTspbs(rm)
+	tss, err := me.recordsToTspbs(rm)
 	if len(tss) == 0 {
-		return aggErr
+		return err
 	}
 
 	name := fmt.Sprintf("projects/%s", me.o.projectID)
 
-	var createErrors []error
+	errs := []error{err}
 	for i := 0; i < len(tss); i += sendBatchSize {
 		j := i + sendBatchSize
 		if j >= len(tss) {
@@ -245,13 +245,10 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, rm *metricdata.R
 			TimeSeries: tss[i:j],
 		}
 
-		err := me.client.CreateTimeSeries(ctx, req)
-		if err != nil {
-			createErrors = append(createErrors, err)
-		}
+		errs = append(errs, me.client.CreateTimeSeries(ctx, req))
 	}
 
-	return multierr.Append(aggErr, multierr.Combine(createErrors...))
+	return errors.Join(errs...)
 }
 
 func (me *metricExporter) extraLabelsFromResource(res *resource.Resource) *attribute.Set {
@@ -430,7 +427,7 @@ func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes att
 // ref. https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TimeSeries
 func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.MonitoredResource, library instrumentation.Scope, extraLabels *attribute.Set) ([]*monitoringpb.TimeSeries, error) {
 	var tss []*monitoringpb.TimeSeries
-	var aggErr error
+	var errs []error
 	if m.Data == nil {
 		return nil, nil
 	}
@@ -439,7 +436,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		for _, point := range a.DataPoints {
 			ts, err := gaugeToTimeSeries[int64](point, m, mr)
 			if err != nil {
-				aggErr = multierr.Append(aggErr, err)
+				errs = append(errs, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
@@ -449,7 +446,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		for _, point := range a.DataPoints {
 			ts, err := gaugeToTimeSeries[float64](point, m, mr)
 			if err != nil {
-				aggErr = multierr.Append(aggErr, err)
+				errs = append(errs, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
@@ -466,7 +463,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				ts, err = gaugeToTimeSeries[int64](point, m, mr)
 			}
 			if err != nil {
-				aggErr = multierr.Append(aggErr, err)
+				errs = append(errs, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
@@ -483,7 +480,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				ts, err = gaugeToTimeSeries[float64](point, m, mr)
 			}
 			if err != nil {
-				aggErr = multierr.Append(aggErr, err)
+				errs = append(errs, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
@@ -493,7 +490,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		for _, point := range a.DataPoints {
 			ts, err := histogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
 			if err != nil {
-				aggErr = multierr.Append(aggErr, err)
+				errs = append(errs, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
@@ -503,16 +500,16 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		for _, point := range a.DataPoints {
 			ts, err := histogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
 			if err != nil {
-				aggErr = multierr.Append(aggErr, err)
+				errs = append(errs, err)
 				continue
 			}
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	default:
-		aggErr = multierr.Append(aggErr, errUnexpectedAggregationKind{kind: reflect.TypeOf(m.Data).String()})
+		errs = append(errs, errUnexpectedAggregationKind{kind: reflect.TypeOf(m.Data).String()})
 	}
-	return tss, aggErr
+	return tss, errors.Join(errs...)
 }
 
 func (me *metricExporter) recordsToTspbs(rm *metricdata.ResourceMetrics) ([]*monitoringpb.TimeSeries, error) {
@@ -520,21 +517,18 @@ func (me *metricExporter) recordsToTspbs(rm *metricdata.ResourceMetrics) ([]*mon
 	extraLabels := me.extraLabelsFromResource(rm.Resource)
 
 	var (
-		tss    []*monitoringpb.TimeSeries
-		errors []error
+		tss  []*monitoringpb.TimeSeries
+		errs []error
 	)
 	for _, scope := range rm.ScopeMetrics {
 		for _, metrics := range scope.Metrics {
 			ts, err := me.recordToTspb(metrics, mr, scope.Scope, extraLabels)
-			if err != nil {
-				errors = append(errors, err)
-			}
-
+			errs = append(errs, err)
 			tss = append(tss, ts...)
 		}
 	}
 
-	return tss, multierr.Combine(errors...)
+	return tss, errors.Join(errs...)
 }
 
 func sanitizeUTF8(s string) string {
@@ -616,7 +610,7 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 	}
 	startpb := timestamppb.New(start)
 	endpb := timestamppb.New(end)
-	err := multierr.Combine(
+	err := errors.Join(
 		startpb.CheckValid(),
 		endpb.CheckValid(),
 	)

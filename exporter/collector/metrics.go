@@ -55,7 +55,6 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/tidwall/wal"
-	"go.uber.org/multierr"
 	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/datapointstorage"
@@ -392,17 +391,11 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 				}
 			} else {
 				// otherwise export directly
-				err := me.export(ctx, req)
-				if err != nil {
-					errs = append(errs, err)
-				}
+				errs = append(errs, me.export(ctx, req))
 			}
 		}
 	}
-	if len(errs) > 0 {
-		return multierr.Combine(errs...)
-	}
-	return nil
+	return errors.Join(errs...)
 }
 
 // exportToTimeSeries is the default exporting call to GCM.
