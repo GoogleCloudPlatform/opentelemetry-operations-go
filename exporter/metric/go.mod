@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric
 
-go 1.20
+go 1.21
 
 require (
 	cloud.google.com/go/monitoring v1.15.1
@@ -12,7 +12,6 @@ require (
 	go.opentelemetry.io/otel/metric v1.16.0
 	go.opentelemetry.io/otel/sdk v1.16.0
 	go.opentelemetry.io/otel/sdk/metric v0.39.0
-	go.uber.org/multierr v1.8.0
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/oauth2 v0.8.0
 	golang.org/x/sys v0.8.0 // indirect
@@ -41,7 +40,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/otel/trace v1.16.0 // indirect
-	go.uber.org/atomic v1.10.0 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
 	golang.org/x/text v0.9.0 // indirect

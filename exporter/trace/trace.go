@@ -17,6 +17,7 @@ package trace
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -25,7 +26,6 @@ import (
 
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"cloud.google.com/go/trace/apiv2/tracepb"
-	"go.uber.org/multierr"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc/metadata"
 )
@@ -71,15 +71,9 @@ func (e *traceExporter) ExportSpans(ctx context.Context, spanData []sdktrace.Rea
 			Name:  "projects/" + projectID,
 			Spans: spans,
 		}
-		err := e.uploadFn(ctx, req)
-		if err != nil {
-			errs = append(errs, err)
-		}
+		errs = append(errs, e.uploadFn(ctx, req))
 	}
-	if len(errs) > 0 {
-		return multierr.Combine(errs...)
-	}
-	return nil
+	return errors.Join(errs...)
 }
 
 // ConvertSpan converts a ReadOnlySpan to Stackdriver Trace.

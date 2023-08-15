@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math"
 	"net/url"
@@ -29,7 +30,6 @@ import (
 	loggingv2 "cloud.google.com/go/logging/apiv2"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
 	"github.com/googleapis/gax-go/v2"
-	"go.uber.org/multierr"
 	"go.uber.org/zap"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	logtypepb "google.golang.org/genproto/googleapis/logging/type"
@@ -199,7 +199,7 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 		return err
 	}
 
-	errors := []error{}
+	var errs []error
 	for project, entries := range projectEntries {
 		entry := 0
 		currentBatchSize := 0
@@ -229,27 +229,21 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 			// if the current entry goes over the request size (or we have gone over every entry, i.e. index=len),
 			// write the list up to but not including the current entry's index
 			_, err := l.writeLogEntries(ctx, entries[:entry])
-			if err != nil {
-				errors = append(errors, err)
-			}
+			errs = append(errs, err)
 
 			entries = entries[entry:]
 			entry = 0
 			currentBatchSize = 0
 		}
 	}
-
-	if len(errors) > 0 {
-		return multierr.Combine(errors...)
-	}
-	return nil
+	return errors.Join(errs...)
 }
 
 func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, error) {
 	// if destination_project_quota is enabled, projectMapKey will be the name of the project for each batch of entries
 	// otherwise, we can mix project entries for more efficient batching and store all entries in a single list
 	projectMapKey := ""
-	errors := []error{}
+	var errs []error
 	entries := make(map[string][]*logpb.LogEntry)
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
@@ -279,7 +273,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 				// metadata in case the payload needs to be split between multiple entries.
 				logName, err := l.getLogName(log)
 				if err != nil {
-					errors = append(errors, err)
+					errs = append(errs, err)
 					continue
 				}
 
@@ -292,7 +286,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 					projectID,
 				)
 				if err != nil {
-					errors = append(errors, err)
+					errs = append(errs, err)
 					continue
 				}
 
@@ -309,7 +303,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 		}
 	}
 
-	return entries, multierr.Combine(errors...)
+	return entries, errors.Join(errs...)
 }
 
 func mergeLogLabels(instrumentationSource, instrumentationVersion string, resourceLabels map[string]string) map[string]string {
