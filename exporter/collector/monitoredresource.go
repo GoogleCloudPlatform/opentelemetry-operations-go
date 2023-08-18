@@ -39,20 +39,17 @@ func (attrs *attributes) GetString(key string) (string, bool) {
 }
 
 // defaultResourceToMonitoredResource pdata Resource to a GCM Monitored Resource.
-func defaultResourceToMonitoredResource(resource pcommon.Resource) *monitoredrespb.MonitoredResource {
-	attrs := resource.Attributes()
-	gmr := resourcemapping.ResourceAttributesToMonitoredResource(&attributes{
-		Attrs: attrs,
+func defaultResourceToMonitoringMonitoredResource(resource pcommon.Resource) *monitoredrespb.MonitoredResource {
+	return resourcemapping.ResourceAttributesToMonitoringMonitoredResource(&attributes{
+		Attrs: resource.Attributes(),
 	})
-	newLabels := make(labels, len(gmr.Labels))
-	for k, v := range gmr.Labels {
-		newLabels[k] = sanitizeUTF8(v)
-	}
-	mr := &monitoredrespb.MonitoredResource{
-		Type:   gmr.Type,
-		Labels: newLabels,
-	}
-	return mr
+}
+
+// defaultResourceToMonitoredResource pdata Resource to a GCM Monitored Resource.
+func defaultResourceToLoggingMonitoredResource(resource pcommon.Resource) *monitoredrespb.MonitoredResource {
+	return resourcemapping.ResourceAttributesToLoggingMonitoredResource(&attributes{
+		Attrs: resource.Attributes(),
+	})
 }
 
 // resourceToLabels converts the Resource attributes into labels.

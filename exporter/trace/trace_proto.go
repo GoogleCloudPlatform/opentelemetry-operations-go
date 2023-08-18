@@ -118,7 +118,7 @@ func attributeWithLabelsFromResources(sd sdktrace.ReadOnlySpan) []attribute.KeyV
 	}
 
 	// Monitored resource attributes (`g.co/r/{resource_type}/{resource_label}`) come next.
-	gceResource := resourcemapping.ResourceAttributesToMonitoredResource(&attrs{
+	gceResource := resourcemapping.ResourceAttributesToMonitoringMonitoredResource(&attrs{
 		Attrs: sd.Resource().Attributes(),
 	})
 	for key, value := range gceResource.Labels {

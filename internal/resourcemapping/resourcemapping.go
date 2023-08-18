@@ -15,7 +15,10 @@
 package resourcemapping
 
 import (
+	"strings"
+
 	semconv "go.opentelemetry.io/otel/semconv/v1.18.0"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 const (
@@ -44,6 +47,7 @@ const (
 	taskID            = "task_id"
 	zone              = "zone"
 	gaeInstance       = "gae_instance"
+	gaeApp            = "gae_app"
 	gaeModuleID       = "module_id"
 	gaeVersionID      = "version_id"
 	cloudRunRevision  = "cloud_run_revision"
@@ -113,6 +117,14 @@ var (
 			gaeVersionID: {otelKeys: []string{string(semconv.FaaSVersionKey)}},
 			instanceID:   {otelKeys: []string{string(semconv.FaaSIDKey)}},
 		},
+		gaeApp: {
+			location: {otelKeys: []string{
+				string(semconv.CloudAvailabilityZoneKey),
+				string(semconv.CloudRegionKey),
+			}},
+			gaeModuleID:  {otelKeys: []string{string(semconv.FaaSNameKey)}},
+			gaeVersionID: {otelKeys: []string{string(semconv.FaaSVersionKey)}},
+		},
 		awsEc2Instance: {
 			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
 			region: {
@@ -153,27 +165,43 @@ var (
 	}
 )
 
-type GceResource struct {
-	Labels map[string]string
-	Type   string
-}
-
 // ReadOnlyAttributes is an interface to abstract between pulling attributes from PData library or OTEL SDK.
 type ReadOnlyAttributes interface {
 	GetString(string) (string, bool)
 }
 
-// ResourceAttributesToMonitoredResource converts from a set of OTEL resource attributes into a
-// GCP monitored resource type and label set.
+// ResourceAttributesToLoggingMonitoredResource converts from a set of OTEL resource attributes into a
+// GCP monitored resource type and label set for Cloud Logging.
 // E.g.
 // This may output `gce_instance` type with appropriate labels.
-func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResource {
+func ResourceAttributesToLoggingMonitoredResource(attrs ReadOnlyAttributes) *monitoredrespb.MonitoredResource {
 	cloudPlatform, _ := attrs.GetString(string(semconv.CloudPlatformKey))
+	switch cloudPlatform {
+	case semconv.CloudPlatformGCPAppEngine.Value.AsString():
+		return createMonitoredResource(gaeApp, attrs)
+	default:
+		return commonResourceAttributesToMonitoredResource(cloudPlatform, attrs)
+	}
+}
+
+// ResourceAttributesToMonitoringMonitoredResource converts from a set of OTEL resource attributes into a
+// GCP monitored resource type and label set for Cloud Monitoring
+// E.g.
+// This may output `gce_instance` type with appropriate labels.
+func ResourceAttributesToMonitoringMonitoredResource(attrs ReadOnlyAttributes) *monitoredrespb.MonitoredResource {
+	cloudPlatform, _ := attrs.GetString(string(semconv.CloudPlatformKey))
+	switch cloudPlatform {
+	case semconv.CloudPlatformGCPAppEngine.Value.AsString():
+		return createMonitoredResource(gaeInstance, attrs)
+	default:
+		return commonResourceAttributesToMonitoredResource(cloudPlatform, attrs)
+	}
+}
+
+func commonResourceAttributesToMonitoredResource(cloudPlatform string, attrs ReadOnlyAttributes) *monitoredrespb.MonitoredResource {
 	switch cloudPlatform {
 	case semconv.CloudPlatformGCPComputeEngine.Value.AsString():
 		return createMonitoredResource(gceInstance, attrs)
-	case semconv.CloudPlatformGCPAppEngine.Value.AsString():
-		return createMonitoredResource(gaeInstance, attrs)
 	case semconv.CloudPlatformAWSEC2.Value.AsString():
 		return createMonitoredResource(awsEc2Instance, attrs)
 	// TODO(alex-basinov): replace this string literal with semconv.CloudPlatformGCPBareMetalSolution
@@ -214,7 +242,7 @@ func ResourceAttributesToMonitoredResource(attrs ReadOnlyAttributes) *GceResourc
 func createMonitoredResource(
 	monitoredResourceType string,
 	resourceAttrs ReadOnlyAttributes,
-) *GceResource {
+) *monitoredrespb.MonitoredResource {
 	mappings := monitoredResourceMappings[monitoredResourceType]
 	mrLabels := make(map[string]string, len(mappings))
 
@@ -231,10 +259,14 @@ func createMonitoredResource(
 		if !ok || mrValue == "" {
 			mrValue = mappingConfig.fallbackLiteral
 		}
-		mrLabels[mrKey] = mrValue
+		mrLabels[mrKey] = sanitizeUTF8(mrValue)
 	}
-	return &GceResource{
+	return &monitoredrespb.MonitoredResource{
 		Type:   monitoredResourceType,
 		Labels: mrLabels,
 	}
+}
+
+func sanitizeUTF8(s string) string {
+	return strings.ToValidUTF8(s, "�")
 }

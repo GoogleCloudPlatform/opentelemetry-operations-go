@@ -357,7 +357,7 @@ func (attrs *attributes) GetString(key string) (string, bool) {
 //
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
 func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
-	gmr := resourcemapping.ResourceAttributesToMonitoredResource(&attributes{
+	gmr := resourcemapping.ResourceAttributesToMonitoringMonitoredResource(&attributes{
 		attrs: attribute.NewSet(res.Attributes()...),
 	})
 	newLabels := make(map[string]string, len(gmr.Labels))

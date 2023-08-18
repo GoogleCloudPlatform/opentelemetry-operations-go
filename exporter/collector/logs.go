@@ -247,7 +247,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 	entries := make(map[string][]*logpb.LogEntry)
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
-		mr := defaultResourceToMonitoredResource(rl.Resource())
+		mr := defaultResourceToLoggingMonitoredResource(rl.Resource())
 		extraResourceLabels := resourceToLabels(rl.Resource(), l.cfg.LogConfig.ServiceResourceLabels, l.cfg.LogConfig.ResourceFilters, l.obs.log)
 		projectID := l.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
