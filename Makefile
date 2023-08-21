@@ -217,6 +217,7 @@ update-otel:
 prepare-release:
 	echo "make sure tools/release.go is updated to your desired stable and unstable versions"
 	go run tools/release.go prepare
+	$(MAKE) fixtures
 
 .PHONY: release
 release: prepare-release check-clean-work-tree
