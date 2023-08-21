@@ -171,7 +171,7 @@ func TestMapToPrometheusTarget(t *testing.T) {
 			for k, v := range tc.resourceLabels {
 				r.Attributes().PutStr(k, v)
 			}
-			got := MapToPrometheusTarget(r)
+			got := DefaultConfig().MapToPrometheusTarget(r)
 			assert.Equal(t, tc.expected, got)
 		})
 	}

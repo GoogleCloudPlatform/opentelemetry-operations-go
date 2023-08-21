@@ -297,14 +297,15 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 	// they need to be sent to. Each project's timeseries are sent in a
 	// separate request later.
 	pendingTimeSeries := map[string][]*monitoringpb.TimeSeries{}
-	rms := m.ResourceMetrics()
 
 	// add extra metrics from the ExtraMetrics() extension point, combine into a new copy
 	if me.cfg.MetricConfig.ExtraMetrics != nil {
 		metricsCopy := pmetric.NewMetrics()
 		m.ResourceMetrics().CopyTo(metricsCopy.ResourceMetrics())
-		rms = me.cfg.MetricConfig.ExtraMetrics(metricsCopy)
+		me.cfg.MetricConfig.ExtraMetrics(metricsCopy)
+		m = metricsCopy
 	}
+	rms := m.ResourceMetrics()
 
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)

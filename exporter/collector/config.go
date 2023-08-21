@@ -95,9 +95,9 @@ type MetricConfig struct {
 	// exporter. It allows overriding the function used to map otel resource to
 	// monitored resource.
 	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource
-	// ExtraMetrics is an extension point for exporters to add to the set
-	// of ResourceMetrics during a call to PushMetrics.
-	ExtraMetrics func(pmetric.Metrics) pmetric.ResourceMetricsSlice
+	// ExtraMetrics is an extension point for exporters to modify the metrics
+	// before they are sent by the exporter.
+	ExtraMetrics func(pmetric.Metrics)
 	// GetMetricName is not settable in config files, but can be used by other
 	// exporters which extend the functionality of this exporter. It allows
 	// customizing the naming of metrics. baseName already includes type

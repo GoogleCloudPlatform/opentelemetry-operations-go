@@ -241,7 +241,7 @@ func TestGetMetricName(t *testing.T) {
 			assert.True(t, gate.IsEnabled())
 			metric := pmetric.NewMetric()
 			tc.metric(metric)
-			got, err := GetMetricName(tc.baseName, metric)
+			got, err := DefaultConfig().GetMetricName(tc.baseName, metric)
 			if tc.expectErr == (err == nil) {
 				t.Errorf("MetricName(%v, %+v)=err(%v); want err: %v", tc.baseName, metric, err, tc.expectErr)
 			}
