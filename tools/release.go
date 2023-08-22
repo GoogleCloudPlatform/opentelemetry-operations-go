@@ -29,29 +29,13 @@ import (
 const (
 	prefix = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
 
-	stable   = "1.18.0"
-	unstable = "0.42.0"
+	stable   = "1.19.0"
+	unstable = "0.43.0"
 )
 
-var versions = map[string]string{
-	"":                    unstable,
-	"exporter/trace/":     stable,
-	"example/trace/http/": unstable,
-
-	"exporter/metric/": unstable,
-	"example/metric/":  unstable,
-
-	"exporter/collector/":                         unstable,
-	"exporter/collector/googlemanagedprometheus/": unstable,
-
-	"internal/resourcemapping/": unstable,
-	"internal/cloudmock/":       unstable,
-
-	"detectors/gcp/": stable,
-
-	"propagator/": unstable,
-
-	"e2e-test-server/": unstable,
+var stableModules = map[string]struct{}{
+	"exporter/trace/": struct{}{},
+	"detectors/gcp/":  struct{}{},
 }
 
 type module string
@@ -62,7 +46,7 @@ func allModules() ([]module, error) {
 		if err != nil {
 			return err
 		}
-		if info.Name() == "go.mod" {
+		if info.Name() == "go.mod" && path != "tools/" {
 			out = append(out, module(path))
 		}
 
@@ -107,8 +91,15 @@ func (m module) version() string {
 	} else {
 		modDir += "/"
 	}
-	ver := versions[modDir]
-	return ver
+	return versionForPath(modDir)
+}
+
+func versionForPath(modDir string) string {
+	_, ok := stableModules[modDir]
+	if ok {
+		return stable
+	}
+	return unstable
 }
 
 var pattern = regexp.MustCompile(`return ".*"`)
@@ -147,7 +138,7 @@ func prepare() error {
 			if suffix != "" {
 				suffix = suffix[1:] + "/"
 			}
-			ver := versions[suffix]
+			ver := versionForPath(suffix)
 			if err := m.editRequirement(dep, ver); err != nil {
 				return err
 			}
@@ -158,8 +149,13 @@ func prepare() error {
 }
 
 func tag() error {
-	for dir, ver := range versions {
-		tag := dir + "v" + ver
+	mods, err := allModules()
+	if err != nil {
+		return err
+	}
+	for _, dir := range mods {
+		ver := versionForPath(string(dir))
+		tag := string(dir) + "v" + ver
 		fmt.Printf("Creating tag %s\n", tag)
 		cmd := exec.Command("git", "tag", tag)
 		cmd.Stderr = os.Stderr
