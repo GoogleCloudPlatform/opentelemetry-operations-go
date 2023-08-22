@@ -84,14 +84,16 @@ func (m module) editRequirement(dep, version string) error {
 	return nil
 }
 
-func (m module) version() string {
+func (m module) dir() string {
 	modDir := filepath.Dir(string(m))
 	if modDir == "." {
-		modDir = ""
-	} else {
-		modDir += "/"
+		return ""
 	}
-	return versionForPath(modDir)
+	return modDir + "/"
+}
+
+func (m module) version() string {
+	return versionForPath(m.dir())
 }
 
 func versionForPath(modDir string) string {
@@ -153,9 +155,8 @@ func tag() error {
 	if err != nil {
 		return err
 	}
-	for _, dir := range mods {
-		ver := versionForPath(string(dir))
-		tag := string(dir) + "v" + ver
+	for _, m := range mods {
+		tag := m.dir() + "v" + m.version()
 		fmt.Printf("Creating tag %s\n", tag)
 		cmd := exec.Command("git", "tag", tag)
 		cmd.Stderr = os.Stderr
