@@ -45,7 +45,7 @@ var promTargetKeys = map[string][]string{
 	instanceLabel:         {instanceLabel, semconv.AttributeFaaSInstance, semconv.AttributeServiceInstanceID},
 }
 
-func MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
+func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
 	attrs := res.Attributes()
 	// Prepend namespace if it exists to match what is specified in
 	// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/metrics/datamodel.md#resource-attributes-1

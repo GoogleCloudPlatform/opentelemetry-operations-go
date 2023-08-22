@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"go.opentelemetry.io/collector/featuregate"
-	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 
@@ -463,15 +462,10 @@ func configureGMPCollector(cfg *collector.Config) {
 	featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", true)
 	cfg.MetricConfig.Prefix = "prometheus.googleapis.com/"
 	cfg.MetricConfig.SkipCreateMetricDescriptor = true
-	cfg.MetricConfig.GetMetricName = googlemanagedprometheus.GetMetricName
-	cfg.MetricConfig.MapMonitoredResource = googlemanagedprometheus.MapToPrometheusTarget
-	cfg.MetricConfig.ExtraMetrics = func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-		// This should not add any change without the featuregate enabled (from Ops Agent)
-		googlemanagedprometheus.AddUntypedMetrics(m)
-		googlemanagedprometheus.AddScopeInfoMetric(m)
-		googlemanagedprometheus.AddTargetInfoMetric(m)
-		return m.ResourceMetrics()
-	}
+	gmpConfig := googlemanagedprometheus.DefaultConfig()
+	cfg.MetricConfig.GetMetricName = gmpConfig.GetMetricName
+	cfg.MetricConfig.MapMonitoredResource = gmpConfig.MapToPrometheusTarget
+	cfg.MetricConfig.ExtraMetrics = gmpConfig.ExtraMetrics
 	cfg.MetricConfig.InstrumentationLibraryLabels = false
 	cfg.MetricConfig.ServiceResourceLabels = false
 	cfg.MetricConfig.EnableSumOfSquaredDeviation = true

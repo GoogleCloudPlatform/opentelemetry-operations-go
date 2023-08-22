@@ -37,9 +37,15 @@ var untypedDoubleExportFeatureGate = featuregate.GlobalRegistry().MustRegister(
 	featuregate.WithRegisterDescription("Enable automatically exporting untyped Prometheus metrics as both gauge and cumulative to GCP."),
 	featuregate.WithRegisterReferenceURL("https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/668"))
 
-// AddUntypedMetrics looks for any Gauge data point with the special Ops Agent untyped metric
+func (c Config) ExtraMetrics(m pmetric.Metrics) {
+	addUntypedMetrics(m)
+	c.addTargetInfoMetric(m)
+	c.addScopeInfoMetric(m)
+}
+
+// addUntypedMetrics looks for any Gauge data point with the special Ops Agent untyped metric
 // attribute and duplicates that data point to a matching Sum.
-func AddUntypedMetrics(m pmetric.Metrics) {
+func addUntypedMetrics(m pmetric.Metrics) {
 	if !untypedDoubleExportFeatureGate.IsEnabled() {
 		return
 	}
@@ -98,11 +104,14 @@ func AddUntypedMetrics(m pmetric.Metrics) {
 	}
 }
 
-// AddTargetInfoMetric inserts target_info for each resource.
+// addTargetInfoMetric inserts target_info for each resource.
 // First, it extracts the target_info metric from each ResourceMetric associated with the input pmetric.Metrics
 // and inserts it into a new ScopeMetric for that resource, as specified in
 // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.16.0/specification/compatibility/prometheus_and_openmetrics.md#resource-attributes-1
-func AddTargetInfoMetric(m pmetric.Metrics) {
+func (c Config) addTargetInfoMetric(m pmetric.Metrics) {
+	if !c.ExtraMetricsConfig.EnableTargetInfo {
+		return
+	}
 	rms := m.ResourceMetrics()
 	// loop over input (original) resource metrics
 	for i := 0; i < rms.Len(); i++ {
@@ -178,10 +187,13 @@ func AddTargetInfoMetric(m pmetric.Metrics) {
 	}
 }
 
-// AddScopeInfoMetric adds the otel_scope_info metric to a Metrics slice as specified in
+// addScopeInfoMetric adds the otel_scope_info metric to a Metrics slice as specified in
 // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.16.0/specification/compatibility/prometheus_and_openmetrics.md#instrumentation-scope-1
 // It also updates all other metrics with the corresponding scope_name and scope_version attributes, if they are present.
-func AddScopeInfoMetric(m pmetric.Metrics) {
+func (c Config) addScopeInfoMetric(m pmetric.Metrics) {
+	if !c.ExtraMetricsConfig.EnableScopeInfo {
+		return
+	}
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		sms := rms.At(i).ScopeMetrics()

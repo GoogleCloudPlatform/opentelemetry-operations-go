@@ -23,9 +23,10 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-func GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
+// GetMetricName returns the metric name with GMP-specific suffixes. The.
+func (c Config) GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
 	// First, build a name that is compliant with prometheus conventions
-	compliantName := prometheus.BuildPromCompliantName(metric, "")
+	compliantName := prometheus.BuildCompliantName(metric, "", c.AddMetricSuffixes)
 	// Second, ad the GMP-specific suffix
 	switch metric.Type() {
 	case pmetric.MetricTypeSum:

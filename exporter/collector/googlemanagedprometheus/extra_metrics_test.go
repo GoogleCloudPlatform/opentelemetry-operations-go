@@ -48,18 +48,16 @@ func testMetric(timestamp time.Time) pmetric.Metrics {
 func TestAddExtraMetrics(t *testing.T) {
 	timestamp := time.Now()
 	for _, tc := range []struct {
-		testFunc func(pmetric.Metrics) pmetric.ResourceMetricsSlice
-		input    pmetric.Metrics
-		expected pmetric.ResourceMetricsSlice
-		name     string
+		input                    pmetric.Metrics
+		expected                 pmetric.ResourceMetricsSlice
+		name                     string
+		config                   Config
+		enableUntypedFeatureGate bool
 	}{
 		{
-			name: "add target info from resource metric",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				AddTargetInfoMetric(m)
-				return m.ResourceMetrics()
-			},
-			input: testMetric(timestamp),
+			name:   "add target info from resource metric",
+			config: Config{ExtraMetricsConfig: ExtraMetricsConfig{EnableTargetInfo: true}},
+			input:  testMetric(timestamp),
 			expected: func() pmetric.ResourceMetricsSlice {
 				metrics := testMetric(timestamp).ResourceMetrics()
 
@@ -74,12 +72,9 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
-			name: "add scope info from scope metrics",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				AddScopeInfoMetric(m)
-				return m.ResourceMetrics()
-			},
-			input: testMetric(timestamp),
+			name:   "add scope info from scope metrics",
+			config: Config{ExtraMetricsConfig: ExtraMetricsConfig{EnableScopeInfo: true}},
+			input:  testMetric(timestamp),
 			expected: func() pmetric.ResourceMetricsSlice {
 				metrics := testMetric(timestamp).ResourceMetrics()
 
@@ -100,11 +95,8 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
-			name: "add scope info with attributes",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				AddScopeInfoMetric(m)
-				return m.ResourceMetrics()
-			},
+			name:   "add scope info with attributes",
+			config: Config{ExtraMetricsConfig: ExtraMetricsConfig{EnableScopeInfo: true}},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Scope().Attributes().PutStr("foo_attribute", "bar")
@@ -133,11 +125,10 @@ func TestAddExtraMetrics(t *testing.T) {
 		},
 		{
 			name: "add both scope info and target info",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				AddScopeInfoMetric(m)
-				AddTargetInfoMetric(m)
-				return m.ResourceMetrics()
-			},
+			config: Config{ExtraMetricsConfig: ExtraMetricsConfig{
+				EnableScopeInfo:  true,
+				EnableTargetInfo: true,
+			}},
 			input: testMetric(timestamp),
 			expected: func() pmetric.ResourceMetricsSlice {
 				metrics := testMetric(timestamp).ResourceMetrics()
@@ -171,50 +162,8 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
-			name: "ordering of scope/target should not matter",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				AddTargetInfoMetric(m)
-				AddScopeInfoMetric(m)
-				return m.ResourceMetrics()
-			},
-			input: testMetric(timestamp),
-			expected: func() pmetric.ResourceMetricsSlice {
-				metrics := testMetric(timestamp).ResourceMetrics()
-				scopeMetrics := metrics.At(0).ScopeMetrics()
-
-				// Insert a new, empty ScopeMetricsSlice for this resource that will hold target_info
-				sm := scopeMetrics.AppendEmpty()
-				metric := sm.Metrics().AppendEmpty()
-				metric.SetName("target_info")
-				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
-				metric.Gauge().DataPoints().At(0).Attributes().PutStr("foo-label", "bar")
-				metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
-
-				// Insert the scope_info metric into the existing ScopeMetricsSlice
-				sm = scopeMetrics.At(0)
-				scopeInfoMetric := sm.Metrics().AppendEmpty()
-				scopeInfoMetric.SetName("otel_scope_info")
-				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
-
-				// add otel_scope_* attributes to all metrics in all scopes
-				// this includes otel_scope_info for the existing (input) ScopeMetrics,
-				// and target_info (which will have an empty scope)
-				for i := 0; i < sm.Metrics().Len(); i++ {
-					metric := sm.Metrics().At(i)
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
-					metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
-				}
-
-				return metrics
-			}(),
-		},
-		{
-			name: "scope info for other metric types",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				AddScopeInfoMetric(m)
-				return m.ResourceMetrics()
-			},
+			name:   "scope info for other metric types",
+			config: Config{ExtraMetricsConfig: ExtraMetricsConfig{EnableScopeInfo: true}},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				sum := metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
@@ -293,13 +242,9 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
-			name: "add untyped Sum metric from Gauge",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				//nolint:errcheck
-				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
-				AddUntypedMetrics(m)
-				return m.ResourceMetrics()
-			},
+			name:                     "add untyped Sum metric from Gauge",
+			enableUntypedFeatureGate: true,
+			config:                   Config{},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).
@@ -330,13 +275,9 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
-			name: "add untyped Sum metric from Gauge (double value)",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				//nolint:errcheck
-				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
-				AddUntypedMetrics(m)
-				return m.ResourceMetrics()
-			},
+			name:                     "add untyped Sum metric from Gauge (double value)",
+			enableUntypedFeatureGate: true,
+			config:                   Config{},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).
@@ -373,13 +314,9 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
-			name: "untyped Gauge does nothing if feature gate is disabled",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				//nolint:errcheck
-				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, false)
-				AddUntypedMetrics(m)
-				return m.ResourceMetrics()
-			},
+			name:                     "untyped Gauge does nothing if feature gate is disabled",
+			enableUntypedFeatureGate: false,
+			config:                   Config{},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).
@@ -400,13 +337,9 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
-			name: "untyped Gauge does nothing if feature gate is enabled and key!=true",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				//nolint:errcheck
-				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
-				AddUntypedMetrics(m)
-				return m.ResourceMetrics()
-			},
+			name:                     "untyped Gauge does nothing if feature gate is enabled and key!=true",
+			enableUntypedFeatureGate: true,
+			config:                   Config{},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).
@@ -427,13 +360,9 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
-			name: "untyped non-Gauge does nothing if feature gate is enabled",
-			testFunc: func(m pmetric.Metrics) pmetric.ResourceMetricsSlice {
-				//nolint:errcheck
-				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true)
-				AddUntypedMetrics(m)
-				return m.ResourceMetrics()
-			},
+			name:                     "untyped non-Gauge does nothing if feature gate is enabled",
+			enableUntypedFeatureGate: true,
+			config:                   Config{},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).
@@ -453,8 +382,16 @@ func TestAddExtraMetrics(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			rms := tc.testFunc(tc.input)
-			assert.EqualValues(t, tc.expected, rms)
+			if tc.enableUntypedFeatureGate {
+				assert.NoError(t, featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true))
+				// disable it after the test is over
+				defer func() {
+					assert.NoError(t, featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, false))
+				}()
+			}
+			m := tc.input
+			tc.config.ExtraMetrics(m)
+			assert.EqualValues(t, tc.expected, m.ResourceMetrics())
 		})
 	}
 }
