@@ -88,4 +88,12 @@ var LogsTestCases = []TestCase{
 			MaxRequestSize: 550,
 		},
 	},
+	{
+		Name:                 "Logs custom user-agent",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_span_trace_id.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_user_agent_expected.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.UserAgent = "custom-user-agent {{version}}"
+		},
+	},
 }

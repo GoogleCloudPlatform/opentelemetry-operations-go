@@ -22,6 +22,7 @@ import (
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
+	"google.golang.org/api/option"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus"
@@ -316,6 +317,17 @@ var MetricsTestCases = []TestCase{
 		},
 		// SDK exporter does not support CreateServiceTimeSeries
 		SkipForSDK: true,
+	},
+	{
+		Name:                 "Custom User Agent",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/counter.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/counter_user_agent_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.UserAgent = "custom-user-agent"
+		},
+		MetricSDKExporterOptions: []metric.Option{
+			metric.WithMonitoringClientOptions(option.WithUserAgent("custom-user-agent")),
+		},
 	},
 	// Tests for the GMP exporter
 	{

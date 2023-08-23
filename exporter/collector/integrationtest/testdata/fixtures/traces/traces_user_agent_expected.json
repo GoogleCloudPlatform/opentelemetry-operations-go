@@ -1,0 +1,2763 @@
+{
+  "batchWriteSpansRequest": [
+    {
+      "name": "projects/fakeprojectid",
+      "spans": [
+        {
+          "name": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/84f9e8929bb1cd5b",
+          "spanId": "84f9e8929bb1cd5b",
+          "parentSpanId": "a514c25ace3f0a5a",
+          "displayName": {
+            "value": "/hello"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "/http/user_agent": {
+                "stringValue": {
+                  "value": "Go-http-client/1.1"
+                }
+              },
+              "baggage key:client": {
+                "stringValue": {
+                  "value": "cli"
+                }
+              },
+              "baggage key:method": {
+                "stringValue": {
+                  "value": "repl"
+                }
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.server_name": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.target": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.wrote_bytes": {
+                "intValue": "11"
+              },
+              "net.host.ip": {
+                "stringValue": {
+                  "value": "0.0.0.0"
+                }
+              },
+              "net.host.port": {
+                "intValue": "7080"
+              },
+              "net.peer.ip": {
+                "stringValue": {
+                  "value": "127.0.0.1"
+                }
+              },
+              "net.peer.port": {
+                "intValue": "32878"
+              },
+              "net.transport": {
+                "stringValue": {
+                  "value": "ip_tcp"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2634978"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "server-attribute": {
+                "stringValue": {
+                  "value": "foo"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "SERVER"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/df6abba5b998b3046de7ecd2c23d7459/spans/dc1adbd8a2e1d6b6",
+          "spanId": "dc1adbd8a2e1d6b6",
+          "parentSpanId": "ba144401a09fc5c5",
+          "displayName": {
+            "value": "/hello"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "/http/user_agent": {
+                "stringValue": {
+                  "value": "Go-http-client/1.1"
+                }
+              },
+              "baggage key:client": {
+                "stringValue": {
+                  "value": "cli"
+                }
+              },
+              "baggage key:method": {
+                "stringValue": {
+                  "value": "repl"
+                }
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.server_name": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.target": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.wrote_bytes": {
+                "intValue": "11"
+              },
+              "net.host.ip": {
+                "stringValue": {
+                  "value": "0.0.0.0"
+                }
+              },
+              "net.host.port": {
+                "intValue": "7080"
+              },
+              "net.peer.ip": {
+                "stringValue": {
+                  "value": "127.0.0.1"
+                }
+              },
+              "net.peer.port": {
+                "intValue": "32886"
+              },
+              "net.transport": {
+                "stringValue": {
+                  "value": "ip_tcp"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2634978"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "server-attribute": {
+                "stringValue": {
+                  "value": "foo"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "SERVER"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/666cba42b1f5777a74e1cb81b3d221a2/spans/acf9b35cd028e694",
+          "spanId": "acf9b35cd028e694",
+          "parentSpanId": "03bfb23a0cb56fa3",
+          "displayName": {
+            "value": "/hello"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "/http/user_agent": {
+                "stringValue": {
+                  "value": "Go-http-client/1.1"
+                }
+              },
+              "baggage key:client": {
+                "stringValue": {
+                  "value": "cli"
+                }
+              },
+              "baggage key:method": {
+                "stringValue": {
+                  "value": "repl"
+                }
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.server_name": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.target": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.wrote_bytes": {
+                "intValue": "11"
+              },
+              "net.host.ip": {
+                "stringValue": {
+                  "value": "0.0.0.0"
+                }
+              },
+              "net.host.port": {
+                "intValue": "7080"
+              },
+              "net.peer.ip": {
+                "stringValue": {
+                  "value": "127.0.0.1"
+                }
+              },
+              "net.peer.port": {
+                "intValue": "32902"
+              },
+              "net.transport": {
+                "stringValue": {
+                  "value": "ip_tcp"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2634978"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "server-attribute": {
+                "stringValue": {
+                  "value": "foo"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "SERVER"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/38bf17bbbfc0e07a54bc6329656e1930/spans/3fe400c29bfecd69",
+          "spanId": "3fe400c29bfecd69",
+          "parentSpanId": "78229db3839d4cf8",
+          "displayName": {
+            "value": "/hello"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "/http/user_agent": {
+                "stringValue": {
+                  "value": "Go-http-client/1.1"
+                }
+              },
+              "baggage key:client": {
+                "stringValue": {
+                  "value": "cli"
+                }
+              },
+              "baggage key:method": {
+                "stringValue": {
+                  "value": "repl"
+                }
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.server_name": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.target": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.wrote_bytes": {
+                "intValue": "11"
+              },
+              "net.host.ip": {
+                "stringValue": {
+                  "value": "0.0.0.0"
+                }
+              },
+              "net.host.port": {
+                "intValue": "7080"
+              },
+              "net.peer.ip": {
+                "stringValue": {
+                  "value": "127.0.0.1"
+                }
+              },
+              "net.peer.port": {
+                "intValue": "32912"
+              },
+              "net.transport": {
+                "stringValue": {
+                  "value": "ip_tcp"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2634978"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "server-attribute": {
+                "stringValue": {
+                  "value": "foo"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "SERVER"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/a514c25ace3f0a5a",
+          "spanId": "a514c25ace3f0a5a",
+          "parentSpanId": "df3970ec0d4c6163",
+          "displayName": {
+            "value": "HTTP GET"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.url": {
+                "stringValue": {
+                  "value": "http://0.0.0.0:7080/hello"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "CLIENT"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/df6abba5b998b3046de7ecd2c23d7459/spans/ba144401a09fc5c5",
+          "spanId": "ba144401a09fc5c5",
+          "parentSpanId": "a8826159d61b39d7",
+          "displayName": {
+            "value": "HTTP GET"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.url": {
+                "stringValue": {
+                  "value": "http://0.0.0.0:7080/hello"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "CLIENT"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/666cba42b1f5777a74e1cb81b3d221a2/spans/03bfb23a0cb56fa3",
+          "spanId": "03bfb23a0cb56fa3",
+          "parentSpanId": "1f1d2da13f72b58f",
+          "displayName": {
+            "value": "HTTP GET"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.url": {
+                "stringValue": {
+                  "value": "http://0.0.0.0:7080/hello"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "CLIENT"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/38bf17bbbfc0e07a54bc6329656e1930/spans/78229db3839d4cf8",
+          "spanId": "78229db3839d4cf8",
+          "parentSpanId": "cd32b09d82d743ce",
+          "displayName": {
+            "value": "HTTP GET"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.url": {
+                "stringValue": {
+                  "value": "http://0.0.0.0:7080/hello"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "CLIENT"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/df3970ec0d4c6163",
+          "spanId": "df3970ec0d4c6163",
+          "displayName": {
+            "value": "ExecuteRequest"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "demo-client-tracer"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/df6abba5b998b3046de7ecd2c23d7459/spans/a8826159d61b39d7",
+          "spanId": "a8826159d61b39d7",
+          "displayName": {
+            "value": "ExecuteRequest"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "demo-client-tracer"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/666cba42b1f5777a74e1cb81b3d221a2/spans/1f1d2da13f72b58f",
+          "spanId": "1f1d2da13f72b58f",
+          "displayName": {
+            "value": "ExecuteRequest"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "demo-client-tracer"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/38bf17bbbfc0e07a54bc6329656e1930/spans/cd32b09d82d743ce",
+          "spanId": "cd32b09d82d743ce",
+          "displayName": {
+            "value": "ExecuteRequest"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "demo-client-tracer"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/c2824081ecac96c496ff2ab9265b9590/spans/758080723210fa18",
+          "spanId": "758080723210fa18",
+          "parentSpanId": "894c881be709e0e5",
+          "displayName": {
+            "value": "/hello"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "/http/user_agent": {
+                "stringValue": {
+                  "value": "Go-http-client/1.1"
+                }
+              },
+              "baggage key:client": {
+                "stringValue": {
+                  "value": "cli"
+                }
+              },
+              "baggage key:method": {
+                "stringValue": {
+                  "value": "repl"
+                }
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.server_name": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.target": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.wrote_bytes": {
+                "intValue": "11"
+              },
+              "net.host.ip": {
+                "stringValue": {
+                  "value": "0.0.0.0"
+                }
+              },
+              "net.host.port": {
+                "intValue": "7080"
+              },
+              "net.peer.ip": {
+                "stringValue": {
+                  "value": "127.0.0.1"
+                }
+              },
+              "net.peer.port": {
+                "intValue": "32924"
+              },
+              "net.transport": {
+                "stringValue": {
+                  "value": "ip_tcp"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2634978"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "server-attribute": {
+                "stringValue": {
+                  "value": "foo"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "SERVER"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/7f014cc852bd0f881fa1cfd745d183b6/spans/55ac070a34ee08df",
+          "spanId": "55ac070a34ee08df",
+          "parentSpanId": "5a8bd3205d2e964d",
+          "displayName": {
+            "value": "/hello"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "/http/user_agent": {
+                "stringValue": {
+                  "value": "Go-http-client/1.1"
+                }
+              },
+              "baggage key:client": {
+                "stringValue": {
+                  "value": "cli"
+                }
+              },
+              "baggage key:method": {
+                "stringValue": {
+                  "value": "repl"
+                }
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.server_name": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.target": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.wrote_bytes": {
+                "intValue": "11"
+              },
+              "net.host.ip": {
+                "stringValue": {
+                  "value": "0.0.0.0"
+                }
+              },
+              "net.host.port": {
+                "intValue": "7080"
+              },
+              "net.peer.ip": {
+                "stringValue": {
+                  "value": "127.0.0.1"
+                }
+              },
+              "net.peer.port": {
+                "intValue": "32928"
+              },
+              "net.transport": {
+                "stringValue": {
+                  "value": "ip_tcp"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2634978"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "server-attribute": {
+                "stringValue": {
+                  "value": "foo"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "SERVER"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/f28b0673f1147f72b0655b4960772a05/spans/0628d269872bb264",
+          "spanId": "0628d269872bb264",
+          "parentSpanId": "59dd652ebd1fb5b3",
+          "displayName": {
+            "value": "/hello"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "/http/user_agent": {
+                "stringValue": {
+                  "value": "Go-http-client/1.1"
+                }
+              },
+              "baggage key:client": {
+                "stringValue": {
+                  "value": "cli"
+                }
+              },
+              "baggage key:method": {
+                "stringValue": {
+                  "value": "repl"
+                }
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.server_name": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.target": {
+                "stringValue": {
+                  "value": "/hello"
+                }
+              },
+              "http.wrote_bytes": {
+                "intValue": "11"
+              },
+              "net.host.ip": {
+                "stringValue": {
+                  "value": "0.0.0.0"
+                }
+              },
+              "net.host.port": {
+                "intValue": "7080"
+              },
+              "net.peer.ip": {
+                "stringValue": {
+                  "value": "127.0.0.1"
+                }
+              },
+              "net.peer.port": {
+                "intValue": "32942"
+              },
+              "net.transport": {
+                "stringValue": {
+                  "value": "ip_tcp"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2634978"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "server-attribute": {
+                "stringValue": {
+                  "value": "foo"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "SERVER"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/c2824081ecac96c496ff2ab9265b9590/spans/894c881be709e0e5",
+          "spanId": "894c881be709e0e5",
+          "parentSpanId": "847ab8fd2ebbc3a1",
+          "displayName": {
+            "value": "HTTP GET"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.url": {
+                "stringValue": {
+                  "value": "http://0.0.0.0:7080/hello"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "CLIENT"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/7f014cc852bd0f881fa1cfd745d183b6/spans/5a8bd3205d2e964d",
+          "spanId": "5a8bd3205d2e964d",
+          "parentSpanId": "f9b36c6bc9da2da4",
+          "displayName": {
+            "value": "HTTP GET"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.url": {
+                "stringValue": {
+                  "value": "http://0.0.0.0:7080/hello"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "CLIENT"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/f28b0673f1147f72b0655b4960772a05/spans/59dd652ebd1fb5b3",
+          "spanId": "59dd652ebd1fb5b3",
+          "parentSpanId": "58d2299363617187",
+          "displayName": {
+            "value": "HTTP GET"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.url": {
+                "stringValue": {
+                  "value": "http://0.0.0.0:7080/hello"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "CLIENT"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/01807a8911d7cc2704124128b4d9741a/spans/83fc30eb9796c970",
+          "spanId": "83fc30eb9796c970",
+          "parentSpanId": "1783176e15b37558",
+          "displayName": {
+            "value": "HTTP GET"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "/http/host": {
+                "stringValue": {
+                  "value": "0.0.0.0:7080"
+                }
+              },
+              "/http/method": {
+                "stringValue": {
+                  "value": "GET"
+                }
+              },
+              "/http/status_code": {
+                "intValue": "200"
+              },
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "http.flavor": {
+                "stringValue": {
+                  "value": "1.1"
+                }
+              },
+              "http.scheme": {
+                "stringValue": {
+                  "value": "http"
+                }
+              },
+              "http.url": {
+                "stringValue": {
+                  "value": "http://0.0.0.0:7080/hello"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "otel.scope.version": {
+                "stringValue": {
+                  "value": "semver:0.33.0"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "CLIENT"
+        },
+        {
+          "name": "projects/fakeprojectid/traces/c2824081ecac96c496ff2ab9265b9590/spans/847ab8fd2ebbc3a1",
+          "spanId": "847ab8fd2ebbc3a1",
+          "displayName": {
+            "value": "ExecuteRequest"
+          },
+          "startTime": "1970-01-01T00:00:00Z",
+          "endTime": "1970-01-01T00:00:00Z",
+          "attributes": {
+            "attributeMap": {
+              "g.co/agent": {
+                "stringValue": {
+                  "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.0"
+                }
+              },
+              "g.co/gae/app/module": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
+              "g.co/r/generic_node/location": {
+                "stringValue": {
+                  "value": "global"
+                }
+              },
+              "g.co/r/generic_node/namespace": {
+                "stringValue": {}
+              },
+              "g.co/r/generic_node/node_id": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "host.name": {
+                "stringValue": {
+                  "value": "foo.bar.host"
+                }
+              },
+              "otel.scope.name": {
+                "stringValue": {
+                  "value": "demo-client-tracer"
+                }
+              },
+              "process.executable.name": {
+                "stringValue": {
+                  "value": "main"
+                }
+              },
+              "process.executable.path": {
+                "stringValue": {
+                  "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/client/main"
+                }
+              },
+              "process.owner": {
+                "stringValue": {
+                  "value": "mikedame"
+                }
+              },
+              "process.pid": {
+                "intValue": "2635405"
+              },
+              "process.runtime.description": {
+                "stringValue": {
+                  "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
+                }
+              },
+              "process.runtime.name": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "process.runtime.version": {
+                "stringValue": {
+                  "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "telemetry.sdk.language": {
+                "stringValue": {
+                  "value": "go"
+                }
+              },
+              "telemetry.sdk.name": {
+                "stringValue": {
+                  "value": "opentelemetry"
+                }
+              },
+              "telemetry.sdk.version": {
+                "stringValue": {
+                  "value": "1.8.0"
+                }
+              }
+            }
+          },
+          "sameProcessAsParentSpan": true,
+          "spanKind": "INTERNAL"
+        }
+      ]
+    }
+  ],
+  "userAgent": "custom-user-agent latest grpc-go/1.57.0"
+}

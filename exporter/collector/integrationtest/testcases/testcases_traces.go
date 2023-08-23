@@ -14,10 +14,20 @@
 
 package testcases
 
+import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
+
 var TracesTestCases = []TestCase{
 	{
 		Name:                 "Basic traces",
 		OTLPInputFixturePath: "testdata/fixtures/traces/traces_basic.json",
 		ExpectFixturePath:    "testdata/fixtures/traces/traces_basic_expected.json",
+	},
+	{
+		Name:                 "Custom User Agent",
+		OTLPInputFixturePath: "testdata/fixtures/traces/traces_basic.json",
+		ExpectFixturePath:    "testdata/fixtures/traces/traces_user_agent_expected.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.UserAgent = "custom-user-agent {{version}}"
+		},
 	},
 }
