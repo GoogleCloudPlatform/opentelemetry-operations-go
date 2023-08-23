@@ -42,7 +42,7 @@ type traceExporter struct {
 }
 
 func newTraceExporter(o *options) (*traceExporter, error) {
-	clientOps := append(o.traceClientOptions, option.WithUserAgent(userAgent))
+	clientOps := append([]option.ClientOption{option.WithUserAgent(userAgent)}, o.traceClientOptions...)
 	client, err := traceapi.NewClient(o.context, clientOps...)
 	if err != nil {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
