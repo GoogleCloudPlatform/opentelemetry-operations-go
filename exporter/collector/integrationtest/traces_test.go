@@ -60,6 +60,7 @@ func TestTraces(t *testing.T) {
 
 			fixture := &protos.TraceExpectFixture{
 				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
+				UserAgent:              testServer.UserAgent(),
 			}
 
 			diff := DiffTraceProtos(

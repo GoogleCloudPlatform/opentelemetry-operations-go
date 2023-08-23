@@ -96,6 +96,7 @@ func TestCollectorMetrics(t *testing.T) {
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
 				SelfObservabilityMetrics:        selfObsMetrics,
+				UserAgent:                       testServer.UserAgent(),
 			}
 			sort.Slice(fixture.CreateTimeSeriesRequests, func(i, j int) bool {
 				return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name

@@ -75,6 +75,7 @@ func TestLogs(t *testing.T) {
 
 			fixture := &protos.LogExpectFixture{
 				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
+				UserAgent:               testServer.UserAgent(),
 			}
 			// sort the entries in each request
 			for listIndex := 0; listIndex < len(fixture.WriteLogEntriesRequests); listIndex++ {
