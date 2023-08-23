@@ -179,5 +179,5 @@
       "partialSuccess": true
     }
   ],
-  "userAgent": "opentelemetry-collector-contrib {{version}} grpc-go/1.57.0"
+  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.57.0"
 }

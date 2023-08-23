@@ -188,6 +188,7 @@ func NewLogTestExporter(
 		ctx,
 		cfg,
 		logger,
+		"latest",
 	)
 	require.NoError(t, err)
 
