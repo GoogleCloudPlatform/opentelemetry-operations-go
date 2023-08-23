@@ -97,6 +97,7 @@ func (fr fixtureRecorder) recordTraces(ctx context.Context, t *FakeTesting, star
 			require.NoError(t, err)
 			fixture := &protos.TraceExpectFixture{
 				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
+				UserAgent:              testServer.UserAgent(),
 			}
 			test.SaveRecordedTraceFixtures(t, fixture)
 		}()
@@ -128,6 +129,7 @@ func (fr fixtureRecorder) recordLogs(ctx context.Context, t *FakeTesting, timest
 			require.NoError(t, err)
 			fixture := &protos.LogExpectFixture{
 				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
+				UserAgent:               testServer.UserAgent(),
 			}
 			test.SaveRecordedLogFixtures(t, fixture)
 		}()
@@ -172,6 +174,7 @@ func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, sta
 				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
 				SelfObservabilityMetrics:        selfObsMetrics,
+				UserAgent:                       testServer.UserAgent(),
 			}
 			test.SaveRecordedMetricFixtures(t, fixture)
 		}()

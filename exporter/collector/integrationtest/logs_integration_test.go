@@ -45,6 +45,7 @@ func createLogsExporter(
 		ctx,
 		cfg,
 		logger,
+		"latest",
 	)
 	exporter.ConfigureExporter(test.ConfigureLogsExporter)
 	require.NoError(t, err)

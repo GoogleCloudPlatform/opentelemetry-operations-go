@@ -17,11 +17,13 @@ package cloudmock
 import (
 	"context"
 	"net"
+	"strings"
 	"sync"
 	"time"
 
 	"cloud.google.com/go/trace/apiv2/tracepb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -30,9 +32,10 @@ type TracesTestServer struct {
 	srv *grpc.Server
 	// Endpoint where the gRPC server is listening
 	Endpoint                string
+	userAgent               string
 	batchWriteSpansRequests []*tracepb.BatchWriteSpansRequest
-	mu                      sync.Mutex
 	Retries                 int
+	mu                      sync.Mutex
 }
 
 func (t *TracesTestServer) Shutdown() {
@@ -59,14 +62,17 @@ func (f *fakeTraceServiceServer) BatchWriteSpans(
 		f.tracesTestServer.Retries++
 		return &emptypb.Empty{}, f.cfg.responseErr
 	}
-	f.tracesTestServer.appendBatchWriteSpansRequest(request)
+	f.tracesTestServer.appendBatchWriteSpansRequest(ctx, request)
 	return &emptypb.Empty{}, nil
 }
 
-func (t *TracesTestServer) appendBatchWriteSpansRequest(req *tracepb.BatchWriteSpansRequest) {
+func (t *TracesTestServer) appendBatchWriteSpansRequest(ctx context.Context, req *tracepb.BatchWriteSpansRequest) {
 	t.mu.Lock()
 	defer t.mu.Unlock()
 	t.batchWriteSpansRequests = append(t.batchWriteSpansRequests, req)
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		t.userAgent = strings.Join(md.Get("User-Agent"), ";")
+	}
 }
 
 func (t *TracesTestServer) CreateBatchWriteSpansRequests() []*tracepb.BatchWriteSpansRequest {
@@ -75,6 +81,15 @@ func (t *TracesTestServer) CreateBatchWriteSpansRequests() []*tracepb.BatchWrite
 	reqs := t.batchWriteSpansRequests
 	t.batchWriteSpansRequests = nil
 	return reqs
+}
+
+// Pops out the UserAgent from the most recent BatchWriteSpans.
+func (t *TracesTestServer) UserAgent() string {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	ua := t.userAgent
+	t.userAgent = ""
+	return ua
 }
 
 func NewTracesTestServer(opts ...TraceServerOption) (*TracesTestServer, error) {

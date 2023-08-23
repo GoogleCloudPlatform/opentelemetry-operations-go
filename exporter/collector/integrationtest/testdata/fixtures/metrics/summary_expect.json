@@ -849,5 +849,6 @@
         }
       }
     ]
-  }
+  },
+  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.57.0"
 }

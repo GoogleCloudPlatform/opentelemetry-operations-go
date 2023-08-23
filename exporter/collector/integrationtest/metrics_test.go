@@ -96,6 +96,7 @@ func TestCollectorMetrics(t *testing.T) {
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
 				SelfObservabilityMetrics:        selfObsMetrics,
+				UserAgent:                       testServer.UserAgent(),
 			}
 			sort.Slice(fixture.CreateTimeSeriesRequests, func(i, j int) bool {
 				return fixture.CreateTimeSeriesRequests[i].Name < fixture.CreateTimeSeriesRequests[j].Name
@@ -183,6 +184,7 @@ func TestSDKMetrics(t *testing.T) {
 					apioption.WithEndpoint(testServer.Endpoint),
 					apioption.WithoutAuthentication(),
 					apioption.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+					apioption.WithUserAgent("opentelemetry-collector-contrib latest"),
 				)},
 				test.MetricSDKExporterOptions...,
 			)
@@ -225,6 +227,7 @@ func TestSDKMetrics(t *testing.T) {
 				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),
 				CreateServiceTimeSeriesRequests: testServer.CreateServiceTimeSeriesRequests(),
+				UserAgent:                       testServer.UserAgent(),
 				// Do not test self-observability metrics with SDK exporters
 			}
 			sort.Slice(fixture.CreateTimeSeriesRequests, func(i, j int) bool {
