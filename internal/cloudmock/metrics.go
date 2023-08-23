@@ -24,6 +24,7 @@ import (
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
@@ -37,6 +38,7 @@ type MetricsTestServer struct {
 	createServiceTimeSeriesReqs []*monitoringpb.CreateTimeSeriesRequest
 	mu                          sync.Mutex
 	RetryCount                  int
+	userAgent                   string
 }
 
 func (m *MetricsTestServer) Shutdown() {
@@ -51,6 +53,15 @@ func (m *MetricsTestServer) CreateMetricDescriptorRequests() []*monitoringpb.Cre
 	reqs := m.createMetricDescriptorReqs
 	m.createMetricDescriptorReqs = nil
 	return reqs
+}
+
+// Pops out the UserAgent from the most recent CreateTimeSeriesRequests or CreateServiceTimeSeriesRequests.
+func (m *MetricsTestServer) UserAgent() string {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	ua := m.userAgent
+	m.userAgent = ""
+	return ua
 }
 
 // Pops out the CreateTimeSeriesRequests which the test server has received so far.
@@ -71,20 +82,26 @@ func (m *MetricsTestServer) CreateServiceTimeSeriesRequests() []*monitoringpb.Cr
 	return reqs
 }
 
-func (m *MetricsTestServer) appendCreateMetricDescriptorReq(req *monitoringpb.CreateMetricDescriptorRequest) {
+func (m *MetricsTestServer) appendCreateMetricDescriptorReq(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.createMetricDescriptorReqs = append(m.createMetricDescriptorReqs, req)
 }
-func (m *MetricsTestServer) appendCreateTimeSeriesReq(req *monitoringpb.CreateTimeSeriesRequest) {
+func (m *MetricsTestServer) appendCreateTimeSeriesReq(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.createTimeSeriesReqs = append(m.createTimeSeriesReqs, req)
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		m.userAgent = strings.Join(md.Get("User-Agent"), ";")
+	}
 }
-func (m *MetricsTestServer) appendCreateServiceTimeSeriesReq(req *monitoringpb.CreateTimeSeriesRequest) {
+func (m *MetricsTestServer) appendCreateServiceTimeSeriesReq(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.createServiceTimeSeriesReqs = append(m.createServiceTimeSeriesReqs, req)
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		m.userAgent = strings.Join(md.Get("User-Agent"), ";")
+	}
 }
 
 func (m *MetricsTestServer) Serve() error {
@@ -120,7 +137,7 @@ func (f *fakeMetricServiceServer) CreateTimeSeries(
 	if code == codes.NotFound || code == codes.Unavailable || code == codes.DeadlineExceeded {
 		successPointCount = 0
 	} else {
-		f.metricsTestServer.appendCreateTimeSeriesReq(req)
+		f.metricsTestServer.appendCreateTimeSeriesReq(ctx, req)
 	}
 
 	statusResp, _ := status.New(code, "").WithDetails(
@@ -136,7 +153,7 @@ func (f *fakeMetricServiceServer) CreateServiceTimeSeries(
 	ctx context.Context,
 	req *monitoringpb.CreateTimeSeriesRequest,
 ) (*emptypb.Empty, error) {
-	f.metricsTestServer.appendCreateServiceTimeSeriesReq(req)
+	f.metricsTestServer.appendCreateServiceTimeSeriesReq(ctx, req)
 	return &emptypb.Empty{}, nil
 }
 
@@ -144,7 +161,7 @@ func (f *fakeMetricServiceServer) CreateMetricDescriptor(
 	ctx context.Context,
 	req *monitoringpb.CreateMetricDescriptorRequest,
 ) (*metricpb.MetricDescriptor, error) {
-	f.metricsTestServer.appendCreateMetricDescriptorReq(req)
+	f.metricsTestServer.appendCreateMetricDescriptorReq(ctx, req)
 	return &metricpb.MetricDescriptor{}, nil
 }
 

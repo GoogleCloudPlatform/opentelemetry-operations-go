@@ -17,10 +17,12 @@ package cloudmock
 import (
 	"context"
 	"net"
+	"strings"
 	"sync"
 
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 )
 
 type LogsTestServer struct {
@@ -30,6 +32,7 @@ type LogsTestServer struct {
 	Endpoint                string
 	writeLogEntriesRequests []*logpb.WriteLogEntriesRequest
 	mu                      sync.Mutex
+	userAgent               string
 }
 
 func (l *LogsTestServer) Shutdown() {
@@ -49,10 +52,22 @@ func (l *LogsTestServer) CreateWriteLogEntriesRequests() []*logpb.WriteLogEntrie
 	return reqs
 }
 
-func (l *LogsTestServer) appendWriteLogEntriesRequest(req *logpb.WriteLogEntriesRequest) {
+// Pops out the UserAgent from the most recent CreateWriteLogEntries
+func (l *LogsTestServer) UserAgent() string {
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	ua := l.userAgent
+	l.userAgent = ""
+	return ua
+}
+
+func (l *LogsTestServer) appendWriteLogEntriesRequest(ctx context.Context, req *logpb.WriteLogEntriesRequest) {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	l.writeLogEntriesRequests = append(l.writeLogEntriesRequests, req)
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		l.userAgent = strings.Join(md.Get("User-Agent"), ";")
+	}
 }
 
 type fakeLoggingServiceServer struct {
@@ -64,7 +79,7 @@ func (f *fakeLoggingServiceServer) WriteLogEntries(
 	ctx context.Context,
 	request *logpb.WriteLogEntriesRequest,
 ) (*logpb.WriteLogEntriesResponse, error) {
-	f.logsTestServer.appendWriteLogEntriesRequest(request)
+	f.logsTestServer.appendWriteLogEntriesRequest(ctx, request)
 	return &logpb.WriteLogEntriesResponse{}, nil
 }
 
