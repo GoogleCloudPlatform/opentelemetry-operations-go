@@ -25,6 +25,7 @@ message MetricExpectFixture {
   repeated google.monitoring.v3.CreateMetricDescriptorRequest create_metric_descriptor_requests = 2;
   repeated google.monitoring.v3.CreateTimeSeriesRequest create_service_time_series_requests = 3;
   SelfObservabilityMetric self_observability_metrics = 4;
+  string user_agent = 5;
 }
 
 message SelfObservabilityMetric {
@@ -34,8 +35,10 @@ message SelfObservabilityMetric {
 
 message LogExpectFixture {
   repeated google.logging.v2.WriteLogEntriesRequest write_log_entries_requests = 1;
+  string user_agent = 2;
 }
 
 message TraceExpectFixture {
   repeated google.tracing.v2.BatchWriteSpansRequest batch_write_spans_request = 1;
+  string user_agent = 2;
 }
