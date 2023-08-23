@@ -32,10 +32,10 @@ type TracesTestServer struct {
 	srv *grpc.Server
 	// Endpoint where the gRPC server is listening
 	Endpoint                string
-	batchWriteSpansRequests []*tracepb.BatchWriteSpansRequest
-	mu                      sync.Mutex
-	Retries                 int
 	userAgent               string
+	batchWriteSpansRequests []*tracepb.BatchWriteSpansRequest
+	Retries                 int
+	mu                      sync.Mutex
 }
 
 func (t *TracesTestServer) Shutdown() {
@@ -83,7 +83,7 @@ func (t *TracesTestServer) CreateBatchWriteSpansRequests() []*tracepb.BatchWrite
 	return reqs
 }
 
-// Pops out the UserAgent from the most recent BatchWriteSpans
+// Pops out the UserAgent from the most recent BatchWriteSpans.
 func (t *TracesTestServer) UserAgent() string {
 	t.mu.Lock()
 	defer t.mu.Unlock()

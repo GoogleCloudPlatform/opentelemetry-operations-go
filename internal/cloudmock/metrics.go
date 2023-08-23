@@ -33,12 +33,12 @@ type MetricsTestServer struct {
 	lis                         net.Listener
 	srv                         *grpc.Server
 	Endpoint                    string
+	userAgent                   string
 	createMetricDescriptorReqs  []*monitoringpb.CreateMetricDescriptorRequest
 	createTimeSeriesReqs        []*monitoringpb.CreateTimeSeriesRequest
 	createServiceTimeSeriesReqs []*monitoringpb.CreateTimeSeriesRequest
-	mu                          sync.Mutex
 	RetryCount                  int
-	userAgent                   string
+	mu                          sync.Mutex
 }
 
 func (m *MetricsTestServer) Shutdown() {

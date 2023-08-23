@@ -30,9 +30,9 @@ type LogsTestServer struct {
 	srv *grpc.Server
 	// Endpoint where the gRPC server is listening
 	Endpoint                string
+	userAgent               string
 	writeLogEntriesRequests []*logpb.WriteLogEntriesRequest
 	mu                      sync.Mutex
-	userAgent               string
 }
 
 func (l *LogsTestServer) Shutdown() {
@@ -52,7 +52,7 @@ func (l *LogsTestServer) CreateWriteLogEntriesRequests() []*logpb.WriteLogEntrie
 	return reqs
 }
 
-// Pops out the UserAgent from the most recent CreateWriteLogEntries
+// Pops out the UserAgent from the most recent CreateWriteLogEntries.
 func (l *LogsTestServer) UserAgent() string {
 	l.mu.Lock()
 	defer l.mu.Unlock()
