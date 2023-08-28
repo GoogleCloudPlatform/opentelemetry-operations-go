@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/tools
 
-go 1.21
+go 1.20
 
 require (
 	github.com/client9/misspell v0.3.4

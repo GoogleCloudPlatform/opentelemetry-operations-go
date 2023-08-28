@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-server/cloudfunctions
 
-go 1.21
+go 1.20
 
 require (
 	cloud.google.com/go/pubsub v1.33.0

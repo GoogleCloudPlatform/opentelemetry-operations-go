@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock
 
-go 1.21
+go 1.20
 
 require (
 	cloud.google.com/go/logging v1.7.0
