@@ -61,9 +61,6 @@ const (
 	labelHTTPStatusCode = `/http/status_code`
 	labelHTTPPath       = `/http/path`
 	labelHTTPUserAgent  = `/http/user_agent`
-	// This is prefixed for google app engine, but translates to the service
-	// in the trace UI.
-	labelService = `g.co/gae/app/module`
 
 	instrumentationScopeNameAttribute    = "otel.scope.name"
 	instrumentationScopeVersionAttribute = "otel.scope.version"
@@ -306,8 +303,6 @@ func defaultAttributeMapping(k attribute.Key) attribute.Key {
 		return labelHTTPUserAgent
 	case statusCodeAttribute:
 		return labelHTTPStatusCode
-	case serviceAttribute:
-		return labelService
 	}
 	return k
 }

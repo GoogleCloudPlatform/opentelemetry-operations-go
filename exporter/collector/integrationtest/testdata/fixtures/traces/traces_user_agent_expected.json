@@ -47,11 +47,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-server"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -162,6 +157,11 @@
                   "value": "foo"
                 }
               },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
               "telemetry.sdk.language": {
                 "stringValue": {
                   "value": "go"
@@ -224,11 +224,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-server"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -341,6 +336,11 @@
                   "value": "foo"
                 }
               },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
               "telemetry.sdk.language": {
                 "stringValue": {
                   "value": "go"
@@ -403,11 +403,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-server"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -520,6 +515,11 @@
                   "value": "foo"
                 }
               },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
               "telemetry.sdk.language": {
                 "stringValue": {
                   "value": "go"
@@ -582,11 +582,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-server"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -699,6 +694,11 @@
                   "value": "foo"
                 }
               },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
               "telemetry.sdk.language": {
                 "stringValue": {
                   "value": "go"
@@ -746,11 +746,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -822,6 +817,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -873,11 +873,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -947,6 +942,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -998,11 +998,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -1072,6 +1067,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -1123,11 +1123,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -1199,6 +1194,11 @@
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
                 }
               },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
               "telemetry.sdk.language": {
                 "stringValue": {
                   "value": "go"
@@ -1232,11 +1232,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1293,6 +1288,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -1330,11 +1330,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -1389,6 +1384,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -1426,11 +1426,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -1485,6 +1480,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -1522,11 +1522,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -1581,6 +1576,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -1645,11 +1645,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-server"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1762,6 +1757,11 @@
                   "value": "foo"
                 }
               },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
               "telemetry.sdk.language": {
                 "stringValue": {
                   "value": "go"
@@ -1824,11 +1824,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-server"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1941,6 +1936,11 @@
                   "value": "foo"
                 }
               },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
               "telemetry.sdk.language": {
                 "stringValue": {
                   "value": "go"
@@ -2003,11 +2003,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-server"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -2120,6 +2115,11 @@
                   "value": "foo"
                 }
               },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-server"
+                }
+              },
               "telemetry.sdk.language": {
                 "stringValue": {
                   "value": "go"
@@ -2167,11 +2167,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -2248,6 +2243,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -2299,11 +2299,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -2378,6 +2373,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -2429,11 +2429,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -2508,6 +2503,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {
@@ -2559,11 +2559,6 @@
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
                 }
               },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
-                }
-              },
               "g.co/r/generic_node/location": {
                 "stringValue": {
                   "value": "global"
@@ -2640,6 +2635,11 @@
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
                 }
               },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
+                }
+              },
               "telemetry.sdk.language": {
                 "stringValue": {
                   "value": "go"
@@ -2673,11 +2673,6 @@
               "g.co/agent": {
                 "stringValue": {
                   "value": "opentelemetry-go 1.16.0; google-cloud-trace-exporter 1.19.1"
-                }
-              },
-              "g.co/gae/app/module": {
-                "stringValue": {
-                  "value": "demo-client"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -2734,6 +2729,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "service.name": {
+                "stringValue": {
+                  "value": "demo-client"
                 }
               },
               "telemetry.sdk.language": {

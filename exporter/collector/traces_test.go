@@ -64,10 +64,10 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 					},
 				},
 			},
-			expectedServiceKey: "g.co/gae/app/module",
+			expectedServiceKey: "service.name",
 		},
 		{
-			name: "With Empty Mapping",
+			name: "With Custom Mapping",
 			cfg: Config{
 				ProjectID: "idk",
 				TraceConfig: TraceConfig{
@@ -75,10 +75,15 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 						Endpoint:    "127.0.0.1:8080",
 						UseInsecure: true,
 					},
-					AttributeMappings: []AttributeMapping{},
+					AttributeMappings: []AttributeMapping{
+						{
+							Key:         "service.name",
+							Replacement: "g.co/gae/app/module",
+						},
+					},
 				},
 			},
-			expectedServiceKey: "service.name",
+			expectedServiceKey: "g.co/gae/app/module",
 		},
 	}
 
