@@ -153,7 +153,6 @@ func (*detectResourceHandler) tracerProvider() (*sdktrace.TracerProvider, error)
 	res, err := resource.New(context.Background(),
 		resource.WithDetectors(gcp.NewDetector()),
 		resource.WithFromEnv(),
-		resource.WithTelemetrySDK(),
 	)
 	if err != nil {
 		return nil, err
