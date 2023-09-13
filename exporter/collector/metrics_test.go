@@ -307,7 +307,7 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	hdp := ts.Points[0].Value.GetDistributionValue()
 	assert.Equal(t, int64(15), hdp.Count)
 	assert.ElementsMatch(t, []int64{1, 2, 3, 4, 5}, hdp.BucketCounts)
-	assert.Equal(t, 12847.600000000002, hdp.SumOfSquaredDeviation)
+	assert.InDelta(t, 12847.6, hdp.SumOfSquaredDeviation, 0.0001)
 	assert.Equal(t, 2.8, hdp.Mean)
 	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
 	assert.Len(t, hdp.Exemplars, 1)

@@ -6,10 +6,10 @@ require (
 	cloud.google.com/go/trace v1.10.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.43.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.43.1
-	github.com/stretchr/testify v1.8.3
-	go.opentelemetry.io/otel v1.16.0
-	go.opentelemetry.io/otel/sdk v1.16.0
-	go.opentelemetry.io/otel/trace v1.16.0
+	github.com/stretchr/testify v1.8.4
+	go.opentelemetry.io/otel v1.18.0
+	go.opentelemetry.io/otel/sdk v1.18.0
+	go.opentelemetry.io/otel/trace v1.18.0
 	golang.org/x/oauth2 v0.8.0
 	google.golang.org/api v0.126.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230731190214-cbb8c96f2d6d
@@ -34,11 +34,11 @@ require (
 	github.com/googleapis/gax-go/v2 v2.11.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.opentelemetry.io/otel/metric v1.16.0 // indirect
+	go.opentelemetry.io/otel/metric v1.18.0 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
 	golang.org/x/net v0.10.0 // indirect
 	golang.org/x/sync v0.2.0 // indirect
-	golang.org/x/sys v0.8.0 // indirect
+	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.9.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20230731193218-e0aa005b6bdf // indirect
