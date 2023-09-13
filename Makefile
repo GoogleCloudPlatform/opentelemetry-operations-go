@@ -49,6 +49,7 @@ tools: $(GOLANGCI_LINT) $(MISSPELL) $(GOCOVMERGE) $(STRINGER) $(GOJQ) $(FIELDALI
 
 PROTOBUF_VERSION = 3.19.0
 PROTOBUF_OS = linux
+UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
 	PROTOBUF_OS = osx
 endif
@@ -185,13 +186,13 @@ gotidy:
 update-dep:
 	$(MAKE) for-all-mod CMD="$(PWD)/internal/buildscripts/update-dep"
 
-STABLE_OTEL_VERSION=v1.16.0
-UNSTABLE_OTEL_VERSION=v0.39.0
-STABLE_CONTRIB_OTEL_VERSION=v1.17.0
-UNSTABLE_CONTRIB_OTEL_VERSION=v0.42.0
+STABLE_OTEL_VERSION=v1.18.0
+UNSTABLE_OTEL_VERSION=v0.41.0
+STABLE_CONTRIB_OTEL_VERSION=v1.19.0
+UNSTABLE_CONTRIB_OTEL_VERSION=v0.44.0
 STABLE_COLLECTOR_VERSION=v1.0.0-rcv0014
-UNSTABLE_COLLECTOR_VERSION=v0.83.0
-UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.83.0
+UNSTABLE_COLLECTOR_VERSION=v0.85.0
+UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.85.0
 
 .PHONY: update-otel
 update-otel:
@@ -202,6 +203,7 @@ update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/export/metric VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/metric VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/trace VERSION=$(STABLE_OTEL_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/exporters/prometheus VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/detectors/gcp VERSION=$(STABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_CONTRIB_OTEL_VERSION)

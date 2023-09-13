@@ -29,7 +29,6 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	"go.opentelemetry.io/otel/sdk/metric"
-	"go.opentelemetry.io/otel/sdk/metric/aggregation"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
 
@@ -155,7 +154,7 @@ func (me *metricExporter) Temporality(ik metric.InstrumentKind) metricdata.Tempo
 }
 
 // Aggregation returns the Aggregation to use for an instrument kind.
-func (me *metricExporter) Aggregation(ik metric.InstrumentKind) aggregation.Aggregation {
+func (me *metricExporter) Aggregation(ik metric.InstrumentKind) metric.Aggregation {
 	return metric.DefaultAggregationSelector(ik)
 }
 

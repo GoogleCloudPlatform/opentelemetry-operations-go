@@ -30,7 +30,7 @@ func TestGetMetricName(t *testing.T) {
 	registry := featuregate.NewRegistry()
 	gate := registry.MustRegister(
 		promFeatureGate,
-		featuregate.StageAlpha,
+		featuregate.StageBeta,
 		featuregate.WithRegisterDescription("Controls whether metrics names are automatically normalized to follow Prometheus naming convention"),
 		featuregate.WithRegisterReferenceURL("https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/8950"),
 	)
@@ -46,9 +46,21 @@ func TestGetMetricName(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			desc:     "sum without total is unaffected",
+			desc:     "sum without total",
 			baseName: "foo",
 			metric: func(m pmetric.Metric) {
+				m.SetName("foo")
+				sum := m.SetEmptySum()
+				sum.SetIsMonotonic(true)
+			},
+			expected: "foo_total/counter",
+		},
+		{
+			desc:     "sum without total is unaffected when normalization disabled",
+			baseName: "foo",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", false)
 				m.SetName("foo")
 				sum := m.SetEmptySum()
 				sum.SetIsMonotonic(true)
@@ -69,6 +81,19 @@ func TestGetMetricName(t *testing.T) {
 			desc:     "sum with unit",
 			baseName: "foo",
 			metric: func(m pmetric.Metric) {
+				m.SetName("foo_total")
+				m.SetUnit("s")
+				sum := m.SetEmptySum()
+				sum.SetIsMonotonic(true)
+			},
+			expected: "foo_seconds_total/counter",
+		},
+		{
+			desc:     "sum with unit is unaffected when normalization disabled",
+			baseName: "foo",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", false)
 				m.SetName("foo_total")
 				m.SetUnit("s")
 				sum := m.SetEmptySum()
@@ -153,9 +178,24 @@ func TestGetMetricName(t *testing.T) {
 			expected: "bar/gauge",
 		},
 		{
-			desc:     "untyped sum with feature gate disabled does nothing",
+			desc:     "untyped sum with gcp.untyped_double_export disabled only normalizes",
 			baseName: "bar",
 			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, false)
+				m.SetName("bar")
+				m.SetEmptySum()
+				m.Sum().SetIsMonotonic(true)
+				m.Sum().DataPoints().AppendEmpty().Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+			},
+			expected: "bar_total/counter",
+		},
+		{
+			desc:     "untyped sum with feature gates disabled does nothing",
+			baseName: "bar",
+			metric: func(m pmetric.Metric) {
+				//nolint:errcheck
+				featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", false)
 				//nolint:errcheck
 				featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, false)
 				m.SetName("bar")
@@ -238,6 +278,10 @@ func TestGetMetricName(t *testing.T) {
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
+			// Name translation uses global feature gate registry, set to defaults before each test.
+			//nolint:errcheck
+			featuregate.GlobalRegistry().Set("pkg.translator.prometheus.NormalizeName", true)
+
 			assert.True(t, gate.IsEnabled())
 			metric := pmetric.NewMetric()
 			tc.metric(metric)
