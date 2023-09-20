@@ -20,7 +20,6 @@ import (
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
-	"go.uber.org/zap"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
@@ -56,14 +55,13 @@ func defaultResourceToLoggingMonitoredResource(resource pcommon.Resource) *monit
 // TODO(@damemi): Refactor to pass control-coupling lint check.
 //
 //nolint:revive
-func resourceToLabels(
-	resource pcommon.Resource,
+func filterAttributes(
+	attributes pcommon.Map,
 	serviceResourceLabels bool,
 	resourceFilters []ResourceFilter,
-	log *zap.Logger,
-) labels {
+) pcommon.Map {
 	attrs := pcommon.NewMap()
-	resource.Attributes().Range(func(k string, v pcommon.Value) bool {
+	attributes.Range(func(k string, v pcommon.Value) bool {
 		// Is a service attribute and should be included
 		if serviceResourceLabels &&
 			(k == semconv.AttributeServiceName ||
@@ -83,5 +81,5 @@ func resourceToLabels(
 		}
 		return true
 	})
-	return attributesToLabels(attrs)
+	return attrs
 }

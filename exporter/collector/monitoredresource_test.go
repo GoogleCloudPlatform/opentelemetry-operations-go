@@ -572,14 +572,14 @@ func TestResourceMetricsToLoggingMonitoredResource(t *testing.T) {
 
 func TestResourceToMetricLabels(t *testing.T) {
 	tests := []struct {
-		resourceLabels    map[string]string
+		resourceLabels    map[string]any
 		expectExtraLabels labels
 		updateMapper      func(mapper *metricMapper)
 		name              string
 	}{
 		{
 			name: "No Extra labels",
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.platform":          "gcp_compute_engine",
 				"cloud.availability_zone": "us-central1",
 				"host.id":                 "abc123",
@@ -588,7 +588,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 		},
 		{
 			name: "GCE with OTel service attribs",
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.platform":          "gcp_compute_engine",
 				"cloud.availability_zone": "us-central1",
 				"host.id":                 "abc123",
@@ -607,7 +607,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 			updateMapper: func(mapper *metricMapper) {
 				mapper.cfg.MetricConfig.ServiceResourceLabels = false
 			},
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.platform":          "gcp_compute_engine",
 				"cloud.availability_zone": "us-central1",
 				"host.id":                 "abc123",
@@ -622,7 +622,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 			updateMapper: func(mapper *metricMapper) {
 				mapper.cfg.MetricConfig.ResourceFilters = []ResourceFilter{{Prefix: "cloud."}}
 			},
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.platform":          "gcp_compute_engine",
 				"cloud.availability_zone": "us-central1",
 				"host.id":                 "abc123",
@@ -634,7 +634,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 		},
 		{
 			name: "Generic task no cloud.platform",
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.availability_zone": "us-central1",
 				"cloud.region":            "my-region",
 				"service.namespace":       "myservicenamespace",
@@ -649,7 +649,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 		},
 		{
 			name: "Generic task no location",
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"service.namespace":   "myservicenamespace",
 				"service.name":        "myservicename",
 				"service.instance.id": "myserviceinstanceid",
@@ -662,7 +662,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 		},
 		{
 			name: "Generic task unrecognized cloud.platform",
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.platform":          "fooprovider_kubernetes_service",
 				"cloud.availability_zone": "us-central1",
 				"service.namespace":       "myservicenamespace",
@@ -677,7 +677,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 		},
 		{
 			name: "Generic task without cloud.availability_zone region",
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.platform":      "fooprovider_kubernetes_service",
 				"cloud.region":        "my-region",
 				"service.namespace":   "myservicenamespace",
@@ -692,7 +692,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 		},
 		{
 			name: "Generic node",
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.platform":          "fooprovider_kubernetes_service",
 				"cloud.availability_zone": "us-central1",
 				"cloud.region":            "my-region",
@@ -708,7 +708,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 		},
 		{
 			name: "Generic node without cloud.availability_zone",
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.region":      "my-region",
 				"service.namespace": "myservicenamespace",
 				"host.id":           "myhostid",
@@ -720,7 +720,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 		},
 		{
 			name: "Generic node without host.id",
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.region":      "my-region",
 				"service.namespace": "myservicenamespace",
 				"host.name":         "myhostname",
@@ -737,7 +737,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 					{Regex: "host.*"},
 				}
 			},
-			resourceLabels: map[string]string{
+			resourceLabels: map[string]any{
 				"cloud.platform":            "gcp_compute_engine",
 				"cloud.availability_zone":   "us-central1",
 				"cloud.availability_region": "us-central",
@@ -758,11 +758,9 @@ func TestResourceToMetricLabels(t *testing.T) {
 			if test.updateMapper != nil {
 				test.updateMapper(&mapper)
 			}
-			r := pcommon.NewResource()
-			for k, v := range test.resourceLabels {
-				r.Attributes().PutStr(k, v)
-			}
-			extraLabels := resourceToLabels(r, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters, nil)
+			attrs := pcommon.NewMap()
+			attrs.FromRaw(test.resourceLabels)
+			extraLabels := attributesToLabels(filterAttributes(attrs, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters))
 			assert.Equal(t, test.expectExtraLabels, extraLabels)
 		})
 	}
@@ -810,6 +808,6 @@ func TestResourceMetricsToMonitoredResourceUTF8(t *testing.T) {
 	}
 	mr := defaultResourceToMonitoringMonitoredResource(r)
 	assert.Equal(t, expectMr, mr)
-	extraLabels := resourceToLabels(r, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters, nil)
+	extraLabels := attributesToLabels(filterAttributes(r.Attributes(), mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters))
 	assert.Equal(t, expectExtraLabels, extraLabels)
 }

@@ -18,7 +18,7 @@
           "timestamp": "1970-01-01T00:00:00Z",
           "severity": "ERROR",
           "labels": {
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -37,7 +37,7 @@
           "timestamp": "1970-01-01T00:00:00Z",
           "severity": "ERROR",
           "labels": {
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         }
       ],
