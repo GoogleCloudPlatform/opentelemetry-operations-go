@@ -250,7 +250,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr := defaultResourceToLoggingMonitoredResource(rl.Resource())
-		extraResourceLabels := resourceToLabels(rl.Resource(), l.cfg.LogConfig.ServiceResourceLabels, l.cfg.LogConfig.ResourceFilters, l.obs.log)
+		extraResourceLabels := attributesToUnsanitizedLabels(filterAttributes(rl.Resource().Attributes(), l.cfg.LogConfig.ServiceResourceLabels, l.cfg.LogConfig.ResourceFilters))
 		projectID := l.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
 		if projectFromResource, found := rl.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
@@ -306,6 +306,17 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 	}
 
 	return entries, errors.Join(errs...)
+}
+
+// converts attributes to a map[string]string.
+// It ensures the label values are valid UTF-8, but does not sanitize keys.
+func attributesToUnsanitizedLabels(attrs pcommon.Map) labels {
+	ls := make(labels, attrs.Len())
+	attrs.Range(func(k string, v pcommon.Value) bool {
+		ls[k] = sanitizeUTF8(v.AsString())
+		return true
+	})
+	return ls
 }
 
 func mergeLogLabels(instrumentationSource, instrumentationVersion string, resourceLabels map[string]string) map[string]string {

@@ -23,7 +23,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service",
+            "service.name": "apache_service",
             "single-attribute": "foobar"
           }
         },
@@ -48,7 +48,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -72,7 +72,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -96,7 +96,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -120,7 +120,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -144,7 +144,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -168,7 +168,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -192,7 +192,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -216,7 +216,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -240,7 +240,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -264,7 +264,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -288,7 +288,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -312,7 +312,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -336,7 +336,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -360,7 +360,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -376,7 +376,7 @@
           "timestamp": "1970-01-01T00:00:00Z",
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         },
         {
@@ -400,7 +400,7 @@
           },
           "labels": {
             "log.file.name": "test.log",
-            "service_name": "apache_service"
+            "service.name": "apache_service"
           }
         }
       ],

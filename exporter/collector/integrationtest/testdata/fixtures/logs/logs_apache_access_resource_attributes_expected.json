@@ -22,11 +22,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -49,11 +49,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -76,11 +76,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -103,11 +103,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -130,11 +130,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -157,11 +157,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -184,11 +184,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -211,11 +211,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -238,11 +238,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -265,11 +265,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -292,11 +292,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -319,11 +319,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -346,11 +346,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -373,11 +373,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -400,11 +400,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -419,11 +419,11 @@
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:54:43 +0800] \"-\" 408 -",
           "timestamp": "1970-01-01T00:00:00Z",
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         },
         {
@@ -446,11 +446,11 @@
             "protocol": "HTTP/1.1"
           },
           "labels": {
-            "custom_foobar": "baz",
+            "custom.foobar": "baz",
             "log.file.name": "test.log",
-            "service_instance_id": "my_service_instance_id",
-            "service_name": "my_service_name",
-            "service_namespace": "my_service_namespace"
+            "service.instance.id": "my_service_instance_id",
+            "service.name": "my_service_name",
+            "service.namespace": "my_service_namespace"
           }
         }
       ],
