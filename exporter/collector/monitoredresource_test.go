@@ -759,7 +759,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 				test.updateMapper(&mapper)
 			}
 			attrs := pcommon.NewMap()
-			attrs.FromRaw(test.resourceLabels)
+			assert.NoError(t, attrs.FromRaw(test.resourceLabels))
 			extraLabels := attributesToLabels(filterAttributes(attrs, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters))
 			assert.Equal(t, test.expectExtraLabels, extraLabels)
 		})

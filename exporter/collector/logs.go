@@ -308,6 +308,8 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 	return entries, errors.Join(errs...)
 }
 
+// converts attributes to a map[string]string.
+// It ensures the label values are valid UTF-8, but does not sanitize keys.
 func attributesToUnsanitizedLabels(attrs pcommon.Map) labels {
 	ls := make(labels, attrs.Len())
 	attrs.Range(func(k string, v pcommon.Value) bool {
