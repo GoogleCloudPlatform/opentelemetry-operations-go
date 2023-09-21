@@ -65,7 +65,8 @@ func main() {
 		log.Fatalf("Failed to create exporter: %v", err)
 	}
 
-	res, err := resource.New(ctx,
+	res, err := resource.New(
+		ctx,
 		// Use the GCP resource detector to detect information about the GCP platform
 		resource.WithDetectors(gcp.NewDetector()),
 		// Keep the default detectors
