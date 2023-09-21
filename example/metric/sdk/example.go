@@ -24,9 +24,12 @@ import (
 
 	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
+	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.18.0"
 )
 
 type observedFloat struct {
@@ -53,6 +56,7 @@ func newObservedFloat(v float64) *observedFloat {
 }
 
 func main() {
+	ctx := context.Background()
 	// Initialization. In order to pass the credentials to the exporter,
 	// prepare credential file following the instruction described in this doc.
 	// https://pkg.go.dev/golang.org/x/oauth2/google?tab=doc#FindDefaultCredentials
@@ -61,11 +65,27 @@ func main() {
 		log.Fatalf("Failed to create exporter: %v", err)
 	}
 
+	res, err := resource.New(ctx,
+		// Use the GCP resource detector to detect information about the GCP platform
+		resource.WithDetectors(gcp.NewDetector()),
+		// Keep the default detectors
+		resource.WithTelemetrySDK(),
+		// Add attributes from environment variables
+		resource.WithFromEnv(),
+		// Add your own custom attributes to identify your application
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String("example-application"),
+		),
+	)
+	if err != nil {
+		log.Fatalf("resource.New: %v", err)
+	}
+
 	// initialize a MeterProvider with that periodically exports to the GCP exporter.
 	provider := sdkmetric.NewMeterProvider(
 		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exporter)),
+		sdkmetric.WithResource(res),
 	)
-	ctx := context.Background()
 	defer func() {
 		if err = provider.Shutdown(ctx); err != nil {
 			log.Fatalf("failed to shutdown meter provider: %v", err)
