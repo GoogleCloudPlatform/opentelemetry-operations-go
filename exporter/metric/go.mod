@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	cloud.google.com/go/monitoring v1.15.1
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.43.1
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.43.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.44.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.44.0
 	github.com/googleapis/gax-go/v2 v2.11.0
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/otel v1.19.0
