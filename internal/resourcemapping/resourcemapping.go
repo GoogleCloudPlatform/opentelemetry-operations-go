@@ -17,7 +17,7 @@ package resourcemapping
 import (
 	"strings"
 
-	semconv "go.opentelemetry.io/otel/semconv/v1.18.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -115,7 +115,7 @@ var (
 			}},
 			gaeModuleID:  {otelKeys: []string{string(semconv.FaaSNameKey)}},
 			gaeVersionID: {otelKeys: []string{string(semconv.FaaSVersionKey)}},
-			instanceID:   {otelKeys: []string{string(semconv.FaaSIDKey)}},
+			instanceID:   {otelKeys: []string{string(semconv.FaaSInstanceKey)}},
 		},
 		gaeApp: {
 			location: {otelKeys: []string{
@@ -149,7 +149,7 @@ var (
 			},
 			namespace: {otelKeys: []string{string(semconv.ServiceNamespaceKey)}},
 			job:       {otelKeys: []string{string(semconv.ServiceNameKey), string(semconv.FaaSNameKey)}},
-			taskID:    {otelKeys: []string{string(semconv.ServiceInstanceIDKey), string(semconv.FaaSIDKey)}},
+			taskID:    {otelKeys: []string{string(semconv.ServiceInstanceIDKey), string(semconv.FaaSInstanceKey)}},
 		},
 		genericNode: {
 			location: {
@@ -229,8 +229,8 @@ func commonResourceAttributesToMonitoredResource(cloudPlatform string, attrs Rea
 		_, hasServiceName := attrs.GetString(string(semconv.ServiceNameKey))
 		_, hasFaaSName := attrs.GetString(string(semconv.FaaSNameKey))
 		_, hasServiceInstanceID := attrs.GetString(string(semconv.ServiceInstanceIDKey))
-		_, hasFaaSID := attrs.GetString(string(semconv.FaaSIDKey))
-		if (hasServiceName && hasServiceInstanceID) || (hasFaaSID && hasFaaSName) {
+		_, hasFaaSInstance := attrs.GetString(string(semconv.FaaSInstanceKey))
+		if (hasServiceName && hasServiceInstanceID) || (hasFaaSInstance && hasFaaSName) {
 			return createMonitoredResource(genericTask, attrs)
 		}
 
