@@ -25,6 +25,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -100,7 +101,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 
 			//nolint:errcheck
 			go srv.Serve(lis)
-			sde, err := NewGoogleCloudTracesExporter(ctx, test.cfg, "latest", DefaultTimeout)
+			sde, err := NewGoogleCloudTracesExporter(ctx, test.cfg, zap.NewNop(), "latest", DefaultTimeout)
 			if test.expectedErr != "" {
 				assert.EqualError(t, err, test.expectedErr)
 				return

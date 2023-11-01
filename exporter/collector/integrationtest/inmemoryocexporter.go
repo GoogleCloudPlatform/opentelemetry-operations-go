@@ -136,9 +136,13 @@ func NewTraceTestExporter(
 	cfg.TraceConfig.ClientConfig.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+
 	exporter, err := collector.NewGoogleCloudTracesExporter(
 		ctx,
 		cfg,
+		logger,
 		"latest",
 		collector.DefaultTimeout,
 	)

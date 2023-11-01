@@ -27,6 +27,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.uber.org/zap"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -34,13 +35,14 @@ import (
 // TraceExporter is a wrapper struct of OT cloud trace exporter.
 type TraceExporter struct {
 	texporter *texporter.Exporter
+	logger    *zap.Logger
 }
 
 func (te *TraceExporter) Shutdown(ctx context.Context) error {
 	return te.texporter.Shutdown(ctx)
 }
 
-func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
+func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, log *zap.Logger, version string, timeout time.Duration) (*TraceExporter, error) {
 	// TODO: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/537#discussion_r1038290097
 	//nolint:errcheck
 	view.Register(ocgrpc.DefaultClientViews...)
@@ -70,7 +72,7 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 		return nil, fmt.Errorf("error creating GoogleCloud Trace exporter: %w", err)
 	}
 
-	return &TraceExporter{texporter: exp}, nil
+	return &TraceExporter{texporter: exp, logger: log}, nil
 }
 
 func mappingFuncFromAKM(akm []AttributeMapping) func(attribute.Key) attribute.Key {
@@ -98,5 +100,12 @@ func (te *TraceExporter) PushTraces(ctx context.Context, td ptrace.Traces) error
 		spans = append(spans, sd...)
 	}
 
-	return te.texporter.ExportSpans(ctx, spans)
+	err := te.texporter.ExportSpans(ctx, spans)
+	if err != nil {
+		te.logger.Error(
+			"Exporting spans failed",
+			zap.Error(err),
+		)
+	}
+	return err
 }

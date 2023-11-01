@@ -396,7 +396,14 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 			}
 		}
 	}
-	return errors.Join(errs...)
+	err := errors.Join(errs...)
+	if err != nil {
+		me.obs.log.Error(
+			"Exporting metrics failed",
+			zap.Error(err),
+		)
+	}
+	return err
 }
 
 // exportToTimeSeries is the default exporting call to GCM.

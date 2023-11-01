@@ -196,6 +196,17 @@ func (l *LogsExporter) Shutdown(ctx context.Context) error {
 }
 
 func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
+	err := l.pushLogs(ctx, ld)
+	if err != nil {
+		l.obs.log.Error(
+			"Exporting logs failed",
+			zap.Error(err),
+		)
+	}
+	return err
+}
+
+func (l *LogsExporter) pushLogs(ctx context.Context, ld plog.Logs) error {
 	projectEntries, err := l.mapper.createEntries(ld)
 	if err != nil {
 		return err
