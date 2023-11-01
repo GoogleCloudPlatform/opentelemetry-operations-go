@@ -517,6 +517,70 @@ func TestResourceMetricsToMonitoringMonitoredResource(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "Cloud Run Instance",
+			resourceLabels: map[string]string{
+				"cloud.provider": "gcp",
+				"cloud.platform": "gcp_cloud_run",
+				"cloud.region":   "my-region",
+				"faas.instance":  "myinstanceid",
+				"faas.name":      "myfaasname",
+				"faas.version":   "v1",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "generic_task",
+				Labels: map[string]string{
+					"job":       "myfaasname",
+					"location":  "my-region",
+					"namespace": "",
+					"task_id":   "myinstanceid",
+				},
+			},
+		},
+		{
+			name: "Cloud Run Instance with default service",
+			resourceLabels: map[string]string{
+				"cloud.provider": "gcp",
+				"cloud.platform": "gcp_cloud_run",
+				"cloud.region":   "my-region",
+				"service.name":   "unknown_service:go",
+				"faas.instance":  "myinstanceid",
+				"faas.name":      "myfaasname",
+				"faas.version":   "v1",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "generic_task",
+				Labels: map[string]string{
+					"job":       "myfaasname",
+					"location":  "my-region",
+					"namespace": "",
+					"task_id":   "myinstanceid",
+				},
+			},
+		},
+		{
+			name: "Cloud Run Instance with custom service",
+			resourceLabels: map[string]string{
+				"cloud.provider":      "gcp",
+				"cloud.platform":      "gcp_cloud_run",
+				"cloud.region":        "my-region",
+				"service.name":        "customservice",
+				"service.namespace":   "customnamespace",
+				"service.instance.id": "customserviceid",
+				"faas.instance":       "myinstanceid",
+				"faas.name":           "myfaasname",
+				"faas.version":        "v1",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "generic_task",
+				Labels: map[string]string{
+					"job":       "customservice",
+					"location":  "my-region",
+					"namespace": "customnamespace",
+					"task_id":   "customserviceid",
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {

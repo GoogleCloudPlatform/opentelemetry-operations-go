@@ -569,7 +569,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			},
 		},
 		{
-			desc: "Cloud Run From Detector",
+			desc: "Cloud Run From Detector with default service",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
@@ -578,6 +578,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				attribute.String("faas.instance", "bar"),
 				attribute.String("faas.name", "x-service"),
 				attribute.String("faas.version", "v1"),
+				attribute.String("service.name", "unknown_service:go"),
 			),
 			expectedType: "generic_task",
 			expectedLabels: map[string]string{

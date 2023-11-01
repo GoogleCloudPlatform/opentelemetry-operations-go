@@ -150,7 +150,7 @@ func TestMapToPrometheusTarget(t *testing.T) {
 			desc: "Attributes from cloud run",
 			resourceLabels: map[string]string{
 				"cloud.region":  "us-central1",
-				"service.name":  "service:unknown",
+				"service.name":  "unknown_service:go",
 				"faas.name":     "my-cloud-run-service",
 				"faas.instance": "1234759430923053489543203",
 			},

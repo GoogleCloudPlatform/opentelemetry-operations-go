@@ -15,6 +15,8 @@
 package googlemanagedprometheus
 
 import (
+	"strings"
+
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -32,6 +34,7 @@ const (
 	jobLabel              = "job"
 	serviceNamespaceLabel = "service_namespace"
 	instanceLabel         = "instance"
+	unknownServicePrefix  = "unknown_service"
 )
 
 // promTargetKeys are attribute keys which are used in the prometheus_target monitored resource.
@@ -40,9 +43,9 @@ var promTargetKeys = map[string][]string{
 	locationLabel:         {locationLabel, semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion},
 	clusterLabel:          {clusterLabel, semconv.AttributeK8SClusterName},
 	namespaceLabel:        {namespaceLabel, semconv.AttributeK8SNamespaceName},
-	jobLabel:              {jobLabel, semconv.AttributeFaaSName, semconv.AttributeServiceName},
+	jobLabel:              {jobLabel, semconv.AttributeServiceName, semconv.AttributeFaaSName},
 	serviceNamespaceLabel: {semconv.AttributeServiceNamespace},
-	instanceLabel:         {instanceLabel, semconv.AttributeFaaSInstance, semconv.AttributeServiceInstanceID},
+	instanceLabel:         {instanceLabel, semconv.AttributeServiceInstanceID, semconv.AttributeFaaSInstance},
 }
 
 func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
@@ -69,9 +72,24 @@ func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.Moni
 // getStringOrEmpty returns the value of the first key found, or the empty string.
 func getStringOrEmpty(attributes pcommon.Map, keys ...string) string {
 	for _, k := range keys {
-		if val, ok := attributes.Get(k); ok {
+		if val, ok := attributes.Get(k); ok && !strings.HasPrefix(val.Str(), unknownServicePrefix) {
+			return val.Str()
+		}
+	}
+	if contains(keys, string(semconv.AttributeServiceName)) {
+		// the service name started with unknown_service, and was ignored above
+		if val, ok := attributes.Get(semconv.AttributeServiceName); ok {
 			return val.Str()
 		}
 	}
 	return ""
+}
+
+func contains(list []string, element string) bool {
+	for _, item := range list {
+		if item == element {
+			return true
+		}
+	}
+	return false
 }
