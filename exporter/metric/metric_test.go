@@ -29,7 +29,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
-	semconv "go.opentelemetry.io/otel/semconv/v1.18.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
 
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"github.com/stretchr/testify/assert"
@@ -569,15 +569,16 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 			},
 		},
 		{
-			desc: "Cloud Run From Detector",
+			desc: "Cloud Run From Detector with default service",
 			resource: resource.NewWithAttributes(
 				semconv.SchemaURL,
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.platform", "gcp_cloud_run"),
 				attribute.String("cloud.region", "utopia"),
-				attribute.String("faas.id", "bar"),
+				attribute.String("faas.instance", "bar"),
 				attribute.String("faas.name", "x-service"),
 				attribute.String("faas.version", "v1"),
+				attribute.String("service.name", "unknown_service:go"),
 			),
 			expectedType: "generic_task",
 			expectedLabels: map[string]string{
@@ -594,7 +595,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.platform", "gcp_cloud_functions"),
 				attribute.String("cloud.region", "utopia"),
-				attribute.String("faas.id", "bar"),
+				attribute.String("faas.instance", "bar"),
 				attribute.String("faas.name", "x-service"),
 				attribute.String("faas.version", "v1"),
 			),
@@ -613,7 +614,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				attribute.String("cloud.provider", "gcp"),
 				attribute.String("cloud.platform", "gcp_app_engine"),
 				attribute.String("cloud.availability_zone", "utopia"),
-				attribute.String("faas.id", "bar"),
+				attribute.String("faas.instance", "bar"),
 				attribute.String("faas.name", "x-service"),
 				attribute.String("faas.version", "v1"),
 			),
