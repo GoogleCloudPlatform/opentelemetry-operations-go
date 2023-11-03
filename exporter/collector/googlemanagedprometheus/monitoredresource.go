@@ -72,6 +72,9 @@ func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.Moni
 // getStringOrEmpty returns the value of the first key found, or the empty string.
 func getStringOrEmpty(attributes pcommon.Map, keys ...string) string {
 	for _, k := range keys {
+		// skip the attribute if it starts with unknown_service, since the SDK
+		// sets this by default. It is used as a fallback below if no other
+		// values are found.
 		if val, ok := attributes.Get(k); ok && !strings.HasPrefix(val.Str(), unknownServicePrefix) {
 			return val.Str()
 		}
