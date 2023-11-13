@@ -353,7 +353,7 @@ var MetricsTestCases = []TestCase{
 		ConfigureCollector: func(cfg *collector.Config) {
 			configureGMPCollector(cfg)
 			//nolint:errcheck
-			featuregate.GlobalRegistry().Set("gcp.untyped_double_export", true)
+			featuregate.GlobalRegistry().Set("gcp.untypedDoubleExport", true)
 		},
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,

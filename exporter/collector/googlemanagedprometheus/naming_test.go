@@ -178,7 +178,7 @@ func TestGetMetricName(t *testing.T) {
 			expected: "bar/gauge",
 		},
 		{
-			desc:     "untyped sum with gcp.untyped_double_export disabled only normalizes",
+			desc:     "untyped sum with gcp.untypedDoubleExport disabled only normalizes",
 			baseName: "bar",
 			metric: func(m pmetric.Metric) {
 				//nolint:errcheck
