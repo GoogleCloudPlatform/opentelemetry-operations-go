@@ -661,6 +661,7 @@ func projectName(projectID string) string {
 	return fmt.Sprintf("projects/%s", projectID)
 }
 
+// isNotRecoverable returns true if the error is permanent.
 func isNotRecoverable(err error) bool {
 	s := status.Convert(err)
 	return !(s.Code() == codes.DeadlineExceeded || s.Code() == codes.Unavailable)
