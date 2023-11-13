@@ -24,12 +24,14 @@ import (
 
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"github.com/google/go-cmp/cmp"
+	"github.com/googleapis/gax-go/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/wal"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
@@ -56,6 +58,120 @@ func newTestMetricMapper() (metricMapper, func()) {
 		cfg:        cfg,
 		normalizer: normalization.NewStandardNormalizer(s, zap.NewNop()),
 	}, func() { close(s) }
+}
+
+type mock struct {
+	monitoringClient
+	createMetricDescriptor func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest, opts ...gax.CallOption) (*metricpb.MetricDescriptor, error)
+}
+
+func (m *mock) CreateMetricDescriptor(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest, opts ...gax.CallOption) (*metricpb.MetricDescriptor, error) {
+	return m.createMetricDescriptor(ctx, req)
+}
+
+func TestExportCreateMetricDescriptorCache(t *testing.T) {
+	for _, tc := range []struct {
+		reqs                            []*monitoringpb.CreateMetricDescriptorRequest
+		desc                            string
+		createMetricDescriptorResponses []error
+		expectedTimesRequestCalled      int
+		expectedTimesZapCalled          int
+	}{
+		{
+			expectedTimesRequestCalled:      2,
+			expectedTimesZapCalled:          0,
+			desc:                            "valid metric descriptor gets created",
+			createMetricDescriptorResponses: []error{nil, nil},
+			reqs: []*monitoringpb.CreateMetricDescriptorRequest{
+				{
+					Name: "foo",
+					MetricDescriptor: &metricpb.MetricDescriptor{
+						Type: "goo",
+					},
+				},
+				{
+					Name: "bar",
+					MetricDescriptor: &metricpb.MetricDescriptor{
+						Type: "baz",
+					},
+				},
+			},
+		},
+		{
+			expectedTimesRequestCalled: 1,
+			expectedTimesZapCalled:     1,
+			desc:                       "non-recoverable error",
+			createMetricDescriptorResponses: []error{
+				status.Error(codes.PermissionDenied, "permission denied"),
+				status.Error(codes.PermissionDenied, "permission denied"),
+			},
+			reqs: []*monitoringpb.CreateMetricDescriptorRequest{
+				{
+					Name: "foo",
+					MetricDescriptor: &metricpb.MetricDescriptor{
+						Type: "goo",
+					},
+				},
+				{
+					Name: "foo",
+					MetricDescriptor: &metricpb.MetricDescriptor{
+						Type: "goo",
+					},
+				},
+			},
+		},
+		{
+			expectedTimesRequestCalled: 2,
+			expectedTimesZapCalled:     1,
+			desc:                       "recoverable error",
+			createMetricDescriptorResponses: []error{
+				status.Error(codes.DeadlineExceeded, "deadline exceeded"),
+				nil,
+			},
+			reqs: []*monitoringpb.CreateMetricDescriptorRequest{
+				{
+					Name: "foo",
+					MetricDescriptor: &metricpb.MetricDescriptor{
+						Type: "goo",
+					},
+				},
+				{
+					Name: "foo",
+					MetricDescriptor: &metricpb.MetricDescriptor{
+						Type: "goo",
+					},
+				},
+			},
+		},
+	} {
+		logger, observed := observer.New(zap.DebugLevel)
+
+		actualTimesCalled := 0
+		i := 0
+		m := &mock{
+			createMetricDescriptor: func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest, opts ...gax.CallOption) (*metricpb.MetricDescriptor, error) {
+				actualTimesCalled++
+				err := tc.createMetricDescriptorResponses[i]
+				i++
+				return req.MetricDescriptor, err
+			},
+		}
+
+		me := MetricsExporter{
+			mdCache: make(map[string]*monitoringpb.CreateMetricDescriptorRequest),
+			obs: selfObservability{
+				log: zap.New(logger),
+			},
+			client: m,
+		}
+
+		for _, r := range tc.reqs {
+			me.exportMetricDescriptor(r)
+		}
+
+		require.Len(t, observed.FilterLevelExact(zap.ErrorLevel).All(), tc.expectedTimesZapCalled)
+		require.Equal(t, tc.expectedTimesRequestCalled, actualTimesCalled)
+	}
 }
 
 func TestMetricToTimeSeries(t *testing.T) {

@@ -79,7 +79,7 @@ type MetricsExporter struct {
 	mdCache map[string]*monitoringpb.CreateMetricDescriptorRequest
 	// A channel that receives metric descriptor and sends them to GCM once
 	metricDescriptorC chan *monitoringpb.CreateMetricDescriptorRequest
-	client            *monitoring.MetricClient
+	client            monitoringClient
 	// Only used for testing purposes in lieu of initializing a fake client
 	exportFunc func(context.Context, *monitoringpb.CreateTimeSeriesRequest) error
 	// requestOpts applies options to the context for requests, such as additional headers.
@@ -136,6 +136,15 @@ const (
 )
 
 type labels map[string]string
+
+// monitoringClient is the subset of monitoring.MetricClient this exporter uses,
+// and allows us to mock the implementation for testing.
+type monitoringClient interface {
+	CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error
+	CreateServiceTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error
+	Close() error
+	CreateMetricDescriptor(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest, opts ...gax.CallOption) (*metricpb.MetricDescriptor, error)
+}
 
 func (me *MetricsExporter) Shutdown(ctx context.Context) error {
 	// TODO: pass ctx to goroutines so that we can use its deadline
@@ -471,8 +480,7 @@ func (me *MetricsExporter) readWALAndExport(ctx context.Context) error {
 				me.obs.log.Warn(fmt.Sprintf("error exporting to GCM: %+v", err))
 			}
 			// retry at same read index if retryable (network) error
-			s := status.Convert(err)
-			if !(s.Code() == codes.DeadlineExceeded || s.Code() == codes.Unavailable) {
+			if isNotRecoverable(err) {
 				break
 			}
 			me.obs.log.Error("retryable error, retrying request")
@@ -655,6 +663,12 @@ func projectName(projectID string) string {
 	return fmt.Sprintf("projects/%s", projectID)
 }
 
+// isNotRecoverable returns true if the error is permanent.
+func isNotRecoverable(err error) bool {
+	s := status.Convert(err)
+	return !(s.Code() == codes.DeadlineExceeded || s.Code() == codes.Unavailable)
+}
+
 // Helper method to send metric descriptors to GCM.
 func (me *MetricsExporter) exportMetricDescriptor(req *monitoringpb.CreateMetricDescriptorRequest) {
 	cacheKey := fmt.Sprintf("%s/%s", req.Name, req.MetricDescriptor.Type)
@@ -669,12 +683,16 @@ func (me *MetricsExporter) exportMetricDescriptor(req *monitoringpb.CreateMetric
 	}
 	_, err := me.client.CreateMetricDescriptor(ctx, req)
 	if err != nil {
+		if isNotRecoverable(err) {
+			// cache if the error is non-recoverable
+			me.mdCache[cacheKey] = req
+		}
 		// TODO: Log-once on error, per metric descriptor?
 		me.obs.log.Error("Unable to send metric descriptor.", zap.Error(err), zap.Any("metric_descriptor", req.MetricDescriptor))
 		return
 	}
 
-	// only cache if we are successful. We want to retry if there is an error
+	// cache if we are successful
 	me.mdCache[cacheKey] = req
 }
 
