@@ -79,7 +79,7 @@ type MetricsExporter struct {
 	mdCache map[string]*monitoringpb.CreateMetricDescriptorRequest
 	// A channel that receives metric descriptor and sends them to GCM once
 	metricDescriptorC chan *monitoringpb.CreateMetricDescriptorRequest
-	client            *monitoring.MetricClient
+	client            monitoringClient
 	// Only used for testing purposes in lieu of initializing a fake client
 	exportFunc func(context.Context, *monitoringpb.CreateTimeSeriesRequest) error
 	// requestOpts applies options to the context for requests, such as additional headers.
@@ -136,6 +136,13 @@ const (
 )
 
 type labels map[string]string
+
+type monitoringClient interface {
+	CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error
+	CreateServiceTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error
+	Close() error
+	CreateMetricDescriptor(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest, opts ...gax.CallOption) (*metricpb.MetricDescriptor, error)
+}
 
 func (me *MetricsExporter) Shutdown(ctx context.Context) error {
 	// TODO: pass ctx to goroutines so that we can use its deadline
