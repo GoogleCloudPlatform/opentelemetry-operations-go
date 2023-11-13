@@ -137,6 +137,8 @@ const (
 
 type labels map[string]string
 
+// monitoringClient is the subset of monitoring.MetricClient this exporter uses,
+// and allows us to mock the implementation for testing.
 type monitoringClient interface {
 	CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error
 	CreateServiceTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error
