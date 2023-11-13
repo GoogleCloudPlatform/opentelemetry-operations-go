@@ -71,16 +71,16 @@ func (m *mock) CreateMetricDescriptor(ctx context.Context, req *monitoringpb.Cre
 
 func TestExportCreateMetricDescriptorCache(t *testing.T) {
 	for _, tc := range []struct {
-		desc                            string
 		expectedTimesRequestCalled      int
 		expectedTimesZapCalled          int
-		reqs                            []*monitoringpb.CreateMetricDescriptorRequest
+		desc                            string
 		createMetricDescriptorResponses []error
+		reqs                            []*monitoringpb.CreateMetricDescriptorRequest
 	}{
 		{
-			desc:                            "valid metric descriptor gets created",
 			expectedTimesRequestCalled:      2,
 			expectedTimesZapCalled:          0,
+			desc:                            "valid metric descriptor gets created",
 			createMetricDescriptorResponses: []error{nil, nil},
 			reqs: []*monitoringpb.CreateMetricDescriptorRequest{
 				{
@@ -98,9 +98,9 @@ func TestExportCreateMetricDescriptorCache(t *testing.T) {
 			},
 		},
 		{
-			desc:                       "non-recoverable error",
 			expectedTimesRequestCalled: 1,
 			expectedTimesZapCalled:     1,
+			desc:                       "non-recoverable error",
 			createMetricDescriptorResponses: []error{
 				status.Error(codes.PermissionDenied, "permission denied"),
 				status.Error(codes.PermissionDenied, "permission denied"),
@@ -121,9 +121,9 @@ func TestExportCreateMetricDescriptorCache(t *testing.T) {
 			},
 		},
 		{
-			desc:                       "recoverable error",
 			expectedTimesRequestCalled: 2,
 			expectedTimesZapCalled:     1,
+			desc:                       "recoverable error",
 			createMetricDescriptorResponses: []error{
 				status.Error(codes.DeadlineExceeded, "deadline exceeded"),
 				nil,
