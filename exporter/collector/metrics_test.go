@@ -72,8 +72,8 @@ func (m *mock) CreateMetricDescriptor(ctx context.Context, req *monitoringpb.Cre
 func TestExportCreateMetricDescriptorCache(t *testing.T) {
 	for _, tc := range []struct {
 		reqs                            []*monitoringpb.CreateMetricDescriptorRequest
-		createMetricDescriptorResponses []error
 		desc                            string
+		createMetricDescriptorResponses []error
 		expectedTimesRequestCalled      int
 		expectedTimesZapCalled          int
 	}{
