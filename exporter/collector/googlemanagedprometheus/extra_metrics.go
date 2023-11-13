@@ -27,7 +27,7 @@ const (
 	// prometheus metric. Internal use only.
 	GCPOpsAgentUntypedMetricKey = "prometheus.googleapis.com/internal/untyped_metric"
 
-	gcpUntypedDoubleExportGateKey = "gcp.untyped_double_export"
+	gcpUntypedDoubleExportGateKey = "gcp.untypedDoubleExport"
 )
 
 var untypedDoubleExportFeatureGate = featuregate.GlobalRegistry().MustRegister(
