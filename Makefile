@@ -26,6 +26,9 @@ $(TOOLS)/%: | $(TOOLS)
 GOLANGCI_LINT = $(TOOLS)/golangci-lint
 $(TOOLS)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/cmd/golangci-lint
 
+GOVULNCHECK = $(TOOLS)/govulncheck
+$(TOOLS)/govulncheck: PACKAGE=golang.org/x/vuln/cmd/govulncheck
+
 MISSPELL = $(TOOLS)/misspell
 $(TOOLS)/misspell: PACKAGE=github.com/client9/misspell/cmd/misspell
 
@@ -138,7 +141,7 @@ test:
 	done
 
 .PHONY: lint
-lint: $(GOLANGCI_LINT) $(MISSPELL)
+lint: $(GOLANGCI_LINT) $(MISSPELL) govulncheck
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "golangci-lint in $${dir}"; \
 	  (cd "$${dir}" && \
@@ -147,9 +150,9 @@ lint: $(GOLANGCI_LINT) $(MISSPELL)
 	done
 	$(MISSPELL) -w $(ALL_DOCS)
 	set -e; for dir in $(ALL_GO_MOD_DIRS) $(TOOLS_MOD_DIR); do \
-	  echo "go mod tidy -compat=1.18 in $${dir}"; \
+	  echo "go mod tidy -compat=1.20 in $${dir}"; \
 	  (cd "$${dir}" && \
-	    go mod tidy -compat=1.18); \
+	    go mod tidy -compat=1.20); \
 	done
 
 generate: $(STRINGER) $(PROTOC)
@@ -177,6 +180,14 @@ for-all-package:
 	  	echo "running $${CMD} in $${dir}" && \
 	 	$${CMD} || true); \
 	done
+
+.PHONY: govulncheck
+govulncheck: $(ALL_GO_MOD_DIRS:%=govulncheck/%)
+govulncheck/%: DIR=$*
+govulncheck/%: | $(GOVULNCHECK)
+	@echo "govulncheck ./... in $(DIR)" \
+		&& cd $(DIR) \
+		&& $(GOVULNCHECK) ./...
 
 .PHONY: gotidy
 gotidy:

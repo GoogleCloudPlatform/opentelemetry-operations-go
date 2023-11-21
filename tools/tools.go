@@ -23,5 +23,6 @@ import (
 	_ "github.com/wadey/gocovmerge"
 	_ "golang.org/x/tools/cmd/stringer"
 	_ "golang.org/x/tools/go/analysis/passes/fieldalignment/cmd/fieldalignment"
+	_ "golang.org/x/vuln/cmd/govulncheck"
 	_ "google.golang.org/protobuf/cmd/protoc-gen-go"
 )
