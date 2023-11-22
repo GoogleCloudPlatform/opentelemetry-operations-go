@@ -14,7 +14,14 @@
 
 package collector
 
-import "testing"
+import (
+	"fmt"
+	"os"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
+)
 
 func TestValidateConfig(t *testing.T) {
 	for _, tc := range []struct {
@@ -83,4 +90,58 @@ func TestValidateConfig(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestFileTokenSource(t *testing.T) {
+	orig := readAndMarshallFile
+	fts := fileTokenSource{}
+	defer func() {
+		readAndMarshallFile = orig
+	}()
+
+	// Environment variable not defined error.
+	_, err := fts.Token()
+	require.EqualError(t, err, fmt.Errorf("%v not defined", accessTokenPath).Error())
+
+	err = os.Setenv(accessTokenPath, "foobar")
+	require.NoError(t, err)
+	defer func() {
+		err = os.Unsetenv(accessTokenPath)
+		require.NoError(t, err)
+	}()
+
+	// no accessToken.
+	readAndMarshallFile = func(filePath string) (map[string]string, error) {
+		require.Equal(t, "foobar", filePath)
+		return map[string]string{"": "foobar"}, nil
+	}
+	_, err = fts.Token()
+	require.EqualError(t, err, "accessToken field not present")
+
+	// no expireTime.
+	readAndMarshallFile = func(filePath string) (map[string]string, error) {
+		require.Equal(t, "foobar", filePath)
+		return map[string]string{"accessToken": "foobar"}, nil
+	}
+	_, err = fts.Token()
+	require.EqualError(t, err, "expireTime field not present")
+
+	// expireTime invalid format.
+	readAndMarshallFile = func(filePath string) (map[string]string, error) {
+		require.Equal(t, "foobar", filePath)
+		return map[string]string{"accessToken": "foobar", "expireTime": "2023-10-16"}, nil
+	}
+	_, err = fts.Token()
+	require.ErrorContains(t, err, "unable to parse expiry")
+
+	// success.
+	readAndMarshallFile = func(filePath string) (map[string]string, error) {
+		require.Equal(t, "foobar", filePath)
+		return map[string]string{"accessToken": "foobar", "expireTime": "2023-10-16T17:59:59Z"}, nil
+	}
+	token, err := fts.Token()
+	require.NoError(t, err)
+	expiry, _ := time.Parse(time.RFC3339, "2023-10-16T17:59:59Z")
+	require.Equal(t, "foobar", token.AccessToken)
+	require.Equal(t, expiry, token.Expiry)
 }

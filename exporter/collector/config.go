@@ -16,8 +16,10 @@ package collector
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -25,6 +27,7 @@ import (
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
@@ -36,6 +39,20 @@ import (
 
 const (
 	DefaultTimeout = 12 * time.Second // Consistent with Cloud Monitoring's timeout
+	// accessTokenPath is an environment variable that if present is the filepath
+	// where the collector will look for an access token to authenticate with.
+	// CLOUDSDK_AUTH_ACCESS_TOKEN is an environment variable used by the gcloud cli
+	// so the naming of this is in reference to that.
+	// Other gcp cloud SDKs have requested support for configuring the use of access tokens,
+	// see: https://github.com/googleapis/google-auth-library-python/issues/1165.
+	accessTokenPath = "CLOUDSDK_AUTH_ACCESS_TOKEN_PATH"
+	// accessTokenEarlyExpiry is an environment variable that if present is a duration that will
+	// control when the collector will reload the access token pointed to by accessTokenPath.
+	// For example, if the access token expires in 1h and the early expiry is set to 15m, then
+	// the collector will reload the access token in 45m. This is useful when you do not want
+	// to rely on the access token expiring in order to reload. If not set, then no early expiry
+	// is used for the token.
+	accessTokenEarlyExpiry        = "CLOUDSDK_AUTH_ACCESS_TOKEN_EARLY_EXPIRY"
 )
 
 // Config defines configuration for Google Cloud exporter.
@@ -275,7 +292,29 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 			copts = append(copts, option.WithEndpoint(clientCfg.Endpoint))
 		}
 	}
-	if cfg.ImpersonateConfig.TargetPrincipal != "" {
+	// If the accessTokenPath environment variable is defined, then use that
+	// for credentials.
+	accessTokenFilePath := os.Getenv(accessTokenPath)
+	if accessTokenFilePath != "" {
+		fts := fileTokenSource{}
+		if _, err := fts.Token(); err != nil {
+			return nil, fmt.Errorf("parsing access token file: %v", err)
+		}
+
+		// Check if an early expiration was specified.
+		var tokenSource oauth2.TokenSource
+		customExpiry := os.Getenv(accessTokenEarlyExpiry)
+		if customExpiry != "" {
+			e, err := time.ParseDuration(customExpiry)
+			if err != nil {
+				return nil, fmt.Errorf("parsing access token early expiry: %v", err)
+			}
+			tokenSource = oauth2.ReuseTokenSourceWithExpiry(nil, fts, e)
+		} else {
+			tokenSource = oauth2.ReuseTokenSource(nil, fts)
+		}
+		copts = append(copts, option.WithTokenSource(tokenSource))
+	} else if cfg.ImpersonateConfig.TargetPrincipal != "" {
 		if cfg.ProjectID == "" {
 			creds, err := google.FindDefaultCredentials(ctx, scopes...)
 			if err != nil {
@@ -316,4 +355,54 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 		return nil, errors.New("no project set in config, or found with application default credentials")
 	}
 	return copts, nil
+}
+
+
+type fileTokenSource struct {}
+
+func (fts fileTokenSource) Token() (*oauth2.Token, error) {
+	accessTokenFilePath := os.Getenv(accessTokenPath)
+	if accessTokenFilePath == "" {
+		return nil, fmt.Errorf("%v not defined", accessTokenPath)
+	}
+
+	t, err := readAndMarshallFile(accessTokenFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if _, ok := t["accessToken"]; !ok {
+		return nil, errors.New("accessToken field not present")
+	}
+	if _, ok := t["expireTime"]; !ok {
+		return nil, errors.New("expireTime field not present")
+	}
+	accessToken := t["accessToken"]
+
+	expiry, err := time.Parse(time.RFC3339, t["expireTime"])
+	if err != nil {
+		return nil, fmt.Errorf("unable to parse expiry: %v", err)
+	}
+
+	token := &oauth2.Token{
+		AccessToken: accessToken,
+		Expiry: expiry,
+	}
+
+	return token, nil
+}
+
+// hook for testing.
+var readAndMarshallFile = func(filePath string) (map[string]string, error) {
+	tokenFile, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("reading file %v", filePath)
+	}
+
+	var t map[string]string
+	if err = json.Unmarshal(tokenFile, &t); err != nil {
+		return nil, errors.New("unmarshalling token")
+	}
+
+	return t, nil
 }
