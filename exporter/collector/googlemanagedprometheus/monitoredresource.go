@@ -48,6 +48,28 @@ var promTargetKeys = map[string][]string{
 	instanceLabel:         {instanceLabel, semconv.AttributeServiceInstanceID, semconv.AttributeFaaSInstance},
 }
 
+// According to Cloud Monitoring docs, there are special values for
+// cluser in some runtimes.
+// See: https://cloud.google.com/stackdriver/docs/managed-prometheus/setup-opsagent
+func (c Config) getClusterNameByEnvironment(res pcommon.Resource) string {
+	attrs := res.Attributes()
+
+	if !c.UseEnvironmentClusterNames {
+		return getStringOrEmpty(attrs, promTargetKeys[clusterLabel]...)
+	}
+
+	cloudPlatform := getStringOrEmpty(attrs, semconv.AttributeCloudPlatform)
+	switch cloudPlatform {
+	case semconv.AttributeCloudPlatformGCPComputeEngine:
+		return "__gce__"
+	case semconv.AttributeCloudPlatformGCPCloudRun:
+		return "__run__"
+	default:
+		// No special rules, look up cluster as normal.
+		return getStringOrEmpty(attrs, promTargetKeys[clusterLabel]...)
+	}
+}
+
 func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
 	attrs := res.Attributes()
 	// Prepend namespace if it exists to match what is specified in
@@ -61,7 +83,7 @@ func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.Moni
 		Type: "prometheus_target",
 		Labels: map[string]string{
 			locationLabel:  getStringOrEmpty(attrs, promTargetKeys[locationLabel]...),
-			clusterLabel:   getStringOrEmpty(attrs, promTargetKeys[clusterLabel]...),
+			clusterLabel:   c.getClusterNameByEnvironment(res),
 			namespaceLabel: getStringOrEmpty(attrs, promTargetKeys[namespaceLabel]...),
 			jobLabel:       job,
 			instanceLabel:  getStringOrEmpty(attrs, promTargetKeys[instanceLabel]...),
