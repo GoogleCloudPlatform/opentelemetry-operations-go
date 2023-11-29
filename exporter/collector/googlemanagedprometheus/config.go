@@ -21,9 +21,6 @@ type Config struct {
 	AddMetricSuffixes bool `mapstructure:"add_metric_suffixes"`
 	// ExtraMetricsConfig configures the target_info and otel_scope_info metrics.
 	ExtraMetricsConfig ExtraMetricsConfig `mapstructure:"extra_metrics_config"`
-	// UseEnvironmentClusterNames controls whether cluster names "__run__" and "__gce__" are used on
-	// these environments.
-	UseEnvironmentClusterNames bool `mapstructure:"use_environment_cluster_names"`
 }
 
 // ExtraMetricsConfig controls the inclusion of additional metrics.
@@ -41,7 +38,6 @@ func DefaultConfig() Config {
 			EnableTargetInfo: true,
 			EnableScopeInfo:  true,
 		},
-		UseEnvironmentClusterNames: true,
 	}
 }
 
