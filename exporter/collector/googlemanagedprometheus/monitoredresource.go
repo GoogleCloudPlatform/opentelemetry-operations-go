@@ -61,7 +61,7 @@ func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.Moni
 		Type: "prometheus_target",
 		Labels: map[string]string{
 			locationLabel:  getStringOrEmpty(attrs, promTargetKeys[locationLabel]...),
-			clusterLabel:   getStringOrEmpty(attrs, promTargetKeys[clusterLabel]...),
+			clusterLabel:   getStringOrDefaultClusterName(attrs, promTargetKeys[clusterLabel]...),
 			namespaceLabel: getStringOrEmpty(attrs, promTargetKeys[namespaceLabel]...),
 			jobLabel:       job,
 			instanceLabel:  getStringOrEmpty(attrs, promTargetKeys[instanceLabel]...),
@@ -69,8 +69,23 @@ func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.Moni
 	}
 }
 
-// getStringOrEmpty returns the value of the first key found, or the empty string.
-func getStringOrEmpty(attributes pcommon.Map, keys ...string) string {
+// According to Cloud Monitoring docs, there are special values for
+// cluser in some runtimes.
+// See: https://cloud.google.com/stackdriver/docs/managed-prometheus/setup-opsagent
+func getStringOrDefaultClusterName(attrs pcommon.Map, keys ...string) string {
+	defaultClusterName := ""
+	cloudPlatform := getStringOrEmpty(attrs, semconv.AttributeCloudPlatform)
+	switch cloudPlatform {
+	case semconv.AttributeCloudPlatformGCPComputeEngine:
+		defaultClusterName = "__gce__"
+	case semconv.AttributeCloudPlatformGCPCloudRun:
+		defaultClusterName = "__run__"
+	}
+	return getStringOrDefault(attrs, defaultClusterName, promTargetKeys[clusterLabel]...)
+}
+
+// getStringOrEmpty returns the value of the first key found, or the orElse string.
+func getStringOrDefault(attributes pcommon.Map, orElse string, keys ...string) string {
 	for _, k := range keys {
 		// skip the attribute if it starts with unknown_service, since the SDK
 		// sets this by default. It is used as a fallback below if no other
@@ -85,7 +100,12 @@ func getStringOrEmpty(attributes pcommon.Map, keys ...string) string {
 			return val.Str()
 		}
 	}
-	return ""
+	return orElse
+}
+
+// getStringOrEmpty returns the value of the first key found, or the empty string.
+func getStringOrEmpty(attributes pcommon.Map, keys ...string) string {
+	return getStringOrDefault(attributes, "", keys...)
 }
 
 func contains(list []string, element string) bool {
