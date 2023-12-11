@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"math"
 	"net/url"
 	"reflect"
@@ -643,8 +644,17 @@ func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]
 				},
 			},
 		},
-		// TODO: support exemplars
+		Exemplars: toDistributionExemplar[N](hist.Exemplars),
 	}
+}
+
+func toDistributionExemplar[N int64 | float64](Exemplars []metricdata.Exemplar[N]) []*distribution.Distribution_Exemplar {
+	var exemplars []*distribution.Distribution_Exemplar
+	log.Printf("Exemplar Size : %d", len(Exemplars))
+	for _, e := range Exemplars {
+		exemplars = append(exemplars, &distribution.Distribution_Exemplar{Value: float64(e.Value), Timestamp: timestamppb.New(e.Time)})
+	}
+	return exemplars
 }
 
 func setSumOfSquaredDeviation[N int64 | float64](hist metricdata.HistogramDataPoint[N], dist *distribution.Distribution) {
@@ -662,6 +672,25 @@ func setSumOfSquaredDeviation[N int64 | float64](hist metricdata.HistogramDataPo
 	if len(dist.BucketCounts) > 0 {
 		dist.SumOfSquaredDeviation += float64(dist.BucketCounts[len(dist.BucketCounts)-1]) * (middleOfInfBucket - dist.Mean) * (middleOfInfBucket - dist.Mean)
 	}
+}
+
+func exemplarToValue[N int64 | float64](
+	exemplar metricdata.Exemplar[N],
+) (*monitoringpb.TypedValue, googlemetricpb.MetricDescriptor_ValueType) {
+	switch v := any(exemplar.Value).(type) {
+	case int64:
+		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
+				Int64Value: v,
+			}},
+			googlemetricpb.MetricDescriptor_INT64
+	case float64:
+		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
+				DoubleValue: v,
+			}},
+			googlemetricpb.MetricDescriptor_DOUBLE
+	}
+	// It is impossible to reach this statement
+	return nil, googlemetricpb.MetricDescriptor_INT64
 }
 
 func numberDataPointToValue[N int64 | float64](
