@@ -22,6 +22,7 @@ import (
 	"math"
 	"net/url"
 	"reflect"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -506,6 +507,16 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
+	case metricdata.ExponentialHistogram[float64]:
+		for _, point := range a.DataPoints {
+			ts, err := expHistogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			tss = append(tss, ts)
+		}
 	default:
 		errs = append(errs, errUnexpectedAggregationKind{kind: reflect.TypeOf(m.Data).String()})
 	}
@@ -601,6 +612,31 @@ func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoin
 	}, nil
 }
 
+func expHistogramToTimeSeries[N int64 | float64](point metricdata.ExponentialHistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource, enableSOSD bool) (*monitoringpb.TimeSeries, error) {
+	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
+	if err != nil {
+		return nil, err
+	}
+	distributionValue := expHistToDistribution(point)
+	// if enableSOSD {
+	//	setSumOfSquaredDeviation(point, distributionValue)
+	// }
+	return &monitoringpb.TimeSeries{
+		Resource:   mr,
+		Unit:       string(metrics.Unit),
+		MetricKind: googlemetricpb.MetricDescriptor_CUMULATIVE,
+		ValueType:  googlemetricpb.MetricDescriptor_DISTRIBUTION,
+		Points: []*monitoringpb.Point{{
+			Interval: interval,
+			Value: &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_DistributionValue{
+					DistributionValue: distributionValue,
+				},
+			},
+		}},
+	}, nil
+}
+
 func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval, error) {
 	// The end time of a new interval must be at least a millisecond after the end time of the
 	// previous interval, for all non-gauge types.
@@ -626,6 +662,8 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 
 func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]) *distribution.Distribution {
 	counts := make([]int64, len(hist.BucketCounts))
+	log.Printf("Exemplar Size : %d", len(hist.Exemplars))
+	log.Println(hist.Bounds)
 	for i, v := range hist.BucketCounts {
 		counts[i] = int64(v)
 	}
@@ -648,14 +686,66 @@ func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]
 	}
 }
 
+func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N]) *distribution.Distribution {
+	numBuckets := hist.PositiveBucket.Offset + int32(len(hist.PositiveBucket.Counts))
+	counts := make([]int64, numBuckets)
+	// log.Printf("Exemplar Size : %d", len(hist.Exemplars))
+	// log.Println(hist.PositiveBucket.Counts)
+	for i := 0; i < int(numBuckets); i++ {
+		if i < int(hist.PositiveBucket.Offset) {
+			counts[i] = 0
+		} else {
+			counts[i] = int64(hist.PositiveBucket.Counts[i-int(hist.PositiveBucket.Offset)])
+		}
+	}
+	var mean float64
+	if !math.IsNaN(float64(hist.Sum)) && hist.Count > 0 { // Avoid divide-by-zero
+		mean = float64(hist.Sum) / float64(hist.Count)
+	}
+	return &distribution.Distribution{
+		Count:        int64(hist.Count),
+		Mean:         mean,
+		BucketCounts: counts,
+		BucketOptions: &distribution.Distribution_BucketOptions{
+			Options: &distribution.Distribution_BucketOptions_ExponentialBuckets{
+				ExponentialBuckets: &distribution.Distribution_BucketOptions_Exponential{
+					Scale:            1,
+					GrowthFactor:     math.Exp2(math.Exp2(-float64(hist.Scale))),
+					NumFiniteBuckets: numBuckets,
+				},
+			},
+		},
+		Exemplars: toDistributionExemplar[N](hist.Exemplars),
+	}
+}
+
 func toDistributionExemplar[N int64 | float64](Exemplars []metricdata.Exemplar[N]) []*distribution.Distribution_Exemplar {
 	var exemplars []*distribution.Distribution_Exemplar
-	log.Printf("Exemplar Size : %d", len(Exemplars))
 	for _, e := range Exemplars {
 		exemplars = append(exemplars, &distribution.Distribution_Exemplar{Value: float64(e.Value), Timestamp: timestamppb.New(e.Time)})
 	}
+	sort.Slice(exemplars, func(i, j int) bool {
+		return exemplars[i].Value < exemplars[j].Value
+	})
 	return exemplars
 }
+
+// func setSumOfSquaredDeviationExpHist[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N], dist *distribution.Distribution) {
+// 	var prevBound float64
+// 	// Calculate the sum of squared deviation.
+// 	for i := 0; i < len(hist.PositiveBucket.Counts); i++ {
+// 		// Assume all points in the bucket occur at the middle of the bucket range
+// 		middleOfBucket := (prevBound + hist.Po[i]) / 2
+// 		dist.SumOfSquaredDeviation += float64(dist.BucketCounts[i]) * (middleOfBucket - dist.Mean) * (middleOfBucket - dist.Mean)
+// 		prevBound = hist.Bounds[i]
+// 	}
+// 	// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
+// 	// Assume points in the infinity bucket are at the top of the previous bucket
+// 	middleOfInfBucket := prevBound
+// 	if len(dist.BucketCounts) > 0 {
+// 		dist.SumOfSquaredDeviation += float64(dist.BucketCounts[len(dist.BucketCounts)-1]) * (middleOfInfBucket - dist.Mean) * (middleOfInfBucket - dist.Mean)
+// 	}
+// }
 
 func setSumOfSquaredDeviation[N int64 | float64](hist metricdata.HistogramDataPoint[N], dist *distribution.Distribution) {
 	var prevBound float64
