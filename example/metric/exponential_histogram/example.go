@@ -18,20 +18,23 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
+	"gonum.org/v1/gonum/stat"
+	"gonum.org/v1/gonum/stat/distuv"
 
 	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	api "go.opentelemetry.io/otel/metric"
-	"go.opentelemetry.io/otel/sdk/instrumentation"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.21.0"
-	"gonum.org/v1/gonum/stat"
-	"gonum.org/v1/gonum/stat/distuv"
 )
 
 func workloadMetricsPrefixFormatter(d metricdata.Metrics) string {
@@ -63,8 +66,8 @@ func main() {
 
 	view := sdkmetric.NewView(
 		sdkmetric.Instrument{
-			Name:  "latency",
-			Scope: instrumentation.Scope{Name: "http"},
+			Name: "latency_a",
+			// Scope: instrumentation.Scope{Name: "http"},
 		},
 		sdkmetric.Stream{
 			Aggregation: sdkmetric.AggregationBase2ExponentialHistogram{
@@ -77,7 +80,12 @@ func main() {
 	// initialize a MeterProvider with that periodically exports to the GCP exporter.
 	provider := sdkmetric.NewMeterProvider(
 		sdkmetric.WithView(view),
-		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exporter)),
+		sdkmetric.WithReader(
+			sdkmetric.NewPeriodicReader(
+				exporter,
+				sdkmetric.WithInterval(10*time.Second),
+			),
+		),
 		sdkmetric.WithResource(res),
 	)
 	defer func() {
@@ -90,34 +98,59 @@ func main() {
 	meter := provider.Meter("github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric")
 
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
+	explicitBuckets := make([]float64, 35)
+	for i := 0; i < 35; i++ {
+		explicitBuckets[i] = float64(i*10 + 10)
+	}
 	histogram, err := meter.Float64Histogram(
-		"latency",
+		"latency_b",
 		api.WithDescription("description"),
-		//api.WithExplicitBucketBoundaries(-10, -9, -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10),
+		api.WithExplicitBucketBoundaries(explicitBuckets...),
 	)
 	if err != nil {
 		log.Fatalf("Failed to create histogram: %v", err)
 	}
 
-	// Add measurement once an every 10 second.
-	points := 10000
-	timer := time.NewTicker(10 * time.Second)
-	for range timer.C {
+	_, err = meter.Float64ObservableGauge(
+		"latency_a",
+		metric.WithDescription(
+			"Latency",
+		),
+		metric.WithUnit("ms"),
+		metric.WithFloat64Callback(func(_ context.Context, o metric.Float64Observer) error {
 
-		// Create a normal distribution
-		dist := distuv.LogNormal{
-			Mu:    4,
-			Sigma: .5,
-		}
+			points := 1000
 
-		data := make([]float64, points)
+			// Create a log normal distribution to simulate latency
+			// from server response.
+			dist := distuv.LogNormal{
+				Mu:    4,
+				Sigma: .5,
+			}
 
-		// Draw some random values from the standard normal distribution
-		for i := range data {
-			data[i] = dist.Rand()
-			histogram.Record(ctx, data[i], api.WithAttributes(clabels...))
-		}
-		mean, std := stat.MeanStdDev(data, nil)
-		log.Printf("Sent : #points %d , mean %v, sdv %v", points, mean, std)
+			data := make([]float64, points)
+
+			// Draw some random values from the log normal distribution
+			for i := range data {
+				data[i] = dist.Rand()
+
+				// Gauge aggregated to exponential histogram
+				o.Observe(data[i], api.WithAttributes(clabels...))
+
+				// Explicit histogram
+				histogram.Record(ctx, data[i], api.WithAttributes(clabels...))
+			}
+			mean, std := stat.MeanStdDev(data, nil)
+			log.Printf("Sent : #points %d , mean %v, sdv %v", points, mean, std)
+			return nil
+		}),
+	)
+	if err != nil {
+		log.Fatalf("Failed to create gauge: %v", err)
 	}
+
+	// Wait for interrupt
+	var stopChan = make(chan os.Signal, 2)
+	signal.Notify(stopChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+	<-stopChan
 }
