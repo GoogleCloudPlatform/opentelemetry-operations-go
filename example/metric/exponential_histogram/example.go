@@ -64,12 +64,18 @@ func main() {
 		log.Fatalf("Failed to create exporter: %v", err)
 	}
 
-	view := sdkmetric.NewView(
+	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
+	explicitBuckets := make([]float64, 35)
+	for i := 0; i < 35; i++ {
+		explicitBuckets[i] = float64(i*10 + 10)
+	}
+
+	view_a := sdkmetric.NewView(
 		sdkmetric.Instrument{
-			Name: "latency_a",
-			// Scope: instrumentation.Scope{Name: "http"},
+			Name: "latency",
 		},
 		sdkmetric.Stream{
+			Name: "latency_a",
 			Aggregation: sdkmetric.AggregationBase2ExponentialHistogram{
 				MaxSize:  160,
 				MaxScale: 20,
@@ -77,9 +83,22 @@ func main() {
 		},
 	)
 
+	view_b := sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Name: "latency",
+		},
+		sdkmetric.Stream{
+			Name: "latency_b",
+			Aggregation: sdkmetric.AggregationExplicitBucketHistogram{
+				Boundaries: explicitBuckets,
+			},
+		},
+	)
+
 	// initialize a MeterProvider with that periodically exports to the GCP exporter.
 	provider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithView(view),
+		sdkmetric.WithView(view_a),
+		sdkmetric.WithView(view_b),
 		sdkmetric.WithReader(
 			sdkmetric.NewPeriodicReader(
 				exporter,
@@ -97,22 +116,8 @@ func main() {
 	// Create a meter with which we will record metrics for our package.
 	meter := provider.Meter("github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric")
 
-	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
-	explicitBuckets := make([]float64, 35)
-	for i := 0; i < 35; i++ {
-		explicitBuckets[i] = float64(i*10 + 10)
-	}
-	histogram, err := meter.Float64Histogram(
-		"latency_b",
-		api.WithDescription("description"),
-		api.WithExplicitBucketBoundaries(explicitBuckets...),
-	)
-	if err != nil {
-		log.Fatalf("Failed to create histogram: %v", err)
-	}
-
 	_, err = meter.Float64ObservableGauge(
-		"latency_a",
+		"latency",
 		metric.WithDescription(
 			"Latency",
 		),
@@ -134,11 +139,8 @@ func main() {
 			for i := range data {
 				data[i] = dist.Rand()
 
-				// Gauge aggregated to exponential histogram
+				// Gauge metric observation
 				o.Observe(data[i], api.WithAttributes(clabels...))
-
-				// Explicit histogram
-				histogram.Record(ctx, data[i], api.WithAttributes(clabels...))
 			}
 			mean, std := stat.MeanStdDev(data, nil)
 			log.Printf("Sent : #points %d , mean %v, sdv %v", points, mean, std)
