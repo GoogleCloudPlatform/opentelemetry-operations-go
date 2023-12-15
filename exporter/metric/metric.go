@@ -662,8 +662,8 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 
 func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]) *distribution.Distribution {
 	counts := make([]int64, len(hist.BucketCounts))
-	log.Printf("Exemplar Size : %d", len(hist.Exemplars))
-	log.Println(hist.Bounds)
+	log.Printf("Explicit Histogram - # Exemplars : %d", len(hist.Exemplars))
+	log.Printf("Explicit Histogram - Buckets : %v", hist.Bounds)
 	for i, v := range hist.BucketCounts {
 		counts[i] = int64(v)
 	}
@@ -687,31 +687,37 @@ func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]
 }
 
 func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N]) *distribution.Distribution {
-	numBuckets := hist.PositiveBucket.Offset + int32(len(hist.PositiveBucket.Counts))
+	numBuckets := len(hist.PositiveBucket.Counts)
 	counts := make([]int64, numBuckets)
-	// log.Printf("Exemplar Size : %d", len(hist.Exemplars))
-	// log.Println(hist.PositiveBucket.Counts)
+	positiveCounts := 0
+	negativeCounts := 0
+	growthFactor := math.Exp2(math.Exp2(-float64(hist.Scale)))
+	log.Printf("Exponential Histogram - # Exemplars : %d", len(hist.Exemplars))
+
 	for i := 0; i < int(numBuckets); i++ {
-		if i < int(hist.PositiveBucket.Offset) {
-			counts[i] = 0
-		} else {
-			counts[i] = int64(hist.PositiveBucket.Counts[i-int(hist.PositiveBucket.Offset)])
-		}
+		counts[i] = int64(hist.PositiveBucket.Counts[i])
 	}
+	for _, v := range hist.PositiveBucket.Counts {
+		positiveCounts += int(v)
+	}
+	for _, v := range hist.NegativeBucket.Counts {
+		negativeCounts += int(v)
+	}
+	tCount := positiveCounts + negativeCounts
 	var mean float64
 	if !math.IsNaN(float64(hist.Sum)) && hist.Count > 0 { // Avoid divide-by-zero
-		mean = float64(hist.Sum) / float64(hist.Count)
+		mean = float64(hist.Sum) / float64(tCount)
 	}
 	return &distribution.Distribution{
-		Count:        int64(hist.Count),
+		Count:        int64(tCount),
 		Mean:         mean,
 		BucketCounts: counts,
 		BucketOptions: &distribution.Distribution_BucketOptions{
 			Options: &distribution.Distribution_BucketOptions_ExponentialBuckets{
 				ExponentialBuckets: &distribution.Distribution_BucketOptions_Exponential{
-					Scale:            1,
-					GrowthFactor:     math.Exp2(math.Exp2(-float64(hist.Scale))),
-					NumFiniteBuckets: numBuckets,
+					Scale:            math.Pow(growthFactor, float64(hist.PositiveBucket.Offset)),
+					GrowthFactor:     growthFactor,
+					NumFiniteBuckets: int32(numBuckets),
 				},
 			},
 		},
