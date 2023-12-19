@@ -1043,6 +1043,31 @@ func TestZeroCountExponentialHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, int32(3), hdp.BucketOptions.GetExponentialBuckets().NumFiniteBuckets)
 }
 
+func TestExemplarSorted(t *testing.T) {
+	mapper, shutdown := newTestMetricMapper()
+	defer shutdown()
+	exemplars := pmetric.NewExemplarSlice()
+
+	exemplar := exemplars.AppendEmpty()
+	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(start))
+	exemplar.SetDoubleValue(2)
+
+	exemplar2 := exemplars.AppendEmpty()
+	exemplar2.SetTimestamp(pcommon.NewTimestampFromTime(start))
+	exemplar2.SetDoubleValue(1)
+
+	exemplar3 := exemplars.AppendEmpty()
+	exemplar3.SetTimestamp(pcommon.NewTimestampFromTime(start))
+	exemplar3.SetDoubleValue(3)
+
+	result := mapper.exemplars(exemplars, mapper.cfg.ProjectID)
+	assert.Equal(t, len(result), 3)
+	// Ensure exemplars are in value order.
+	assert.Equal(t, float64(1), result[0].Value)
+	assert.Equal(t, float64(2), result[1].Value)
+	assert.Equal(t, float64(3), result[2].Value)
+}
+
 func TestExemplarNoAttachements(t *testing.T) {
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
