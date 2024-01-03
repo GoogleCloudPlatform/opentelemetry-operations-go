@@ -26,6 +26,7 @@ import (
 	"net/url"
 	"path"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -927,6 +928,10 @@ func (m *metricMapper) exemplars(exs pmetric.ExemplarSlice, projectID string) []
 	for i := 0; i < exs.Len(); i++ {
 		exemplars[i] = m.exemplar(exs.At(i), projectID)
 	}
+	sort.Slice(exemplars, func(i, j int) bool {
+		return exemplars[i].Value < exemplars[j].Value
+	})
+
 	return exemplars
 }
 
