@@ -197,13 +197,13 @@ gotidy:
 update-dep:
 	$(MAKE) for-all-mod CMD="$(PWD)/internal/buildscripts/update-dep"
 
-STABLE_OTEL_VERSION=v1.19.0
-UNSTABLE_OTEL_VERSION=v0.42.0
-STABLE_CONTRIB_OTEL_VERSION=v1.19.0
-UNSTABLE_CONTRIB_OTEL_VERSION=v0.44.0
-STABLE_COLLECTOR_VERSION=v1.0.0-rcv0015
-UNSTABLE_COLLECTOR_VERSION=v0.86.0
-UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.86.0
+STABLE_OTEL_VERSION=v1.21.0
+UNSTABLE_OTEL_VERSION=v0.44.0
+STABLE_CONTRIB_OTEL_VERSION=v1.21.1
+UNSTABLE_CONTRIB_OTEL_VERSION=v0.46.1
+STABLE_COLLECTOR_VERSION=v1.0.0
+UNSTABLE_COLLECTOR_VERSION=v0.91.0
+UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.91.0
 
 .PHONY: update-otel
 update-otel:
@@ -218,8 +218,10 @@ update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/detectors/gcp VERSION=$(STABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector VERSION=$(UNSTABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/featuregate VERSION=$(STABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/semconv VERSION=$(UNSTABLE_COLLECTOR_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/otelcol VERSION=$(UNSTABLE_COLLECTOR_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/extension/auth VERSION=$(UNSTABLE_COLLECTOR_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/featuregate VERSION=$(STABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/pdata VERSION=$(STABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus VERSION=$(UNSTABLE_COLLECTOR_CONTRIB_VERSION)
 	$(MAKE) gotidy
@@ -239,3 +241,9 @@ release: prepare-release check-clean-work-tree
 fixtures:
 	cd ./exporter/collector/integrationtest && \
 	go run cmd/recordfixtures/main.go
+
+.PHONY: go-work
+go-work:
+	go work init
+	go work use -r .
+	go work sync
