@@ -2961,5 +2961,5 @@
       }
     ]
   },
-  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.58.3"
+  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.59.0"
 }

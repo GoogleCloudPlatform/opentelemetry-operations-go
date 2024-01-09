@@ -13,3 +13,5 @@ coverage.*
 /example/metric/collector/collector
 /example/metric/sdk/metrics
 /example/metric/sdk/sdk
+go.work
+go.work.sum
