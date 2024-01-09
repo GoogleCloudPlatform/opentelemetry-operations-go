@@ -423,6 +423,32 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log with sourceLocation (string)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutStr(
+					SourceLocationAttributeKey,
+					`{"file": "test.php", "line":100, "function":"helloWorld"}`,
+				)
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					SourceLocation: &logpb.LogEntrySourceLocation{
+						File:     "test.php",
+						Line:     100,
+						Function: "helloWorld",
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
 			name: "log with traceSampled (bool)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
