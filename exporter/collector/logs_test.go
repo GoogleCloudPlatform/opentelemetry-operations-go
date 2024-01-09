@@ -371,7 +371,6 @@ func TestLogMapping(t *testing.T) {
 			},
 		},
 		{
-			// TODO(damemi): parse/test sourceLocation from more than just bytes values
 			name: "log with sourceLocation (bytes)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
@@ -395,6 +394,21 @@ func TestLogMapping(t *testing.T) {
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with bad source location (bytes)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutEmptyBytes(SourceLocationAttributeKey).FromRaw(
+					[]byte(`{"file": 100}`),
+				)
+				return log
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			expectError:  true,
 		},
 		{
 			name: "log with sourceLocation (map)",
@@ -423,6 +437,20 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log with bad source location (map)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				sourceLocationMap := log.Attributes().PutEmptyMap(SourceLocationAttributeKey)
+				sourceLocationMap.PutStr("line", "100")
+				return log
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			expectError:  true,
+		},
+		{
 			name: "log with sourceLocation (string)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
@@ -447,6 +475,22 @@ func TestLogMapping(t *testing.T) {
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with bad source location (string)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutStr(
+					SourceLocationAttributeKey,
+					`{"file": 100}`,
+				)
+				return log
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			expectError:  true,
 		},
 		{
 			name: "log with traceSampled (bool)",
