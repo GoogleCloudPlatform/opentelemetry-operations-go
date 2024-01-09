@@ -164,8 +164,8 @@ func TestLogMapping(t *testing.T) {
 				log := plog.NewLogRecord()
 				log.Body().SetEmptyMap().PutStr("message", "hello!")
 				log.Attributes().PutEmptyBytes(HTTPRequestAttributeKey).FromRaw([]byte(`{
-						"requestMethod": "GET", 
-						"requestURL": "https://www.example.com", 
+						"requestMethod": "GET",
+						"requestURL": "https://www.example.com",
 						"requestSize": "1",
 						"status": "200",
 						"responseSize": "1",
@@ -381,6 +381,32 @@ func TestLogMapping(t *testing.T) {
 				log.Attributes().PutEmptyBytes(SourceLocationAttributeKey).FromRaw(
 					[]byte(`{"file": "test.php", "line":100, "function":"helloWorld"}`),
 				)
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					SourceLocation: &logpb.LogEntrySourceLocation{
+						File:     "test.php",
+						Line:     100,
+						Function: "helloWorld",
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with sourceLocation (map)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				sourceLocationMap := log.Attributes().PutEmptyMap(SourceLocationAttributeKey)
+				sourceLocationMap.PutStr("file", "test.php")
+				sourceLocationMap.PutInt("line", 100)
+				sourceLocationMap.PutStr("function", "helloWorld")
 				return log
 			},
 			expectedEntries: []*logpb.LogEntry{

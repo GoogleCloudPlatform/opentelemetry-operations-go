@@ -393,8 +393,16 @@ func (l logMapper) logToSplitEntries(
 
 	// parse LogEntrySourceLocation struct from OTel attribute
 	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
+		var sourceLocationBytes []byte
+		switch sourceLocation.Type() {
+		case pcommon.ValueTypeBytes:
+			sourceLocationBytes = sourceLocation.Bytes().AsRaw()
+		case pcommon.ValueTypeMap, pcommon.ValueTypeStr:
+			sourceLocationStr := sourceLocation.AsString()
+			sourceLocationBytes = []byte(sourceLocationStr)
+		}
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
-		err := json.Unmarshal(sourceLocation.Bytes().AsRaw(), &logEntrySourceLocation)
+		err := json.Unmarshal(sourceLocationBytes, &logEntrySourceLocation)
 		if err != nil {
 			return nil, err
 		}
