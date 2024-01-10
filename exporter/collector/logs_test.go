@@ -63,14 +63,14 @@ func TestLogMapping(t *testing.T) {
 	logName := "projects/fakeprojectid/logs/default-log"
 
 	testCases := []struct {
+		expectedError   error
+		expectError     bool
 		log             func() plog.LogRecord
 		mr              func() *monitoredrespb.MonitoredResource
 		config          Option
 		name            string
 		expectedEntries []*logpb.LogEntry
 		maxEntrySize    int
-		expectError     bool
-		expectedError   error
 	}{
 		{
 			name:         "split entry size",

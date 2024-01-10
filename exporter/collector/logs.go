@@ -654,15 +654,15 @@ func fixUTF8(s string) string {
 }
 
 func bytesFromValue(v pcommon.Value) ([]byte, error) {
-	var bytes []byte
+	var valueBytes []byte
 	var err error
 	switch v.Type() {
 	case pcommon.ValueTypeBytes:
-		bytes = v.Bytes().AsRaw()
+		valueBytes = v.Bytes().AsRaw()
 	case pcommon.ValueTypeMap, pcommon.ValueTypeStr:
-		bytes = []byte(v.AsString())
+		valueBytes = []byte(v.AsString())
 	default:
 		err = &UnsupportedValueTypeError{ValueType: v.Type()}
 	}
-	return bytes, err
+	return valueBytes, err
 }
