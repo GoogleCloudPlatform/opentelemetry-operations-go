@@ -70,6 +70,7 @@ func TestLogMapping(t *testing.T) {
 		expectedEntries []*logpb.LogEntry
 		maxEntrySize    int
 		expectError     bool
+		expectedError   error
 	}{
 		{
 			name:         "split entry size",
@@ -371,7 +372,7 @@ func TestLogMapping(t *testing.T) {
 			},
 		},
 		{
-			name: "log with sourceLocation (bytes)",
+			name: "log with valid sourceLocation (bytes)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -396,7 +397,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with bad source location (bytes)",
+			name: "log with invalid sourceLocation (bytes)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -411,7 +412,7 @@ func TestLogMapping(t *testing.T) {
 			expectError:  true,
 		},
 		{
-			name: "log with sourceLocation (map)",
+			name: "log with valid sourceLocation (map)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -437,7 +438,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with bad source location (map)",
+			name: "log with invalid sourceLocation (map)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -451,7 +452,7 @@ func TestLogMapping(t *testing.T) {
 			expectError:  true,
 		},
 		{
-			name: "log with sourceLocation (string)",
+			name: "log with valid sourceLocation (string)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -477,7 +478,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with bad source location (string)",
+			name: "log with invalid sourceLocation (string)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -491,6 +492,23 @@ func TestLogMapping(t *testing.T) {
 			},
 			maxEntrySize: defaultMaxEntrySize,
 			expectError:  true,
+		},
+		{
+			name: "log with unsupported sourceLocation type",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutBool(SourceLocationAttributeKey, true)
+				return log
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			expectError:  true,
+			expectedError: &AttributeProcessingError{
+				Key: SourceLocationAttributeKey,
+				Err: &UnsupportedValueTypeError{ValueType: pcommon.ValueTypeBool},
+			},
 		},
 		{
 			name: "log with traceSampled (bool)",
@@ -602,6 +620,9 @@ func TestLogMapping(t *testing.T) {
 
 			if testCase.expectError {
 				assert.NotNil(t, err)
+				if testCase.expectedError != nil {
+					assert.Equal(t, err.Error(), testCase.expectedError.Error())
+				}
 			} else {
 				assert.Nil(t, err)
 				assert.Equal(t, len(testCase.expectedEntries), len(entries))
