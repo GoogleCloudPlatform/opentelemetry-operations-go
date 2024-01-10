@@ -398,8 +398,7 @@ func (l logMapper) logToSplitEntries(
 		case pcommon.ValueTypeBytes:
 			sourceLocationBytes = sourceLocation.Bytes().AsRaw()
 		case pcommon.ValueTypeMap, pcommon.ValueTypeStr:
-			sourceLocationStr := sourceLocation.AsString()
-			sourceLocationBytes = []byte(sourceLocationStr)
+			sourceLocationBytes = []byte(sourceLocation.AsString())
 		}
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
 		err := json.Unmarshal(sourceLocationBytes, &logEntrySourceLocation)
