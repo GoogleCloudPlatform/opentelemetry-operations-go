@@ -64,12 +64,12 @@ func TestLogMapping(t *testing.T) {
 
 	testCases := []struct {
 		expectedError   error
-		expectError     bool
 		log             func() plog.LogRecord
 		mr              func() *monitoredrespb.MonitoredResource
 		config          Option
 		name            string
 		expectedEntries []*logpb.LogEntry
+		expectError     bool
 		maxEntrySize    int
 	}{
 		{
