@@ -72,57 +72,77 @@ var (
 		otelKeys []string
 	}{
 		gceInstance: {
-			zone:       {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
+			zone: {
+				otelKeys:        []string{string(semconv.CloudAvailabilityZoneKey)},
+				fallbackLiteral: "global",
+			},
 			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
 		},
 		k8sContainer: {
-			location: {otelKeys: []string{
-				string(semconv.CloudAvailabilityZoneKey),
-				string(semconv.CloudRegionKey),
-			}},
+			location: {
+				otelKeys: []string{
+					string(semconv.CloudAvailabilityZoneKey),
+					string(semconv.CloudRegionKey),
+				},
+				fallbackLiteral: "global",
+			},
 			clusterName:   {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
 			namespaceName: {otelKeys: []string{string(semconv.K8SNamespaceNameKey)}},
 			podName:       {otelKeys: []string{string(semconv.K8SPodNameKey)}},
 			containerName: {otelKeys: []string{string(semconv.K8SContainerNameKey)}},
 		},
 		k8sPod: {
-			location: {otelKeys: []string{
-				string(semconv.CloudAvailabilityZoneKey),
-				string(semconv.CloudRegionKey),
-			}},
+			location: {
+				otelKeys: []string{
+					string(semconv.CloudAvailabilityZoneKey),
+					string(semconv.CloudRegionKey),
+				},
+				fallbackLiteral: "global",
+			},
 			clusterName:   {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
 			namespaceName: {otelKeys: []string{string(semconv.K8SNamespaceNameKey)}},
 			podName:       {otelKeys: []string{string(semconv.K8SPodNameKey)}},
 		},
 		k8sNode: {
-			location: {otelKeys: []string{
-				string(semconv.CloudAvailabilityZoneKey),
-				string(semconv.CloudRegionKey),
-			}},
+			location: {
+				otelKeys: []string{
+					string(semconv.CloudAvailabilityZoneKey),
+					string(semconv.CloudRegionKey),
+				},
+				fallbackLiteral: "global",
+			},
 			clusterName: {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
 			nodeName:    {otelKeys: []string{string(semconv.K8SNodeNameKey)}},
 		},
 		k8sCluster: {
-			location: {otelKeys: []string{
-				string(semconv.CloudAvailabilityZoneKey),
-				string(semconv.CloudRegionKey),
-			}},
+			location: {
+				otelKeys: []string{
+					string(semconv.CloudAvailabilityZoneKey),
+					string(semconv.CloudRegionKey),
+				},
+				fallbackLiteral: "global",
+			},
 			clusterName: {otelKeys: []string{string(semconv.K8SClusterNameKey)}},
 		},
 		gaeInstance: {
-			location: {otelKeys: []string{
-				string(semconv.CloudAvailabilityZoneKey),
-				string(semconv.CloudRegionKey),
-			}},
+			location: {
+				otelKeys: []string{
+					string(semconv.CloudAvailabilityZoneKey),
+					string(semconv.CloudRegionKey),
+				},
+				fallbackLiteral: "global",
+			},
 			gaeModuleID:  {otelKeys: []string{string(semconv.FaaSNameKey)}},
 			gaeVersionID: {otelKeys: []string{string(semconv.FaaSVersionKey)}},
 			instanceID:   {otelKeys: []string{string(semconv.FaaSInstanceKey)}},
 		},
 		gaeApp: {
-			location: {otelKeys: []string{
-				string(semconv.CloudAvailabilityZoneKey),
-				string(semconv.CloudRegionKey),
-			}},
+			location: {
+				otelKeys: []string{
+					string(semconv.CloudAvailabilityZoneKey),
+					string(semconv.CloudRegionKey),
+				},
+			},
 			gaeModuleID:  {otelKeys: []string{string(semconv.FaaSNameKey)}},
 			gaeVersionID: {otelKeys: []string{string(semconv.FaaSVersionKey)}},
 		},
@@ -133,6 +153,7 @@ var (
 					string(semconv.CloudAvailabilityZoneKey),
 					string(semconv.CloudRegionKey),
 				},
+				fallbackLiteral: "global",
 			},
 			awsAccount: {otelKeys: []string{string(semconv.CloudAccountIDKey)}},
 		},
