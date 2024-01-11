@@ -581,6 +581,139 @@ func TestResourceMetricsToMonitoringMonitoredResource(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "GCE instance without location",
+			resourceLabels: map[string]string{
+				"cloud.platform": "gcp_compute_engine",
+				"host.id":        "abc123",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type:   "gce_instance",
+				Labels: map[string]string{"instance_id": "abc123", "zone": "global"},
+			},
+		},
+		{
+			name: "K8s container without location",
+			resourceLabels: map[string]string{
+				"cloud.platform":     "gcp_kubernetes_engine",
+				"k8s.cluster.name":   "mycluster",
+				"k8s.namespace.name": "mynamespace",
+				"k8s.pod.name":       "mypod",
+				"k8s.container.name": "mycontainer",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_container",
+				Labels: map[string]string{
+					"cluster_name":   "mycluster",
+					"container_name": "mycontainer",
+					"location":       "global",
+					"namespace_name": "mynamespace",
+					"pod_name":       "mypod",
+				},
+			},
+		},
+		{
+			name: "K8s pod without location",
+			resourceLabels: map[string]string{
+				"cloud.platform":     "gcp_kubernetes_engine",
+				"k8s.cluster.name":   "mycluster",
+				"k8s.namespace.name": "mynamespace",
+				"k8s.pod.name":       "mypod",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_pod",
+				Labels: map[string]string{
+					"cluster_name":   "mycluster",
+					"location":       "global",
+					"namespace_name": "mynamespace",
+					"pod_name":       "mypod",
+				},
+			},
+		},
+		{
+			name: "K8s node without location",
+			resourceLabels: map[string]string{
+				"cloud.platform":   "gcp_kubernetes_engine",
+				"k8s.cluster.name": "mycluster",
+				"k8s.node.name":    "mynode",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_node",
+				Labels: map[string]string{
+					"cluster_name": "mycluster",
+					"location":     "global",
+					"node_name":    "mynode",
+				},
+			},
+		},
+		{
+			name: "K8s cluster without location",
+			resourceLabels: map[string]string{
+				"cloud.platform":   "gcp_kubernetes_engine",
+				"k8s.cluster.name": "mycluster",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "k8s_cluster",
+				Labels: map[string]string{
+					"cluster_name": "mycluster",
+					"location":     "global",
+				},
+			},
+		},
+		{
+			name: "AWS ec2 instance without location",
+			resourceLabels: map[string]string{
+				"cloud.platform":   "aws_ec2",
+				"host.id":          "abc123",
+				"cloud.account.id": "myawsaccount",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "aws_ec2_instance",
+				Labels: map[string]string{
+					"aws_account": "myawsaccount",
+					"instance_id": "abc123",
+					"region":      "global",
+				},
+			},
+		},
+		{
+			name: "Gae Instance without location",
+			resourceLabels: map[string]string{
+				"cloud.provider": "gcp",
+				"cloud.platform": "gcp_app_engine",
+				"faas.instance":  "myinstanceid",
+				"faas.name":      "myhostname",
+				"faas.version":   "v1",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "gae_instance",
+				Labels: map[string]string{
+					"instance_id": "myinstanceid",
+					"location":    "global",
+					"module_id":   "myhostname",
+					"version_id":  "v1",
+				},
+			},
+		},
+		{
+			name: "Cloud Run Instance without location",
+			resourceLabels: map[string]string{
+				"cloud.provider": "gcp",
+				"cloud.platform": "gcp_cloud_run",
+				"faas.instance":  "myinstanceid",
+				"faas.name":      "myfaasname",
+				"faas.version":   "v1",
+			},
+			expectMr: &monitoredrespb.MonitoredResource{
+				Type: "generic_task",
+				Labels: map[string]string{
+					"job":       "myfaasname",
+					"location":  "global",
+					"namespace": "",
+					"task_id":   "myinstanceid",
+				},
+			},
+		},
 	}
 
 	for _, test := range tests {
