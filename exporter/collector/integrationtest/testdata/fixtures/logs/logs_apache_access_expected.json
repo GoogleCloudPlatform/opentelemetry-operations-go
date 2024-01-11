@@ -8,7 +8,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:36 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -33,7 +33,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /favicon.ico HTTP/1.1\" 200 3990",
@@ -57,7 +57,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:37 +0800] \"GET /lamp.png HTTP/1.1\" 200 51164",
@@ -81,7 +81,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:51 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -105,7 +105,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:52 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -129,7 +129,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -153,7 +153,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -177,7 +177,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -201,7 +201,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:53 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -225,7 +225,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -249,7 +249,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -273,7 +273,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -297,7 +297,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -321,7 +321,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -345,7 +345,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:53:54 +0800] \"GET / HTTP/1.1\" 200 1247",
@@ -369,7 +369,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:54:43 +0800] \"-\" 408 -",
@@ -385,7 +385,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "textPayload": "127.0.0.2 - - [26/Apr/2022:22:54:38 +0800] \"GET / HTTP/1.1\" 200 4429",

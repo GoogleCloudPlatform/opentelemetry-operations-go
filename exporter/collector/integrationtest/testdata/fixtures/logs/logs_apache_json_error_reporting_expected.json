@@ -8,7 +8,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "jsonPayload": {
@@ -29,7 +29,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "jsonPayload": {
@@ -48,7 +48,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "jsonPayload": {
@@ -67,7 +67,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "jsonPayload": {
@@ -86,7 +86,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "jsonPayload": {
@@ -105,7 +105,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "jsonPayload": {
@@ -125,7 +125,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "jsonPayload": {
@@ -144,7 +144,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "jsonPayload": {
@@ -163,7 +163,7 @@
             "type": "gce_instance",
             "labels": {
               "instance_id": "",
-              "zone": ""
+              "zone": "global"
             }
           },
           "jsonPayload": {
