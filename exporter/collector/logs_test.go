@@ -212,6 +212,28 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log with httpRequest attribute unsupported type",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				log.Attributes().PutBool(HTTPRequestAttributeKey, true)
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
 			name: "log with timestamp",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
@@ -525,6 +547,24 @@ func TestLogMapping(t *testing.T) {
 					LogName:      logName,
 					Timestamp:    timestamppb.New(testObservedTime),
 					TraceSampled: true,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with traceSampled (unsupported type)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutStr(TraceSampledAttributeKey, "hi!")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
