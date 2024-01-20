@@ -124,24 +124,24 @@ var otelSeverityForText = map[string]plog.SeverityNumber{
 	"fatal4": plog.SeverityNumberFatal4,
 }
 
-type AttributeProcessingError struct {
+type attributeProcessingError struct {
 	Err error
 	Key string
 }
 
-func (e *AttributeProcessingError) Error() string {
+func (e *attributeProcessingError) Error() string {
 	return fmt.Sprintf("could not process attribute %s: %s", e.Key, e.Err.Error())
 }
 
-func (e *AttributeProcessingError) Unwrap() error {
+func (e *attributeProcessingError) Unwrap() error {
 	return e.Err
 }
 
-type UnsupportedValueTypeError struct {
+type unsupportedValueTypeError struct {
 	ValueType pcommon.ValueType
 }
 
-func (e *UnsupportedValueTypeError) Error() string {
+func (e *unsupportedValueTypeError) Error() string {
 	return fmt.Sprintf("unsupported value type %v", e.ValueType)
 }
 
@@ -416,7 +416,7 @@ func (l logMapper) logToSplitEntries(
 	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
 		sourceLocationBytes, err := bytesFromValue(sourceLocation)
 		if err != nil {
-			return nil, &AttributeProcessingError{Key: SourceLocationAttributeKey, Err: err}
+			return nil, &attributeProcessingError{Key: SourceLocationAttributeKey, Err: err}
 		}
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
 		err = json.Unmarshal(sourceLocationBytes, &logEntrySourceLocation)
@@ -575,7 +575,7 @@ type httpRequestLog struct {
 func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.HttpRequest, error) {
 	httpBytes, err := bytesFromValue(httpRequestAttr)
 	if err != nil {
-		return nil, &AttributeProcessingError{Key: HTTPRequestAttributeKey, Err: err}
+		return nil, &attributeProcessingError{Key: HTTPRequestAttributeKey, Err: err}
 	}
 	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
 	// instead of a slice of bytes could do, but would need a lot of type casting and checking
@@ -662,7 +662,7 @@ func bytesFromValue(v pcommon.Value) ([]byte, error) {
 	case pcommon.ValueTypeMap, pcommon.ValueTypeStr:
 		valueBytes = []byte(v.AsString())
 	default:
-		err = &UnsupportedValueTypeError{ValueType: v.Type()}
+		err = &unsupportedValueTypeError{ValueType: v.Type()}
 	}
 	return valueBytes, err
 }

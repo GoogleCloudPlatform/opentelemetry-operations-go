@@ -527,9 +527,9 @@ func TestLogMapping(t *testing.T) {
 			},
 			maxEntrySize: defaultMaxEntrySize,
 			expectError:  true,
-			expectedError: &AttributeProcessingError{
+			expectedError: &attributeProcessingError{
 				Key: SourceLocationAttributeKey,
-				Err: &UnsupportedValueTypeError{ValueType: pcommon.ValueTypeBool},
+				Err: &unsupportedValueTypeError{ValueType: pcommon.ValueTypeBool},
 			},
 		},
 		{
