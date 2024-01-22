@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
+	semconv "go.opentelemetry.io/collector/semconv/v1.22.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
