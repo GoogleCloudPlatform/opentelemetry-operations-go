@@ -197,10 +197,10 @@ gotidy:
 update-dep:
 	$(MAKE) for-all-mod CMD="$(PWD)/internal/buildscripts/update-dep"
 
-STABLE_OTEL_VERSION=v1.21.0
-UNSTABLE_OTEL_VERSION=v0.44.0
-STABLE_CONTRIB_OTEL_VERSION=v1.21.1
-UNSTABLE_CONTRIB_OTEL_VERSION=v0.46.1
+STABLE_OTEL_VERSION=v1.22.0
+UNSTABLE_OTEL_VERSION=v0.45.0
+STABLE_CONTRIB_OTEL_VERSION=v1.22.0
+UNSTABLE_CONTRIB_OTEL_VERSION=v0.47.0
 STABLE_COLLECTOR_VERSION=v1.0.0
 UNSTABLE_COLLECTOR_VERSION=v0.91.0
 UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.91.0
@@ -209,7 +209,6 @@ UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.91.0
 update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel VERSION=$(STABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/metric VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/metric/instrument VERSION=$(UNSTABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk VERSION=$(STABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/metric VERSION=$(STABLE_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/trace VERSION=$(STABLE_OTEL_VERSION)
