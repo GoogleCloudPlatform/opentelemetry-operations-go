@@ -133,10 +133,6 @@ func (e *attributeProcessingError) Error() string {
 	return fmt.Sprintf("could not process attribute %s: %s", e.Key, e.Err.Error())
 }
 
-func (e *attributeProcessingError) Unwrap() error {
-	return e.Err
-}
-
 type unsupportedValueTypeError struct {
 	ValueType pcommon.ValueType
 }
@@ -414,14 +410,10 @@ func (l logMapper) logToSplitEntries(
 
 	// parse LogEntrySourceLocation struct from OTel attribute
 	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
-		sourceLocationBytes, err := bytesFromValue(sourceLocation)
+		var logEntrySourceLocation logpb.LogEntrySourceLocation
+		err := unmarshalAttribute(sourceLocation, &logEntrySourceLocation)
 		if err != nil {
 			return nil, &attributeProcessingError{Key: SourceLocationAttributeKey, Err: err}
-		}
-		var logEntrySourceLocation logpb.LogEntrySourceLocation
-		err = json.Unmarshal(sourceLocationBytes, &logEntrySourceLocation)
-		if err != nil {
-			return nil, err
 		}
 		entry.SourceLocation = &logEntrySourceLocation
 		delete(attrsMap, SourceLocationAttributeKey)
@@ -573,16 +565,10 @@ type httpRequestLog struct {
 }
 
 func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.HttpRequest, error) {
-	httpBytes, err := bytesFromValue(httpRequestAttr)
+	var parsedHTTPRequest httpRequestLog
+	err := unmarshalAttribute(httpRequestAttr, &parsedHTTPRequest)
 	if err != nil {
 		return nil, &attributeProcessingError{Key: HTTPRequestAttributeKey, Err: err}
-	}
-	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
-	// instead of a slice of bytes could do, but would need a lot of type casting and checking
-	// assertions with it.
-	var parsedHTTPRequest httpRequestLog
-	if err := json.Unmarshal(httpBytes, &parsedHTTPRequest); err != nil {
-		return nil, err
 	}
 
 	pb := &logtypepb.HttpRequest{
@@ -653,16 +639,18 @@ func fixUTF8(s string) string {
 	return buf.String()
 }
 
-func bytesFromValue(v pcommon.Value) ([]byte, error) {
+func unmarshalAttribute(v pcommon.Value, out any) error {
 	var valueBytes []byte
-	var err error
 	switch v.Type() {
 	case pcommon.ValueTypeBytes:
 		valueBytes = v.Bytes().AsRaw()
 	case pcommon.ValueTypeMap, pcommon.ValueTypeStr:
 		valueBytes = []byte(v.AsString())
 	default:
-		err = &unsupportedValueTypeError{ValueType: v.Type()}
+		return &unsupportedValueTypeError{ValueType: v.Type()}
 	}
-	return valueBytes, err
+	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
+	// instead of a slice of bytes could do, but would need a lot of type casting and checking
+	// assertions with it.
+	return json.Unmarshal(valueBytes, out)
 }
