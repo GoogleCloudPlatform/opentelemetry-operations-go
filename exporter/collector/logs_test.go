@@ -63,13 +63,14 @@ func TestLogMapping(t *testing.T) {
 	logName := "projects/fakeprojectid/logs/default-log"
 
 	testCases := []struct {
+		expectedError   error
 		log             func() plog.LogRecord
 		mr              func() *monitoredrespb.MonitoredResource
 		config          Option
 		name            string
 		expectedEntries []*logpb.LogEntry
-		maxEntrySize    int
 		expectError     bool
+		maxEntrySize    int
 	}{
 		{
 			name:         "split entry size",
@@ -164,8 +165,8 @@ func TestLogMapping(t *testing.T) {
 				log := plog.NewLogRecord()
 				log.Body().SetEmptyMap().PutStr("message", "hello!")
 				log.Attributes().PutEmptyBytes(HTTPRequestAttributeKey).FromRaw([]byte(`{
-						"requestMethod": "GET", 
-						"requestURL": "https://www.example.com", 
+						"requestMethod": "GET",
+						"requestURL": "https://www.example.com",
 						"requestSize": "1",
 						"status": "200",
 						"responseSize": "1",
@@ -206,6 +207,28 @@ func TestLogMapping(t *testing.T) {
 						CacheFillBytes:                 1,
 						CacheLookup:                    false,
 					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with httpRequest attribute unsupported type",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				log.Attributes().PutBool(HTTPRequestAttributeKey, true)
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
@@ -371,8 +394,7 @@ func TestLogMapping(t *testing.T) {
 			},
 		},
 		{
-			// TODO(damemi): parse/test sourceLocation from more than just bytes values
-			name: "log with sourceLocation (bytes)",
+			name: "log with valid sourceLocation (bytes)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -397,6 +419,120 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log with invalid sourceLocation (bytes)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutEmptyBytes(SourceLocationAttributeKey).FromRaw(
+					[]byte(`{"file": 100}`),
+				)
+				return log
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			expectError:  true,
+		},
+		{
+			name: "log with valid sourceLocation (map)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				sourceLocationMap := log.Attributes().PutEmptyMap(SourceLocationAttributeKey)
+				sourceLocationMap.PutStr("file", "test.php")
+				sourceLocationMap.PutInt("line", 100)
+				sourceLocationMap.PutStr("function", "helloWorld")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					SourceLocation: &logpb.LogEntrySourceLocation{
+						File:     "test.php",
+						Line:     100,
+						Function: "helloWorld",
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with invalid sourceLocation (map)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				sourceLocationMap := log.Attributes().PutEmptyMap(SourceLocationAttributeKey)
+				sourceLocationMap.PutStr("line", "100")
+				return log
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			expectError:  true,
+		},
+		{
+			name: "log with valid sourceLocation (string)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutStr(
+					SourceLocationAttributeKey,
+					`{"file": "test.php", "line":100, "function":"helloWorld"}`,
+				)
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					SourceLocation: &logpb.LogEntrySourceLocation{
+						File:     "test.php",
+						Line:     100,
+						Function: "helloWorld",
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with invalid sourceLocation (string)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutStr(
+					SourceLocationAttributeKey,
+					`{"file": 100}`,
+				)
+				return log
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			expectError:  true,
+		},
+		{
+			name: "log with unsupported sourceLocation type",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutBool(SourceLocationAttributeKey, true)
+				return log
+			},
+			maxEntrySize: defaultMaxEntrySize,
+			expectError:  true,
+			expectedError: &attributeProcessingError{
+				Key: SourceLocationAttributeKey,
+				Err: &unsupportedValueTypeError{ValueType: pcommon.ValueTypeBool},
+			},
+		},
+		{
 			name: "log with traceSampled (bool)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
@@ -411,6 +547,24 @@ func TestLogMapping(t *testing.T) {
 					LogName:      logName,
 					Timestamp:    timestamppb.New(testObservedTime),
 					TraceSampled: true,
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with traceSampled (unsupported type)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutStr(TraceSampledAttributeKey, "hi!")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,
@@ -506,6 +660,9 @@ func TestLogMapping(t *testing.T) {
 
 			if testCase.expectError {
 				assert.NotNil(t, err)
+				if testCase.expectedError != nil {
+					assert.Equal(t, err.Error(), testCase.expectedError.Error())
+				}
 			} else {
 				assert.Nil(t, err)
 				assert.Equal(t, len(testCase.expectedEntries), len(entries))

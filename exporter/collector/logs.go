@@ -124,6 +124,23 @@ var otelSeverityForText = map[string]plog.SeverityNumber{
 	"fatal4": plog.SeverityNumberFatal4,
 }
 
+type attributeProcessingError struct {
+	Err error
+	Key string
+}
+
+func (e *attributeProcessingError) Error() string {
+	return fmt.Sprintf("could not process attribute %s: %s", e.Key, e.Err.Error())
+}
+
+type unsupportedValueTypeError struct {
+	ValueType pcommon.ValueType
+}
+
+func (e *unsupportedValueTypeError) Error() string {
+	return fmt.Sprintf("unsupported value type %v", e.ValueType)
+}
+
 type LogsExporter struct {
 	obs           selfObservability
 	loggingClient *loggingv2.Client
@@ -394,9 +411,9 @@ func (l logMapper) logToSplitEntries(
 	// parse LogEntrySourceLocation struct from OTel attribute
 	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
 		var logEntrySourceLocation logpb.LogEntrySourceLocation
-		err := json.Unmarshal(sourceLocation.Bytes().AsRaw(), &logEntrySourceLocation)
+		err := unmarshalAttribute(sourceLocation, &logEntrySourceLocation)
 		if err != nil {
-			return nil, err
+			return nil, &attributeProcessingError{Key: SourceLocationAttributeKey, Err: err}
 		}
 		entry.SourceLocation = &logEntrySourceLocation
 		delete(attrsMap, SourceLocationAttributeKey)
@@ -548,20 +565,10 @@ type httpRequestLog struct {
 }
 
 func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.HttpRequest, error) {
-	var httpBytes []byte
-	switch httpRequestAttr.Type() {
-	case pcommon.ValueTypeBytes:
-		httpBytes = httpRequestAttr.Bytes().AsRaw()
-	case pcommon.ValueTypeStr, pcommon.ValueTypeMap:
-		httpBytes = []byte(httpRequestAttr.AsString())
-	}
-
-	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
-	// instead of a slice of bytes could do, but would need a lot of type casting and checking
-	// assertions with it.
 	var parsedHTTPRequest httpRequestLog
-	if err := json.Unmarshal(httpBytes, &parsedHTTPRequest); err != nil {
-		return nil, err
+	err := unmarshalAttribute(httpRequestAttr, &parsedHTTPRequest)
+	if err != nil {
+		return nil, &attributeProcessingError{Key: HTTPRequestAttributeKey, Err: err}
 	}
 
 	pb := &logtypepb.HttpRequest{
@@ -630,4 +637,20 @@ func fixUTF8(s string) string {
 		}
 	}
 	return buf.String()
+}
+
+func unmarshalAttribute(v pcommon.Value, out any) error {
+	var valueBytes []byte
+	switch v.Type() {
+	case pcommon.ValueTypeBytes:
+		valueBytes = v.Bytes().AsRaw()
+	case pcommon.ValueTypeMap, pcommon.ValueTypeStr:
+		valueBytes = []byte(v.AsString())
+	default:
+		return &unsupportedValueTypeError{ValueType: v.Type()}
+	}
+	// TODO: Investigate doing this without the JSON unmarshal. Getting the attribute as a map
+	// instead of a slice of bytes could do, but would need a lot of type casting and checking
+	// assertions with it.
+	return json.Unmarshal(valueBytes, out)
 }
