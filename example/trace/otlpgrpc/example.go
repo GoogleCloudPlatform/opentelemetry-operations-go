@@ -18,24 +18,17 @@ package main
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
-	"net/http"
+	"time"
 
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/baggage"
-	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/propagation"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 	"go.opentelemetry.io/otel/trace"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/oauth"
-
-	gcppropagator "github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator"
 )
 
 func initTracer() (func(), error) {
@@ -66,19 +59,7 @@ func initTracer() (func(), error) {
 	}, nil
 }
 
-func installPropagators() {
-	otel.SetTextMapPropagator(
-		propagation.NewCompositeTextMapPropagator(
-			// Putting the CloudTraceOneWayPropagator first means the TraceContext propagator
-			// takes precedence if both the traceparent and the XCTC headers exist.
-			gcppropagator.CloudTraceOneWayPropagator{},
-			propagation.TraceContext{},
-			propagation.Baggage{},
-		))
-}
-
 func main() {
-	installPropagators()
 	shutdown, err := initTracer()
 	if err != nil {
 		log.Fatal(err)
@@ -86,40 +67,11 @@ func main() {
 	defer shutdown()
 	tr := otel.Tracer("cloudtrace/example/client")
 
-	client := http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
-	member, err := baggage.NewMember("username", "donuts")
-	if err != nil {
-		panic(err)
-	}
-	b, err := baggage.New(member)
-	if err != nil {
-		panic(err)
-	}
-	ctx := baggage.ContextWithBaggage(context.Background(), b)
-	var body []byte
+	ctx := context.Background()
+	fmt.Println("starting span...")
+	_, span := tr.Start(ctx, "test span", trace.WithAttributes(semconv.PeerServiceKey.String("ExampleService")))
+	defer span.End()
+	defer fmt.Println("ending span.")
 
-	err = func(ctx context.Context) error {
-		ctx, span := tr.Start(ctx, "say hello", trace.WithAttributes(semconv.PeerServiceKey.String("ExampleService")))
-		defer span.End()
-		req, _ := http.NewRequestWithContext(ctx, "GET", "http://localhost:7777/hello", nil)
-
-		fmt.Printf("Sending request...\n")
-		var res *http.Response
-		res, err = client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-		body, err = io.ReadAll(res.Body)
-		_ = res.Body.Close()
-		span.SetStatus(codes.Ok, "")
-
-		return err
-	}(ctx)
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("Response Received: %s\n\n\n", body)
-	fmt.Printf("Waiting to export spans ...\n\n")
+	time.Sleep(3 * time.Second)
 }
