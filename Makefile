@@ -225,6 +225,7 @@ update-otel:
 	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus VERSION=$(UNSTABLE_COLLECTOR_CONTRIB_VERSION)
 	$(MAKE) gotidy
 	$(MAKE) build
+	$(MAKE) fixtures
 
 .PHONY: prepare-release
 prepare-release:
