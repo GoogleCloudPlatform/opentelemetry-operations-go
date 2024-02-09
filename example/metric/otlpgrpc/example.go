@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 
 	"go.opentelemetry.io/contrib/detectors/gcp"
@@ -50,7 +51,9 @@ func main() {
 			semconv.ServiceNameKey.String("example-application"),
 		),
 	)
-	if err != nil {
+	if errors.Is(err, resource.ErrPartialResource) || errors.Is(err, resource.ErrSchemaURLConflict) {
+		log.Println(err)
+	} else if err != nil {
 		panic(err)
 	}
 

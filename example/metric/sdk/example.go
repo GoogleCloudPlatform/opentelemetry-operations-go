@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"log"
 	"math/rand"
 	"os"
@@ -78,7 +79,9 @@ func main() {
 			semconv.ServiceNameKey.String("example-application"),
 		),
 	)
-	if err != nil {
+	if errors.Is(err, resource.ErrPartialResource) || errors.Is(err, resource.ErrSchemaURLConflict) {
+		log.Println(err)
+	} else if err != nil {
 		log.Fatalf("resource.New: %v", err)
 	}
 
