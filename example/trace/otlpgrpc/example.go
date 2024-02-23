@@ -19,13 +19,10 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
-	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 	"go.opentelemetry.io/otel/trace"
@@ -34,7 +31,7 @@ import (
 	"google.golang.org/grpc/credentials/oauth"
 )
 
-func initTracer(projectID string) (func(), error) {
+func initTracer() (func(), error) {
 	ctx := context.Background()
 
 	creds, err := oauth.NewApplicationDefault(ctx)
@@ -42,10 +39,10 @@ func initTracer(projectID string) (func(), error) {
 		panic(err)
 	}
 
-	res := resource.NewWithAttributes(semconv.SchemaURL, attribute.String("gcp.project_id", projectID))
-
+	// set OTEL_RESOURCE_ATTRIBUTES="gcp.project_id=<project_id>"
 	// set endpoint with OTEL_EXPORTER_OTLP_ENDPOINT=https://<endpoint>
-	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithDialOption(grpc.WithPerRPCCredentials(creds)), otlptracegrpc.WithHeaders(map[string]string{"x-goog-user-project": projectID}))
+	// set OTEL_EXPORTER_OTLP_HEADERS="x-goog-user-project=<project_id>"
+	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithDialOption(grpc.WithPerRPCCredentials(creds)))
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +51,6 @@ func initTracer(projectID string) (func(), error) {
 		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithResource(res),
 		sdktrace.WithBatcher(exporter))
 
 	otel.SetTracerProvider(tp)
@@ -67,8 +63,7 @@ func initTracer(projectID string) (func(), error) {
 }
 
 func main() {
-	projectID := os.Getenv("GCLOUD_PROJECT")
-	shutdown, err := initTracer(projectID)
+	shutdown, err := initTracer()
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -23,9 +23,7 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
-	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 	"go.opentelemetry.io/otel/trace"
@@ -45,8 +43,7 @@ func initTracer(projectID string) (func(), error) {
 		panic(err)
 	}
 
-	res := resource.NewWithAttributes(semconv.SchemaURL, attribute.String("gcp.project_id", projectID))
-
+	// set OTEL_RESOURCE_ATTRIBUTES="gcp.project_id=<project_id>"
 	// set endpoint with OTEL_EXPORTER_OTLP_ENDPOINT=https://<endpoint>
 	exporter, err := otlptracehttp.New(ctx, otlptracehttp.WithHeaders(map[string]string{
 		"Authorization":       fmt.Sprintf("Bearer %s", token.AccessToken),
@@ -60,7 +57,6 @@ func initTracer(projectID string) (func(), error) {
 		// For this example code we use sdktrace.AlwaysSample sampler to sample all traces.
 		// In a production application, use sdktrace.ProbabilitySampler with a desired probability.
 		sdktrace.WithSampler(sdktrace.AlwaysSample()),
-		sdktrace.WithResource(res),
 		sdktrace.WithBatcher(exporter))
 
 	otel.SetTracerProvider(tp)
