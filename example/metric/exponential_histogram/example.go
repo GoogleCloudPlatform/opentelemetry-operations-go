@@ -224,7 +224,7 @@ func main() {
 			// Create a log normal distribution to simulate latency
 			// from server response.
 			dist := distuv.LogNormal{
-				Mu:    300,
+				Mu:    3.5,
 				Sigma: .5,
 			}
 
@@ -238,7 +238,7 @@ func main() {
 				o.Observe(data[i], api.WithAttributes(clabels...))
 			}
 			mean, std := stat.MeanStdDev(data, nil)
-			log.Printf("Sent latency: #points %d , mean %v, sdv %v", points, mean, std)
+			log.Printf("Sent Latency Data (Original Distribution): #points %d , mean %v, sdv %v", points, mean, std)
 			return nil
 		}),
 	)
@@ -256,7 +256,7 @@ func main() {
 			// Create a log normal distribution to simulate latency
 			// from server response.
 			dist := distuv.LogNormal{
-				Mu:    1000,
+				Mu:    5.5,
 				Sigma: .5,
 			}
 
@@ -270,7 +270,7 @@ func main() {
 				o.Observe(data[i], api.WithAttributes(clabels...))
 			}
 			mean, std := stat.MeanStdDev(data, nil)
-			log.Printf("Sent shifted: #points %d , mean %v, sdv %v", points, mean, std)
+			log.Printf("Sent Latency Data (Shifted Distribution): #points %d , mean %v, sdv %v", points, mean, std)
 			return nil
 		}),
 	)
@@ -309,7 +309,7 @@ func main() {
 				o.Observe(data[i], api.WithAttributes(clabels...))
 			}
 			mean, std := stat.MeanStdDev(data, nil)
-			log.Printf("Sent multimodal : #points %d , mean %v, sdv %v", points, mean, std)
+			log.Printf("Sent Latency Data (Multimodal Distribution): #points %d , mean %v, sdv %v", points, mean, std)
 			return nil
 		}),
 	)
