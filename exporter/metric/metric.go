@@ -18,7 +18,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"math"
 	"net/url"
 	"reflect"
@@ -618,9 +617,7 @@ func expHistogramToTimeSeries[N int64 | float64](point metricdata.ExponentialHis
 		return nil, err
 	}
 	distributionValue := expHistToDistribution(point)
-	// if enableSOSD {
-	//	setSumOfSquaredDeviation(point, distributionValue)
-	// }
+	// TODO: Implement "setSumOfSquaredDeviationExpHist" for parameter "enableSOSD" functionality. 
 	return &monitoringpb.TimeSeries{
 		Resource:   mr,
 		Unit:       string(metrics.Unit),
@@ -662,8 +659,6 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 
 func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]) *distribution.Distribution {
 	counts := make([]int64, len(hist.BucketCounts))
-	log.Printf("Explicit Histogram - # Exemplars : %d", len(hist.Exemplars))
-	log.Printf("Explicit Histogram - Buckets : %v", hist.Bounds)
 	for i, v := range hist.BucketCounts {
 		counts[i] = int64(v)
 	}
@@ -687,29 +682,20 @@ func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]
 }
 
 func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N]) *distribution.Distribution {
-	numBuckets := len(hist.PositiveBucket.Counts)
-	counts := make([]int64, numBuckets)
-	positiveCounts := 0
-	negativeCounts := 0
+	numFiniteBuckets := len(hist.PositiveBucket.Counts)
+	counts := make([]int64, numFiniteBuckets)
+	positiveBucketCounts := 0
 	growthFactor := math.Exp2(math.Exp2(-float64(hist.Scale)))
-	log.Printf("Exponential Histogram - # Exemplars : %d", len(hist.Exemplars))
-
-	for i := 0; i < int(numBuckets); i++ {
-		counts[i] = int64(hist.PositiveBucket.Counts[i])
+	for i, v := range hist.PositiveBucket.Counts {
+		counts[i] = int64(v)
+		positiveBucketCounts += int(v)
 	}
-	for _, v := range hist.PositiveBucket.Counts {
-		positiveCounts += int(v)
-	}
-	for _, v := range hist.NegativeBucket.Counts {
-		negativeCounts += int(v)
-	}
-	tCount := positiveCounts + negativeCounts
 	var mean float64
 	if !math.IsNaN(float64(hist.Sum)) && hist.Count > 0 { // Avoid divide-by-zero
-		mean = float64(hist.Sum) / float64(tCount)
+		mean = float64(hist.Sum) / float64(positiveBucketCounts)
 	}
 	return &distribution.Distribution{
-		Count:        int64(tCount),
+		Count:        int64(positiveBucketCounts),
 		Mean:         mean,
 		BucketCounts: counts,
 		BucketOptions: &distribution.Distribution_BucketOptions{
@@ -717,7 +703,7 @@ func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogr
 				ExponentialBuckets: &distribution.Distribution_BucketOptions_Exponential{
 					Scale:            math.Pow(growthFactor, float64(hist.PositiveBucket.Offset)),
 					GrowthFactor:     growthFactor,
-					NumFiniteBuckets: int32(numBuckets),
+					NumFiniteBuckets: int32(numFiniteBuckets),
 				},
 			},
 		},
@@ -736,23 +722,6 @@ func toDistributionExemplar[N int64 | float64](Exemplars []metricdata.Exemplar[N
 	return exemplars
 }
 
-// func setSumOfSquaredDeviationExpHist[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N], dist *distribution.Distribution) {
-// 	var prevBound float64
-// 	// Calculate the sum of squared deviation.
-// 	for i := 0; i < len(hist.PositiveBucket.Counts); i++ {
-// 		// Assume all points in the bucket occur at the middle of the bucket range
-// 		middleOfBucket := (prevBound + hist.Po[i]) / 2
-// 		dist.SumOfSquaredDeviation += float64(dist.BucketCounts[i]) * (middleOfBucket - dist.Mean) * (middleOfBucket - dist.Mean)
-// 		prevBound = hist.Bounds[i]
-// 	}
-// 	// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
-// 	// Assume points in the infinity bucket are at the top of the previous bucket
-// 	middleOfInfBucket := prevBound
-// 	if len(dist.BucketCounts) > 0 {
-// 		dist.SumOfSquaredDeviation += float64(dist.BucketCounts[len(dist.BucketCounts)-1]) * (middleOfInfBucket - dist.Mean) * (middleOfInfBucket - dist.Mean)
-// 	}
-// }
-
 func setSumOfSquaredDeviation[N int64 | float64](hist metricdata.HistogramDataPoint[N], dist *distribution.Distribution) {
 	var prevBound float64
 	// Calculate the sum of squared deviation.
@@ -768,25 +737,6 @@ func setSumOfSquaredDeviation[N int64 | float64](hist metricdata.HistogramDataPo
 	if len(dist.BucketCounts) > 0 {
 		dist.SumOfSquaredDeviation += float64(dist.BucketCounts[len(dist.BucketCounts)-1]) * (middleOfInfBucket - dist.Mean) * (middleOfInfBucket - dist.Mean)
 	}
-}
-
-func exemplarToValue[N int64 | float64](
-	exemplar metricdata.Exemplar[N],
-) (*monitoringpb.TypedValue, googlemetricpb.MetricDescriptor_ValueType) {
-	switch v := any(exemplar.Value).(type) {
-	case int64:
-		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_Int64Value{
-				Int64Value: v,
-			}},
-			googlemetricpb.MetricDescriptor_INT64
-	case float64:
-		return &monitoringpb.TypedValue{Value: &monitoringpb.TypedValue_DoubleValue{
-				DoubleValue: v,
-			}},
-			googlemetricpb.MetricDescriptor_DOUBLE
-	}
-	// It is impossible to reach this statement
-	return nil, googlemetricpb.MetricDescriptor_INT64
 }
 
 func numberDataPointToValue[N int64 | float64](
