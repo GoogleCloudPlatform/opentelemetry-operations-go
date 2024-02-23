@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"os"
 	"os/signal"
 	"syscall"
@@ -65,12 +66,13 @@ func main() {
 	}
 
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
-	explicitBuckets := make([]float64, 35)
+	defaultBuckets := []float64{0, 5, 10, 25, 50, 75, 100, 250, 500, 1000}
+	linearBuckets := make([]float64, 35)
 	for i := 0; i < 35; i++ {
-		explicitBuckets[i] = float64(i*10 + 10)
+		linearBuckets[i] = float64(i*10 + 10)
 	}
 
-	view_a := sdkmetric.NewView(
+	view_latency_a := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency",
 		},
@@ -83,22 +85,115 @@ func main() {
 		},
 	)
 
-	view_b := sdkmetric.NewView(
+	view_latency_b := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency",
 		},
 		sdkmetric.Stream{
 			Name: "latency_b",
 			Aggregation: sdkmetric.AggregationExplicitBucketHistogram{
-				Boundaries: explicitBuckets,
+				Boundaries: linearBuckets,
+			},
+		},
+	)
+
+	view_latency_c := sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Name: "latency",
+		},
+		sdkmetric.Stream{
+			Name: "latency_c",
+			Aggregation: sdkmetric.AggregationExplicitBucketHistogram{
+				Boundaries: defaultBuckets,
+			},
+		},
+	)
+
+	view_latency_shifted_a := sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Name: "latency_shifted",
+		},
+		sdkmetric.Stream{
+			Name: "latency_shifted_a",
+			Aggregation: sdkmetric.AggregationBase2ExponentialHistogram{
+				MaxSize:  160,
+				MaxScale: 20,
+			},
+		},
+	)
+
+	view_latency_shifted_b := sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Name: "latency_shifted",
+		},
+		sdkmetric.Stream{
+			Name: "latency_shifted_b",
+			Aggregation: sdkmetric.AggregationExplicitBucketHistogram{
+				Boundaries: linearBuckets,
+			},
+		},
+	)
+
+	view_latency_shifted_c := sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Name: "latency_shifted",
+		},
+		sdkmetric.Stream{
+			Name: "latency_shifted_c",
+			Aggregation: sdkmetric.AggregationExplicitBucketHistogram{
+				Boundaries: defaultBuckets,
+			},
+		},
+	)
+
+	view_latency_multimodal_a := sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Name: "latency_multimodal",
+		},
+		sdkmetric.Stream{
+			Name: "latency_multimodal_a",
+			Aggregation: sdkmetric.AggregationBase2ExponentialHistogram{
+				MaxSize:  160,
+				MaxScale: 20,
+			},
+		},
+	)
+
+	view_latency_multimodal_b := sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Name: "latency_multimodal",
+		},
+		sdkmetric.Stream{
+			Name: "latency_multimodal_b",
+			Aggregation: sdkmetric.AggregationExplicitBucketHistogram{
+				Boundaries: linearBuckets,
+			},
+		},
+	)
+
+	view_latency_multimodal_c := sdkmetric.NewView(
+		sdkmetric.Instrument{
+			Name: "latency_multimodal",
+		},
+		sdkmetric.Stream{
+			Name: "latency_multimodal_c",
+			Aggregation: sdkmetric.AggregationExplicitBucketHistogram{
+				Boundaries: defaultBuckets,
 			},
 		},
 	)
 
 	// initialize a MeterProvider with that periodically exports to the GCP exporter.
 	provider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithView(view_a),
-		sdkmetric.WithView(view_b),
+		sdkmetric.WithView(view_latency_a),
+		sdkmetric.WithView(view_latency_b),
+		sdkmetric.WithView(view_latency_c),
+		sdkmetric.WithView(view_latency_shifted_a),
+		sdkmetric.WithView(view_latency_shifted_b),
+		sdkmetric.WithView(view_latency_shifted_c),
+		sdkmetric.WithView(view_latency_multimodal_a),
+		sdkmetric.WithView(view_latency_multimodal_b),
+		sdkmetric.WithView(view_latency_multimodal_c),
 		sdkmetric.WithReader(
 			sdkmetric.NewPeriodicReader(
 				exporter,
@@ -129,7 +224,7 @@ func main() {
 			// Create a log normal distribution to simulate latency
 			// from server response.
 			dist := distuv.LogNormal{
-				Mu:    4,
+				Mu:    300,
 				Sigma: .5,
 			}
 
@@ -143,10 +238,82 @@ func main() {
 				o.Observe(data[i], api.WithAttributes(clabels...))
 			}
 			mean, std := stat.MeanStdDev(data, nil)
-			log.Printf("Sent : #points %d , mean %v, sdv %v", points, mean, std)
+			log.Printf("Sent latency: #points %d , mean %v, sdv %v", points, mean, std)
 			return nil
 		}),
 	)
+
+	_, err = meter.Float64ObservableGauge(
+		"latency_shifted",
+		metric.WithDescription(
+			"Latency Shifted",
+		),
+		metric.WithUnit("ms"),
+		metric.WithFloat64Callback(func(_ context.Context, o metric.Float64Observer) error {
+
+			points := 1000
+
+			// Create a log normal distribution to simulate latency
+			// from server response.
+			dist := distuv.LogNormal{
+				Mu:    1000,
+				Sigma: .5,
+			}
+
+			data := make([]float64, points)
+
+			// Draw some random values from the log normal distribution
+			for i := range data {
+				data[i] = dist.Rand()
+
+				// Gauge metric observation
+				o.Observe(data[i], api.WithAttributes(clabels...))
+			}
+			mean, std := stat.MeanStdDev(data, nil)
+			log.Printf("Sent shifted: #points %d , mean %v, sdv %v", points, mean, std)
+			return nil
+		}),
+	)
+
+	_, err = meter.Float64ObservableGauge(
+		"latency_multimodal",
+		metric.WithDescription(
+			"Latency Multimodal",
+		),
+		metric.WithUnit("ms"),
+		metric.WithFloat64Callback(func(_ context.Context, o metric.Float64Observer) error {
+
+			points := 1000
+
+			// Create a multimodal normal
+			dist_1 := distuv.LogNormal{
+				Mu:    3.5,
+				Sigma: .5,
+			}
+			dist_2 := distuv.LogNormal{
+				Mu:    5.5,
+				Sigma: .5,
+			}
+
+			data := make([]float64, points)
+
+			// Draw some random values from the log normal distribution
+			for i := range data {
+				if rand.Float64() < .5 {
+					data[i] = dist_1.Rand()
+				} else {
+					data[i] = dist_2.Rand()
+				}
+
+				// Gauge metric observation
+				o.Observe(data[i], api.WithAttributes(clabels...))
+			}
+			mean, std := stat.MeanStdDev(data, nil)
+			log.Printf("Sent multimodal : #points %d , mean %v, sdv %v", points, mean, std)
+			return nil
+		}),
+	)
+
 	if err != nil {
 		log.Fatalf("Failed to create gauge: %v", err)
 	}
