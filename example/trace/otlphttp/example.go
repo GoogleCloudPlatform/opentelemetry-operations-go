@@ -19,30 +19,36 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 	"go.opentelemetry.io/otel/trace"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/oauth"
+	"golang.org/x/oauth2/google"
 )
 
-func initTracer() (func(), error) {
+func initTracer(projectID string) (func(), error) {
 	ctx := context.Background()
 
-	creds, err := oauth.NewApplicationDefault(ctx)
+	creds, err := google.FindDefaultCredentials(ctx)
+	if err != nil {
+		panic(err)
+	}
+	token, err := creds.TokenSource.Token()
 	if err != nil {
 		panic(err)
 	}
 
 	// set OTEL_RESOURCE_ATTRIBUTES="gcp.project_id=<project_id>"
 	// set endpoint with OTEL_EXPORTER_OTLP_ENDPOINT=https://<endpoint>
-	// set OTEL_EXPORTER_OTLP_HEADERS="x-goog-user-project=<project_id>"
-	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithDialOption(grpc.WithPerRPCCredentials(creds)))
+	exporter, err := otlptracehttp.New(ctx, otlptracehttp.WithHeaders(map[string]string{
+		"Authorization":       fmt.Sprintf("Bearer %s", token.AccessToken),
+		"x-goog-user-project": projectID,
+	}))
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +69,8 @@ func initTracer() (func(), error) {
 }
 
 func main() {
-	shutdown, err := initTracer()
+	projectID := os.Getenv("GCLOUD_PROJECT")
+	shutdown, err := initTracer(projectID)
 	if err != nil {
 		log.Fatal(err)
 	}
