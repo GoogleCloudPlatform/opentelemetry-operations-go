@@ -691,7 +691,7 @@ func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogr
 		positiveBucketCounts += int(v)
 	}
 	var mean float64
-	if !math.IsNaN(float64(hist.Sum)) && hist.Count > 0 { // Avoid divide-by-zero
+	if !math.IsNaN(float64(hist.Sum)) && positiveBucketCounts > 0 { // Avoid divide-by-zero
 		mean = float64(hist.Sum) / float64(positiveBucketCounts)
 	}
 	return &distribution.Distribution{
