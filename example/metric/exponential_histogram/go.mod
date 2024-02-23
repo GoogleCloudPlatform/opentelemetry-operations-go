@@ -4,7 +4,7 @@ go 1.20
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.45.0
-	go.opentelemetry.io/contrib/detectors/gcp v1.19.0
+	go.opentelemetry.io/contrib/detectors/gcp v1.24.0
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/metric v1.24.0
 	go.opentelemetry.io/otel/sdk v1.24.0
@@ -43,3 +43,5 @@ require (
 	google.golang.org/grpc v1.58.3 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 )
+
+replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric => ../../../exporter/metric
