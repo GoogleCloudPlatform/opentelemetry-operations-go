@@ -24,14 +24,14 @@ import (
 	"syscall"
 	"time"
 
-	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 	"gonum.org/v1/gonum/stat"
 	"gonum.org/v1/gonum/stat/distuv"
+
+	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 
 	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/metric"
-	api "go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
@@ -72,7 +72,7 @@ func main() {
 		linearBuckets[i] = float64(i*10 + 10)
 	}
 
-	view_latency_a := sdkmetric.NewView(
+	viewLatencyA := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency",
 		},
@@ -85,7 +85,7 @@ func main() {
 		},
 	)
 
-	view_latency_b := sdkmetric.NewView(
+	viewLatencyB := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency",
 		},
@@ -97,7 +97,7 @@ func main() {
 		},
 	)
 
-	view_latency_c := sdkmetric.NewView(
+	viewLatencyC := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency",
 		},
@@ -109,7 +109,7 @@ func main() {
 		},
 	)
 
-	view_latency_shifted_a := sdkmetric.NewView(
+	viewLatencyShiftedA := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency_shifted",
 		},
@@ -122,7 +122,7 @@ func main() {
 		},
 	)
 
-	view_latency_shifted_b := sdkmetric.NewView(
+	viewLatencyShiftedB := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency_shifted",
 		},
@@ -134,7 +134,7 @@ func main() {
 		},
 	)
 
-	view_latency_shifted_c := sdkmetric.NewView(
+	viewLatencyShiftedC := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency_shifted",
 		},
@@ -146,7 +146,7 @@ func main() {
 		},
 	)
 
-	view_latency_multimodal_a := sdkmetric.NewView(
+	viewLatencyMultimodalA := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency_multimodal",
 		},
@@ -159,7 +159,7 @@ func main() {
 		},
 	)
 
-	view_latency_multimodal_b := sdkmetric.NewView(
+	viewLatencyMultimodalB := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency_multimodal",
 		},
@@ -171,7 +171,7 @@ func main() {
 		},
 	)
 
-	view_latency_multimodal_c := sdkmetric.NewView(
+	viewLatencyMultimodalC := sdkmetric.NewView(
 		sdkmetric.Instrument{
 			Name: "latency_multimodal",
 		},
@@ -185,15 +185,15 @@ func main() {
 
 	// initialize a MeterProvider with that periodically exports to the GCP exporter.
 	provider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithView(view_latency_a),
-		sdkmetric.WithView(view_latency_b),
-		sdkmetric.WithView(view_latency_c),
-		sdkmetric.WithView(view_latency_shifted_a),
-		sdkmetric.WithView(view_latency_shifted_b),
-		sdkmetric.WithView(view_latency_shifted_c),
-		sdkmetric.WithView(view_latency_multimodal_a),
-		sdkmetric.WithView(view_latency_multimodal_b),
-		sdkmetric.WithView(view_latency_multimodal_c),
+		sdkmetric.WithView(viewLatencyA),
+		sdkmetric.WithView(viewLatencyB),
+		sdkmetric.WithView(viewLatencyC),
+		sdkmetric.WithView(viewLatencyShiftedA),
+		sdkmetric.WithView(viewLatencyShiftedB),
+		sdkmetric.WithView(viewLatencyShiftedC),
+		sdkmetric.WithView(viewLatencyMultimodalA),
+		sdkmetric.WithView(viewLatencyMultimodalB),
+		sdkmetric.WithView(viewLatencyMultimodalC),
 		sdkmetric.WithReader(
 			sdkmetric.NewPeriodicReader(
 				exporter,
@@ -218,7 +218,6 @@ func main() {
 		),
 		metric.WithUnit("ms"),
 		metric.WithFloat64Callback(func(_ context.Context, o metric.Float64Observer) error {
-
 			points := 1000
 
 			// Create a log normal distribution to simulate latency
@@ -235,7 +234,7 @@ func main() {
 				data[i] = dist.Rand()
 
 				// Gauge metric observation
-				o.Observe(data[i], api.WithAttributes(clabels...))
+				o.Observe(data[i], metric.WithAttributes(clabels...))
 			}
 			mean, std := stat.MeanStdDev(data, nil)
 			log.Printf("Sent Latency Data (Original Distribution): #points %d , mean %v, sdv %v", points, mean, std)
@@ -250,7 +249,6 @@ func main() {
 		),
 		metric.WithUnit("ms"),
 		metric.WithFloat64Callback(func(_ context.Context, o metric.Float64Observer) error {
-
 			points := 1000
 
 			// Create a log normal distribution to simulate latency
@@ -267,7 +265,7 @@ func main() {
 				data[i] = dist.Rand()
 
 				// Gauge metric observation
-				o.Observe(data[i], api.WithAttributes(clabels...))
+				o.Observe(data[i], metric.WithAttributes(clabels...))
 			}
 			mean, std := stat.MeanStdDev(data, nil)
 			log.Printf("Sent Latency Data (Shifted Distribution): #points %d , mean %v, sdv %v", points, mean, std)
@@ -282,15 +280,14 @@ func main() {
 		),
 		metric.WithUnit("ms"),
 		metric.WithFloat64Callback(func(_ context.Context, o metric.Float64Observer) error {
-
 			points := 1000
 
 			// Create a multimodal normal
-			dist_1 := distuv.LogNormal{
+			dist1 := distuv.LogNormal{
 				Mu:    3.5,
 				Sigma: .5,
 			}
-			dist_2 := distuv.LogNormal{
+			dist2 := distuv.LogNormal{
 				Mu:    5.5,
 				Sigma: .5,
 			}
@@ -300,13 +297,13 @@ func main() {
 			// Draw some random values from the log normal distribution
 			for i := range data {
 				if rand.Float64() < .5 {
-					data[i] = dist_1.Rand()
+					data[i] = dist1.Rand()
 				} else {
-					data[i] = dist_2.Rand()
+					data[i] = dist2.Rand()
 				}
 
 				// Gauge metric observation
-				o.Observe(data[i], api.WithAttributes(clabels...))
+				o.Observe(data[i], metric.WithAttributes(clabels...))
 			}
 			mean, std := stat.MeanStdDev(data, nil)
 			log.Printf("Sent Latency Data (Multimodal Distribution): #points %d , mean %v, sdv %v", points, mean, std)
