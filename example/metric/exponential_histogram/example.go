@@ -216,7 +216,7 @@ func main() {
 		metric.WithDescription(
 			"Latency",
 		),
-		metric.WithUnit("ms"),
+		metric.WithUnit("s"),
 		metric.WithFloat64Callback(func(_ context.Context, o metric.Float64Observer) error {
 			points := 1000
 
@@ -247,7 +247,7 @@ func main() {
 		metric.WithDescription(
 			"Latency Shifted",
 		),
-		metric.WithUnit("ms"),
+		metric.WithUnit("s"),
 		metric.WithFloat64Callback(func(_ context.Context, o metric.Float64Observer) error {
 			points := 1000
 
@@ -278,7 +278,7 @@ func main() {
 		metric.WithDescription(
 			"Latency Multimodal",
 		),
-		metric.WithUnit("ms"),
+		metric.WithUnit("s"),
 		metric.WithFloat64Callback(func(_ context.Context, o metric.Float64Observer) error {
 			points := 1000
 
