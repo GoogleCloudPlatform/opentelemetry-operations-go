@@ -617,7 +617,7 @@ func expHistogramToTimeSeries[N int64 | float64](point metricdata.ExponentialHis
 		return nil, err
 	}
 	distributionValue := expHistToDistribution(point)
-	// TODO: Implement "setSumOfSquaredDeviationExpHist" for parameter "enableSOSD" functionality. 
+	// TODO: Implement "setSumOfSquaredDeviationExpHist" for parameter "enableSOSD" functionality.
 	return &monitoringpb.TimeSeries{
 		Resource:   mr,
 		Unit:       string(metrics.Unit),
@@ -681,33 +681,57 @@ func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]
 	}
 }
 
-func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N]) *distribution.Distribution {
-	numFiniteBuckets := len(hist.PositiveBucket.Counts)
-	counts := make([]int64, numFiniteBuckets)
-	positiveBucketCounts := 0
-	growthFactor := math.Exp2(math.Exp2(-float64(hist.Scale)))
-	for i, v := range hist.PositiveBucket.Counts {
-		counts[i] = int64(v)
-		positiveBucketCounts += int(v)
+func expHistToDistribution[N int64 | float64](point metricdata.ExponentialHistogramDataPoint[N]) *distribution.Distribution {
+	// First calculate underflow bucket with all negatives + zeros.
+	underflow := point.ZeroCount()
+	negativeBuckets := point.Negative().BucketCounts()
+	for i := 0; i < negativeBuckets.Len(); i++ {
+		underflow += negativeBuckets.At(i)
 	}
-	var mean float64
-	if !math.IsNaN(float64(hist.Sum)) && positiveBucketCounts > 0 { // Avoid divide-by-zero
-		mean = float64(hist.Sum) / float64(positiveBucketCounts)
+
+	// Next, pull in remaining buckets.
+	counts := make([]int64, point.Positive().BucketCounts().Len()+2)
+	bucketOptions := &distribution.Distribution_BucketOptions{}
+	counts[0] = int64(underflow)
+	positiveBuckets := point.Positive().BucketCounts()
+	for i := 0; i < positiveBuckets.Len(); i++ {
+		counts[i+1] = int64(positiveBuckets.At(i))
 	}
-	return &distribution.Distribution{
-		Count:        int64(positiveBucketCounts),
-		Mean:         mean,
-		BucketCounts: counts,
-		BucketOptions: &distribution.Distribution_BucketOptions{
-			Options: &distribution.Distribution_BucketOptions_ExponentialBuckets{
-				ExponentialBuckets: &distribution.Distribution_BucketOptions_Exponential{
-					Scale:            math.Pow(growthFactor, float64(hist.PositiveBucket.Offset)),
-					GrowthFactor:     growthFactor,
-					NumFiniteBuckets: int32(numFiniteBuckets),
-				},
+	// Overflow bucket is always empty
+	counts[len(counts)-1] = 0
+
+	if point.Positive().BucketCounts().Len() == 0 {
+		// We cannot send exponential distributions with no positive buckets,
+		// instead we send a simple overflow/underflow histogram.
+		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExplicitBuckets{
+			ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
+				Bounds: []float64{0},
 			},
-		},
-		Exemplars: toDistributionExemplar[N](hist.Exemplars),
+		}
+	} else {
+		// Exponential histogram
+		growth := math.Exp2(math.Exp2(-float64(point.Scale())))
+		scale := math.Pow(growth, float64(point.Positive().Offset()))
+		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExponentialBuckets{
+			ExponentialBuckets: &distribution.Distribution_BucketOptions_Exponential{
+				GrowthFactor:     growth,
+				Scale:            scale,
+				NumFiniteBuckets: int32(len(counts) - 2),
+			},
+		}
+	}
+
+	mean := float64(0)
+	if !math.IsNaN(point.Sum()) && point.Count() > 0 { // Avoid divide-by-zero
+		mean = float64(point.Sum() / float64(point.Count()))
+	}
+
+	return &distribution.Distribution{
+		Count:         int64(point.Count()),
+		Mean:          mean,
+		BucketCounts:  counts,
+		BucketOptions: bucketOptions,
+		Exemplars:     toDistributionExemplar[N](point.Exemplars),
 	}
 }
 
