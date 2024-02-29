@@ -39,7 +39,7 @@ import (
 )
 
 func workloadMetricsPrefixFormatter(d metricdata.Metrics) string {
-	return fmt.Sprintf("custom.googleapis.com/%s", d.Name)
+	return fmt.Sprintf("workload.googleapis.com/%s", d.Name)
 }
 
 func main() {
