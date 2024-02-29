@@ -681,7 +681,7 @@ func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]
 	}
 }
 
-func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogramDatahist[N]) *distribution.Distribution {
+func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N]) *distribution.Distribution {
 	// First calculate underflow bucket with all negatives + zeros.
 	underflow := hist.ZeroCount
 	negativeBuckets := hist.NegativeBucket.Counts
@@ -700,7 +700,7 @@ func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogr
 	// Overflow bucket is always empty
 	counts[len(counts)-1] = 0
 
-	if hist.Positive().BucketCounts().Len() == 0 {
+	if len(hist.PositiveBucket.Counts) == 0 {
 		// We cannot send exponential distributions with no positive buckets,
 		// instead we send a simple overflow/underflow histogram.
 		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExplicitBuckets{
@@ -722,8 +722,8 @@ func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogr
 	}
 
 	mean := float64(0)
-	if !math.IsNaN(hist.Sum()) && hist.Count() > 0 { // Avoid divide-by-zero
-		mean = float64(hist.Sum() / float64(hist.Count()))
+	if !math.IsNaN(hist.Sum) && hist.Count > 0 { // Avoid divide-by-zero
+		mean = float64(hist.Sum / float64(hist.Count))
 	}
 
 	return &distribution.Distribution{
