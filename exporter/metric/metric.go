@@ -738,6 +738,7 @@ func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogr
 func toDistributionExemplar[N int64 | float64](Exemplars []metricdata.Exemplar[N]) []*distribution.Distribution_Exemplar {
 	var exemplars []*distribution.Distribution_Exemplar
 	for _, e := range Exemplars {
+		// TODO: Add context []attachments. See https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TypedValue#exemplar
 		exemplars = append(exemplars, &distribution.Distribution_Exemplar{Value: float64(e.Value), Timestamp: timestamppb.New(e.Time)})
 	}
 	sort.Slice(exemplars, func(i, j int) bool {
