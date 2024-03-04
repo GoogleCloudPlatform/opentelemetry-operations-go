@@ -58,9 +58,7 @@ func main() {
 	}
 
 	// Create exporter pipeline
-	exporter, err := mexporter.New(
-		mexporter.WithMetricDescriptorTypeFormatter(workloadMetricsPrefixFormatter),
-	)
+	exporter, err := mexporter.New()
 	if err != nil {
 		log.Fatalf("Failed to create exporter: %v", err)
 	}
