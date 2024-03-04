@@ -110,7 +110,7 @@
                         "groupByFields": [],
                         "perSeriesAligner": "ALIGN_DELTA"
                       },
-                      "filter": "metric.type=\"workload.googleapis.com/latency_c\" resource.type=\"gce_instance\" metadata.system_labels.\"name\"=\"exemplar-dev\" resource.label.\"project_id\"=\"fcovalente-dev\""
+                      "filter": "metric.type=\"workload.googleapis.com/latency_c\" resource.type=\"gce_instance\""
                     }
                   }
                 }
