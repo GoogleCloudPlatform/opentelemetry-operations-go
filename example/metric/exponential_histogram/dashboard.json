@@ -1,0 +1,367 @@
+{
+    "displayName": "Exponential Histogram",
+    "dashboardFilters": [],
+    "mosaicLayout": {
+      "columns": 48,
+      "tiles": [
+        {
+          "xPos": 17,
+          "width": 15,
+          "height": 17,
+          "widget": {
+            "title": "Linear Buckets - latency_b",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "breakdowns": [],
+                  "dimensions": [],
+                  "legendTemplate": "Latency",
+                  "measures": [],
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "HEATMAP",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_DELTA"
+                      },
+                      "filter": "metric.type=\"workload.googleapis.com/latency_b\" resource.type=\"gce_instance\""
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        },
+        {
+          "width": 17,
+          "height": 17,
+          "widget": {
+            "title": "Exponential Buckets - latency_a",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "breakdowns": [],
+                  "dimensions": [],
+                  "legendTemplate": "Latency",
+                  "measures": [],
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "HEATMAP",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_DELTA"
+                      },
+                      "filter": "metric.type=\"workload.googleapis.com/latency_a\" resource.type=\"gce_instance\""
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        },
+        {
+          "xPos": 32,
+          "width": 16,
+          "height": 17,
+          "widget": {
+            "title": "Default Buckets - latency_c",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "breakdowns": [],
+                  "dimensions": [],
+                  "legendTemplate": "Latency",
+                  "measures": [],
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "HEATMAP",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_DELTA"
+                      },
+                      "filter": "metric.type=\"workload.googleapis.com/latency_c\" resource.type=\"gce_instance\" metadata.system_labels.\"name\"=\"exemplar-dev\" resource.label.\"project_id\"=\"fcovalente-dev\""
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        },
+        {
+          "yPos": 17,
+          "width": 17,
+          "height": 16,
+          "widget": {
+            "title": "Exponential Buckets - latency_shifted_a",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "breakdowns": [],
+                  "dimensions": [],
+                  "measures": [],
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "HEATMAP",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_DELTA"
+                      },
+                      "filter": "metric.type=\"workload.googleapis.com/latency_shifted_a\" resource.type=\"gce_instance\""
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        },
+        {
+          "xPos": 17,
+          "yPos": 17,
+          "width": 15,
+          "height": 16,
+          "widget": {
+            "title": "Linear Buckets - latency_shifted_b",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "breakdowns": [],
+                  "dimensions": [],
+                  "measures": [],
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "HEATMAP",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_DELTA"
+                      },
+                      "filter": "metric.type=\"workload.googleapis.com/latency_shifted_b\" resource.type=\"gce_instance\""
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        },
+        {
+          "xPos": 32,
+          "yPos": 17,
+          "width": 16,
+          "height": 16,
+          "widget": {
+            "title": "Default Buckets - latency_shifted_c",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "breakdowns": [],
+                  "dimensions": [],
+                  "measures": [],
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "HEATMAP",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_DELTA"
+                      },
+                      "filter": "metric.type=\"workload.googleapis.com/latency_shifted_c\" resource.type=\"gce_instance\""
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        },
+        {
+          "yPos": 33,
+          "width": 17,
+          "height": 16,
+          "widget": {
+            "title": "Exponential Buckets - latency_multimodal_a",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "breakdowns": [],
+                  "dimensions": [],
+                  "measures": [],
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "HEATMAP",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_DELTA"
+                      },
+                      "filter": "metric.type=\"workload.googleapis.com/latency_multimodal_a\" resource.type=\"gce_instance\""
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        },
+        {
+          "xPos": 17,
+          "yPos": 33,
+          "width": 15,
+          "height": 16,
+          "widget": {
+            "title": "Linear Buckets - latency_multimodal_b",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "breakdowns": [],
+                  "dimensions": [],
+                  "measures": [],
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "HEATMAP",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_DELTA"
+                      },
+                      "filter": "metric.type=\"workload.googleapis.com/latency_multimodal_b\" resource.type=\"gce_instance\""
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        },
+        {
+          "xPos": 32,
+          "yPos": 33,
+          "width": 16,
+          "height": 16,
+          "widget": {
+            "title": "Default Buckets - latency_multimodal_c",
+            "xyChart": {
+              "chartOptions": {
+                "mode": "COLOR"
+              },
+              "dataSets": [
+                {
+                  "breakdowns": [],
+                  "dimensions": [],
+                  "measures": [],
+                  "minAlignmentPeriod": "60s",
+                  "plotType": "HEATMAP",
+                  "targetAxis": "Y1",
+                  "timeSeriesQuery": {
+                    "timeSeriesFilter": {
+                      "aggregation": {
+                        "alignmentPeriod": "60s",
+                        "crossSeriesReducer": "REDUCE_SUM",
+                        "groupByFields": [],
+                        "perSeriesAligner": "ALIGN_DELTA"
+                      },
+                      "filter": "metric.type=\"workload.googleapis.com/latency_multimodal_c\" resource.type=\"gce_instance\""
+                    }
+                  }
+                }
+              ],
+              "thresholds": [],
+              "yAxis": {
+                "label": "",
+                "scale": "LINEAR"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "labels": {}
+  }

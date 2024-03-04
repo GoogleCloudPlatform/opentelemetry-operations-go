@@ -21,6 +21,7 @@ import (
 	"math"
 	"net/url"
 	"reflect"
+	"sort"
 	"strings"
 	"sync"
 	"time"
@@ -505,6 +506,26 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
+	case metricdata.ExponentialHistogram[int64]:
+		for _, point := range a.DataPoints {
+			ts, err := expHistogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			tss = append(tss, ts)
+		}
+	case metricdata.ExponentialHistogram[float64]:
+		for _, point := range a.DataPoints {
+			ts, err := expHistogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			tss = append(tss, ts)
+		}
 	default:
 		errs = append(errs, errUnexpectedAggregationKind{kind: reflect.TypeOf(m.Data).String()})
 	}
@@ -600,6 +621,29 @@ func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoin
 	}, nil
 }
 
+func expHistogramToTimeSeries[N int64 | float64](point metricdata.ExponentialHistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource, enableSOSD bool) (*monitoringpb.TimeSeries, error) {
+	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
+	if err != nil {
+		return nil, err
+	}
+	distributionValue := expHistToDistribution(point)
+	// TODO: Implement "setSumOfSquaredDeviationExpHist" for parameter "enableSOSD" functionality.
+	return &monitoringpb.TimeSeries{
+		Resource:   mr,
+		Unit:       string(metrics.Unit),
+		MetricKind: googlemetricpb.MetricDescriptor_CUMULATIVE,
+		ValueType:  googlemetricpb.MetricDescriptor_DISTRIBUTION,
+		Points: []*monitoringpb.Point{{
+			Interval: interval,
+			Value: &monitoringpb.TypedValue{
+				Value: &monitoringpb.TypedValue_DistributionValue{
+					DistributionValue: distributionValue,
+				},
+			},
+		}},
+	}, nil
+}
+
 func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval, error) {
 	// The end time of a new interval must be at least a millisecond after the end time of the
 	// previous interval, for all non-gauge types.
@@ -643,8 +687,74 @@ func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]
 				},
 			},
 		},
-		// TODO: support exemplars
+		Exemplars: toDistributionExemplar[N](hist.Exemplars),
 	}
+}
+
+func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N]) *distribution.Distribution {
+	// First calculate underflow bucket with all negatives + zeros.
+	underflow := hist.ZeroCount
+	negativeBuckets := hist.NegativeBucket.Counts
+	for i := 0; i < len(negativeBuckets); i++ {
+		underflow += negativeBuckets[i]
+	}
+
+	// Next, pull in remaining buckets.
+	counts := make([]int64, len(hist.PositiveBucket.Counts)+2)
+	bucketOptions := &distribution.Distribution_BucketOptions{}
+	counts[0] = int64(underflow)
+	positiveBuckets := hist.PositiveBucket.Counts
+	for i := 0; i < len(positiveBuckets); i++ {
+		counts[i+1] = int64(positiveBuckets[i])
+	}
+	// Overflow bucket is always empty
+	counts[len(counts)-1] = 0
+
+	if len(hist.PositiveBucket.Counts) == 0 {
+		// We cannot send exponential distributions with no positive buckets,
+		// instead we send a simple overflow/underflow histogram.
+		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExplicitBuckets{
+			ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
+				Bounds: []float64{0},
+			},
+		}
+	} else {
+		// Exponential histogram
+		growth := math.Exp2(math.Exp2(-float64(hist.Scale)))
+		scale := math.Pow(growth, float64(hist.PositiveBucket.Offset))
+		bucketOptions.Options = &distribution.Distribution_BucketOptions_ExponentialBuckets{
+			ExponentialBuckets: &distribution.Distribution_BucketOptions_Exponential{
+				GrowthFactor:     growth,
+				Scale:            scale,
+				NumFiniteBuckets: int32(len(counts) - 2),
+			},
+		}
+	}
+
+	var mean float64
+	if !math.IsNaN(float64(hist.Sum)) && hist.Count > 0 { // Avoid divide-by-zero
+		mean = float64(hist.Sum) / float64(hist.Count)
+	}
+
+	return &distribution.Distribution{
+		Count:         int64(hist.Count),
+		Mean:          mean,
+		BucketCounts:  counts,
+		BucketOptions: bucketOptions,
+		Exemplars:     toDistributionExemplar[N](hist.Exemplars),
+	}
+}
+
+func toDistributionExemplar[N int64 | float64](Exemplars []metricdata.Exemplar[N]) []*distribution.Distribution_Exemplar {
+	var exemplars []*distribution.Distribution_Exemplar
+	for _, e := range Exemplars {
+		// TODO: Add context []attachments. See https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TypedValue#exemplar
+		exemplars = append(exemplars, &distribution.Distribution_Exemplar{Value: float64(e.Value), Timestamp: timestamppb.New(e.Time)})
+	}
+	sort.Slice(exemplars, func(i, j int) bool {
+		return exemplars[i].Value < exemplars[j].Value
+	})
+	return exemplars
 }
 
 func setSumOfSquaredDeviation[N int64 | float64](hist metricdata.HistogramDataPoint[N], dist *distribution.Distribution) {
