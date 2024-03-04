@@ -183,15 +183,17 @@ func main() {
 
 	// initialize a MeterProvider with that periodically exports to the GCP exporter.
 	provider := sdkmetric.NewMeterProvider(
-		sdkmetric.WithView(viewLatencyA),
-		sdkmetric.WithView(viewLatencyB),
-		sdkmetric.WithView(viewLatencyC),
-		sdkmetric.WithView(viewLatencyShiftedA),
-		sdkmetric.WithView(viewLatencyShiftedB),
-		sdkmetric.WithView(viewLatencyShiftedC),
-		sdkmetric.WithView(viewLatencyMultimodalA),
-		sdkmetric.WithView(viewLatencyMultimodalB),
-		sdkmetric.WithView(viewLatencyMultimodalC),
+		sdkmetric.WithView(
+			viewLatencyA,
+			viewLatencyB,
+			viewLatencyC,
+			viewLatencyShiftedA,
+			viewLatencyShiftedB,
+			viewLatencyShiftedC,
+			viewLatencyMultimodalA,
+			viewLatencyMultimodalB,
+			viewLatencyMultimodalC,
+		),
 		sdkmetric.WithReader(
 			sdkmetric.NewPeriodicReader(
 				exporter,
