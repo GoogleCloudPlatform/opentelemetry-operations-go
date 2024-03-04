@@ -506,6 +506,16 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
+	case metricdata.ExponentialHistogram[int64]:
+		for _, point := range a.DataPoints {
+			ts, err := expHistogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
+			if err != nil {
+				errs = append(errs, err)
+				continue
+			}
+			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			tss = append(tss, ts)
+		}
 	case metricdata.ExponentialHistogram[float64]:
 		for _, point := range a.DataPoints {
 			ts, err := expHistogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
