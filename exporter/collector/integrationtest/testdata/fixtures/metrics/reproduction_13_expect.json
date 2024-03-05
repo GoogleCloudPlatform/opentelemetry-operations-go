@@ -1,0 +1,3586 @@
+{
+  "createTimeSeriesRequests": [
+    {
+      "name": "projects/fakeprojectid",
+      "timeSeries": [
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "sys"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "total"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 198.33
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "user"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "sys"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "total"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 213.74
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "user"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "sys"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "total"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 285.5
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "user"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "sys"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "total"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 277.79
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "user"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "sys"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "total"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 475.43
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "user"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "sys"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "total"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 329.16
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_cpu_time_sum_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "user"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_mem_virtual_size/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 5637804032
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_mem_virtual_size/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 5570695168
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_mem_virtual_size/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 6047825920
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_mem_virtual_size/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 5022273536
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_mem_virtual_size/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 12792729600
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_process_mem_virtual_size/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 12793020416
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_process_cpu_total/counter",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.06
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_cluster_health_up/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_clusterinfo_up/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "url": "https://xray-es:9200"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_indices_flush_time_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_indices_flush_time_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_indices_flush_time_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_indices_flush_time_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_indices_flush_time_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 23.52
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_indices_flush_time_total/counter",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 17.86
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_node_stats_up/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_os_mem_actual_free/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_os_mem_actual_free/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_os_mem_actual_free/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_os_mem_actual_free/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_os_mem_actual_free/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_os_mem_actual_free/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 647628560
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 170453696
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 507476080
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 305806208
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 358013784
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 705292672
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "non-heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 196966936
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "non-heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 166308624
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "non-heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 220190608
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "non-heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 166673792
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "non-heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 244997216
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_memory_used/gauge",
+            "labels": {
+              "area": "non-heap",
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 202398536
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_go_memstats_heap_released/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 62963712
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_go_memstats_last_gc_time/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_cluster_health_active_primary_shards/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 50
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_cluster_health_task_max_waiting_in_queue_millis/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_clusterinfo_last_retrieval_success_ts/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "url": "https://xray-es:9200"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1709566992
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_filesystem_data_available/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "mount": "/usr/share/elasticsearch/data (/dev/sdp)",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "path": "/usr/share/elasticsearch/data",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 2019430400
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_filesystem_data_available/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "mount": "/usr/share/elasticsearch/data (/dev/sdp)",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "path": "/usr/share/elasticsearch/data",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 2017853440
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_filesystem_data_available/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "mount": "/usr/share/elasticsearch/data (/dev/sds)",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "path": "/usr/share/elasticsearch/data",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 2014748672
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_filesystem_data_available/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "mount": "/usr/share/elasticsearch/data (/dev/sdf)",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "path": "/usr/share/elasticsearch/data",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 2018291712
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_filesystem_data_available/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "mount": "/usr/share/elasticsearch/data (/dev/sdi)",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "path": "/usr/share/elasticsearch/data",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 15684710400
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_filesystem_data_available/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "mount": "/usr/share/elasticsearch/data (/dev/sdag)",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "path": "/usr/share/elasticsearch/data",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 15684493312
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "direct"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1073315
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.116.193",
+              "name": "es-master-2",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "mapped"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "direct"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1073315
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.134.78",
+              "name": "es-master-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "mapped"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "direct"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1073337
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "false",
+              "es_master_node": "true",
+              "host": "100.64.77.222",
+              "name": "es-master-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "mapped"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "direct"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1056931
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "false",
+              "es_ingest_node": "true",
+              "es_master_node": "false",
+              "host": "100.64.82.70",
+              "name": "tx-service-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "mapped"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "direct"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 4691685
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.34.7",
+              "name": "es-data-0",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "mapped"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 33920778
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "direct"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 4665000
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_elasticsearch_jvm_buffer_pool_used/gauge",
+            "labels": {
+              "cluster": "namespace-name-cluster",
+              "container_name": "es-exporter",
+              "es_client_node": "true",
+              "es_data_node": "true",
+              "es_ingest_node": "false",
+              "es_master_node": "false",
+              "host": "100.64.60.87",
+              "name": "es-data-1",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project",
+              "type": "mapped"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 34225011
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_app_go_memstats_lookups_total/counter",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_scope_info/gauge",
+            "labels": {
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/target_info/gauge",
+            "labels": {
+              "cloud_account_id": "cluster-project",
+              "cloud_platform": "gcp_kubernetes_engine",
+              "cloud_provider": "gcp",
+              "host_id": "5840590402498461127",
+              "http_scheme": "http",
+              "k8s_container_name": "otel-collector",
+              "k8s_pod_name": "pod-name-b46559d5b-d9gh7",
+              "net_host_port": "9114"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "selfObservabilityMetrics": {
+    "createTimeSeriesRequests": [
+      {
+        "name": "projects/myproject",
+        "timeSeries": [
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+              "labels": {
+                "status": "OK"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "78"
+                }
+              }
+            ]
+          },
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
+              "labels": {
+                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries",
+                "grpc_client_status": "OK"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "1"
+                }
+              }
+            ]
+          },
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
+              "labels": {
+                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
+              "labels": {
+                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          0.01,
+                          0.05,
+                          0.1,
+                          0.3,
+                          0.6,
+                          0.8,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          8,
+                          10,
+                          13,
+                          16,
+                          20,
+                          25,
+                          30,
+                          40,
+                          50,
+                          65,
+                          80,
+                          100,
+                          130,
+                          160,
+                          200,
+                          250,
+                          300,
+                          400,
+                          500,
+                          650,
+                          800,
+                          1000,
+                          2000,
+                          5000,
+                          10000,
+                          20000,
+                          50000,
+                          100000
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
+              "labels": {
+                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "createMetricDescriptorRequests": [
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+          "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+          "labels": [
+            {
+              "key": "status"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "unit": "1",
+          "description": "Count of metric points written to Cloud Monitoring.",
+          "displayName": "OpenCensus/googlecloudmonitoring/point_count"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
+          "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
+          "labels": [
+            {
+              "key": "grpc_client_method"
+            },
+            {
+              "key": "grpc_client_status"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "unit": "1",
+          "description": "Count of RPCs by method and status.",
+          "displayName": "OpenCensus/grpc.io/client/completed_rpcs"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
+          "type": "custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
+          "labels": [
+            {
+              "key": "grpc_client_method"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Distribution of bytes received per RPC, by method.",
+          "displayName": "OpenCensus/grpc.io/client/received_bytes_per_rpc"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
+          "type": "custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
+          "labels": [
+            {
+              "key": "grpc_client_method"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "ms",
+          "description": "Distribution of round-trip latency, by method.",
+          "displayName": "OpenCensus/grpc.io/client/roundtrip_latency"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
+          "type": "custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
+          "labels": [
+            {
+              "key": "grpc_client_method"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Distribution of bytes sent per RPC, by method.",
+          "displayName": "OpenCensus/grpc.io/client/sent_bytes_per_rpc"
+        }
+      }
+    ]
+  },
+  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.61.0"
+}

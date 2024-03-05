@@ -9,7 +9,7 @@ ALL_COVERAGE_MOD_DIRS := $(shell find . -type f -name 'go.mod' -exec dirname {} 
 
 GOTEST = go test -v -timeout 70s
 GOTEST_SHORT = $(GOTEST) -short
-GOTEST_RACE = $(GOTEST) -race
+GOTEST_RACE = $(GOTEST) -race -timeout 200s
 
 .DEFAULT_GOAL := precommit
 

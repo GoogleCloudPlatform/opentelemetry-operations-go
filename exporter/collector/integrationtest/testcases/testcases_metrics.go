@@ -466,6 +466,191 @@ var MetricsTestCases = []TestCase{
 		// We don't support disabling metric descriptor creation for the SDK exporter
 		SkipForSDK: true,
 	},
+	// TESTING
+	// {
+	// 	Name:                 "Reproduction 0", // TIMESTAMP 1709567016863000000 +0s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_0.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_0_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 1", // TIMESTAMP 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_1.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_1_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 2", // TIMESTAMP 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_2.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_2_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 3", // TIMESTAMP 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_3.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_3_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 4", // TIMESTAMP 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_4.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_4_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 5", // TIMESTAMP 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_5.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_5s_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 6", // TIMESTAMP 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_6.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_6_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 7", // TIMESTAMP 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_7.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_7_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 8", // TIMESTAMP 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_8.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_8_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 9", // 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_9.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_9_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 10", // 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_10.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_10_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 11", // 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_11.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_11_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 12", // 1709567046863000000 + 30s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_12.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_12_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 13", // 1709567044853000000 +28s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_13.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_13_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	// {
+	// 	Name:                 "Reproduction 14", // 1709567076863000000 +60s
+	// 	OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_14.json",
+	// 	ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_14_expect.json",
+	// 	ConfigureCollector:   configureGMPCollector,
+	// 	// We are reproducing an issue with the collector
+	// 	SkipForSDK: true,
+	// },
+	{
+		Name:                 "Reproduction 15", // 1709567104853000000 +88s
+		OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_15.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_15s_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// We are reproducing an issue with the collector
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Reproduction 16", // 1709567104853000000 +88s
+		OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_16.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_16_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// We are reproducing an issue with the collector
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Reproduction 17", // 1709567104853000000 +88s
+		OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_17.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_17_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// We are reproducing an issue with the collector
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Reproduction 18", // 1709567104853000000 +88s
+		OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_18.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_18_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// We are reproducing an issue with the collector
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Reproduction 19", // 1709567104853000000 +88s
+		OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_19.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_19_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// We are reproducing an issue with the collector
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Reproduction 20", // 1709567104853000000 +88s
+		OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_20.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_20_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// We are reproducing an issue with the collector
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Reproduction 21", // 1709567104853000000 +88s
+		OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_21.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_21_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// We are reproducing an issue with the collector
+		SkipForSDK: true,
+	},
+	{
+		Name:                 "Reproduction 22", // 1709567104853000000 +88s
+		OTLPInputFixturePath: "testdata/fixtures/metrics/reproduction_22.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/reproduction_22_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// We are reproducing an issue with the collector
+		SkipForSDK: true,
+	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }
 

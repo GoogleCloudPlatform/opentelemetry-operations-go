@@ -1,0 +1,968 @@
+{
+  "createTimeSeriesRequests": [
+    {
+      "name": "projects/fakeprojectid",
+      "timeSeries": [
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_otelcol_process_memory_rss/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 77008896
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_otelcol_process_runtime_alloc_total/counter",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 26091040
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_up/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_scrape_duration_seconds/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.002796415
+              }
+            }
+          ],
+          "unit": "s"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_scrape_samples_post_metric_relabeling/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 10
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_scrape_series_added/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 10
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_otelcol_exporter_queue_size/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "exporter": "googlecloud/app-traces",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_otelcol_process_cpu_total/counter",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.24000000000000002
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_scrape_samples_scraped/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 10
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_otelcol_process_runtime_total_sys_memory/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 34968840
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_otelcol_process_uptime_total/counter",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 33.182606006
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_otelcol_exporter_queue_capacity/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "exporter": "googlecloud/app-traces",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1000
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_otelcol_process_runtime_heap_alloc/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 13665536
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_internal_otelcol_processor_batch_metadata_cardinality/gauge",
+            "labels": {
+              "container_name": "es-exporter",
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "pod_name": "pod-name-b46559d5b-d9gh7",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706",
+              "source_project_id": "cluster-project"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/otel_scope_info/gauge",
+            "labels": {
+              "otel_scope_name": "otelcol/prometheusreceiver",
+              "otel_scope_version": "0.95.0-rc-9-ga589cc4-20240304-152706"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/target_info/gauge",
+            "labels": {
+              "cloud_account_id": "cluster-project",
+              "cloud_platform": "gcp_kubernetes_engine",
+              "cloud_provider": "gcp",
+              "host_id": "5840590402498461127",
+              "http_scheme": "http",
+              "k8s_container_name": "otel-collector",
+              "k8s_pod_name": "pod-name-b46559d5b-d9gh7",
+              "net_host_port": "8888",
+              "service_instance_id": "instance-974f7d0120e0",
+              "service_name": "otel-collector-ngp-monitoring",
+              "service_version": "0.95.0-rc-9-ga589cc4-20240304-152706"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "dev-01-a9wx",
+              "instance": "",
+              "job": "",
+              "location": "us-central1-c",
+              "namespace": "namespace-name"
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "selfObservabilityMetrics": {
+    "createTimeSeriesRequests": [
+      {
+        "name": "projects/myproject",
+        "timeSeries": [
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+              "labels": {
+                "status": "OK"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "16"
+                }
+              }
+            ]
+          },
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
+              "labels": {
+                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries",
+                "grpc_client_status": "OK"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "1"
+                }
+              }
+            ]
+          },
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
+              "labels": {
+                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
+              "labels": {
+                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          0.01,
+                          0.05,
+                          0.1,
+                          0.3,
+                          0.6,
+                          0.8,
+                          1,
+                          2,
+                          3,
+                          4,
+                          5,
+                          6,
+                          8,
+                          10,
+                          13,
+                          16,
+                          20,
+                          25,
+                          30,
+                          40,
+                          50,
+                          65,
+                          80,
+                          100,
+                          130,
+                          160,
+                          200,
+                          250,
+                          300,
+                          400,
+                          500,
+                          650,
+                          800,
+                          1000,
+                          2000,
+                          5000,
+                          10000,
+                          20000,
+                          50000,
+                          100000
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "metric": {
+              "type": "custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
+              "labels": {
+                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries"
+              }
+            },
+            "resource": {
+              "type": "global"
+            },
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "createMetricDescriptorRequests": [
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+          "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+          "labels": [
+            {
+              "key": "status"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "unit": "1",
+          "description": "Count of metric points written to Cloud Monitoring.",
+          "displayName": "OpenCensus/googlecloudmonitoring/point_count"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
+          "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
+          "labels": [
+            {
+              "key": "grpc_client_method"
+            },
+            {
+              "key": "grpc_client_status"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "unit": "1",
+          "description": "Count of RPCs by method and status.",
+          "displayName": "OpenCensus/grpc.io/client/completed_rpcs"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
+          "type": "custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
+          "labels": [
+            {
+              "key": "grpc_client_method"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Distribution of bytes received per RPC, by method.",
+          "displayName": "OpenCensus/grpc.io/client/received_bytes_per_rpc"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
+          "type": "custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
+          "labels": [
+            {
+              "key": "grpc_client_method"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "ms",
+          "description": "Distribution of round-trip latency, by method.",
+          "displayName": "OpenCensus/grpc.io/client/roundtrip_latency"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
+          "type": "custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
+          "labels": [
+            {
+              "key": "grpc_client_method"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Distribution of bytes sent per RPC, by method.",
+          "displayName": "OpenCensus/grpc.io/client/sent_bytes_per_rpc"
+        }
+      }
+    ]
+  },
+  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.61.0"
+}

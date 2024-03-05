@@ -1,0 +1,2400 @@
+{
+    "resourceMetrics": [
+      {
+        "resource": {
+          "attributes": [
+            {
+              "key": "cloud.availability_zone",
+              "value": {
+                "stringValue": "us-central1-c"
+              }
+            },
+            {
+              "key": "k8s.container.name",
+              "value": {
+                "stringValue": "otel-collector"
+              }
+            },
+            {
+              "key": "net.host.port",
+              "value": {
+                "stringValue": "8888"
+              }
+            },
+            {
+              "key": "http.scheme",
+              "value": {
+                "stringValue": "http"
+              }
+            },
+            {
+              "key": "service_instance_id",
+              "value": {
+                "stringValue": "instance-974f7d0120e0"
+              }
+            },
+            {
+              "key": "service_name",
+              "value": {
+                "stringValue": "otel-collector-ngp-monitoring"
+              }
+            },
+            {
+              "key": "service_version",
+              "value": {
+                "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+              }
+            },
+            {
+              "key": "cloud.provider",
+              "value": {
+                "stringValue": "gcp"
+              }
+            },
+            {
+              "key": "cloud.account.id",
+              "value": {
+                "stringValue": "cluster-project"
+              }
+            },
+            {
+              "key": "cloud.platform",
+              "value": {
+                "stringValue": "gcp_kubernetes_engine"
+              }
+            },
+            {
+              "key": "cloud.region",
+              "value": {
+                "stringValue": "us-central1"
+              }
+            },
+            {
+              "key": "k8s.cluster.name",
+              "value": {
+                "stringValue": "dev-01-a9wx"
+              }
+            },
+            {
+              "key": "host.id",
+              "value": {
+                "stringValue": "5840590402498461127"
+              }
+            },
+            {
+              "key": "k8s.namespace.name",
+              "value": {
+                "stringValue": "namespace-name"
+              }
+            },
+            {
+              "key": "k8s.pod.name",
+              "value": {
+                "stringValue": "pod-name-b46559d5b-d9gh7"
+              }
+            }
+          ]
+        },
+        "scopeMetrics": [
+          {
+            "scope": {
+              "name": "otelcol/prometheusreceiver",
+              "version": "0.95.0-rc-9-ga589cc4-20240304-152706"
+            },
+            "metrics": [
+              {
+                "name": "otel_internal_otelcol_exporter_send_failed_metric_points",
+                "description": "Number of metric points in failed attempts to send to destination.",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "exporter",
+                          "value": {
+                            "stringValue": "file/metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 0
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "exporter",
+                          "value": {
+                            "stringValue": "googlemanagedprometheus/app-metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 0
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "exporter",
+                          "value": {
+                            "stringValue": "googlemanagedprometheus/otel-metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 36
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_googlecloudmonitoring_point_count",
+                "description": "Count of metric points written to Cloud Monitoring.",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "INVALID_ARGUMENT"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567076863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 1
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "status",
+                          "value": {
+                            "stringValue": "OK"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 1373
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_grpc_io_client_received_per_rpc",
+                "description": "Distribution of bytes received per RPC, by method.",
+                "histogram": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "grpc_client_method",
+                          "value": {
+                            "stringValue": "google.monitoring.v3.MetricService/CreateTimeSeries"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "count": "17",
+                      "sum": 0,
+                      "bucketCounts": [
+                        "17",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        1024,
+                        2048,
+                        4096,
+                        16384,
+                        65536,
+                        262144,
+                        1048576,
+                        4194304,
+                        16777216,
+                        67108864,
+                        268435456,
+                        1073741824,
+                        4294967296
+                      ]
+                    }
+                  ],
+                  "aggregationTemporality": 2
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_receiver_refused_metric_points",
+                "description": "Number of metric points that could not be pushed into the pipeline.",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "receiver",
+                          "value": {
+                            "stringValue": "prometheus/app-metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "transport",
+                          "value": {
+                            "stringValue": "http"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 0
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "receiver",
+                          "value": {
+                            "stringValue": "prometheus/otel-metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "transport",
+                          "value": {
+                            "stringValue": "http"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 0
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_exporter_queue_capacity",
+                "description": "Fixed capacity of the retry queue (in batches)",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "exporter",
+                          "value": {
+                            "stringValue": "googlecloud/app-traces"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 1000
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_exporter_queue_size",
+                "description": "Current size of the retry queue (in batches)",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "exporter",
+                          "value": {
+                            "stringValue": "googlecloud/app-traces"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 0
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_up",
+                "description": "The scraping was successful",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_processor_accepted_metric_points",
+                "description": "Number of metric points successfully pushed into the next component in the pipeline.",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "processor",
+                          "value": {
+                            "stringValue": "memory_limiter"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 2276
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_processor_batch_timeout_trigger_send",
+                "description": "Number of times the batch was sent due to a timeout trigger",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "processor",
+                          "value": {
+                            "stringValue": "batch/metrics-app"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567076863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 1
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "processor",
+                          "value": {
+                            "stringValue": "batch/metrics-otel"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 1
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_scrape_duration",
+                "description": "Duration of the scrape",
+                "unit": "s",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 0.00295318
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_process_memory_rss",
+                "description": "Total physical memory (resident set size)",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 95342592
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_process_runtime_total_alloc",
+                "description": "Cumulative bytes allocated for heap objects (see 'go doc runtime.MemStats.TotalAlloc')",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567016863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 114479936
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_scrape_samples_post_metric_relabeling",
+                "description": "The number of samples remaining after metric relabeling was applied",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 155
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_exporter_sent_metric_points",
+                "description": "Number of metric points successfully sent to destination.",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "exporter",
+                          "value": {
+                            "stringValue": "file/metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 2326
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "exporter",
+                          "value": {
+                            "stringValue": "googlemanagedprometheus/app-metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 2276
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "exporter",
+                          "value": {
+                            "stringValue": "googlemanagedprometheus/otel-metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 14
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_grpc_io_client_roundtrip_latency",
+                "description": "Distribution of round-trip latency, by method.",
+                "histogram": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "grpc_client_method",
+                          "value": {
+                            "stringValue": "google.monitoring.v3.MetricService/CreateTimeSeries"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "count": "17",
+                      "sum": 1433.1745250000001,
+                      "bucketCounts": [
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "6",
+                        "2",
+                        "5",
+                        "3",
+                        "1",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        0.01,
+                        0.05,
+                        0.1,
+                        0.3,
+                        0.6,
+                        0.8,
+                        1,
+                        2,
+                        3,
+                        4,
+                        5,
+                        6,
+                        8,
+                        10,
+                        13,
+                        16,
+                        20,
+                        25,
+                        30,
+                        40,
+                        50,
+                        65,
+                        80,
+                        100,
+                        130,
+                        160,
+                        200,
+                        250,
+                        300,
+                        400,
+                        500,
+                        650,
+                        800,
+                        1000,
+                        2000,
+                        5000,
+                        10000,
+                        20000,
+                        50000,
+                        100000
+                      ]
+                    }
+                  ],
+                  "aggregationTemporality": 2
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_grpc_io_client_sent_per_rpc",
+                "description": "Distribution of bytes sent per RPC, by method.",
+                "histogram": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "grpc_client_method",
+                          "value": {
+                            "stringValue": "google.monitoring.v3.MetricService/CreateTimeSeries"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "count": "17",
+                      "sum": 883760,
+                      "bucketCounts": [
+                        "3",
+                        "0",
+                        "0",
+                        "4",
+                        "4",
+                        "6",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        1024,
+                        2048,
+                        4096,
+                        16384,
+                        65536,
+                        262144,
+                        1048576,
+                        4194304,
+                        16777216,
+                        67108864,
+                        268435456,
+                        1073741824,
+                        4294967296
+                      ]
+                    }
+                  ],
+                  "aggregationTemporality": 2
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_processor_batch_batch_send_size",
+                "description": "Number of units in the batch",
+                "histogram": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "processor",
+                          "value": {
+                            "stringValue": "batch/metrics-app"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "count": "12",
+                      "sum": 2276,
+                      "bucketCounts": [
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "1",
+                        "11",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        10,
+                        25,
+                        50,
+                        75,
+                        100,
+                        250,
+                        500,
+                        750,
+                        1000,
+                        2000,
+                        3000,
+                        4000,
+                        5000,
+                        6000,
+                        7000,
+                        8000,
+                        9000,
+                        10000,
+                        20000,
+                        30000,
+                        50000,
+                        100000
+                      ]
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "processor",
+                          "value": {
+                            "stringValue": "batch/metrics-otel"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "count": "1",
+                      "sum": 14,
+                      "bucketCounts": [
+                        "0",
+                        "1",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        10,
+                        25,
+                        50,
+                        75,
+                        100,
+                        250,
+                        500,
+                        750,
+                        1000,
+                        2000,
+                        3000,
+                        4000,
+                        5000,
+                        6000,
+                        7000,
+                        8000,
+                        9000,
+                        10000,
+                        20000,
+                        30000,
+                        50000,
+                        100000
+                      ]
+                    }
+                  ],
+                  "aggregationTemporality": 2
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_processor_batch_metadata_cardinality",
+                "description": "Number of distinct metadata value combinations being processed",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_processor_refused_metric_points",
+                "description": "Number of metric points that were rejected by the next component in the pipeline.",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "processor",
+                          "value": {
+                            "stringValue": "memory_limiter"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 0
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_receiver_accepted_metric_points",
+                "description": "Number of metric points successfully pushed into the pipeline.",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "receiver",
+                          "value": {
+                            "stringValue": "prometheus/app-metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "transport",
+                          "value": {
+                            "stringValue": "http"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 2276
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "receiver",
+                          "value": {
+                            "stringValue": "prometheus/otel-metrics"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "transport",
+                          "value": {
+                            "stringValue": "http"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 50
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_process_runtime_heap_alloc",
+                "description": "Bytes of allocated heap objects (see 'go doc runtime.MemStats.HeapAlloc')",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 21105544
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_process_runtime_total_sys_memory",
+                "description": "Total bytes of memory obtained from the OS (see 'go doc runtime.MemStats.Sys')",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 49059080
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_process_uptime",
+                "description": "Uptime of the process",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567016863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 93.183225558
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_scrape_samples_scraped",
+                "description": "The number of samples the target exposed",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 155
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_scrape_series_added",
+                "description": "The approximate number of new series in this scrape",
+                "gauge": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 155
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_grpc_io_client_completed_rpcs",
+                "description": "Count of RPCs by method and status.",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "grpc_client_method",
+                          "value": {
+                            "stringValue": "google.monitoring.v3.MetricService/CreateTimeSeries"
+                          }
+                        },
+                        {
+                          "key": "grpc_client_status",
+                          "value": {
+                            "stringValue": "INVALID_ARGUMENT"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567076863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 1
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "grpc_client_method",
+                          "value": {
+                            "stringValue": "google.monitoring.v3.MetricService/CreateTimeSeries"
+                          }
+                        },
+                        {
+                          "key": "grpc_client_status",
+                          "value": {
+                            "stringValue": "OK"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 16
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_process_cpu",
+                "description": "Total CPU user and system time in seconds",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567016863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 0.72
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_processor_batch_batch_size_trigger_send",
+                "description": "Number of times the batch was sent due to a size trigger",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "processor",
+                          "value": {
+                            "stringValue": "batch/metrics-app"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 11
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              },
+              {
+                "name": "otel_internal_otelcol_processor_dropped_metric_points",
+                "description": "Number of metric points that were dropped.",
+                "sum": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "processor",
+                          "value": {
+                            "stringValue": "memory_limiter"
+                          }
+                        },
+                        {
+                          "key": "service_instance_id",
+                          "value": {
+                            "stringValue": "instance-974f7d0120e0"
+                          }
+                        },
+                        {
+                          "key": "service_name",
+                          "value": {
+                            "stringValue": "otel-collector-ngp-monitoring"
+                          }
+                        },
+                        {
+                          "key": "service_version",
+                          "value": {
+                            "stringValue": "0.95.0-rc-9-ga589cc4-20240304-152706"
+                          }
+                        },
+                        {
+                          "key": "source_project_id",
+                          "value": {
+                            "stringValue": "cluster-project"
+                          }
+                        },
+                        {
+                          "key": "pod_name",
+                          "value": {
+                            "stringValue": "pod-name-b46559d5b-d9gh7"
+                          }
+                        },
+                        {
+                          "key": "container_name",
+                          "value": {
+                            "stringValue": "es-exporter"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1709567046863000000",
+                      "timeUnixNano": "1709567076863000000",
+                      "asDouble": 0
+                    }
+                  ],
+                  "aggregationTemporality": 2,
+                  "isMonotonic": true
+                }
+              }
+            ]
+          }
+        ],
+        "schemaUrl": "https://opentelemetry.io/schemas/1.6.1"
+      }
+    ]
+  }
