@@ -61,6 +61,22 @@
                         10,
                         20,
                         50
+                      ],
+                      "exemplars": [
+                        {
+                          "asInt": 1,
+                          "timeUnixNano": "1649443516286000000",
+                          "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+                          "spanId": "84f9e8929bb1cd5b",
+                          "filteredAttributes": [
+                            {
+                              "key": "filtered.attribute",
+                              "value": {
+                                "stringValue": "foobar"
+                              }
+                            }
+                          ]
+                        }
                       ]
                     },
                     {
@@ -92,6 +108,22 @@
                         10,
                         20,
                         50
+                      ],
+                      "exemplars": [
+                        {
+                          "asDouble": 10.5,
+                          "timeUnixNano": "1649443516286000000",
+                          "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+                          "spanId": "84f9e8929bb1cd5b",
+                          "filteredAttributes": [
+                            {
+                              "key": "filtered.attribute",
+                              "value": {
+                                "stringValue": "foobar"
+                              }
+                            }
+                          ]
+                        }
                       ]
                     }
                   ],

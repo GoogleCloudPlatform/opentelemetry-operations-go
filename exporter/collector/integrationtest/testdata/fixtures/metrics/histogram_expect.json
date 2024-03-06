@@ -52,6 +52,24 @@
                     "0",
                     "0",
                     "0"
+                  ],
+                  "exemplars": [
+                    {
+                      "value": 1,
+                      "timestamp": "2022-04-08T18:45:16.286Z",
+                      "attachments": [
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
+                          "spanName": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/84f9e8929bb1cd5b"
+                        },
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.DroppedLabels",
+                          "label": {
+                            "filtered_attribute": "foobar"
+                          }
+                        }
+                      ]
+                    }
                   ]
                 }
               }
@@ -108,6 +126,24 @@
                     "1",
                     "0",
                     "0"
+                  ],
+                  "exemplars": [
+                    {
+                      "value": 10.5,
+                      "timestamp": "2022-04-08T18:45:16.286Z",
+                      "attachments": [
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
+                          "spanName": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/84f9e8929bb1cd5b"
+                        },
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.DroppedLabels",
+                          "label": {
+                            "filtered_attribute": "foobar"
+                          }
+                        }
+                      ]
+                    }
                   ]
                 }
               }
