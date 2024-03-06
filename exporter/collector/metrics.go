@@ -916,8 +916,15 @@ func (m *metricMapper) exemplar(ex pmetric.Exemplar, projectID string) *distribu
 			recordExemplarFailure(ctx, 1)
 		}
 	}
+	var val float64
+	switch ex.ValueType() {
+	case pmetric.ExemplarValueTypeDouble:
+		val = ex.DoubleValue()
+	case pmetric.ExemplarValueTypeInt:
+		val = float64(ex.IntValue())
+	}
 	return &distribution.Distribution_Exemplar{
-		Value:       ex.DoubleValue(),
+		Value:       val,
 		Timestamp:   timestamppb.New(ex.Timestamp().AsTime()),
 		Attachments: attachments,
 	}
