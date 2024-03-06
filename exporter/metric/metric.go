@@ -15,7 +15,9 @@
 package metric
 
 import (
+	"bytes"
 	"context"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"math"
@@ -32,6 +34,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/trace"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
@@ -44,6 +47,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
@@ -488,7 +492,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		}
 	case metricdata.Histogram[int64]:
 		for _, point := range a.DataPoints {
-			ts, err := histogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
+			ts, err := histogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation, me.o.projectID)
 			if err != nil {
 				errs = append(errs, err)
 				continue
@@ -498,7 +502,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		}
 	case metricdata.Histogram[float64]:
 		for _, point := range a.DataPoints {
-			ts, err := histogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
+			ts, err := histogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation, me.o.projectID)
 			if err != nil {
 				errs = append(errs, err)
 				continue
@@ -508,7 +512,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		}
 	case metricdata.ExponentialHistogram[int64]:
 		for _, point := range a.DataPoints {
-			ts, err := expHistogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
+			ts, err := expHistogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation, me.o.projectID)
 			if err != nil {
 				errs = append(errs, err)
 				continue
@@ -518,7 +522,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 		}
 	case metricdata.ExponentialHistogram[float64]:
 		for _, point := range a.DataPoints {
-			ts, err := expHistogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation)
+			ts, err := expHistogramToTimeSeries(point, m, mr, me.o.enableSumOfSquaredDeviation, me.o.projectID)
 			if err != nil {
 				errs = append(errs, err)
 				continue
@@ -596,12 +600,12 @@ func sumToTimeSeries[N int64 | float64](point metricdata.DataPoint[N], metrics m
 // TODO(@dashpole): Refactor to pass control-coupling lint check.
 //
 //nolint:revive
-func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource, enableSOSD bool) (*monitoringpb.TimeSeries, error) {
+func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource, enableSOSD bool, projectID string) (*monitoringpb.TimeSeries, error) {
 	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
 	if err != nil {
 		return nil, err
 	}
-	distributionValue := histToDistribution(point)
+	distributionValue := histToDistribution(point, projectID)
 	if enableSOSD {
 		setSumOfSquaredDeviation(point, distributionValue)
 	}
@@ -621,12 +625,12 @@ func histogramToTimeSeries[N int64 | float64](point metricdata.HistogramDataPoin
 	}, nil
 }
 
-func expHistogramToTimeSeries[N int64 | float64](point metricdata.ExponentialHistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource, enableSOSD bool) (*monitoringpb.TimeSeries, error) {
+func expHistogramToTimeSeries[N int64 | float64](point metricdata.ExponentialHistogramDataPoint[N], metrics metricdata.Metrics, mr *monitoredrespb.MonitoredResource, enableSOSD bool, projectID string) (*monitoringpb.TimeSeries, error) {
 	interval, err := toNonemptyTimeIntervalpb(point.StartTime, point.Time)
 	if err != nil {
 		return nil, err
 	}
-	distributionValue := expHistToDistribution(point)
+	distributionValue := expHistToDistribution(point, projectID)
 	// TODO: Implement "setSumOfSquaredDeviationExpHist" for parameter "enableSOSD" functionality.
 	return &monitoringpb.TimeSeries{
 		Resource:   mr,
@@ -667,7 +671,7 @@ func toNonemptyTimeIntervalpb(start, end time.Time) (*monitoringpb.TimeInterval,
 	}, nil
 }
 
-func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]) *distribution.Distribution {
+func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N], projectID string) *distribution.Distribution {
 	counts := make([]int64, len(hist.BucketCounts))
 	for i, v := range hist.BucketCounts {
 		counts[i] = int64(v)
@@ -687,11 +691,11 @@ func histToDistribution[N int64 | float64](hist metricdata.HistogramDataPoint[N]
 				},
 			},
 		},
-		Exemplars: toDistributionExemplar[N](hist.Exemplars),
+		Exemplars: toDistributionExemplar[N](hist.Exemplars, projectID),
 	}
 }
 
-func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N]) *distribution.Distribution {
+func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogramDataPoint[N], projectID string) *distribution.Distribution {
 	// First calculate underflow bucket with all negatives + zeros.
 	underflow := hist.ZeroCount
 	negativeBuckets := hist.NegativeBucket.Counts
@@ -741,20 +745,58 @@ func expHistToDistribution[N int64 | float64](hist metricdata.ExponentialHistogr
 		Mean:          mean,
 		BucketCounts:  counts,
 		BucketOptions: bucketOptions,
-		Exemplars:     toDistributionExemplar[N](hist.Exemplars),
+		Exemplars:     toDistributionExemplar[N](hist.Exemplars, projectID),
 	}
 }
 
-func toDistributionExemplar[N int64 | float64](Exemplars []metricdata.Exemplar[N]) []*distribution.Distribution_Exemplar {
+func toDistributionExemplar[N int64 | float64](Exemplars []metricdata.Exemplar[N], projectID string) []*distribution.Distribution_Exemplar {
 	var exemplars []*distribution.Distribution_Exemplar
 	for _, e := range Exemplars {
-		// TODO: Add context []attachments. See https://cloud.google.com/monitoring/api/ref_v3/rest/v3/TypedValue#exemplar
-		exemplars = append(exemplars, &distribution.Distribution_Exemplar{Value: float64(e.Value), Timestamp: timestamppb.New(e.Time)})
+		attachments := []*anypb.Any{}
+		if hasValidSpanContext(e) {
+			traceID, spanID := e.TraceID, e.SpanID
+			sctx, err := anypb.New(&monitoringpb.SpanContext{
+				SpanName: fmt.Sprintf("projects/%s/traces/%s/spans/%s", projectID, hex.EncodeToString(traceID[:]), hex.EncodeToString(spanID[:])),
+			})
+			if err == nil {
+				attachments = append(attachments, sctx)
+			}
+		}
+		if len(e.FilteredAttributes) > 0 {
+			attr, err := anypb.New(&monitoringpb.DroppedLabels{
+				Label: attributesToLabels(e.FilteredAttributes),
+			})
+			if err == nil {
+				attachments = append(attachments, attr)
+			}
+		}
+		exemplars = append(exemplars, &distribution.Distribution_Exemplar{
+			Value:       float64(e.Value),
+			Timestamp:   timestamppb.New(e.Time),
+			Attachments: attachments,
+		})
 	}
 	sort.Slice(exemplars, func(i, j int) bool {
 		return exemplars[i].Value < exemplars[j].Value
 	})
 	return exemplars
+}
+
+func attributesToLabels(attrs []attribute.KeyValue) map[string]string {
+	labels := make(map[string]string, len(attrs))
+	for _, attr := range attrs {
+		labels[normalizeLabelKey(string(attr.Key))] = sanitizeUTF8(attr.Value.Emit())
+	}
+	return labels
+}
+
+var (
+	nilTraceID trace.TraceID
+	nilSpanID  trace.SpanID
+)
+
+func hasValidSpanContext[N int64 | float64](e metricdata.Exemplar[N]) bool {
+	return !bytes.Equal(e.TraceID[:], nilTraceID[:]) && !bytes.Equal(e.SpanID[:], nilSpanID[:])
 }
 
 func setSumOfSquaredDeviation[N int64 | float64](hist metricdata.HistogramDataPoint[N], dist *distribution.Distribution) {

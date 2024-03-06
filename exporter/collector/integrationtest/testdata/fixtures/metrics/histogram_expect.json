@@ -5,7 +5,155 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/simple.histogram",
+            "type": "workload.googleapis.com/simple.float64.histogram",
+            "labels": {
+              "some_lemons": "13"
+            }
+          },
+          "resource": {
+            "type": "generic_task",
+            "labels": {
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "",
+              "task_id": "10.92.5.2:15692"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "distributionValue": {
+                  "count": "1",
+                  "mean": 2.5,
+                  "sumOfSquaredDeviation": 1,
+                  "bucketOptions": {
+                    "explicitBuckets": {
+                      "bounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "0",
+                    "1",
+                    "0",
+                    "0",
+                    "0",
+                    "0"
+                  ],
+                  "exemplars": [
+                    {
+                      "value": 1.1,
+                      "timestamp": "2022-04-08T18:45:16.286Z",
+                      "attachments": [
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
+                          "spanName": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/84f9e8929bb1cd5b"
+                        },
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.DroppedLabels",
+                          "label": {
+                            "filtered_attribute": "foobar"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "unit": "s"
+        },
+        {
+          "metric": {
+            "type": "workload.googleapis.com/simple.float64.histogram",
+            "labels": {
+              "some_lemons": "10"
+            }
+          },
+          "resource": {
+            "type": "generic_task",
+            "labels": {
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": "",
+              "task_id": "10.92.5.2:15692"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "distributionValue": {
+                  "count": "2",
+                  "mean": 7.15,
+                  "sumOfSquaredDeviation": 74.945,
+                  "bucketOptions": {
+                    "explicitBuckets": {
+                      "bounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "0",
+                    "1",
+                    "0",
+                    "1",
+                    "0",
+                    "0"
+                  ],
+                  "exemplars": [
+                    {
+                      "value": 10.5,
+                      "timestamp": "2022-04-08T18:45:16.286Z",
+                      "attachments": [
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
+                          "spanName": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/84f9e8929bb1cd5b"
+                        },
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.DroppedLabels",
+                          "label": {
+                            "filtered_attribute": "foobar"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "unit": "s"
+        },
+        {
+          "metric": {
+            "type": "workload.googleapis.com/simple.int64.histogram",
             "labels": {
               "some_lemons": "13"
             }
@@ -79,7 +227,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/simple.histogram",
+            "type": "workload.googleapis.com/simple.int64.histogram",
             "labels": {
               "some_lemons": "10"
             }
@@ -129,7 +277,7 @@
                   ],
                   "exemplars": [
                     {
-                      "value": 10.5,
+                      "value": 3,
                       "timestamp": "2022-04-08T18:45:16.286Z",
                       "attachments": [
                         {
@@ -158,8 +306,8 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "simple.histogram",
-        "type": "workload.googleapis.com/simple.histogram",
+        "name": "simple.float64.histogram",
+        "type": "workload.googleapis.com/simple.float64.histogram",
         "labels": [
           {
             "key": "some_lemons"
@@ -168,7 +316,23 @@
         "metricKind": "CUMULATIVE",
         "valueType": "DISTRIBUTION",
         "unit": "s",
-        "displayName": "simple.histogram"
+        "displayName": "simple.float64.histogram"
+      }
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "metricDescriptor": {
+        "name": "simple.int64.histogram",
+        "type": "workload.googleapis.com/simple.int64.histogram",
+        "labels": [
+          {
+            "key": "some_lemons"
+          }
+        ],
+        "metricKind": "CUMULATIVE",
+        "valueType": "DISTRIBUTION",
+        "unit": "s",
+        "displayName": "simple.int64.histogram"
       }
     }
   ],
@@ -194,7 +358,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "2"
+                  "int64Value": "4"
                 }
               }
             ]
@@ -217,7 +381,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "1"
+                  "int64Value": "2"
                 }
               }
             ]

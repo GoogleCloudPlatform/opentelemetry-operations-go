@@ -28,7 +28,110 @@
             "scope": {},
             "metrics": [
               {
-                "name": "simple.histogram",
+                "name": "simple.float64.histogram",
+                "unit": "s",
+                "histogram": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "some.lemons",
+                          "value": {
+                            "stringValue": "13"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "1",
+                      "sum": 2.5,
+                      "bucketCounts": [
+                        "0",
+                        "0",
+                        "1",
+                        "0",
+                        "0",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ],
+                      "exemplars": [
+                        {
+                          "asDouble": 1.1,
+                          "timeUnixNano": "1649443516286000000",
+                          "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+                          "spanId": "84f9e8929bb1cd5b",
+                          "filteredAttributes": [
+                            {
+                              "key": "filtered.attribute",
+                              "value": {
+                                "stringValue": "foobar"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "some.lemons",
+                          "value": {
+                            "stringValue": "10"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "2",
+                      "sum": 14.3,
+                      "bucketCounts": [
+                        "0",
+                        "0",
+                        "1",
+                        "0",
+                        "1",
+                        "0",
+                        "0"
+                      ],
+                      "explicitBounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ],
+                      "exemplars": [
+                        {
+                          "asDouble": 10.5,
+                          "timeUnixNano": "1649443516286000000",
+                          "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+                          "spanId": "84f9e8929bb1cd5b",
+                          "filteredAttributes": [
+                            {
+                              "key": "filtered.attribute",
+                              "value": {
+                                "stringValue": "foobar"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE"
+                }
+              },
+              {
+                "name": "simple.int64.histogram",
                 "unit": "s",
                 "histogram": {
                   "dataPoints": [
@@ -111,7 +214,7 @@
                       ],
                       "exemplars": [
                         {
-                          "asDouble": 10.5,
+                          "asInt": 3,
                           "timeUnixNano": "1649443516286000000",
                           "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
                           "spanId": "84f9e8929bb1cd5b",
