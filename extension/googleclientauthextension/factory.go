@@ -32,13 +32,13 @@ import (
 func NewFactory() extension.Factory {
 	return extension.NewFactory(
 		metadata.Type,
-		createDefaultConfig,
-		createExtension,
+		CreateDefaultConfig,
+		CreateExtension,
 		metadata.ExtensionStability,
 	)
 }
 
-func createExtension(ctx context.Context, set extension.CreateSettings, cfg component.Config) (extension.Extension, error) {
+func CreateExtension(ctx context.Context, set extension.CreateSettings, cfg component.Config) (extension.Extension, error) {
 	config := cfg.(*Config)
 	creds, err := google.FindDefaultCredentials(ctx, config.Scopes...)
 	if err != nil {

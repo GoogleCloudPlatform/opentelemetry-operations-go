@@ -37,7 +37,7 @@ func TestNewFactory(t *testing.T) {
 
 func TestCreateExtension(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, createDefaultConfig())
+	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 }
