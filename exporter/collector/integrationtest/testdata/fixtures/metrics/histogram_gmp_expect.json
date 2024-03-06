@@ -56,7 +56,7 @@
                   ],
                   "exemplars": [
                     {
-                      "value": 1.1,
+                      "value": 4.1,
                       "timestamp": "2022-04-08T18:45:16.286Z",
                       "attachments": [
                         {
@@ -131,7 +131,7 @@
                   ],
                   "exemplars": [
                     {
-                      "value": 10.5,
+                      "value": 15.5,
                       "timestamp": "2022-04-08T18:45:16.286Z",
                       "attachments": [
                         {
@@ -206,7 +206,7 @@
                   ],
                   "exemplars": [
                     {
-                      "value": 1,
+                      "value": 4,
                       "timestamp": "2022-04-08T18:45:16.286Z",
                       "attachments": [
                         {
@@ -281,7 +281,7 @@
                   ],
                   "exemplars": [
                     {
-                      "value": 3,
+                      "value": 12,
                       "timestamp": "2022-04-08T18:45:16.286Z",
                       "attachments": [
                         {

@@ -64,7 +64,7 @@
                       ],
                       "exemplars": [
                         {
-                          "asDouble": 1.1,
+                          "asDouble": 4.1,
                           "timeUnixNano": "1649443516286000000",
                           "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
                           "spanId": "84f9e8929bb1cd5b",
@@ -111,7 +111,7 @@
                       ],
                       "exemplars": [
                         {
-                          "asDouble": 10.5,
+                          "asDouble": 15.5,
                           "timeUnixNano": "1649443516286000000",
                           "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
                           "spanId": "84f9e8929bb1cd5b",
@@ -167,7 +167,7 @@
                       ],
                       "exemplars": [
                         {
-                          "asInt": 1,
+                          "asInt": 4,
                           "timeUnixNano": "1649443516286000000",
                           "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
                           "spanId": "84f9e8929bb1cd5b",
@@ -214,7 +214,7 @@
                       ],
                       "exemplars": [
                         {
-                          "asInt": 3,
+                          "asInt": 12,
                           "timeUnixNano": "1649443516286000000",
                           "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
                           "spanId": "84f9e8929bb1cd5b",

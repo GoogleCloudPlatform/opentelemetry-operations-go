@@ -21,7 +21,10 @@ require (
 	google.golang.org/protobuf v1.33.0
 )
 
-require google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e
+require (
+	go.opentelemetry.io/otel/trace v1.23.1
+	google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e
+)
 
 require (
 	cloud.google.com/go/compute v1.23.0 // indirect
@@ -41,7 +44,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.opentelemetry.io/otel/trace v1.23.1 // indirect
 	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/text v0.14.0 // indirect

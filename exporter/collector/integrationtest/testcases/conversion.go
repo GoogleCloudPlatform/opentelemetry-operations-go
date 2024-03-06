@@ -244,7 +244,6 @@ func convertFloatExemplars(es pmetric.ExemplarSlice) []metricdata.Exemplar[float
 		}
 	}
 	return exemplars
-
 }
 
 func convertAttributes(attrs pcommon.Map) []attribute.KeyValue {
