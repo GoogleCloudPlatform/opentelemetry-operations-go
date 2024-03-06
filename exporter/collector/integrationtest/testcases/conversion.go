@@ -149,6 +149,22 @@ func convertIntDataPoints(pts pmetric.NumberDataPointSlice) []metricdata.DataPoi
 }
 
 func convertHistogram(h pmetric.Histogram) metricdata.Aggregation {
+	for i := 0; i < h.DataPoints().Len(); i++ {
+		pt := h.DataPoints().At(i)
+		for j := 0; j < pt.Exemplars().Len(); j++ {
+			switch pt.Exemplars().At(j).ValueType() {
+			case pmetric.ExemplarValueTypeDouble:
+				return convertFloatHistogram(h)
+			case pmetric.ExemplarValueTypeInt:
+				return convertIntHistogram(h)
+			}
+		}
+	}
+	// The sum is always a float, so default to treating it as a float histogram.
+	return convertFloatHistogram(h)
+}
+
+func convertFloatHistogram(h pmetric.Histogram) metricdata.Aggregation {
 	if h.DataPoints().Len() == 0 {
 		return nil
 	}
@@ -166,9 +182,69 @@ func convertHistogram(h pmetric.Histogram) metricdata.Aggregation {
 			Sum:          pt.Sum(),
 			Bounds:       pt.ExplicitBounds().AsRaw(),
 			BucketCounts: pt.BucketCounts().AsRaw(),
+			Exemplars:    convertFloatExemplars(pt.Exemplars()),
 		}
 	}
 	return agg
+}
+
+func convertIntHistogram(h pmetric.Histogram) metricdata.Aggregation {
+	if h.DataPoints().Len() == 0 {
+		return nil
+	}
+	agg := metricdata.Histogram[int64]{
+		Temporality: convertTemporality(h.AggregationTemporality()),
+		DataPoints:  make([]metricdata.HistogramDataPoint[int64], h.DataPoints().Len()),
+	}
+	for i := 0; i < h.DataPoints().Len(); i++ {
+		pt := h.DataPoints().At(i)
+		agg.DataPoints[i] = metricdata.HistogramDataPoint[int64]{
+			Attributes:   attribute.NewSet(convertAttributes(pt.Attributes())...),
+			StartTime:    pt.StartTimestamp().AsTime(),
+			Time:         pt.Timestamp().AsTime(),
+			Count:        pt.Count(),
+			Sum:          int64(pt.Sum()),
+			Bounds:       pt.ExplicitBounds().AsRaw(),
+			BucketCounts: pt.BucketCounts().AsRaw(),
+			Exemplars:    convertIntExemplars(pt.Exemplars()),
+		}
+	}
+	return agg
+}
+
+func convertIntExemplars(es pmetric.ExemplarSlice) []metricdata.Exemplar[int64] {
+	exemplars := make([]metricdata.Exemplar[int64], es.Len())
+	for i := 0; i < es.Len(); i++ {
+		e := es.At(i)
+		traceID := e.TraceID()
+		spanID := e.SpanID()
+		exemplars[i] = metricdata.Exemplar[int64]{
+			FilteredAttributes: convertAttributes(e.FilteredAttributes()),
+			Time:               e.Timestamp().AsTime(),
+			TraceID:            []byte(traceID[:]),
+			SpanID:             []byte(spanID[:]),
+			Value:              e.IntValue(),
+		}
+	}
+	return exemplars
+}
+
+func convertFloatExemplars(es pmetric.ExemplarSlice) []metricdata.Exemplar[float64] {
+	exemplars := make([]metricdata.Exemplar[float64], es.Len())
+	for i := 0; i < es.Len(); i++ {
+		e := es.At(i)
+		traceID := e.TraceID()
+		spanID := e.SpanID()
+		exemplars[i] = metricdata.Exemplar[float64]{
+			FilteredAttributes: convertAttributes(e.FilteredAttributes()),
+			Time:               e.Timestamp().AsTime(),
+			TraceID:            []byte(traceID[:]),
+			SpanID:             []byte(spanID[:]),
+			Value:              e.DoubleValue(),
+		}
+	}
+	return exemplars
+
 }
 
 func convertAttributes(attrs pcommon.Map) []attribute.KeyValue {
