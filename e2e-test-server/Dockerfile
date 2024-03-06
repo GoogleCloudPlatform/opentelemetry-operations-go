@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-FROM golang:1.22 as builder
+FROM golang:1.22.1 as builder
 
 WORKDIR /workspace/e2e-test-server/
 
