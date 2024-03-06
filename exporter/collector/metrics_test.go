@@ -394,12 +394,20 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	point.SetCount(15)
 	point.SetSum(42)
 	point.ExplicitBounds().FromRaw([]float64{10, 20, 30, 40})
-	exemplar := point.Exemplars().AppendEmpty()
-	exemplar.SetDoubleValue(2)
-	exemplar.SetTimestamp(pcommon.NewTimestampFromTime(end))
-	exemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
-	exemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
-	exemplar.FilteredAttributes().PutStr("test", "extra")
+
+	intExemplar := point.Exemplars().AppendEmpty()
+	intExemplar.SetIntValue(30)
+	intExemplar.SetTimestamp(pcommon.NewTimestampFromTime(end))
+	intExemplar.SetTraceID([16]byte{0, 1, 1, 1, 1, 2, 2, 3, 3, 5, 6, 6, 6, 6, 7, 8})
+	intExemplar.SetSpanID([8]byte{0, 0, 1, 5, 7, 3, 4, 5})
+	intExemplar.FilteredAttributes().PutStr("foo", "intexemplar")
+
+	floatExemplar := point.Exemplars().AppendEmpty()
+	floatExemplar.SetDoubleValue(2)
+	floatExemplar.SetTimestamp(pcommon.NewTimestampFromTime(end))
+	floatExemplar.SetTraceID([16]byte{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 1, 2, 3, 4, 5, 6})
+	floatExemplar.SetSpanID([8]byte{0, 1, 2, 3, 4, 5, 6, 7})
+	floatExemplar.FilteredAttributes().PutStr("test", "extra")
 
 	tsl := mapper.histogramToTimeSeries(mr, labels{}, metric, hist, point, mapper.cfg.ProjectID)
 	assert.Len(t, tsl, 1)
@@ -426,18 +434,34 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	assert.InDelta(t, 12847.6, hdp.SumOfSquaredDeviation, 0.0001)
 	assert.Equal(t, 2.8, hdp.Mean)
 	assert.Equal(t, []float64{10, 20, 30, 40}, hdp.BucketOptions.GetExplicitBuckets().Bounds)
-	assert.Len(t, hdp.Exemplars, 1)
-	ex := hdp.Exemplars[0]
-	assert.Equal(t, float64(2), ex.Value)
-	assert.Equal(t, timestamppb.New(end), ex.Timestamp)
+	assert.Len(t, hdp.Exemplars, 2)
+	// Check int64 exemplar
+	intEx := hdp.Exemplars[1]
+	assert.Equal(t, float64(30), intEx.Value)
+	assert.Equal(t, timestamppb.New(end), intEx.Timestamp)
 	// We should see trace + dropped labels
-	assert.Len(t, ex.Attachments, 2)
+	assert.Len(t, intEx.Attachments, 2)
 	spanctx := &monitoringpb.SpanContext{}
-	err := ex.Attachments[0].UnmarshalTo(spanctx)
+	err := intEx.Attachments[0].UnmarshalTo(spanctx)
+	assert.Nil(t, err)
+	assert.Equal(t, "projects/myproject/traces/00010101010202030305060606060708/spans/0000010507030405", spanctx.SpanName)
+	dropped := &monitoringpb.DroppedLabels{}
+	err = intEx.Attachments[1].UnmarshalTo(dropped)
+	assert.Nil(t, err)
+	assert.Equal(t, map[string]string{"foo": "intexemplar"}, dropped.Label)
+
+	// Check float64 exemplar
+	floatEx := hdp.Exemplars[0]
+	assert.Equal(t, float64(2), floatEx.Value)
+	assert.Equal(t, timestamppb.New(end), floatEx.Timestamp)
+	// We should see trace + dropped labels
+	assert.Len(t, floatEx.Attachments, 2)
+	spanctx = &monitoringpb.SpanContext{}
+	err = floatEx.Attachments[0].UnmarshalTo(spanctx)
 	assert.Nil(t, err)
 	assert.Equal(t, "projects/myproject/traces/00010203040506070809010203040506/spans/0001020304050607", spanctx.SpanName)
-	dropped := &monitoringpb.DroppedLabels{}
-	err = ex.Attachments[1].UnmarshalTo(dropped)
+	dropped = &monitoringpb.DroppedLabels{}
+	err = floatEx.Attachments[1].UnmarshalTo(dropped)
 	assert.Nil(t, err)
 	assert.Equal(t, map[string]string{"test": "extra"}, dropped.Label)
 }
