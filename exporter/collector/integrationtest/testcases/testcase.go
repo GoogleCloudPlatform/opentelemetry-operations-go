@@ -26,6 +26,7 @@ import (
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	distributionpb "google.golang.org/genproto/googleapis/api/distribution"
+	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
@@ -291,6 +292,10 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 		SetStartTimestamp(pcommon.Timestamp)
 		SetTimestamp(pcommon.Timestamp)
 	}
+	type pointWithExemplars interface {
+		point
+		Exemplars() pmetric.ExemplarSlice
+	}
 	updatePoint := func(p point) {
 		if p.StartTimestamp() != 0 {
 			p.SetStartTimestamp(pcommon.NewTimestampFromTime(startTime))
@@ -298,6 +303,13 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 		if p.Timestamp() != 0 {
 			p.SetTimestamp(pcommon.NewTimestampFromTime(endTime))
 		}
+	}
+	updatePointWithExemplars := func(p pointWithExemplars) {
+		updatePoint(p)
+		for i := 0; i < p.Exemplars().Len(); i++ {
+			p.Exemplars().At(i).SetTimestamp(pcommon.NewTimestampFromTime(endTime))
+		}
+
 	}
 
 	for i := 0; i < metrics.ResourceMetrics().Len(); i++ {
@@ -310,15 +322,15 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 				switch m.Type() {
 				case pmetric.MetricTypeGauge:
 					for i := 0; i < m.Gauge().DataPoints().Len(); i++ {
-						updatePoint(m.Gauge().DataPoints().At(i))
+						updatePointWithExemplars(m.Gauge().DataPoints().At(i))
 					}
 				case pmetric.MetricTypeSum:
 					for i := 0; i < m.Sum().DataPoints().Len(); i++ {
-						updatePoint(m.Sum().DataPoints().At(i))
+						updatePointWithExemplars(m.Sum().DataPoints().At(i))
 					}
 				case pmetric.MetricTypeHistogram:
 					for i := 0; i < m.Histogram().DataPoints().Len(); i++ {
-						updatePoint(m.Histogram().DataPoints().At(i))
+						updatePointWithExemplars(m.Histogram().DataPoints().At(i))
 					}
 				case pmetric.MetricTypeSummary:
 					for i := 0; i < m.Summary().DataPoints().Len(); i++ {
@@ -326,7 +338,7 @@ func (tc *TestCase) LoadOTLPMetricsInput(
 					}
 				case pmetric.MetricTypeExponentialHistogram:
 					for i := 0; i < m.ExponentialHistogram().DataPoints().Len(); i++ {
-						updatePoint(m.ExponentialHistogram().DataPoints().At(i))
+						updatePointWithExemplars(m.ExponentialHistogram().DataPoints().At(i))
 					}
 				}
 			}
@@ -369,6 +381,11 @@ func (tc *TestCase) updateMetricExpectFixture(
 				}
 				if p.GetInterval().GetEndTime() != nil {
 					p.GetInterval().EndTime = timestamppb.New(endTime)
+				}
+				if ts.GetValueType() == googlemetricpb.MetricDescriptor_DISTRIBUTION {
+					for _, ex := range p.GetValue().GetDistributionValue().GetExemplars() {
+						ex.Timestamp = timestamppb.New(endTime)
+					}
 				}
 			}
 		}
@@ -422,6 +439,11 @@ func normalizeTimeSeriesReqs(t testing.TB, reqs ...*monitoringpb.CreateTimeSerie
 				}
 				if p.GetInterval().GetEndTime() != nil {
 					p.GetInterval().EndTime = &timestamppb.Timestamp{}
+				}
+				if ts.GetValueType() == googlemetricpb.MetricDescriptor_DISTRIBUTION {
+					for _, ex := range p.GetValue().GetDistributionValue().GetExemplars() {
+						ex.Timestamp = &timestamppb.Timestamp{}
+					}
 				}
 			}
 
