@@ -754,9 +754,8 @@ func toDistributionExemplar[N int64 | float64](Exemplars []metricdata.Exemplar[N
 	for _, e := range Exemplars {
 		attachments := []*anypb.Any{}
 		if hasValidSpanContext(e) {
-			traceID, spanID := e.TraceID, e.SpanID
 			sctx, err := anypb.New(&monitoringpb.SpanContext{
-				SpanName: fmt.Sprintf("projects/%s/traces/%s/spans/%s", projectID, hex.EncodeToString(traceID[:]), hex.EncodeToString(spanID[:])),
+				SpanName: fmt.Sprintf("projects/%s/traces/%s/spans/%s", projectID, hex.EncodeToString(e.TraceID[:]), hex.EncodeToString(e.SpanID[:])),
 			})
 			if err == nil {
 				attachments = append(attachments, sctx)
