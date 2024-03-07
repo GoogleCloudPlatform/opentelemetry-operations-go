@@ -57,7 +57,7 @@
                   "exemplars": [
                     {
                       "value": 4.1,
-                      "timestamp": "2022-04-08T18:45:16.286Z",
+                      "timestamp": "1970-01-01T00:00:00Z",
                       "attachments": [
                         {
                           "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
@@ -132,7 +132,7 @@
                   "exemplars": [
                     {
                       "value": 15.5,
-                      "timestamp": "2022-04-08T18:45:16.286Z",
+                      "timestamp": "1970-01-01T00:00:00Z",
                       "attachments": [
                         {
                           "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
@@ -207,7 +207,7 @@
                   "exemplars": [
                     {
                       "value": 4,
-                      "timestamp": "2022-04-08T18:45:16.286Z",
+                      "timestamp": "1970-01-01T00:00:00Z",
                       "attachments": [
                         {
                           "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
@@ -282,7 +282,7 @@
                   "exemplars": [
                     {
                       "value": 12,
-                      "timestamp": "2022-04-08T18:45:16.286Z",
+                      "timestamp": "1970-01-01T00:00:00Z",
                       "attachments": [
                         {
                           "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
