@@ -144,6 +144,8 @@ func NewTraceTestExporter(
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
+	err = exporter.Start(ctx, componenttest.NewNopHost())
+	require.NoError(t, err)
 	t.Logf("Collector TracesTestServer exporter started, pointing at %v", cfg.TraceConfig.ClientConfig.Endpoint)
 	return exporter
 }
