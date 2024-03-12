@@ -24,6 +24,7 @@ import (
 	"go.opencensus.io/metric/metricexport"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
@@ -190,6 +191,9 @@ func NewLogTestExporter(
 		logger,
 		"latest",
 	)
+	require.NoError(t, err)
+
+	err = exporter.Start(ctx, componenttest.NewNopHost())
 	require.NoError(t, err)
 
 	exporter.ConfigureExporter(extraConfig)
