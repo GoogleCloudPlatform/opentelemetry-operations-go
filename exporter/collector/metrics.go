@@ -51,6 +51,7 @@ import (
 
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 
@@ -161,7 +162,10 @@ func (me *MetricsExporter) Shutdown(ctx context.Context) error {
 		me.obs.log.Error("Error waiting for async tasks to finish.", zap.Error(ctx.Err()))
 	case <-c:
 	}
-	return me.client.Close()
+	if me.client != nil {
+		return me.client.Close()
+	}
+	return nil
 }
 
 func NewGoogleCloudMetricsExporter(
@@ -178,35 +182,11 @@ func NewGoogleCloudMetricsExporter(
 	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
 
-	clientOpts, err := generateClientOptions(ctx, &cfg.MetricConfig.ClientConfig, &cfg, monitoring.DefaultAuthScopes())
-	if err != nil {
-		return nil, err
-	}
-
-	client, err := monitoring.NewMetricClient(ctx, clientOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	if cfg.MetricConfig.ClientConfig.Compression == gzip.Name {
-		client.CallOptions.CreateMetricDescriptor = append(client.CallOptions.CreateMetricDescriptor,
-			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
-		client.CallOptions.CreateTimeSeries = append(client.CallOptions.CreateTimeSeries,
-			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
-		client.CallOptions.CreateServiceTimeSeries = append(client.CallOptions.CreateServiceTimeSeries,
-			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
-	}
-
 	obs := selfObservability{log: log}
-	shutdown := make(chan struct{})
 	normalizer := normalization.NewDisabledNormalizer()
-	if cfg.MetricConfig.CumulativeNormalization {
-		normalizer = normalization.NewStandardNormalizer(shutdown, log)
-	}
 	mExp := &MetricsExporter{
-		cfg:    cfg,
-		client: client,
-		obs:    obs,
+		cfg: cfg,
+		obs: obs,
 		mapper: metricMapper{
 			obs:        obs,
 			cfg:        cfg,
@@ -218,7 +198,7 @@ func NewGoogleCloudMetricsExporter(
 		// to drop / conserve resources for sending timeseries.
 		metricDescriptorC: make(chan *monitoringpb.CreateMetricDescriptorRequest, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
 		mdCache:           make(map[string]*monitoringpb.CreateMetricDescriptorRequest),
-		shutdownC:         shutdown,
+		shutdownC:         make(chan struct{}),
 		timeout:           timeout,
 	}
 	mExp.exportFunc = mExp.exportToTimeSeries
@@ -230,21 +210,47 @@ func NewGoogleCloudMetricsExporter(
 		})
 	}
 
-	if cfg.MetricConfig.WALConfig != nil {
-		_, _, err = mExp.setupWAL()
+	return mExp, nil
+}
+
+func (me *MetricsExporter) Start(ctx context.Context, _ component.Host) error {
+	me.shutdownC = make(chan struct{})
+	if me.cfg.MetricConfig.CumulativeNormalization {
+		me.mapper.normalizer = normalization.NewStandardNormalizer(me.shutdownC, me.obs.log)
+	}
+	clientOpts, err := generateClientOptions(ctx, &me.cfg.MetricConfig.ClientConfig, &me.cfg, monitoring.DefaultAuthScopes())
+	if err != nil {
+		return err
+	}
+
+	client, err := monitoring.NewMetricClient(ctx, clientOpts...)
+	if err != nil {
+		return err
+	}
+
+	if me.cfg.MetricConfig.ClientConfig.Compression == gzip.Name {
+		client.CallOptions.CreateMetricDescriptor = append(client.CallOptions.CreateMetricDescriptor,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+		client.CallOptions.CreateTimeSeries = append(client.CallOptions.CreateTimeSeries,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+		client.CallOptions.CreateServiceTimeSeries = append(client.CallOptions.CreateServiceTimeSeries,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+	}
+	me.client = client
+	if me.cfg.MetricConfig.WALConfig != nil {
+		_, _, err = me.setupWAL()
 		if err != nil {
-			return nil, err
+			return err
 		}
 		// start WAL popper routine
-		mExp.goroutines.Add(1)
-		go mExp.runWALReadAndExportLoop(ctx)
+		me.goroutines.Add(1)
+		go me.runWALReadAndExportLoop(ctx)
 	}
 
 	// Fire up the metric descriptor exporter.
-	mExp.goroutines.Add(1)
-	go mExp.exportMetricDescriptorRunner()
-
-	return mExp, nil
+	me.goroutines.Add(1)
+	go me.exportMetricDescriptorRunner()
+	return nil
 }
 
 // setupWAL creates the WAL.
@@ -299,6 +305,9 @@ func (me *MetricsExporter) closeWAL() error {
 
 // PushMetrics calls pushes pdata metrics to GCM, creating metric descriptors if necessary.
 func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) error {
+	if me.client == nil {
+		return errors.New("not started")
+	}
 	if me.wal != nil {
 		me.wal.mutex.Lock()
 		defer me.wal.mutex.Unlock()

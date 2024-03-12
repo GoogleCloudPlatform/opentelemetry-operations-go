@@ -167,6 +167,8 @@ func NewMetricTestExporter(
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
+	err = exporter.Start(ctx, componenttest.NewNopHost())
+	require.NoError(t, err)
 	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.MetricConfig.ClientConfig.Endpoint)
 	return exporter
 }

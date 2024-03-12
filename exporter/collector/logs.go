@@ -193,9 +193,6 @@ func (l *LogsExporter) ConfigureExporter(config *logsutil.ExporterConfig) {
 }
 
 func (l *LogsExporter) Start(ctx context.Context, _ component.Host) error {
-	if l.loggingClient != nil {
-		return errors.New("already started")
-	}
 	clientOpts, err := generateClientOptions(ctx, &l.cfg.LogConfig.ClientConfig, &l.cfg, loggingv2.DefaultAuthScopes())
 	if err != nil {
 		return err
