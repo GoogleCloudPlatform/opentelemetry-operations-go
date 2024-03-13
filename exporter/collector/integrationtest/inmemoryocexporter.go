@@ -24,6 +24,7 @@ import (
 	"go.opencensus.io/metric/metricexport"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
@@ -143,6 +144,8 @@ func NewTraceTestExporter(
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
+	err = exporter.Start(ctx, componenttest.NewNopHost())
+	require.NoError(t, err)
 	t.Logf("Collector TracesTestServer exporter started, pointing at %v", cfg.TraceConfig.ClientConfig.Endpoint)
 	return exporter
 }
@@ -165,6 +168,8 @@ func NewMetricTestExporter(
 		"latest",
 		collector.DefaultTimeout,
 	)
+	require.NoError(t, err)
+	err = exporter.Start(ctx, componenttest.NewNopHost())
 	require.NoError(t, err)
 	t.Logf("Collector MetricsTestServer exporter started, pointing at %v", cfg.MetricConfig.ClientConfig.Endpoint)
 	return exporter
@@ -190,6 +195,9 @@ func NewLogTestExporter(
 		logger,
 		"latest",
 	)
+	require.NoError(t, err)
+
+	err = exporter.Start(ctx, componenttest.NewNopHost())
 	require.NoError(t, err)
 
 	exporter.ConfigureExporter(extraConfig)

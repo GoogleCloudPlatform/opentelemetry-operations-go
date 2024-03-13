@@ -26,6 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 
@@ -47,8 +48,10 @@ func createLogsExporter(
 		logger,
 		"latest",
 	)
-	exporter.ConfigureExporter(test.ConfigureLogsExporter)
 	require.NoError(t, err)
+	err = exporter.Start(ctx, componenttest.NewNopHost())
+	require.NoError(t, err)
+	exporter.ConfigureExporter(test.ConfigureLogsExporter)
 	t.Log("Collector logs exporter started")
 	return exporter
 }

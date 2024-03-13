@@ -18,12 +18,14 @@ package collector
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/stats/view"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -34,10 +36,15 @@ import (
 // TraceExporter is a wrapper struct of OT cloud trace exporter.
 type TraceExporter struct {
 	texporter *texporter.Exporter
+	cfg       Config
+	timeout   time.Duration
 }
 
 func (te *TraceExporter) Shutdown(ctx context.Context) error {
-	return te.texporter.Shutdown(ctx)
+	if te.texporter != nil {
+		return te.texporter.Shutdown(ctx)
+	}
+	return nil
 }
 
 func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
@@ -45,32 +52,35 @@ func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version strin
 	//nolint:errcheck
 	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
+	return &TraceExporter{cfg: cfg, timeout: timeout}, nil
+}
 
+func (te *TraceExporter) Start(ctx context.Context, _ component.Host) error {
 	topts := []texporter.Option{
-		texporter.WithProjectID(cfg.ProjectID),
-		texporter.WithTimeout(timeout),
+		texporter.WithProjectID(te.cfg.ProjectID),
+		texporter.WithTimeout(te.timeout),
 	}
 
-	if cfg.DestinationProjectQuota {
+	if te.cfg.DestinationProjectQuota {
 		topts = append(topts, texporter.WithDestinationProjectQuota())
 	}
 
-	if cfg.TraceConfig.AttributeMappings != nil {
-		topts = append(topts, texporter.WithAttributeMapping(mappingFuncFromAKM(cfg.TraceConfig.AttributeMappings)))
+	if te.cfg.TraceConfig.AttributeMappings != nil {
+		topts = append(topts, texporter.WithAttributeMapping(mappingFuncFromAKM(te.cfg.TraceConfig.AttributeMappings)))
 	}
 
-	copts, err := generateClientOptions(ctx, &cfg.TraceConfig.ClientConfig, &cfg, traceapi.DefaultAuthScopes())
+	copts, err := generateClientOptions(ctx, &te.cfg.TraceConfig.ClientConfig, &te.cfg, traceapi.DefaultAuthScopes())
 	if err != nil {
-		return nil, err
+		return err
 	}
 	topts = append(topts, texporter.WithTraceClientOptions(copts))
 
 	exp, err := texporter.New(topts...)
 	if err != nil {
-		return nil, fmt.Errorf("error creating GoogleCloud Trace exporter: %w", err)
+		return fmt.Errorf("error creating GoogleCloud Trace exporter: %w", err)
 	}
-
-	return &TraceExporter{texporter: exp}, nil
+	te.texporter = exp
+	return nil
 }
 
 func mappingFuncFromAKM(akm []AttributeMapping) func(attribute.Key) attribute.Key {
@@ -91,6 +101,9 @@ func mappingFuncFromAKM(akm []AttributeMapping) func(attribute.Key) attribute.Ke
 
 // PushTraces calls texporter.ExportSpan for each span in the given traces.
 func (te *TraceExporter) PushTraces(ctx context.Context, td ptrace.Traces) error {
+	if te.texporter == nil {
+		return errors.New("not started")
+	}
 	resourceSpans := td.ResourceSpans()
 	spans := make([]sdktrace.ReadOnlySpan, 0, td.SpanCount())
 	for i := 0; i < resourceSpans.Len(); i++ {

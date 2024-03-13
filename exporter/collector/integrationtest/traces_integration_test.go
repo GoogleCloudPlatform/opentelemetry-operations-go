@@ -26,6 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 )
 
 func createTracesExporter(
@@ -41,6 +42,8 @@ func createTracesExporter(
 		"latest",
 		collector.DefaultTimeout,
 	)
+	require.NoError(t, err)
+	err = exporter.Start(ctx, componenttest.NewNopHost())
 	require.NoError(t, err)
 	t.Log("Collector traces exporter started")
 	return exporter

@@ -23,6 +23,7 @@ import (
 	"cloud.google.com/go/trace/apiv2/tracepb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"google.golang.org/grpc"
@@ -101,6 +102,8 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			//nolint:errcheck
 			go srv.Serve(lis)
 			sde, err := NewGoogleCloudTracesExporter(ctx, test.cfg, "latest", DefaultTimeout)
+			require.NoError(t, err)
+			err = sde.Start(ctx, componenttest.NewNopHost())
 			if test.expectedErr != "" {
 				assert.EqualError(t, err, test.expectedErr)
 				return

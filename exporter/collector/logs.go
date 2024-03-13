@@ -41,6 +41,7 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 
@@ -162,21 +163,6 @@ func NewGoogleCloudLogsExporter(
 	version string,
 ) (*LogsExporter, error) {
 	setVersionInUserAgent(&cfg, version)
-	clientOpts, err := generateClientOptions(ctx, &cfg.LogConfig.ClientConfig, &cfg, loggingv2.DefaultAuthScopes())
-	if err != nil {
-		return nil, err
-	}
-
-	loggingClient, err := loggingv2.NewClient(ctx, clientOpts...)
-	if err != nil {
-		return nil, err
-	}
-
-	if cfg.LogConfig.ClientConfig.Compression == gzip.Name {
-		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries,
-			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
-	}
-
 	obs := selfObservability{
 		log: log,
 	}
@@ -190,8 +176,6 @@ func NewGoogleCloudLogsExporter(
 			maxEntrySize:   defaultMaxEntrySize,
 			maxRequestSize: defaultMaxRequestSize,
 		},
-
-		loggingClient: loggingClient,
 	}, nil
 }
 
@@ -208,11 +192,39 @@ func (l *LogsExporter) ConfigureExporter(config *logsutil.ExporterConfig) {
 	}
 }
 
+func (l *LogsExporter) Start(ctx context.Context, _ component.Host) error {
+	clientOpts, err := generateClientOptions(ctx, &l.cfg.LogConfig.ClientConfig, &l.cfg, loggingv2.DefaultAuthScopes())
+	if err != nil {
+		return err
+	}
+
+	loggingClient, err := loggingv2.NewClient(ctx, clientOpts...)
+	if err != nil {
+		return err
+	}
+
+	if l.cfg.LogConfig.ClientConfig.Compression == gzip.Name {
+		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+	}
+	l.loggingClient = loggingClient
+	// We might have modified the config when we generated options above.
+	// Make sure changes to the config are synced to the mapper.
+	l.mapper.cfg = l.cfg
+	return nil
+}
+
 func (l *LogsExporter) Shutdown(ctx context.Context) error {
-	return l.loggingClient.Close()
+	if l.loggingClient != nil {
+		return l.loggingClient.Close()
+	}
+	return nil
 }
 
 func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
+	if l.loggingClient == nil {
+		return errors.New("not started")
+	}
 	projectEntries, err := l.mapper.createEntries(ld)
 	if err != nil {
 		return err

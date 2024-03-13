@@ -26,6 +26,7 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.uber.org/zap"
 
@@ -49,6 +50,8 @@ func createMetricsExporter(
 		"latest",
 		collector.DefaultTimeout,
 	)
+	require.NoError(t, err)
+	err = exporter.Start(ctx, componenttest.NewNopHost())
 	require.NoError(t, err)
 	t.Log("Collector metrics exporter started")
 	return exporter

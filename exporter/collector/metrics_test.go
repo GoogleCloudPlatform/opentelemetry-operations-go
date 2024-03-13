@@ -2573,6 +2573,7 @@ func TestPushMetricsOntoWAL(t *testing.T) {
 		obs:       obs,
 		shutdownC: shutdown,
 		cfg:       cfg,
+		client:    &mock{},
 		mapper: metricMapper{
 			obs:        obs,
 			cfg:        cfg,
