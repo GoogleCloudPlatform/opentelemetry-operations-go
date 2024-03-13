@@ -209,7 +209,6 @@ func (l *LogsExporter) Start(ctx context.Context, _ component.Host) error {
 	}
 	l.loggingClient = loggingClient
 	return nil
-
 }
 
 func (l *LogsExporter) Shutdown(ctx context.Context) error {

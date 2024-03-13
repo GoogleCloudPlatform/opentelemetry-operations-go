@@ -35,9 +35,9 @@ import (
 
 // TraceExporter is a wrapper struct of OT cloud trace exporter.
 type TraceExporter struct {
+	texporter *texporter.Exporter
 	cfg       Config
 	timeout   time.Duration
-	texporter *texporter.Exporter
 }
 
 func (te *TraceExporter) Shutdown(ctx context.Context) error {
