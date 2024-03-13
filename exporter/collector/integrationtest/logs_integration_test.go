@@ -49,9 +49,9 @@ func createLogsExporter(
 		"latest",
 	)
 	require.NoError(t, err)
-	exporter.ConfigureExporter(test.ConfigureLogsExporter)
 	err = exporter.Start(ctx, componenttest.NewNopHost())
 	require.NoError(t, err)
+	exporter.ConfigureExporter(test.ConfigureLogsExporter)
 	t.Log("Collector logs exporter started")
 	return exporter
 }

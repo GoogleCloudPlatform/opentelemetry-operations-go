@@ -208,6 +208,9 @@ func (l *LogsExporter) Start(ctx context.Context, _ component.Host) error {
 			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
 	}
 	l.loggingClient = loggingClient
+	// We might have modified the config when we generated options above.
+	// Make sure changes to the config are synced to the mapper.
+	l.mapper.cfg = l.cfg
 	return nil
 }
 
