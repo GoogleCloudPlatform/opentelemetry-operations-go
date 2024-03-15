@@ -23,7 +23,7 @@ import (
 
 func TestRoundTripper(t *testing.T) {
 	ca := clientAuthenticator{}
-	rt, err := ca.roundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+	rt, err := ca.RoundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return nil, nil
 	}))
 	assert.NotNil(t, rt)

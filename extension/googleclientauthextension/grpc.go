@@ -22,7 +22,7 @@ import (
 
 // perRPCCredentials returns gRPC credentials using the OAuth TokenSource, and adds
 // google metadata.
-func (ca clientAuthenticator) perRPCCredentials() (credentials.PerRPCCredentials, error) {
+func (ca clientAuthenticator) PerRPCCredentials() (credentials.PerRPCCredentials, error) {
 	return ca, nil
 }
 

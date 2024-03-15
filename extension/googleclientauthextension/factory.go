@@ -21,7 +21,6 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/extension"
-	"go.opentelemetry.io/collector/extension/auth"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/grpc/credentials/oauth"
 
@@ -40,35 +39,39 @@ func NewFactory() extension.Factory {
 
 func CreateExtension(ctx context.Context, set extension.CreateSettings, cfg component.Config) (extension.Extension, error) {
 	config := cfg.(*Config)
-	creds, err := google.FindDefaultCredentials(ctx, config.Scopes...)
-	if err != nil {
-		return nil, err
+	ca := &clientAuthenticator{
+		config: config,
 	}
-	if config.Project == "" {
-		config.Project = creds.ProjectID
-	}
-	if config.Project == "" {
-		return nil, errors.New("no project set in config or found with application default credentials")
-	}
-	if config.QuotaProject == "" {
-		config.QuotaProject = quotaProjectFromCreds(creds)
-	}
-
-	ca := clientAuthenticator{
-		TokenSource: oauth.TokenSource{TokenSource: creds.TokenSource},
-		config:      config,
-	}
-
-	return auth.NewClient(
-		auth.WithClientRoundTripper(ca.roundTripper),
-		auth.WithClientPerRPCCredentials(ca.perRPCCredentials),
-	), nil
+	return ca, nil
 }
 
 // clientAuthenticator supplies credentials from an oauth.TokenSource.
 type clientAuthenticator struct {
 	oauth.TokenSource
 	config *Config
+}
+
+func (ca *clientAuthenticator) Start(ctx context.Context, _ component.Host) error {
+	config := ca.config
+	creds, err := google.FindDefaultCredentials(ctx, config.Scopes...)
+	if err != nil {
+		return err
+	}
+	if config.Project == "" {
+		config.Project = creds.ProjectID
+	}
+	if config.Project == "" {
+		return errors.New("no project set in config or found with application default credentials")
+	}
+	if config.QuotaProject == "" {
+		config.QuotaProject = quotaProjectFromCreds(creds)
+	}
+	ca.TokenSource = oauth.TokenSource{TokenSource: creds.TokenSource}
+	return nil
+}
+
+func (ca *clientAuthenticator) Shutdown(ctx context.Context) error {
+	return nil
 }
 
 // quotaProjectFromCreds retrieves quota project from the credentials file.
