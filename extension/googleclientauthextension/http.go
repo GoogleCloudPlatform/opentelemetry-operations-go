@@ -24,6 +24,9 @@ import (
 // roundTripper provides an HTTP RoundTripper which adds gcp credentials and
 // headers.
 func (ca *clientAuthenticator) RoundTripper(base http.RoundTripper) (http.RoundTripper, error) {
+	if ca.TokenSource == nil {
+		return nil, errors.New("not started")
+	}
 	return &oauth2.Transport{
 		Source: ca,
 		Base: &parameterTransport{

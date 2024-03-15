@@ -15,6 +15,7 @@
 package googleclientauthextension // import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/extension/googleclientauthextension"
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
@@ -22,12 +23,32 @@ import (
 )
 
 func TestRoundTripper(t *testing.T) {
-	ca := clientAuthenticator{}
+	ca := clientAuthenticator{config: &Config{
+		Project:      "my-project",
+		QuotaProject: "other-project",
+	},
+	}
+	err := ca.Start(context.Background(), nil)
+	assert.NoError(t, err)
+
 	rt, err := ca.RoundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		return nil, nil
 	}))
 	assert.NotNil(t, rt)
 	assert.NoError(t, err)
+}
+
+func TestRoundTripperNotStarted(t *testing.T) {
+	ca := clientAuthenticator{config: &Config{
+		Project:      "my-project",
+		QuotaProject: "other-project",
+	}}
+
+	rt, err := ca.RoundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		return nil, nil
+	}))
+	assert.Nil(t, rt)
+	assert.Error(t, err)
 }
 
 func TestRoundTrip(t *testing.T) {

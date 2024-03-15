@@ -47,7 +47,7 @@ func CreateExtension(ctx context.Context, set extension.CreateSettings, cfg comp
 
 // clientAuthenticator supplies credentials from an oauth.TokenSource.
 type clientAuthenticator struct {
-	oauth.TokenSource
+	*oauth.TokenSource
 	config *Config
 }
 
@@ -66,7 +66,7 @@ func (ca *clientAuthenticator) Start(ctx context.Context, _ component.Host) erro
 	if config.QuotaProject == "" {
 		config.QuotaProject = quotaProjectFromCreds(creds)
 	}
-	ca.TokenSource = oauth.TokenSource{TokenSource: creds.TokenSource}
+	ca.TokenSource = &oauth.TokenSource{TokenSource: creds.TokenSource}
 	return nil
 }
 
