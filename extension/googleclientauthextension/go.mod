@@ -7,7 +7,6 @@ require (
 	go.opentelemetry.io/collector/component v0.94.0
 	go.opentelemetry.io/collector/confmap v0.94.0
 	go.opentelemetry.io/collector/extension v0.94.0
-	go.opentelemetry.io/collector/extension/auth v0.94.0
 	golang.org/x/oauth2 v0.16.0
 	google.golang.org/grpc v1.61.0
 )
