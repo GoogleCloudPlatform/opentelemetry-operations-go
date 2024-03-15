@@ -23,6 +23,7 @@ import (
 )
 
 func TestRoundTripper(t *testing.T) {
+	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
 	ca := clientAuthenticator{config: &Config{
 		Project:      "my-project",
 		QuotaProject: "other-project",
