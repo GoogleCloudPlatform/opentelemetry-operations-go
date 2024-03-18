@@ -16,13 +16,17 @@ package googleclientauthextension // import "github.com/GoogleCloudPlatform/open
 
 import (
 	"context"
+	"errors"
 
 	"google.golang.org/grpc/credentials"
 )
 
 // perRPCCredentials returns gRPC credentials using the OAuth TokenSource, and adds
 // google metadata.
-func (ca clientAuthenticator) perRPCCredentials() (credentials.PerRPCCredentials, error) {
+func (ca clientAuthenticator) PerRPCCredentials() (credentials.PerRPCCredentials, error) {
+	if ca.TokenSource == nil {
+		return nil, errors.New("not started")
+	}
 	return ca, nil
 }
 
@@ -30,6 +34,10 @@ func (ca clientAuthenticator) perRPCCredentials() (credentials.PerRPCCredentials
 // Based on metadata added by the google go client:
 // https://github.com/googleapis/google-api-go-client/blob/113082d14d54f188d1b6c34c652e416592fc51b5/transport/grpc/dial.go#L224
 func (ca clientAuthenticator) GetRequestMetadata(ctx context.Context, uri ...string) (map[string]string, error) {
+	if ca.TokenSource == nil {
+		return nil, errors.New("not started")
+	}
+
 	metadata, err := ca.TokenSource.GetRequestMetadata(ctx, uri...)
 	if err != nil {
 		return nil, err

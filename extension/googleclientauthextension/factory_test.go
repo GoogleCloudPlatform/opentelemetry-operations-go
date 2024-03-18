@@ -37,7 +37,25 @@ func TestNewFactory(t *testing.T) {
 
 func TestCreateExtension(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, createDefaultConfig())
+	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
+}
+
+func TestStart(t *testing.T) {
+	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
+	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	assert.NotNil(t, ext)
+	assert.NoError(t, err)
+	err = ext.Start(context.Background(), nil)
+	assert.NoError(t, err)
+}
+
+func TestStart_WithError(t *testing.T) {
+	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/foo.json")
+	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	assert.NotNil(t, ext)
+	assert.NoError(t, err)
+	err = ext.Start(context.Background(), nil)
+	assert.Error(t, err)
 }

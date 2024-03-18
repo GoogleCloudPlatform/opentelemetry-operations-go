@@ -21,7 +21,6 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/extension"
-	"go.opentelemetry.io/collector/extension/auth"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/grpc/credentials/oauth"
 
@@ -32,43 +31,47 @@ import (
 func NewFactory() extension.Factory {
 	return extension.NewFactory(
 		metadata.Type,
-		createDefaultConfig,
-		createExtension,
+		CreateDefaultConfig,
+		CreateExtension,
 		metadata.ExtensionStability,
 	)
 }
 
-func createExtension(ctx context.Context, set extension.CreateSettings, cfg component.Config) (extension.Extension, error) {
+func CreateExtension(ctx context.Context, set extension.CreateSettings, cfg component.Config) (extension.Extension, error) {
 	config := cfg.(*Config)
+	ca := &clientAuthenticator{
+		config: config,
+	}
+	return ca, nil
+}
+
+// clientAuthenticator supplies credentials from an oauth.TokenSource.
+type clientAuthenticator struct {
+	*oauth.TokenSource
+	config *Config
+}
+
+func (ca *clientAuthenticator) Start(ctx context.Context, _ component.Host) error {
+	config := ca.config
 	creds, err := google.FindDefaultCredentials(ctx, config.Scopes...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	if config.Project == "" {
 		config.Project = creds.ProjectID
 	}
 	if config.Project == "" {
-		return nil, errors.New("no project set in config or found with application default credentials")
+		return errors.New("no project set in config or found with application default credentials")
 	}
 	if config.QuotaProject == "" {
 		config.QuotaProject = quotaProjectFromCreds(creds)
 	}
-
-	ca := clientAuthenticator{
-		TokenSource: oauth.TokenSource{TokenSource: creds.TokenSource},
-		config:      config,
-	}
-
-	return auth.NewClient(
-		auth.WithClientRoundTripper(ca.roundTripper),
-		auth.WithClientPerRPCCredentials(ca.perRPCCredentials),
-	), nil
+	ca.TokenSource = &oauth.TokenSource{TokenSource: creds.TokenSource}
+	return nil
 }
 
-// clientAuthenticator supplies credentials from an oauth.TokenSource.
-type clientAuthenticator struct {
-	oauth.TokenSource
-	config *Config
+func (ca *clientAuthenticator) Shutdown(ctx context.Context) error {
+	return nil
 }
 
 // quotaProjectFromCreds retrieves quota project from the credentials file.

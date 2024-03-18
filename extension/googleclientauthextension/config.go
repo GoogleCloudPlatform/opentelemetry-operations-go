@@ -54,7 +54,7 @@ var defaultScopes = []string{
 	"https://www.googleapis.com/auth/trace.append",
 }
 
-func createDefaultConfig() component.Config {
+func CreateDefaultConfig() component.Config {
 	return &Config{
 		Scopes: defaultScopes,
 	}
