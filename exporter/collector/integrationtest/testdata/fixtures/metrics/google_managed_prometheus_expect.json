@@ -942,7 +942,6 @@
               "http_scheme": "http",
               "k8s_container_name": "rabbitmq",
               "k8s_node_name": "10.92.5.2",
-              "k8s_pod_name": "rabbitmq-server-0",
               "net_host_ip": "10.92.5.2",
               "net_host_port": "15692"
             }

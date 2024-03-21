@@ -40,12 +40,38 @@ const (
 // promTargetKeys are attribute keys which are used in the prometheus_target monitored resource.
 // It is also used by GMP to exclude these keys from the target_info metric.
 var promTargetKeys = map[string][]string{
-	locationLabel:         {locationLabel, semconv.AttributeCloudAvailabilityZone, semconv.AttributeCloudRegion},
-	clusterLabel:          {clusterLabel, semconv.AttributeK8SClusterName},
-	namespaceLabel:        {namespaceLabel, semconv.AttributeK8SNamespaceName},
-	jobLabel:              {jobLabel, semconv.AttributeServiceName, semconv.AttributeFaaSName},
-	serviceNamespaceLabel: {semconv.AttributeServiceNamespace},
-	instanceLabel:         {instanceLabel, semconv.AttributeServiceInstanceID, semconv.AttributeFaaSInstance},
+	locationLabel: {
+		locationLabel,
+		semconv.AttributeCloudAvailabilityZone,
+		semconv.AttributeCloudRegion,
+	},
+	clusterLabel: {
+		clusterLabel,
+		semconv.AttributeK8SClusterName,
+	},
+	namespaceLabel: {
+		namespaceLabel,
+		semconv.AttributeK8SNamespaceName,
+	},
+	jobLabel: {
+		jobLabel,
+		semconv.AttributeServiceName,
+		semconv.AttributeFaaSName,
+		semconv.AttributeK8SDeploymentName,
+		semconv.AttributeK8SStatefulSetName,
+		semconv.AttributeK8SDaemonSetName,
+		semconv.AttributeK8SJobName,
+		semconv.AttributeK8SCronJobName,
+	},
+	serviceNamespaceLabel: {
+		semconv.AttributeServiceNamespace,
+	},
+	instanceLabel: {
+		instanceLabel,
+		semconv.AttributeServiceInstanceID,
+		semconv.AttributeFaaSInstance,
+		semconv.AttributeK8SPodName,
+	},
 }
 
 func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.MonitoredResource {
