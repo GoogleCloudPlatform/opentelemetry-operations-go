@@ -22,15 +22,20 @@ Next, set this project ID to the environment variable `GOOGLE_PROJECT_ID` using 
 export GOOGLE_PROJECT_ID=$(gcloud config get-value project)
 ```
 
+Enable experimental [Exemplar Sampling]https://github.com/open-telemetry/opentelemetry-go/blob/main/sdk/metric/internal/x/README.md#exemplars) support, optional for this example, with :
+```
+export OTEL_GO_X_EXEMPLAR=true
+export OTEL_METRICS_EXEMPLAR_FILTER=always_on
+```
+
 Run the example using following commands:
 
 ```
 $ go build -o exponential_histogram
 $ ./exponential_histogram
-2020/06/11 21:11:15 Most recent data: counter 110, observer 13.45
-2020/06/11 21:11:15 Most recent data: counter 160, observer 16.02
-2020/06/11 21:11:15 Most recent data: counter 134, observer 14.33
-2020/06/11 21:11:15 Most recent data: counter 125, observer 15.12
+2024/03/21 15:38:58 Sent Latency Data (Original Distribution): #points 1000 , mean 36.64255895183214, sdv 19.670797833645373
+2024/03/21 15:38:58 Sent Latency Data (Shifted Distribution): #points 1000 , mean 277.70002931783233, sdv 143.59582355437485
+2024/03/21 15:38:58 Sent Latency Data (Multimodal Distribution): #points 1000 , mean 151.49111863163805, sdv 159.2187295223318
 ...
 ```
 
@@ -42,9 +47,9 @@ https://console.cloud.google.com/monitoring/dashboards?project=<your-project-id>
 
 Once you think you have sent sufficient data, then create a dashboard. If you are learning how to use Google Cloud Monitoring, you can follow how to use charts step by step on [this document](https://cloud.google.com/monitoring/charts).
 
-When filling in the **Find resource type and metric box**, use the metric names "custom.googleapis.com/opentelemetry/counter-a" and "custom.googleapis.com/opentelemetry/observer-a".
+When filling in the **Find resource type and metric box**, use the metric names with the prefix "workload.googleapis.com/latency_" to observe histogram metrics (for example "workload.googleapis.com/latency_a").
 
-If you already know how to use Cloud Monitoring and would just like to confirm the data is properly received, you can run the dashboard creation script bundled in this directory.
+If you already know how to use Cloud Monitoring and would just like to confirm the data is properly received, you can run the dashboard creation script bundled in this directory. This command requires at least the [roles/monitoring.dashboardEditor](https://cloud.google.com/monitoring/access-control#dashboard_roles_desc) permissions to create a new dashboard.
 
 ```
 $ ./create_dashboard.sh
@@ -52,6 +57,6 @@ $ ./create_dashboard.sh
 
 This script creates a dashboard titled "OpenTelemetry exporter example/metric".
 
-You should be able to view line charts like below once you create the dashboard.
+You should be able to view histogram charts like below once you create the dashboard.
 
 <img width="1200" alt="2 charts in dashboard" src="images/charts.png?raw=true"/>
