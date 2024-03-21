@@ -1,5 +1,5 @@
 {
-    "displayName": "Exponential Histogram",
+    "displayName": "OpenTelemetry - Exponential Histogram example",
     "dashboardFilters": [],
     "mosaicLayout": {
       "columns": 48,
