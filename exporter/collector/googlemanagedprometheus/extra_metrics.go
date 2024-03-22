@@ -20,6 +20,7 @@ import (
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
 )
 
 const (
@@ -177,9 +178,22 @@ func (c Config) addTargetInfoMetric(m pmetric.Metrics) {
 		dataPoint.SetIntValue(1)
 		dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(latestTime))
 
-		// copy Resource attributes to the metric except for attributes which will already be present in the MonitoredResource labels
+		// copy Resource attributes to the metric except for service.name, service.namespace, and service.instance.id
+		// because those three attributes (if present) will be copied to resource attributes.
+		// See https://opentelemetry.io/docs/specs/otel/compatibility/prometheus_and_openmetrics/#resource-attributes-1
+		// Also drop reserved GMP labels (location, cluster, namespace, job, service_namespace, instance).
+		// Other "fallback" attributes which could become `job` or `instance` in the absence of those three
+		// (such as k8s.pod.name or faas.name) will be duplicated as a resource attribute and metric label.
 		rm.Resource().Attributes().Range(func(k string, v pcommon.Value) bool {
-			if !isSpecialAttribute(k) {
+			if k != semconv.AttributeServiceName &&
+				k != semconv.AttributeServiceNamespace &&
+				k != semconv.AttributeServiceInstanceID &&
+				k != locationLabel &&
+				k != clusterLabel &&
+				k != namespaceLabel &&
+				k != jobLabel &&
+				k != serviceNamespaceLabel &&
+				k != instanceLabel {
 				dataPoint.Attributes().PutStr(k, v.AsString())
 			}
 			return true
@@ -281,15 +295,4 @@ func (c Config) addScopeInfoMetric(m pmetric.Metrics) {
 			dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(latestTime))
 		}
 	}
-}
-
-func isSpecialAttribute(attributeKey string) bool {
-	for _, keys := range promTargetKeys {
-		for _, specialKey := range keys {
-			if attributeKey == specialKey {
-				return true
-			}
-		}
-	}
-	return false
 }
