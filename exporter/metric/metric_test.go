@@ -81,12 +81,17 @@ func TestExportMetrics(t *testing.T) {
 		metric.WithResource(res),
 	)
 
+	//nolint:errcheck
+	defer func() {
+		err = provider.Shutdown(ctx)
+		assert.NoError(t, err)
+	}()
+
 	meter := provider.Meter("test")
 	counter, err := meter.Int64Counter("name.lastvalue")
 	require.NoError(t, err)
 
 	counter.Add(ctx, 1)
-	require.NoError(t, provider.Shutdown(ctx))
 }
 
 func TestExportCounter(t *testing.T) {
@@ -119,7 +124,10 @@ func TestExportCounter(t *testing.T) {
 
 	ctx := context.Background()
 	//nolint:errcheck
-	defer provider.Shutdown(ctx)
+	defer func() {
+		err = provider.Shutdown(ctx)
+		assert.NoError(t, err)
+	}()
 
 	// Start meter
 	meter := provider.Meter("cloudmonitoring/test")
@@ -163,12 +171,78 @@ func TestExportHistogram(t *testing.T) {
 
 	ctx := context.Background()
 	//nolint:errcheck
-	defer provider.Shutdown(ctx)
+	defer func() {
+		err = provider.Shutdown(ctx)
+		assert.NoError(t, err)
+	}()
 
 	// Start meter
 	meter := provider.Meter("cloudmonitoring/test")
 
 	// Register counter value
+	counter, err := meter.Int64Histogram("counter-a")
+	assert.NoError(t, err)
+	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
+	counter.Record(ctx, 100, otelmetric.WithAttributes(clabels...))
+	counter.Record(ctx, 50, otelmetric.WithAttributes(clabels...))
+	counter.Record(ctx, 200, otelmetric.WithAttributes(clabels...))
+}
+
+func TestExportExponentialHistogram(t *testing.T) {
+	testServer, err := cloudmock.NewMetricTestServer()
+	//nolint:errcheck
+	go testServer.Serve()
+	defer testServer.Shutdown()
+	assert.NoError(t, err)
+
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint(testServer.Endpoint),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
+
+	exporter, err := New(
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithMonitoringClientOptions(clientOpts...),
+		WithMetricDescriptorTypeFormatter(formatter),
+	)
+	assert.NoError(t, err)
+
+	view := metric.NewView(
+		metric.Instrument{
+			Name:  "counter-a",
+			Scope: instrumentation.Scope{Name: "cloudmonitoring/test"},
+		},
+		metric.Stream{
+			Aggregation: metric.AggregationBase2ExponentialHistogram{
+				MaxSize:  160,
+				MaxScale: 20,
+			},
+		},
+	)
+
+	provider := metric.NewMeterProvider(
+		metric.WithReader(metric.NewPeriodicReader(exporter)),
+		metric.WithView(view),
+		metric.WithResource(
+			resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("test_id", "abc123"),
+			),
+		),
+	)
+	assert.NoError(t, err)
+
+	ctx := context.Background()
+	//nolint:errcheck
+	defer func() {
+		err = provider.Shutdown(ctx)
+		assert.NoError(t, err)
+	}()
+
+	// Start meter
+	meter := provider.Meter("cloudmonitoring/test")
+
 	counter, err := meter.Int64Histogram("counter-a")
 	assert.NoError(t, err)
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
