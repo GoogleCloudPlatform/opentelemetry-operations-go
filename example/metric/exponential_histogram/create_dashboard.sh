@@ -17,4 +17,4 @@
 # This dashboard is intended to show the metrics emit from the example
 # in the same directory.
 # https://cloud.google.com/monitoring/dashboards/api-dashboard
-gcloud monitoring dashboards create --config-from-file=dashboard.json
+gcloud monitoring dashboards create --config-from-file=--config-from-file=../dashboards/exponential_histogram_dashboard.json
