@@ -73,4 +73,4 @@ This script creates a dashboard titled "OpenTelemetry - Exponential Histogram ex
 
 You should be able to view histogram charts like below once you create the dashboard.
 
-<img width="1200" alt="2 charts in dashboard" src="images/exponential_histogram_charts.png?raw=true"/>
+<img width="1200" alt="2 charts in dashboard" src="../images/exponential_histogram_charts.png?raw=true"/>
