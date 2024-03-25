@@ -1,4 +1,4 @@
-module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric/sdk
+module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric/exponential_histogram
 
 go 1.20
 
