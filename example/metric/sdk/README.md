@@ -17,4 +17,4 @@ You should be able to view line charts like below once you create the dashboard.
 
 *Note: This script is configured to create dashboard which displays the metrics generated via the `sdk` example.*
 
-<img width="1200" alt="2 charts in dashboard" src="images/sdk_charts.png?raw=true"/>
+<img width="1200" alt="2 charts in dashboard" src="../images/sdk_charts.png?raw=true"/>
