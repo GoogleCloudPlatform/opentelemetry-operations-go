@@ -20,6 +20,16 @@ We explore the resulting distributions with three types of histograms :
 
 Go to the [example/metric/README.md](../README.md) instructions that describe how to build and run all examples.
 
+## Sample execution
+
+```
+$ ./metrics
+2024/03/21 15:38:58 Sent Latency Data (Original Distribution): #points 1000 , mean 36.64255895183214, sdv 19.670797833645373
+2024/03/21 15:38:58 Sent Latency Data (Shifted Distribution): #points 1000 , mean 277.70002931783233, sdv 143.59582355437485
+2024/03/21 15:38:58 Sent Latency Data (Multimodal Distribution): #points 1000 , mean 151.49111863163805, sdv 159.2187295223318
+...
+```
+
 ## Create dashboard
 
 When filling in the **Find resource type and metric box**, use the metric names with the prefix "workload.googleapis.com/latency_" to observe histogram metrics (for example "workload.googleapis.com/latency_a").
