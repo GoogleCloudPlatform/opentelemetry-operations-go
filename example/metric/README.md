@@ -2,7 +2,7 @@
 
 This example shows how to use [`go.opentelemetry.io/otel`](https://pkg.go.dev/go.opentelemetry.io/otel/) to instrument a simple Go application with metrics and export the metrics to [Google Cloud Monitoring](https://cloud.google.com/monitoring/)
 
-## Build and run the application
+## Setup environment
 
 Before sending metrics to Google Cloud Monitoring, confirm the Cloud Monitoring API is enabled for the project you will use to access the API as described in [this document](https://cloud.google.com/monitoring/api/enable-api).
 
@@ -22,11 +22,21 @@ Next, set this project ID to the environment variable `GOOGLE_PROJECT_ID` using 
 export GOOGLE_PROJECT_ID=$(gcloud config get-value project)
 ```
 
-Once you ensure the API is enabled, then build the example application and run the executable. There are two separate examples showcasing the following - 
-1. Exporting metrics via the SDK.
-2. Exporting metrics via the OpenTelemetry Collector.
+### Enable experimental features
+The `exponential_histogram` example can optionally export [exemplars](https://opentelemetry.io/docs/specs/otel/metrics/data-model/#exemplars). Enable experimental [exemplar sampling](https://github.com/open-telemetry/opentelemetry-go/blob/main/sdk/metric/internal/x/README.md#exemplars) support with :
+```
+export OTEL_GO_X_EXEMPLAR=true
+export OTEL_METRICS_EXEMPLAR_FILTER=always_on
+```
 
-Change the current directory to the example you wish to run - either to [sdk](./sdk/) directory or [collector](./collector/) directory and then run the example using following commands:
+## Build and run the application
+
+Once you ensure the API is enabled, then build the example application and run the executable. There are three separate examples showcasing the following - 
+1. Exporting metrics via the SDK - [sdk](./sdk/) directory.
+2. Exporting metrics via the OpenTelemetry Collector - [collector](./collector/).
+3. Exporting histogram metrics via the SDK - [exponential_histogram](./exponential_histogram/).
+
+Change the current directory to the example you wish to run, for example `cd sdk`, and then run the example using following commands:
 
 ```
 $ go build -o metrics
@@ -50,16 +60,16 @@ Once you think you have sent sufficient data, then create a dashboard. If you ar
 
 When filling in the **Find resource type and metric box**, use the metric names "custom.googleapis.com/opentelemetry/counter-a" and "custom.googleapis.com/opentelemetry/observer-a".
 
-If you already know how to use Cloud Monitoring and would just like to confirm the data is properly received, you can run the dashboard creation script bundled in this directory.
+If you already know how to use Cloud Monitoring and would just like to confirm the data is properly received, you can run the dashboard creation script bundled in the example sub-directory, either [sdk](./sdk/) or [exponential_histogram](./exponential_histogram/), with the following command :
 
 ```
 $ ./create_dashboard.sh
 ```
 
-This script creates a dashboard titled "OpenTelemetry exporter example/metric".
+This script creates a dashboard titled "OpenTelemetry exporter example/metric" or "OpenTelemetry - Exponential Histogram example" depending on the example .
 
 You should be able to view line charts like below once you create the dashboard.
 
 *Note: This script is configured to create dashboard which displays the metrics generated via the `sdk` example.*
 
-<img width="1200" alt="2 charts in dashboard" src="images/charts.png?raw=true"/>
+<img width="1200" alt="2 charts in dashboard" src="images/sdk_charts.png?raw=true"/>
