@@ -66,6 +66,138 @@ func TestMapToPrometheusTarget(t *testing.T) {
 			},
 		},
 		{
+			desc: "k8s.pod.name as additional fallback to instance",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_kubernetes_engine",
+				"cloud.availability_zone": "us-central1-c",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+				"service.name":            "myservicename",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1-c",
+					"cluster":   "mycluster",
+					"namespace": "mynamespace",
+					"job":       "myservicename",
+					"instance":  "mypod",
+				},
+			},
+		},
+		{
+			desc: "k8s.deployment.name as additional fallback to job",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_kubernetes_engine",
+				"cloud.availability_zone": "us-central1-c",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.deployment.name":     "mydeployment",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1-c",
+					"cluster":   "mycluster",
+					"namespace": "mynamespace",
+					"job":       "mydeployment",
+					"instance":  "mypod",
+				},
+			},
+		},
+		{
+			desc: "k8s.statefuleset.name as additional fallback to job",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_kubernetes_engine",
+				"cloud.availability_zone": "us-central1-c",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.statefulset.name":    "mystatefulset",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1-c",
+					"cluster":   "mycluster",
+					"namespace": "mynamespace",
+					"job":       "mystatefulset",
+					"instance":  "mypod",
+				},
+			},
+		},
+		{
+			desc: "k8s.daemonset.name as additional fallback to job",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_kubernetes_engine",
+				"cloud.availability_zone": "us-central1-c",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.daemonset.name":      "mydaemonset",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1-c",
+					"cluster":   "mycluster",
+					"namespace": "mynamespace",
+					"job":       "mydaemonset",
+					"instance":  "mypod",
+				},
+			},
+		},
+		{
+			desc: "k8s.job.name as additional fallback to job",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_kubernetes_engine",
+				"cloud.availability_zone": "us-central1-c",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.job.name":            "myjob",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1-c",
+					"cluster":   "mycluster",
+					"namespace": "mynamespace",
+					"job":       "myjob",
+					"instance":  "mypod",
+				},
+			},
+		},
+		{
+			desc: "k8s.cronjob.name as additional fallback to job",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_kubernetes_engine",
+				"cloud.availability_zone": "us-central1-c",
+				"k8s.cluster.name":        "mycluster",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.cronjob.name":        "mycronjob",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1-c",
+					"cluster":   "mycluster",
+					"namespace": "mynamespace",
+					"job":       "mycronjob",
+					"instance":  "mypod",
+				},
+			},
+		},
+		{
 			desc: "overridden attributes",
 			resourceLabels: map[string]string{
 				"cloud.platform":          "gcp_kubernetes_engine",

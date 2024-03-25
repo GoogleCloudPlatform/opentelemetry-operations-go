@@ -938,9 +938,12 @@
           "metric": {
             "type": "prometheus.googleapis.com/target_info/gauge",
             "labels": {
+              "cloud_availability_zone": "us-central1-c",
               "cloud_platform": "gcp_kubernetes_engine",
               "http_scheme": "http",
+              "k8s_cluster_name": "rabbitmq-test-dev",
               "k8s_container_name": "rabbitmq",
+              "k8s_namespace_name": "default",
               "k8s_node_name": "10.92.5.2",
               "k8s_pod_name": "rabbitmq-server-0",
               "net_host_ip": "10.92.5.2",

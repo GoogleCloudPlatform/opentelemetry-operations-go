@@ -37,7 +37,10 @@
         },
         {
           "metric": {
-            "type": "prometheus.googleapis.com/target_info/gauge"
+            "type": "prometheus.googleapis.com/target_info/gauge",
+            "labels": {
+              "cloud_availability_zone": "us-central1-c"
+            }
           },
           "resource": {
             "type": "prometheus_target",
