@@ -52,24 +52,12 @@ To ensure you have enough data to create interesting charts for the Counter and 
 
 *Note: For running the collector example, you need to have a locally running OpenTelemetry Collector, configured using the provided [sample config](./collector/sample-collector-config.yaml). Instructions for running OpenTelemetry Collector on your system can be found [here](https://opentelemetry.io/docs/collector/getting-started/#local).*
 
-## Create dashboard
+## Visualize exported metrics
 
 https://console.cloud.google.com/monitoring/dashboards?project=<your-project-id>
 
 Once you think you have sent sufficient data, then create a dashboard. If you are learning how to use Google Cloud Monitoring, you can follow how to use charts step by step on [this document](https://cloud.google.com/monitoring/charts).
 
-When filling in the **Find resource type and metric box**, use the metric names "custom.googleapis.com/opentelemetry/counter-a" and "custom.googleapis.com/opentelemetry/observer-a".
+When filling in the **Find resource type and metric box**, use the metric names with the prefix "custom.googleapis.com/opentelemetry/counter-a", "custom.googleapis.com/opentelemetry/observer-a" or with prefix "workload.googleapis.com/latency_" (for example "workload.googleapis.com/latency_a").
 
-If you already know how to use Cloud Monitoring and would just like to confirm the data is properly received, you can run the dashboard creation script bundled in the example sub-directory, either [sdk](./sdk/) or [exponential_histogram](./exponential_histogram/), with the following command :
-
-```
-$ ./create_dashboard.sh
-```
-
-This script creates a dashboard titled "OpenTelemetry exporter example/metric" or "OpenTelemetry - Exponential Histogram example" depending on the example .
-
-You should be able to view line charts like below once you create the dashboard.
-
-*Note: This script is configured to create dashboard which displays the metrics generated via the `sdk` example.*
-
-<img width="1200" alt="2 charts in dashboard" src="images/sdk_charts.png?raw=true"/>
+Go to the individual example sub-directories [sdk](./sdk/) or [exponential_histogram](./exponential_histogram/) for further instructions on how to `Create a dashboard`.
