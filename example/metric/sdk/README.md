@@ -2,6 +2,10 @@
 
 This example shows how to use [`go.opentelemetry.io/otel`](https://pkg.go.dev/go.opentelemetry.io/otel/) to instrument a simple Go application with metrics and export the metrics to [Google Cloud Monitoring](https://cloud.google.com/monitoring/)
 
+## Build and run the application
+
+Go to the [example/metric/README.md](../README.md) instructions that describe how to build and run all examples.
+
 ## Create dashboard
 
 When filling in the **Find resource type and metric box**, use the metric names "custom.googleapis.com/opentelemetry/counter-a" and "custom.googleapis.com/opentelemetry/observer-a".

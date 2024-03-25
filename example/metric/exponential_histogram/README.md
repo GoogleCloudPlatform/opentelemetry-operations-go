@@ -16,6 +16,10 @@ We explore the resulting distributions with three types of histograms :
 2. Opentelemetry Linear Buckets Histogram. Buckets are `0, 10, 20, 30, ..., 340, 350`. 
 3. Opentelemetry Exponential Buckets Histogram with default parameters.
 
+## Build and run the application
+
+Go to the [example/metric/README.md](../README.md) instructions that describe how to build and run all examples.
+
 ## Create dashboard
 
 When filling in the **Find resource type and metric box**, use the metric names with the prefix "workload.googleapis.com/latency_" to observe histogram metrics (for example "workload.googleapis.com/latency_a").

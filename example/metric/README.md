@@ -60,4 +60,4 @@ Once you think you have sent sufficient data, then create a dashboard. If you ar
 
 When filling in the **Find resource type and metric box**, use the metric names with the prefix "custom.googleapis.com/opentelemetry/counter-a", "custom.googleapis.com/opentelemetry/observer-a" or with prefix "workload.googleapis.com/latency_" (for example "workload.googleapis.com/latency_a").
 
-Go to the individual example sub-directories [sdk](./sdk/) or [exponential_histogram](./exponential_histogram/) for further instructions on how to `Create a dashboard`.
+Go to the individual example sub-directories [sdk](./sdk/) or [exponential_histogram](./exponential_histogram/) for further instructions on how to `Create a dashboard` to visualize the exported metrics.
