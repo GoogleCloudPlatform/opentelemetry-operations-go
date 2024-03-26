@@ -7,8 +7,6 @@ $ git fetch
 $ git checkout origin/main -b pre-release
 $ # ensure that version numbers in tools/release.go are what you want
 $ make prepare-release
-$ # update test fixtures to reflect new versions
-$ make fixtures
 $ git commit -a
 $ git push -u origin HEAD
 $ # create a PR with a link to draft release notes

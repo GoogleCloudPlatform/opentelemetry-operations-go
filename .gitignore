@@ -15,5 +15,7 @@ coverage.*
 /example/metric/sdk/sdk
 /example/metric/otlpgrpc/otlpgrpc
 /example/trace/otlpgrpc/otlpgrpc
+/example/metric/exponential_histogram/exponential_histogram
+/example/trace/otlphttp/otlphttp
 go.work
 go.work.sum
