@@ -18,7 +18,10 @@ import (
 	"go.opentelemetry.io/collector/component"
 )
 
+var (
+	Type = component.MustNewType("googleclientauth")
+)
+
 const (
-	Type               = "googleclientauth"
 	ExtensionStability = component.StabilityLevelAlpha
 )

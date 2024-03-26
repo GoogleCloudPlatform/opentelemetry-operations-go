@@ -27,16 +27,14 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
-const (
-	typeStr = "googlecloud"
-)
-
 func TestLoadConfig(t *testing.T) {
+	gcpType, err := component.NewType("googlecloud")
+	assert.NoError(t, err)
 	factories, err := otelcoltest.NopFactories()
 	assert.Nil(t, err)
 
-	factory := newFactory()
-	factories.Exporters[typeStr] = factory
+	factory := newFactory(gcpType)
+	factories.Exporters[gcpType] = factory
 	cfg, err := otelcoltest.LoadConfigAndValidate(path.Join("..", "testdata", "config.yaml"), factories)
 
 	require.NoError(t, err)
@@ -44,11 +42,11 @@ func TestLoadConfig(t *testing.T) {
 
 	assert.Equal(t, len(cfg.Exporters), 2)
 
-	r0 := cfg.Exporters[component.NewID(typeStr)].(*testExporterConfig)
+	r0 := cfg.Exporters[component.NewID(gcpType)].(*testExporterConfig)
 	defaultConfig := factory.CreateDefaultConfig().(*testExporterConfig)
 	assert.Equal(t, sanitize(r0), sanitize(defaultConfig))
 
-	r1 := cfg.Exporters[component.NewIDWithName(typeStr, "customname")].(*testExporterConfig)
+	r1 := cfg.Exporters[component.NewIDWithName(gcpType, "customname")].(*testExporterConfig)
 	assert.Equal(t, sanitize(r1),
 		&testExporterConfig{
 			Config: collector.Config{
@@ -94,9 +92,9 @@ func sanitize(cfg *testExporterConfig) *testExporterConfig {
 	return cfg
 }
 
-func newFactory() exporter.Factory {
+func newFactory(componentType component.Type) exporter.Factory {
 	return exporter.NewFactory(
-		typeStr,
+		componentType,
 		func() component.Config { return defaultConfig() },
 	)
 }
