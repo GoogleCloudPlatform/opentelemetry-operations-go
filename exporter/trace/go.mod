@@ -4,8 +4,8 @@ go 1.20
 
 require (
 	cloud.google.com/go/trace v1.10.1
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.45.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.45.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.46.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.46.0
 	github.com/stretchr/testify v1.8.4
 	go.opentelemetry.io/otel v1.23.1
 	go.opentelemetry.io/otel/sdk v1.23.1

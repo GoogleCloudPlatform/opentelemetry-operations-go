@@ -3,8 +3,8 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/trace/
 go 1.20
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.21.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator v0.45.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.22.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator v0.46.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.48.0
 	go.opentelemetry.io/otel v1.23.1
 	go.opentelemetry.io/otel/sdk v1.23.1
@@ -15,7 +15,7 @@ require (
 	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/trace v1.10.1 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.45.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.46.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
