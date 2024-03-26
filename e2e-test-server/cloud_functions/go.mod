@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/pubsub v1.33.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.6.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-server v0.46.0
-	github.com/cloudevents/sdk-go/v2 v2.13.0
+	github.com/cloudevents/sdk-go/v2 v2.15.2
 )
 
 require (
