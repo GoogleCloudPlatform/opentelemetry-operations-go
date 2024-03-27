@@ -199,7 +199,7 @@ func DefaultConfig() Config {
 		UserAgent: "opentelemetry-collector-contrib {{version}}",
 		LogConfig: LogConfig{
 			ServiceResourceLabels: true,
-			MapMonitoredResource:  defaultResourceToMonitoredResource,
+			MapMonitoredResource:  defaultResourceToLoggingMonitoredResource,
 		},
 		MetricConfig: MetricConfig{
 			KnownDomains:                     domains,
