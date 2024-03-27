@@ -183,6 +183,11 @@ type LogConfig struct {
 	// ErrorReportingType enables automatically parsing error logs to a json payload containing the
 	// type value for GCP Error Reporting. See https://cloud.google.com/error-reporting/docs/formatting-error-messages#log-text.
 	ErrorReportingType bool `mapstructure:"error_reporting_type"`
+	// MapMonitoredResource is not exposed as an option in the configuration, but
+	// can be used by other exporters to extend the functionality of this
+	// exporter. It allows overriding the function used to map otel resource to
+	// monitored resource.
+	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource
 }
 
 // Known metric domains. Note: This is now configurable for advanced usages.
@@ -194,6 +199,7 @@ func DefaultConfig() Config {
 		UserAgent: "opentelemetry-collector-contrib {{version}}",
 		LogConfig: LogConfig{
 			ServiceResourceLabels: true,
+			MapMonitoredResource:  defaultResourceToMonitoredResource,
 		},
 		MetricConfig: MetricConfig{
 			KnownDomains:                     domains,
