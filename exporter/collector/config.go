@@ -168,6 +168,11 @@ type ResourceFilter struct {
 }
 
 type LogConfig struct {
+	// MapMonitoredResource is not exposed as an option in the configuration, but
+	// can be used by other exporters to extend the functionality of this
+	// exporter. It allows overriding the function used to map otel resource to
+	// monitored resource.
+	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource
 	// DefaultLogName sets the fallback log name to use when one isn't explicitly set
 	// for a log entry. If unset, logs without a log name will raise an error.
 	DefaultLogName string `mapstructure:"default_log_name"`
@@ -194,6 +199,7 @@ func DefaultConfig() Config {
 		UserAgent: "opentelemetry-collector-contrib {{version}}",
 		LogConfig: LogConfig{
 			ServiceResourceLabels: true,
+			MapMonitoredResource:  defaultResourceToLoggingMonitoredResource,
 		},
 		MetricConfig: MetricConfig{
 			KnownDomains:                     domains,
