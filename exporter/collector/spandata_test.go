@@ -82,6 +82,10 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 	span.Attributes().PutInt("timeout_ns", 12e9)
 	span.Attributes().PutInt("ping_count", 25)
 	span.Attributes().PutStr("agent", "ocagent")
+	span.Attributes().PutEmptySlice("header")
+	strArr := []any{"value1", "value2"}
+	headerValue, _ := span.Attributes().Get("header")
+	headerValue.Slice().FromRaw(strArr)
 
 	gotOTSpanData := pdataResourceSpansToOTSpanData(rs)
 
@@ -136,6 +140,7 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 			attribute.String("agent", "ocagent"),
 			attribute.Bool("cache_hit", true),
 			attribute.Int64("timeout_ns", 12e9),
+			attribute.String("header", "value1,value2"),
 		},
 		instrumentationLibrary: instrumentation.Library{
 			Name:    "test_il_name",

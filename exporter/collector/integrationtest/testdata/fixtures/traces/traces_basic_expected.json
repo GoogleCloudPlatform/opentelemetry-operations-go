@@ -129,6 +129,11 @@
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "process.owner": {
                 "stringValue": {
                   "value": "mikedame"
@@ -306,6 +311,11 @@
               "process.executable.path": {
                 "stringValue": {
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
                 }
               },
               "process.owner": {
@@ -487,6 +497,11 @@
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "process.owner": {
                 "stringValue": {
                   "value": "mikedame"
@@ -666,6 +681,11 @@
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "process.owner": {
                 "stringValue": {
                   "value": "mikedame"
@@ -809,6 +829,11 @@
                   "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "process.runtime.name": {
                 "stringValue": {
                   "value": "go"
@@ -944,6 +969,11 @@
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "service.name": {
                 "stringValue": {
                   "value": "demo-client"
@@ -1067,6 +1097,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
                 }
               },
               "service.name": {
@@ -1194,6 +1229,11 @@
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "service.name": {
                 "stringValue": {
                   "value": "demo-client"
@@ -1288,6 +1328,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
                 }
               },
               "service.name": {
@@ -1386,6 +1431,11 @@
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "service.name": {
                 "stringValue": {
                   "value": "demo-client"
@@ -1482,6 +1532,11 @@
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "service.name": {
                 "stringValue": {
                   "value": "demo-client"
@@ -1576,6 +1631,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
                 }
               },
               "service.name": {
@@ -1727,6 +1787,11 @@
               "process.executable.path": {
                 "stringValue": {
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
                 }
               },
               "process.owner": {
@@ -1908,6 +1973,11 @@
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "process.owner": {
                 "stringValue": {
                   "value": "mikedame"
@@ -2087,6 +2157,11 @@
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "process.owner": {
                 "stringValue": {
                   "value": "mikedame"
@@ -2245,6 +2320,11 @@
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "service.name": {
                 "stringValue": {
                   "value": "demo-client"
@@ -2373,6 +2453,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
                 }
               },
               "service.name": {
@@ -2505,6 +2590,11 @@
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "service.name": {
                 "stringValue": {
                   "value": "demo-client"
@@ -2635,6 +2725,11 @@
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
+                }
+              },
               "service.name": {
                 "stringValue": {
                   "value": "demo-client"
@@ -2729,6 +2824,11 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "./main"
                 }
               },
               "service.name": {
