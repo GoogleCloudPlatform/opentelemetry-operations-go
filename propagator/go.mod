@@ -7,5 +7,3 @@ require (
 	go.opentelemetry.io/otel v1.24.0
 	go.opentelemetry.io/otel/trace v1.24.0
 )
-
-require golang.org/x/net v0.23.0 // indirect

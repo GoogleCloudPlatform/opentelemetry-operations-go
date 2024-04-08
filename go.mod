@@ -13,5 +13,3 @@ retract (
 	v1.0.0-RC2
 	v1.0.0-RC1
 )
-
-require golang.org/x/net v0.23.0 // indirect
