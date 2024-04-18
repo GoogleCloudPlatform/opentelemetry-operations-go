@@ -17,6 +17,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log"
 	"time"
@@ -30,6 +31,8 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/oauth"
 )
+
+var sustainedRun = flag.Bool("keepRunning", false, "Set to true for generating spans at a fixed rate for 2 hours. Default is false.")
 
 func initTracer() (func(), error) {
 	ctx := context.Background()
@@ -62,7 +65,34 @@ func initTracer() (func(), error) {
 	}, nil
 }
 
+func generateTestSpan(ctx context.Context, tr trace.Tracer, description string) {
+	fmt.Println("starting span...")
+	_, span := tr.Start(ctx, description, trace.WithAttributes(semconv.PeerServiceKey.String("ExampleService")))
+	defer span.End()
+	defer fmt.Println("ending span.")
+
+	time.Sleep(3 * time.Second)
+}
+
+func generateSpansAtFixedRate(ctx context.Context, tr trace.Tracer) {
+	fmt.Println("Generating 1 test span every 10 seconds for 2 hours")
+	totalDuration := 2 * time.Hour
+	endTime := time.Now().Add(totalDuration)
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for tick := range ticker.C {
+		if tick.After(endTime) {
+			fmt.Println("Total duration elapsed.")
+			break
+		}
+		go generateTestSpan(ctx, tr, fmt.Sprintf("span-%s", tick))
+	}
+	fmt.Println("Span generation complete.")
+}
+
 func main() {
+	flag.Parse()
 	shutdown, err := initTracer()
 	if err != nil {
 		log.Fatal(err)
@@ -71,10 +101,9 @@ func main() {
 	tr := otel.Tracer("cloudtrace/example/client")
 
 	ctx := context.Background()
-	fmt.Println("starting span...")
-	_, span := tr.Start(ctx, "test span", trace.WithAttributes(semconv.PeerServiceKey.String("ExampleService")))
-	defer span.End()
-	defer fmt.Println("ending span.")
-
-	time.Sleep(3 * time.Second)
+	if *sustainedRun {
+		generateSpansAtFixedRate(ctx, tr)
+	} else {
+		generateTestSpan(ctx, tr, "test span")
+	}
 }
