@@ -73,7 +73,7 @@ type options struct {
 	// deviation.  It isn't correct, so we don't send it by default.
 	enableSumOfSquaredDeviation bool
 
-	// createServiceTimeSeries, if true, this will send all timeseries using `CreateServiceTimeSeries`.
+	// createServiceTimeSeries sets whether to create timeseries using `CreateServiceTimeSeries`.
 	// Implicitly, this sets `disableCreateMetricDescriptors` to true.
 	createServiceTimeSeries bool
 }
