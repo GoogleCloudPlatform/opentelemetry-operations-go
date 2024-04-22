@@ -122,6 +122,8 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
 		client.CallOptions.CreateTimeSeries = append(client.CallOptions.CreateTimeSeries,
 			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
+		client.CallOptions.CreateServiceTimeSeries = append(client.CallOptions.CreateServiceTimeSeries,
+			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
 	}
 
 	cache := map[key]*googlemetricpb.MetricDescriptor{}
@@ -166,6 +168,7 @@ func (me *metricExporter) Aggregation(ik metric.InstrumentKind) metric.Aggregati
 // exportMetricDescriptor create MetricDescriptor from the record
 // if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm *metricdata.ResourceMetrics) error {
+	// We only send metric descriptors if we're configured *and* we're not sending service timeseries.
 	if me.o.disableCreateMetricDescriptors {
 		return nil
 	}
@@ -248,8 +251,11 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, rm *metricdata.R
 			Name:       name,
 			TimeSeries: tss[i:j],
 		}
-
-		errs = append(errs, me.client.CreateTimeSeries(ctx, req))
+		if me.o.createServiceTimeSeries {
+			errs = append(errs, me.client.CreateServiceTimeSeries(ctx, req))
+		} else {
+			errs = append(errs, me.client.CreateTimeSeries(ctx, req))
+		}
 	}
 
 	return errors.Join(errs...)

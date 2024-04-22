@@ -72,6 +72,10 @@ type options struct {
 	// enableSumOfSquaredDeviation enables calculation of an estimated sum of squared
 	// deviation.  It isn't correct, so we don't send it by default.
 	enableSumOfSquaredDeviation bool
+
+	// createServiceTimeSeries sets whether to create timeseries using `CreateServiceTimeSeries`.
+	// Implicitly, this sets `disableCreateMetricDescriptors` to true.
+	createServiceTimeSeries bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -157,5 +161,14 @@ func WithCompression(c string) func(o *options) {
 func WithSumOfSquaredDeviation() func(o *options) {
 	return func(o *options) {
 		o.enableSumOfSquaredDeviation = true
+	}
+}
+
+// WithCreateServiceTimeSeries configures the exporter to use `CreateServiceTimeSeries` for creating timeseries.
+// If this is used, metric descriptors are not exported.
+func WithCreateServiceTimeSeries() func(o *options) {
+	return func(o *options) {
+		o.createServiceTimeSeries = true
+		o.disableCreateMetricDescriptors = true
 	}
 }

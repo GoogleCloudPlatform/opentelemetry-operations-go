@@ -867,42 +867,72 @@ func TestTimeIntervalPassthru(t *testing.T) {
 
 type mock struct {
 	monitoringpb.UnimplementedMetricServiceServer
-	createTimeSeries       func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error)
-	createMetricDescriptor func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error)
+	createTimeSeries        func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error)
+	createServiceTimeSeries func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error)
+	createMetricDescriptor  func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error)
 }
 
 func (m *mock) CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
 	return m.createTimeSeries(ctx, req)
 }
 
+func (m *mock) CreateServiceTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
+	return m.createServiceTimeSeries(ctx, req)
+}
+
 func (m *mock) CreateMetricDescriptor(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
 	return m.createMetricDescriptor(ctx, req)
 }
 
-func TestExportWithDisableCreateMetricDescriptors(t *testing.T) {
+func TestExportWithDisableCreateMetricDescriptorsAndEnableServiceTimeSeries(t *testing.T) {
 	for _, tc := range []struct {
 		desc                           string
 		disableCreateMetricsDescriptor bool
 		expectExportMetricDescriptor   bool
+		enableServiceTimeSeries        bool
+		expectServiceTimeSeries        bool
 	}{
 		{
 			desc:                           "default",
 			disableCreateMetricsDescriptor: false,
 			expectExportMetricDescriptor:   true,
+			enableServiceTimeSeries:        false,
+			expectServiceTimeSeries:        false,
 		},
 		{
-			desc:                           "Disable CreateMetricsDescriptor",
+			desc:                           "Disable CreateMetricsDescriptor and CreateServiceTimeSeries",
 			disableCreateMetricsDescriptor: true,
 			expectExportMetricDescriptor:   false,
+			enableServiceTimeSeries:        false,
+			expectServiceTimeSeries:        false,
+		},
+		{
+			desc:                           "Enable CreateServiceTimeSeries and Enable CreateMetricsDescriptor",
+			disableCreateMetricsDescriptor: false,
+			expectExportMetricDescriptor:   false,
+			enableServiceTimeSeries:        true,
+			expectServiceTimeSeries:        true,
+		},
+		{
+			desc:                           "Enable CreateServiceTimeSeries and Disable CreateMetricsDescriptor",
+			disableCreateMetricsDescriptor: true,
+			expectExportMetricDescriptor:   false,
+			enableServiceTimeSeries:        true,
+			expectServiceTimeSeries:        true,
 		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			server := grpc.NewServer()
 
 			metricDescriptorCreated := false
+			createServicTimeSeriesUsed := false
 
 			m := mock{
 				createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
+					return &emptypb.Empty{}, nil
+				},
+				createServiceTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
+					createServicTimeSeriesUsed = true
 					return &emptypb.Empty{}, nil
 				},
 				createMetricDescriptor: func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
@@ -932,6 +962,10 @@ func TestExportWithDisableCreateMetricDescriptors(t *testing.T) {
 				WithMetricDescriptorTypeFormatter(formatter),
 			}
 
+			if tc.enableServiceTimeSeries {
+				opts = append(opts, WithCreateServiceTimeSeries())
+			}
+
 			if tc.disableCreateMetricsDescriptor {
 				opts = append(opts, WithDisableCreateMetricDescriptors())
 			}
@@ -954,6 +988,7 @@ func TestExportWithDisableCreateMetricDescriptors(t *testing.T) {
 			require.NoError(t, provider.ForceFlush(ctx))
 			server.Stop()
 			require.Equal(t, tc.expectExportMetricDescriptor, metricDescriptorCreated)
+			require.Equal(t, tc.expectServiceTimeSeries, createServicTimeSeriesUsed)
 		})
 	}
 }
