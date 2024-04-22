@@ -169,7 +169,7 @@ func (me *metricExporter) Aggregation(ik metric.InstrumentKind) metric.Aggregati
 // if the descriptor is not registered in Cloud Monitoring yet.
 func (me *metricExporter) exportMetricDescriptor(ctx context.Context, rm *metricdata.ResourceMetrics) error {
 	// We only send metric descriptors if we're configured *and* we're not sending service timeseries.
-	if me.o.disableCreateMetricDescriptors || me.o.createServiceTimeSeries {
+	if me.o.disableCreateMetricDescriptors {
 		return nil
 	}
 
