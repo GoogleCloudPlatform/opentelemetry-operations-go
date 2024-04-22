@@ -131,7 +131,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -315,7 +315,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -499,7 +499,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -683,7 +683,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -831,7 +831,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "process.runtime.name": {
@@ -971,7 +971,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1101,7 +1101,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1231,7 +1231,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1332,7 +1332,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1433,7 +1433,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1534,7 +1534,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1635,7 +1635,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1791,7 +1791,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -1975,7 +1975,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -2159,7 +2159,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -2322,7 +2322,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -2457,7 +2457,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -2592,7 +2592,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -2727,7 +2727,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -2828,7 +2828,7 @@
               },
               "process.command_args": {
                 "stringValue": {
-                  "value": "./main"
+                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {

@@ -16,7 +16,6 @@ package collector
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -150,13 +149,8 @@ func pdataAttributesToOTAttributes(attrs pcommon.Map, resource pcommon.Resource)
 				otAttrs = append(otAttrs, attribute.Int64(k, v.Int()))
 			case pcommon.ValueTypeDouble:
 				otAttrs = append(otAttrs, attribute.Float64(k, v.Double()))
-			case pcommon.ValueTypeSlice:
-				slice := v.Slice()
-				stringArr := make([]string, 0, slice.Len())
-				for i := 0; i < slice.Len(); i++ {
-					stringArr = append(stringArr, slice.At(i).AsString())
-				}
-				otAttrs = append(otAttrs, attribute.String(k, strings.Join(stringArr, ",")))
+			default:
+				otAttrs = append(otAttrs, attribute.String(k, v.AsString()))
 			}
 			return true
 		})
