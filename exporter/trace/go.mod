@@ -1,15 +1,17 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace
 
-go 1.20
+go 1.21
+
+toolchain go1.22.0
 
 require (
 	cloud.google.com/go/trace v1.10.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.46.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.46.0
-	github.com/stretchr/testify v1.8.4
-	go.opentelemetry.io/otel v1.24.0
-	go.opentelemetry.io/otel/sdk v1.24.0
-	go.opentelemetry.io/otel/trace v1.24.0
+	github.com/stretchr/testify v1.9.0
+	go.opentelemetry.io/otel v1.25.0
+	go.opentelemetry.io/otel/sdk v1.25.0
+	go.opentelemetry.io/otel/trace v1.25.0
 	golang.org/x/oauth2 v0.10.0
 	google.golang.org/api v0.126.0
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230731190214-cbb8c96f2d6d
@@ -36,7 +38,7 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.opentelemetry.io/otel/metric v1.24.0 // indirect
+	go.opentelemetry.io/otel/metric v1.25.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sync v0.3.0 // indirect
