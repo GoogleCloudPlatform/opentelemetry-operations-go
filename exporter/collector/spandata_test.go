@@ -85,12 +85,15 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 	span.Attributes().PutStr("agent", "ocagent")
 	span.Attributes().PutEmptySlice("header")
 	strArr := []any{"value1", "value2"}
-	headerValue, _ := span.Attributes().Get("header")
-	headerValue.Slice().FromRaw(strArr)
+	headerValue, found := span.Attributes().Get("header")
+	assert.True(t, found)
+	err := headerValue.Slice().FromRaw(strArr)
+	assert.NoError(t, err)
 
 	gotOTSpanData := pdataResourceSpansToOTSpanData(rs)
 
-	jsonStr, _ := json.Marshal(strArr)
+	jsonStr, err := json.Marshal(strArr)
+	assert.NoError(t, err)
 	wantOTSpanData := &spanSnapshot{
 		spanContext: apitrace.NewSpanContext(apitrace.SpanContextConfig{
 			TraceID: apitrace.TraceID{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F},
