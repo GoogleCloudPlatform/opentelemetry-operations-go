@@ -22,13 +22,18 @@ import (
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
 )
 
 func testMetric(timestamp time.Time) pmetric.Metrics {
-	metrics := pmetric.NewMetrics()
+	return appendMetric(pmetric.NewMetrics(), timestamp)
+}
+
+func appendMetric(metrics pmetric.Metrics, timestamp time.Time) pmetric.Metrics {
 	rm := metrics.ResourceMetrics().AppendEmpty()
 
 	// foo-label should be copied to target_info, not locationLabel
+	rm.Resource().Attributes().PutStr(semconv.AttributeServiceName, "my-service")
 	rm.Resource().Attributes().PutStr(locationLabel, "us-east")
 	rm.Resource().Attributes().PutStr("foo-label", "bar")
 
@@ -60,6 +65,30 @@ func TestAddExtraMetrics(t *testing.T) {
 			input:  testMetric(timestamp),
 			expected: func() pmetric.ResourceMetricsSlice {
 				metrics := testMetric(timestamp).ResourceMetrics()
+
+				// Insert a new, empty ScopeMetricsSlice for this resource that will hold target_info
+				sm := metrics.At(0).ScopeMetrics().AppendEmpty()
+				metric := sm.Metrics().AppendEmpty()
+				metric.SetName("target_info")
+				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+				metric.Gauge().DataPoints().At(0).Attributes().PutStr("foo-label", "bar")
+				metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+				return metrics
+			}(),
+		},
+		{
+			name:   "deduplicate target info from multiple resource metric",
+			config: Config{ExtraMetricsConfig: ExtraMetricsConfig{EnableTargetInfo: true}},
+			input: func() pmetric.Metrics {
+				metrics := appendMetric(testMetric(timestamp), timestamp)
+				// Add a non-identifying attribute to the second resource, which should be ignored.
+				metrics.ResourceMetrics().At(1).Resource().Attributes().PutStr("ignored-label", "ignored-value")
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := appendMetric(testMetric(timestamp), timestamp).ResourceMetrics()
+				// Make sure it matches the input
+				metrics.At(1).Resource().Attributes().PutStr("ignored-label", "ignored-value")
 
 				// Insert a new, empty ScopeMetricsSlice for this resource that will hold target_info
 				sm := metrics.At(0).ScopeMetrics().AppendEmpty()
@@ -114,6 +143,57 @@ func TestAddExtraMetrics(t *testing.T) {
 				scopeInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("foo_attribute", "bar")
 
 				// add otel_scope_* attributes to all metrics in this scope (including otel_scope_info)
+				for i := 0; i < sm.Metrics().Len(); i++ {
+					metric := sm.Metrics().At(i)
+					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					scopeInfoMetric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+				}
+				return metrics
+			}(),
+		},
+		{
+			name:   "add duplicate scope info with attributes",
+			config: Config{ExtraMetricsConfig: ExtraMetricsConfig{EnableScopeInfo: true}},
+			input: func() pmetric.Metrics {
+				metrics := appendMetric(testMetric(timestamp), timestamp)
+				// set different attributes on scopes with the same name + version
+				metrics.ResourceMetrics().At(0).ScopeMetrics().At(0).Scope().Attributes().PutStr("foo_attribute", "bar")
+				metrics.ResourceMetrics().At(1).ScopeMetrics().At(0).Scope().Attributes().PutStr("foo_attribute", "not_bar")
+
+				// Add a duplicate scope within the same resource
+				sm := metrics.ResourceMetrics().At(1).ScopeMetrics().AppendEmpty()
+				sm.Scope().SetName("myscope")
+				sm.Scope().SetVersion("v0.0.1")
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				// Make sure it matches the input
+				metrics := appendMetric(testMetric(timestamp), timestamp).ResourceMetrics()
+				metrics.At(0).ScopeMetrics().At(0).Scope().Attributes().PutStr("foo_attribute", "bar")
+				// This scope attribute is on a duplicate scope_info metric, so it does not
+				metrics.At(1).ScopeMetrics().At(0).Scope().Attributes().PutStr("foo_attribute", "not_bar")
+				sm := metrics.At(1).ScopeMetrics().AppendEmpty()
+				sm.Scope().SetName("myscope")
+				sm.Scope().SetVersion("v0.0.1")
+
+				// Insert the scope_info metric into the existing ScopeMetricsSlice
+				sm = metrics.At(0).ScopeMetrics().At(0)
+				scopeInfoMetric := sm.Metrics().AppendEmpty()
+				scopeInfoMetric.SetName("otel_scope_info")
+				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(1)
+				scopeInfoMetric.Gauge().DataPoints().At(0).Attributes().PutStr("foo_attribute", "bar")
+
+				// add otel_scope_* attributes to all metrics in this scope (including otel_scope_info)
+				for i := 0; i < sm.Metrics().Len(); i++ {
+					metric := sm.Metrics().At(i)
+					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					scopeInfoMetric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+				}
+
+				// add otel_scope_* attributes to all metrics in the second scope
+				sm = metrics.At(1).ScopeMetrics().At(0)
 				for i := 0; i < sm.Metrics().Len(); i++ {
 					metric := sm.Metrics().At(i)
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
