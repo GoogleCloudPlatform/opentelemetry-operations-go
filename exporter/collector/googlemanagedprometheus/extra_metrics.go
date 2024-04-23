@@ -119,7 +119,7 @@ func (c Config) addTargetInfoMetric(m pmetric.Metrics) {
 	if !c.ExtraMetricsConfig.EnableTargetInfo {
 		return
 	}
-	ids := make(map[resourceID]bool)
+	ids := make(map[resourceID]struct{})
 	rms := m.ResourceMetrics()
 	// loop over input (original) resource metrics
 	for i := 0; i < rms.Len(); i++ {
@@ -188,11 +188,11 @@ func (c Config) addTargetInfoMetric(m pmetric.Metrics) {
 			serviceNamespace:  getResourceAttr(semconv.AttributeServiceNamespace),
 			serviceInstanceID: getResourceAttr(semconv.AttributeServiceInstanceID),
 		}
-		if ids[id] {
+		if _, ok := ids[id]; ok {
 			// We've already added a resource with the same ID before, so skip this one.
 			continue
 		}
-		ids[id] = true
+		ids[id] = struct{}{}
 
 		// create the target_info metric as a Gauge with value 1
 		targetInfoMetric := rm.ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
@@ -238,7 +238,7 @@ func (c Config) addScopeInfoMetric(m pmetric.Metrics) {
 	if !c.ExtraMetricsConfig.EnableScopeInfo {
 		return
 	}
-	ids := make(map[scopeID]bool)
+	ids := make(map[scopeID]struct{})
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
@@ -328,11 +328,11 @@ func (c Config) addScopeInfoMetric(m pmetric.Metrics) {
 				name:    sm.Scope().Name(),
 				version: sm.Scope().Version(),
 			}
-			if ids[id] {
+			if _, ok := ids[id]; ok {
 				// We've already added a scope with the same ID before, so skip this one.
 				continue
 			}
-			ids[id] = true
+			ids[id] = struct{}{}
 
 			// Add otel_scope_info metric
 			scopeInfoMetric := sm.Metrics().AppendEmpty()
