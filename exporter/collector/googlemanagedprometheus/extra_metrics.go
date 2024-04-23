@@ -105,6 +105,12 @@ func addUntypedMetrics(m pmetric.Metrics) {
 	}
 }
 
+// resourceID identifies a resource. We only send one target info for each
+// resourceID.
+type resourceID struct {
+	serviceName, serviceInstanceID, serviceNamespace string
+}
+
 // addTargetInfoMetric inserts target_info for each resource.
 // First, it extracts the target_info metric from each ResourceMetric associated with the input pmetric.Metrics
 // and inserts it into a new ScopeMetric for that resource, as specified in
@@ -113,10 +119,17 @@ func (c Config) addTargetInfoMetric(m pmetric.Metrics) {
 	if !c.ExtraMetricsConfig.EnableTargetInfo {
 		return
 	}
+	ids := make(map[resourceID]bool)
 	rms := m.ResourceMetrics()
 	// loop over input (original) resource metrics
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
+		getResourceAttr := func(attr string) string {
+			if v, ok := rm.Resource().Attributes().Get(attr); ok {
+				return v.AsString()
+			}
+			return ""
+		}
 
 		// Keep track of the most recent time in this resource's metrics
 		// Use that time for the timestamp of the new metric
@@ -170,6 +183,17 @@ func (c Config) addTargetInfoMetric(m pmetric.Metrics) {
 			}
 		}
 
+		id := resourceID{
+			serviceName:       getResourceAttr(semconv.AttributeServiceName),
+			serviceNamespace:  getResourceAttr(semconv.AttributeServiceNamespace),
+			serviceInstanceID: getResourceAttr(semconv.AttributeServiceInstanceID),
+		}
+		if ids[id] {
+			// We've already added a resource with the same ID before, so skip this one.
+			continue
+		}
+		ids[id] = true
+
 		// create the target_info metric as a Gauge with value 1
 		targetInfoMetric := rm.ScopeMetrics().AppendEmpty().Metrics().AppendEmpty()
 		targetInfoMetric.SetName("target_info")
@@ -201,6 +225,12 @@ func (c Config) addTargetInfoMetric(m pmetric.Metrics) {
 	}
 }
 
+// scopeID identifies a scope. We only send one scope info for each scopeID within a unique resource.
+type scopeID struct {
+	resource      resourceID
+	name, version string
+}
+
 // addScopeInfoMetric adds the otel_scope_info metric to a Metrics slice as specified in
 // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.16.0/specification/compatibility/prometheus_and_openmetrics.md#instrumentation-scope-1
 // It also updates all other metrics with the corresponding scope_name and scope_version attributes, if they are present.
@@ -208,25 +238,23 @@ func (c Config) addScopeInfoMetric(m pmetric.Metrics) {
 	if !c.ExtraMetricsConfig.EnableScopeInfo {
 		return
 	}
+	ids := make(map[scopeID]bool)
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
-		sms := rms.At(i).ScopeMetrics()
+		rm := rms.At(i)
+		getResourceAttr := func(attr string) string {
+			if v, ok := rm.Resource().Attributes().Get(attr); ok {
+				return v.AsString()
+			}
+			return ""
+		}
+		sms := rm.ScopeMetrics()
 		for j := 0; j < sms.Len(); j++ {
 			sm := sms.At(j)
 			// If not present, skip this scope
 			if len(sm.Scope().Name()) == 0 && len(sm.Scope().Version()) == 0 {
 				continue
 			}
-
-			// Add otel_scope_info metric
-			scopeInfoMetric := sm.Metrics().AppendEmpty()
-			scopeInfoMetric.SetName("otel_scope_info")
-			dataPoint := scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty()
-			dataPoint.SetIntValue(1)
-			sm.Scope().Attributes().Range(func(k string, v pcommon.Value) bool {
-				dataPoint.Attributes().PutStr(k, v.AsString())
-				return true
-			})
 
 			// Keep track of the most recent time in this scope's metrics
 			// Use that time for the timestamp of the new metric
@@ -291,7 +319,32 @@ func (c Config) addScopeInfoMetric(m pmetric.Metrics) {
 					}
 				}
 			}
+			id := scopeID{
+				resource: resourceID{
+					serviceName:       getResourceAttr(semconv.AttributeServiceName),
+					serviceNamespace:  getResourceAttr(semconv.AttributeServiceNamespace),
+					serviceInstanceID: getResourceAttr(semconv.AttributeServiceInstanceID),
+				},
+				name:    sm.Scope().Name(),
+				version: sm.Scope().Version(),
+			}
+			if ids[id] {
+				// We've already added a scope with the same ID before, so skip this one.
+				continue
+			}
+			ids[id] = true
 
+			// Add otel_scope_info metric
+			scopeInfoMetric := sm.Metrics().AppendEmpty()
+			scopeInfoMetric.SetName("otel_scope_info")
+			dataPoint := scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty()
+			dataPoint.SetIntValue(1)
+			sm.Scope().Attributes().Range(func(k string, v pcommon.Value) bool {
+				dataPoint.Attributes().PutStr(k, v.AsString())
+				return true
+			})
+			dataPoint.Attributes().PutStr("otel_scope_name", sm.Scope().Name())
+			dataPoint.Attributes().PutStr("otel_scope_version", sm.Scope().Version())
 			dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(latestTime))
 		}
 	}
