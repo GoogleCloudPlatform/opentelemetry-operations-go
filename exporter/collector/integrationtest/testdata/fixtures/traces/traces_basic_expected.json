@@ -119,6 +119,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -127,11 +132,6 @@
               "process.executable.path": {
                 "stringValue": {
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -303,6 +303,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -311,11 +316,6 @@
               "process.executable.path": {
                 "stringValue": {
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -487,6 +487,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -495,11 +500,6 @@
               "process.executable.path": {
                 "stringValue": {
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -671,6 +671,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -679,11 +684,6 @@
               "process.executable.path": {
                 "stringValue": {
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -806,6 +806,11 @@
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -827,11 +832,6 @@
               "process.runtime.description": {
                 "stringValue": {
                   "value": "go version go1.19-pre4 cl/455575533 +12f49fe0ed linux/amd64"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "process.runtime.name": {
@@ -936,6 +936,11 @@
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -967,11 +972,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1066,6 +1066,11 @@
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1097,11 +1102,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1196,6 +1196,11 @@
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1227,11 +1232,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1297,6 +1297,11 @@
                   "value": "demo-client-tracer"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1328,11 +1333,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1398,6 +1398,11 @@
                   "value": "demo-client-tracer"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1429,11 +1434,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1499,6 +1499,11 @@
                   "value": "demo-client-tracer"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1530,11 +1535,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1600,6 +1600,11 @@
                   "value": "demo-client-tracer"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1631,11 +1636,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -1779,6 +1779,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1787,11 +1792,6 @@
               "process.executable.path": {
                 "stringValue": {
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -1963,6 +1963,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1971,11 +1976,6 @@
               "process.executable.path": {
                 "stringValue": {
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -2147,6 +2147,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2155,11 +2160,6 @@
               "process.executable.path": {
                 "stringValue": {
                   "value": "/go/src/github.com/open-telemetry/opentelemetry-collector-contrib/examples/demo/server/main"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "process.owner": {
@@ -2287,6 +2287,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2318,11 +2323,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -2422,6 +2422,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2453,11 +2458,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -2557,6 +2557,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2588,11 +2593,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -2692,6 +2692,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2723,11 +2728,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
@@ -2793,6 +2793,11 @@
                   "value": "demo-client-tracer"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2824,11 +2829,6 @@
               "process.runtime.version": {
                 "stringValue": {
                   "value": "go1.19-pre4 cl/455575533 +12f49fe0ed"
-                }
-              },
-              "process.command_args": {
-                "stringValue": {
-                  "value": "[\"./main\"]"
                 }
               },
               "service.name": {
