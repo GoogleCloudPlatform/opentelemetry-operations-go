@@ -6,6 +6,7 @@ toolchain go1.22.0
 
 require (
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus v0.99.0
+	github.com/prometheus/common v0.53.0
 	github.com/stretchr/testify v1.9.0
 	go.opentelemetry.io/collector/featuregate v1.6.0
 	go.opentelemetry.io/collector/pdata v1.6.0
@@ -21,6 +22,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/prometheus/client_model v0.6.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/net v0.23.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect

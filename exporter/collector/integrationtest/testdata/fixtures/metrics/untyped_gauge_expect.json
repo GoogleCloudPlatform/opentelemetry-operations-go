@@ -7,8 +7,7 @@
           "metric": {
             "type": "workload.googleapis.com/fake_untyped_metric",
             "labels": {
-              "ex_com_lemons_untyped": "13",
-              "prometheus_googleapis_com_internal_untyped_metric": "true"
+              "ex_com_lemons_untyped": "13"
             }
           },
           "resource": {
@@ -45,9 +44,6 @@
         "labels": [
           {
             "key": "ex_com_lemons_untyped"
-          },
-          {
-            "key": "prometheus_googleapis_com_internal_untyped_metric"
           }
         ],
         "metricKind": "GAUGE",

@@ -21,7 +21,7 @@ require (
 	go.opentelemetry.io/collector/exporter v0.99.0
 	go.opentelemetry.io/collector/featuregate v1.6.0
 	go.opentelemetry.io/collector/otelcol v0.99.0
-	go.opentelemetry.io/collector/pdata v1.6.0
+	go.opentelemetry.io/collector/pdata v1.6.1-0.20240426134529-31528ce81d44
 	go.opentelemetry.io/otel v1.25.0
 	go.opentelemetry.io/otel/sdk v1.25.0
 	go.opentelemetry.io/otel/sdk/metric v1.25.0
@@ -75,7 +75,7 @@ require (
 	github.com/power-devops/perfstat v0.0.0-20210106213030-5aafc221ea8c // indirect
 	github.com/prometheus/client_golang v1.19.0 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
-	github.com/prometheus/common v0.52.3 // indirect
+	github.com/prometheus/common v0.53.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
 	github.com/prometheus/prometheus v0.39.1 // indirect
 	github.com/shirou/gopsutil/v3 v3.24.3 // indirect

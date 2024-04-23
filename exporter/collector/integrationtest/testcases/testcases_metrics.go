@@ -350,11 +350,7 @@ var MetricsTestCases = []TestCase{
 		Name:                 "[GMP] Untyped Gauge becomes a GCM Gauge and a Cumulative with /unknown and /unknown:counter suffixes",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/untyped_gauge.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/untyped_gauge_gmp_expect.json",
-		ConfigureCollector: func(cfg *collector.Config) {
-			configureGMPCollector(cfg)
-			//nolint:errcheck
-			featuregate.GlobalRegistry().Set("gcp.untypedDoubleExport", true)
-		},
+		ConfigureCollector:   configureGMPCollector,
 		// prometheus_target is not supported by the SDK
 		SkipForSDK: true,
 	},

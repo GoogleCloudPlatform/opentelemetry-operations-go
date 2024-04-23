@@ -17,26 +17,13 @@ package googlemanagedprometheus
 import (
 	"time"
 
-	"go.opentelemetry.io/collector/featuregate"
+	"github.com/prometheus/common/model"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
 )
 
-const (
-	// Special attribute key used by Ops Agent prometheus receiver to denote untyped
-	// prometheus metric. Internal use only.
-	GCPOpsAgentUntypedMetricKey = "prometheus.googleapis.com/internal/untyped_metric"
-
-	gcpUntypedDoubleExportGateKey = "gcp.untypedDoubleExport"
-)
-
-var untypedDoubleExportFeatureGate = featuregate.GlobalRegistry().MustRegister(
-	gcpUntypedDoubleExportGateKey,
-	featuregate.StageAlpha,
-	featuregate.WithRegisterFromVersion("v0.77.0"),
-	featuregate.WithRegisterDescription("Enable automatically exporting untyped Prometheus metrics as both gauge and cumulative to GCP."),
-	featuregate.WithRegisterReferenceURL("https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/668"))
+const prometheusMetricMetadataTypeKey = "prometheus.type"
 
 func (c Config) ExtraMetrics(m pmetric.Metrics) {
 	addUntypedMetrics(m)
@@ -47,9 +34,6 @@ func (c Config) ExtraMetrics(m pmetric.Metrics) {
 // addUntypedMetrics looks for any Gauge data point with the special Ops Agent untyped metric
 // attribute and duplicates that data point to a matching Sum.
 func addUntypedMetrics(m pmetric.Metrics) {
-	if !untypedDoubleExportFeatureGate.IsEnabled() {
-		return
-	}
 	rms := m.ResourceMetrics()
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
@@ -69,21 +53,21 @@ func addUntypedMetrics(m pmetric.Metrics) {
 					continue
 				}
 
+				if !isUnknown(metric) {
+					continue
+				}
+
 				// attribute is set on the data point
 				gauge := metric.Gauge()
 				points := gauge.DataPoints()
 				for l := 0; l < points.Len(); l++ {
-					point := points.At(l)
-					val, ok := point.Attributes().Get(GCPOpsAgentUntypedMetricKey)
-					if !(ok && val.AsString() == "true") {
-						continue
-					}
-
 					// Add the new Sum metric and copy values over from this Gauge
+					point := points.At(l)
 					newMetric := mes.AppendEmpty()
 					newMetric.SetName(metric.Name())
 					newMetric.SetDescription(metric.Description())
 					newMetric.SetUnit(metric.Unit())
+					newMetric.Metadata().PutStr(prometheusMetricMetadataTypeKey, string(model.MetricTypeUnknown))
 
 					newSum := newMetric.SetEmptySum()
 					newSum.SetIsMonotonic(true)
@@ -103,6 +87,11 @@ func addUntypedMetrics(m pmetric.Metrics) {
 			}
 		}
 	}
+}
+
+func isUnknown(metric pmetric.Metric) bool {
+	originalType, ok := metric.Metadata().Get(prometheusMetricMetadataTypeKey)
+	return ok && originalType.Str() == string(model.MetricTypeUnknown)
 }
 
 // resourceID identifies a resource. We only send one target info for each

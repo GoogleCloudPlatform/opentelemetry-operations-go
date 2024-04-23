@@ -38,12 +38,6 @@
                                     "value": {
                                        "stringValue": "13"
                                     }
-                                 },
-                                 {
-                                    "key": "prometheus.googleapis.com/internal/untyped_metric",
-                                    "value": {
-                                       "stringValue": "true"
-                                    }
                                  }
                               ],
                               "startTimeUnixNano": "1649443416286000000",
@@ -51,7 +45,15 @@
                               "asDouble": 3
                            }
                         ]
-                     }
+                     },
+                     "metadata": [
+                        {
+                           "key": "prometheus.type",
+                           "value": {
+                              "stringValue": "unknown"
+                           }
+                        }
+                     ]
                   }
                ]
             }

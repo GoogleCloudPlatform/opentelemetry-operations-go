@@ -19,7 +19,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
@@ -53,11 +52,10 @@ func appendMetric(metrics pmetric.Metrics, timestamp time.Time) pmetric.Metrics 
 func TestAddExtraMetrics(t *testing.T) {
 	timestamp := time.Now()
 	for _, tc := range []struct {
-		input                    pmetric.Metrics
-		expected                 pmetric.ResourceMetricsSlice
-		name                     string
-		config                   Config
-		enableUntypedFeatureGate bool
+		input    pmetric.Metrics
+		expected pmetric.ResourceMetricsSlice
+		name     string
+		config   Config
 	}{
 		{
 			name:   "add target info from resource metric",
@@ -322,49 +320,44 @@ func TestAddExtraMetrics(t *testing.T) {
 			}(),
 		},
 		{
-			name:                     "add untyped Sum metric from Gauge",
-			enableUntypedFeatureGate: true,
-			config:                   Config{},
+			name:   "add untyped Sum metric from Gauge",
+			config: Config{},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).
 					ScopeMetrics().At(0).
 					Metrics().At(0).
-					Gauge().DataPoints().At(0).
-					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+					Metadata().PutStr("prometheus.type", "unknown")
 				return metrics
 			}(),
 			expected: func() pmetric.ResourceMetricsSlice {
 				metrics := testMetric(timestamp).ResourceMetrics()
 
-				dataPoint := metrics.At(0).
+				metrics.At(0).
 					ScopeMetrics().At(0).
 					Metrics().At(0).
-					Gauge().DataPoints().At(0)
-				dataPoint.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+					Metadata().PutStr("prometheus.type", "unknown")
 
 				metric := metrics.At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				metric.SetName("baz-metric")
+				metric.Metadata().PutStr("prometheus.type", "unknown")
 				metric.SetEmptySum().DataPoints().AppendEmpty().SetIntValue(2112)
 				metric.Sum().SetIsMonotonic(true)
 				metric.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 				metric.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
-				metric.Sum().DataPoints().At(0).Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
 
 				return metrics
 			}(),
 		},
 		{
-			name:                     "add untyped Sum metric from Gauge (double value)",
-			enableUntypedFeatureGate: true,
-			config:                   Config{},
+			name:   "add untyped Sum metric from Gauge (double value)",
+			config: Config{},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).
 					ScopeMetrics().At(0).
 					Metrics().At(0).
-					Gauge().DataPoints().At(0).
-					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+					Metadata().PutStr("prometheus.type", "unknown")
 				metrics.ResourceMetrics().At(0).
 					ScopeMetrics().At(0).
 					Metrics().At(0).
@@ -375,100 +368,69 @@ func TestAddExtraMetrics(t *testing.T) {
 			expected: func() pmetric.ResourceMetricsSlice {
 				metrics := testMetric(timestamp).ResourceMetrics()
 
-				dataPoint := metrics.At(0).
+				metrics.At(0).ScopeMetrics().At(0).Metrics().At(0).Metadata().PutStr("prometheus.type", "unknown")
+				metrics.At(0).
 					ScopeMetrics().At(0).
 					Metrics().At(0).
-					Gauge().DataPoints().At(0)
-				dataPoint.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
-				dataPoint.SetDoubleValue(123.5)
+					Gauge().DataPoints().At(0).SetDoubleValue(123.5)
 
 				metric := metrics.At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
 				metric.SetName("baz-metric")
+				metric.Metadata().PutStr("prometheus.type", "unknown")
 				metric.SetEmptySum().DataPoints().AppendEmpty().SetDoubleValue(123.5)
 				metric.Sum().SetIsMonotonic(true)
 				metric.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 				metric.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
-				metric.Sum().DataPoints().At(0).Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
 
 				return metrics
 			}(),
 		},
 		{
-			name:                     "untyped Gauge does nothing if feature gate is disabled",
-			enableUntypedFeatureGate: false,
-			config:                   Config{},
+			name:   "untyped Gauge does nothing if feature gate is enabled and key!=unknown",
+			config: Config{},
 			input: func() pmetric.Metrics {
 				metrics := testMetric(timestamp)
 				metrics.ResourceMetrics().At(0).
 					ScopeMetrics().At(0).
 					Metrics().At(0).
-					Gauge().DataPoints().At(0).
-					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
-				return metrics
-			}(),
-			expected: func() pmetric.ResourceMetricsSlice {
-				metrics := testMetric(timestamp).ResourceMetrics()
-				dataPoint := metrics.At(0).
-					ScopeMetrics().At(0).
-					Metrics().At(0).
-					Gauge().DataPoints().At(0)
-				dataPoint.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
-				return metrics
-			}(),
-		},
-		{
-			name:                     "untyped Gauge does nothing if feature gate is enabled and key!=true",
-			enableUntypedFeatureGate: true,
-			config:                   Config{},
-			input: func() pmetric.Metrics {
-				metrics := testMetric(timestamp)
-				metrics.ResourceMetrics().At(0).
-					ScopeMetrics().At(0).
-					Metrics().At(0).
-					Gauge().DataPoints().At(0).
-					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "foo")
-				return metrics
-			}(),
-			expected: func() pmetric.ResourceMetricsSlice {
-				metrics := testMetric(timestamp).ResourceMetrics()
-				dataPoint := metrics.At(0).
-					ScopeMetrics().At(0).
-					Metrics().At(0).
-					Gauge().DataPoints().At(0)
-				dataPoint.Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "foo")
-				return metrics
-			}(),
-		},
-		{
-			name:                     "untyped non-Gauge does nothing if feature gate is enabled",
-			enableUntypedFeatureGate: true,
-			config:                   Config{},
-			input: func() pmetric.Metrics {
-				metrics := testMetric(timestamp)
-				metrics.ResourceMetrics().At(0).
-					ScopeMetrics().At(0).
-					Metrics().AppendEmpty().SetEmptyHistogram().DataPoints().AppendEmpty().
-					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+					Metadata().PutStr("prometheus.type", "foo")
 				return metrics
 			}(),
 			expected: func() pmetric.ResourceMetricsSlice {
 				metrics := testMetric(timestamp).ResourceMetrics()
 				metrics.At(0).
 					ScopeMetrics().At(0).
-					Metrics().AppendEmpty().SetEmptyHistogram().DataPoints().AppendEmpty().
-					Attributes().PutStr(GCPOpsAgentUntypedMetricKey, "true")
+					Metrics().At(0).
+					Metadata().PutStr("prometheus.type", "foo")
+				return metrics
+			}(),
+		},
+		{
+			name:   "untyped non-Gauge does nothing if feature gate is enabled",
+			config: Config{},
+			input: func() pmetric.Metrics {
+				metrics := testMetric(timestamp)
+				metric := metrics.ResourceMetrics().At(0).
+					ScopeMetrics().At(0).
+					Metrics().AppendEmpty()
+
+				metric.SetEmptyHistogram().DataPoints().AppendEmpty()
+				metric.Metadata().PutStr("prometheus.type", "unknown")
+				return metrics
+			}(),
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := testMetric(timestamp).ResourceMetrics()
+				metric := metrics.At(0).
+					ScopeMetrics().At(0).
+					Metrics().AppendEmpty()
+
+				metric.SetEmptyHistogram().DataPoints().AppendEmpty()
+				metric.Metadata().PutStr("prometheus.type", "unknown")
 				return metrics
 			}(),
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
-			if tc.enableUntypedFeatureGate {
-				assert.NoError(t, featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, true))
-				// disable it after the test is over
-				defer func() {
-					assert.NoError(t, featuregate.GlobalRegistry().Set(gcpUntypedDoubleExportGateKey, false))
-				}()
-			}
 			m := tc.input
 			tc.config.ExtraMetrics(m)
 			assert.EqualValues(t, tc.expected, m.ResourceMetrics())
