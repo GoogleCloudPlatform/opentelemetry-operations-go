@@ -149,6 +149,8 @@ func pdataAttributesToOTAttributes(attrs pcommon.Map, resource pcommon.Resource)
 				otAttrs = append(otAttrs, attribute.Int64(k, v.Int()))
 			case pcommon.ValueTypeDouble:
 				otAttrs = append(otAttrs, attribute.Float64(k, v.Double()))
+			default:
+				otAttrs = append(otAttrs, attribute.String(k, v.AsString()))
 			}
 			return true
 		})

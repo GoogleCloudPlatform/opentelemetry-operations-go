@@ -119,6 +119,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -296,6 +301,11 @@
               "otel.scope.version": {
                 "stringValue": {
                   "value": "semver:0.33.0"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
                 }
               },
               "process.executable.name": {
@@ -477,6 +487,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -656,6 +671,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -786,6 +806,11 @@
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -909,6 +934,11 @@
               "otel.scope.name": {
                 "stringValue": {
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
                 }
               },
               "process.executable.name": {
@@ -1036,6 +1066,11 @@
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1161,6 +1196,11 @@
                   "value": "go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1255,6 +1295,11 @@
               "otel.scope.name": {
                 "stringValue": {
                   "value": "demo-client-tracer"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
                 }
               },
               "process.executable.name": {
@@ -1353,6 +1398,11 @@
                   "value": "demo-client-tracer"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1449,6 +1499,11 @@
                   "value": "demo-client-tracer"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -1543,6 +1598,11 @@
               "otel.scope.name": {
                 "stringValue": {
                   "value": "demo-client-tracer"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
                 }
               },
               "process.executable.name": {
@@ -1717,6 +1777,11 @@
               "otel.scope.version": {
                 "stringValue": {
                   "value": "semver:0.33.0"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
                 }
               },
               "process.executable.name": {
@@ -1898,6 +1963,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2077,6 +2147,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2212,6 +2287,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2340,6 +2420,11 @@
               "otel.scope.version": {
                 "stringValue": {
                   "value": "semver:0.33.0"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
                 }
               },
               "process.executable.name": {
@@ -2472,6 +2557,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2602,6 +2692,11 @@
                   "value": "semver:0.33.0"
                 }
               },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
+                }
+              },
               "process.executable.name": {
                 "stringValue": {
                   "value": "main"
@@ -2696,6 +2791,11 @@
               "otel.scope.name": {
                 "stringValue": {
                   "value": "demo-client-tracer"
+                }
+              },
+              "process.command_args": {
+                "stringValue": {
+                  "value": "[\"./main\"]"
                 }
               },
               "process.executable.name": {

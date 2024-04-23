@@ -15,6 +15,7 @@
 package collector
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 
@@ -82,9 +83,17 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 	span.Attributes().PutInt("timeout_ns", 12e9)
 	span.Attributes().PutInt("ping_count", 25)
 	span.Attributes().PutStr("agent", "ocagent")
+	span.Attributes().PutEmptySlice("header")
+	strArr := []any{"value1", "value2"}
+	headerValue, found := span.Attributes().Get("header")
+	assert.True(t, found)
+	err := headerValue.Slice().FromRaw(strArr)
+	assert.NoError(t, err)
 
 	gotOTSpanData := pdataResourceSpansToOTSpanData(rs)
 
+	jsonStr, err := json.Marshal(strArr)
+	assert.NoError(t, err)
 	wantOTSpanData := &spanSnapshot{
 		spanContext: apitrace.NewSpanContext(apitrace.SpanContextConfig{
 			TraceID: apitrace.TraceID{0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F},
@@ -136,6 +145,7 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 			attribute.String("agent", "ocagent"),
 			attribute.Bool("cache_hit", true),
 			attribute.Int64("timeout_ns", 12e9),
+			attribute.String("header", string(jsonStr)),
 		},
 		instrumentationLibrary: instrumentation.Library{
 			Name:    "test_il_name",
