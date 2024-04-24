@@ -150,9 +150,9 @@ lint: $(GOLANGCI_LINT) $(MISSPELL) govulncheck
 	done
 	$(MISSPELL) -w $(ALL_DOCS)
 	set -e; for dir in $(ALL_GO_MOD_DIRS) $(TOOLS_MOD_DIR); do \
-	  echo "go mod tidy -compat=1.20 in $${dir}"; \
+	  echo "go mod tidy -compat=1.21 in $${dir}"; \
 	  (cd "$${dir}" && \
-	    go mod tidy -compat=1.20); \
+	    go mod tidy -compat=1.21); \
 	done
 
 generate: $(STRINGER) $(PROTOC)
@@ -191,19 +191,19 @@ govulncheck/%: | $(GOVULNCHECK)
 
 .PHONY: gotidy
 gotidy:
-	$(MAKE) for-all-mod CMD="go mod tidy -compat=1.20"
+	$(MAKE) for-all-mod CMD="go mod tidy -compat=1.21"
 
 .PHONY: update-dep
 update-dep:
 	$(MAKE) for-all-mod CMD="$(PWD)/internal/buildscripts/update-dep"
 
-STABLE_OTEL_VERSION=v1.24.0
-UNSTABLE_OTEL_VERSION=v0.46.0
-STABLE_CONTRIB_OTEL_VERSION=v1.24.0
-UNSTABLE_CONTRIB_OTEL_VERSION=v0.49.0
-STABLE_COLLECTOR_VERSION=v1.4.0
-UNSTABLE_COLLECTOR_VERSION=v0.97.0
-UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.96.0
+STABLE_OTEL_VERSION=v1.25.0
+UNSTABLE_OTEL_VERSION=v0.47.0
+STABLE_CONTRIB_OTEL_VERSION=v1.25.0
+UNSTABLE_CONTRIB_OTEL_VERSION=v0.50.0
+STABLE_COLLECTOR_VERSION=v1.6.0
+UNSTABLE_COLLECTOR_VERSION=v0.99.0
+UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.99.0
 
 .PHONY: update-otel
 update-otel:

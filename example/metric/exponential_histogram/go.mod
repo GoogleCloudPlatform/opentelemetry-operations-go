@@ -1,14 +1,16 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric/exponential_histogram
 
-go 1.20
+go 1.21
+
+toolchain go1.22.0
 
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.46.0
-	go.opentelemetry.io/contrib/detectors/gcp v1.24.0
-	go.opentelemetry.io/otel v1.24.0
-	go.opentelemetry.io/otel/metric v1.24.0
-	go.opentelemetry.io/otel/sdk v1.24.0
-	go.opentelemetry.io/otel/sdk/metric v1.24.0
+	go.opentelemetry.io/contrib/detectors/gcp v1.25.0
+	go.opentelemetry.io/otel v1.25.0
+	go.opentelemetry.io/otel/metric v1.25.0
+	go.opentelemetry.io/otel/sdk v1.25.0
+	go.opentelemetry.io/otel/sdk/metric v1.25.0
 	gonum.org/v1/gonum v0.14.0
 )
 
@@ -27,7 +29,7 @@ require (
 	github.com/googleapis/enterprise-certificate-proxy v0.2.3 // indirect
 	github.com/googleapis/gax-go/v2 v2.11.0 // indirect
 	go.opencensus.io v0.24.0 // indirect
-	go.opentelemetry.io/otel/trace v1.24.0 // indirect
+	go.opentelemetry.io/otel/trace v1.25.0 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/exp v0.0.0-20230321023759-10a507213a29 // indirect
 	golang.org/x/net v0.23.0 // indirect
