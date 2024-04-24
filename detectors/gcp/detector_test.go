@@ -90,7 +90,7 @@ func TestCloudPlatformCloudFunctions(t *testing.T) {
 	assert.Equal(t, platform, CloudFunctions)
 }
 
-func TestCloudPlatformBMS(t *testing.T) {
+func TestCloudPlatformBareMetalSolution(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{
 			bmsInstanceIDEnv: "foo",
@@ -99,7 +99,7 @@ func TestCloudPlatformBMS(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, BMS)
+	assert.Equal(t, platform, BareMetalSolution)
 }
 
 func TestProjectID(t *testing.T) {

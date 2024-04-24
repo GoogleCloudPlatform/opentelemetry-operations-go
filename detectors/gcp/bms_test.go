@@ -20,62 +20,62 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBMSInstanceID(t *testing.T) {
+func TestBareMetalSolutionInstanceID(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{
 			bmsInstanceIDEnv: "my-host-123",
 		},
 	})
-	instanceID, err := d.BMSInstanceID()
+	instanceID, err := d.BareMetalSolutionInstanceID()
 	assert.NoError(t, err)
 	assert.Equal(t, instanceID, "my-host-123")
 }
 
-func TestBMSInstanceIDErr(t *testing.T) {
+func TestBareMetalSolutionInstanceIDErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
-	instanceID, err := d.BMSInstanceID()
+	instanceID, err := d.BareMetalSolutionInstanceID()
 	assert.Error(t, err)
 	assert.Equal(t, instanceID, "")
 }
 
-func TestBMSBMSCloudRegion(t *testing.T) {
+func TestBareMetalSolutionCloudRegion(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{
 			bmsRegionEnv: "us-central1",
 		},
 	})
-	region, err := d.BMSCloudRegion()
+	region, err := d.BareMetalSolutionCloudRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, region, "us-central1")
 }
 
-func TestBMSCloudRegionErr(t *testing.T) {
+func TestBareMetalSolutionCloudRegionErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
-	region, err := d.BMSCloudRegion()
+	region, err := d.BareMetalSolutionCloudRegion()
 	assert.Error(t, err)
 	assert.Equal(t, region, "")
 }
 
-func TestBMSBMSProjectID(t *testing.T) {
+func TestBareMetalSolutionProjectID(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{
 			bmsProjectIDEnv: "my-test-project",
 		},
 	})
-	projectID, err := d.BMSProjectID()
+	projectID, err := d.BareMetalSolutionProjectID()
 	assert.NoError(t, err)
 	assert.Equal(t, projectID, "my-test-project")
 }
 
-func TestBMSProjectIDErr(t *testing.T) {
+func TestBareMetalSolutionProjectIDErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
-	projectID, err := d.BMSProjectID()
+	projectID, err := d.BareMetalSolutionProjectID()
 	assert.Error(t, err)
 	assert.Equal(t, projectID, "")
 }
