@@ -34,9 +34,9 @@ func (c Config) GetMetricName(baseName string, metric pmetric.Metric) (string, e
 			// Non-monotonic sums are converted to GCM gauges
 			return compliantName + "/gauge", nil
 		}
-		return getUnknownMetricName(metric.Sum().DataPoints(), "/counter", "counter", metric.Name(), compliantName), nil
+		return getUnknownMetricName(metric, metric.Sum().DataPoints(), "/counter", "counter", compliantName), nil
 	case pmetric.MetricTypeGauge:
-		return getUnknownMetricName(metric.Gauge().DataPoints(), "/gauge", "", metric.Name(), compliantName), nil
+		return getUnknownMetricName(metric, metric.Gauge().DataPoints(), "/gauge", "", compliantName), nil
 	case pmetric.MetricTypeSummary:
 		// summaries are sent as the following series:
 		// * Sum: prometheus.googleapis.com/<baseName>_sum/summary:counter
@@ -60,36 +60,23 @@ func (c Config) GetMetricName(baseName string, metric pmetric.Metric) (string, e
 // "/unknown" (eg, for Gauge) or "/unknown:{secondarySuffix}" (eg, "/unknown:counter" for Sum).
 // It also removes the "_total" suffix on an unknown counter, if this suffix was not present in
 // the original metric name before calling prometheus.BuildCompliantName(), which is hacky.
-// It is based on the untyped_prometheus_metric data point attribute, and behind a feature gate.
-func getUnknownMetricName(points pmetric.NumberDataPointSlice, suffix, secondarySuffix, originalName, compliantName string) string {
-	if !untypedDoubleExportFeatureGate.IsEnabled() {
-		return compliantName + suffix
-	}
-
+func getUnknownMetricName(metric pmetric.Metric, points pmetric.NumberDataPointSlice, suffix, secondarySuffix, compliantName string) string {
 	nameTokens := strings.FieldsFunc(
-		originalName,
+		metric.Name(),
 		func(r rune) bool { return !unicode.IsLetter(r) && !unicode.IsDigit(r) },
 	)
 
-	untyped := false
 	newSuffix := suffix
-	for i := 0; i < points.Len(); i++ {
-		point := points.At(i)
-		if val, ok := point.Attributes().Get(GCPOpsAgentUntypedMetricKey); ok && val.AsString() == "true" {
-			untyped = true
-			// delete the special Ops Agent untyped attribute
-			point.Attributes().Remove(GCPOpsAgentUntypedMetricKey)
-			newSuffix = "/unknown"
-			if len(secondarySuffix) > 0 {
-				newSuffix = newSuffix + ":" + secondarySuffix
-			}
-			// even though we have the suffix, keep looping to remove the attribute from other points, if any
+	if isUnknown(metric) {
+		newSuffix = "/unknown"
+		if len(secondarySuffix) > 0 {
+			newSuffix = newSuffix + ":" + secondarySuffix
 		}
-	}
 
-	// de-normalize "_total" suffix for counters where not present on original metric name
-	if untyped && nameTokens[len(nameTokens)-1] != "total" && strings.HasSuffix(compliantName, "_total") {
-		compliantName = strings.TrimSuffix(compliantName, "_total")
+		// de-normalize "_total" suffix for counters where not present on original metric name
+		if nameTokens[len(nameTokens)-1] != "total" && strings.HasSuffix(compliantName, "_total") {
+			compliantName = strings.TrimSuffix(compliantName, "_total")
+		}
 	}
 	return compliantName + newSuffix
 }
