@@ -23,19 +23,7 @@ import (
 	"go.opentelemetry.io/collector/extension"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/grpc/credentials/oauth"
-
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/extension/googleclientauthextension/internal/metadata"
 )
-
-// NewFactory creates a factory for the GCP Auth extension.
-func NewFactory() extension.Factory {
-	return extension.NewFactory(
-		metadata.Type,
-		CreateDefaultConfig,
-		CreateExtension,
-		metadata.ExtensionStability,
-	)
-}
 
 func CreateExtension(ctx context.Context, set extension.CreateSettings, cfg component.Config) (extension.Extension, error) {
 	config := cfg.(*Config)

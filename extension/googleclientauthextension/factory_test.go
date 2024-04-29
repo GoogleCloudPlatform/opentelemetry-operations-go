@@ -19,32 +19,43 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/extension"
 )
 
+// newFactory creates a factory for the GCP Auth extension.
+func newFactory() extension.Factory {
+	return extension.NewFactory(
+		component.MustNewType("googleclientauth"),
+		CreateDefaultConfig,
+		CreateExtension,
+		component.StabilityLevelAlpha,
+	)
+}
+
 func TestCreateDefaultConfig(t *testing.T) {
-	factory := NewFactory()
+	factory := newFactory()
 	cfg := factory.CreateDefaultConfig()
 	assert.NotNil(t, cfg, "failed to create default config")
 	assert.NoError(t, componenttest.CheckConfigStruct(cfg))
 }
 
 func TestNewFactory(t *testing.T) {
-	f := NewFactory()
+	f := newFactory()
 	assert.NotNil(t, f)
 }
 
 func TestCreateExtension(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	ext, err := newFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 }
 
 func TestStart(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	ext, err := newFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 	err = ext.Start(context.Background(), nil)
@@ -53,7 +64,7 @@ func TestStart(t *testing.T) {
 
 func TestStart_WithError(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/foo.json")
-	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	ext, err := newFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 	err = ext.Start(context.Background(), nil)
