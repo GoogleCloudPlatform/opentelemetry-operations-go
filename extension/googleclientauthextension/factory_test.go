@@ -24,27 +24,21 @@ import (
 )
 
 func TestCreateDefaultConfig(t *testing.T) {
-	factory := NewFactory()
-	cfg := factory.CreateDefaultConfig()
+	cfg := CreateDefaultConfig()
 	assert.NotNil(t, cfg, "failed to create default config")
 	assert.NoError(t, componenttest.CheckConfigStruct(cfg))
 }
 
-func TestNewFactory(t *testing.T) {
-	f := NewFactory()
-	assert.NotNil(t, f)
-}
-
 func TestCreateExtension(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	ext, err := CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 }
 
 func TestStart(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	ext, err := CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 	err = ext.Start(context.Background(), nil)
@@ -53,7 +47,7 @@ func TestStart(t *testing.T) {
 
 func TestStart_WithError(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/foo.json")
-	ext, err := NewFactory().CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	ext, err := CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 	err = ext.Start(context.Background(), nil)
