@@ -18,10 +18,18 @@ import (
 	"time"
 
 	"github.com/prometheus/common/model"
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
 )
+
+var intToDoubleFeatureGate = featuregate.GlobalRegistry().MustRegister(
+	"exporter.googlemanagedpromethues.intToDouble",
+	featuregate.StageAlpha,
+	featuregate.WithRegisterFromVersion("v0.100.0"),
+	featuregate.WithRegisterDescription("Convert all int metrics to double metrics to avoid incompatible value types."),
+	featuregate.WithRegisterReferenceURL("https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/issues/798"))
 
 const prometheusMetricMetadataTypeKey = "prometheus.type"
 
@@ -29,6 +37,40 @@ func (c Config) ExtraMetrics(m pmetric.Metrics) {
 	addUntypedMetrics(m)
 	c.addTargetInfoMetric(m)
 	c.addScopeInfoMetric(m)
+	convertIntToDouble(m)
+}
+
+// convertIntToDouble converts all counter and gauge int values to double
+func convertIntToDouble(m pmetric.Metrics) {
+	if !intToDoubleFeatureGate.IsEnabled() {
+		return
+	}
+	rms := m.ResourceMetrics()
+	for i := 0; i < rms.Len(); i++ {
+		rm := rms.At(i)
+		for j := 0; j < rm.ScopeMetrics().Len(); j++ {
+			sm := rm.ScopeMetrics().At(j)
+			for k := 0; k < sm.Metrics().Len(); k++ {
+				metric := sm.Metrics().At(k)
+
+				var points pmetric.NumberDataPointSlice
+				switch metric.Type() {
+				case pmetric.MetricTypeSum:
+					points = metric.Sum().DataPoints()
+				case pmetric.MetricTypeGauge:
+					points = metric.Gauge().DataPoints()
+				default:
+					continue
+				}
+				for x := 0; x < points.Len(); x++ {
+					point := points.At(x)
+					if point.ValueType() == pmetric.NumberDataPointValueTypeInt {
+						point.SetDoubleValue(float64(point.IntValue()))
+					}
+				}
+			}
+		}
+	}
 }
 
 // addUntypedMetrics looks for any Gauge data point with the special Ops Agent untyped metric

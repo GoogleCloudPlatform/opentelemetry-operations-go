@@ -19,6 +19,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
@@ -52,10 +54,11 @@ func appendMetric(metrics pmetric.Metrics, timestamp time.Time) pmetric.Metrics 
 func TestAddExtraMetrics(t *testing.T) {
 	timestamp := time.Now()
 	for _, tc := range []struct {
-		input    pmetric.Metrics
-		expected pmetric.ResourceMetricsSlice
-		name     string
-		config   Config
+		input                   pmetric.Metrics
+		expected                pmetric.ResourceMetricsSlice
+		name                    string
+		config                  Config
+		enableDoubleFeatureGate bool
 	}{
 		{
 			name:   "add target info from resource metric",
@@ -234,6 +237,52 @@ func TestAddExtraMetrics(t *testing.T) {
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
 					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
 					metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+				}
+
+				return metrics
+			}(),
+		},
+		{
+			name: "metric as double",
+			config: Config{ExtraMetricsConfig: ExtraMetricsConfig{
+				EnableScopeInfo:  true,
+				EnableTargetInfo: true,
+			}},
+			input:                   testMetric(timestamp),
+			enableDoubleFeatureGate: true,
+			expected: func() pmetric.ResourceMetricsSlice {
+				metrics := testMetric(timestamp).ResourceMetrics()
+				scopeMetrics := metrics.At(0).ScopeMetrics()
+
+				// Insert a new, empty ScopeMetricsSlice for this resource that will hold target_info
+				sm := scopeMetrics.AppendEmpty()
+				metric := sm.Metrics().AppendEmpty()
+				metric.SetName("target_info")
+				// This changes the value to double because of the feature gate.
+				metric.SetEmptyGauge().DataPoints().AppendEmpty().SetDoubleValue(1)
+				metric.Gauge().DataPoints().At(0).Attributes().PutStr("foo-label", "bar")
+				metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+
+				// Insert the scope_info metric into the existing ScopeMetricsSlice
+				sm = scopeMetrics.At(0)
+				scopeInfoMetric := sm.Metrics().AppendEmpty()
+				scopeInfoMetric.SetName("otel_scope_info")
+				// This changes the value to double because of the feature gate.
+				scopeInfoMetric.SetEmptyGauge().DataPoints().AppendEmpty().SetDoubleValue(1)
+
+				// add otel_scope_* attributes to all metrics in all scopes
+				// this includes otel_scope_info for the existing (input) ScopeMetrics,
+				// and target_info (which will have an empty scope)
+				for i := 0; i < sm.Metrics().Len(); i++ {
+					metric := sm.Metrics().At(i)
+					dataPoint := metric.Gauge().DataPoints().At(0)
+					dataPoint.Attributes().PutStr("otel_scope_name", "myscope")
+					dataPoint.Attributes().PutStr("otel_scope_version", "v0.0.1")
+					dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					// Change the original value to double
+					if dataPoint.IntValue() == 2112 {
+						dataPoint.SetDoubleValue(float64(2112.0))
+					}
 				}
 
 				return metrics
@@ -431,6 +480,11 @@ func TestAddExtraMetrics(t *testing.T) {
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
+			originalValue := intToDoubleFeatureGate.IsEnabled()
+			require.NoError(t, featuregate.GlobalRegistry().Set(intToDoubleFeatureGate.ID(), tc.enableDoubleFeatureGate))
+			defer func() {
+				require.NoError(t, featuregate.GlobalRegistry().Set(intToDoubleFeatureGate.ID(), originalValue))
+			}()
 			m := tc.input
 			tc.config.ExtraMetrics(m)
 			assert.EqualValues(t, tc.expected, m.ResourceMetrics())
