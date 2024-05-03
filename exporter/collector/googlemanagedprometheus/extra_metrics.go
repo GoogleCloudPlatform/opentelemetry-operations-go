@@ -40,7 +40,7 @@ func (c Config) ExtraMetrics(m pmetric.Metrics) {
 	convertIntToDouble(m)
 }
 
-// convertIntToDouble converts all counter and gauge int values to double
+// convertIntToDouble converts all counter and gauge int values to double.
 func convertIntToDouble(m pmetric.Metrics) {
 	if !intToDoubleFeatureGate.IsEnabled() {
 		return

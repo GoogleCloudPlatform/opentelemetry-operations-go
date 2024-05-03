@@ -45,9 +45,17 @@ func appendMetric(metrics pmetric.Metrics, timestamp time.Time) pmetric.Metrics 
 
 	// other metrics should not be copied to target_info
 	metric := sm.Metrics().AppendEmpty()
-	metric.SetName("baz-metric")
+	metric.SetName("gauge-metric")
 	metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(2112)
 	metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+	metric = sm.Metrics().AppendEmpty()
+	metric.SetName("sum-metric")
+	metric.SetEmptySum().DataPoints().AppendEmpty().SetIntValue(2112)
+	metric.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+	metric = sm.Metrics().AppendEmpty()
+	metric.SetName("summary-metric")
+	metric.SetEmptySummary().DataPoints().AppendEmpty().SetCount(2112)
+	metric.Summary().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 	return metrics
 }
 
@@ -117,9 +125,20 @@ func TestAddExtraMetrics(t *testing.T) {
 				// add otel_scope_* attributes to all metrics in this scope (including otel_scope_info)
 				for i := 0; i < sm.Metrics().Len(); i++ {
 					metric := sm.Metrics().At(i)
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
-					metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					switch metric.Type() {
+					case pmetric.MetricTypeGauge:
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					case pmetric.MetricTypeSum:
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					case pmetric.MetricTypeSummary:
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Summary().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					}
 				}
 				return metrics
 			}(),
@@ -146,9 +165,20 @@ func TestAddExtraMetrics(t *testing.T) {
 				// add otel_scope_* attributes to all metrics in this scope (including otel_scope_info)
 				for i := 0; i < sm.Metrics().Len(); i++ {
 					metric := sm.Metrics().At(i)
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
-					scopeInfoMetric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					switch metric.Type() {
+					case pmetric.MetricTypeGauge:
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					case pmetric.MetricTypeSum:
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					case pmetric.MetricTypeSummary:
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Summary().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					}
 				}
 				return metrics
 			}(),
@@ -188,18 +218,36 @@ func TestAddExtraMetrics(t *testing.T) {
 				// add otel_scope_* attributes to all metrics in this scope (including otel_scope_info)
 				for i := 0; i < sm.Metrics().Len(); i++ {
 					metric := sm.Metrics().At(i)
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
-					scopeInfoMetric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					switch metric.Type() {
+					case pmetric.MetricTypeGauge:
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						scopeInfoMetric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					case pmetric.MetricTypeSum:
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					case pmetric.MetricTypeSummary:
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					}
 				}
 
 				// add otel_scope_* attributes to all metrics in the second scope
 				sm = metrics.At(1).ScopeMetrics().At(0)
 				for i := 0; i < sm.Metrics().Len(); i++ {
 					metric := sm.Metrics().At(i)
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
-					scopeInfoMetric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					switch metric.Type() {
+					case pmetric.MetricTypeGauge:
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						scopeInfoMetric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					case pmetric.MetricTypeSum:
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					case pmetric.MetricTypeSummary:
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+					}
 				}
 				return metrics
 			}(),
@@ -234,9 +282,20 @@ func TestAddExtraMetrics(t *testing.T) {
 				// and target_info (which will have an empty scope)
 				for i := 0; i < sm.Metrics().Len(); i++ {
 					metric := sm.Metrics().At(i)
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
-					metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
-					metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					switch metric.Type() {
+					case pmetric.MetricTypeGauge:
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					case pmetric.MetricTypeSum:
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Sum().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Sum().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					case pmetric.MetricTypeSummary:
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Summary().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Summary().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+					}
 				}
 
 				return metrics
@@ -275,13 +334,30 @@ func TestAddExtraMetrics(t *testing.T) {
 				// and target_info (which will have an empty scope)
 				for i := 0; i < sm.Metrics().Len(); i++ {
 					metric := sm.Metrics().At(i)
-					dataPoint := metric.Gauge().DataPoints().At(0)
-					dataPoint.Attributes().PutStr("otel_scope_name", "myscope")
-					dataPoint.Attributes().PutStr("otel_scope_version", "v0.0.1")
-					dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
-					// Change the original value to double
-					if dataPoint.IntValue() == 2112 {
-						dataPoint.SetDoubleValue(float64(2112.0))
+					switch metric.Type() {
+					case pmetric.MetricTypeGauge:
+						dataPoint := metric.Gauge().DataPoints().At(0)
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_name", "myscope")
+						metric.Gauge().DataPoints().At(0).Attributes().PutStr("otel_scope_version", "v0.0.1")
+						metric.Gauge().DataPoints().At(0).SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+						// Change the original value to double
+						if dataPoint.IntValue() == 2112 {
+							dataPoint.SetDoubleValue(float64(2112.0))
+						}
+					case pmetric.MetricTypeSum:
+						dataPoint := metric.Sum().DataPoints().At(0)
+						dataPoint.Attributes().PutStr("otel_scope_name", "myscope")
+						dataPoint.Attributes().PutStr("otel_scope_version", "v0.0.1")
+						dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
+						// Change the original value to double
+						if dataPoint.IntValue() == 2112 {
+							dataPoint.SetDoubleValue(float64(2112.0))
+						}
+					case pmetric.MetricTypeSummary:
+						dataPoint := metric.Summary().DataPoints().At(0)
+						dataPoint.Attributes().PutStr("otel_scope_name", "myscope")
+						dataPoint.Attributes().PutStr("otel_scope_version", "v0.0.1")
+						dataPoint.SetTimestamp(pcommon.NewTimestampFromTime(timestamp))
 					}
 				}
 
@@ -388,7 +464,7 @@ func TestAddExtraMetrics(t *testing.T) {
 					Metadata().PutStr("prometheus.type", "unknown")
 
 				metric := metrics.At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
-				metric.SetName("baz-metric")
+				metric.SetName("gauge-metric")
 				metric.Metadata().PutStr("prometheus.type", "unknown")
 				metric.SetEmptySum().DataPoints().AppendEmpty().SetIntValue(2112)
 				metric.Sum().SetIsMonotonic(true)
@@ -424,7 +500,7 @@ func TestAddExtraMetrics(t *testing.T) {
 					Gauge().DataPoints().At(0).SetDoubleValue(123.5)
 
 				metric := metrics.At(0).ScopeMetrics().At(0).Metrics().AppendEmpty()
-				metric.SetName("baz-metric")
+				metric.SetName("gauge-metric")
 				metric.Metadata().PutStr("prometheus.type", "unknown")
 				metric.SetEmptySum().DataPoints().AppendEmpty().SetDoubleValue(123.5)
 				metric.Sum().SetIsMonotonic(true)
