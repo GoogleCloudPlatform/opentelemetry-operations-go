@@ -1,4 +1,4 @@
-# Copyright 2021 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,24 +13,28 @@
 # limitations under the License.
 
 steps:
-  # Wait for the image to exist
-  - name: "docker"
-    id: wait-for-image
-    entrypoint: "sh"
-    timeout: 3m
-    env: ["_TEST_SERVER_IMAGE=${_TEST_SERVER_IMAGE}"]
+  # Vendor dependencies, and zip the code.
+  - name: golang:1.22.2
+    id: zip-code
+    entrypoint: /bin/bash
     args:
-      - e2e-test-server/wait-for-image.sh
+      - '-c'
+      - |
+         apt-get update && \
+         apt-get install zip --assume-yes && \
+         cd e2e-test-server/ && \
+         go mod vendor && \
+         zip -r appsource *
 
   # Run the test
   - name: $_TEST_RUNNER_IMAGE
-    id: run-tests-gce
+    id: run-tests-gae-standard
     dir: /
     env: ["PROJECT_ID=$PROJECT_ID"]
     args:
-      - gce
-      - --image=$_TEST_SERVER_IMAGE
-
+      - gae-standard
+      - --runtime=go122
+      - --appsource=/workspace/e2e-test-server/appsource.zip
 logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs
 substitutions:
   _TEST_RUNNER_IMAGE: gcr.io/${PROJECT_ID}/opentelemetry-operations-e2e-testing:0.19.0
