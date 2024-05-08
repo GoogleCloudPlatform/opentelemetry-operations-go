@@ -24,14 +24,6 @@ import (
 const (
 	ProjectIDAttributeKey = "gcp.project.id"
 
-	bigtableClientRaw          = "bigtable_client_raw"
-	bigtableClientRawProjectId = "project_id"
-	bigtableClientRawInstance  = "instance"
-	bigtableClientRawCluster   = "cluster"
-	bigtableClientRawTable     = "table"
-	bigtableClientRawZone      = "zone"
-	// bigtableClientRawUid       = "uid"
-
 	awsAccount           = "aws_account"
 	awsEc2Instance       = "aws_ec2_instance"
 	clusterName          = "cluster_name"
@@ -79,14 +71,6 @@ var (
 		// is a non-empty value.
 		otelKeys []string
 	}{
-		bigtableClientRaw: {
-			bigtableClientRawProjectId: {otelKeys: []string{"project_id"}},
-			bigtableClientRawInstance:  {otelKeys: []string{"instance"}},
-			bigtableClientRawCluster:   {otelKeys: []string{"cluster"}},
-			bigtableClientRawTable:     {otelKeys: []string{"table"}},
-			bigtableClientRawZone:      {otelKeys: []string{"zone"}},
-			// bigtableClientRawUid:       {otelKeys: []string{"uid"}},
-		},
 		gceInstance: {
 			zone:       {otelKeys: []string{string(semconv.CloudAvailabilityZoneKey)}},
 			instanceID: {otelKeys: []string{string(semconv.HostIDKey)}},
@@ -226,8 +210,6 @@ func commonResourceAttributesToMonitoredResource(cloudPlatform string, attrs Rea
 	// into the semconv module.
 	case "gcp_bare_metal_solution":
 		return createMonitoredResource(bmsInstance, attrs)
-	case bigtableClientRaw:
-		return createMonitoredResource(bigtableClientRaw, attrs)
 	default:
 		// if k8s.cluster.name is set, pattern match for various k8s resources.
 		// this will also match non-cloud k8s platforms like minikube.
