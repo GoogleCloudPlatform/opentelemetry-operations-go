@@ -416,6 +416,8 @@ func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes att
 		md = me.recordToMdpb(metrics, extraLabels)
 	}
 
+	filteredAttributes, _ := attribute.NewSetWithFiltered(attributes.ToSlice(), me.o.metricAttributesFilter)
+
 	labels := make(map[string]string)
 	addAttributes := func(attr *attribute.Set) {
 		iter := attr.Iter()
@@ -425,7 +427,7 @@ func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes att
 		}
 	}
 	addAttributes(extraLabels)
-	addAttributes(&attributes)
+	addAttributes(&filteredAttributes)
 
 	return &googlemetricpb.Metric{
 		Type:   md.Type,
@@ -543,7 +545,16 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 }
 
 func (me *metricExporter) recordsToTspbs(rm *metricdata.ResourceMetrics) ([]*monitoringpb.TimeSeries, error) {
-	mr := me.resourceToMonitoredResourcepb(rm.Resource)
+	var mr *monitoredrespb.MonitoredResource
+	var err error
+	if creator := me.o.monitoredResourceCreator; creator != nil {
+		mr, err = creator(rm)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		mr = me.resourceToMonitoredResourcepb(rm.Resource)
+	}
 	extraLabels := me.extraLabelsFromResource(rm.Resource)
 
 	var (

@@ -24,6 +24,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 
 	apioption "google.golang.org/api/option"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-metric-exporter %s", otel.Version(), Version())
@@ -43,10 +44,20 @@ type options struct {
 	// metricDescriptorTypeFormatter is the custom formtter for the MetricDescriptor.Type.
 	// By default, the format string is "workload.googleapis.com/[metric name]".
 	metricDescriptorTypeFormatter func(metricdata.Metrics) string
+
+	// monitoredResourceCreator is the custom function that creates monitored resource
+	// for Google Cloud Monitoring
+	monitoredResourceCreator func(*metricdata.ResourceMetrics) (*monitoredrespb.MonitoredResource, error)
+
 	// resourceAttributeFilter determinies which resource attributes to
 	// add to metrics as metric labels. By default, it adds service.name,
 	// service.namespace, and service.instance.id.
 	resourceAttributeFilter attribute.Filter
+
+	// metricAttributesFilter determinies which metric attributes to
+	// add to metrics as metric labels
+	metricAttributesFilter attribute.Filter
+
 	// projectID is the identifier of the Cloud Monitoring
 	// project the user is uploading the stats data to.
 	// If not set, this will default to your "Application Default Credentials".
@@ -170,5 +181,19 @@ func WithCreateServiceTimeSeries() func(o *options) {
 	return func(o *options) {
 		o.createServiceTimeSeries = true
 		o.disableCreateMetricDescriptors = true
+	}
+}
+
+// WithFilteredMetricAttributes allows passing a function which creates a Google Cloud Monitoring resource
+func WithMonitoredResourceCreator(f func(*metricdata.ResourceMetrics) (*monitoredrespb.MonitoredResource, error)) func(o *options) {
+	return func(o *options) {
+		o.monitoredResourceCreator = f
+	}
+}
+
+// WithFilteredMetricAttributes allows filtering the metric labels
+func WithFilteredMetricAttributes(filter attribute.Filter) func(o *options) {
+	return func(o *options) {
+		o.metricAttributesFilter = filter
 	}
 }
