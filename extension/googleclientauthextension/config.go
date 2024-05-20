@@ -15,6 +15,8 @@
 package googleclientauthextension // import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/extension/googleclientauthextension"
 
 import (
+	"errors"
+
 	"go.opentelemetry.io/collector/component"
 )
 
@@ -50,6 +52,10 @@ var _ component.Config = (*Config)(nil)
 
 // Validate checks if the extension configuration is valid.
 func (cfg *Config) Validate() error {
+	if _, ok := tokenFormats[cfg.TokenFormat]; !ok {
+		return errors.New("invalid token_format")
+	}
+
 	return nil
 }
 
@@ -61,8 +67,16 @@ var defaultScopes = []string{
 	"https://www.googleapis.com/auth/trace.append",
 }
 
-// defaultTokenFormat is the default value of token_format parameter.
-var defaultTokenFormat = "access_token"
+var (
+	// tokenFormats defines possible values for token_format
+	tokenFormats = map[string]struct{}{
+		"access_token": {},
+		"id_token":     {},
+	}
+
+	// defaultTokenFormat is the default value of token_format parameter.
+	defaultTokenFormat = "access_token"
+)
 
 func CreateDefaultConfig() component.Config {
 	return &Config{
