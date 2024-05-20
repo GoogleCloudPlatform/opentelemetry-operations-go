@@ -21,7 +21,9 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/extension"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc/credentials/oauth"
 )
 
@@ -54,8 +56,24 @@ func (ca *clientAuthenticator) Start(ctx context.Context, _ component.Host) erro
 	if config.QuotaProject == "" {
 		config.QuotaProject = quotaProjectFromCreds(creds)
 	}
-	ca.TokenSource = &oauth.TokenSource{TokenSource: creds.TokenSource}
+	source, err := ca.newTokenSource(ctx, creds)
+	if err != nil {
+		return err
+	}
+	ca.TokenSource = &oauth.TokenSource{TokenSource: source}
 	return nil
+}
+
+func (ca *clientAuthenticator) newTokenSource(ctx context.Context, creds *google.Credentials) (oauth2.TokenSource, error) {
+	switch ca.config.TokenFormat {
+	case "id_token":
+		if ca.config.Audience == "" {
+			return nil, errors.New("audience must be specified")
+		}
+		return idtoken.NewTokenSource(ctx, ca.config.Audience)
+	default:
+		return creds.TokenSource, nil
+	}
 }
 
 func (ca *clientAuthenticator) Shutdown(ctx context.Context) error {

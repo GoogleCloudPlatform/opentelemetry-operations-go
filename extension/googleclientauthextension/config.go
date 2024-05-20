@@ -36,6 +36,13 @@ type Config struct {
 	// See https://datatracker.ietf.org/doc/html/rfc6749#section-3.3
 	Scopes []string `mapstructure:"scopes,omitempty"`
 
+	// TokenFormat specifies which type of token will be generated.
+	// default: access_token
+	TokenFormat string `mapstructure:"token_format,omitempty"`
+
+	// Audience specifies the audience claim used for generating ID token.
+	Audience string `mapstructure:"audience,omitempty"`
+
 	// TODO: Support impersonation, similar to what exists in the googlecloud collector exporter.
 }
 
@@ -54,8 +61,12 @@ var defaultScopes = []string{
 	"https://www.googleapis.com/auth/trace.append",
 }
 
+// defaultTokenFormat is the default value of token_format parameter.
+var defaultTokenFormat = "access_token"
+
 func CreateDefaultConfig() component.Config {
 	return &Config{
-		Scopes: defaultScopes,
+		Scopes:      defaultScopes,
+		TokenFormat: defaultTokenFormat,
 	}
 }
