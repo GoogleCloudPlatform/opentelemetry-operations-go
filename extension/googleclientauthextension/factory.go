@@ -65,15 +65,22 @@ func (ca *clientAuthenticator) Start(ctx context.Context, _ component.Host) erro
 }
 
 func (ca *clientAuthenticator) newTokenSource(ctx context.Context, creds *google.Credentials) (oauth2.TokenSource, error) {
-	switch ca.config.TokenFormat {
-	case "id_token":
+	t, err := SToTokenFormat(ca.config.TokenFormat)
+	if err != nil {
+		return nil, err
+	}
+
+	switch t {
+	case IDToken:
 		if ca.config.Audience == "" {
 			return nil, errors.New("audience must be specified")
 		}
 		return idtoken.NewTokenSource(ctx, ca.config.Audience)
-	default:
+	case AccessToken:
 		return creds.TokenSource, nil
 	}
+
+	return creds.TokenSource, nil
 }
 
 func (ca *clientAuthenticator) Shutdown(ctx context.Context) error {

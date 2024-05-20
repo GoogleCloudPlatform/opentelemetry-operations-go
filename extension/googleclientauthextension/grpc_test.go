@@ -26,6 +26,7 @@ func TestPerRPCCredentials(t *testing.T) {
 	ca := clientAuthenticator{config: &Config{
 		Project:      "my-project",
 		QuotaProject: "other-project",
+		TokenFormat:  "access_token",
 	}}
 	err := ca.Start(context.Background(), nil)
 	assert.NoError(t, err)
@@ -39,6 +40,7 @@ func TestPerRPCCredentialsNotStarted(t *testing.T) {
 	ca := clientAuthenticator{config: &Config{
 		Project:      "my-project",
 		QuotaProject: "other-project",
+		TokenFormat:  "access_token",
 	}}
 	perrpc, err := ca.PerRPCCredentials()
 	assert.Nil(t, perrpc)

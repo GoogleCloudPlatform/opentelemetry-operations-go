@@ -24,10 +24,12 @@ import (
 
 func TestRoundTripper(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ca := clientAuthenticator{config: &Config{
-		Project:      "my-project",
-		QuotaProject: "other-project",
-	},
+	ca := clientAuthenticator{
+		config: &Config{
+			Project:      "my-project",
+			QuotaProject: "other-project",
+			TokenFormat:  "access_token",
+		},
 	}
 	err := ca.Start(context.Background(), nil)
 	assert.NoError(t, err)
@@ -43,6 +45,7 @@ func TestRoundTripperNotStarted(t *testing.T) {
 	ca := clientAuthenticator{config: &Config{
 		Project:      "my-project",
 		QuotaProject: "other-project",
+		TokenFormat:  "access_token",
 	}}
 
 	rt, err := ca.RoundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
@@ -57,6 +60,7 @@ func TestRoundTrip(t *testing.T) {
 		config: &Config{
 			Project:      "my-project",
 			QuotaProject: "other-project",
+			TokenFormat:  "access_token",
 		},
 		base: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			assert.Equal(t, r.Header.Get("X-Goog-User-Project"), "other-project")

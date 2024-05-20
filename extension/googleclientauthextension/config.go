@@ -16,9 +16,28 @@ package googleclientauthextension // import "github.com/GoogleCloudPlatform/open
 
 import (
 	"errors"
+	"strings"
 
 	"go.opentelemetry.io/collector/component"
 )
+
+type TokenFormat uint8
+
+const (
+	AccessToken TokenFormat = 1 + iota
+	IDToken
+)
+
+// SToTokenFormat returns TokenFormat
+func SToTokenFormat(t string) (TokenFormat, error) {
+	switch strings.ToLower(t) {
+	case "access_token":
+		return AccessToken, nil
+	case "id_token":
+		return IDToken, nil
+	}
+	return 0, errors.New("unknown token_format")
+}
 
 // Config stores the configuration for GCP Client Credentials.
 type Config struct {
@@ -52,8 +71,8 @@ var _ component.Config = (*Config)(nil)
 
 // Validate checks if the extension configuration is valid.
 func (cfg *Config) Validate() error {
-	if _, ok := tokenFormats[cfg.TokenFormat]; !ok {
-		return errors.New("invalid token_format")
+	if _, err := SToTokenFormat(cfg.TokenFormat); err != nil {
+		return err
 	}
 
 	return nil
@@ -67,16 +86,8 @@ var defaultScopes = []string{
 	"https://www.googleapis.com/auth/trace.append",
 }
 
-var (
-	// tokenFormats defines possible values for token_format
-	tokenFormats = map[string]struct{}{
-		"access_token": {},
-		"id_token":     {},
-	}
-
-	// defaultTokenFormat is the default value of token_format parameter.
-	defaultTokenFormat = "access_token"
-)
+// defaultTokenFormat is the default value of token_format parameter.
+var defaultTokenFormat = "access_token"
 
 func CreateDefaultConfig() component.Config {
 	return &Config{
