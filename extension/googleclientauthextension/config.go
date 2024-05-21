@@ -28,8 +28,8 @@ const (
 	IDToken
 )
 
-// SToTokenFormat returns TokenFormat
-func SToTokenFormat(t string) (TokenFormat, error) {
+// toTokenFormat returns TokenFormat
+func toTokenFormat(t string) (TokenFormat, error) {
 	switch strings.ToLower(t) {
 	case "access_token":
 		return AccessToken, nil
@@ -71,7 +71,7 @@ var _ component.Config = (*Config)(nil)
 
 // Validate checks if the extension configuration is valid.
 func (cfg *Config) Validate() error {
-	if _, err := SToTokenFormat(cfg.TokenFormat); err != nil {
+	if _, err := toTokenFormat(cfg.TokenFormat); err != nil {
 		return err
 	}
 
