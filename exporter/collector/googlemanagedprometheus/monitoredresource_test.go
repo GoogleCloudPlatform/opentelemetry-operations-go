@@ -336,6 +336,26 @@ func TestMapToPrometheusTarget(t *testing.T) {
 				},
 			},
 		},
+		{
+			desc: "Attributes from GCE with instance ID override",
+			resourceLabels: map[string]string{
+				"cloud.platform":      "gcp_compute_engine",
+				"cloud.region":        "us-central1",
+				"service.name":        "service-name",
+				"service.instance.id": "service-instance-id",
+				"host.id":             "1234759430923053489543203",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1",
+					"cluster":   "__gce__",
+					"namespace": "",
+					"job":       "service-name",
+					"instance":  "service-instance-id",
+				},
+			},
+		},
 	} {
 		t.Run(tc.desc, func(t *testing.T) {
 			r := pcommon.NewResource()
