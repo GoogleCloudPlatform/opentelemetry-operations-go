@@ -320,10 +320,10 @@ func TestMapToPrometheusTarget(t *testing.T) {
 		{
 			desc: "Attributes from GCE with environment label",
 			resourceLabels: map[string]string{
-				"cloud.platform":      "gcp_compute_engine",
-				"cloud.region":        "us-central1",
-				"service.name":        "service-name",
-				"service.instance.id": "1234759430923053489543203",
+				"cloud.platform": "gcp_compute_engine",
+				"cloud.region":   "us-central1",
+				"service.name":   "service-name",
+				"host.id":        "1234759430923053489543203",
 			},
 			expected: &monitoredrespb.MonitoredResource{
 				Type: "prometheus_target",

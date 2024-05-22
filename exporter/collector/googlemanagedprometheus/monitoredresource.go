@@ -71,6 +71,7 @@ var promTargetKeys = map[string][]string{
 		semconv.AttributeServiceInstanceID,
 		semconv.AttributeFaaSInstance,
 		semconv.AttributeK8SPodName,
+		semconv.AttributeHostID,
 	},
 }
 
