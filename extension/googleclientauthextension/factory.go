@@ -72,9 +72,6 @@ func (ca *clientAuthenticator) newTokenSource(ctx context.Context, creds *google
 
 	switch t {
 	case IDToken:
-		if ca.config.Audience == "" {
-			return nil, errors.New("audience must be specified")
-		}
 		return idtoken.NewTokenSource(
 			ctx,
 			ca.config.Audience,

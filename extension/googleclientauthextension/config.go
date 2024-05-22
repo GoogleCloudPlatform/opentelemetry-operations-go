@@ -71,8 +71,13 @@ var _ component.Config = (*Config)(nil)
 
 // Validate checks if the extension configuration is valid.
 func (cfg *Config) Validate() error {
-	if _, err := toTokenFormat(cfg.TokenFormat); err != nil {
+	tf, err := toTokenFormat(cfg.TokenFormat)
+	if err != nil {
 		return err
+	}
+
+	if tf == IDToken && cfg.Audience == "" {
+		return errors.New("audience must be specified")
 	}
 
 	return nil
