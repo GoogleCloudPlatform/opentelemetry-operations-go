@@ -16,27 +16,21 @@ package googleclientauthextension // import "github.com/GoogleCloudPlatform/open
 
 import (
 	"errors"
-	"strings"
 
 	"go.opentelemetry.io/collector/component"
 )
 
-type TokenFormat uint8
-
 const (
-	AccessToken TokenFormat = 1 + iota
-	IDToken
+	// accessToken indicates OAuth 2.0 access token (https://cloud.google.com/docs/authentication/token-types#access)
+	accessToken = "access_token"
+
+	// idToken indicates Google-signed ID-token (https://cloud.google.com/docs/authentication/token-types#id)
+	idToken = "id_token"
 )
 
-// toTokenFormat returns TokenFormat
-func toTokenFormat(t string) (TokenFormat, error) {
-	switch strings.ToLower(t) {
-	case "access_token":
-		return AccessToken, nil
-	case "id_token":
-		return IDToken, nil
-	}
-	return 0, errors.New("unknown token_format")
+var tokenTypes = map[string]struct{}{
+	accessToken: {},
+	idToken:     {},
 }
 
 // Config stores the configuration for GCP Client Credentials.
@@ -53,16 +47,16 @@ type Config struct {
 	// https://cloud.google.com/apis/docs/system-parameters
 	QuotaProject string `mapstructure:"quota_project"`
 
-	// Scope specifies optional requested permissions.
-	// See https://datatracker.ietf.org/doc/html/rfc6749#section-3.3
-	Scopes []string `mapstructure:"scopes,omitempty"`
-
-	// TokenFormat specifies which type of token will be generated.
+	// TokenType specifies which type of token will be generated.
 	// default: access_token
-	TokenFormat string `mapstructure:"token_format,omitempty"`
+	TokenType string `mapstructure:"token_type,omitempty"`
 
 	// Audience specifies the audience claim used for generating ID token.
 	Audience string `mapstructure:"audience,omitempty"`
+
+	// Scope specifies optional requested permissions.
+	// See https://datatracker.ietf.org/doc/html/rfc6749#section-3.3
+	Scopes []string `mapstructure:"scopes,omitempty"`
 
 	// TODO: Support impersonation, similar to what exists in the googlecloud collector exporter.
 }
@@ -71,12 +65,11 @@ var _ component.Config = (*Config)(nil)
 
 // Validate checks if the extension configuration is valid.
 func (cfg *Config) Validate() error {
-	tf, err := toTokenFormat(cfg.TokenFormat)
-	if err != nil {
-		return err
+	if _, ok := tokenTypes[cfg.TokenType]; !ok {
+		return errors.New("invalid token_type")
 	}
 
-	if tf == IDToken && cfg.Audience == "" {
+	if cfg.TokenType == idToken && cfg.Audience == "" {
 		return errors.New("audience must be specified")
 	}
 
@@ -91,12 +84,9 @@ var defaultScopes = []string{
 	"https://www.googleapis.com/auth/trace.append",
 }
 
-// defaultTokenFormat is the default value of token_format parameter.
-var defaultTokenFormat = "access_token"
-
 func CreateDefaultConfig() component.Config {
 	return &Config{
-		Scopes:      defaultScopes,
-		TokenFormat: defaultTokenFormat,
+		Scopes:    defaultScopes,
+		TokenType: accessToken,
 	}
 }

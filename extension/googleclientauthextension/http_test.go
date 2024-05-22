@@ -28,7 +28,7 @@ func TestRoundTripper(t *testing.T) {
 		config: &Config{
 			Project:      "my-project",
 			QuotaProject: "other-project",
-			TokenFormat:  "access_token",
+			TokenType:    accessToken,
 		},
 	}
 	err := ca.Start(context.Background(), nil)
@@ -45,7 +45,7 @@ func TestRoundTripperNotStarted(t *testing.T) {
 	ca := clientAuthenticator{config: &Config{
 		Project:      "my-project",
 		QuotaProject: "other-project",
-		TokenFormat:  "access_token",
+		TokenType:    accessToken,
 	}}
 
 	rt, err := ca.RoundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
@@ -60,7 +60,7 @@ func TestRoundTrip(t *testing.T) {
 		config: &Config{
 			Project:      "my-project",
 			QuotaProject: "other-project",
-			TokenFormat:  "access_token",
+			TokenType:    accessToken,
 		},
 		base: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			assert.Equal(t, r.Header.Get("X-Goog-User-Project"), "other-project")

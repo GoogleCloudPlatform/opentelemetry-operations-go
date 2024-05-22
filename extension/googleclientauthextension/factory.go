@@ -65,13 +65,8 @@ func (ca *clientAuthenticator) Start(ctx context.Context, _ component.Host) erro
 }
 
 func (ca *clientAuthenticator) newTokenSource(ctx context.Context, creds *google.Credentials) (oauth2.TokenSource, error) {
-	t, err := toTokenFormat(ca.config.TokenFormat)
-	if err != nil {
-		return nil, err
-	}
-
-	switch t {
-	case IDToken:
+	switch ca.config.TokenType {
+	case idToken:
 		return idtoken.NewTokenSource(
 			ctx,
 			ca.config.Audience,

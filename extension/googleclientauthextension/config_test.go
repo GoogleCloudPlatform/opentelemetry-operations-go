@@ -22,7 +22,7 @@ import (
 
 func TestConfig_Validate_ValidAccessToken(t *testing.T) {
 	cfg := &Config{
-		TokenFormat: "access_token",
+		TokenType: accessToken,
 	}
 
 	err := cfg.Validate()
@@ -31,16 +31,26 @@ func TestConfig_Validate_ValidAccessToken(t *testing.T) {
 
 func TestConfig_Validate_ValidIDToken(t *testing.T) {
 	cfg := &Config{
-		TokenFormat: "id_token",
+		TokenType: idToken,
+		Audience:  "audience",
 	}
 
 	err := cfg.Validate()
 	assert.NoError(t, err)
 }
 
+func TestConfig_Validate_MissingAudience(t *testing.T) {
+	cfg := &Config{
+		TokenType: idToken,
+	}
+
+	err := cfg.Validate()
+	assert.Error(t, err)
+}
+
 func TestConfig_Validate_Invalid(t *testing.T) {
 	cfg := &Config{
-		TokenFormat: "invalid",
+		TokenType: "invalid",
 	}
 
 	err := cfg.Validate()
