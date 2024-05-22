@@ -70,7 +70,7 @@ func (cfg *Config) Validate() error {
 	}
 
 	if cfg.TokenType == idToken && cfg.Audience == "" {
-		return errors.New("audience must be specified")
+		return errors.New("audience must be specified when using the id_token token_type")
 	}
 
 	return nil
