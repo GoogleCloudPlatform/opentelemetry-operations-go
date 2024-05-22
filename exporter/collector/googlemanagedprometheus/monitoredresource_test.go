@@ -320,10 +320,10 @@ func TestMapToPrometheusTarget(t *testing.T) {
 		{
 			desc: "Attributes from GCE with environment label",
 			resourceLabels: map[string]string{
-				"cloud.platform":      "gcp_compute_engine",
-				"cloud.region":        "us-central1",
-				"service.name":        "service-name",
-				"service.instance.id": "1234759430923053489543203",
+				"cloud.platform": "gcp_compute_engine",
+				"cloud.region":   "us-central1",
+				"service.name":   "service-name",
+				"host.id":        "1234759430923053489543203",
 			},
 			expected: &monitoredrespb.MonitoredResource{
 				Type: "prometheus_target",
@@ -333,6 +333,26 @@ func TestMapToPrometheusTarget(t *testing.T) {
 					"namespace": "",
 					"job":       "service-name",
 					"instance":  "1234759430923053489543203",
+				},
+			},
+		},
+		{
+			desc: "Attributes from GCE with instance ID override",
+			resourceLabels: map[string]string{
+				"cloud.platform":      "gcp_compute_engine",
+				"cloud.region":        "us-central1",
+				"service.name":        "service-name",
+				"service.instance.id": "service-instance-id",
+				"host.id":             "1234759430923053489543203",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1",
+					"cluster":   "__gce__",
+					"namespace": "",
+					"job":       "service-name",
+					"instance":  "service-instance-id",
 				},
 			},
 		},
