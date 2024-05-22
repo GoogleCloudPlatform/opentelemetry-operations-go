@@ -77,11 +77,9 @@ func (ca *clientAuthenticator) newTokenSource(ctx context.Context, creds *google
 			ca.config.Audience,
 			idtoken.WithCredentialsJSON(creds.JSON),
 		)
-	case AccessToken:
+	default:
 		return creds.TokenSource, nil
 	}
-
-	return creds.TokenSource, nil
 }
 
 func (ca *clientAuthenticator) Shutdown(ctx context.Context) error {
