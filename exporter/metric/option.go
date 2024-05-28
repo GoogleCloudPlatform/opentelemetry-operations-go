@@ -24,7 +24,6 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 
 	apioption "google.golang.org/api/option"
-	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-metric-exporter %s", otel.Version(), Version())
@@ -45,18 +44,14 @@ type options struct {
 	// By default, the format string is "workload.googleapis.com/[metric name]".
 	metricDescriptorTypeFormatter func(metricdata.Metrics) string
 
-	// monitoredResourceCreator is the custom function that creates monitored resource
-	// for Google Cloud Monitoring
-	monitoredResourceCreator func(*metricdata.ResourceMetrics) (*monitoredrespb.MonitoredResource, error)
-
 	// resourceAttributeFilter determinies which resource attributes to
 	// add to metrics as metric labels. By default, it adds service.name,
 	// service.namespace, and service.instance.id.
 	resourceAttributeFilter attribute.Filter
 
-	// metricAttributesFilter determinies which metric attributes to
-	// add to metrics as metric labels
-	metricAttributesFilter attribute.Filter
+	// monitoredResourceAttributesFilter determines which metric attributes to
+	// add to resource as resource labels. These attributes won't be added to metric labels
+	monitoredResourceAttributesFilter attribute.Filter
 
 	// projectID is the identifier of the Cloud Monitoring
 	// project the user is uploading the stats data to.
@@ -87,6 +82,8 @@ type options struct {
 	// createServiceTimeSeries sets whether to create timeseries using `CreateServiceTimeSeries`.
 	// Implicitly, this sets `disableCreateMetricDescriptors` to true.
 	createServiceTimeSeries bool
+
+	monitoredResourceDescription MonitoredResourceDescription
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -138,6 +135,16 @@ func WithFilteredResourceAttributes(filter attribute.Filter) func(o *options) {
 	}
 }
 
+// WithMonitoredResourceAttributes determines which metric attributes to
+// add to monitored resource as resource labels. These will not be added to metric labels
+// By default, none of the
+// metric attributes are added to resource attributes
+func WithMonitoredResourceAttributes(filter attribute.Filter) func(o *options) {
+	return func(o *options) {
+		o.monitoredResourceAttributesFilter = filter
+	}
+}
+
 // DefaultResourceAttributesFilter is the default filter applied to resource
 // attributes.
 func DefaultResourceAttributesFilter(kv attribute.KeyValue) bool {
@@ -184,16 +191,8 @@ func WithCreateServiceTimeSeries() func(o *options) {
 	}
 }
 
-// WithFilteredMetricAttributes allows passing a function which creates a Google Cloud Monitoring resource
-func WithMonitoredResourceCreator(f func(*metricdata.ResourceMetrics) (*monitoredrespb.MonitoredResource, error)) func(o *options) {
+func WithMonitoredResourceDescription(mrd MonitoredResourceDescription) func(o *options) {
 	return func(o *options) {
-		o.monitoredResourceCreator = f
-	}
-}
-
-// WithFilteredMetricAttributes allows filtering the metric labels
-func WithFilteredMetricAttributes(filter attribute.Filter) func(o *options) {
-	return func(o *options) {
-		o.metricAttributesFilter = filter
+		o.monitoredResourceDescription = mrd
 	}
 }

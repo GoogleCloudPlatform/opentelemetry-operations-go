@@ -37,6 +37,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/label"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -329,7 +330,8 @@ func TestRecordToMpb(t *testing.T) {
 			"service_namespace":   "servicenamespace",
 		},
 	}
-	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary, &inputExtraLabels)
+
+	out := me.recordToMpb(&monitoredrespb.MonitoredResource{}, inputMetrics, inputAttributes, inputLibrary, &inputExtraLabels)
 	if !reflect.DeepEqual(want, out) {
 		t.Errorf("expected: %v, actual: %v", want, out)
 	}
@@ -814,7 +816,8 @@ func TestRecordToMpbUTF8(t *testing.T) {
 		Type:   md.Type,
 		Labels: expectedLabels,
 	}
-	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary, attribute.EmptySet())
+
+	out := me.recordToMpb(&monitoredrespb.MonitoredResource{}, inputMetrics, inputAttributes, inputLibrary, attribute.EmptySet())
 	if !reflect.DeepEqual(want, out) {
 		t.Errorf("expected: %v, actual: %v", want, out)
 	}

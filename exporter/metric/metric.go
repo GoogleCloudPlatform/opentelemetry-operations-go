@@ -47,6 +47,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -72,6 +73,11 @@ func keyOf(metrics metricdata.Metrics, library instrumentation.Library) key {
 		name:        metrics.Name,
 		libraryname: library.Name,
 	}
+}
+
+type MonitoredResourceDescription struct {
+	Type   string
+	Labels []string
 }
 
 // metricExporter is the implementation of OpenTelemetry metric exporter for
@@ -251,6 +257,10 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, rm *metricdata.R
 			Name:       name,
 			TimeSeries: tss[i:j],
 		}
+		fmt.Printf("writeTimeseriesRequest: %+v\n", protojson.MarshalOptions{
+			Multiline:       true,
+			EmitUnpopulated: true,
+		}.Format(req))
 		if me.o.createServiceTimeSeries {
 			errs = append(errs, me.client.CreateServiceTimeSeries(ctx, req))
 		} else {
@@ -367,9 +377,27 @@ func (attrs *attributes) GetString(key string) (string, bool) {
 //
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
 func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
-	gmr := resourcemapping.ResourceAttributesToMonitoringMonitoredResource(&attributes{
+	var gmr *monitoredrespb.MonitoredResource
+	resAttrsSet := &attributes{
 		attrs: attribute.NewSet(res.Attributes()...),
-	})
+	}
+
+	if resourceType, ok := resAttrsSet.GetString("gcp.resource_type"); ok && resourceType == me.o.monitoredResourceDescription.Type {
+		// OTel resource attribute 'gcp.resource_type' matches monitoredResourceDescription.Type
+		gmr = &monitoredrespb.MonitoredResource{
+			Type:   resourceType,
+			Labels: make(map[string]string),
+		}
+
+		mrdLabels := me.o.monitoredResourceDescription.Labels
+		for _, mrdLabel := range mrdLabels {
+			if resAttr, ok := resAttrsSet.GetString(mrdLabel); ok {
+				gmr.Labels[mrdLabel] = resAttr
+			}
+		}
+	} else {
+		gmr = resourcemapping.ResourceAttributesToMonitoringMonitoredResource(resAttrsSet)
+	}
 	newLabels := make(map[string]string, len(gmr.Labels))
 	for k, v := range gmr.Labels {
 		newLabels[k] = sanitizeUTF8(v)
@@ -407,7 +435,7 @@ func recordToMdpbKindType(a metricdata.Aggregation) (googlemetricpb.MetricDescri
 }
 
 // recordToMpb converts data from records to Metric proto type for Cloud Monitoring.
-func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes attribute.Set, library instrumentation.Library, extraLabels *attribute.Set) *googlemetricpb.Metric {
+func (me *metricExporter) recordToMpb(mr *monitoredrespb.MonitoredResource, metrics metricdata.Metrics, attributes attribute.Set, library instrumentation.Library, extraLabels *attribute.Set) *googlemetricpb.Metric {
 	me.mdLock.RLock()
 	defer me.mdLock.RUnlock()
 	k := keyOf(metrics, library)
@@ -415,23 +443,38 @@ func (me *metricExporter) recordToMpb(metrics metricdata.Metrics, attributes att
 	if !ok {
 		md = me.recordToMdpb(metrics, extraLabels)
 	}
+	fmt.Printf("attributes.ToSlice(): %+v\n", attributes.ToSlice())
 
-	filteredAttributes, _ := attribute.NewSetWithFiltered(attributes.ToSlice(), me.o.metricAttributesFilter)
-
-	labels := make(map[string]string)
-	addAttributes := func(attr *attribute.Set) {
+	addAttributes := func(attr *attribute.Set, labels map[string]string) {
 		iter := attr.Iter()
 		for iter.Next() {
 			kv := iter.Attribute()
 			labels[normalizeLabelKey(string(kv.Key))] = sanitizeUTF8(kv.Value.Emit())
 		}
 	}
-	addAttributes(extraLabels)
-	addAttributes(&filteredAttributes)
+
+	// Get attributes from metric attributes to add as resource labels
+	resourceAttributes, _ := attribute.NewSetWithFiltered(attributes.ToSlice(), me.o.monitoredResourceAttributesFilter)
+	resourceAttributeKeys := []attribute.Key{}
+	for i := 0; i < resourceAttributes.Len(); i++ {
+		kv, _ := resourceAttributes.Get(i)
+		resourceAttributeKeys = append(resourceAttributeKeys, kv.Key)
+	}
+
+	// Do not add attributes to metric that added to monitored resource
+	metricAttributes, _ := attribute.NewSetWithFiltered(attributes.ToSlice(), attribute.NewDenyKeysFilter(resourceAttributeKeys...))
+
+	resourceLabels := make(map[string]string)
+	addAttributes(&resourceAttributes, resourceLabels)
+	mr.Labels = resourceLabels
+
+	metricLabels := make(map[string]string)
+	addAttributes(extraLabels, metricLabels)
+	addAttributes(&metricAttributes, metricLabels)
 
 	return &googlemetricpb.Metric{
 		Type:   md.Type,
-		Labels: labels,
+		Labels: metricLabels,
 	}
 }
 
@@ -451,7 +494,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				errs = append(errs, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			ts.Metric = me.recordToMpb(mr, m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.Gauge[float64]:
@@ -461,7 +504,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				errs = append(errs, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			ts.Metric = me.recordToMpb(mr, m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.Sum[int64]:
@@ -478,7 +521,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				errs = append(errs, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			ts.Metric = me.recordToMpb(mr, m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.Sum[float64]:
@@ -495,7 +538,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				errs = append(errs, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			ts.Metric = me.recordToMpb(mr, m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.Histogram[int64]:
@@ -505,7 +548,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				errs = append(errs, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			ts.Metric = me.recordToMpb(mr, m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.Histogram[float64]:
@@ -515,7 +558,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				errs = append(errs, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			ts.Metric = me.recordToMpb(mr, m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.ExponentialHistogram[int64]:
@@ -525,7 +568,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				errs = append(errs, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			ts.Metric = me.recordToMpb(mr, m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	case metricdata.ExponentialHistogram[float64]:
@@ -535,7 +578,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 				errs = append(errs, err)
 				continue
 			}
-			ts.Metric = me.recordToMpb(m, point.Attributes, library, extraLabels)
+			ts.Metric = me.recordToMpb(mr, m, point.Attributes, library, extraLabels)
 			tss = append(tss, ts)
 		}
 	default:
@@ -545,16 +588,7 @@ func (me *metricExporter) recordToTspb(m metricdata.Metrics, mr *monitoredrespb.
 }
 
 func (me *metricExporter) recordsToTspbs(rm *metricdata.ResourceMetrics) ([]*monitoringpb.TimeSeries, error) {
-	var mr *monitoredrespb.MonitoredResource
-	var err error
-	if creator := me.o.monitoredResourceCreator; creator != nil {
-		mr, err = creator(rm)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		mr = me.resourceToMonitoredResourcepb(rm.Resource)
-	}
+	mr := me.resourceToMonitoredResourcepb(rm.Resource)
 	extraLabels := me.extraLabelsFromResource(rm.Resource)
 
 	var (
