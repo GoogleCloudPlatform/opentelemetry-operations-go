@@ -15,8 +15,23 @@
 package googleclientauthextension // import "github.com/GoogleCloudPlatform/opentelemetry-operations-go/extension/googleclientauthextension"
 
 import (
+	"errors"
+
 	"go.opentelemetry.io/collector/component"
 )
+
+const (
+	// accessToken indicates OAuth 2.0 access token (https://cloud.google.com/docs/authentication/token-types#access)
+	accessToken = "access_token"
+
+	// idToken indicates Google-signed ID-token (https://cloud.google.com/docs/authentication/token-types#id)
+	idToken = "id_token"
+)
+
+var tokenTypes = map[string]struct{}{
+	accessToken: {},
+	idToken:     {},
+}
 
 // Config stores the configuration for GCP Client Credentials.
 type Config struct {
@@ -32,6 +47,13 @@ type Config struct {
 	// https://cloud.google.com/apis/docs/system-parameters
 	QuotaProject string `mapstructure:"quota_project"`
 
+	// TokenType specifies which type of token will be generated.
+	// default: access_token
+	TokenType string `mapstructure:"token_type,omitempty"`
+
+	// Audience specifies the audience claim used for generating ID token.
+	Audience string `mapstructure:"audience,omitempty"`
+
 	// Scope specifies optional requested permissions.
 	// See https://datatracker.ietf.org/doc/html/rfc6749#section-3.3
 	Scopes []string `mapstructure:"scopes,omitempty"`
@@ -43,6 +65,14 @@ var _ component.Config = (*Config)(nil)
 
 // Validate checks if the extension configuration is valid.
 func (cfg *Config) Validate() error {
+	if _, ok := tokenTypes[cfg.TokenType]; !ok {
+		return errors.New("invalid token_type")
+	}
+
+	if cfg.TokenType == idToken && cfg.Audience == "" {
+		return errors.New("audience must be specified when using the id_token token_type")
+	}
+
 	return nil
 }
 
@@ -56,6 +86,7 @@ var defaultScopes = []string{
 
 func CreateDefaultConfig() component.Config {
 	return &Config{
-		Scopes: defaultScopes,
+		Scopes:    defaultScopes,
+		TokenType: accessToken,
 	}
 }

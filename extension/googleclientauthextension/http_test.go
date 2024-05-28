@@ -24,10 +24,31 @@ import (
 
 func TestRoundTripper(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ca := clientAuthenticator{config: &Config{
-		Project:      "my-project",
-		QuotaProject: "other-project",
-	},
+	ca := clientAuthenticator{
+		config: &Config{
+			Project:      "my-project",
+			QuotaProject: "other-project",
+			TokenType:    accessToken,
+		},
+	}
+	err := ca.Start(context.Background(), nil)
+	assert.NoError(t, err)
+
+	rt, err := ca.RoundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
+		return nil, nil
+	}))
+	assert.NotNil(t, rt)
+	assert.NoError(t, err)
+}
+
+func TestRoundTripperWithIDToken(t *testing.T) {
+	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_isa_creds.json")
+	ca := clientAuthenticator{
+		config: &Config{
+			Project:   "my-project",
+			TokenType: idToken,
+			Audience:  "http://example.com",
+		},
 	}
 	err := ca.Start(context.Background(), nil)
 	assert.NoError(t, err)
@@ -43,6 +64,7 @@ func TestRoundTripperNotStarted(t *testing.T) {
 	ca := clientAuthenticator{config: &Config{
 		Project:      "my-project",
 		QuotaProject: "other-project",
+		TokenType:    accessToken,
 	}}
 
 	rt, err := ca.RoundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
@@ -57,9 +79,29 @@ func TestRoundTrip(t *testing.T) {
 		config: &Config{
 			Project:      "my-project",
 			QuotaProject: "other-project",
+			TokenType:    accessToken,
 		},
 		base: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			assert.Equal(t, r.Header.Get("X-Goog-User-Project"), "other-project")
+			assert.Equal(t, r.Header.Get("X-Goog-Project-ID"), "my-project")
+			assert.Equal(t, r.Header.Get("foo"), "bar")
+			return &http.Response{}, nil
+		}),
+	}
+	header := make(http.Header)
+	header.Set("foo", "bar")
+	_, err := tr.RoundTrip(&http.Request{Header: header})
+	assert.NoError(t, err)
+}
+
+func TestRoundTripWithIDToken(t *testing.T) {
+	tr := parameterTransport{
+		config: &Config{
+			Project:   "my-project",
+			TokenType: idToken,
+			Audience:  "http://example.com",
+		},
+		base: roundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			assert.Equal(t, r.Header.Get("X-Goog-Project-ID"), "my-project")
 			assert.Equal(t, r.Header.Get("foo"), "bar")
 			return &http.Response{}, nil
