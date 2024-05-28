@@ -47,7 +47,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
-	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
@@ -257,10 +256,6 @@ func (me *metricExporter) exportTimeSeries(ctx context.Context, rm *metricdata.R
 			Name:       name,
 			TimeSeries: tss[i:j],
 		}
-		fmt.Printf("writeTimeseriesRequest: %+v\n", protojson.MarshalOptions{
-			Multiline:       true,
-			EmitUnpopulated: true,
-		}.Format(req))
 		if me.o.createServiceTimeSeries {
 			errs = append(errs, me.client.CreateServiceTimeSeries(ctx, req))
 		} else {

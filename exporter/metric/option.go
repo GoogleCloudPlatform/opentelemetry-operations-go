@@ -191,6 +191,8 @@ func WithCreateServiceTimeSeries() func(o *options) {
 	}
 }
 
+// WithMonitoredResourceDescription allows specifying custom mornitored resource type
+// and labels. The values for the labels will picked from Otel resource attributes.
 func WithMonitoredResourceDescription(mrd MonitoredResourceDescription) func(o *options) {
 	return func(o *options) {
 		o.monitoredResourceDescription = mrd
