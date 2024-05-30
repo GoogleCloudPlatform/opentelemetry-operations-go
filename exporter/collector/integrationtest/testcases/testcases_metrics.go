@@ -387,6 +387,14 @@ var MetricsTestCases = []TestCase{
 		SkipForSDK: true,
 	},
 	{
+		Name:                 "[GMP] Exponential Histogram becomes a GCM Distribution with exponential bucketOptions and a /histogram suffix",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_gmp_expect.json",
+		ConfigureCollector:   configureGMPCollector,
+		// prometheus_target is not supported by the SDK
+		SkipForSDK: true,
+	},
+	{
 		Name:                 "[GMP] Summary becomes a GCM Cumulative for sum/count, Gauges for quantiles",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/summary.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/summary_gmp_expect.json",

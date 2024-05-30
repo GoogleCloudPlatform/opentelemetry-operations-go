@@ -157,13 +157,13 @@ func TestGetMetricName(t *testing.T) {
 			expected: "hello/histogram",
 		},
 		{
-			desc:     "other",
-			baseName: "other",
+			desc:     "exponential histogram",
+			baseName: "hello",
 			metric: func(m pmetric.Metric) {
-				m.SetName("other")
+				m.SetName("hello")
 				m.SetEmptyExponentialHistogram()
 			},
-			expectErr: true,
+			expected: "hello/histogram",
 		},
 		{
 			desc:     "untyped gauge with feature gate enabled returns unknown",
