@@ -59,6 +59,7 @@ const (
 	sendBatchSize = 200
 
 	cloudMonitoringMetricDescriptorNameFormat = "workload.googleapis.com/%s"
+	platformMappingMonitoredResourceKey       = "gcp.resource_type"
 )
 
 // key is used to judge the uniqueness of the record descriptor.
@@ -367,6 +368,24 @@ func (attrs *attributes) GetString(key string) (string, bool) {
 //
 // https://cloud.google.com/monitoring/api/ref_v3/rest/v3/projects.monitoredResourceDescriptors
 func (me *metricExporter) resourceToMonitoredResourcepb(res *resource.Resource) *monitoredrespb.MonitoredResource {
+	platformMrType, platformMappingRequested := res.Set().Value(platformMappingMonitoredResourceKey)
+
+	// check if platform mapping is requested and possible
+	if platformMappingRequested && platformMrType.AsString() == me.o.monitoredResourceDescription.mrType {
+		// assemble attributes required to construct this MR
+		attributeMap := make(map[string]string)
+		for expectedLabel := range me.o.monitoredResourceDescription.mrLabels {
+			value, found := res.Set().Value(attribute.Key(expectedLabel))
+			if found {
+				attributeMap[expectedLabel] = value.AsString()
+			}
+		}
+		return &monitoredrespb.MonitoredResource{
+			Type:   platformMrType.AsString(),
+			Labels: attributeMap,
+		}
+	}
+
 	gmr := resourcemapping.ResourceAttributesToMonitoringMonitoredResource(&attributes{
 		attrs: attribute.NewSet(res.Attributes()...),
 	})

@@ -28,6 +28,13 @@ import (
 
 var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-metric-exporter %s", otel.Version(), Version())
 
+// MonitoredResourceDescription is the struct which holds information required to map OTel resource to specific
+// Google Cloud MonitoredResource.
+type MonitoredResourceDescription struct {
+	mrType   string
+	mrLabels map[string]struct{}
+}
+
 // Option is function type that is passed to the exporter initialization function.
 type Option func(*options)
 
@@ -76,6 +83,11 @@ type options struct {
 	// createServiceTimeSeries sets whether to create timeseries using `CreateServiceTimeSeries`.
 	// Implicitly, this sets `disableCreateMetricDescriptors` to true.
 	createServiceTimeSeries bool
+
+	// monitoredResourceDescription sets whether to attempt mapping the OTel Resource to a specific
+	// Google Cloud Monitored Resource. When provided, the exporter attempts to map only to the provided
+	// monitored resource type.
+	monitoredResourceDescription MonitoredResourceDescription
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -170,5 +182,21 @@ func WithCreateServiceTimeSeries() func(o *options) {
 	return func(o *options) {
 		o.createServiceTimeSeries = true
 		o.disableCreateMetricDescriptors = true
+	}
+}
+
+// WithMonitoredResourceDescription configures the exporter to attempt to map the OpenTelemetry Resource to the provided
+// Google MonitoredResource. The provided mrLabels would be searched for in the OpenTelemetry Resource Attributes and if
+// found, would be included in the MonitoredResource labels.
+func WithMonitoredResourceDescription(mrType string, mrLabels []string) func(o *options) {
+	return func(o *options) {
+		mrLabelSet := make(map[string]struct{})
+		for _, label := range mrLabels {
+			mrLabelSet[label] = struct{}{}
+		}
+		o.monitoredResourceDescription = MonitoredResourceDescription{
+			mrType:   mrType,
+			mrLabels: mrLabelSet,
+		}
 	}
 }
