@@ -281,6 +281,38 @@ func TestDescToMetricType(t *testing.T) {
 	}
 }
 
+func TestMonitoredResourceDescriptionDeduplicatesLabels(t *testing.T) {
+	clientOpts := []option.ClientOption{
+		option.WithEndpoint("http://fake-endpoint"),
+		option.WithoutAuthentication(),
+		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+	}
+
+	opts := []Option{
+		WithProjectID("PROJECT_ID_NOT_REAL"),
+		WithMonitoringClientOptions(clientOpts...),
+		WithMetricDescriptorTypeFormatter(formatter),
+		WithMonitoredResourceDescription("storage_client", []string{"service_instance_id", "host_id", "location", "api", "host_id"}),
+	}
+
+	exporter, err := New(opts...)
+	assert.NoError(t, err)
+
+	me := exporter.(*metricExporter)
+
+	expectedMrDescription := MonitoredResourceDescription{
+		mrType: "storage_client",
+		mrLabels: map[string]struct{}{
+			"service_instance_id": {},
+			"location":            {},
+			"host_id":             {},
+			"api":                 {},
+		},
+	}
+
+	assert.Equal(t, expectedMrDescription, me.o.monitoredResourceDescription)
+}
+
 func TestRecordToMpb(t *testing.T) {
 	metricName := "testing"
 
@@ -477,6 +509,7 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 	testCases := []struct {
 		desc           string
 		resource       *resource.Resource
+		mrDescription  MonitoredResourceDescription
 		expectedLabels map[string]string
 		expectedType   string
 	}{
@@ -730,6 +763,125 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 				"location":    "us-west2",
 			},
 		},
+		{
+			desc: "Custom Monitored Resource mapped successfully",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("gcp.resource_type", "storage_client"),
+				attribute.String("service_instance_id", "client_id"),
+				attribute.String("location", "us-west2"),
+				attribute.String("host_id", "123"),
+				attribute.String("custom.attribute", "custom"),
+				attribute.String("detected.attribute", "detected"),
+			),
+			mrDescription: MonitoredResourceDescription{
+				mrType: "storage_client",
+				mrLabels: map[string]struct{}{
+					"service_instance_id": {},
+					"location":            {},
+					"host_id":             {},
+				},
+			},
+			expectedType: "storage_client",
+			expectedLabels: map[string]string{
+				"service_instance_id": "client_id",
+				"location":            "us-west2",
+				"host_id":             "123",
+			},
+		},
+		{
+			desc: "Custom MR mapping with insufficient required labels",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("gcp.resource_type", "storage_client"),
+				attribute.String("location", "us-west2"),
+				attribute.String("host_id", "123"),
+				attribute.String("custom.attribute", "custom"),
+				attribute.String("detected.attribute", "detected"),
+			),
+			mrDescription: MonitoredResourceDescription{
+				mrType: "storage_client",
+				mrLabels: map[string]struct{}{
+					"service_instance_id": {}, // missing from OTel resource
+					"location":            {},
+					"host_id":             {},
+				},
+			},
+			expectedType: "storage_client",
+			expectedLabels: map[string]string{
+				"location": "us-west2",
+				"host_id":  "123",
+			},
+		},
+		{
+			desc: "Custom MR mapping with mismatched MR type",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("gcp.resource_type", "storage_reader_client"),
+				attribute.String("location", "us-west2"),
+				attribute.String("host_id", "123"),
+				attribute.String("custom.attribute", "custom"),
+				attribute.String("detected.attribute", "detected"),
+			),
+			mrDescription: MonitoredResourceDescription{
+				mrType: "storage_client",
+				mrLabels: map[string]struct{}{
+					"service_instance_id": {}, // missing from OTel resource
+					"location":            {},
+					"host_id":             {},
+				},
+			},
+			expectedType: "generic_node",
+			expectedLabels: map[string]string{
+				"location":  "global",
+				"namespace": "",
+				"node_id":   "",
+			},
+		},
+		{
+			desc: "Custom MR platform mapping with no MonitoredResourceDescription",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				attribute.String("gcp.resource_type", "storage_client"),
+				attribute.String("service_instance_id", "client_id"),
+				attribute.String("location", "us-west2"),
+				attribute.String("host_id", "123"),
+				attribute.String("custom.attribute", "custom"),
+				attribute.String("detected.attribute", "detected"),
+			),
+			expectedType: "generic_node",
+			expectedLabels: map[string]string{
+				"location":  "global",
+				"namespace": "",
+				"node_id":   "",
+			},
+		},
+		{
+			desc: "Custom MR platform mapping key not present",
+			resource: resource.NewWithAttributes(
+				semconv.SchemaURL,
+				// gcp.resource_type key is absent from OTEL resource
+				attribute.String("service_instance_id", "client_id"),
+				attribute.String("location", "us-west2"),
+				attribute.String("host_id", "123"),
+				attribute.String("custom.attribute", "custom"),
+				attribute.String("detected.attribute", "detected"),
+			),
+			mrDescription: MonitoredResourceDescription{
+				mrType: "storage_client",
+				mrLabels: map[string]struct{}{
+					"service_instance_id": {},
+					"location":            {},
+					"host_id":             {},
+				},
+			},
+			expectedType: "generic_node",
+			expectedLabels: map[string]string{
+				"location":  "global",
+				"namespace": "",
+				"node_id":   "",
+			},
+		},
 	}
 
 	md := &googlemetricpb.MetricDescriptor{
@@ -745,15 +897,16 @@ func TestResourceToMonitoredResourcepb(t *testing.T) {
 		libraryname: "",
 	}
 
-	me := &metricExporter{
-		o: &options{},
-		mdCache: map[key]*googlemetricpb.MetricDescriptor{
-			mdkey: md,
-		},
-	}
-
 	for _, test := range testCases {
 		t.Run(test.desc, func(t *testing.T) {
+			me := &metricExporter{
+				o: &options{
+					monitoredResourceDescription: test.mrDescription,
+				},
+				mdCache: map[key]*googlemetricpb.MetricDescriptor{
+					mdkey: md,
+				},
+			}
 			got := me.resourceToMonitoredResourcepb(test.resource)
 			if !reflect.DeepEqual(got.GetLabels(), test.expectedLabels) {
 				t.Errorf("expected: %v, actual: %v", test.expectedLabels, got.GetLabels())
