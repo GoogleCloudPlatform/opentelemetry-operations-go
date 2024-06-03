@@ -31,8 +31,8 @@ var userAgent = fmt.Sprintf("opentelemetry-go %s; google-cloud-metric-exporter %
 // MonitoredResourceDescription is the struct which holds information required to map OTel resource to specific
 // Google Cloud MonitoredResource.
 type MonitoredResourceDescription struct {
-	mrType   string
 	mrLabels map[string]struct{}
+	mrType   string
 }
 
 // Option is function type that is passed to the exporter initialization function.
@@ -54,6 +54,10 @@ type options struct {
 	// add to metrics as metric labels. By default, it adds service.name,
 	// service.namespace, and service.instance.id.
 	resourceAttributeFilter attribute.Filter
+	// monitoredResourceDescription sets whether to attempt mapping the OTel Resource to a specific
+	// Google Cloud Monitored Resource. When provided, the exporter attempts to map only to the provided
+	// monitored resource type.
+	monitoredResourceDescription MonitoredResourceDescription
 	// projectID is the identifier of the Cloud Monitoring
 	// project the user is uploading the stats data to.
 	// If not set, this will default to your "Application Default Credentials".
@@ -83,11 +87,6 @@ type options struct {
 	// createServiceTimeSeries sets whether to create timeseries using `CreateServiceTimeSeries`.
 	// Implicitly, this sets `disableCreateMetricDescriptors` to true.
 	createServiceTimeSeries bool
-
-	// monitoredResourceDescription sets whether to attempt mapping the OTel Resource to a specific
-	// Google Cloud Monitored Resource. When provided, the exporter attempts to map only to the provided
-	// monitored resource type.
-	monitoredResourceDescription MonitoredResourceDescription
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
