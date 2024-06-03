@@ -5,15 +5,220 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "prometheus.googleapis.com/target_info/gauge"
+            "type": "prometheus.googleapis.com/durationhist_seconds/histogram"
           },
           "resource": {
             "type": "prometheus_target",
             "labels": {
               "cluster": "",
-              "instance": "",
-              "job": "",
-              "location": "",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "distributionValue": {
+                  "count": "10000",
+                  "mean": 198.4636328211394,
+                  "bucketOptions": {
+                    "exponentialBuckets": {
+                      "numFiniteBuckets": 113,
+                      "growthFactor": 1.0442737824274138,
+                      "scale": 98.70149282610706
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "646",
+                    "736",
+                    "733",
+                    "639",
+                    "606",
+                    "585",
+                    "480",
+                    "481",
+                    "411",
+                    "436",
+                    "366",
+                    "304",
+                    "309",
+                    "270",
+                    "226",
+                    "210",
+                    "238",
+                    "169",
+                    "181",
+                    "178",
+                    "149",
+                    "132",
+                    "131",
+                    "117",
+                    "109",
+                    "89",
+                    "107",
+                    "80",
+                    "78",
+                    "75",
+                    "56",
+                    "73",
+                    "59",
+                    "51",
+                    "46",
+                    "53",
+                    "22",
+                    "31",
+                    "35",
+                    "24",
+                    "23",
+                    "31",
+                    "18",
+                    "8",
+                    "16",
+                    "12",
+                    "15",
+                    "13",
+                    "12",
+                    "12",
+                    "12",
+                    "7",
+                    "7",
+                    "7",
+                    "9",
+                    "5",
+                    "4",
+                    "4",
+                    "8",
+                    "6",
+                    "3",
+                    "1",
+                    "4",
+                    "2",
+                    "2",
+                    "4",
+                    "5",
+                    "1",
+                    "2",
+                    "2",
+                    "1",
+                    "0",
+                    "1",
+                    "2",
+                    "2",
+                    "1",
+                    "0",
+                    "0",
+                    "2",
+                    "1",
+                    "2",
+                    "1",
+                    "0",
+                    "2",
+                    "0",
+                    "0",
+                    "2",
+                    "0",
+                    "1",
+                    "1",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "1",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "1",
+                    "0",
+                    "0",
+                    "0",
+                    "0",
+                    "1",
+                    "1",
+                    "0",
+                    "1",
+                    "0"
+                  ]
+                }
+              }
+            }
+          ],
+          "unit": "s"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/foohist_seconds/histogram"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "distributionValue": {
+                  "count": "7",
+                  "mean": 1.7857142857142858,
+                  "bucketOptions": {
+                    "exponentialBuckets": {
+                      "numFiniteBuckets": 3,
+                      "growthFactor": 4,
+                      "scale": 0.25
+                    }
+                  },
+                  "bucketCounts": [
+                    "2",
+                    "1",
+                    "3",
+                    "1",
+                    "0"
+                  ]
+                }
+              }
+            }
+          ],
+          "unit": "s"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/target_info/gauge",
+            "labels": {
+              "cloud_availability_zone": "us-central1-c"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "10.92.5.2:15692",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -55,7 +260,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "1"
+                  "int64Value": "3"
                 }
               }
             ]
@@ -410,5 +615,6 @@
         }
       }
     ]
-  }
+  },
+  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.63.2"
 }

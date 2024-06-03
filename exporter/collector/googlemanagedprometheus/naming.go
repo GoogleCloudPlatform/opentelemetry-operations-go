@@ -50,6 +50,8 @@ func (c Config) GetMetricName(baseName string, metric pmetric.Metric) (string, e
 		}
 		return compliantName + "/summary", nil
 	case pmetric.MetricTypeHistogram:
+		fallthrough
+	case pmetric.MetricTypeExponentialHistogram:
 		return compliantName + "/histogram", nil
 	default:
 		return "", fmt.Errorf("unsupported metric datatype: %v", metric.Type())
