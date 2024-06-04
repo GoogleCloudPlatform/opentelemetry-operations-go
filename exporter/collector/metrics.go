@@ -973,10 +973,12 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectI
 			deviation += float64(counts[i]) * (middleOfBucket - mean) * (middleOfBucket - mean)
 			prevBound = bounds.At(i)
 		}
-		// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
-		// Assume points in the infinity bucket are at the top of the previous bucket
-		middleOfInfBucket := prevBound
-		deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
+		if len(counts) > 0 {
+			// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
+			// Assume points in the infinity bucket are at the top of the previous bucket
+			middleOfInfBucket := prevBound
+			deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
+		}
 	}
 
 	return &monitoringpb.TypedValue{
@@ -1066,9 +1068,9 @@ func (m *metricMapper) histogramToTimeSeries(
 	point pmetric.HistogramDataPoint,
 	projectID string,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().NoRecordedValue() || !point.HasSum() || point.ExplicitBounds().Len() == 0 {
+	if point.Flags().NoRecordedValue() || !point.HasSum() {
 		// Drop points without a value or without a sum
-		m.obs.log.Debug("Metric has no value, sum, or explicit bounds. Dropping the metric.", zap.Any("metric", metric))
+		m.obs.log.Debug("Metric has no value or sum. Dropping the metric.", zap.Any("metric", metric))
 		return nil
 	}
 	t, err := m.metricNameToType(metric.Name(), metric)

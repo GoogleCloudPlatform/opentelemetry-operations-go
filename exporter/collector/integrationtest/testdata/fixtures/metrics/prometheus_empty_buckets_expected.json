@@ -5,6 +5,44 @@
       "timeSeries": [
         {
           "metric": {
+            "type": "workload.googleapis.com/kv_prober_write_latency",
+            "labels": {
+              "service_instance_id": "0.0.0.0:2112",
+              "service_name": "otel-collector"
+            }
+          },
+          "resource": {
+            "type": "generic_task",
+            "labels": {
+              "job": "otel-collector",
+              "location": "global",
+              "namespace": "",
+              "task_id": "0.0.0.0:2112"
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "distributionValue": {
+                  "bucketOptions": {
+                    "explicitBuckets": {}
+                  },
+                  "bucketCounts": [
+                    "0"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
             "type": "workload.googleapis.com/up",
             "labels": {
               "service_instance_id": "0.0.0.0:2112",
@@ -296,7 +334,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "5"
+                  "int64Value": "6"
                 }
               }
             ]
