@@ -113,6 +113,17 @@ var MetricsTestCases = []TestCase{
 		},
 	},
 	{
+		Name:                 "Zero-Bucket Histogram becomes a GCM Distribution",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/histogram_zero_bucket.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/histogram_zero_bucket_expect.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			cfg.MetricConfig.ServiceResourceLabels = false
+			cfg.MetricConfig.InstrumentationLibraryLabels = true
+			cfg.MetricConfig.EnableSumOfSquaredDeviation = true
+		},
+		SkipForSDK: true,
+	},
+	{
 		Name:                 "Exponential Histogram becomes a GCM Distribution with exponential bucketOptions",
 		OTLPInputFixturePath: "testdata/fixtures/metrics/exponential_histogram.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/exponential_histogram_expect.json",

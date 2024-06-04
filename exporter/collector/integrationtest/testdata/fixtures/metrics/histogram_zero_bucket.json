@@ -1,0 +1,173 @@
+{
+    "resourceMetrics": [
+      {
+        "resource": {
+          "attributes": [
+            {
+              "key": "cloud.availability_zone",
+              "value": {
+                "stringValue": "us-central1-c"
+              }
+            },
+            {
+              "key": "service.name",
+              "value": {
+                "stringValue": "demo"
+              }
+            },
+            {
+              "key": "service.instance.id",
+              "value": {
+                "stringValue": "10.92.5.2:15692"
+              }
+            }
+          ]
+        },
+        "scopeMetrics": [
+          {
+            "scope": {},
+            "metrics": [
+              {
+                "name": "simple.float64.histogram",
+                "unit": "s",
+                "histogram": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "some.lemons",
+                          "value": {
+                            "stringValue": "13"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "1",
+                      "sum": 2.5,
+                      "exemplars": [
+                        {
+                          "asDouble": 4.1,
+                          "timeUnixNano": "1649443516286000000",
+                          "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+                          "spanId": "84f9e8929bb1cd5b",
+                          "filteredAttributes": [
+                            {
+                              "key": "filtered.attribute",
+                              "value": {
+                                "stringValue": "foobar"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "some.lemons",
+                          "value": {
+                            "stringValue": "10"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "2",
+                      "sum": 14.3,
+                      "exemplars": [
+                        {
+                          "asDouble": 15.5,
+                          "timeUnixNano": "1649443516286000000",
+                          "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+                          "spanId": "84f9e8929bb1cd5b",
+                          "filteredAttributes": [
+                            {
+                              "key": "filtered.attribute",
+                              "value": {
+                                "stringValue": "foobar"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE"
+                }
+              },
+              {
+                "name": "simple.int64.histogram",
+                "unit": "s",
+                "histogram": {
+                  "dataPoints": [
+                    {
+                      "attributes": [
+                        {
+                          "key": "some.lemons",
+                          "value": {
+                            "stringValue": "13"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "1",
+                      "sum": 2,
+                      "exemplars": [
+                        {
+                          "asInt": 4,
+                          "timeUnixNano": "1649443516286000000",
+                          "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+                          "spanId": "84f9e8929bb1cd5b",
+                          "filteredAttributes": [
+                            {
+                              "key": "filtered.attribute",
+                              "value": {
+                                "stringValue": "foobar"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "attributes": [
+                        {
+                          "key": "some.lemons",
+                          "value": {
+                            "stringValue": "10"
+                          }
+                        }
+                      ],
+                      "startTimeUnixNano": "1649443516286000000",
+                      "timeUnixNano": "1649443516286000000",
+                      "count": "2",
+                      "sum": 14,
+                      "exemplars": [
+                        {
+                          "asInt": 12,
+                          "timeUnixNano": "1649443516286000000",
+                          "traceId": "2499d13df7b35ae93dfa3d6ddc01da74",
+                          "spanId": "84f9e8929bb1cd5b",
+                          "filteredAttributes": [
+                            {
+                              "key": "filtered.attribute",
+                              "value": {
+                                "stringValue": "foobar"
+                              }
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "aggregationTemporality": "AGGREGATION_TEMPORALITY_CUMULATIVE"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
