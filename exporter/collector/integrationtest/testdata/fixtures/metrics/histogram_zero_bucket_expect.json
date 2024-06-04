@@ -34,6 +34,9 @@
                   "bucketOptions": {
                     "explicitBuckets": {}
                   },
+                  "bucketCounts": [
+                    "1"
+                  ],
                   "exemplars": [
                     {
                       "value": 4.1,
@@ -89,6 +92,9 @@
                   "bucketOptions": {
                     "explicitBuckets": {}
                   },
+                  "bucketCounts": [
+                    "2"
+                  ],
                   "exemplars": [
                     {
                       "value": 15.5,
@@ -144,6 +150,9 @@
                   "bucketOptions": {
                     "explicitBuckets": {}
                   },
+                  "bucketCounts": [
+                    "1"
+                  ],
                   "exemplars": [
                     {
                       "value": 4,
@@ -199,6 +208,9 @@
                   "bucketOptions": {
                     "explicitBuckets": {}
                   },
+                  "bucketCounts": [
+                    "2"
+                  ],
                   "exemplars": [
                     {
                       "value": 12,

@@ -980,6 +980,9 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectI
 			deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
 		}
 	}
+	if len(counts) == 0 {
+		counts = []int64{int64(point.Count())}
+	}
 
 	return &monitoringpb.TypedValue{
 		Value: &monitoringpb.TypedValue_DistributionValue{
