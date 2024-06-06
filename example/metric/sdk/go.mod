@@ -5,7 +5,7 @@ go 1.21
 toolchain go1.22.0
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.47.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.25.0
 	go.opentelemetry.io/otel v1.25.0
 	go.opentelemetry.io/otel/metric v1.25.0
@@ -17,8 +17,8 @@ require (
 	cloud.google.com/go/compute v1.23.0 // indirect
 	cloud.google.com/go/compute/metadata v0.2.3 // indirect
 	cloud.google.com/go/monitoring v1.15.1 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.23.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.47.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.24.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.0 // indirect
 	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
