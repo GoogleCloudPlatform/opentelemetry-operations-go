@@ -980,8 +980,15 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectI
 			deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
 		}
 	}
-	if len(counts) == 0 {
-		counts = []int64{int64(point.Count())}
+	rawBounds := bounds.AsRaw()
+	if len(rawBounds) == 0 {
+		// If we have no bounds, that means there must only be a single bucket
+		// containing all observations. GCM rejects distributions with only a
+		// single bucket (no boundaries), so we artificially add a bucket
+		// boundary at zero so it is accepted. This assumes all observations
+		// are positive, which may not be the case.
+		counts = []int64{0, int64(point.Count())}
+		rawBounds = []float64{0}
 	}
 
 	return &monitoringpb.TypedValue{
@@ -994,7 +1001,7 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectI
 				BucketOptions: &distribution.Distribution_BucketOptions{
 					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
 						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
-							Bounds: bounds.AsRaw(),
+							Bounds: rawBounds,
 						},
 					},
 				},

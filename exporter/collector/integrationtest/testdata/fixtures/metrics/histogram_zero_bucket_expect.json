@@ -5,7 +5,7 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/simple.float64.histogram",
+            "type": "workload.googleapis.com/zero.float64.histogram",
             "labels": {
               "some_lemons": "13"
             }
@@ -32,9 +32,14 @@
                   "count": "1",
                   "mean": 2.5,
                   "bucketOptions": {
-                    "explicitBuckets": {}
+                    "explicitBuckets": {
+                      "bounds": [
+                        0
+                      ]
+                    }
                   },
                   "bucketCounts": [
+                    "0",
                     "1"
                   ],
                   "exemplars": [
@@ -63,7 +68,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/simple.float64.histogram",
+            "type": "workload.googleapis.com/zero.float64.histogram",
             "labels": {
               "some_lemons": "10"
             }
@@ -90,9 +95,14 @@
                   "count": "2",
                   "mean": 7.15,
                   "bucketOptions": {
-                    "explicitBuckets": {}
+                    "explicitBuckets": {
+                      "bounds": [
+                        0
+                      ]
+                    }
                   },
                   "bucketCounts": [
+                    "0",
                     "2"
                   ],
                   "exemplars": [
@@ -121,7 +131,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/simple.int64.histogram",
+            "type": "workload.googleapis.com/zero.int64.histogram",
             "labels": {
               "some_lemons": "13"
             }
@@ -148,9 +158,14 @@
                   "count": "1",
                   "mean": 2,
                   "bucketOptions": {
-                    "explicitBuckets": {}
+                    "explicitBuckets": {
+                      "bounds": [
+                        0
+                      ]
+                    }
                   },
                   "bucketCounts": [
+                    "0",
                     "1"
                   ],
                   "exemplars": [
@@ -179,7 +194,7 @@
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/simple.int64.histogram",
+            "type": "workload.googleapis.com/zero.int64.histogram",
             "labels": {
               "some_lemons": "10"
             }
@@ -206,9 +221,14 @@
                   "count": "2",
                   "mean": 7,
                   "bucketOptions": {
-                    "explicitBuckets": {}
+                    "explicitBuckets": {
+                      "bounds": [
+                        0
+                      ]
+                    }
                   },
                   "bucketCounts": [
+                    "0",
                     "2"
                   ],
                   "exemplars": [
@@ -242,8 +262,8 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "simple.float64.histogram",
-        "type": "workload.googleapis.com/simple.float64.histogram",
+        "name": "zero.float64.histogram",
+        "type": "workload.googleapis.com/zero.float64.histogram",
         "labels": [
           {
             "key": "some_lemons"
@@ -252,14 +272,14 @@
         "metricKind": "CUMULATIVE",
         "valueType": "DISTRIBUTION",
         "unit": "s",
-        "displayName": "simple.float64.histogram"
+        "displayName": "zero.float64.histogram"
       }
     },
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "simple.int64.histogram",
-        "type": "workload.googleapis.com/simple.int64.histogram",
+        "name": "zero.int64.histogram",
+        "type": "workload.googleapis.com/zero.int64.histogram",
         "labels": [
           {
             "key": "some_lemons"
@@ -268,7 +288,7 @@
         "metricKind": "CUMULATIVE",
         "valueType": "DISTRIBUTION",
         "unit": "s",
-        "displayName": "simple.int64.histogram"
+        "displayName": "zero.int64.histogram"
       }
     }
   ],

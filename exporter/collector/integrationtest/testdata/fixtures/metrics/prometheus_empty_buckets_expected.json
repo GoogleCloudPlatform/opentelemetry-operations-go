@@ -31,9 +31,14 @@
               "value": {
                 "distributionValue": {
                   "bucketOptions": {
-                    "explicitBuckets": {}
+                    "explicitBuckets": {
+                      "bounds": [
+                        0
+                      ]
+                    }
                   },
                   "bucketCounts": [
+                    "0",
                     "0"
                   ]
                 }

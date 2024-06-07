@@ -28,7 +28,7 @@
             "scope": {},
             "metrics": [
               {
-                "name": "simple.float64.histogram",
+                "name": "zero.float64.histogram",
                 "unit": "s",
                 "histogram": {
                   "dataPoints": [
@@ -97,7 +97,7 @@
                 }
               },
               {
-                "name": "simple.int64.histogram",
+                "name": "zero.int64.histogram",
                 "unit": "s",
                 "histogram": {
                   "dataPoints": [
