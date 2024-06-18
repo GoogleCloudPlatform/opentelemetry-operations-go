@@ -31,14 +31,14 @@ func TestCreateDefaultConfig(t *testing.T) {
 
 func TestCreateExtension(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ext, err := CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	ext, err := CreateExtension(context.Background(), extension.Settings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 }
 
 func TestStart(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	ext, err := CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	ext, err := CreateExtension(context.Background(), extension.Settings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 	err = ext.Start(context.Background(), nil)
@@ -47,7 +47,7 @@ func TestStart(t *testing.T) {
 
 func TestStart_WithError(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/foo.json")
-	ext, err := CreateExtension(context.Background(), extension.CreateSettings{}, CreateDefaultConfig())
+	ext, err := CreateExtension(context.Background(), extension.Settings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 	err = ext.Start(context.Background(), nil)
