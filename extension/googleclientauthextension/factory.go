@@ -27,7 +27,7 @@ import (
 	"google.golang.org/grpc/credentials/oauth"
 )
 
-func CreateExtension(ctx context.Context, set extension.CreateSettings, cfg component.Config) (extension.Extension, error) {
+func CreateExtension(ctx context.Context, set extension.Settings, cfg component.Config) (extension.Extension, error) {
 	config := cfg.(*Config)
 	ca := &clientAuthenticator{
 		config: config,
