@@ -24,14 +24,14 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/idtoken"
-	"google.golang.org/api/option"
 	"google.golang.org/grpc/credentials/oauth"
 )
 
 func CreateExtension(ctx context.Context, set extension.Settings, cfg component.Config) (extension.Extension, error) {
 	config := cfg.(*Config)
 	ca := &clientAuthenticator{
-		config: config,
+		config:           config,
+		newIDTokenSource: idtoken.NewTokenSource,
 	}
 	return ca, nil
 }
@@ -40,6 +40,8 @@ func CreateExtension(ctx context.Context, set extension.Settings, cfg component.
 type clientAuthenticator struct {
 	*oauth.TokenSource
 	config *Config
+
+	newIDTokenSource func(ctx context.Context, audience string, opts ...idtoken.ClientOption) (oauth2.TokenSource, error)
 }
 
 func (ca *clientAuthenticator) Start(ctx context.Context, _ component.Host) error {
@@ -68,17 +70,13 @@ func (ca *clientAuthenticator) Start(ctx context.Context, _ component.Host) erro
 func (ca *clientAuthenticator) newTokenSource(ctx context.Context, creds *google.Credentials) (oauth2.TokenSource, error) {
 	switch ca.config.TokenType {
 	case idToken:
-		opts := []option.ClientOption{}
+		opts := []idtoken.ClientOption{}
 
 		if len(creds.JSON) > 0 {
 			opts = append(opts, idtoken.WithCredentialsJSON(creds.JSON))
 		}
 
-		return idtoken.NewTokenSource(
-			ctx,
-			ca.config.Audience,
-			opts...,
-		)
+		return ca.newIDTokenSource(ctx, ca.config.Audience, opts...)
 	default:
 		return creds.TokenSource, nil
 	}
