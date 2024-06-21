@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/api/idtoken"
 )
 
 func TestRoundTripper(t *testing.T) {
@@ -49,6 +50,7 @@ func TestRoundTripperWithIDToken(t *testing.T) {
 			TokenType: idToken,
 			Audience:  "http://example.com",
 		},
+		newIDTokenSource: idtoken.NewTokenSource,
 	}
 	err := ca.Start(context.Background(), nil)
 	assert.NoError(t, err)
