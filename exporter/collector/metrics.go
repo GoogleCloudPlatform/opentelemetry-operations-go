@@ -973,10 +973,22 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectI
 			deviation += float64(counts[i]) * (middleOfBucket - mean) * (middleOfBucket - mean)
 			prevBound = bounds.At(i)
 		}
-		// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
-		// Assume points in the infinity bucket are at the top of the previous bucket
-		middleOfInfBucket := prevBound
-		deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
+		if len(counts) > 0 {
+			// The infinity bucket is an implicit +Inf bound after the list of explicit bounds.
+			// Assume points in the infinity bucket are at the top of the previous bucket
+			middleOfInfBucket := prevBound
+			deviation += float64(counts[len(counts)-1]) * (middleOfInfBucket - mean) * (middleOfInfBucket - mean)
+		}
+	}
+	rawBounds := bounds.AsRaw()
+	if len(rawBounds) == 0 {
+		// If we have no bounds, that means there must only be a single bucket
+		// containing all observations. GCM rejects distributions with only a
+		// single bucket (no boundaries), so we artificially add a bucket
+		// boundary at zero so it is accepted. This assumes all observations
+		// are positive, which may not be the case.
+		counts = []int64{0, int64(point.Count())}
+		rawBounds = []float64{0}
 	}
 
 	return &monitoringpb.TypedValue{
@@ -989,7 +1001,7 @@ func (m *metricMapper) histogramPoint(point pmetric.HistogramDataPoint, projectI
 				BucketOptions: &distribution.Distribution_BucketOptions{
 					Options: &distribution.Distribution_BucketOptions_ExplicitBuckets{
 						ExplicitBuckets: &distribution.Distribution_BucketOptions_Explicit{
-							Bounds: bounds.AsRaw(),
+							Bounds: rawBounds,
 						},
 					},
 				},
@@ -1066,9 +1078,9 @@ func (m *metricMapper) histogramToTimeSeries(
 	point pmetric.HistogramDataPoint,
 	projectID string,
 ) []*monitoringpb.TimeSeries {
-	if point.Flags().NoRecordedValue() || !point.HasSum() || point.ExplicitBounds().Len() == 0 {
+	if point.Flags().NoRecordedValue() || !point.HasSum() {
 		// Drop points without a value or without a sum
-		m.obs.log.Debug("Metric has no value, sum, or explicit bounds. Dropping the metric.", zap.Any("metric", metric))
+		m.obs.log.Debug("Metric has no value or sum. Dropping the metric.", zap.Any("metric", metric))
 		return nil
 	}
 	t, err := m.metricNameToType(metric.Name(), metric)

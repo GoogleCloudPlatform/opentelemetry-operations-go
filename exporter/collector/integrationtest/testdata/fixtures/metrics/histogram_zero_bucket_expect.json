@@ -5,19 +5,18 @@
       "timeSeries": [
         {
           "metric": {
-            "type": "workload.googleapis.com/kv_prober_write_latency",
+            "type": "workload.googleapis.com/zero.float64.histogram",
             "labels": {
-              "service_instance_id": "0.0.0.0:2112",
-              "service_name": "otel-collector"
+              "some_lemons": "13"
             }
           },
           "resource": {
             "type": "generic_task",
             "labels": {
-              "job": "otel-collector",
-              "location": "global",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": "",
-              "task_id": "0.0.0.0:2112"
+              "task_id": "10.92.5.2:15692"
             }
           },
           "metricKind": "CUMULATIVE",
@@ -30,6 +29,8 @@
               },
               "value": {
                 "distributionValue": {
+                  "count": "1",
+                  "mean": 2.5,
                   "bucketOptions": {
                     "explicitBuckets": {
                       "bounds": [
@@ -39,163 +40,220 @@
                   },
                   "bucketCounts": [
                     "0",
-                    "0"
+                    "1"
+                  ],
+                  "exemplars": [
+                    {
+                      "value": 4.1,
+                      "timestamp": "1970-01-01T00:00:00Z",
+                      "attachments": [
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
+                          "spanName": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/84f9e8929bb1cd5b"
+                        },
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.DroppedLabels",
+                          "label": {
+                            "filtered_attribute": "foobar"
+                          }
+                        }
+                      ]
+                    }
                   ]
                 }
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/up",
+            "type": "workload.googleapis.com/zero.float64.histogram",
             "labels": {
-              "service_instance_id": "0.0.0.0:2112",
-              "service_name": "otel-collector"
+              "some_lemons": "10"
             }
           },
           "resource": {
             "type": "generic_task",
             "labels": {
-              "job": "otel-collector",
-              "location": "global",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": "",
-              "task_id": "0.0.0.0:2112"
+              "task_id": "10.92.5.2:15692"
             }
           },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
           "points": [
             {
               "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "doubleValue": 1
-              }
-            }
-          ]
-        },
-        {
-          "metric": {
-            "type": "workload.googleapis.com/scrape_duration_seconds",
-            "labels": {
-              "service_instance_id": "0.0.0.0:2112",
-              "service_name": "otel-collector"
-            }
-          },
-          "resource": {
-            "type": "generic_task",
-            "labels": {
-              "job": "otel-collector",
-              "location": "global",
-              "namespace": "",
-              "task_id": "0.0.0.0:2112"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 0.003655446
+                "distributionValue": {
+                  "count": "2",
+                  "mean": 7.15,
+                  "bucketOptions": {
+                    "explicitBuckets": {
+                      "bounds": [
+                        0
+                      ]
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "2"
+                  ],
+                  "exemplars": [
+                    {
+                      "value": 15.5,
+                      "timestamp": "1970-01-01T00:00:00Z",
+                      "attachments": [
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
+                          "spanName": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/84f9e8929bb1cd5b"
+                        },
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.DroppedLabels",
+                          "label": {
+                            "filtered_attribute": "foobar"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
               }
             }
           ],
-          "unit": "seconds"
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/scrape_samples_scraped",
+            "type": "workload.googleapis.com/zero.int64.histogram",
             "labels": {
-              "service_instance_id": "0.0.0.0:2112",
-              "service_name": "otel-collector"
+              "some_lemons": "13"
             }
           },
           "resource": {
             "type": "generic_task",
             "labels": {
-              "job": "otel-collector",
-              "location": "global",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": "",
-              "task_id": "0.0.0.0:2112"
+              "task_id": "10.92.5.2:15692"
             }
           },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
           "points": [
             {
               "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "doubleValue": 3
+                "distributionValue": {
+                  "count": "1",
+                  "mean": 2,
+                  "bucketOptions": {
+                    "explicitBuckets": {
+                      "bounds": [
+                        0
+                      ]
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "1"
+                  ],
+                  "exemplars": [
+                    {
+                      "value": 4,
+                      "timestamp": "1970-01-01T00:00:00Z",
+                      "attachments": [
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
+                          "spanName": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/84f9e8929bb1cd5b"
+                        },
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.DroppedLabels",
+                          "label": {
+                            "filtered_attribute": "foobar"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
               }
             }
-          ]
+          ],
+          "unit": "s"
         },
         {
           "metric": {
-            "type": "workload.googleapis.com/scrape_samples_post_metric_relabeling",
+            "type": "workload.googleapis.com/zero.int64.histogram",
             "labels": {
-              "service_instance_id": "0.0.0.0:2112",
-              "service_name": "otel-collector"
+              "some_lemons": "10"
             }
           },
           "resource": {
             "type": "generic_task",
             "labels": {
-              "job": "otel-collector",
-              "location": "global",
+              "job": "demo",
+              "location": "us-central1-c",
               "namespace": "",
-              "task_id": "0.0.0.0:2112"
+              "task_id": "10.92.5.2:15692"
             }
           },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
           "points": [
             {
               "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
               },
               "value": {
-                "doubleValue": 3
+                "distributionValue": {
+                  "count": "2",
+                  "mean": 7,
+                  "bucketOptions": {
+                    "explicitBuckets": {
+                      "bounds": [
+                        0
+                      ]
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "2"
+                  ],
+                  "exemplars": [
+                    {
+                      "value": 12,
+                      "timestamp": "1970-01-01T00:00:00Z",
+                      "attachments": [
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.SpanContext",
+                          "spanName": "projects/fakeprojectid/traces/2499d13df7b35ae93dfa3d6ddc01da74/spans/84f9e8929bb1cd5b"
+                        },
+                        {
+                          "@type": "type.googleapis.com/google.monitoring.v3.DroppedLabels",
+                          "label": {
+                            "filtered_attribute": "foobar"
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
               }
             }
-          ]
-        },
-        {
-          "metric": {
-            "type": "workload.googleapis.com/scrape_series_added",
-            "labels": {
-              "service_instance_id": "0.0.0.0:2112",
-              "service_name": "otel-collector"
-            }
-          },
-          "resource": {
-            "type": "generic_task",
-            "labels": {
-              "job": "otel-collector",
-              "location": "global",
-              "namespace": "",
-              "task_id": "0.0.0.0:2112"
-            }
-          },
-          "metricKind": "GAUGE",
-          "valueType": "DOUBLE",
-          "points": [
-            {
-              "interval": {
-                "endTime": "1970-01-01T00:00:00Z"
-              },
-              "value": {
-                "doubleValue": 3
-              }
-            }
-          ]
+          ],
+          "unit": "s"
         }
       ]
     }
@@ -204,116 +262,33 @@
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "kv_prober_write_latency",
-        "type": "workload.googleapis.com/kv_prober_write_latency",
+        "name": "zero.float64.histogram",
+        "type": "workload.googleapis.com/zero.float64.histogram",
         "labels": [
           {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
+            "key": "some_lemons"
           }
         ],
         "metricKind": "CUMULATIVE",
         "valueType": "DISTRIBUTION",
-        "description": "Latency of successful KV write probes",
-        "displayName": "kv_prober_write_latency"
+        "unit": "s",
+        "displayName": "zero.float64.histogram"
       }
     },
     {
       "name": "projects/fakeprojectid",
       "metricDescriptor": {
-        "name": "scrape_duration_seconds",
-        "type": "workload.googleapis.com/scrape_duration_seconds",
+        "name": "zero.int64.histogram",
+        "type": "workload.googleapis.com/zero.int64.histogram",
         "labels": [
           {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
+            "key": "some_lemons"
           }
         ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "unit": "seconds",
-        "description": "Duration of the scrape",
-        "displayName": "scrape_duration_seconds"
-      }
-    },
-    {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
-        "name": "scrape_samples_post_metric_relabeling",
-        "type": "workload.googleapis.com/scrape_samples_post_metric_relabeling",
-        "labels": [
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The number of samples remaining after metric relabeling was applied",
-        "displayName": "scrape_samples_post_metric_relabeling"
-      }
-    },
-    {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
-        "name": "scrape_samples_scraped",
-        "type": "workload.googleapis.com/scrape_samples_scraped",
-        "labels": [
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The number of samples the target exposed",
-        "displayName": "scrape_samples_scraped"
-      }
-    },
-    {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
-        "name": "scrape_series_added",
-        "type": "workload.googleapis.com/scrape_series_added",
-        "labels": [
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The approximate number of new series in this scrape",
-        "displayName": "scrape_series_added"
-      }
-    },
-    {
-      "name": "projects/fakeprojectid",
-      "metricDescriptor": {
-        "name": "up",
-        "type": "workload.googleapis.com/up",
-        "labels": [
-          {
-            "key": "service_instance_id"
-          },
-          {
-            "key": "service_name"
-          }
-        ],
-        "metricKind": "GAUGE",
-        "valueType": "DOUBLE",
-        "description": "The scraping was successful",
-        "displayName": "up"
+        "metricKind": "CUMULATIVE",
+        "valueType": "DISTRIBUTION",
+        "unit": "s",
+        "displayName": "zero.int64.histogram"
       }
     }
   ],
@@ -339,7 +314,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "6"
+                  "int64Value": "4"
                 }
               }
             ]
@@ -362,7 +337,7 @@
                   "startTime": "1970-01-01T00:00:00Z"
                 },
                 "value": {
-                  "int64Value": "6"
+                  "int64Value": "2"
                 }
               }
             ]
