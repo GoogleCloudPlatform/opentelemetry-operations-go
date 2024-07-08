@@ -19,6 +19,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"google.golang.org/api/idtoken"
 )
 
 func TestPerRPCCredentials(t *testing.T) {
@@ -38,11 +39,14 @@ func TestPerRPCCredentials(t *testing.T) {
 
 func TestPerRPCCredentialsWithIDToken(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_isa_creds.json")
-	ca := clientAuthenticator{config: &Config{
-		Project:   "my-project",
-		TokenType: idToken,
-		Audience:  "http://example.com",
-	}}
+	ca := clientAuthenticator{
+		config: &Config{
+			Project:   "my-project",
+			TokenType: idToken,
+			Audience:  "http://example.com",
+		},
+		newIDTokenSource: idtoken.NewTokenSource,
+	}
 	err := ca.Start(context.Background(), nil)
 	assert.NoError(t, err)
 
