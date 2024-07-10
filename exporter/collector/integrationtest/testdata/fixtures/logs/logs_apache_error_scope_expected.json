@@ -27,5 +27,5 @@
       "partialSuccess": true
     }
   ],
-  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.63.2"
+  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.65.0"
 }
