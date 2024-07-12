@@ -272,7 +272,7 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 			if cfg.UserAgent != "" {
 				dialOpts = append(dialOpts, grpc.WithUserAgent(cfg.UserAgent))
 			}
-			conn, err := grpc.Dial(clientCfg.Endpoint, dialOpts...)
+			conn, err := grpc.NewClient(clientCfg.Endpoint, dialOpts...)
 			if err != nil {
 				return nil, fmt.Errorf("cannot configure grpc conn: %w", err)
 			}
