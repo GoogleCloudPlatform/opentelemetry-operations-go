@@ -8,7 +8,7 @@ require (
 	cloud.google.com/go/logging v1.10.0
 	cloud.google.com/go/monitoring v1.20.2
 	cloud.google.com/go/trace v1.10.10
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.0.0-00010101000000-000000000000
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.0
 	github.com/census-instrumentation/opencensus-proto v0.4.1
 	github.com/fsnotify/fsnotify v1.6.0
@@ -29,7 +29,7 @@ require (
 	google.golang.org/api v0.188.0
 	google.golang.org/genproto v0.0.0-20240708141625-4ad9e859172b
 	google.golang.org/genproto/googleapis/api v0.0.0-20240709173604-40e1e62336c5
-	google.golang.org/grpc v1.65.0
+	google.golang.org/grpc v1.64.1
 	google.golang.org/protobuf v1.34.2
 )
 
@@ -65,7 +65,7 @@ require (
 	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/tidwall/tinylru v1.1.0 // indirect
 	go.opentelemetry.io/collector/config/configtelemetry v0.104.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.53.0 // indirect
+	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.52.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.53.0 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.50.0 // indirect
 	go.opentelemetry.io/otel/metric v1.28.0 // indirect

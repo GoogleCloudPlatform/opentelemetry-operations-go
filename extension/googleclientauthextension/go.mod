@@ -8,7 +8,7 @@ require (
 	go.opentelemetry.io/collector/extension v0.103.0
 	golang.org/x/oauth2 v0.21.0
 	google.golang.org/api v0.169.0
-	google.golang.org/grpc v1.64.0
+	google.golang.org/grpc v1.64.1
 )
 
 require (
