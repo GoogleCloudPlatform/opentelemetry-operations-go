@@ -25,7 +25,7 @@ import (
 )
 
 var intToDoubleFeatureGate = featuregate.GlobalRegistry().MustRegister(
-	"exporter.googlemanagedpromethues.intToDouble",
+	"exporter.googlemanagedprometheus.intToDouble",
 	featuregate.StageAlpha,
 	featuregate.WithRegisterFromVersion("v0.100.0"),
 	featuregate.WithRegisterDescription("Convert all int metrics to double metrics to avoid incompatible value types."),
