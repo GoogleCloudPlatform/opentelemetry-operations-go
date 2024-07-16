@@ -1158,7 +1158,7 @@ func TestExportMetricsWithUserAgent(t *testing.T) {
 		},
 		{
 			desc:                   "override user agent",
-			extraOpts:              []option.ClientOption{option.WithUserAgent("test-user-agent")},
+			extraOpts:              []option.ClientOption{option.WithGRPCDialOption(grpc.WithUserAgent("test-user-agent"))},
 			expectedUserAgentRegex: "test-user-agent",
 		},
 	} {

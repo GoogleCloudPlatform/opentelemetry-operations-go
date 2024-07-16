@@ -106,7 +106,7 @@ func newMetricExporter(o *options) (*metricExporter, error) {
 		return nil, errBlankProjectID
 	}
 
-	clientOpts := append([]option.ClientOption{option.WithUserAgent(userAgent)}, o.monitoringClientOptions...)
+	clientOpts := append([]option.ClientOption{option.WithGRPCDialOption(grpc.WithUserAgent(userAgent))}, o.monitoringClientOptions...)
 	ctx := o.context
 	if ctx == nil {
 		ctx = context.Background()

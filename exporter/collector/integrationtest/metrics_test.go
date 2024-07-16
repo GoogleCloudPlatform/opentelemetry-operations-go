@@ -184,7 +184,7 @@ func TestSDKMetrics(t *testing.T) {
 					apioption.WithEndpoint(testServer.Endpoint),
 					apioption.WithoutAuthentication(),
 					apioption.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-					apioption.WithUserAgent("opentelemetry-collector-contrib latest"),
+					apioption.WithGRPCDialOption(grpc.WithUserAgent("opentelemetry-collector-contrib latest")),
 				)},
 				test.MetricSDKExporterOptions...,
 			)

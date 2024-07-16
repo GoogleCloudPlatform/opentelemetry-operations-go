@@ -257,9 +257,9 @@ func setVersionInUserAgent(cfg *Config, version string) {
 
 func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Config, scopes []string) ([]option.ClientOption, error) {
 	var copts []option.ClientOption
-	// option.WithUserAgent is used by the Trace exporter, but not the Metric exporter (see comment below)
+	// grpc.WithUserAgent is used by the Trace exporter, but not the Metric exporter (see comment below)
 	if cfg.UserAgent != "" {
-		copts = append(copts, option.WithUserAgent(cfg.UserAgent))
+		copts = append(copts, option.WithGRPCDialOption(grpc.WithUserAgent(cfg.UserAgent)))
 	}
 	if clientCfg.Endpoint != "" {
 		if clientCfg.UseInsecure {
