@@ -103,7 +103,7 @@ func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
 	}
 	//nolint:errcheck
 	go testServer.Serve()
-	conn, err := grpc.Dial(testServer.Endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(testServer.Endpoint, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
 	}

@@ -3,20 +3,19 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloud
 go 1.21
 
 require (
-	cloud.google.com/go/logging v1.7.0
-	cloud.google.com/go/monitoring v1.15.1
-	cloud.google.com/go/trace v1.10.1
-	google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e
-	google.golang.org/grpc v1.58.3
-	google.golang.org/protobuf v1.33.0
+	cloud.google.com/go/logging v1.10.0
+	cloud.google.com/go/monitoring v1.20.2
+	cloud.google.com/go/trace v1.10.9
+	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094
+	google.golang.org/grpc v1.64.1
+	google.golang.org/protobuf v1.34.2
 )
 
 require (
-	cloud.google.com/go/longrunning v0.5.1 // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
-	golang.org/x/net v0.23.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
-	golang.org/x/text v0.14.0 // indirect
-	google.golang.org/genproto v0.0.0-20230731193218-e0aa005b6bdf // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230731190214-cbb8c96f2d6d // indirect
+	cloud.google.com/go/longrunning v0.5.9 // indirect
+	golang.org/x/net v0.27.0 // indirect
+	golang.org/x/sys v0.22.0 // indirect
+	golang.org/x/text v0.16.0 // indirect
+	google.golang.org/genproto v0.0.0-20240708141625-4ad9e859172b // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20240708141625-4ad9e859172b // indirect
 )

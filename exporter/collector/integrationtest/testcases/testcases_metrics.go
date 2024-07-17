@@ -23,6 +23,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"google.golang.org/api/option"
+	"google.golang.org/grpc"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus"
@@ -326,7 +327,7 @@ var MetricsTestCases = []TestCase{
 			cfg.UserAgent = "custom-user-agent"
 		},
 		MetricSDKExporterOptions: []metric.Option{
-			metric.WithMonitoringClientOptions(option.WithUserAgent("custom-user-agent")),
+			metric.WithMonitoringClientOptions(option.WithGRPCDialOption(grpc.WithUserAgent("custom-user-agent"))),
 		},
 	},
 	// Tests for the GMP exporter
