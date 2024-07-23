@@ -44,7 +44,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -228,7 +228,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -412,7 +412,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -596,7 +596,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -765,7 +765,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -895,7 +895,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1025,7 +1025,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1155,7 +1155,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1271,7 +1271,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1372,7 +1372,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1473,7 +1473,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1574,7 +1574,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1704,7 +1704,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -1888,7 +1888,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -2072,7 +2072,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -2241,7 +2241,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -2376,7 +2376,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -2511,7 +2511,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -2646,7 +2646,7 @@
               },
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
@@ -2767,7 +2767,7 @@
             "attributeMap": {
               "g.co/agent": {
                 "stringValue": {
-                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.0"
+                  "value": "opentelemetry-go 1.28.0; google-cloud-trace-exporter 1.24.1"
                 }
               },
               "g.co/r/generic_node/location": {
