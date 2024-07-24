@@ -1,24 +1,27 @@
-// Copyright 2020-2021 Google LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+/*
+Copyright 2024 Google LLC
 
-package metric
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+package bigtable
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net"
 	"reflect"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -31,88 +34,225 @@ import (
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 
+	"cloud.google.com/go/internal/testutil"
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"google.golang.org/api/option"
-	"google.golang.org/genproto/googleapis/api/label"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
+	metricpb "google.golang.org/genproto/googleapis/api/metric"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/keepalive"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/types/known/emptypb"
-
-	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
-var (
-	formatter = func(d metricdata.Metrics) string {
-		return fmt.Sprintf("test.googleapis.com/%s", d.Name)
+type MetricsTestServer struct {
+	lis                         net.Listener
+	srv                         *grpc.Server
+	Endpoint                    string
+	userAgent                   string
+	createMetricDescriptorReqs  []*monitoringpb.CreateMetricDescriptorRequest
+	createServiceTimeSeriesReqs []*monitoringpb.CreateTimeSeriesRequest
+	RetryCount                  int
+	mu                          sync.Mutex
+}
+
+func (m *MetricsTestServer) Shutdown() {
+	// this will close mts.lis
+	m.srv.GracefulStop()
+}
+
+// Pops out the UserAgent from the most recent CreateTimeSeriesRequests or CreateServiceTimeSeriesRequests.
+func (m *MetricsTestServer) UserAgent() string {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	ua := m.userAgent
+	m.userAgent = ""
+	return ua
+}
+
+// Pops out the CreateServiceTimeSeriesRequests which the test server has received so far.
+func (m *MetricsTestServer) CreateServiceTimeSeriesRequests() []*monitoringpb.CreateTimeSeriesRequest {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	reqs := m.createServiceTimeSeriesReqs
+	m.createServiceTimeSeriesReqs = nil
+	return reqs
+}
+
+func (m *MetricsTestServer) appendCreateMetricDescriptorReq(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.createMetricDescriptorReqs = append(m.createMetricDescriptorReqs, req)
+}
+
+func (m *MetricsTestServer) appendCreateServiceTimeSeriesReq(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.createServiceTimeSeriesReqs = append(m.createServiceTimeSeriesReqs, req)
+	if md, ok := metadata.FromIncomingContext(ctx); ok {
+		m.userAgent = strings.Join(md.Get("User-Agent"), ";")
 	}
-)
+}
+
+func (m *MetricsTestServer) Serve() error {
+	return m.srv.Serve(m.lis)
+}
+
+type fakeMetricServiceServer struct {
+	monitoringpb.UnimplementedMetricServiceServer
+	metricsTestServer *MetricsTestServer
+}
+
+func (f *fakeMetricServiceServer) CreateServiceTimeSeries(
+	ctx context.Context,
+	req *monitoringpb.CreateTimeSeriesRequest,
+) (*emptypb.Empty, error) {
+	f.metricsTestServer.appendCreateServiceTimeSeriesReq(ctx, req)
+	return &emptypb.Empty{}, nil
+}
+
+func (f *fakeMetricServiceServer) CreateMetricDescriptor(
+	ctx context.Context,
+	req *monitoringpb.CreateMetricDescriptorRequest,
+) (*metricpb.MetricDescriptor, error) {
+	f.metricsTestServer.appendCreateMetricDescriptorReq(ctx, req)
+	return &metricpb.MetricDescriptor{}, nil
+}
+
+func NewMetricTestServer() (*MetricsTestServer, error) {
+	srv := grpc.NewServer(grpc.KeepaliveParams(keepalive.ServerParameters{Time: 5 * time.Minute}))
+	lis, err := net.Listen("tcp", "localhost:0")
+	if err != nil {
+		return nil, err
+	}
+	testServer := &MetricsTestServer{
+		Endpoint: lis.Addr().String(),
+		lis:      lis,
+		srv:      srv,
+	}
+
+	monitoringpb.RegisterMetricServiceServer(
+		srv,
+		&fakeMetricServiceServer{metricsTestServer: testServer},
+	)
+
+	return testServer, nil
+}
+
+func requireNoError(t *testing.T, err error) {
+	if err != nil {
+		t.Fatalf("Received unexpected error: \n%v", err)
+	}
+}
+
+func assertNoError(t *testing.T, err error) {
+	if err != nil {
+		t.Errorf("Received unexpected error: \n%v", err)
+	}
+}
+
+func assertErrorIs(t *testing.T, gotErr error, wantErr error) {
+	if !errors.Is(gotErr, wantErr) {
+		t.Errorf("error got: %v, want: %v", gotErr, wantErr)
+	}
+}
+
+func assertEqual(t *testing.T, got, want interface{}) {
+	if !testutil.Equal(got, want) {
+		t.Errorf("got: %+v, want: %+v", got, want)
+	}
+
+}
 
 func TestExportMetrics(t *testing.T) {
-	ctx := context.Background()
-	testServer, err := cloudmock.NewMetricTestServer()
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Minute)
+	defer cancel()
+
+	testServer, err := NewMetricTestServer()
 	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
-	assert.NoError(t, err)
+	assertNoError(t, err)
+
+	res := &resource.Resource{}
 
 	clientOpts := []option.ClientOption{
 		option.WithEndpoint(testServer.Endpoint),
 		option.WithoutAuthentication(),
 		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	}
-	res := &resource.Resource{}
-
-	opts := []Option{
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithMonitoringClientOptions(clientOpts...),
-		WithMetricDescriptorTypeFormatter(formatter),
-	}
-
-	exporter, err := New(opts...)
+	exporter, err := newMonitoringExporter(ctx, "PROJECT_ID_NOT_REAL", clientOpts...)
 	if err != nil {
 		t.Errorf("Error occurred when creating exporter: %v", err)
 	}
+
+	// Reduce sampling period to reduce test run time
+	origSamplePeriod := defaultSamplePeriod
+	defaultSamplePeriod = 5 * time.Second
+	defer func() {
+		defaultSamplePeriod = origSamplePeriod
+	}()
 	provider := metric.NewMeterProvider(
-		metric.WithReader(metric.NewPeriodicReader(exporter)),
+		metric.WithReader(metric.NewPeriodicReader(exporter, metric.WithInterval(defaultSamplePeriod))),
 		metric.WithResource(res),
 	)
 
 	//nolint:errcheck
 	defer func() {
 		err = provider.Shutdown(ctx)
-		assert.NoError(t, err)
+		assertNoError(t, err)
 	}()
 
-	meter := provider.Meter("test")
-	counter, err := meter.Int64Counter("name.lastvalue")
-	require.NoError(t, err)
+	meterBuiltIn := provider.Meter(builtInMetricsMeterName)
+	counterBuiltIn, err := meterBuiltIn.Int64Counter("name.lastvalue")
+	requireNoError(t, err)
 
-	counter.Add(ctx, 1)
+	meterNameNotBuiltIn := "testing"
+	meterNotbuiltIn := provider.Meter(meterNameNotBuiltIn)
+	counterNotBuiltIn, err := meterNotbuiltIn.Int64Counter("name.lastvalue")
+	requireNoError(t, err)
+
+	// record start time
+	testStartTime := time.Now()
+
+	// record data points
+	counterBuiltIn.Add(ctx, 1)
+	counterNotBuiltIn.Add(ctx, 1)
+
+	// Calculate elapsed time
+	elapsedTime := time.Since(testStartTime)
+	if elapsedTime < 3*defaultSamplePeriod {
+		// Ensure at least 2 datapoints are recorded
+		time.Sleep(3*defaultSamplePeriod - elapsedTime)
+	}
+
+	gotCalls := testServer.CreateServiceTimeSeriesRequests()
+	for _, gotCall := range gotCalls {
+		for _, ts := range gotCall.TimeSeries {
+			if strings.Contains(ts.Metric.Type, meterNameNotBuiltIn) {
+				t.Errorf("Exporter should only export builtin metrics")
+			}
+		}
+	}
 }
 
 func TestExportCounter(t *testing.T) {
-	testServer, err := cloudmock.NewMetricTestServer()
+	ctx := context.Background()
+	testServer, err := NewMetricTestServer()
 	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
-	assert.NoError(t, err)
+	assertNoError(t, err)
 
 	clientOpts := []option.ClientOption{
 		option.WithEndpoint(testServer.Endpoint),
 		option.WithoutAuthentication(),
 		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	}
-
-	exporter, err := New(
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithMonitoringClientOptions(clientOpts...),
-		WithMetricDescriptorTypeFormatter(formatter),
-	)
-	assert.NoError(t, err)
+	exporter, err := newMonitoringExporter(ctx, "PROJECT_ID_NOT_REAL", clientOpts...)
+	assertNoError(t, err)
 	provider := metric.NewMeterProvider(
 		metric.WithReader(metric.NewPeriodicReader(exporter)),
 		metric.WithResource(
@@ -122,42 +262,37 @@ func TestExportCounter(t *testing.T) {
 			)),
 	)
 
-	ctx := context.Background()
 	//nolint:errcheck
 	defer func() {
 		err = provider.Shutdown(ctx)
-		assert.NoError(t, err)
+		assertNoError(t, err)
 	}()
 
 	// Start meter
-	meter := provider.Meter("cloudmonitoring/test")
+	meter := provider.Meter(builtInMetricsMeterName)
 
 	// Register counter value
 	counter, err := meter.Int64Counter("counter-a")
-	assert.NoError(t, err)
+	assertNoError(t, err)
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
 	counter.Add(ctx, 100, otelmetric.WithAttributes(clabels...))
 }
 
 func TestExportHistogram(t *testing.T) {
-	testServer, err := cloudmock.NewMetricTestServer()
+	ctx := context.Background()
+	testServer, err := NewMetricTestServer()
 	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
-	assert.NoError(t, err)
+	assertNoError(t, err)
 
 	clientOpts := []option.ClientOption{
 		option.WithEndpoint(testServer.Endpoint),
 		option.WithoutAuthentication(),
 		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	}
-
-	exporter, err := New(
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithMonitoringClientOptions(clientOpts...),
-		WithMetricDescriptorTypeFormatter(formatter),
-	)
-	assert.NoError(t, err)
+	exporter, err := newMonitoringExporter(ctx, "PROJECT_ID_NOT_REAL", clientOpts...)
+	assertNoError(t, err)
 	provider := metric.NewMeterProvider(
 		metric.WithReader(metric.NewPeriodicReader(exporter)),
 		metric.WithResource(
@@ -167,809 +302,75 @@ func TestExportHistogram(t *testing.T) {
 			),
 		),
 	)
-	assert.NoError(t, err)
+	assertNoError(t, err)
 
-	ctx := context.Background()
 	//nolint:errcheck
 	defer func() {
 		err = provider.Shutdown(ctx)
-		assert.NoError(t, err)
+		assertNoError(t, err)
 	}()
 
 	// Start meter
-	meter := provider.Meter("cloudmonitoring/test")
+	meter := provider.Meter(builtInMetricsMeterName)
 
 	// Register counter value
-	counter, err := meter.Int64Histogram("counter-a")
-	assert.NoError(t, err)
+	counter, err := meter.Float64Histogram("counter-a")
+	assertNoError(t, err)
 	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
 	counter.Record(ctx, 100, otelmetric.WithAttributes(clabels...))
 	counter.Record(ctx, 50, otelmetric.WithAttributes(clabels...))
 	counter.Record(ctx, 200, otelmetric.WithAttributes(clabels...))
-}
-
-func TestExportExponentialHistogram(t *testing.T) {
-	testServer, err := cloudmock.NewMetricTestServer()
-	//nolint:errcheck
-	go testServer.Serve()
-	defer testServer.Shutdown()
-	assert.NoError(t, err)
-
-	clientOpts := []option.ClientOption{
-		option.WithEndpoint(testServer.Endpoint),
-		option.WithoutAuthentication(),
-		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	}
-
-	exporter, err := New(
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithMonitoringClientOptions(clientOpts...),
-		WithMetricDescriptorTypeFormatter(formatter),
-	)
-	assert.NoError(t, err)
-
-	view := metric.NewView(
-		metric.Instrument{
-			Name:  "counter-a",
-			Scope: instrumentation.Scope{Name: "cloudmonitoring/test"},
-		},
-		metric.Stream{
-			Aggregation: metric.AggregationBase2ExponentialHistogram{
-				MaxSize:  160,
-				MaxScale: 20,
-			},
-		},
-	)
-
-	provider := metric.NewMeterProvider(
-		metric.WithReader(metric.NewPeriodicReader(exporter)),
-		metric.WithView(view),
-		metric.WithResource(
-			resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("test_id", "abc123"),
-			),
-		),
-	)
-	assert.NoError(t, err)
-
-	ctx := context.Background()
-	//nolint:errcheck
-	defer func() {
-		err = provider.Shutdown(ctx)
-		assert.NoError(t, err)
-	}()
-
-	// Start meter
-	meter := provider.Meter("cloudmonitoring/test")
-
-	counter, err := meter.Int64Histogram("counter-a")
-	assert.NoError(t, err)
-	clabels := []attribute.KeyValue{attribute.Key("key").String("value")}
-	counter.Record(ctx, 100, otelmetric.WithAttributes(clabels...))
-	counter.Record(ctx, 50, otelmetric.WithAttributes(clabels...))
-	counter.Record(ctx, 200, otelmetric.WithAttributes(clabels...))
-}
-
-func TestDescToMetricType(t *testing.T) {
-	inMe := []*metricExporter{
-		{
-			o: &options{},
-		},
-		{
-			o: &options{
-				metricDescriptorTypeFormatter: formatter,
-			},
-		},
-	}
-
-	inDesc := []metricdata.Metrics{
-		{Name: "testing", Data: metricdata.Histogram[float64]{}},
-		{Name: "test/of/path", Data: metricdata.Histogram[float64]{}},
-	}
-
-	wants := []string{
-		"workload.googleapis.com/testing",
-		"test.googleapis.com/test/of/path",
-	}
-
-	for i, w := range wants {
-		out := inMe[i].descToMetricType(inDesc[i])
-		if out != w {
-			t.Errorf("expected: %v, actual: %v", w, out)
-		}
-	}
-}
-
-func TestMonitoredResourceDescriptionDeduplicatesLabels(t *testing.T) {
-	clientOpts := []option.ClientOption{
-		option.WithEndpoint("http://fake-endpoint"),
-		option.WithoutAuthentication(),
-		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-	}
-
-	opts := []Option{
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithMonitoringClientOptions(clientOpts...),
-		WithMetricDescriptorTypeFormatter(formatter),
-		WithMonitoredResourceDescription("storage_client", []string{"service_instance_id", "host_id", "location", "api", "host_id"}),
-	}
-
-	exporter, err := New(opts...)
-	assert.NoError(t, err)
-
-	me := exporter.(*metricExporter)
-
-	expectedMrDescription := MonitoredResourceDescription{
-		mrType: "storage_client",
-		mrLabels: map[string]struct{}{
-			"service_instance_id": {},
-			"location":            {},
-			"host_id":             {},
-			"api":                 {},
-		},
-	}
-
-	assert.Equal(t, expectedMrDescription, me.o.monitoredResourceDescription)
 }
 
 func TestRecordToMpb(t *testing.T) {
 	metricName := "testing"
 
-	md := &googlemetricpb.MetricDescriptor{
-		Name:        metricName,
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, metricName),
-		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
-		Description: "test",
-	}
+	me := &monitoringExporter{}
 
-	mdkey := key{
-		name:        md.Name,
-		libraryname: "",
-	}
-	me := &metricExporter{
-		o: &options{},
-		mdCache: map[key]*googlemetricpb.MetricDescriptor{
-			mdkey: md,
-		},
-	}
+	monitoredResLabelValueProject := "project01"
+	monitoredResLabelValueInstance := "instance01"
+	monitoredResLabelValueZone := "zone01"
+	monitoredResLabelValueTable := "table01"
+	monitoredResLabelValueCluster := "cluster01"
 
-	inputLibrary := instrumentation.Library{Name: "workload.googleapis.com"}
 	inputAttributes := attribute.NewSet(
 		attribute.Key("a").String("A"),
-		attribute.Key("b?b").String("B"),
-		attribute.Key("8foo").Int64(100),
+		attribute.Key("b").Int64(100),
+		attribute.Key(monitoredResLabelKeyProject).String(monitoredResLabelValueProject),
+		attribute.Key(monitoredResLabelKeyInstance).String(monitoredResLabelValueInstance),
+		attribute.Key(monitoredResLabelKeyZone).String(monitoredResLabelValueZone),
+		attribute.Key(monitoredResLabelKeyTable).String(monitoredResLabelValueTable),
+		attribute.Key(monitoredResLabelKeyCluster).String(monitoredResLabelValueCluster),
 	)
 	inputMetrics := metricdata.Metrics{
 		Name: metricName,
 	}
-	inputExtraLabels := attribute.NewSet(
-		attribute.Key("service.name").String("servicename"),
-		attribute.Key("service.namespace").String("servicenamespace"),
-		attribute.Key("service.instance.id").String("23490238490235gfdg87g"),
-	)
 
-	want := &googlemetricpb.Metric{
-		Type: md.Type,
+	wantMetric := &googlemetricpb.Metric{
+		Type: fmt.Sprintf("%v%s", builtInMetricsMeterName, metricName),
 		Labels: map[string]string{
-			"a":                   "A",
-			"b_b":                 "B",
-			"key_8foo":            "100",
-			"service_instance_id": "23490238490235gfdg87g",
-			"service_name":        "servicename",
-			"service_namespace":   "servicenamespace",
-		},
-	}
-	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary, &inputExtraLabels)
-	if !reflect.DeepEqual(want, out) {
-		t.Errorf("expected: %v, actual: %v", want, out)
-	}
-}
-
-func TestExtraLabelsFromResource(t *testing.T) {
-	serviceLabelsSet := attribute.NewSet(
-		semconv.ServiceNameKey.String("myservicename"),
-		semconv.ServiceNamespaceKey.String("myservicenamespace"),
-		semconv.ServiceInstanceIDKey.String("123456789"),
-	)
-	allLabelsSet := attribute.NewSet(
-		semconv.ServiceNameKey.String("myservicename"),
-		semconv.ServiceNamespaceKey.String("myservicenamespace"),
-		semconv.ServiceInstanceIDKey.String("123456789"),
-		semconv.CloudProviderKey.String("gcp"),
-	)
-	for _, tc := range []struct {
-		input                   *resource.Resource
-		expected                *attribute.Set
-		resourceAttributeFilter attribute.Filter
-		desc                    string
-	}{
-		{
-			desc:                    "empty resource",
-			resourceAttributeFilter: DefaultResourceAttributesFilter,
-			expected:                attribute.EmptySet(),
-		},
-		{
-			desc:                    "service labels added",
-			resourceAttributeFilter: DefaultResourceAttributesFilter,
-			input: resource.NewSchemaless(
-				semconv.ServiceNameKey.String("myservicename"),
-				semconv.ServiceNamespaceKey.String("myservicenamespace"),
-				semconv.ServiceInstanceIDKey.String("123456789"),
-			),
-			expected: &serviceLabelsSet,
-		},
-		{
-			desc:                    "non-service labels ignored",
-			resourceAttributeFilter: DefaultResourceAttributesFilter,
-			input: resource.NewSchemaless(
-				semconv.ServiceNameKey.String("myservicename"),
-				semconv.ServiceNamespaceKey.String("myservicenamespace"),
-				semconv.ServiceInstanceIDKey.String("123456789"),
-				semconv.CloudProviderKey.String("gcp"),
-			),
-			expected: &serviceLabelsSet,
-		},
-		{
-			desc:                    "all labels with custom filter",
-			resourceAttributeFilter: func(attribute.KeyValue) bool { return true },
-			input: resource.NewSchemaless(
-				semconv.ServiceNameKey.String("myservicename"),
-				semconv.ServiceNamespaceKey.String("myservicenamespace"),
-				semconv.ServiceInstanceIDKey.String("123456789"),
-				semconv.CloudProviderKey.String("gcp"),
-			),
-			expected: &allLabelsSet,
-		},
-		{
-			desc:                    "service labels disabled",
-			resourceAttributeFilter: NoAttributes,
-			input: resource.NewSchemaless(
-				semconv.ServiceNameKey.String("myservicename"),
-				semconv.ServiceNamespaceKey.String("myservicenamespace"),
-				semconv.ServiceInstanceIDKey.String("123456789"),
-				semconv.CloudProviderKey.String("gcp"),
-			),
-			expected: attribute.EmptySet(),
-		},
-	} {
-		t.Run(tc.desc, func(t *testing.T) {
-			me := &metricExporter{
-				o: &options{
-					resourceAttributeFilter: tc.resourceAttributeFilter,
-				},
-			}
-			actual := me.extraLabelsFromResource(tc.input)
-			if !tc.expected.Equals(actual) {
-				t.Errorf("expected: %v, actual: %v", tc.expected, actual)
-			}
-		})
-	}
-}
-
-func TestRecordToMdpb(t *testing.T) {
-	metricName := "testing"
-
-	want := &googlemetricpb.MetricDescriptor{
-		Name:        metricName,
-		DisplayName: metricName,
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, metricName),
-		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
-		Description: "test",
-		Labels: []*label.LabelDescriptor{
-			{Key: normalizeLabelKey("service.instance.id")},
-			{Key: normalizeLabelKey("service.name")},
-			{Key: normalizeLabelKey("service.namespace")},
-			{Key: normalizeLabelKey("a")},
-			{Key: normalizeLabelKey("b.b")},
-			{Key: normalizeLabelKey("foo")},
+			"a": "A",
+			"b": "100",
 		},
 	}
 
-	mdkey := key{
-		name:        want.Name,
-		libraryname: "",
-	}
-	me := &metricExporter{
-		o: &options{},
-		mdCache: map[key]*googlemetricpb.MetricDescriptor{
-			mdkey: want,
-		},
-	}
-	inputMetrics := metricdata.Metrics{
-		Name:        metricName,
-		Description: "test",
-		Data: metricdata.Sum[float64]{
-			IsMonotonic: false,
-			DataPoints: []metricdata.DataPoint[float64]{
-				{
-					Attributes: attribute.NewSet(
-						attribute.Key("a").String("A"),
-						attribute.Key("b_b").String("B"),
-						attribute.Key("foo").Int64(100),
-					),
-				},
-			},
-		},
-	}
-	inputExtraLabels := attribute.NewSet(
-		attribute.Key("service.name").String("servicename"),
-		attribute.Key("service.namespace").String("servicenamespace"),
-		attribute.Key("service.instance.id").String("23490238490235gfdg87g"),
-	)
-	out := me.recordToMdpb(inputMetrics, &inputExtraLabels)
-	if !reflect.DeepEqual(want, out) {
-		t.Errorf("expected: %v, actual: %v", want, out)
-	}
-}
-
-func TestResourceToMonitoredResourcepb(t *testing.T) {
-	testCases := []struct {
-		desc           string
-		resource       *resource.Resource
-		mrDescription  MonitoredResourceDescription
-		expectedLabels map[string]string
-		expectedType   string
-	}{
-		{
-			desc: "k8s_container success",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_kubernetes_engine"),
-				attribute.String("cloud.availability_zone", "us-central1-a"),
-				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
-				attribute.String("k8s.namespace.name", "default"),
-				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-				attribute.String("k8s.container.name", "opentelemetry"),
-			),
-			expectedType: "k8s_container",
-			expectedLabels: map[string]string{
-				"location":       "us-central1-a",
-				"cluster_name":   "opentelemetry-cluster",
-				"namespace_name": "default",
-				"pod_name":       "opentelemetry-pod-autoconf",
-				"container_name": "opentelemetry",
-			},
-		},
-		{
-			desc: "k8s_node success",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_kubernetes_engine"),
-				attribute.String("cloud.availability_zone", "us-central1-a"),
-				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
-				attribute.String("k8s.node.name", "opentelemetry-node"),
-			),
-			expectedType: "k8s_node",
-			expectedLabels: map[string]string{
-				"location":     "us-central1-a",
-				"cluster_name": "opentelemetry-cluster",
-				"node_name":    "opentelemetry-node",
-			},
-		},
-		{
-			desc: "k8s_pod success",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_kubernetes_engine"),
-				attribute.String("cloud.availability_zone", "us-central1-a"),
-				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
-				attribute.String("k8s.namespace.name", "default"),
-				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-			),
-			expectedType: "k8s_pod",
-			expectedLabels: map[string]string{
-				"location":       "us-central1-a",
-				"cluster_name":   "opentelemetry-cluster",
-				"namespace_name": "default",
-				"pod_name":       "opentelemetry-pod-autoconf",
-			},
-		},
-		{
-			desc: "k8s_cluster success",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_kubernetes_engine"),
-				attribute.String("cloud.availability_zone", "us-central1-a"),
-				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
-			),
-			expectedType: "k8s_cluster",
-			expectedLabels: map[string]string{
-				"location":     "us-central1-a",
-				"cluster_name": "opentelemetry-cluster",
-			},
-		},
-		{
-			desc: "nonexisting resource types (no k8s.cluster.name)",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "none"),
-				attribute.String("cloud.platform", "gcp_foobar"),
-				attribute.String("cloud.availability_zone", "us-central1-a"),
-				attribute.String("k8s.namespace.name", "default"),
-				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-				attribute.String("k8s.container.name", "opentelemetry"),
-			),
-			expectedType: "generic_node",
-			expectedLabels: map[string]string{
-				"location":  "us-central1-a",
-				"namespace": "",
-				"node_id":   "",
-			},
-		},
-		{
-			desc: "non-cloud k8s platform",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "none"),
-				attribute.String("cloud.platform", "gcp_foobar"),
-				attribute.String("cloud.availability_zone", "us-central1-a"),
-				attribute.String("k8s.cluster.name", "opentelemetry-cluster"),
-				attribute.String("k8s.namespace.name", "default"),
-				attribute.String("k8s.pod.name", "opentelemetry-pod-autoconf"),
-				attribute.String("k8s.container.name", "opentelemetry"),
-			),
-			expectedType: "k8s_container",
-			expectedLabels: map[string]string{
-				"location":       "us-central1-a",
-				"cluster_name":   "opentelemetry-cluster",
-				"namespace_name": "default",
-				"pod_name":       "opentelemetry-pod-autoconf",
-				"container_name": "opentelemetry",
-			},
-		},
-		{
-			desc: "GCE instance",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_compute_engine"),
-				attribute.String("host.id", "123"),
-				attribute.String("cloud.availability_zone", "us-central1-a"),
-			),
-			expectedType: "gce_instance",
-			expectedLabels: map[string]string{
-				"instance_id": "123",
-				"zone":        "us-central1-a",
-			},
-		},
-		{
-			desc: "AWS resources",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "aws"),
-				attribute.String("cloud.platform", "aws_ec2"),
-				attribute.String("cloud.region", "us-central1-a"),
-				attribute.String("host.id", "123"),
-				attribute.String("cloud.account.id", "fake_account"),
-			),
-			expectedType: "aws_ec2_instance",
-			expectedLabels: map[string]string{
-				"instance_id": "123",
-				"region":      "us-central1-a",
-				"aws_account": "fake_account",
-			},
-		},
-		{
-			desc: "Cloud Run Via Service",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_cloud_run"),
-				attribute.String("cloud.region", "utopia"),
-				attribute.String("service.instance.id", "bar"),
-				attribute.String("service.name", "x-service"),
-				attribute.String("service.namespace", "cloud-run-managed"),
-			),
-			expectedType: "generic_task",
-			expectedLabels: map[string]string{
-				"location":  "utopia",
-				"namespace": "cloud-run-managed",
-				"job":       "x-service",
-				"task_id":   "bar",
-			},
-		},
-		{
-			desc: "Cloud Run From Detector with default service",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_cloud_run"),
-				attribute.String("cloud.region", "utopia"),
-				attribute.String("faas.instance", "bar"),
-				attribute.String("faas.name", "x-service"),
-				attribute.String("faas.version", "v1"),
-				attribute.String("service.name", "unknown_service:go"),
-			),
-			expectedType: "generic_task",
-			expectedLabels: map[string]string{
-				"location":  "utopia",
-				"namespace": "",
-				"job":       "x-service",
-				"task_id":   "bar",
-			},
-		},
-		{
-			desc: "Cloud Functions",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_cloud_functions"),
-				attribute.String("cloud.region", "utopia"),
-				attribute.String("faas.instance", "bar"),
-				attribute.String("faas.name", "x-service"),
-				attribute.String("faas.version", "v1"),
-			),
-			expectedType: "generic_task",
-			expectedLabels: map[string]string{
-				"location":  "utopia",
-				"namespace": "",
-				"job":       "x-service",
-				"task_id":   "bar",
-			},
-		},
-		{
-			desc: "AppEngine",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_app_engine"),
-				attribute.String("cloud.availability_zone", "utopia"),
-				attribute.String("faas.instance", "bar"),
-				attribute.String("faas.name", "x-service"),
-				attribute.String("faas.version", "v1"),
-			),
-			expectedType: "gae_instance",
-			expectedLabels: map[string]string{
-				"location":    "utopia",
-				"instance_id": "bar",
-				"module_id":   "x-service",
-				"version_id":  "v1",
-			},
-		},
-		{
-			desc: "GCE instance invalid utf8",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_compute_engine"),
-				attribute.String("host.id", invalidUtf8SequenceID),
-				attribute.String("cloud.availability_zone", "us-central1-a"),
-			),
-			expectedType: "gce_instance",
-			expectedLabels: map[string]string{
-				"instance_id": "�",
-				"zone":        "us-central1-a",
-			},
-		},
-		{
-			desc: "Bare Metal Solution",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("cloud.provider", "gcp"),
-				attribute.String("cloud.platform", "gcp_bare_metal_solution"),
-				attribute.String("cloud.region", "us-west2"),
-				attribute.String("host.id", "123"),
-			),
-			expectedType: "baremetalsolution.googleapis.com/Instance",
-			expectedLabels: map[string]string{
-				"instance_id": "123",
-				"location":    "us-west2",
-			},
-		},
-		{
-			desc: "Custom Monitored Resource mapped successfully",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("gcp.resource_type", "storage_client"),
-				attribute.String("service_instance_id", "client_id"),
-				attribute.String("location", "us-west2"),
-				attribute.String("host_id", "123"),
-				attribute.String("custom.attribute", "custom"),
-				attribute.String("detected.attribute", "detected"),
-			),
-			mrDescription: MonitoredResourceDescription{
-				mrType: "storage_client",
-				mrLabels: map[string]struct{}{
-					"service_instance_id": {},
-					"location":            {},
-					"host_id":             {},
-				},
-			},
-			expectedType: "storage_client",
-			expectedLabels: map[string]string{
-				"service_instance_id": "client_id",
-				"location":            "us-west2",
-				"host_id":             "123",
-			},
-		},
-		{
-			desc: "Custom MR mapping with insufficient required labels",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("gcp.resource_type", "storage_client"),
-				attribute.String("location", "us-west2"),
-				attribute.String("host_id", "123"),
-				attribute.String("custom.attribute", "custom"),
-				attribute.String("detected.attribute", "detected"),
-			),
-			mrDescription: MonitoredResourceDescription{
-				mrType: "storage_client",
-				mrLabels: map[string]struct{}{
-					"service_instance_id": {}, // missing from OTel resource
-					"location":            {},
-					"host_id":             {},
-				},
-			},
-			expectedType: "storage_client",
-			expectedLabels: map[string]string{
-				"location": "us-west2",
-				"host_id":  "123",
-			},
-		},
-		{
-			desc: "Custom MR mapping with mismatched MR type",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("gcp.resource_type", "storage_reader_client"),
-				attribute.String("location", "us-west2"),
-				attribute.String("host_id", "123"),
-				attribute.String("custom.attribute", "custom"),
-				attribute.String("detected.attribute", "detected"),
-			),
-			mrDescription: MonitoredResourceDescription{
-				mrType: "storage_client",
-				mrLabels: map[string]struct{}{
-					"service_instance_id": {}, // missing from OTel resource
-					"location":            {},
-					"host_id":             {},
-				},
-			},
-			expectedType: "generic_node",
-			expectedLabels: map[string]string{
-				"location":  "global",
-				"namespace": "",
-				"node_id":   "",
-			},
-		},
-		{
-			desc: "Custom MR platform mapping with no MonitoredResourceDescription",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				attribute.String("gcp.resource_type", "storage_client"),
-				attribute.String("service_instance_id", "client_id"),
-				attribute.String("location", "us-west2"),
-				attribute.String("host_id", "123"),
-				attribute.String("custom.attribute", "custom"),
-				attribute.String("detected.attribute", "detected"),
-			),
-			expectedType: "generic_node",
-			expectedLabels: map[string]string{
-				"location":  "global",
-				"namespace": "",
-				"node_id":   "",
-			},
-		},
-		{
-			desc: "Custom MR platform mapping key not present",
-			resource: resource.NewWithAttributes(
-				semconv.SchemaURL,
-				// gcp.resource_type key is absent from OTEL resource
-				attribute.String("service_instance_id", "client_id"),
-				attribute.String("location", "us-west2"),
-				attribute.String("host_id", "123"),
-				attribute.String("custom.attribute", "custom"),
-				attribute.String("detected.attribute", "detected"),
-			),
-			mrDescription: MonitoredResourceDescription{
-				mrType: "storage_client",
-				mrLabels: map[string]struct{}{
-					"service_instance_id": {},
-					"location":            {},
-					"host_id":             {},
-				},
-			},
-			expectedType: "generic_node",
-			expectedLabels: map[string]string{
-				"location":  "global",
-				"namespace": "",
-				"node_id":   "",
-			},
+	wantMonitoredResource := &monitoredrespb.MonitoredResource{
+		Type: "bigtable_client_raw",
+		Labels: map[string]string{
+			monitoredResLabelKeyProject:  monitoredResLabelValueProject,
+			monitoredResLabelKeyInstance: monitoredResLabelValueInstance,
+			monitoredResLabelKeyZone:     monitoredResLabelValueZone,
+			monitoredResLabelKeyTable:    monitoredResLabelValueTable,
+			monitoredResLabelKeyCluster:  monitoredResLabelValueCluster,
 		},
 	}
 
-	md := &googlemetricpb.MetricDescriptor{
-		Name:        "testing",
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, "testing"),
-		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
-		Description: "test",
+	gotMetric, gotMonitoredResource := me.recordToMetricAndMonitoredResourcePbs(inputMetrics, inputAttributes)
+	if !reflect.DeepEqual(wantMetric, gotMetric) {
+		t.Errorf("Metric: expected: %v, actual: %v", wantMetric, gotMetric)
 	}
-
-	mdkey := key{
-		name:        md.Name,
-		libraryname: "",
-	}
-
-	for _, test := range testCases {
-		t.Run(test.desc, func(t *testing.T) {
-			me := &metricExporter{
-				o: &options{
-					monitoredResourceDescription: test.mrDescription,
-				},
-				mdCache: map[key]*googlemetricpb.MetricDescriptor{
-					mdkey: md,
-				},
-			}
-			got := me.resourceToMonitoredResourcepb(test.resource)
-			if !reflect.DeepEqual(got.GetLabels(), test.expectedLabels) {
-				t.Errorf("expected: %v, actual: %v", test.expectedLabels, got.GetLabels())
-			}
-			if got.GetType() != test.expectedType {
-				t.Errorf("expected: %v, actual: %v", test.expectedType, got.GetType())
-			}
-		})
-	}
-}
-
-var (
-	invalidUtf8TwoOctet   = string([]byte{0xc3, 0x28}) // Invalid 2-octet sequence
-	invalidUtf8SequenceID = string([]byte{0xa0, 0xa1}) // Invalid sequence identifier
-)
-
-func TestRecordToMpbUTF8(t *testing.T) {
-	metricName := "testing"
-
-	md := &googlemetricpb.MetricDescriptor{
-		Name:        metricName,
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, metricName),
-		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
-		Description: "test",
-	}
-
-	mdkey := key{
-		name:        md.Name,
-		libraryname: "",
-	}
-
-	expectedLabels := map[string]string{
-		"valid_ascii":         "abcdefg",
-		"valid_utf8":          "שלום",
-		"invalid_two_octet":   "�(",
-		"invalid_sequence_id": "�",
-	}
-
-	me := &metricExporter{
-		o: &options{},
-		mdCache: map[key]*googlemetricpb.MetricDescriptor{
-			mdkey: md,
-		},
-	}
-
-	inputLibrary := instrumentation.Library{Name: "workload.googleapis.com"}
-	inputAttributes := attribute.NewSet(
-		attribute.Key("valid_ascii").String("abcdefg"),
-		attribute.Key("valid_utf8").String("שלום"),
-		attribute.Key("invalid_two_octet").String(invalidUtf8TwoOctet),
-		attribute.Key("invalid_sequence_id").String(invalidUtf8SequenceID))
-	inputMetrics := metricdata.Metrics{
-		Name: metricName,
-	}
-
-	want := &googlemetricpb.Metric{
-		Type:   md.Type,
-		Labels: expectedLabels,
-	}
-	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary, attribute.EmptySet())
-	if !reflect.DeepEqual(want, out) {
-		t.Errorf("expected: %v, actual: %v", want, out)
+	if !reflect.DeepEqual(wantMonitoredResource, gotMonitoredResource) {
+		t.Errorf("Monitored resource: expected: %v, actual: %v", wantMonitoredResource, gotMonitoredResource)
 	}
 }
 
@@ -1014,269 +415,45 @@ func TestTimeIntervalPassthru(t *testing.T) {
 	}
 	end := interval.EndTime.AsTime()
 
-	assert.Equal(t, start, tm)
-	assert.Equal(t, end, tm.Add(time.Second))
-}
-
-type mock struct {
-	monitoringpb.UnimplementedMetricServiceServer
-	createTimeSeries        func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error)
-	createServiceTimeSeries func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error)
-	createMetricDescriptor  func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error)
-}
-
-func (m *mock) CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
-	return m.createTimeSeries(ctx, req)
-}
-
-func (m *mock) CreateServiceTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
-	return m.createServiceTimeSeries(ctx, req)
-}
-
-func (m *mock) CreateMetricDescriptor(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
-	return m.createMetricDescriptor(ctx, req)
-}
-
-func TestExportWithDisableCreateMetricDescriptorsAndEnableServiceTimeSeries(t *testing.T) {
-	for _, tc := range []struct {
-		desc                           string
-		disableCreateMetricsDescriptor bool
-		expectExportMetricDescriptor   bool
-		enableServiceTimeSeries        bool
-		expectServiceTimeSeries        bool
-	}{
-		{
-			desc:                           "default",
-			disableCreateMetricsDescriptor: false,
-			expectExportMetricDescriptor:   true,
-			enableServiceTimeSeries:        false,
-			expectServiceTimeSeries:        false,
-		},
-		{
-			desc:                           "Disable CreateMetricsDescriptor and CreateServiceTimeSeries",
-			disableCreateMetricsDescriptor: true,
-			expectExportMetricDescriptor:   false,
-			enableServiceTimeSeries:        false,
-			expectServiceTimeSeries:        false,
-		},
-		{
-			desc:                           "Enable CreateServiceTimeSeries and Enable CreateMetricsDescriptor",
-			disableCreateMetricsDescriptor: false,
-			expectExportMetricDescriptor:   false,
-			enableServiceTimeSeries:        true,
-			expectServiceTimeSeries:        true,
-		},
-		{
-			desc:                           "Enable CreateServiceTimeSeries and Disable CreateMetricsDescriptor",
-			disableCreateMetricsDescriptor: true,
-			expectExportMetricDescriptor:   false,
-			enableServiceTimeSeries:        true,
-			expectServiceTimeSeries:        true,
-		},
-	} {
-		t.Run(tc.desc, func(t *testing.T) {
-			server := grpc.NewServer()
-
-			metricDescriptorCreated := false
-			createServicTimeSeriesUsed := false
-
-			m := mock{
-				createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
-					return &emptypb.Empty{}, nil
-				},
-				createServiceTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
-					createServicTimeSeriesUsed = true
-					return &emptypb.Empty{}, nil
-				},
-				createMetricDescriptor: func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
-					metricDescriptorCreated = true
-					return req.MetricDescriptor, nil
-				},
-			}
-
-			monitoringpb.RegisterMetricServiceServer(server, &m)
-
-			lis, err := net.Listen("tcp", "127.0.0.1:0")
-			require.NoError(t, err)
-			//nolint:errcheck
-			go server.Serve(lis)
-
-			clientOpts := []option.ClientOption{
-				option.WithEndpoint(lis.Addr().String()),
-				option.WithoutAuthentication(),
-				option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-			}
-			res := &resource.Resource{}
-			ctx := context.Background()
-
-			opts := []Option{
-				WithProjectID("PROJECT_ID_NOT_REAL"),
-				WithMonitoringClientOptions(clientOpts...),
-				WithMetricDescriptorTypeFormatter(formatter),
-			}
-
-			if tc.enableServiceTimeSeries {
-				opts = append(opts, WithCreateServiceTimeSeries())
-			}
-
-			if tc.disableCreateMetricsDescriptor {
-				opts = append(opts, WithDisableCreateMetricDescriptors())
-			}
-
-			exporter, err := New(opts...)
-			if err != nil {
-				t.Errorf("Error occurred when creating exporter: %v", err)
-			}
-			provider := metric.NewMeterProvider(
-				metric.WithReader(metric.NewPeriodicReader(exporter)),
-				metric.WithResource(res),
-			)
-
-			meter := provider.Meter("test")
-
-			counter, err := meter.Int64Counter("name.lastvalue")
-			require.NoError(t, err)
-
-			counter.Add(ctx, 1)
-			require.NoError(t, provider.ForceFlush(ctx))
-			server.Stop()
-			require.Equal(t, tc.expectExportMetricDescriptor, metricDescriptorCreated)
-			require.Equal(t, tc.expectServiceTimeSeries, createServicTimeSeriesUsed)
-		})
-	}
-}
-
-func TestExportMetricsWithUserAgent(t *testing.T) {
-	for _, tc := range []struct {
-		desc                   string
-		expectedUserAgentRegex string
-		extraOpts              []option.ClientOption
-	}{
-		{
-			desc:                   "default",
-			expectedUserAgentRegex: "opentelemetry-go .*; google-cloud-metric-exporter .*",
-		},
-		{
-			desc:                   "override user agent",
-			extraOpts:              []option.ClientOption{option.WithGRPCDialOption(grpc.WithUserAgent("test-user-agent"))},
-			expectedUserAgentRegex: "test-user-agent",
-		},
-	} {
-		t.Run(tc.desc, func(t *testing.T) {
-			server := grpc.NewServer()
-			t.Cleanup(server.Stop)
-
-			// Channel to shove user agent strings from createTimeSeries
-			ch := make(chan []string, 1)
-			defer close(ch)
-			var wg sync.WaitGroup
-			// wait for 2 calls to be processed
-			wg.Add(2)
-
-			m := mock{
-				createTimeSeries: func(ctx context.Context, r *monitoringpb.CreateTimeSeriesRequest) (*emptypb.Empty, error) {
-					md, _ := metadata.FromIncomingContext(ctx)
-					ch <- md.Get("User-Agent")
-					return &emptypb.Empty{}, nil
-				},
-				createMetricDescriptor: func(ctx context.Context, req *monitoringpb.CreateMetricDescriptorRequest) (*googlemetricpb.MetricDescriptor, error) {
-					md, _ := metadata.FromIncomingContext(ctx)
-					ch <- md.Get("User-Agent")
-					return req.MetricDescriptor, nil
-				},
-			}
-			// Make sure all the calls have the right user agents.
-			// We have to run this in parallel because BOTH calls happen seamlessly when exporting metrics.
-			go func() {
-				for ua := range ch {
-					require.Regexp(t, tc.expectedUserAgentRegex, ua[0])
-					wg.Done()
-				}
-			}()
-			monitoringpb.RegisterMetricServiceServer(server, &m)
-
-			lis, err := net.Listen("tcp", "127.0.0.1:0")
-			require.NoError(t, err)
-			//nolint:errcheck
-			go server.Serve(lis)
-
-			clientOpts := []option.ClientOption{
-				option.WithEndpoint(lis.Addr().String()),
-				option.WithoutAuthentication(),
-				option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-			}
-			clientOpts = append(clientOpts, tc.extraOpts...)
-			res := &resource.Resource{}
-			ctx := context.Background()
-
-			opts := []Option{
-				WithProjectID("PROJECT_ID_NOT_REAL"),
-				WithMonitoringClientOptions(clientOpts...),
-				WithMetricDescriptorTypeFormatter(formatter),
-			}
-
-			exporter, err := New(opts...)
-			if err != nil {
-				t.Errorf("Error occurred when creating exporter: %v", err)
-			}
-			provider := metric.NewMeterProvider(
-				metric.WithReader(metric.NewPeriodicReader(exporter)),
-				metric.WithResource(res),
-			)
-
-			meter := provider.Meter("test")
-
-			counter, err := meter.Int64Counter("name.lastvalue")
-			require.NoError(t, err)
-
-			counter.Add(ctx, 1)
-			require.NoError(t, provider.ForceFlush(ctx))
-			// User agent checking happens above in parallel to this flow.
-			wg.Wait()
-		})
-	}
+	assertEqual(t, start, tm)
+	assertEqual(t, end, tm.Add(time.Second))
 }
 
 func TestConcurrentCallsAfterShutdown(t *testing.T) {
-	testServer, err := cloudmock.NewMetricTestServer()
+	testServer, err := NewMetricTestServer()
 	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
-	assert.NoError(t, err)
+	assertNoError(t, err)
 
+	ctx := context.Background()
 	clientOpts := []option.ClientOption{
 		option.WithEndpoint(testServer.Endpoint),
 		option.WithoutAuthentication(),
 		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	}
+	exporter, err := newMonitoringExporter(ctx, "PROJECT_ID_NOT_REAL", clientOpts...)
+	assertNoError(t, err)
 
-	exporter, err := New(
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithMonitoringClientOptions(clientOpts...),
-		WithMetricDescriptorTypeFormatter(formatter),
-	)
-	assert.NoError(t, err)
-
-	ctx := context.Background()
 	err = exporter.Shutdown(ctx)
-	assert.NoError(t, err)
+	assertNoError(t, err)
 
 	var wg sync.WaitGroup
 	wg.Add(3)
 
 	go func() {
 		err := exporter.Shutdown(ctx)
-		assert.ErrorIs(t, err, errShutdown)
+		assertErrorIs(t, err, errShutdown)
 		wg.Done()
 	}()
 	go func() {
 		err := exporter.ForceFlush(ctx)
-		assert.NoError(t, err)
+		assertNoError(t, err)
 		wg.Done()
 	}()
 	go func() {
 		err := exporter.Export(ctx, &metricdata.ResourceMetrics{})
-		assert.ErrorIs(t, err, errShutdown)
+		assertErrorIs(t, err, errShutdown)
 		wg.Done()
 	}()
 
@@ -1284,29 +461,24 @@ func TestConcurrentCallsAfterShutdown(t *testing.T) {
 }
 
 func TestConcurrentExport(t *testing.T) {
-	testServer, err := cloudmock.NewMetricTestServer()
+	testServer, err := NewMetricTestServer()
 	//nolint:errcheck
 	go testServer.Serve()
 	defer testServer.Shutdown()
-	assert.NoError(t, err)
+	assertNoError(t, err)
 
+	ctx := context.Background()
 	clientOpts := []option.ClientOption{
 		option.WithEndpoint(testServer.Endpoint),
 		option.WithoutAuthentication(),
 		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 	}
+	exporter, err := newMonitoringExporter(ctx, "PROJECT_ID_NOT_REAL", clientOpts...)
+	assertNoError(t, err)
 
-	exporter, err := New(
-		WithProjectID("PROJECT_ID_NOT_REAL"),
-		WithMonitoringClientOptions(clientOpts...),
-		WithMetricDescriptorTypeFormatter(formatter),
-	)
-	assert.NoError(t, err)
-
-	ctx := context.Background()
 	defer func() {
 		err := exporter.Shutdown(ctx)
-		assert.NoError(t, err)
+		assertNoError(t, err)
 	}()
 
 	var wg sync.WaitGroup
@@ -1323,7 +495,7 @@ func TestConcurrentExport(t *testing.T) {
 				},
 			},
 		})
-		assert.NoError(t, err)
+		assertNoError(t, err)
 		wg.Done()
 	}()
 	go func() {
@@ -1337,68 +509,35 @@ func TestConcurrentExport(t *testing.T) {
 				},
 			},
 		})
-		assert.NoError(t, err)
+		assertNoError(t, err)
 		wg.Done()
 	}()
 
 	wg.Wait()
 }
 
-func TestMetricTypeToDisplayName(t *testing.T) {
-	for _, tc := range []struct {
-		desc     string
-		input    string
-		expected string
-	}{
-		{desc: "empty input"},
-		{
-			desc:     "default prefix",
-			input:    "workload.googleapis.com/MyCoolMetric",
-			expected: "MyCoolMetric",
-		},
-		{
-			desc:     "no prefix",
-			input:    "helloworld",
-			expected: "helloworld",
-		},
-		{
-			desc:     "other prefix",
-			input:    "custom.googleapis.com/MyCoolMetric",
-			expected: "MyCoolMetric",
-		},
-	} {
-		t.Run(tc.desc, func(t *testing.T) {
-			require.Equal(t, tc.expected, metricTypeToDisplayName(tc.input))
-		})
-	}
-}
-
 func TestBatchingExport(t *testing.T) {
-	setup := func(t *testing.T) (metric.Exporter, *cloudmock.MetricsTestServer) {
-		testServer, err := cloudmock.NewMetricTestServer()
+	ctx := context.Background()
+	setup := func(t *testing.T) (metric.Exporter, *MetricsTestServer) {
+		testServer, err := NewMetricTestServer()
 		//nolint:errcheck
 		go testServer.Serve()
 		t.Cleanup(testServer.Shutdown)
 
-		assert.NoError(t, err)
+		assertNoError(t, err)
 
 		clientOpts := []option.ClientOption{
 			option.WithEndpoint(testServer.Endpoint),
 			option.WithoutAuthentication(),
 			option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
 		}
-
-		exporter, err := New(
-			WithProjectID("PROJECT_ID_NOT_REAL"),
-			WithMonitoringClientOptions(clientOpts...),
-			WithMetricDescriptorTypeFormatter(formatter),
-		)
-		assert.NoError(t, err)
+		exporter, err := newMonitoringExporter(ctx, "PROJECT_ID_NOT_REAL", clientOpts...)
+		assertNoError(t, err)
 
 		t.Cleanup(func() {
 			ctx := context.Background()
 			err := exporter.Shutdown(ctx)
-			assert.NoError(t, err)
+			assertNoError(t, err)
 		})
 
 		return exporter, testServer
@@ -1452,19 +591,21 @@ func TestBatchingExport(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			exporter, testServer := setup(t)
 			input := createMetrics(tc.numMetrics)
-			ctx := context.Background()
 
 			err := exporter.Export(ctx, &metricdata.ResourceMetrics{
 				ScopeMetrics: []metricdata.ScopeMetrics{
 					{
+						Scope: instrumentation.Scope{
+							Name: builtInMetricsMeterName,
+						},
 						Metrics: input,
 					},
 				},
 			})
-			assert.NoError(t, err)
+			assertNoError(t, err)
 
-			gotCalls := testServer.CreateTimeSeriesRequests()
-			assert.Equal(t, tc.expectedCreateTSCalls, len(gotCalls))
+			gotCalls := testServer.CreateServiceTimeSeriesRequests()
+			assertEqual(t, len(gotCalls), tc.expectedCreateTSCalls)
 		})
 	}
 }
