@@ -198,6 +198,28 @@ func TestMapToPrometheusTarget(t *testing.T) {
 			},
 		},
 		{
+			desc: "k8s.cluster.uid as additional fallback to cluster",
+			resourceLabels: map[string]string{
+				"cloud.platform":          "gcp_kubernetes_engine",
+				"cloud.availability_zone": "us-central1-c",
+				"k8s.cluster.uid":         "123901490g90fd89080943",
+				"k8s.namespace.name":      "mynamespace",
+				"k8s.cronjob.name":        "mycronjob",
+				"k8s.pod.name":            "mypod",
+				"k8s.container.name":      "mycontainer",
+			},
+			expected: &monitoredrespb.MonitoredResource{
+				Type: "prometheus_target",
+				Labels: map[string]string{
+					"location":  "us-central1-c",
+					"cluster":   "123901490g90fd89080943",
+					"namespace": "mynamespace",
+					"job":       "mycronjob",
+					"instance":  "mypod",
+				},
+			},
+		},
+		{
 			desc: "overridden attributes",
 			resourceLabels: map[string]string{
 				"cloud.platform":          "gcp_kubernetes_engine",
