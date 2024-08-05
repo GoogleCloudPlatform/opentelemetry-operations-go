@@ -84,6 +84,13 @@ func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.Moni
 	if serviceNamespace != "" {
 		job = serviceNamespace + "/" + job
 	}
+	// Append k8s.container.name to instance if we are using the pod name
+	instanceKey, instance := getKeyAndStringOrDefault(attrs, "", promTargetKeys[instanceLabel]...)
+	if instanceKey == semconv.AttributeK8SPodName {
+		if containerName, ok := attrs.Get(semconv.AttributeK8SContainerName); ok {
+			instance += "/" + containerName.Str()
+		}
+	}
 	return &monitoredrespb.MonitoredResource{
 		Type: "prometheus_target",
 		Labels: map[string]string{
@@ -91,7 +98,7 @@ func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.Moni
 			clusterLabel:   getStringOrDefaultClusterName(attrs, promTargetKeys[clusterLabel]...),
 			namespaceLabel: getStringOrEmpty(attrs, promTargetKeys[namespaceLabel]...),
 			jobLabel:       job,
-			instanceLabel:  getStringOrEmpty(attrs, promTargetKeys[instanceLabel]...),
+			instanceLabel:  instance,
 		},
 	}
 }
@@ -111,23 +118,29 @@ func getStringOrDefaultClusterName(attrs pcommon.Map, keys ...string) string {
 	return getStringOrDefault(attrs, defaultClusterName, promTargetKeys[clusterLabel]...)
 }
 
-// getStringOrEmpty returns the value of the first key found, or the orElse string.
+// getStringOrDefault returns the value of the first key found, or the orElse string.
 func getStringOrDefault(attributes pcommon.Map, orElse string, keys ...string) string {
+	_, str := getKeyAndStringOrDefault(attributes, orElse, keys...)
+	return str
+}
+
+// getStringOrEmpty returns the value of the first key found, or the orElse string.
+func getKeyAndStringOrDefault(attributes pcommon.Map, orElse string, keys ...string) (string, string) {
 	for _, k := range keys {
 		// skip the attribute if it starts with unknown_service, since the SDK
 		// sets this by default. It is used as a fallback below if no other
 		// values are found.
 		if val, ok := attributes.Get(k); ok && !strings.HasPrefix(val.Str(), unknownServicePrefix) {
-			return val.Str()
+			return k, val.Str()
 		}
 	}
 	if contains(keys, string(semconv.AttributeServiceName)) {
 		// the service name started with unknown_service, and was ignored above
 		if val, ok := attributes.Get(semconv.AttributeServiceName); ok {
-			return val.Str()
+			return semconv.AttributeServiceName, val.Str()
 		}
 	}
-	return orElse
+	return "", orElse
 }
 
 // getStringOrEmpty returns the value of the first key found, or the empty string.
