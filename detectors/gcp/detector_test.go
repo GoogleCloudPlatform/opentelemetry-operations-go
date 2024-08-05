@@ -52,6 +52,16 @@ func TestCloudPlatformGKE(t *testing.T) {
 	assert.Equal(t, platform, GKE)
 }
 
+func TestCloudPlatformK8sNotGKE(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{Err: fmt.Errorf("foo")}, &FakeOSProvider{
+		Vars: map[string]string{
+			k8sServiceHostEnv: "foo",
+		},
+	})
+	platform := d.CloudPlatform()
+	assert.Equal(t, platform, UnknownPlatform)
+}
+
 func TestCloudPlatformGCE(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
 		Vars: map[string]string{},
