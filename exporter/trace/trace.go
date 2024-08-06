@@ -20,15 +20,18 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"sync"
 	"time"
-
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"cloud.google.com/go/trace/apiv2/tracepb"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace/noop"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/stats"
 )
 
 // traceExporter is an implementation of trace.Exporter and trace.BatchExporter
@@ -42,8 +45,33 @@ type traceExporter struct {
 	overflowLogger
 }
 
+// otelStatsHandler is a singleton otelgrpc.clientHandler to be used across
+// all dial connections to avoid the memory leak documented in
+// https://github.com/open-telemetry/opentelemetry-go-contrib/issues/4226
+//
+// TODO: If 4226 has been fixed in opentelemetry-go-contrib, replace this
+// singleton with inline usage for simplicity.
+var (
+	initOtelStatsHandlerOnce sync.Once
+	otelStatsHandler         stats.Handler
+)
+
+// otelGRPCStatsHandler returns singleton otelStatsHandler for reuse across all
+// dial connections.
+func otelGRPCStatsHandler() stats.Handler {
+	initOtelStatsHandlerOnce.Do(func() {
+		// disable tracing in the trace exporter to ensure we don't create an infinite loop.
+		otelStatsHandler = otelgrpc.NewClientHandler(otelgrpc.WithTracerProvider(noop.NewTracerProvider()))
+	})
+	return otelStatsHandler
+}
+
 func newTraceExporter(o *options) (*traceExporter, error) {
-	clientOps := append([]option.ClientOption{option.WithGRPCDialOption(grpc.WithUserAgent(userAgent))}, o.traceClientOptions...)
+	clientOps := append([]option.ClientOption{
+		option.WithGRPCDialOption(grpc.WithUserAgent(userAgent)),
+		option.WithTelemetryDisabled(),
+		option.WithGRPCDialOption(grpc.WithStatsHandler(otelGRPCStatsHandler()))},
+		o.traceClientOptions...)
 	client, err := traceapi.NewClient(o.context, clientOps...)
 	if err != nil {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
