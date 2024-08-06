@@ -48,6 +48,7 @@ var promTargetKeys = map[string][]string{
 	clusterLabel: {
 		clusterLabel,
 		semconv.AttributeK8SClusterName,
+		semconv.AttributeK8SClusterUID,
 	},
 	namespaceLabel: {
 		namespaceLabel,
