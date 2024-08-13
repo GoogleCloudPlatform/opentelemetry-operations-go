@@ -60,7 +60,7 @@ type ClientConfig struct {
 	// default credentials, as those could conflict with options provided via
 	// GetClientOptions.
 	// Optional.
-	GetClientOptions func() []option.ClientOption
+	GetClientOptions func() []option.ClientOption `mapstructure:"-"`
 
 	Endpoint string `mapstructure:"endpoint"`
 	// Compression specifies the compression format for Metrics and Logging gRPC requests.
@@ -94,15 +94,15 @@ type MetricConfig struct {
 	// can be used by other exporters to extend the functionality of this
 	// exporter. It allows overriding the function used to map otel resource to
 	// monitored resource.
-	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource
+	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource `mapstructure:"-"`
 	// ExtraMetrics is an extension point for exporters to modify the metrics
 	// before they are sent by the exporter.
-	ExtraMetrics func(pmetric.Metrics)
+	ExtraMetrics func(pmetric.Metrics) `mapstructure:"-"`
 	// GetMetricName is not settable in config files, but can be used by other
 	// exporters which extend the functionality of this exporter. It allows
 	// customizing the naming of metrics. baseName already includes type
 	// suffixes for summary metrics, but does not (yet) include the domain prefix
-	GetMetricName func(baseName string, metric pmetric.Metric) (string, error)
+	GetMetricName func(baseName string, metric pmetric.Metric) (string, error) `mapstructure:"-"`
 	// WALConfig holds configuration settings for the write ahead log.
 	WALConfig *WALConfig `mapstructure:"experimental_wal_config"`
 	Prefix    string     `mapstructure:"prefix"`
@@ -172,7 +172,7 @@ type LogConfig struct {
 	// can be used by other exporters to extend the functionality of this
 	// exporter. It allows overriding the function used to map otel resource to
 	// monitored resource.
-	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource
+	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource `mapstructure:"-"`
 	// DefaultLogName sets the fallback log name to use when one isn't explicitly set
 	// for a log entry. If unset, logs without a log name will raise an error.
 	DefaultLogName string `mapstructure:"default_log_name"`

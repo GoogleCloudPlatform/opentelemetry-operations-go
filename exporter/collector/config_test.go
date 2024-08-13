@@ -14,7 +14,12 @@
 
 package collector
 
-import "testing"
+import (
+	"testing"
+
+	"go.opentelemetry.io/collector/confmap"
+	"gopkg.in/yaml.v3"
+)
 
 func TestValidateConfig(t *testing.T) {
 	for _, tc := range []struct {
@@ -82,5 +87,20 @@ func TestValidateConfig(t *testing.T) {
 				t.Errorf("ValidateConfig(%v) = %v; want no error", tc.input, err)
 			}
 		})
+	}
+}
+
+func TestMarshal(t *testing.T) {
+	config := DefaultConfig()
+
+	cm := confmap.New()
+	err := cm.Marshal(config)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = yaml.Marshal(cm.ToStringMap())
+	if err != nil {
+		t.Fatal(err)
 	}
 }
