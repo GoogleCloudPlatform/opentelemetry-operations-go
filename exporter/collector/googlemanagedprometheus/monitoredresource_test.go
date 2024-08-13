@@ -215,7 +215,7 @@ func TestMapToPrometheusTarget(t *testing.T) {
 					"cluster":   "123901490g90fd89080943",
 					"namespace": "mynamespace",
 					"job":       "mycronjob",
-					"instance":  "mypod",
+					"instance":  "mypod/mycontainer",
 				},
 			},
 		},
