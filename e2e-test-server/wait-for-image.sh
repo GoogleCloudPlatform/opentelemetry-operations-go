@@ -15,14 +15,11 @@
 # limitations under the License.
 
 while true; do
-    docker pull "$_TEST_SERVER_IMAGE"
-    pull_success=$?
-
-    if [ $pull_success -ne 0 ]; then
-        echo "Image couldn't be pulled yet, will continue to retry"
-    else
-        echo "Image pulled successfully, continuing onto test"
+    if docker manifest inspect ${_TEST_SERVER_IMAGE} > /dev/null; then
+        echo "Image is available, continuing onto test"
         break
+    else
+        echo "Image not available yet, will continue to retry"
     fi
     sleep 5
 done
