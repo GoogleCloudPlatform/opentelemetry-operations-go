@@ -13,37 +13,19 @@
 # limitations under the License.
 
 steps:
-  # If the image doesn't exist, create a skip file for the next step to know
-  - name: "gcr.io/cloud-builders/gcloud"
-    entrypoint: "bash"
-    args:
-      - -c
-      - |
-        existing_tags=$(
-          gcloud container images list-tags \
-            --filter="tags:${SHORT_SHA}" --format=json \
-            ${_TEST_SERVER_IMAGE_NAME}
-        )
-        if [ "$existing_tags" == "[]" ]; then
-          echo "Image doesn't exist, will build it"
-        else
-          echo "Image already exists, will skip building"
-          touch skip
-        fi
-  # If skip doesn't exist, build and push
   - name: docker
-    id: build-test-server
     entrypoint: "sh"
     args:
       - -c
       - |
-        if [ -e "skip" ]; then
-          return
-        else
-          docker build --tag=${_TEST_SERVER_IMAGE} --file=e2e-test-server/Dockerfile .
-          docker push ${_TEST_SERVER_IMAGE}
+        if docker manifest inspect ${_TEST_SERVER_IMAGE} > /dev/null; then
+          echo "Image already exists, will skip building"
+          exit
         fi
+        docker build --tag=${_TEST_SERVER_IMAGE} --file=e2e-test-server/Dockerfile .
+        docker push ${_TEST_SERVER_IMAGE}
+
 logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs
 substitutions:
   _TEST_SERVER_IMAGE: ${_TEST_SERVER_IMAGE_NAME}:${SHORT_SHA}
-  _TEST_SERVER_IMAGE_NAME: gcr.io/${PROJECT_ID}/opentelemetry-operations-go-e2e-test-server
+  _TEST_SERVER_IMAGE_NAME: us-central1-docker.pkg.dev/${PROJECT_ID}/e2e-testing/opentelemetry-operations-go-e2e-test-server
