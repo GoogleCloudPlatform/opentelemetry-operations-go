@@ -8,17 +8,14 @@
             "type": "workload.googleapis.com/test.counter",
             "labels": {
               "foo_bar": "baz",
-              "service_instance_id": "10.92.5.2:15692",
-              "service_name": "demo"
+              "service_name": "/srv.nomsingestor"
             }
           },
           "resource": {
-            "type": "generic_task",
+            "type": "k8s_cluster",
             "labels": {
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "",
-              "task_id": "10.92.5.2:15692"
+              "cluster_name": "core-ap-cluster-uat-au",
+              "location": "australia-southeast1"
             }
           },
           "metricKind": "CUMULATIVE",
@@ -48,9 +45,6 @@
         "labels": [
           {
             "key": "foo_bar"
-          },
-          {
-            "key": "service_instance_id"
           },
           {
             "key": "service_name"

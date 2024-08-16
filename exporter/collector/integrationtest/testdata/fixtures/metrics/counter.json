@@ -4,21 +4,153 @@
       "resource": {
         "attributes": [
           {
-            "key": "cloud.availability_zone",
+            "key": "container.id",
             "value": {
-              "stringValue": "us-central1-c"
+              "stringValue": "bb7e489202c47e3f4249e9bfe20b2f8aa7576f560948a9e7315e2260c5321df6"
+            }
+          },
+          {
+            "key": "host.name",
+            "value": {
+              "stringValue": "gk3-core-ap-cluster-uat--nap-nl9obfoi-84f8dc27-mx45"
+            }
+          },
+          {
+            "key": "k8s.namespace.name",
+            "value": {
+              "stringValue": "deltafusor"
+            }
+          },
+          {
+            "key": "os.description",
+            "value": {
+              "stringValue": "Linux srv-nomsingestor-76c6b765f7-wlmbr 6.1.85+ #1 SMP PREEMPT_DYNAMIC Thu Jun 27 21:05:47 UTC 2024 x86_64"
+            }
+          },
+          {
+            "key": "os.type",
+            "value": {
+              "stringValue": "linux"
+            }
+          },
+          {
+            "key": "process.command_args",
+            "value": {
+              "arrayValue": {
+                "values": [
+                  {
+                    "stringValue": "/srv.nomsingestor"
+                  },
+                  {
+                    "stringValue": "--resolver=kubernetes"
+                  },
+                  {
+                    "stringValue": "--log_level=info"
+                  },
+                  {
+                    "stringValue": "--pubsub_project=deltafusor-uat-au"
+                  },
+                  {
+                    "stringValue": "--trace_fraction=0.1"
+                  },
+                  {
+                    "stringValue": "--metrics_project=deltafusor-uat-au"
+                  },
+                  {
+                    "stringValue": "/srv.nomsingestor"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "key": "process.executable.name",
+            "value": {
+              "stringValue": "srv.nomsingestor"
+            }
+          },
+          {
+            "key": "process.executable.path",
+            "value": {
+              "stringValue": "/srv.nomsingestor"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "root"
+            }
+          },
+          {
+            "key": "process.owner",
+            "value": {
+              "stringValue": "root"
+            }
+          },
+          {
+            "key": "process.pid",
+            "value": {
+              "intValue": 1
+            }
+          },
+          {
+            "key": "process.runtime.description",
+            "value": {
+              "stringValue": "go version go1.22.6 linux/amd64"
+            }
+          },
+          {
+            "key": "process.runtime.name",
+            "value": {
+              "stringValue": "go"
+            }
+          },
+          {
+            "key": "process.runtime.version",
+            "value": {
+              "stringValue": "go1.22.6"
             }
           },
           {
             "key": "service.name",
             "value": {
-              "stringValue": "demo"
+              "stringValue": "/srv.nomsingestor"
             }
           },
           {
-            "key": "service.instance.id",
+            "key": "cloud.provider",
             "value": {
-              "stringValue": "10.92.5.2:15692"
+              "stringValue": "gcp"
+            }
+          },
+          {
+            "key": "cloud.account.id",
+            "value": {
+              "stringValue": "core-cluster-uat-au"
+            }
+          },
+          {
+            "key": "cloud.platform",
+            "value": {
+              "stringValue": "gcp_kubernetes_engine"
+            }
+          },
+          {
+            "key": "cloud.region",
+            "value": {
+              "stringValue": "australia-southeast1"
+            }
+          },
+          {
+            "key": "k8s.cluster.name",
+            "value": {
+              "stringValue": "core-ap-cluster-uat-au"
+            }
+          },
+          {
+            "key": "host.id",
+            "value": {
+              "stringValue": "3534199698998394043"
             }
           }
         ]

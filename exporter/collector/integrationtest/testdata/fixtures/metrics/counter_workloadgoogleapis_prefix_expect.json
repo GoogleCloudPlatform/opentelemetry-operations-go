@@ -11,12 +11,10 @@
             }
           },
           "resource": {
-            "type": "generic_task",
+            "type": "k8s_cluster",
             "labels": {
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": "",
-              "task_id": "10.92.5.2:15692"
+              "cluster_name": "core-ap-cluster-uat-au",
+              "location": "australia-southeast1"
             }
           },
           "metricKind": "CUMULATIVE",

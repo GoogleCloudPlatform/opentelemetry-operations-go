@@ -13,11 +13,11 @@
           "resource": {
             "type": "prometheus_target",
             "labels": {
-              "cluster": "",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": ""
+              "cluster": "core-ap-cluster-uat-au",
+              "instance": "3534199698998394043",
+              "job": "/srv.nomsingestor",
+              "location": "australia-southeast1",
+              "namespace": "deltafusor"
             }
           },
           "metricKind": "CUMULATIVE",
@@ -39,17 +39,35 @@
           "metric": {
             "type": "prometheus.googleapis.com/target_info/gauge",
             "labels": {
-              "cloud_availability_zone": "us-central1-c"
+              "cloud_account_id": "core-cluster-uat-au",
+              "cloud_platform": "gcp_kubernetes_engine",
+              "cloud_provider": "gcp",
+              "cloud_region": "australia-southeast1",
+              "container_id": "bb7e489202c47e3f4249e9bfe20b2f8aa7576f560948a9e7315e2260c5321df6",
+              "host_id": "3534199698998394043",
+              "host_name": "gk3-core-ap-cluster-uat--nap-nl9obfoi-84f8dc27-mx45",
+              "k8s_cluster_name": "core-ap-cluster-uat-au",
+              "k8s_namespace_name": "deltafusor",
+              "os_description": "Linux srv-nomsingestor-76c6b765f7-wlmbr 6.1.85+ #1 SMP PREEMPT_DYNAMIC Thu Jun 27 21:05:47 UTC 2024 x86_64",
+              "os_type": "linux",
+              "process_command_args": "[\"/srv.nomsingestor\",\"--resolver=kubernetes\",\"--log_level=info\",\"--pubsub_project=deltafusor-uat-au\",\"--trace_fraction=0.1\",\"--metrics_project=deltafusor-uat-au\",\"/srv.nomsingestor\"]",
+              "process_executable_name": "srv.nomsingestor",
+              "process_executable_path": "/srv.nomsingestor",
+              "process_owner": "root",
+              "process_pid": "1",
+              "process_runtime_description": "go version go1.22.6 linux/amd64",
+              "process_runtime_name": "go",
+              "process_runtime_version": "go1.22.6"
             }
           },
           "resource": {
             "type": "prometheus_target",
             "labels": {
-              "cluster": "",
-              "instance": "10.92.5.2:15692",
-              "job": "demo",
-              "location": "us-central1-c",
-              "namespace": ""
+              "cluster": "core-ap-cluster-uat-au",
+              "instance": "3534199698998394043",
+              "job": "/srv.nomsingestor",
+              "location": "australia-southeast1",
+              "namespace": "deltafusor"
             }
           },
           "metricKind": "GAUGE",
