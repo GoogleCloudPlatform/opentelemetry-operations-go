@@ -140,6 +140,13 @@ test:
 	(cd "$${dir}" && $(GOTEST) ./...); \
 	done
 
+.PHONY: test-bench
+test-bench:
+	set -e; for dir in $(ALL_GO_FILES_DIRS); do \
+	echo "go test -run=xxxxxMatchNothingxxxxx -test.benchtime=1ms -bench=. in $${dir}"; \
+	(cd "$${dir}" && $(GOTEST) -run=xxxxxMatchNothingxxxxx -test.benchtime=1ms -bench=.); \
+	done
+
 .PHONY: lint
 lint: $(GOLANGCI_LINT) $(MISSPELL) govulncheck
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
