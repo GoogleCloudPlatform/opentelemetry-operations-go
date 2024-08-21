@@ -23,7 +23,7 @@ import (
 
 func BenchmarkAttributesToLabels(b *testing.B) {
 	attr := pcommon.NewMap()
-	attr.FromRaw(map[string]interface{}{
+	assert.NoError(b, attr.FromRaw(map[string]interface{}{
 		"a": true,
 		"b": false,
 		"c": int64(12),
@@ -32,7 +32,7 @@ func BenchmarkAttributesToLabels(b *testing.B) {
 		"f": []byte{0xde, 0xad, 0xbe, 0xef},
 		"g": []interface{}{"x", nil, "y"},
 		"h": map[string]interface{}{"a": "b"},
-	})
+	}))
 	b.ReportAllocs()
 	b.ResetTimer()
 
