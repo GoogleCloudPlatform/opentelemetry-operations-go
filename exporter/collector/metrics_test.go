@@ -30,6 +30,7 @@ import (
 	"github.com/tidwall/wal"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/otel/metric/noop"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
 	"google.golang.org/genproto/googleapis/api/label"
@@ -49,7 +50,7 @@ var (
 )
 
 func newTestMetricMapper() (metricMapper, func()) {
-	obs := selfObservability{log: zap.NewNop()}
+	obs := selfObservability{log: zap.NewNop(), meterProvider: noop.NewMeterProvider()}
 	s := make(chan struct{})
 	cfg := DefaultConfig()
 	cfg.MetricConfig.EnableSumOfSquaredDeviation = true
@@ -160,7 +161,8 @@ func TestExportCreateMetricDescriptorCache(t *testing.T) {
 		me := MetricsExporter{
 			mdCache: make(map[string]*monitoringpb.CreateMetricDescriptorRequest),
 			obs: selfObservability{
-				log: zap.New(logger),
+				log:           zap.New(logger),
+				meterProvider: noop.NewMeterProvider(),
 			},
 			client: m,
 		}
@@ -2423,7 +2425,7 @@ func TestReadWALAndExport(t *testing.T) {
 func TestReadWALAndExportRetry(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
 	mExp := &MetricsExporter{
-		obs: selfObservability{zap.NewNop()},
+		obs: selfObservability{zap.NewNop(), noop.NewMeterProvider()},
 		cfg: Config{
 			MetricConfig: MetricConfig{
 				WALConfig: &WALConfig{
@@ -2464,7 +2466,7 @@ func TestReadWALAndExportRetry(t *testing.T) {
 func TestWatchWALFile(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
 	mExp := &MetricsExporter{
-		obs: selfObservability{zap.NewExample()},
+		obs: selfObservability{zap.NewExample(), noop.NewMeterProvider()},
 		cfg: Config{
 			MetricConfig: MetricConfig{
 				WALConfig: &WALConfig{
@@ -2505,7 +2507,7 @@ func TestRunWALReadAndExportLoop(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
 	shutdown := make(chan struct{})
 	mExp := &MetricsExporter{
-		obs:       selfObservability{zap.NewNop()},
+		obs:       selfObservability{zap.NewNop(), noop.NewMeterProvider()},
 		shutdownC: shutdown,
 		cfg: Config{
 			MetricConfig: MetricConfig{
@@ -2559,7 +2561,7 @@ func TestRunWALReadAndExportLoop(t *testing.T) {
 func TestPushMetricsOntoWAL(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
 	shutdown := make(chan struct{})
-	obs := selfObservability{zap.NewNop()}
+	obs := selfObservability{zap.NewNop(), noop.NewMeterProvider()}
 	cfg := Config{
 		MetricConfig: MetricConfig{
 			MapMonitoredResource: defaultResourceToMonitoringMonitoredResource,

@@ -23,12 +23,12 @@ import (
 	"time"
 
 	traceapi "cloud.google.com/go/trace/apiv2"
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.uber.org/zap"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -38,6 +38,7 @@ type TraceExporter struct {
 	texporter *texporter.Exporter
 	cfg       Config
 	timeout   time.Duration
+	obs       selfObservability
 }
 
 func (te *TraceExporter) Shutdown(ctx context.Context) error {
@@ -47,12 +48,20 @@ func (te *TraceExporter) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-func NewGoogleCloudTracesExporter(ctx context.Context, cfg Config, version string, timeout time.Duration) (*TraceExporter, error) {
-	// TODO: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/537#discussion_r1038290097
-	//nolint:errcheck
-	view.Register(ocgrpc.DefaultClientViews...)
+func NewGoogleCloudTracesExporter(
+	ctx context.Context,
+	cfg Config,
+	log *zap.Logger,
+	meterProvider metric.MeterProvider,
+	version string,
+	timeout time.Duration,
+) (*TraceExporter, error) {
 	setVersionInUserAgent(&cfg, version)
-	return &TraceExporter{cfg: cfg, timeout: timeout}, nil
+	obs := selfObservability{
+		log:           log,
+		meterProvider: meterProvider,
+	}
+	return &TraceExporter{cfg: cfg, timeout: timeout, obs: obs}, nil
 }
 
 func (te *TraceExporter) Start(ctx context.Context, _ component.Host) error {
@@ -69,7 +78,7 @@ func (te *TraceExporter) Start(ctx context.Context, _ component.Host) error {
 		topts = append(topts, texporter.WithAttributeMapping(mappingFuncFromAKM(te.cfg.TraceConfig.AttributeMappings)))
 	}
 
-	copts, err := generateClientOptions(ctx, &te.cfg.TraceConfig.ClientConfig, &te.cfg, traceapi.DefaultAuthScopes())
+	copts, err := generateClientOptions(ctx, &te.cfg.TraceConfig.ClientConfig, &te.cfg, traceapi.DefaultAuthScopes(), te.obs.meterProvider)
 	if err != nil {
 		return err
 	}

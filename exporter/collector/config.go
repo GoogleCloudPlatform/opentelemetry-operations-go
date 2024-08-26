@@ -22,9 +22,9 @@ import (
 	"strings"
 	"time"
 
-	"go.opencensus.io/plugin/ocgrpc"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/otel/metric"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/impersonate"
 	"google.golang.org/api/option"
@@ -255,7 +255,7 @@ func setVersionInUserAgent(cfg *Config, version string) {
 	cfg.UserAgent = strings.ReplaceAll(cfg.UserAgent, "{{version}}", version)
 }
 
-func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Config, scopes []string) ([]option.ClientOption, error) {
+func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Config, scopes []string, meterProvider metric.MeterProvider) ([]option.ClientOption, error) {
 	var copts []option.ClientOption
 	// grpc.WithUserAgent is used by the Trace exporter, but not the Metric exporter (see comment below)
 	if cfg.UserAgent != "" {
@@ -266,7 +266,7 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 			// option.WithGRPCConn option takes precedent over all other supplied options so the
 			// following user agent will be used by both exporters if we reach this branch
 			dialOpts := []grpc.DialOption{
-				grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
+				// TODO: use meterProvider for gRPC instrumentation
 				grpc.WithTransportCredentials(insecure.NewCredentials()),
 			}
 			if cfg.UserAgent != "" {

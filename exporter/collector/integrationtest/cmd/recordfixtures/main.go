@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/metric/noop"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
@@ -89,7 +90,8 @@ func (fr fixtureRecorder) recordTraces(ctx context.Context, t *FakeTesting, star
 
 		func() {
 			traces := test.LoadOTLPTracesInput(t, startTime, endTime)
-			testServerExporter := integrationtest.NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig())
+			// TODO: record OTel self-obs metrics by passing meterProvider from integrationtest.NewInMemoryOTelExporter()
+			testServerExporter := integrationtest.NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig(), noop.NewMeterProvider())
 
 			require.NoError(t, testServerExporter.PushTraces(ctx, traces), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
@@ -121,7 +123,8 @@ func (fr fixtureRecorder) recordLogs(ctx context.Context, t *FakeTesting, timest
 
 		func() {
 			logs := test.LoadOTLPLogsInput(t, timestamp)
-			testServerExporter := integrationtest.NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig(), test.ConfigureLogsExporter)
+			// TODO: record OTel self-obs metrics by passing meterProvider from integrationtest.NewInMemoryOTelExporter()
+			testServerExporter := integrationtest.NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig(), test.ConfigureLogsExporter, noop.NewMeterProvider())
 
 			require.NoError(t, testServerExporter.PushLogs(ctx, logs), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
@@ -153,8 +156,8 @@ func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, sta
 
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig())
-			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
+			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig(), noop.NewMeterProvider())
+			inMemoryOCExporter, err := integrationtest.NewInMemoryOTelExporter()
 			require.NoError(t, err)
 			//nolint:errcheck
 			defer inMemoryOCExporter.Shutdown(ctx)

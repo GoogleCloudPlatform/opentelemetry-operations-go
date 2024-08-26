@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/metric/noop"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
@@ -42,7 +43,8 @@ func TestTraces(t *testing.T) {
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig())
+			// TODO: record OTel self-obs metrics by passing meterProvider from integrationtest.NewInMemoryOTelExporter()
+			testServerExporter := NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig(), noop.NewMeterProvider())
 
 			err = testServerExporter.PushTraces(ctx, traces)
 			if !test.ExpectErr {

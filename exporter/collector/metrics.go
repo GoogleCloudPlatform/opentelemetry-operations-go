@@ -54,6 +54,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	metricapi "go.opentelemetry.io/otel/metric"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/tidwall/wal"
@@ -67,7 +68,8 @@ import (
 // self-observability reporting meters/tracers/loggers.
 type selfObservability struct {
 	// Logger to use for this exporter.
-	log *zap.Logger
+	log           *zap.Logger
+	meterProvider metricapi.MeterProvider
 }
 
 // MetricsExporter is the GCM exporter that uses pdata directly.
@@ -172,6 +174,7 @@ func NewGoogleCloudMetricsExporter(
 	ctx context.Context,
 	cfg Config,
 	log *zap.Logger,
+	meterProvider metricapi.MeterProvider,
 	version string,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
@@ -182,7 +185,7 @@ func NewGoogleCloudMetricsExporter(
 	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
 
-	obs := selfObservability{log: log}
+	obs := selfObservability{log: log, meterProvider: meterProvider}
 	normalizer := normalization.NewDisabledNormalizer()
 	mExp := &MetricsExporter{
 		cfg: cfg,
@@ -218,7 +221,7 @@ func (me *MetricsExporter) Start(ctx context.Context, _ component.Host) error {
 	if me.cfg.MetricConfig.CumulativeNormalization {
 		me.mapper.normalizer = normalization.NewStandardNormalizer(me.shutdownC, me.obs.log)
 	}
-	clientOpts, err := generateClientOptions(ctx, &me.cfg.MetricConfig.ClientConfig, &me.cfg, monitoring.DefaultAuthScopes())
+	clientOpts, err := generateClientOptions(ctx, &me.cfg.MetricConfig.ClientConfig, &me.cfg, monitoring.DefaultAuthScopes(), me.obs.meterProvider)
 	if err != nil {
 		return err
 	}

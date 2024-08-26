@@ -44,6 +44,7 @@ import (
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
+	"go.opentelemetry.io/otel/metric"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
@@ -160,11 +161,13 @@ func NewGoogleCloudLogsExporter(
 	ctx context.Context,
 	cfg Config,
 	log *zap.Logger,
+	meterProvider metric.MeterProvider,
 	version string,
 ) (*LogsExporter, error) {
 	setVersionInUserAgent(&cfg, version)
 	obs := selfObservability{
-		log: log,
+		log:           log,
+		meterProvider: meterProvider,
 	}
 
 	return &LogsExporter{
@@ -193,7 +196,7 @@ func (l *LogsExporter) ConfigureExporter(config *logsutil.ExporterConfig) {
 }
 
 func (l *LogsExporter) Start(ctx context.Context, _ component.Host) error {
-	clientOpts, err := generateClientOptions(ctx, &l.cfg.LogConfig.ClientConfig, &l.cfg, loggingv2.DefaultAuthScopes())
+	clientOpts, err := generateClientOptions(ctx, &l.cfg.LogConfig.ClientConfig, &l.cfg, loggingv2.DefaultAuthScopes(), l.obs.meterProvider)
 	if err != nil {
 		return err
 	}

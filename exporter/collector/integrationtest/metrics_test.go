@@ -21,6 +21,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/otel/metric/noop"
 	apioption "google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -49,9 +50,10 @@ func TestCollectorMetrics(t *testing.T) {
 			//nolint:errcheck
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig())
+			// TODO: record OTel self-obs metrics by passing meterProvider from integrationtest.NewInMemoryOTelExporter()
+			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig(), noop.NewMeterProvider())
 			// For collecting self observability metrics
-			inMemoryOCExporter, err := NewInMemoryOCViewExporter()
+			inMemoryOCExporter, err := NewInMemoryOTelExporter()
 			require.NoError(t, err)
 			//nolint:errcheck
 			defer inMemoryOCExporter.Shutdown(ctx)
