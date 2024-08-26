@@ -47,7 +47,15 @@ var (
 	// the same value every time due to side effects. The values of these metrics get cleared
 	// and are not checked in the fixture. Their labels and types are still checked.
 	selfObsMetricsToNormalize = map[string]struct{}{
-		// TODO: update to OTel metric names
+		"workload.googleapis.com/grpc.client.attempt.duration":                           struct{}{},
+		"workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size": struct{}{},
+		"workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size": struct{}{},
+		"workload.googleapis.com/grpc.client.call.duration":                              struct{}{},
+	}
+	// selfObsMetricsToNormalize is the set of labels on self-observability metrics which change
+	// each run of the fixture. Override the label with the provided value.
+	selfObsLabelsToNormalize = map[string]string{
+		"grpc_target": "dns:///127.0.0.1:40441",
 	}
 )
 
@@ -489,6 +497,11 @@ func normalizeSelfObs(t testing.TB, selfObs *protos.SelfObservabilityMetric) {
 					}
 				default:
 					t.Logf("Do not know how to normalize typed value type %T", value)
+				}
+			}
+			for k, v := range selfObsLabelsToNormalize {
+				if _, ok := ts.Metric.Labels[k]; ok {
+					ts.Metric.Labels[k] = v
 				}
 			}
 		}
