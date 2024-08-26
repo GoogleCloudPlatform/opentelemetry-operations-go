@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel/metric/noop"
 	apioption "google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -50,13 +49,12 @@ func TestCollectorMetrics(t *testing.T) {
 			//nolint:errcheck
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			// TODO: record OTel self-obs metrics by passing meterProvider from integrationtest.NewInMemoryOTelExporter()
-			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig(), noop.NewMeterProvider())
 			// For collecting self observability metrics
-			inMemoryOCExporter, err := NewInMemoryOTelExporter()
+			inMemoryOTelExporter, err := NewInMemoryOTelExporter()
+			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig(), inMemoryOTelExporter.MeterProvider)
 			require.NoError(t, err)
 			//nolint:errcheck
-			defer inMemoryOCExporter.Shutdown(ctx)
+			defer inMemoryOTelExporter.Shutdown(ctx)
 
 			err = testServerExporter.PushMetrics(ctx, metrics)
 			if !test.ExpectErr {
@@ -91,7 +89,7 @@ func TestCollectorMetrics(t *testing.T) {
 				return expectFixture.CreateServiceTimeSeriesRequests[i].Name < expectFixture.CreateServiceTimeSeriesRequests[j].Name
 			})
 
-			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
 			require.NoError(t, err)
 			fixture := &protos.MetricExpectFixture{
 				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),

@@ -156,11 +156,11 @@ func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, sta
 
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig(), noop.NewMeterProvider())
-			inMemoryOCExporter, err := integrationtest.NewInMemoryOTelExporter()
+			inMemoryOTelExporter, err := integrationtest.NewInMemoryOTelExporter()
+			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig(), inMemoryOTelExporter.MeterProvider)
 			require.NoError(t, err)
 			//nolint:errcheck
-			defer inMemoryOCExporter.Shutdown(ctx)
+			defer inMemoryOTelExporter.Shutdown(ctx)
 
 			err = testServerExporter.PushMetrics(ctx, metrics)
 			if !test.ExpectErr {
@@ -170,7 +170,7 @@ func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, sta
 			}
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
-			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
 			require.NoError(t, err)
 			fixture := &protos.MetricExpectFixture{
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),

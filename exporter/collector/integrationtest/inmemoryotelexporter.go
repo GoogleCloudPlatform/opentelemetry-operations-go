@@ -80,6 +80,7 @@ func NewInMemoryOTelExporter() (*InMemoryOTelExporter, error) {
 	exporter, err := gcpmetric.New(
 		gcpmetric.WithProjectID("myproject"),
 		gcpmetric.WithMonitoringClientOptions(option.WithGRPCConn(conn)),
+		gcpmetric.WithFilteredResourceAttributes(gcpmetric.NoAttributes),
 	)
 	if err != nil {
 		return nil, err
