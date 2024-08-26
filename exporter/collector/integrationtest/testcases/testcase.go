@@ -155,6 +155,7 @@ func (tc *TestCase) SaveRecordedTraceFixtures(
 }
 
 func NormalizeTraceFixture(t testing.TB, fixture *protos.TraceExpectFixture) {
+	normalizeSelfObs(t, fixture.SelfObservabilityMetrics)
 	for _, req := range fixture.BatchWriteSpansRequest {
 		for _, span := range req.Spans {
 			if span.GetStartTime() != nil {
@@ -251,6 +252,7 @@ func (tc *TestCase) SaveRecordedLogFixtures(
 // Normalizes timestamps which create noise in the fixture because they can
 // vary each test run.
 func NormalizeLogFixture(t testing.TB, fixture *protos.LogExpectFixture) {
+	normalizeSelfObs(t, fixture.SelfObservabilityMetrics)
 	for listIndex, req := range fixture.WriteLogEntriesRequests {
 		// sort the entries in each request
 		sort.Slice(fixture.WriteLogEntriesRequests[listIndex].Entries, func(i, j int) bool {

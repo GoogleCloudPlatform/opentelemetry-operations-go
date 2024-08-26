@@ -20,7 +20,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel/metric/noop"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
@@ -43,8 +42,12 @@ func TestTraces(t *testing.T) {
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			// TODO: record OTel self-obs metrics by passing meterProvider from integrationtest.NewInMemoryOTelExporter()
-			testServerExporter := NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig(), noop.NewMeterProvider())
+
+			inMemoryOTelExporter, err := NewInMemoryOTelExporter()
+			require.NoError(t, err)
+			//nolint:errcheck
+			defer inMemoryOTelExporter.Shutdown(ctx)
+			testServerExporter := NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig(), inMemoryOTelExporter.MeterProvider)
 
 			err = testServerExporter.PushTraces(ctx, traces)
 			if !test.ExpectErr {
@@ -60,9 +63,12 @@ func TestTraces(t *testing.T) {
 				endTime,
 			)
 
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
+			require.NoError(t, err)
 			fixture := &protos.TraceExpectFixture{
-				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
-				UserAgent:              testServer.UserAgent(),
+				BatchWriteSpansRequest:   testServer.CreateBatchWriteSpansRequests(),
+				UserAgent:                testServer.UserAgent(),
+				SelfObservabilityMetrics: selfObsMetrics,
 			}
 
 			diff := DiffTraceProtos(

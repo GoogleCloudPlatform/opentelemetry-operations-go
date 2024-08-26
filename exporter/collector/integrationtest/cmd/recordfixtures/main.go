@@ -24,7 +24,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel/metric/noop"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
@@ -90,16 +89,21 @@ func (fr fixtureRecorder) recordTraces(ctx context.Context, t *FakeTesting, star
 
 		func() {
 			traces := test.LoadOTLPTracesInput(t, startTime, endTime)
-			// TODO: record OTel self-obs metrics by passing meterProvider from integrationtest.NewInMemoryOTelExporter()
-			testServerExporter := integrationtest.NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig(), noop.NewMeterProvider())
+			inMemoryOTelExporter, err := integrationtest.NewInMemoryOTelExporter()
+			require.NoError(t, err)
+			//nolint:errcheck
+			defer inMemoryOTelExporter.Shutdown(ctx)
+			testServerExporter := integrationtest.NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig(), inMemoryOTelExporter.MeterProvider)
 
 			require.NoError(t, testServerExporter.PushTraces(ctx, traces), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
 			require.NoError(t, err)
 			fixture := &protos.TraceExpectFixture{
-				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
-				UserAgent:              testServer.UserAgent(),
+				BatchWriteSpansRequest:   testServer.CreateBatchWriteSpansRequests(),
+				SelfObservabilityMetrics: selfObsMetrics,
+				UserAgent:                testServer.UserAgent(),
 			}
 			test.SaveRecordedTraceFixtures(t, fixture)
 		}()
@@ -123,16 +127,20 @@ func (fr fixtureRecorder) recordLogs(ctx context.Context, t *FakeTesting, timest
 
 		func() {
 			logs := test.LoadOTLPLogsInput(t, timestamp)
-			// TODO: record OTel self-obs metrics by passing meterProvider from integrationtest.NewInMemoryOTelExporter()
-			testServerExporter := integrationtest.NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig(), test.ConfigureLogsExporter, noop.NewMeterProvider())
+			inMemoryOTelExporter, err := integrationtest.NewInMemoryOTelExporter()
+			require.NoError(t, err)
+			//nolint:errcheck
+			defer inMemoryOTelExporter.Shutdown(ctx)
+			testServerExporter := integrationtest.NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig(), test.ConfigureLogsExporter, inMemoryOTelExporter.MeterProvider)
 
 			require.NoError(t, testServerExporter.PushLogs(ctx, logs), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
-
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
 			require.NoError(t, err)
 			fixture := &protos.LogExpectFixture{
-				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
-				UserAgent:               testServer.UserAgent(),
+				WriteLogEntriesRequests:  testServer.CreateWriteLogEntriesRequests(),
+				SelfObservabilityMetrics: selfObsMetrics,
+				UserAgent:                testServer.UserAgent(),
 			}
 			test.SaveRecordedLogFixtures(t, fixture)
 		}()

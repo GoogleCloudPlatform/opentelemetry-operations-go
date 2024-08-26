@@ -36,9 +36,11 @@ message SelfObservabilityMetric {
 message LogExpectFixture {
   repeated google.logging.v2.WriteLogEntriesRequest write_log_entries_requests = 1;
   string user_agent = 2;
+  SelfObservabilityMetric self_observability_metrics = 3;
 }
 
 message TraceExpectFixture {
   repeated google.tracing.v2.BatchWriteSpansRequest batch_write_spans_request = 1;
   string user_agent = 2;
+  SelfObservabilityMetric self_observability_metrics = 3;
 }

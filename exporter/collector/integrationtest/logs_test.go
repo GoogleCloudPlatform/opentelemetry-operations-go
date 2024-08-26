@@ -21,7 +21,6 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
-	"go.opentelemetry.io/otel/metric/noop"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
@@ -43,8 +42,11 @@ func TestLogs(t *testing.T) {
 			go testServer.Serve()
 			defer testServer.Shutdown()
 
-			// TODO: record OTel self-obs metrics by passing meterProvider from integrationtest.NewInMemoryOTelExporter()
-			testServerExporter := NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig(), test.ConfigureLogsExporter, noop.NewMeterProvider())
+			inMemoryOTelExporter, err := NewInMemoryOTelExporter()
+			require.NoError(t, err)
+			//nolint:errcheck
+			defer inMemoryOTelExporter.Shutdown(ctx)
+			testServerExporter := NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig(), test.ConfigureLogsExporter, inMemoryOTelExporter.MeterProvider)
 
 			require.NoError(
 				t,
@@ -75,9 +77,12 @@ func TestLogs(t *testing.T) {
 				return expectFixture.WriteLogEntriesRequests[i].Entries[0].LogName < expectFixture.WriteLogEntriesRequests[j].Entries[0].LogName
 			})
 
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
+			require.NoError(t, err)
 			fixture := &protos.LogExpectFixture{
-				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
-				UserAgent:               testServer.UserAgent(),
+				WriteLogEntriesRequests:  testServer.CreateWriteLogEntriesRequests(),
+				UserAgent:                testServer.UserAgent(),
+				SelfObservabilityMetrics: selfObsMetrics,
 			}
 			// sort the entries in each request
 			for listIndex := 0; listIndex < len(fixture.WriteLogEntriesRequests); listIndex++ {
