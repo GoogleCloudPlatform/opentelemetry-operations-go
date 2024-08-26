@@ -41,7 +41,6 @@ func BenchmarkNormalizeNumberDataPoint(b *testing.B) {
 	newPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
 	var ok bool
-	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, ok = normalizer.NormalizeNumberDataPoint(newPoint, id)
@@ -69,7 +68,6 @@ func BenchmarkNormalizeHistogramDataPoint(b *testing.B) {
 	newPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
 	var ok bool
-	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, ok = normalizer.NormalizeHistogramDataPoint(newPoint, id)
@@ -101,7 +99,6 @@ func BenchmarkNormalizeExopnentialHistogramDataPoint(b *testing.B) {
 	newPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
 	var ok bool
-	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, ok = normalizer.NormalizeExponentialHistogramDataPoint(newPoint, id)
@@ -127,7 +124,6 @@ func BenchmarkNormalizeSummaryDataPoint(b *testing.B) {
 	newPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
 	var ok bool
-	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		_, ok = normalizer.NormalizeSummaryDataPoint(newPoint, id)

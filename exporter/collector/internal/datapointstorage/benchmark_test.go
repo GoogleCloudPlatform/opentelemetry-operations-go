@@ -51,7 +51,6 @@ func BenchmarkIdentifier(b *testing.B) {
 		"ding":  "dong",
 	}
 
-	b.ReportAllocs()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		Identifier(monitoredResource, extraLabels, metric, attrs)

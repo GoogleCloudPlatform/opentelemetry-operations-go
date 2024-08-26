@@ -33,7 +33,6 @@ func BenchmarkAttributesToLabels(b *testing.B) {
 		"g": []interface{}{"x", nil, "y"},
 		"h": map[string]interface{}{"a": "b"},
 	}))
-	b.ReportAllocs()
 	b.ResetTimer()
 
 	for i := 0; i < b.N; i++ {

@@ -143,8 +143,8 @@ test:
 .PHONY: test-bench
 test-bench:
 	set -e; for dir in $(ALL_GO_FILES_DIRS); do \
-	echo "go test -run=xxxxxMatchNothingxxxxx -test.benchtime=1ms -bench=. in $${dir}"; \
-	(cd "$${dir}" && $(GOTEST) -run=xxxxxMatchNothingxxxxx -test.benchtime=1ms -bench=.); \
+	echo "go test -run=xxxxxMatchNothingxxxxx -test.benchtime=1ms -test.benchmem -bench=. in $${dir}"; \
+	(cd "$${dir}" && $(GOTEST) -run=xxxxxMatchNothingxxxxx -test.benchtime=1ms -test.benchmem -bench=.); \
 	done
 
 .PHONY: lint
