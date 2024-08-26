@@ -35,10 +35,10 @@ import (
 
 // TraceExporter is a wrapper struct of OT cloud trace exporter.
 type TraceExporter struct {
+	obs       selfObservability
 	texporter *texporter.Exporter
 	cfg       Config
 	timeout   time.Duration
-	obs       selfObservability
 }
 
 func (te *TraceExporter) Shutdown(ctx context.Context) error {

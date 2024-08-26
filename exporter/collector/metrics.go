@@ -73,27 +73,27 @@ type selfObservability struct {
 
 // MetricsExporter is the GCM exporter that uses pdata directly.
 type MetricsExporter struct {
-	// write ahead log handles exporter retries in-order to handle network outages
-	wal *exporterWAL
-	obs selfObservability
-	// shutdownC is a channel for signaling a graceful shutdown
-	shutdownC chan struct{}
-	// mdCache tracks the metric descriptors that have already been sent to GCM
-	mdCache map[string]*monitoringpb.CreateMetricDescriptorRequest
-	// A channel that receives metric descriptor and sends them to GCM once
-	metricDescriptorC chan *monitoringpb.CreateMetricDescriptorRequest
-	client            monitoringClient
+	mapper metricMapper
+	obs    selfObservability
+	client monitoringClient
+	// self-observability metrics
+	pointsExportedCounter metricapi.Int64Counter
 	// Only used for testing purposes in lieu of initializing a fake client
 	exportFunc func(context.Context, *monitoringpb.CreateTimeSeriesRequest) error
+	// A channel that receives metric descriptor and sends them to GCM once
+	metricDescriptorC chan *monitoringpb.CreateMetricDescriptorRequest
+	// write ahead log handles exporter retries in-order to handle network outages
+	wal *exporterWAL
+	// mdCache tracks the metric descriptors that have already been sent to GCM
+	mdCache map[string]*monitoringpb.CreateMetricDescriptorRequest
+	// shutdownC is a channel for signaling a graceful shutdown
+	shutdownC chan struct{}
 	// requestOpts applies options to the context for requests, such as additional headers.
 	requestOpts []func(*context.Context, requestInfo)
-	mapper      metricMapper
 	cfg         Config
 	// goroutines tracks the currently running child tasks
 	goroutines sync.WaitGroup
 	timeout    time.Duration
-	// self-observability metrics
-	pointsExportedCounter metricapi.Int64Counter
 }
 
 type exporterWAL struct {
@@ -113,11 +113,10 @@ type requestInfo struct {
 // metricMapper is the part that transforms metrics. Separate from MetricsExporter since it has
 // all pure functions.
 type metricMapper struct {
-	normalizer normalization.Normalizer
-	obs        selfObservability
-	cfg        Config
-	// self-observability metrics
+	normalizer                  normalization.Normalizer
+	obs                         selfObservability
 	exemplarAttachmentDropCount metricapi.Int64Counter
+	cfg                         Config
 }
 
 // Constants we use when translating summary metrics into GCP.
