@@ -47,9 +47,7 @@ var (
 	// the same value every time due to side effects. The values of these metrics get cleared
 	// and are not checked in the fixture. Their labels and types are still checked.
 	selfObsMetricsToNormalize = map[string]struct{}{
-		"custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency":      {},
-		"custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc":     {},
-		"custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc": {},
+		// TODO: update to OTel metric names
 	}
 )
 

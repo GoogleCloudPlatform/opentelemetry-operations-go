@@ -2340,8 +2340,10 @@ func TestInstrumentationScopeToLabelsUTF8(t *testing.T) {
 
 func TestSetupWAL(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
-	mExp := &MetricsExporter{
-		cfg: Config{
+
+	mExp, err := NewGoogleCloudMetricsExporter(
+		context.Background(),
+		Config{
 			MetricConfig: MetricConfig{
 				WALConfig: &WALConfig{
 					Directory:  tmpDir,
@@ -2349,7 +2351,12 @@ func TestSetupWAL(t *testing.T) {
 				},
 			},
 		},
-	}
+		zap.NewNop(),
+		noop.NewMeterProvider(),
+		Version(),
+		10*time.Second,
+	)
+	require.NoError(t, err)
 	firstIndex, lastIndex, err := mExp.setupWAL()
 	require.NoError(t, err)
 	require.Zero(t, firstIndex)
@@ -2369,16 +2376,23 @@ func TestSetupWAL(t *testing.T) {
 
 func TestCloseWAL(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
-	mExp := &MetricsExporter{
-		cfg: Config{
+
+	mExp, err := NewGoogleCloudMetricsExporter(
+		context.Background(),
+		Config{
 			MetricConfig: MetricConfig{
 				WALConfig: &WALConfig{
 					Directory: tmpDir,
 				},
 			},
 		},
-	}
-	_, _, err := mExp.setupWAL()
+		zap.NewNop(),
+		noop.NewMeterProvider(),
+		Version(),
+		10*time.Second,
+	)
+	require.NoError(t, err)
+	_, _, err = mExp.setupWAL()
 	require.NoError(t, err)
 
 	err = mExp.closeWAL()
@@ -2391,20 +2405,26 @@ func TestCloseWAL(t *testing.T) {
 
 func TestReadWALAndExport(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
-	mExp := &MetricsExporter{
-		cfg: Config{
+	mExp, err := NewGoogleCloudMetricsExporter(
+		context.Background(),
+		Config{
 			MetricConfig: MetricConfig{
 				WALConfig: &WALConfig{
 					Directory: tmpDir,
 				},
 			},
 		},
-		exportFunc: func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
-			return nil
-		},
+		zap.NewNop(),
+		noop.NewMeterProvider(),
+		Version(),
+		10*time.Second,
+	)
+	require.NoError(t, err)
+	mExp.exportFunc = func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
+		return nil
 	}
 
-	_, _, err := mExp.setupWAL()
+	_, _, err = mExp.setupWAL()
 	require.NoError(t, err)
 
 	req := &monitoringpb.CreateTimeSeriesRequest{Name: "foo"}
@@ -2424,9 +2444,10 @@ func TestReadWALAndExport(t *testing.T) {
 
 func TestReadWALAndExportRetry(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
-	mExp := &MetricsExporter{
-		obs: selfObservability{zap.NewNop(), noop.NewMeterProvider()},
-		cfg: Config{
+
+	mExp, err := NewGoogleCloudMetricsExporter(
+		context.Background(),
+		Config{
 			MetricConfig: MetricConfig{
 				WALConfig: &WALConfig{
 					Directory:  tmpDir,
@@ -2434,17 +2455,22 @@ func TestReadWALAndExportRetry(t *testing.T) {
 				},
 			},
 		},
-		exportFunc: func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
-			statusResp := status.New(codes.Unavailable, "unavailable")
-			statusResp, _ = statusResp.WithDetails(&monitoringpb.CreateTimeSeriesSummary{
-				TotalPointCount:   int32(len(req.TimeSeries)),
-				SuccessPointCount: 0,
-			})
-			return statusResp.Err()
-		},
+		zap.NewNop(),
+		noop.NewMeterProvider(),
+		Version(),
+		10*time.Second,
+	)
+	require.NoError(t, err)
+	mExp.exportFunc = func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
+		statusResp := status.New(codes.Unavailable, "unavailable")
+		statusResp, _ = statusResp.WithDetails(&monitoringpb.CreateTimeSeriesSummary{
+			TotalPointCount:   int32(len(req.TimeSeries)),
+			SuccessPointCount: 0,
+		})
+		return statusResp.Err()
 	}
 
-	_, _, err := mExp.setupWAL()
+	_, _, err = mExp.setupWAL()
 	require.NoError(t, err)
 
 	req := &monitoringpb.CreateTimeSeriesRequest{Name: "foo"}
@@ -2465,17 +2491,22 @@ func TestReadWALAndExportRetry(t *testing.T) {
 
 func TestWatchWALFile(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
-	mExp := &MetricsExporter{
-		obs: selfObservability{zap.NewExample(), noop.NewMeterProvider()},
-		cfg: Config{
+	mExp, err := NewGoogleCloudMetricsExporter(
+		context.Background(),
+		Config{
 			MetricConfig: MetricConfig{
 				WALConfig: &WALConfig{
 					Directory: tmpDir,
 				},
 			},
 		},
-	}
-	_, _, err := mExp.setupWAL()
+		zap.NewNop(),
+		noop.NewMeterProvider(),
+		Version(),
+		10*time.Second,
+	)
+	require.NoError(t, err)
+	_, _, err = mExp.setupWAL()
 	require.NoError(t, err)
 
 	watchChan := make(chan error)
@@ -2505,29 +2536,33 @@ func TestRunWALReadAndExportLoop(t *testing.T) {
 	doneChan := make(chan bool)
 
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
-	shutdown := make(chan struct{})
-	mExp := &MetricsExporter{
-		obs:       selfObservability{zap.NewNop(), noop.NewMeterProvider()},
-		shutdownC: shutdown,
-		cfg: Config{
+	mExp, err := NewGoogleCloudMetricsExporter(
+		context.Background(),
+		Config{
 			MetricConfig: MetricConfig{
 				WALConfig: &WALConfig{
 					Directory: tmpDir,
 				},
 			},
 		},
-		exportFunc: func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
-			if len(req.String()) == 0 {
-				return nil
-			}
-			requestsReceived++
-			if requestsReceived == 10 {
-				doneChan <- true
-			}
+		zap.NewNop(),
+		noop.NewMeterProvider(),
+		Version(),
+		10*time.Second,
+	)
+	require.NoError(t, err)
+
+	mExp.exportFunc = func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
+		if len(req.String()) == 0 {
 			return nil
-		},
+		}
+		requestsReceived++
+		if requestsReceived == 10 {
+			doneChan <- true
+		}
+		return nil
 	}
-	_, _, err := mExp.setupWAL()
+	_, _, err = mExp.setupWAL()
 	require.NoError(t, err)
 
 	ctx := context.Background()
@@ -2560,30 +2595,26 @@ func TestRunWALReadAndExportLoop(t *testing.T) {
 
 func TestPushMetricsOntoWAL(t *testing.T) {
 	tmpDir, _ := os.MkdirTemp("", "wal-test-")
-	shutdown := make(chan struct{})
-	obs := selfObservability{zap.NewNop(), noop.NewMeterProvider()}
-	cfg := Config{
-		MetricConfig: MetricConfig{
-			MapMonitoredResource: defaultResourceToMonitoringMonitoredResource,
-			GetMetricName:        defaultGetMetricName,
-			WALConfig: &WALConfig{
-				Directory: tmpDir,
+	mExp, err := NewGoogleCloudMetricsExporter(
+		context.Background(),
+		Config{
+			MetricConfig: MetricConfig{
+				MapMonitoredResource: defaultResourceToMonitoringMonitoredResource,
+				GetMetricName:        defaultGetMetricName,
+				WALConfig: &WALConfig{
+					Directory: tmpDir,
+				},
 			},
 		},
-	}
-	mExp := &MetricsExporter{
-		obs:       obs,
-		shutdownC: shutdown,
-		cfg:       cfg,
-		client:    &mock{},
-		mapper: metricMapper{
-			obs:        obs,
-			cfg:        cfg,
-			normalizer: normalization.NewDisabledNormalizer(),
-		},
-	}
+		zap.NewNop(),
+		noop.NewMeterProvider(),
+		Version(),
+		10*time.Second,
+	)
+	require.NoError(t, err)
+	mExp.client = &mock{}
 
-	_, _, err := mExp.setupWAL()
+	_, _, err = mExp.setupWAL()
 	require.NoError(t, err)
 
 	metrics := pmetric.NewMetrics()

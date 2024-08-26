@@ -49,11 +49,10 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/otel/attribute"
 	metricapi "go.opentelemetry.io/otel/metric"
 
 	"github.com/fsnotify/fsnotify"
@@ -93,6 +92,8 @@ type MetricsExporter struct {
 	// goroutines tracks the currently running child tasks
 	goroutines sync.WaitGroup
 	timeout    time.Duration
+	// self-observability metrics
+	pointsExportedCounter metricapi.Int64Counter
 }
 
 type exporterWAL struct {
@@ -115,12 +116,15 @@ type metricMapper struct {
 	normalizer normalization.Normalizer
 	obs        selfObservability
 	cfg        Config
+	// self-observability metrics
+	exemplarAttachmentDropCount metricapi.Int64Counter
 }
 
 // Constants we use when translating summary metrics into GCP.
 const (
 	SummaryCountPrefix = "_count"
 	SummarySumSuffix   = "_sum"
+	scopeName          = "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
 
 const (
@@ -178,12 +182,24 @@ func NewGoogleCloudMetricsExporter(
 	version string,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
-	// TODO: https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/pull/537#discussion_r1038290097
-	//nolint:errcheck
-	view.Register(MetricViews()...)
-	//nolint:errcheck
-	view.Register(ocgrpc.DefaultClientViews...)
 	setVersionInUserAgent(&cfg, version)
+	meter := meterProvider.Meter(scopeName, metricapi.WithInstrumentationVersion(Version()))
+	pointsExportedCounter, err := meter.Int64Counter(
+		"googlecloudmonitoring/point_count",
+		metricapi.WithDescription("Count of metric points written to Cloud Monitoring."),
+		metricapi.WithUnit("1"),
+	)
+	if err != nil {
+		return nil, err
+	}
+	exemplarAttachmentDropCount, err := meter.Int64Counter(
+		"googlecloudmonitoring/exemplar_attachments_dropped",
+		metricapi.WithDescription("Count of exemplar attachments dropped."),
+		metricapi.WithUnit("{attachments}"),
+	)
+	if err != nil {
+		return nil, err
+	}
 
 	obs := selfObservability{log: log, meterProvider: meterProvider}
 	normalizer := normalization.NewDisabledNormalizer()
@@ -191,18 +207,20 @@ func NewGoogleCloudMetricsExporter(
 		cfg: cfg,
 		obs: obs,
 		mapper: metricMapper{
-			obs:        obs,
-			cfg:        cfg,
-			normalizer: normalizer,
+			obs:                         obs,
+			cfg:                         cfg,
+			normalizer:                  normalizer,
+			exemplarAttachmentDropCount: exemplarAttachmentDropCount,
 		},
 		// We create a buffered channel for metric descriptors.
 		// MetricDescritpors are asychronously sent and optimistic.
 		// We only get Unit/Description/Display name from them, so it's ok
 		// to drop / conserve resources for sending timeseries.
-		metricDescriptorC: make(chan *monitoringpb.CreateMetricDescriptorRequest, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
-		mdCache:           make(map[string]*monitoringpb.CreateMetricDescriptorRequest),
-		shutdownC:         make(chan struct{}),
-		timeout:           timeout,
+		metricDescriptorC:     make(chan *monitoringpb.CreateMetricDescriptorRequest, cfg.MetricConfig.CreateMetricDescriptorBufferSize),
+		mdCache:               make(map[string]*monitoringpb.CreateMetricDescriptorRequest),
+		shutdownC:             make(chan struct{}),
+		timeout:               timeout,
+		pointsExportedCounter: pointsExportedCounter,
 	}
 	mExp.exportFunc = mExp.exportToTimeSeries
 
@@ -443,7 +461,6 @@ func (me *MetricsExporter) export(ctx context.Context, req *monitoringpb.CreateT
 
 	err := me.exportFunc(ctx, req)
 	s := status.Convert(err)
-	st := statusCodeToString(s)
 
 	succeededPoints := len(req.TimeSeries)
 	failedPoints := 0
@@ -455,11 +472,62 @@ func (me *MetricsExporter) export(ctx context.Context, req *monitoringpb.CreateT
 	}
 
 	// always record the number of successful points
-	recordPointCountDataPoint(ctx, succeededPoints, "OK")
+	me.pointsExportedCounter.Add(
+		ctx,
+		int64(succeededPoints),
+		metricapi.WithAttributes(attribute.String("status", "OK")),
+	)
 	if failedPoints > 0 {
-		recordPointCountDataPoint(ctx, failedPoints, st)
+		st := statusCodeToString(s)
+		me.pointsExportedCounter.Add(
+			ctx,
+			int64(failedPoints),
+			metricapi.WithAttributes(attribute.String("status", st)),
+		)
 	}
 	return err
+}
+
+func statusCodeToString(s *status.Status) string {
+	// see https://github.com/grpc/grpc/blob/master/doc/statuscodes.md
+	switch c := s.Code(); c {
+	case codes.OK:
+		return "OK"
+	case codes.Canceled:
+		return "CANCELLED"
+	case codes.Unknown:
+		return "UNKNOWN"
+	case codes.InvalidArgument:
+		return "INVALID_ARGUMENT"
+	case codes.DeadlineExceeded:
+		return "DEADLINE_EXCEEDED"
+	case codes.NotFound:
+		return "NOT_FOUND"
+	case codes.AlreadyExists:
+		return "ALREADY_EXISTS"
+	case codes.PermissionDenied:
+		return "PERMISSION_DENIED"
+	case codes.ResourceExhausted:
+		return "RESOURCE_EXHAUSTED"
+	case codes.FailedPrecondition:
+		return "FAILED_PRECONDITION"
+	case codes.Aborted:
+		return "ABORTED"
+	case codes.OutOfRange:
+		return "OUT_OF_RANGE"
+	case codes.Unimplemented:
+		return "UNIMPLEMENTED"
+	case codes.Internal:
+		return "INTERNAL"
+	case codes.Unavailable:
+		return "UNAVAILABLE"
+	case codes.DataLoss:
+		return "DATA_LOSS"
+	case codes.Unauthenticated:
+		return "UNAUTHENTICATED"
+	default:
+		return "CODE_" + strconv.FormatInt(int64(c), 10)
+	}
 }
 
 // readWALAndExport pops the next CreateTimeSeriesRequest from the WAL and tries exporting it.
@@ -913,7 +981,7 @@ func (m *metricMapper) exemplar(ex pmetric.Exemplar, projectID string) *distribu
 		} else {
 			// This happens in the event of logic error (e.g. missing required fields).
 			// As such we complaining loudly to fail our unit tests.
-			recordExemplarFailure(ctx, 1)
+			m.exemplarAttachmentDropCount.Add(ctx, 1)
 		}
 	}
 	if ex.FilteredAttributes().Len() > 0 {
@@ -925,7 +993,7 @@ func (m *metricMapper) exemplar(ex pmetric.Exemplar, projectID string) *distribu
 		} else {
 			// This happens in the event of logic error (e.g. missing required fields).
 			// As such we complaining loudly to fail our unit tests.
-			recordExemplarFailure(ctx, 1)
+			m.exemplarAttachmentDropCount.Add(ctx, 1)
 		}
 	}
 	var val float64
