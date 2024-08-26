@@ -2859,5 +2859,547 @@
       ]
     }
   ],
-  "userAgent": "custom-user-agent latest grpc-go/1.65.0"
+  "userAgent": "custom-user-agent latest grpc-go/1.65.0",
+  "selfObservabilityMetrics": {
+    "createTimeSeriesRequests": [
+      {
+        "name": "projects/myproject",
+        "timeSeries": [
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.duration",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          0.00001,
+                          0.00005,
+                          0.0001,
+                          0.0003,
+                          0.0006,
+                          0.0008,
+                          0.001,
+                          0.002,
+                          0.003,
+                          0.004,
+                          0.005,
+                          0.006,
+                          0.008,
+                          0.01,
+                          0.013,
+                          0.016,
+                          0.02,
+                          0.025,
+                          0.03,
+                          0.04,
+                          0.05,
+                          0.065,
+                          0.08,
+                          0.1,
+                          0.13,
+                          0.16,
+                          0.2,
+                          0.25,
+                          0.3,
+                          0.4,
+                          0.5,
+                          0.65,
+                          0.8,
+                          1,
+                          2,
+                          5,
+                          10,
+                          20,
+                          50,
+                          100
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "s"
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "By"
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "By"
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.started",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "INT64",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "1"
+                }
+              }
+            ],
+            "unit": "attempt"
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.call.duration",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          0.00001,
+                          0.00005,
+                          0.0001,
+                          0.0003,
+                          0.0006,
+                          0.0008,
+                          0.001,
+                          0.002,
+                          0.003,
+                          0.004,
+                          0.005,
+                          0.006,
+                          0.008,
+                          0.01,
+                          0.013,
+                          0.016,
+                          0.02,
+                          0.025,
+                          0.03,
+                          0.04,
+                          0.05,
+                          0.065,
+                          0.08,
+                          0.1,
+                          0.13,
+                          0.16,
+                          0.2,
+                          0.25,
+                          0.3,
+                          0.4,
+                          0.5,
+                          0.65,
+                          0.8,
+                          1,
+                          2,
+                          5,
+                          10,
+                          20,
+                          50,
+                          100
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "s"
+          }
+        ]
+      }
+    ],
+    "createMetricDescriptorRequests": [
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.duration",
+          "type": "workload.googleapis.com/grpc.client.attempt.duration",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "s",
+          "description": "End-to-end time taken to complete a client call attempt.",
+          "displayName": "grpc.client.attempt.duration"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.rcvd_total_compressed_message_size",
+          "type": "workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Compressed message bytes received per call attempt.",
+          "displayName": "grpc.client.attempt.rcvd_total_compressed_message_size"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.sent_total_compressed_message_size",
+          "type": "workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Compressed message bytes sent per client call attempt.",
+          "displayName": "grpc.client.attempt.sent_total_compressed_message_size"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.started",
+          "type": "workload.googleapis.com/grpc.client.attempt.started",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "unit": "attempt",
+          "description": "Number of client call attempts started.",
+          "displayName": "grpc.client.attempt.started"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.call.duration",
+          "type": "workload.googleapis.com/grpc.client.call.duration",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "s",
+          "description": "Time taken by gRPC to complete an RPC from application's perspective.",
+          "displayName": "grpc.client.call.duration"
+        }
+      }
+    ]
+  }
 }
