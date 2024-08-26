@@ -32,6 +32,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
+	otelgrpc "google.golang.org/grpc/stats/opentelemetry"
 )
 
 const (
@@ -266,7 +267,11 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 			// option.WithGRPCConn option takes precedent over all other supplied options so the
 			// following user agent will be used by both exporters if we reach this branch
 			dialOpts := []grpc.DialOption{
-				// TODO: use meterProvider for gRPC instrumentation
+				otelgrpc.DialOption(otelgrpc.Options{
+					MetricsOptions: otelgrpc.MetricsOptions{
+						MeterProvider: meterProvider,
+					},
+				}),
 				grpc.WithTransportCredentials(insecure.NewCredentials()),
 			}
 			if cfg.UserAgent != "" {
