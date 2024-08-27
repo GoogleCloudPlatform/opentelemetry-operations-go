@@ -34,7 +34,7 @@ func NewDisabledNormalizer() Normalizer {
 type disabledNormalizer struct{}
 
 // NormalizeExponentialHistogramDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, _ string) (pmetric.ExponentialHistogramDataPoint, bool) {
+func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, _ uint64) (pmetric.ExponentialHistogramDataPoint, bool) {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
 		// Make a copy so we don't mutate underlying data.
@@ -48,7 +48,7 @@ func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetri
 }
 
 // NormalizeHistogramDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, _ string) (pmetric.HistogramDataPoint, bool) {
+func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, _ uint64) (pmetric.HistogramDataPoint, bool) {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
 		// Make a copy so we don't mutate underlying data.
@@ -62,7 +62,7 @@ func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 }
 
 // NormalizeNumberDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, _ string) (pmetric.NumberDataPoint, bool) {
+func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, _ uint64) (pmetric.NumberDataPoint, bool) {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
 		// Make a copy so we don't mutate underlying data.
@@ -76,7 +76,7 @@ func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPo
 }
 
 // NormalizeSummaryDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, _ string) (pmetric.SummaryDataPoint, bool) {
+func (d *disabledNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, _ uint64) (pmetric.SummaryDataPoint, bool) {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
 		// Make a copy so we don't mutate underlying data.

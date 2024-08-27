@@ -15,9 +15,9 @@
 package datapointstorage
 
 import (
-	"fmt"
+	"hash"
+	"hash/fnv"
 	"sort"
-	"strings"
 	"sync"
 	"time"
 
@@ -30,10 +30,10 @@ import (
 const gcInterval = 20 * time.Minute
 
 type Cache struct {
-	numberCache               map[string]usedNumberPoint
-	summaryCache              map[string]usedSummaryPoint
-	histogramCache            map[string]usedHistogramPoint
-	exponentialHistogramCache map[string]usedExponentialHistogramPoint
+	numberCache               map[uint64]usedNumberPoint
+	summaryCache              map[uint64]usedSummaryPoint
+	histogramCache            map[uint64]usedHistogramPoint
+	exponentialHistogramCache map[uint64]usedExponentialHistogramPoint
 	numberLock                sync.RWMutex
 	summaryLock               sync.RWMutex
 	histogramLock             sync.RWMutex
@@ -63,10 +63,10 @@ type usedExponentialHistogramPoint struct {
 // NewCache instantiates a cache and starts background processes.
 func NewCache(shutdown <-chan struct{}) *Cache {
 	c := &Cache{
-		numberCache:               make(map[string]usedNumberPoint),
-		summaryCache:              make(map[string]usedSummaryPoint),
-		histogramCache:            make(map[string]usedHistogramPoint),
-		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+		numberCache:               make(map[uint64]usedNumberPoint),
+		summaryCache:              make(map[uint64]usedSummaryPoint),
+		histogramCache:            make(map[uint64]usedHistogramPoint),
+		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
 	go func() {
 		ticker := time.NewTicker(gcInterval)
@@ -79,7 +79,7 @@ func NewCache(shutdown <-chan struct{}) *Cache {
 
 // GetNumberDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found.
-func (c *Cache) GetNumberDataPoint(identifier string) (pmetric.NumberDataPoint, bool) {
+func (c *Cache) GetNumberDataPoint(identifier uint64) (pmetric.NumberDataPoint, bool) {
 	c.numberLock.RLock()
 	defer c.numberLock.RUnlock()
 	point, found := c.numberCache[identifier]
@@ -90,7 +90,7 @@ func (c *Cache) GetNumberDataPoint(identifier string) (pmetric.NumberDataPoint, 
 }
 
 // SetNumberDataPoint assigns the point to the identifier in the cache.
-func (c *Cache) SetNumberDataPoint(identifier string, point pmetric.NumberDataPoint) {
+func (c *Cache) SetNumberDataPoint(identifier uint64, point pmetric.NumberDataPoint) {
 	c.numberLock.Lock()
 	defer c.numberLock.Unlock()
 	c.numberCache[identifier] = usedNumberPoint{point, atomic.NewBool(true)}
@@ -98,7 +98,7 @@ func (c *Cache) SetNumberDataPoint(identifier string, point pmetric.NumberDataPo
 
 // GetSummaryDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found.
-func (c *Cache) GetSummaryDataPoint(identifier string) (pmetric.SummaryDataPoint, bool) {
+func (c *Cache) GetSummaryDataPoint(identifier uint64) (pmetric.SummaryDataPoint, bool) {
 	c.summaryLock.RLock()
 	defer c.summaryLock.RUnlock()
 	point, found := c.summaryCache[identifier]
@@ -109,7 +109,7 @@ func (c *Cache) GetSummaryDataPoint(identifier string) (pmetric.SummaryDataPoint
 }
 
 // SetSummaryDataPoint assigns the point to the identifier in the cache.
-func (c *Cache) SetSummaryDataPoint(identifier string, point pmetric.SummaryDataPoint) {
+func (c *Cache) SetSummaryDataPoint(identifier uint64, point pmetric.SummaryDataPoint) {
 	c.summaryLock.Lock()
 	defer c.summaryLock.Unlock()
 	c.summaryCache[identifier] = usedSummaryPoint{point, atomic.NewBool(true)}
@@ -117,7 +117,7 @@ func (c *Cache) SetSummaryDataPoint(identifier string, point pmetric.SummaryData
 
 // GetHistogramDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found.
-func (c *Cache) GetHistogramDataPoint(identifier string) (pmetric.HistogramDataPoint, bool) {
+func (c *Cache) GetHistogramDataPoint(identifier uint64) (pmetric.HistogramDataPoint, bool) {
 	c.histogramLock.RLock()
 	defer c.histogramLock.RUnlock()
 	point, found := c.histogramCache[identifier]
@@ -128,7 +128,7 @@ func (c *Cache) GetHistogramDataPoint(identifier string) (pmetric.HistogramDataP
 }
 
 // SetHistogramDataPoint assigns the point to the identifier in the cache.
-func (c *Cache) SetHistogramDataPoint(identifier string, point pmetric.HistogramDataPoint) {
+func (c *Cache) SetHistogramDataPoint(identifier uint64, point pmetric.HistogramDataPoint) {
 	c.histogramLock.Lock()
 	defer c.histogramLock.Unlock()
 	c.histogramCache[identifier] = usedHistogramPoint{point, atomic.NewBool(true)}
@@ -136,7 +136,7 @@ func (c *Cache) SetHistogramDataPoint(identifier string, point pmetric.Histogram
 
 // GetExponentialHistogramDataPoint retrieves the point associated with the identifier, and whether
 // or not it was found.
-func (c *Cache) GetExponentialHistogramDataPoint(identifier string) (pmetric.ExponentialHistogramDataPoint, bool) {
+func (c *Cache) GetExponentialHistogramDataPoint(identifier uint64) (pmetric.ExponentialHistogramDataPoint, bool) {
 	c.exponentialHistogramLock.RLock()
 	defer c.exponentialHistogramLock.RUnlock()
 	point, found := c.exponentialHistogramCache[identifier]
@@ -147,7 +147,7 @@ func (c *Cache) GetExponentialHistogramDataPoint(identifier string) (pmetric.Exp
 }
 
 // SetExponentialHistogramDataPoint assigns the point to the identifier in the cache.
-func (c *Cache) SetExponentialHistogramDataPoint(identifier string, point pmetric.ExponentialHistogramDataPoint) {
+func (c *Cache) SetExponentialHistogramDataPoint(identifier uint64, point pmetric.ExponentialHistogramDataPoint) {
 	c.exponentialHistogramLock.Lock()
 	defer c.exponentialHistogramLock.Unlock()
 	c.exponentialHistogramCache[identifier] = usedExponentialHistogramPoint{point, atomic.NewBool(true)}
@@ -212,27 +212,57 @@ func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 }
 
 // Identifier returns the unique string identifier for a metric.
-func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pmetric.Metric, attributes pcommon.Map) string {
-	var b strings.Builder
+func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pmetric.Metric, attributes pcommon.Map) (uint64, error) {
+	var err error
+	h := fnv.New64()
 
-	// Resource identifiers
-	if resource != nil {
-		fmt.Fprintf(&b, "%v", resource.GetLabels())
+	_, err = h.Write([]byte(resource.GetType()))
+	if err != nil {
+		return 0, err
+	}
+	_, err = h.Write([]byte(metric.Name()))
+	if err != nil {
+		return 0, err
 	}
 
-	// Instrumentation library labels and additional resource labels
-	fmt.Fprintf(&b, " - %v", extraLabels)
-
-	// Metric identifiers
-	fmt.Fprintf(&b, " - %s -", metric.Name())
-	attrsIds := make([]string, 0, attributes.Len())
+	attrs := make(map[string]string)
 	attributes.Range(func(k string, v pcommon.Value) bool {
-		attrsIds = append(attrsIds, k+"="+v.AsString())
+		attrs[k] = v.AsString()
 		return true
 	})
-	if len(attrsIds) > 0 {
-		sort.Strings(attrsIds)
-		fmt.Fprint(&b, " "+strings.Join(attrsIds, " "))
+
+	err = hashOfMap(h, extraLabels)
+	if err != nil {
+		return 0, err
 	}
-	return b.String()
+
+	err = hashOfMap(h, attrs)
+	if err != nil {
+		return 0, err
+	}
+
+	err = hashOfMap(h, resource.GetLabels())
+	if err != nil {
+		return 0, err
+	}
+	return h.Sum64(), err
+}
+
+func hashOfMap(h hash.Hash64, m map[string]string) error {
+	keys := make([]string, 0, len(m))
+	for k := range m {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, key := range keys {
+		_, err := h.Write([]byte(key))
+		if err != nil {
+			return err
+		}
+		_, err = h.Write([]byte(m[key]))
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

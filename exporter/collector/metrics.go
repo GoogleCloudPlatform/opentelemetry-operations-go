@@ -875,7 +875,11 @@ func (m *metricMapper) summaryPointToTimeSeries(
 		return nil
 	}
 	// Normalize the summary point.
-	metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+	metricIdentifier, err := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+	if err != nil {
+		m.obs.log.Debug("Failed to get identifier for summary metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
+		return nil
+	}
 	normalizedPoint, keep := m.normalizer.NormalizeSummaryDataPoint(point, metricIdentifier)
 	if !keep {
 		return nil
@@ -1148,7 +1152,11 @@ func (m *metricMapper) histogramToTimeSeries(
 	}
 	if hist.AggregationTemporality() == pmetric.AggregationTemporalityCumulative {
 		// Normalize cumulative histogram points.
-		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+		metricIdentifier, err := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+		if err != nil {
+			m.obs.log.Debug("Failed to get identifier for histogram metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
+			return nil
+		}
 		normalizedPoint, keep := m.normalizer.NormalizeHistogramDataPoint(point, metricIdentifier)
 		if !keep {
 			return nil
@@ -1202,7 +1210,11 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	}
 	if exponentialHist.AggregationTemporality() == pmetric.AggregationTemporalityCumulative {
 		// Normalize the histogram point.
-		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+		metricIdentifier, err := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+		if err != nil {
+			m.obs.log.Debug("Failed to get identifier for exponential histogram metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
+			return nil
+		}
 		normalizedPoint, keep := m.normalizer.NormalizeExponentialHistogramDataPoint(point, metricIdentifier)
 		if !keep {
 			return nil
@@ -1257,7 +1269,11 @@ func (m *metricMapper) sumPointToTimeSeries(
 	}
 	if sum.IsMonotonic() {
 		if sum.AggregationTemporality() == pmetric.AggregationTemporalityCumulative {
-			metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+			metricIdentifier, err := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
+			if err != nil {
+				m.obs.log.Debug("Failed to get identifier for sum metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
+				return nil
+			}
 			normalizedPoint, keep := m.normalizer.NormalizeNumberDataPoint(point, metricIdentifier)
 			if !keep {
 				return nil
