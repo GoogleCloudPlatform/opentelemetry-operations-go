@@ -28,6 +28,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pmetric"
+	"go.opentelemetry.io/otel/metric/noop"
 	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
@@ -47,6 +48,7 @@ func createMetricsExporter(
 		ctx,
 		cfg,
 		logger,
+		noop.NewMeterProvider(),
 		"latest",
 		collector.DefaultTimeout,
 	)

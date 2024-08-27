@@ -47,10 +47,10 @@ var (
 	// the same value every time due to side effects. The values of these metrics get cleared
 	// and are not checked in the fixture. Their labels and types are still checked.
 	selfObsMetricsToNormalize = map[string]struct{}{
-		"workload.googleapis.com/grpc.client.attempt.duration":                           struct{}{},
-		"workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size": struct{}{},
-		"workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size": struct{}{},
-		"workload.googleapis.com/grpc.client.call.duration":                              struct{}{},
+		"workload.googleapis.com/grpc.client.attempt.duration":                           {},
+		"workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size": {},
+		"workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size": {},
+		"workload.googleapis.com/grpc.client.call.duration":                              {},
 	}
 	// selfObsMetricsToNormalize is the set of labels on self-observability metrics which change
 	// each run of the fixture. Override the label with the provided value.
