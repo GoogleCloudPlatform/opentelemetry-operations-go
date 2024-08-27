@@ -89,15 +89,21 @@ func (fr fixtureRecorder) recordTraces(ctx context.Context, t *FakeTesting, star
 
 		func() {
 			traces := test.LoadOTLPTracesInput(t, startTime, endTime)
-			testServerExporter := integrationtest.NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig())
+			inMemoryOTelExporter, err := integrationtest.NewInMemoryOTelExporter()
+			require.NoError(t, err)
+			//nolint:errcheck
+			defer inMemoryOTelExporter.Shutdown(ctx)
+			testServerExporter := integrationtest.NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig(), inMemoryOTelExporter.MeterProvider)
 
 			require.NoError(t, testServerExporter.PushTraces(ctx, traces), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
 			require.NoError(t, err)
 			fixture := &protos.TraceExpectFixture{
-				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
-				UserAgent:              testServer.UserAgent(),
+				BatchWriteSpansRequest:   testServer.CreateBatchWriteSpansRequests(),
+				SelfObservabilityMetrics: selfObsMetrics,
+				UserAgent:                testServer.UserAgent(),
 			}
 			test.SaveRecordedTraceFixtures(t, fixture)
 		}()
@@ -121,15 +127,20 @@ func (fr fixtureRecorder) recordLogs(ctx context.Context, t *FakeTesting, timest
 
 		func() {
 			logs := test.LoadOTLPLogsInput(t, timestamp)
-			testServerExporter := integrationtest.NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig(), test.ConfigureLogsExporter)
+			inMemoryOTelExporter, err := integrationtest.NewInMemoryOTelExporter()
+			require.NoError(t, err)
+			//nolint:errcheck
+			defer inMemoryOTelExporter.Shutdown(ctx)
+			testServerExporter := integrationtest.NewLogTestExporter(ctx, t, testServer, test.CreateLogConfig(), test.ConfigureLogsExporter, inMemoryOTelExporter.MeterProvider)
 
 			require.NoError(t, testServerExporter.PushLogs(ctx, logs), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
-
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
 			require.NoError(t, err)
 			fixture := &protos.LogExpectFixture{
-				WriteLogEntriesRequests: testServer.CreateWriteLogEntriesRequests(),
-				UserAgent:               testServer.UserAgent(),
+				WriteLogEntriesRequests:  testServer.CreateWriteLogEntriesRequests(),
+				SelfObservabilityMetrics: selfObsMetrics,
+				UserAgent:                testServer.UserAgent(),
 			}
 			test.SaveRecordedLogFixtures(t, fixture)
 		}()
@@ -153,11 +164,11 @@ func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, sta
 
 		func() {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
-			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig())
-			inMemoryOCExporter, err := integrationtest.NewInMemoryOCViewExporter()
+			inMemoryOTelExporter, err := integrationtest.NewInMemoryOTelExporter()
+			testServerExporter := integrationtest.NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig(), inMemoryOTelExporter.MeterProvider)
 			require.NoError(t, err)
 			//nolint:errcheck
-			defer inMemoryOCExporter.Shutdown(ctx)
+			defer inMemoryOTelExporter.Shutdown(ctx)
 
 			err = testServerExporter.PushMetrics(ctx, metrics)
 			if !test.ExpectErr {
@@ -167,7 +178,7 @@ func (fr fixtureRecorder) recordMetrics(ctx context.Context, t *FakeTesting, sta
 			}
 			require.NoError(t, testServerExporter.Shutdown(ctx))
 
-			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
 			require.NoError(t, err)
 			fixture := &protos.MetricExpectFixture{
 				CreateMetricDescriptorRequests:  testServer.CreateMetricDescriptorRequests(),

@@ -6,7 +6,6 @@ toolchain go1.22.0
 
 require (
 	cloud.google.com/go/monitoring v1.20.2
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.48.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.1
 	github.com/googleapis/gax-go/v2 v2.12.5
 	github.com/stretchr/testify v1.9.0
@@ -19,11 +18,12 @@ require (
 	golang.org/x/sys v0.22.0 // indirect
 	google.golang.org/api v0.188.0
 	google.golang.org/genproto v0.0.0-20240708141625-4ad9e859172b // indirect
-	google.golang.org/grpc v1.64.1
+	google.golang.org/grpc v1.65.0
 	google.golang.org/protobuf v1.34.2
 )
 
 require (
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.48.1
 	go.opentelemetry.io/otel/trace v1.28.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240701130421-f6361c86f094
 )

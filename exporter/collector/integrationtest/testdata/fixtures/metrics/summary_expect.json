@@ -222,14 +222,21 @@
         "timeSeries": [
           {
             "metric": {
-              "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+              "type": "workload.googleapis.com/googlecloudmonitoring/point_count",
               "labels": {
                 "status": "OK"
               }
             },
             "resource": {
-              "type": "global"
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
             },
+            "metricKind": "CUMULATIVE",
+            "valueType": "INT64",
             "points": [
               {
                 "interval": {
@@ -240,64 +247,28 @@
                   "int64Value": "5"
                 }
               }
-            ]
+            ],
+            "unit": "1"
           },
           {
             "metric": {
-              "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
+              "type": "workload.googleapis.com/grpc.client.attempt.duration",
               "labels": {
-                "grpc_client_method": "google.monitoring.v3.MetricService/CreateMetricDescriptor",
-                "grpc_client_status": "OK"
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
               }
             },
             "resource": {
-              "type": "global"
-            },
-            "points": [
-              {
-                "interval": {
-                  "endTime": "1970-01-01T00:00:00Z",
-                  "startTime": "1970-01-01T00:00:00Z"
-                },
-                "value": {
-                  "int64Value": "3"
-                }
-              }
-            ]
-          },
-          {
-            "metric": {
-              "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
+              "type": "generic_node",
               "labels": {
-                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries",
-                "grpc_client_status": "OK"
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
               }
             },
-            "resource": {
-              "type": "global"
-            },
-            "points": [
-              {
-                "interval": {
-                  "endTime": "1970-01-01T00:00:00Z",
-                  "startTime": "1970-01-01T00:00:00Z"
-                },
-                "value": {
-                  "int64Value": "1"
-                }
-              }
-            ]
-          },
-          {
-            "metric": {
-              "type": "custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
-              "labels": {
-                "grpc_client_method": "google.monitoring.v3.MetricService/CreateMetricDescriptor"
-              }
-            },
-            "resource": {
-              "type": "global"
-            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
             "points": [
               {
                 "interval": {
@@ -310,166 +281,46 @@
                       "explicitBuckets": {
                         "bounds": [
                           0,
-                          1024,
-                          2048,
-                          4096,
-                          16384,
-                          65536,
-                          262144,
-                          1048576,
-                          4194304,
-                          16777216,
-                          67108864,
-                          268435456,
-                          1073741824,
-                          4294967296
-                        ]
-                      }
-                    },
-                    "bucketCounts": [
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0"
-                    ]
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "metric": {
-              "type": "custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
-              "labels": {
-                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries"
-              }
-            },
-            "resource": {
-              "type": "global"
-            },
-            "points": [
-              {
-                "interval": {
-                  "endTime": "1970-01-01T00:00:00Z",
-                  "startTime": "1970-01-01T00:00:00Z"
-                },
-                "value": {
-                  "distributionValue": {
-                    "bucketOptions": {
-                      "explicitBuckets": {
-                        "bounds": [
-                          0,
-                          1024,
-                          2048,
-                          4096,
-                          16384,
-                          65536,
-                          262144,
-                          1048576,
-                          4194304,
-                          16777216,
-                          67108864,
-                          268435456,
-                          1073741824,
-                          4294967296
-                        ]
-                      }
-                    },
-                    "bucketCounts": [
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0"
-                    ]
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "metric": {
-              "type": "custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
-              "labels": {
-                "grpc_client_method": "google.monitoring.v3.MetricService/CreateMetricDescriptor"
-              }
-            },
-            "resource": {
-              "type": "global"
-            },
-            "points": [
-              {
-                "interval": {
-                  "endTime": "1970-01-01T00:00:00Z",
-                  "startTime": "1970-01-01T00:00:00Z"
-                },
-                "value": {
-                  "distributionValue": {
-                    "bucketOptions": {
-                      "explicitBuckets": {
-                        "bounds": [
-                          0,
+                          0.00001,
+                          0.00005,
+                          0.0001,
+                          0.0003,
+                          0.0006,
+                          0.0008,
+                          0.001,
+                          0.002,
+                          0.003,
+                          0.004,
+                          0.005,
+                          0.006,
+                          0.008,
                           0.01,
+                          0.013,
+                          0.016,
+                          0.02,
+                          0.025,
+                          0.03,
+                          0.04,
                           0.05,
+                          0.065,
+                          0.08,
                           0.1,
+                          0.13,
+                          0.16,
+                          0.2,
+                          0.25,
                           0.3,
-                          0.6,
+                          0.4,
+                          0.5,
+                          0.65,
                           0.8,
                           1,
                           2,
-                          3,
-                          4,
                           5,
-                          6,
-                          8,
                           10,
-                          13,
-                          16,
                           20,
-                          25,
-                          30,
-                          40,
                           50,
-                          65,
-                          80,
-                          100,
-                          130,
-                          160,
-                          200,
-                          250,
-                          300,
-                          400,
-                          500,
-                          650,
-                          800,
-                          1000,
-                          2000,
-                          5000,
-                          10000,
-                          20000,
-                          50000,
-                          100000
+                          100
                         ]
                       }
                     },
@@ -520,18 +371,28 @@
                   }
                 }
               }
-            ]
+            ],
+            "unit": "s"
           },
           {
             "metric": {
-              "type": "custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
+              "type": "workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size",
               "labels": {
-                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries"
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
               }
             },
             "resource": {
-              "type": "global"
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
             },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
             "points": [
               {
                 "interval": {
@@ -544,46 +405,217 @@
                       "explicitBuckets": {
                         "bounds": [
                           0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "By"
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "By"
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.started",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "INT64",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "4"
+                }
+              }
+            ],
+            "unit": "attempt"
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.call.duration",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          0.00001,
+                          0.00005,
+                          0.0001,
+                          0.0003,
+                          0.0006,
+                          0.0008,
+                          0.001,
+                          0.002,
+                          0.003,
+                          0.004,
+                          0.005,
+                          0.006,
+                          0.008,
                           0.01,
+                          0.013,
+                          0.016,
+                          0.02,
+                          0.025,
+                          0.03,
+                          0.04,
                           0.05,
+                          0.065,
+                          0.08,
                           0.1,
+                          0.13,
+                          0.16,
+                          0.2,
+                          0.25,
                           0.3,
-                          0.6,
+                          0.4,
+                          0.5,
+                          0.65,
                           0.8,
                           1,
                           2,
-                          3,
-                          4,
                           5,
-                          6,
-                          8,
                           10,
-                          13,
-                          16,
                           20,
-                          25,
-                          30,
-                          40,
                           50,
-                          65,
-                          80,
-                          100,
-                          130,
-                          160,
-                          200,
-                          250,
-                          300,
-                          400,
-                          500,
-                          650,
-                          800,
-                          1000,
-                          2000,
-                          5000,
-                          10000,
-                          20000,
-                          50000,
-                          100000
+                          100
                         ]
                       }
                     },
@@ -634,127 +666,8 @@
                   }
                 }
               }
-            ]
-          },
-          {
-            "metric": {
-              "type": "custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
-              "labels": {
-                "grpc_client_method": "google.monitoring.v3.MetricService/CreateMetricDescriptor"
-              }
-            },
-            "resource": {
-              "type": "global"
-            },
-            "points": [
-              {
-                "interval": {
-                  "endTime": "1970-01-01T00:00:00Z",
-                  "startTime": "1970-01-01T00:00:00Z"
-                },
-                "value": {
-                  "distributionValue": {
-                    "bucketOptions": {
-                      "explicitBuckets": {
-                        "bounds": [
-                          0,
-                          1024,
-                          2048,
-                          4096,
-                          16384,
-                          65536,
-                          262144,
-                          1048576,
-                          4194304,
-                          16777216,
-                          67108864,
-                          268435456,
-                          1073741824,
-                          4294967296
-                        ]
-                      }
-                    },
-                    "bucketCounts": [
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0"
-                    ]
-                  }
-                }
-              }
-            ]
-          },
-          {
-            "metric": {
-              "type": "custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
-              "labels": {
-                "grpc_client_method": "google.monitoring.v3.MetricService/CreateTimeSeries"
-              }
-            },
-            "resource": {
-              "type": "global"
-            },
-            "points": [
-              {
-                "interval": {
-                  "endTime": "1970-01-01T00:00:00Z",
-                  "startTime": "1970-01-01T00:00:00Z"
-                },
-                "value": {
-                  "distributionValue": {
-                    "bucketOptions": {
-                      "explicitBuckets": {
-                        "bounds": [
-                          0,
-                          1024,
-                          2048,
-                          4096,
-                          16384,
-                          65536,
-                          262144,
-                          1048576,
-                          4194304,
-                          16777216,
-                          67108864,
-                          268435456,
-                          1073741824,
-                          4294967296
-                        ]
-                      }
-                    },
-                    "bucketCounts": [
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0",
-                      "0"
-                    ]
-                  }
-                }
-              }
-            ]
+            ],
+            "unit": "s"
           }
         ]
       }
@@ -763,8 +676,8 @@
       {
         "name": "projects/myproject",
         "metricDescriptor": {
-          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
-          "type": "custom.googleapis.com/opencensus/googlecloudmonitoring/point_count",
+          "name": "googlecloudmonitoring/point_count",
+          "type": "workload.googleapis.com/googlecloudmonitoring/point_count",
           "labels": [
             {
               "key": "status"
@@ -774,81 +687,122 @@
           "valueType": "INT64",
           "unit": "1",
           "description": "Count of metric points written to Cloud Monitoring.",
-          "displayName": "OpenCensus/googlecloudmonitoring/point_count"
+          "displayName": "googlecloudmonitoring/point_count"
         }
       },
       {
         "name": "projects/myproject",
         "metricDescriptor": {
-          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
-          "type": "custom.googleapis.com/opencensus/grpc.io/client/completed_rpcs",
+          "name": "grpc.client.attempt.duration",
+          "type": "workload.googleapis.com/grpc.client.attempt.duration",
           "labels": [
             {
-              "key": "grpc_client_method"
+              "key": "grpc_method"
             },
             {
-              "key": "grpc_client_status"
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "s",
+          "description": "End-to-end time taken to complete a client call attempt.",
+          "displayName": "grpc.client.attempt.duration"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.rcvd_total_compressed_message_size",
+          "type": "workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Compressed message bytes received per call attempt.",
+          "displayName": "grpc.client.attempt.rcvd_total_compressed_message_size"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.sent_total_compressed_message_size",
+          "type": "workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Compressed message bytes sent per client call attempt.",
+          "displayName": "grpc.client.attempt.sent_total_compressed_message_size"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.started",
+          "type": "workload.googleapis.com/grpc.client.attempt.started",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_target"
             }
           ],
           "metricKind": "CUMULATIVE",
           "valueType": "INT64",
-          "unit": "1",
-          "description": "Count of RPCs by method and status.",
-          "displayName": "OpenCensus/grpc.io/client/completed_rpcs"
+          "unit": "attempt",
+          "description": "Number of client call attempts started.",
+          "displayName": "grpc.client.attempt.started"
         }
       },
       {
         "name": "projects/myproject",
         "metricDescriptor": {
-          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
-          "type": "custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc",
+          "name": "grpc.client.call.duration",
+          "type": "workload.googleapis.com/grpc.client.call.duration",
           "labels": [
             {
-              "key": "grpc_client_method"
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
             }
           ],
           "metricKind": "CUMULATIVE",
           "valueType": "DISTRIBUTION",
-          "unit": "By",
-          "description": "Distribution of bytes received per RPC, by method.",
-          "displayName": "OpenCensus/grpc.io/client/received_bytes_per_rpc"
-        }
-      },
-      {
-        "name": "projects/myproject",
-        "metricDescriptor": {
-          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
-          "type": "custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency",
-          "labels": [
-            {
-              "key": "grpc_client_method"
-            }
-          ],
-          "metricKind": "CUMULATIVE",
-          "valueType": "DISTRIBUTION",
-          "unit": "ms",
-          "description": "Distribution of round-trip latency, by method.",
-          "displayName": "OpenCensus/grpc.io/client/roundtrip_latency"
-        }
-      },
-      {
-        "name": "projects/myproject",
-        "metricDescriptor": {
-          "name": "projects/myproject/metricDescriptors/custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
-          "type": "custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc",
-          "labels": [
-            {
-              "key": "grpc_client_method"
-            }
-          ],
-          "metricKind": "CUMULATIVE",
-          "valueType": "DISTRIBUTION",
-          "unit": "By",
-          "description": "Distribution of bytes sent per RPC, by method.",
-          "displayName": "OpenCensus/grpc.io/client/sent_bytes_per_rpc"
+          "unit": "s",
+          "description": "Time taken by gRPC to complete an RPC from application's perspective.",
+          "displayName": "grpc.client.call.duration"
         }
       }
     ]
   },
-  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.64.1"
+  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.65.0"
 }

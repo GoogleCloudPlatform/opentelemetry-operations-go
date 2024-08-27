@@ -26,6 +26,8 @@ import (
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+	"go.opentelemetry.io/otel/metric/noop"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -101,7 +103,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 
 			//nolint:errcheck
 			go srv.Serve(lis)
-			sde, err := NewGoogleCloudTracesExporter(ctx, test.cfg, "latest", DefaultTimeout)
+			sde, err := NewGoogleCloudTracesExporter(ctx, test.cfg, zap.NewNop(), noop.NewMeterProvider(), "latest", DefaultTimeout)
 			require.NoError(t, err)
 			err = sde.Start(ctx, componenttest.NewNopHost())
 			if test.expectedErr != "" {

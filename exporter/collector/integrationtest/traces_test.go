@@ -42,7 +42,12 @@ func TestTraces(t *testing.T) {
 			require.NoError(t, err)
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig())
+
+			inMemoryOTelExporter, err := NewInMemoryOTelExporter()
+			require.NoError(t, err)
+			//nolint:errcheck
+			defer inMemoryOTelExporter.Shutdown(ctx)
+			testServerExporter := NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig(), inMemoryOTelExporter.MeterProvider)
 
 			err = testServerExporter.PushTraces(ctx, traces)
 			if !test.ExpectErr {
@@ -58,9 +63,12 @@ func TestTraces(t *testing.T) {
 				endTime,
 			)
 
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
+			require.NoError(t, err)
 			fixture := &protos.TraceExpectFixture{
-				BatchWriteSpansRequest: testServer.CreateBatchWriteSpansRequests(),
-				UserAgent:              testServer.UserAgent(),
+				BatchWriteSpansRequest:   testServer.CreateBatchWriteSpansRequests(),
+				UserAgent:                testServer.UserAgent(),
+				SelfObservabilityMetrics: selfObsMetrics,
 			}
 
 			diff := DiffTraceProtos(

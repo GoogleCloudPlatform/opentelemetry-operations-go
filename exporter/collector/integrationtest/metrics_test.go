@@ -49,12 +49,12 @@ func TestCollectorMetrics(t *testing.T) {
 			//nolint:errcheck
 			go testServer.Serve()
 			defer testServer.Shutdown()
-			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig())
 			// For collecting self observability metrics
-			inMemoryOCExporter, err := NewInMemoryOCViewExporter()
+			inMemoryOTelExporter, err := NewInMemoryOTelExporter()
+			testServerExporter := NewMetricTestExporter(ctx, t, testServer, test.CreateCollectorMetricConfig(), inMemoryOTelExporter.MeterProvider)
 			require.NoError(t, err)
 			//nolint:errcheck
-			defer inMemoryOCExporter.Shutdown(ctx)
+			defer inMemoryOTelExporter.Shutdown(ctx)
 
 			err = testServerExporter.PushMetrics(ctx, metrics)
 			if !test.ExpectErr {
@@ -89,7 +89,7 @@ func TestCollectorMetrics(t *testing.T) {
 				return expectFixture.CreateServiceTimeSeriesRequests[i].Name < expectFixture.CreateServiceTimeSeriesRequests[j].Name
 			})
 
-			selfObsMetrics, err := inMemoryOCExporter.Proto(ctx)
+			selfObsMetrics, err := inMemoryOTelExporter.Proto(ctx)
 			require.NoError(t, err)
 			fixture := &protos.MetricExpectFixture{
 				CreateTimeSeriesRequests:        testServer.CreateTimeSeriesRequests(),

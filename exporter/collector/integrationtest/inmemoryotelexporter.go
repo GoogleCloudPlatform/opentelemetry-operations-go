@@ -19,12 +19,10 @@ import (
 	"testing"
 	"time"
 
-	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/stretchr/testify/require"
-	"go.opencensus.io/metric/metricexport"
-	"go.opencensus.io/plugin/ocgrpc"
-	"go.opencensus.io/stats/view"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/otel/metric"
+	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
@@ -33,40 +31,22 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
+	gcpmetric "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
-// OC stats/metrics exporter used to capture self observability metrics.
-type InMemoryOCExporter struct {
-	testServer          *cloudmock.MetricsTestServer
-	reader              *metricexport.Reader
-	stackdriverExporter *stackdriver.Exporter
+// OTel metrics exporter used to capture self observability metrics.
+type InMemoryOTelExporter struct {
+	testServer    *cloudmock.MetricsTestServer
+	MeterProvider *sdkmetric.MeterProvider
 }
 
-func getViews() []*view.View {
-	views := []*view.View{}
-	views = append(views, collector.MetricViews()...)
-	views = append(views, ocgrpc.DefaultClientViews...)
-	return views
-}
-
-func (i *InMemoryOCExporter) Proto(ctx context.Context) (*protos.SelfObservabilityMetric, error) {
-	// Hack to flush stats, see https://tinyurl.com/5hfcxzk2
-	view.SetReportingPeriod(time.Minute)
-	i.reader.ReadAndExport(i.stackdriverExporter)
+func (i *InMemoryOTelExporter) Proto(ctx context.Context) (*protos.SelfObservabilityMetric, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Millisecond*500)
 	defer cancel()
-
-	done := make(chan struct{}, 1)
-	go func() {
-		i.stackdriverExporter.Flush()
-		close(done)
-	}()
-
-	select {
-	case <-ctx.Done():
-		return nil, ctx.Err()
-	case <-done:
+	err := i.MeterProvider.ForceFlush(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	return &protos.SelfObservabilityMetric{
@@ -77,26 +57,15 @@ func (i *InMemoryOCExporter) Proto(ctx context.Context) (*protos.SelfObservabili
 }
 
 // Shutdown unregisters the global OpenCensus views to reset state for the next test.
-func (i *InMemoryOCExporter) Shutdown(ctx context.Context) error {
-	i.stackdriverExporter.StopMetricsExporter()
-	err := i.stackdriverExporter.Close()
+func (i *InMemoryOTelExporter) Shutdown(ctx context.Context) error {
+	err := i.MeterProvider.Shutdown(ctx)
 	i.testServer.Shutdown()
-
-	view.Unregister(getViews()...)
 	return err
 }
 
-// NewInMemoryOCViewExporter creates a new in memory OC exporter for testing. Be sure to defer
+// NewInMemoryOTelExporter creates a new in memory OTel exporter for testing. Be sure to defer
 // a call to Shutdown().
-func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
-	// Reset our views in case any tests ran before this
-	views := getViews()
-	view.Unregister(views...)
-	err := view.Register(views...)
-	if err != nil {
-		return nil, err
-	}
-
+func NewInMemoryOTelExporter() (*InMemoryOTelExporter, error) {
 	testServer, err := cloudmock.NewMetricTestServer()
 	if err != nil {
 		return nil, err
@@ -107,22 +76,21 @@ func NewInMemoryOCViewExporter() (*InMemoryOCExporter, error) {
 	if err != nil {
 		return nil, err
 	}
-	clientOpts := []option.ClientOption{option.WithGRPCConn(conn)}
 
-	stackdriverExporter, err := stackdriver.NewExporter(stackdriver.Options{
-		DefaultMonitoringLabels: &stackdriver.Labels{},
-		ProjectID:               "myproject",
-		MonitoringClientOptions: clientOpts,
-		TraceClientOptions:      clientOpts,
-	})
+	exporter, err := gcpmetric.New(
+		gcpmetric.WithProjectID("myproject"),
+		gcpmetric.WithMonitoringClientOptions(option.WithGRPCConn(conn)),
+		gcpmetric.WithFilteredResourceAttributes(gcpmetric.NoAttributes),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	return &InMemoryOCExporter{
-			testServer:          testServer,
-			stackdriverExporter: stackdriverExporter,
-			reader:              metricexport.NewReader(),
+	return &InMemoryOTelExporter{
+			testServer: testServer,
+			MeterProvider: sdkmetric.NewMeterProvider(
+				sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exporter)),
+			),
 		},
 		nil
 }
@@ -132,6 +100,7 @@ func NewTraceTestExporter(
 	t testing.TB,
 	s *cloudmock.TracesTestServer,
 	cfg collector.Config,
+	meterProvider metric.MeterProvider,
 ) *collector.TraceExporter {
 	cfg.TraceConfig.ClientConfig.Endpoint = s.Endpoint
 	cfg.TraceConfig.ClientConfig.UseInsecure = true
@@ -140,6 +109,8 @@ func NewTraceTestExporter(
 	exporter, err := collector.NewGoogleCloudTracesExporter(
 		ctx,
 		cfg,
+		zap.NewNop(),
+		meterProvider,
 		"latest",
 		collector.DefaultTimeout,
 	)
@@ -157,14 +128,19 @@ func NewMetricTestExporter(
 	t testing.TB,
 	m *cloudmock.MetricsTestServer,
 	cfg collector.Config,
+	meterProvider metric.MeterProvider,
 ) *collector.MetricsExporter {
 	cfg.MetricConfig.ClientConfig.Endpoint = m.Endpoint
 	cfg.MetricConfig.ClientConfig.UseInsecure = true
 
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
 		cfg,
-		zap.NewNop(),
+		logger,
+		meterProvider,
 		"latest",
 		collector.DefaultTimeout,
 	)
@@ -181,6 +157,7 @@ func NewLogTestExporter(
 	l *cloudmock.LogsTestServer,
 	cfg collector.Config,
 	extraConfig *logsutil.ExporterConfig,
+	meterProvider metric.MeterProvider,
 ) *collector.LogsExporter {
 	cfg.LogConfig.ClientConfig.Endpoint = l.Endpoint
 	cfg.LogConfig.ClientConfig.UseInsecure = true
@@ -193,6 +170,7 @@ func NewLogTestExporter(
 		ctx,
 		cfg,
 		logger,
+		meterProvider,
 		"latest",
 	)
 	require.NoError(t, err)

@@ -47,9 +47,15 @@ var (
 	// the same value every time due to side effects. The values of these metrics get cleared
 	// and are not checked in the fixture. Their labels and types are still checked.
 	selfObsMetricsToNormalize = map[string]struct{}{
-		"custom.googleapis.com/opencensus/grpc.io/client/roundtrip_latency":      {},
-		"custom.googleapis.com/opencensus/grpc.io/client/sent_bytes_per_rpc":     {},
-		"custom.googleapis.com/opencensus/grpc.io/client/received_bytes_per_rpc": {},
+		"workload.googleapis.com/grpc.client.attempt.duration":                           {},
+		"workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size": {},
+		"workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size": {},
+		"workload.googleapis.com/grpc.client.call.duration":                              {},
+	}
+	// selfObsMetricsToNormalize is the set of labels on self-observability metrics which change
+	// each run of the fixture. Override the label with the provided value.
+	selfObsLabelsToNormalize = map[string]string{
+		"grpc_target": "dns:///127.0.0.1:40441",
 	}
 )
 
@@ -149,6 +155,7 @@ func (tc *TestCase) SaveRecordedTraceFixtures(
 }
 
 func NormalizeTraceFixture(t testing.TB, fixture *protos.TraceExpectFixture) {
+	normalizeSelfObs(t, fixture.SelfObservabilityMetrics)
 	for _, req := range fixture.BatchWriteSpansRequest {
 		for _, span := range req.Spans {
 			if span.GetStartTime() != nil {
@@ -245,6 +252,7 @@ func (tc *TestCase) SaveRecordedLogFixtures(
 // Normalizes timestamps which create noise in the fixture because they can
 // vary each test run.
 func NormalizeLogFixture(t testing.TB, fixture *protos.LogExpectFixture) {
+	normalizeSelfObs(t, fixture.SelfObservabilityMetrics)
 	for listIndex, req := range fixture.WriteLogEntriesRequests {
 		// sort the entries in each request
 		sort.Slice(fixture.WriteLogEntriesRequests[listIndex].Entries, func(i, j int) bool {
@@ -491,6 +499,11 @@ func normalizeSelfObs(t testing.TB, selfObs *protos.SelfObservabilityMetric) {
 					}
 				default:
 					t.Logf("Do not know how to normalize typed value type %T", value)
+				}
+			}
+			for k, v := range selfObsLabelsToNormalize {
+				if _, ok := ts.Metric.Labels[k]; ok {
+					ts.Metric.Labels[k] = v
 				}
 			}
 		}
