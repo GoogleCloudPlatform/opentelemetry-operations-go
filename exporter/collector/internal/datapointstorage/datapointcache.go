@@ -212,57 +212,29 @@ func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 }
 
 // Identifier returns the unique string identifier for a metric.
-func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pmetric.Metric, attributes pcommon.Map) (uint64, error) {
-	var err error
+func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pmetric.Metric, attributes pcommon.Map) uint64 {
 	h := fnv.New64()
-
-	_, err = h.Write([]byte(resource.GetType()))
-	if err != nil {
-		return 0, err
-	}
-	_, err = h.Write([]byte(metric.Name()))
-	if err != nil {
-		return 0, err
-	}
-
+	h.Write([]byte(resource.GetType()))
+	h.Write([]byte(metric.Name()))
 	attrs := make(map[string]string)
 	attributes.Range(func(k string, v pcommon.Value) bool {
 		attrs[k] = v.AsString()
 		return true
 	})
-
-	err = hashOfMap(h, extraLabels)
-	if err != nil {
-		return 0, err
-	}
-
-	err = hashOfMap(h, attrs)
-	if err != nil {
-		return 0, err
-	}
-
-	err = hashOfMap(h, resource.GetLabels())
-	if err != nil {
-		return 0, err
-	}
-	return h.Sum64(), err
+	hashOfMap(h, extraLabels)
+	hashOfMap(h, attrs)
+	hashOfMap(h, resource.GetLabels())
+	return h.Sum64()
 }
 
-func hashOfMap(h hash.Hash64, m map[string]string) error {
+func hashOfMap(h hash.Hash64, m map[string]string) {
 	keys := make([]string, 0, len(m))
 	for k := range m {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
 	for _, key := range keys {
-		_, err := h.Write([]byte(key))
-		if err != nil {
-			return err
-		}
-		_, err = h.Write([]byte(m[key]))
-		if err != nil {
-			return err
-		}
+		h.Write([]byte(key))
+		h.Write([]byte(m[key]))
 	}
-	return nil
 }

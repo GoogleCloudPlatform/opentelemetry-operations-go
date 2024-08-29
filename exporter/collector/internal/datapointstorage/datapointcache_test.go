@@ -327,8 +327,7 @@ func TestIdentifier(t *testing.T) {
 		t.Run(tc.desc, func(t *testing.T) {
 			origLabels := pcommon.NewMap()
 			tc.labels.CopyTo(origLabels)
-			got, err := Identifier(tc.resource, tc.extraLabels, tc.metric, tc.labels)
-			assert.NoError(t, err)
+			got := Identifier(tc.resource, tc.extraLabels, tc.metric, tc.labels)
 			if tc.want != got {
 				t.Errorf("Identifier() = %d; want %d", got, tc.want)
 			}
