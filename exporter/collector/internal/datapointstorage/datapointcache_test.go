@@ -261,19 +261,15 @@ func TestIdentifier(t *testing.T) {
 	metricWithName := pmetric.NewMetric()
 	metricWithName.SetName("custom.googleapis.com/test.metric")
 	dpWithAttributes := pmetric.NewNumberDataPoint()
-	dpWithAttributes.Attributes().PutStr("string", "strval")
-	dpWithAttributes.Attributes().PutBool("bool", true)
-	dpWithAttributes.Attributes().PutInt("int", 123)
+	dpWithAttributes.Attributes().PutStr("foo", "bar")
 	monitoredResource := &monitoredrespb.MonitoredResource{
 		Type: "generic_task",
 		Labels: map[string]string{
-			"location": "us-central1-b",
-			"project":  "project-foo",
+			"foo": "bar",
 		},
 	}
 	extraLabels := map[string]string{
-		"foo":   "bar",
-		"hello": "world",
+		"foo": "bar",
 	}
 	for _, tc := range []struct {
 		resource    *monitoredrespb.MonitoredResource
@@ -285,39 +281,39 @@ func TestIdentifier(t *testing.T) {
 	}{
 		{
 			desc:   "empty",
-			want:   14695981039346656037,
+			want:   16303200508382005237,
 			metric: pmetric.NewMetric(),
 			labels: pmetric.NewNumberDataPoint().Attributes(),
 		},
 		{
 			desc:   "with name",
-			want:   4430695870278802542,
+			want:   9745949301560396956,
 			metric: metricWithName,
 			labels: pmetric.NewNumberDataPoint().Attributes(),
 		},
 		{
 			desc:   "with attributes",
-			want:   12689322622784691089,
+			want:   2247677448538243046,
 			metric: pmetric.NewMetric(),
 			labels: dpWithAttributes.Attributes(),
 		},
 		{
 			desc:     "with resource",
-			want:     10341971859444782974,
+			want:     4344837656395061793,
 			resource: monitoredResource,
 			metric:   pmetric.NewMetric(),
 			labels:   pmetric.NewNumberDataPoint().Attributes(),
 		},
 		{
 			desc:        "with extra labels",
-			want:        5179797973592387646,
+			want:        4054966704305404600,
 			metric:      pmetric.NewMetric(),
 			labels:      pmetric.NewNumberDataPoint().Attributes(),
 			extraLabels: extraLabels,
 		},
 		{
 			desc:        "with all",
-			want:        322569983349436668,
+			want:        2679814683341169356,
 			metric:      metricWithName,
 			labels:      dpWithAttributes.Attributes(),
 			extraLabels: extraLabels,

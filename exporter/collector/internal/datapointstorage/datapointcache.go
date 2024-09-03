@@ -211,18 +211,27 @@ func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 	return true
 }
 
+var (
+	itemSep = []byte{'\xfe'} // Used between identifiers
+	KVsep   = []byte{'\xff'} // Used between map keys and values
+)
+
 // Identifier returns the unique string identifier for a metric.
 func Identifier(resource *monitoredrespb.MonitoredResource, extraLabels map[string]string, metric pmetric.Metric, attributes pcommon.Map) uint64 {
 	h := fnv.New64()
 	h.Write([]byte(resource.GetType()))
+	h.Write(itemSep)
 	h.Write([]byte(metric.Name()))
+	h.Write(itemSep)
 	attrs := make(map[string]string)
 	attributes.Range(func(k string, v pcommon.Value) bool {
 		attrs[k] = v.AsString()
 		return true
 	})
 	hashOfMap(h, extraLabels)
+	h.Write(itemSep)
 	hashOfMap(h, attrs)
+	h.Write(itemSep)
 	hashOfMap(h, resource.GetLabels())
 	return h.Sum64()
 }
@@ -235,6 +244,8 @@ func hashOfMap(h hash.Hash64, m map[string]string) {
 	sort.Strings(keys)
 	for _, key := range keys {
 		h.Write([]byte(key))
+		h.Write(KVsep)
 		h.Write([]byte(m[key]))
+		h.Write(KVsep)
 	}
 }
