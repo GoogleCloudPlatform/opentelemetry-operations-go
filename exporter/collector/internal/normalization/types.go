@@ -22,14 +22,14 @@ import (
 type Normalizer interface {
 	// NormalizeExponentialHistogramDataPoint normalizes an exponential histogram.
 	// It returns the normalized point, and true if the point should be kept.
-	NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier string) (pmetric.ExponentialHistogramDataPoint, bool)
+	NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier uint64) (pmetric.ExponentialHistogramDataPoint, bool)
 	// NormalizeHistogramDataPoint normalizes a cumulative histogram.
 	// It returns the normalized point, and true if the point should be kept.
-	NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) (pmetric.HistogramDataPoint, bool)
+	NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier uint64) (pmetric.HistogramDataPoint, bool)
 	// NormalizeNumberDataPoint normalizes a cumulative, monotonic sum.
 	// It returns the normalized point, and true if the point should be kept.
-	NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier string) (pmetric.NumberDataPoint, bool)
+	NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier uint64) (pmetric.NumberDataPoint, bool)
 	// NormalizeSummaryDataPoint normalizes a summary.
 	// It returns the normalized point, and true if the point should be kept.
-	NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier string) (pmetric.SummaryDataPoint, bool)
+	NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier uint64) (pmetric.SummaryDataPoint, bool)
 }

@@ -33,7 +33,7 @@ func BenchmarkNormalizeNumberDataPoint(b *testing.B) {
 	startPoint.SetIntValue(12)
 	startPoint.Exemplars().AppendEmpty().SetIntValue(0)
 	addAttributes(startPoint.Attributes())
-	id := "abc123"
+	id := uint64(12345)
 	// ensure each run is the same by skipping the first call, which will populate caches
 	normalizer.NormalizeNumberDataPoint(startPoint, id)
 	newPoint := pmetric.NewNumberDataPoint()
@@ -60,7 +60,7 @@ func BenchmarkNormalizeHistogramDataPoint(b *testing.B) {
 	startPoint.ExplicitBounds().FromRaw([]float64{1, 2})
 	startPoint.Exemplars().AppendEmpty().SetIntValue(0)
 	addAttributes(startPoint.Attributes())
-	id := "abc123"
+	id := uint64(12345)
 	// ensure each run is the same by skipping the first call, which will populate caches
 	normalizer.NormalizeHistogramDataPoint(startPoint, id)
 	newPoint := pmetric.NewHistogramDataPoint()
@@ -91,7 +91,7 @@ func BenchmarkNormalizeExopnentialHistogramDataPoint(b *testing.B) {
 	startPoint.Negative().BucketCounts().FromRaw([]uint64{1, 1})
 	startPoint.Negative().SetOffset(1)
 	addAttributes(startPoint.Attributes())
-	id := "abc123"
+	id := uint64(12345)
 	// ensure each run is the same by skipping the first call, which will populate caches
 	normalizer.NormalizeExponentialHistogramDataPoint(startPoint, id)
 	newPoint := pmetric.NewExponentialHistogramDataPoint()
@@ -116,7 +116,7 @@ func BenchmarkNormalizeSummaryDataPoint(b *testing.B) {
 	startPoint.SetSum(10.1)
 	startPoint.QuantileValues().AppendEmpty().SetValue(1)
 	addAttributes(startPoint.Attributes())
-	id := "abc123"
+	id := uint64(12345)
 	// ensure each run is the same by skipping the first call, which will populate caches
 	normalizer.NormalizeSummaryDataPoint(startPoint, id)
 	newPoint := pmetric.NewSummaryDataPoint()

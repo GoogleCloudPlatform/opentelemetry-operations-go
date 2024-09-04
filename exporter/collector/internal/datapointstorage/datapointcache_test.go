@@ -27,16 +27,17 @@ import (
 
 func TestSetAndGet(t *testing.T) {
 	c := Cache{
-		numberCache:               make(map[string]usedNumberPoint),
-		summaryCache:              make(map[string]usedSummaryPoint),
-		histogramCache:            make(map[string]usedHistogramPoint),
-		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+		numberCache:               make(map[uint64]usedNumberPoint),
+		summaryCache:              make(map[uint64]usedSummaryPoint),
+		histogramCache:            make(map[uint64]usedHistogramPoint),
+		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
-	_, found := c.GetNumberDataPoint("bar")
+	id := uint64(12345)
+	_, found := c.GetNumberDataPoint(id)
 	assert.False(t, found)
 	setPoint := pmetric.NewNumberDataPoint()
-	c.SetNumberDataPoint("bar", setPoint)
-	point, found := c.GetNumberDataPoint("bar")
+	c.SetNumberDataPoint(id, setPoint)
+	point, found := c.GetNumberDataPoint(id)
 	assert.Equal(t, point, setPoint)
 	assert.True(t, found)
 }
@@ -44,10 +45,10 @@ func TestSetAndGet(t *testing.T) {
 func TestShutdown(t *testing.T) {
 	shutdown := make(chan struct{})
 	c := Cache{
-		numberCache:               make(map[string]usedNumberPoint),
-		summaryCache:              make(map[string]usedSummaryPoint),
-		histogramCache:            make(map[string]usedHistogramPoint),
-		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+		numberCache:               make(map[uint64]usedNumberPoint),
+		summaryCache:              make(map[uint64]usedSummaryPoint),
+		histogramCache:            make(map[uint64]usedHistogramPoint),
+		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
 	close(shutdown)
 	// gc should return after shutdown is closed
@@ -58,17 +59,18 @@ func TestShutdown(t *testing.T) {
 func TestGC(t *testing.T) {
 	shutdown := make(chan struct{})
 	c := Cache{
-		numberCache:               make(map[string]usedNumberPoint),
-		summaryCache:              make(map[string]usedSummaryPoint),
-		histogramCache:            make(map[string]usedHistogramPoint),
-		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+		numberCache:               make(map[uint64]usedNumberPoint),
+		summaryCache:              make(map[uint64]usedSummaryPoint),
+		histogramCache:            make(map[uint64]usedHistogramPoint),
+		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
 	fakeTicker := make(chan time.Time)
+	id := uint64(12345)
 
-	c.SetNumberDataPoint("bar", pmetric.NumberDataPoint{})
+	c.SetNumberDataPoint(id, pmetric.NumberDataPoint{})
 
 	// bar exists since we just set it
-	usedPoint, found := c.numberCache["bar"]
+	usedPoint, found := c.numberCache[id]
 	assert.True(t, usedPoint.used.Load())
 	assert.True(t, found)
 
@@ -78,7 +80,7 @@ func TestGC(t *testing.T) {
 	}()
 	cont := c.gc(shutdown, fakeTicker)
 	assert.True(t, cont)
-	usedPoint, found = c.numberCache["bar"]
+	usedPoint, found = c.numberCache[id]
 	assert.False(t, usedPoint.used.Load())
 	assert.True(t, found)
 
@@ -88,24 +90,25 @@ func TestGC(t *testing.T) {
 	}()
 	cont = c.gc(shutdown, fakeTicker)
 	assert.True(t, cont)
-	_, found = c.numberCache["bar"]
+	_, found = c.numberCache[id]
 	assert.False(t, found)
 }
 
 func TestGetPreventsGC(t *testing.T) {
+	id := uint64(12345)
 	shutdown := make(chan struct{})
 	c := Cache{
-		numberCache:               make(map[string]usedNumberPoint),
-		summaryCache:              make(map[string]usedSummaryPoint),
-		histogramCache:            make(map[string]usedHistogramPoint),
-		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+		numberCache:               make(map[uint64]usedNumberPoint),
+		summaryCache:              make(map[uint64]usedSummaryPoint),
+		histogramCache:            make(map[uint64]usedHistogramPoint),
+		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
 	fakeTicker := make(chan time.Time)
 
 	setPoint := pmetric.NewNumberDataPoint()
-	c.SetNumberDataPoint("bar", setPoint)
+	c.SetNumberDataPoint(id, setPoint)
 	// bar exists since we just set it
-	_, found := c.numberCache["bar"]
+	_, found := c.numberCache[id]
 	assert.True(t, found)
 	// first gc tick marks bar stale
 	go func() {
@@ -114,7 +117,7 @@ func TestGetPreventsGC(t *testing.T) {
 	cont := c.gc(shutdown, fakeTicker)
 	assert.True(t, cont)
 	// calling Get() marks it fresh again.
-	_, found = c.GetNumberDataPoint("bar")
+	_, found = c.GetNumberDataPoint(id)
 	assert.True(t, found)
 	// second gc tick does not remove bar
 	go func() {
@@ -122,16 +125,17 @@ func TestGetPreventsGC(t *testing.T) {
 	}()
 	cont = c.gc(shutdown, fakeTicker)
 	assert.True(t, cont)
-	_, found = c.numberCache["bar"]
+	_, found = c.numberCache[id]
 	assert.True(t, found)
 }
 
 func TestConcurrentNumber(t *testing.T) {
+	id := uint64(12345)
 	c := Cache{
-		numberCache:               make(map[string]usedNumberPoint),
-		summaryCache:              make(map[string]usedSummaryPoint),
-		histogramCache:            make(map[string]usedHistogramPoint),
-		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+		numberCache:               make(map[uint64]usedNumberPoint),
+		summaryCache:              make(map[uint64]usedSummaryPoint),
+		histogramCache:            make(map[uint64]usedHistogramPoint),
+		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
 	setPoint := pmetric.NewNumberDataPoint()
 
@@ -139,8 +143,8 @@ func TestConcurrentNumber(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
-			c.SetNumberDataPoint("bar", setPoint)
-			point, found := c.GetNumberDataPoint("bar")
+			c.SetNumberDataPoint(id, setPoint)
+			point, found := c.GetNumberDataPoint(id)
 			assert.Equal(t, point, setPoint)
 			assert.True(t, found)
 			wg.Done()
@@ -158,11 +162,12 @@ func TestConcurrentNumber(t *testing.T) {
 }
 
 func TestConcurrentSummary(t *testing.T) {
+	id := uint64(12345)
 	c := Cache{
-		numberCache:               make(map[string]usedNumberPoint),
-		summaryCache:              make(map[string]usedSummaryPoint),
-		histogramCache:            make(map[string]usedHistogramPoint),
-		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+		numberCache:               make(map[uint64]usedNumberPoint),
+		summaryCache:              make(map[uint64]usedSummaryPoint),
+		histogramCache:            make(map[uint64]usedHistogramPoint),
+		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
 	setPoint := pmetric.NewSummaryDataPoint()
 
@@ -170,8 +175,8 @@ func TestConcurrentSummary(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
-			c.SetSummaryDataPoint("bar", setPoint)
-			point, found := c.GetSummaryDataPoint("bar")
+			c.SetSummaryDataPoint(id, setPoint)
+			point, found := c.GetSummaryDataPoint(id)
 			assert.Equal(t, point, setPoint)
 			assert.True(t, found)
 			wg.Done()
@@ -189,11 +194,12 @@ func TestConcurrentSummary(t *testing.T) {
 }
 
 func TestConcurrentHistogram(t *testing.T) {
+	id := uint64(12345)
 	c := Cache{
-		numberCache:               make(map[string]usedNumberPoint),
-		summaryCache:              make(map[string]usedSummaryPoint),
-		histogramCache:            make(map[string]usedHistogramPoint),
-		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+		numberCache:               make(map[uint64]usedNumberPoint),
+		summaryCache:              make(map[uint64]usedSummaryPoint),
+		histogramCache:            make(map[uint64]usedHistogramPoint),
+		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
 	setPoint := pmetric.NewHistogramDataPoint()
 
@@ -201,8 +207,8 @@ func TestConcurrentHistogram(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
-			c.SetHistogramDataPoint("bar", setPoint)
-			point, found := c.GetHistogramDataPoint("bar")
+			c.SetHistogramDataPoint(id, setPoint)
+			point, found := c.GetHistogramDataPoint(id)
 			assert.Equal(t, point, setPoint)
 			assert.True(t, found)
 			wg.Done()
@@ -220,11 +226,12 @@ func TestConcurrentHistogram(t *testing.T) {
 }
 
 func TestConcurrentExponentialHistogram(t *testing.T) {
+	id := uint64(12345)
 	c := Cache{
-		numberCache:               make(map[string]usedNumberPoint),
-		summaryCache:              make(map[string]usedSummaryPoint),
-		histogramCache:            make(map[string]usedHistogramPoint),
-		exponentialHistogramCache: make(map[string]usedExponentialHistogramPoint),
+		numberCache:               make(map[uint64]usedNumberPoint),
+		summaryCache:              make(map[uint64]usedSummaryPoint),
+		histogramCache:            make(map[uint64]usedHistogramPoint),
+		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
 	setPoint := pmetric.NewExponentialHistogramDataPoint()
 
@@ -232,8 +239,8 @@ func TestConcurrentExponentialHistogram(t *testing.T) {
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
 		go func() {
-			c.SetExponentialHistogramDataPoint("bar", setPoint)
-			point, found := c.GetExponentialHistogramDataPoint("bar")
+			c.SetExponentialHistogramDataPoint(id, setPoint)
+			point, found := c.GetExponentialHistogramDataPoint(id)
 			assert.Equal(t, point, setPoint)
 			assert.True(t, found)
 			wg.Done()
@@ -254,19 +261,15 @@ func TestIdentifier(t *testing.T) {
 	metricWithName := pmetric.NewMetric()
 	metricWithName.SetName("custom.googleapis.com/test.metric")
 	dpWithAttributes := pmetric.NewNumberDataPoint()
-	dpWithAttributes.Attributes().PutStr("string", "strval")
-	dpWithAttributes.Attributes().PutBool("bool", true)
-	dpWithAttributes.Attributes().PutInt("int", 123)
+	dpWithAttributes.Attributes().PutStr("foo", "bar")
 	monitoredResource := &monitoredrespb.MonitoredResource{
 		Type: "generic_task",
 		Labels: map[string]string{
-			"location": "us-central1-b",
-			"project":  "project-foo",
+			"foo": "bar",
 		},
 	}
 	extraLabels := map[string]string{
-		"foo":   "bar",
-		"hello": "world",
+		"foo": "bar",
 	}
 	for _, tc := range []struct {
 		resource    *monitoredrespb.MonitoredResource
@@ -274,43 +277,43 @@ func TestIdentifier(t *testing.T) {
 		metric      pmetric.Metric
 		labels      pcommon.Map
 		desc        string
-		want        string
+		want        uint64
 	}{
 		{
 			desc:   "empty",
-			want:   " - map[] -  -",
+			want:   16303200508382005237,
 			metric: pmetric.NewMetric(),
 			labels: pmetric.NewNumberDataPoint().Attributes(),
 		},
 		{
 			desc:   "with name",
-			want:   " - map[] - custom.googleapis.com/test.metric -",
+			want:   9745949301560396956,
 			metric: metricWithName,
 			labels: pmetric.NewNumberDataPoint().Attributes(),
 		},
 		{
 			desc:   "with attributes",
-			want:   " - map[] -  - bool=true int=123 string=strval",
+			want:   2247677448538243046,
 			metric: pmetric.NewMetric(),
 			labels: dpWithAttributes.Attributes(),
 		},
 		{
 			desc:     "with resource",
-			want:     "map[location:us-central1-b project:project-foo] - map[] -  -",
+			want:     4344837656395061793,
 			resource: monitoredResource,
 			metric:   pmetric.NewMetric(),
 			labels:   pmetric.NewNumberDataPoint().Attributes(),
 		},
 		{
 			desc:        "with extra labels",
-			want:        " - map[foo:bar hello:world] -  -",
+			want:        4054966704305404600,
 			metric:      pmetric.NewMetric(),
 			labels:      pmetric.NewNumberDataPoint().Attributes(),
 			extraLabels: extraLabels,
 		},
 		{
 			desc:        "with all",
-			want:        "map[location:us-central1-b project:project-foo] - map[foo:bar hello:world] - custom.googleapis.com/test.metric - bool=true int=123 string=strval",
+			want:        2679814683341169356,
 			metric:      metricWithName,
 			labels:      dpWithAttributes.Attributes(),
 			extraLabels: extraLabels,
@@ -322,7 +325,7 @@ func TestIdentifier(t *testing.T) {
 			tc.labels.CopyTo(origLabels)
 			got := Identifier(tc.resource, tc.extraLabels, tc.metric, tc.labels)
 			if tc.want != got {
-				t.Errorf("Identifier() = %q; want %q", got, tc.want)
+				t.Errorf("Identifier() = %d; want %d", got, tc.want)
 			}
 			assert.Equal(t, origLabels, tc.labels) // Make sure the labels are not mutated
 		})

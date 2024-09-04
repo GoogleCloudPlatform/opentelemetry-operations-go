@@ -47,7 +47,7 @@ type standardNormalizer struct {
 	log           *zap.Logger
 }
 
-func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier string) (pmetric.ExponentialHistogramDataPoint, bool) {
+func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier uint64) (pmetric.ExponentialHistogramDataPoint, bool) {
 	start, hasStart := s.startCache.GetExponentialHistogramDataPoint(identifier)
 	if !hasStart {
 		if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
@@ -152,7 +152,7 @@ func subtractExponentialBuckets(a, b pmetric.ExponentialHistogramDataPointBucket
 	return newBuckets
 }
 
-func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier string) (pmetric.HistogramDataPoint, bool) {
+func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier uint64) (pmetric.HistogramDataPoint, bool) {
 	start, hasStart := s.startCache.GetHistogramDataPoint(identifier)
 	if !hasStart {
 		if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
@@ -258,7 +258,7 @@ func bucketBoundariesEqual(a, b pcommon.Float64Slice) bool {
 
 // NormalizeNumberDataPoint normalizes a cumulative, monotonic sum.
 // It returns the normalized point, and true if the point should be kept.
-func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier string) (pmetric.NumberDataPoint, bool) {
+func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier uint64) (pmetric.NumberDataPoint, bool) {
 	start, hasStart := s.startCache.GetNumberDataPoint(identifier)
 	if !hasStart {
 		if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
@@ -341,7 +341,7 @@ func subtractNumberDataPoint(a, b pmetric.NumberDataPoint) pmetric.NumberDataPoi
 	return newPoint
 }
 
-func (s *standardNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier string) (pmetric.SummaryDataPoint, bool) {
+func (s *standardNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier uint64) (pmetric.SummaryDataPoint, bool) {
 	start, hasStart := s.startCache.GetSummaryDataPoint(identifier)
 	if !hasStart {
 		if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
