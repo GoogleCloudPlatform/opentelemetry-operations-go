@@ -211,9 +211,11 @@ func (c *Cache) gc(shutdown <-chan struct{}, tickerCh <-chan time.Time) bool {
 	return true
 }
 
+// Use the same constants as Prometheus uses for hashing:
+// https://github.com/prometheus/prometheus/blob/282fb1632ad62a82401a230f486538a72384faf0/model/labels/labels_common.go#L32
 var (
 	itemSep = []byte{'\xfe'} // Used between identifiers
-	KVsep   = []byte{'\xff'} // Used between map keys and values
+	kvSep   = []byte{'\xff'} // Used between map keys and values
 )
 
 // Identifier returns the unique string identifier for a metric.
@@ -244,8 +246,8 @@ func hashOfMap(h hash.Hash64, m map[string]string) {
 	sort.Strings(keys)
 	for _, key := range keys {
 		h.Write([]byte(key))
-		h.Write(KVsep)
+		h.Write(kvSep)
 		h.Write([]byte(m[key]))
-		h.Write(KVsep)
+		h.Write(kvSep)
 	}
 }
