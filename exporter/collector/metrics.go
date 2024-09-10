@@ -454,7 +454,7 @@ func (me *MetricsExporter) exportToTimeSeries(ctx context.Context, req *monitori
 func (me *MetricsExporter) export(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
 	// if this is an empty request, skip it
 	// empty requests are used by the WAL to signal the end of pending data
-	if req == nil || (req.TimeSeries == nil && req.Name == "") {
+	if isEmptyReq(req) {
 		return nil
 	}
 
@@ -574,7 +574,7 @@ func (me *MetricsExporter) readWALAndExport(ctx context.Context) error {
 		// If we are at the last index, and this last index is not an empty request
 		// (we use empty requests to fill out the end of a log, and if we didn't check for them
 		// this would loop constantly adding empty requests onto the end)
-		if readIndex == writeIndex && (req != nil && (req.Name != "" || req.TimeSeries != nil)) {
+		if readIndex == writeIndex && !isEmptyReq(req) {
 			// This indicates that we are trying to truncate the last item in the WAL.
 			// If that is the case, write an empty request so we can truncate the last real request
 			// (the WAL library requires at least 1 entry).
@@ -1630,6 +1630,10 @@ func metricPointValueType(pt pmetric.NumberDataPointValueType) metricpb.MetricDe
 	default:
 		return metricpb.MetricDescriptor_VALUE_TYPE_UNSPECIFIED
 	}
+}
+
+func isEmptyReq(req *monitoringpb.CreateTimeSeriesRequest) bool {
+	return (req == nil || (req.Name == "" && req.TimeSeries == nil))
 }
 
 func (me *metricMapper) mapMetricPointKind(m pmetric.Metric) (metricpb.MetricDescriptor_MetricKind, metricpb.MetricDescriptor_ValueType) {
