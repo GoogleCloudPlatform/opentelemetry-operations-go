@@ -47,7 +47,7 @@ type standardNormalizer struct {
 	log           *zap.Logger
 }
 
-func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier uint64) (pmetric.ExponentialHistogramDataPoint, bool) {
+func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, identifier uint64) bool {
 	start, hasStart := s.startCache.GetExponentialHistogramDataPoint(identifier)
 	if !hasStart {
 		if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
@@ -57,10 +57,10 @@ func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetri
 			// Record it in history and drop the point.
 			s.startCache.SetExponentialHistogramDataPoint(identifier, point)
 			s.previousCache.SetExponentialHistogramDataPoint(identifier, point)
-			return pmetric.ExponentialHistogramDataPoint{}, false
+			return false
 		}
 		// No normalization required, since we haven't cached anything, and the start TS is non-zero.
-		return point, true
+		return true
 	}
 
 	// TODO(#366): It is possible, but difficult to compare exponential
@@ -70,7 +70,7 @@ func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetri
 	if point.Scale() != start.Scale() {
 		s.startCache.SetExponentialHistogramDataPoint(identifier, point)
 		s.previousCache.SetExponentialHistogramDataPoint(identifier, point)
-		return pmetric.ExponentialHistogramDataPoint{}, false
+		return false
 	}
 
 	previous, hasPrevious := s.previousCache.GetExponentialHistogramDataPoint(identifier)
@@ -81,22 +81,19 @@ func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetri
 	}
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) ||
 		(point.StartTimestamp() == 0 && lessThanExponentialHistogramDataPoint(point, previous)) {
-		// Make a copy so we don't mutate underlying data
-		newPoint := pmetric.NewExponentialHistogramDataPoint()
 		// This is a reset point, but we have seen this timeseries before, so we know the reset happened in the time period since the last point.
 		// Assume the reset occurred at T - 1 ms, and leave the value untouched.
-		point.CopyTo(newPoint)
-		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		s.previousCache.SetExponentialHistogramDataPoint(identifier, newPoint)
+		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
+		s.previousCache.SetExponentialHistogramDataPoint(identifier, point)
 		// For subsequent points, we don't want to modify the value, but we do
 		// want to make the start timestamp match the point we write here.
 		// Store a point with the same timestamps, but zero value to achieve
 		// that behavior.
 		zeroPoint := pmetric.NewExponentialHistogramDataPoint()
-		zeroPoint.SetTimestamp(newPoint.StartTimestamp())
-		zeroPoint.SetScale(newPoint.Scale())
+		zeroPoint.SetTimestamp(point.StartTimestamp())
+		zeroPoint.SetScale(point.Scale())
 		s.startCache.SetExponentialHistogramDataPoint(identifier, zeroPoint)
-		return newPoint, true
+		return true
 	}
 	if !start.Timestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// We found a cached start timestamp that wouldn't produce a valid point.
@@ -106,12 +103,12 @@ func (s *standardNormalizer) NormalizeExponentialHistogramDataPoint(point pmetri
 			zap.String("lastRecordedReset", start.Timestamp().String()),
 			zap.String("dataPoint", point.Timestamp().String()),
 		)
-		return pmetric.ExponentialHistogramDataPoint{}, false
+		return false
 	}
 	// There was no reset, so normalize the point against the start point
-	newPoint := subtractExponentialHistogramDataPoint(point, start)
-	s.previousCache.SetExponentialHistogramDataPoint(identifier, newPoint)
-	return newPoint, true
+	subtractExponentialHistogramDataPoint(point, start)
+	s.previousCache.SetExponentialHistogramDataPoint(identifier, point)
+	return true
 }
 
 // lessThanExponentialHistogramDataPoint returns a < b.
@@ -119,21 +116,17 @@ func lessThanExponentialHistogramDataPoint(a, b pmetric.ExponentialHistogramData
 	return a.Count() < b.Count() || a.Sum() < b.Sum()
 }
 
-// subtractExponentialHistogramDataPoint returns a - b.
-func subtractExponentialHistogramDataPoint(a, b pmetric.ExponentialHistogramDataPoint) pmetric.ExponentialHistogramDataPoint {
-	// Make a copy so we don't mutate underlying data
-	newPoint := pmetric.NewExponentialHistogramDataPoint()
-	a.CopyTo(newPoint)
+// subtractExponentialHistogramDataPoint subtracts b from a.
+func subtractExponentialHistogramDataPoint(a, b pmetric.ExponentialHistogramDataPoint) {
 	// Use the timestamp from the normalization point
-	newPoint.SetStartTimestamp(b.Timestamp())
+	a.SetStartTimestamp(b.Timestamp())
 	// Adjust the value based on the start point's value
-	newPoint.SetCount(a.Count() - b.Count())
+	a.SetCount(a.Count() - b.Count())
 	// We drop points without a sum, so no need to check here.
-	newPoint.SetSum(a.Sum() - b.Sum())
-	newPoint.SetZeroCount(a.ZeroCount() - b.ZeroCount())
-	newPoint.Positive().BucketCounts().FromRaw(subtractExponentialBuckets(a.Positive(), b.Positive()))
-	newPoint.Negative().BucketCounts().FromRaw(subtractExponentialBuckets(a.Negative(), b.Negative()))
-	return newPoint
+	a.SetSum(a.Sum() - b.Sum())
+	a.SetZeroCount(a.ZeroCount() - b.ZeroCount())
+	a.Positive().BucketCounts().FromRaw(subtractExponentialBuckets(a.Positive(), b.Positive()))
+	a.Negative().BucketCounts().FromRaw(subtractExponentialBuckets(a.Negative(), b.Negative()))
 }
 
 // subtractExponentialBuckets returns a - b.
@@ -152,7 +145,7 @@ func subtractExponentialBuckets(a, b pmetric.ExponentialHistogramDataPointBucket
 	return newBuckets
 }
 
-func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier uint64) (pmetric.HistogramDataPoint, bool) {
+func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, identifier uint64) bool {
 	start, hasStart := s.startCache.GetHistogramDataPoint(identifier)
 	if !hasStart {
 		if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
@@ -162,10 +155,10 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 			// Record it in history and drop the point.
 			s.startCache.SetHistogramDataPoint(identifier, point)
 			s.previousCache.SetHistogramDataPoint(identifier, point)
-			return pmetric.HistogramDataPoint{}, false
+			return false
 		}
 		// No normalization required, since we haven't cached anything, and the start TS is non-zero.
-		return point, true
+		return true
 	}
 
 	// The number of buckets changed, so we can't normalize points anymore.
@@ -173,7 +166,7 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 	if !bucketBoundariesEqual(point.ExplicitBounds(), start.ExplicitBounds()) {
 		s.startCache.SetHistogramDataPoint(identifier, point)
 		s.previousCache.SetHistogramDataPoint(identifier, point)
-		return pmetric.HistogramDataPoint{}, false
+		return false
 	}
 
 	previous, hasPrevious := s.previousCache.GetHistogramDataPoint(identifier)
@@ -184,23 +177,20 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 	}
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) ||
 		(point.StartTimestamp() == 0 && lessThanHistogramDataPoint(point, previous)) {
-		// Make a copy so we don't mutate underlying data
-		newPoint := pmetric.NewHistogramDataPoint()
 		// This is a reset point, but we have seen this timeseries before, so we know the reset happened in the time period since the last point.
 		// Assume the reset occurred at T - 1 ms, and leave the value untouched.
-		point.CopyTo(newPoint)
-		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		s.previousCache.SetHistogramDataPoint(identifier, newPoint)
+		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
+		s.previousCache.SetHistogramDataPoint(identifier, point)
 		// For subsequent points, we don't want to modify the value, but we do
 		// want to make the start timestamp match the point we write here.
 		// Store a point with the same timestamps, but zero value to achieve
 		// that behavior.
 		zeroPoint := pmetric.NewHistogramDataPoint()
-		zeroPoint.SetTimestamp(newPoint.StartTimestamp())
-		newPoint.ExplicitBounds().CopyTo(zeroPoint.ExplicitBounds())
-		zeroPoint.BucketCounts().FromRaw(make([]uint64, newPoint.BucketCounts().Len()))
+		zeroPoint.SetTimestamp(point.StartTimestamp())
+		point.ExplicitBounds().CopyTo(zeroPoint.ExplicitBounds())
+		zeroPoint.BucketCounts().FromRaw(make([]uint64, point.BucketCounts().Len()))
 		s.startCache.SetHistogramDataPoint(identifier, zeroPoint)
-		return newPoint, true
+		return true
 	}
 	if !start.Timestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// We found a cached start timestamp that wouldn't produce a valid point.
@@ -210,12 +200,12 @@ func (s *standardNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 			zap.String("lastRecordedReset", start.Timestamp().String()),
 			zap.String("dataPoint", point.Timestamp().String()),
 		)
-		return pmetric.HistogramDataPoint{}, false
+		return false
 	}
 	// There was no reset, so normalize the point against the start point
-	newPoint := subtractHistogramDataPoint(point, start)
-	s.previousCache.SetHistogramDataPoint(identifier, newPoint)
-	return newPoint, true
+	subtractHistogramDataPoint(point, start)
+	s.previousCache.SetHistogramDataPoint(identifier, point)
+	return true
 }
 
 // lessThanHistogramDataPoint returns a < b.
@@ -224,24 +214,20 @@ func lessThanHistogramDataPoint(a, b pmetric.HistogramDataPoint) bool {
 }
 
 // subtractHistogramDataPoint returns a - b.
-func subtractHistogramDataPoint(a, b pmetric.HistogramDataPoint) pmetric.HistogramDataPoint {
-	// Make a copy so we don't mutate underlying data
-	newPoint := pmetric.NewHistogramDataPoint()
-	a.CopyTo(newPoint)
+func subtractHistogramDataPoint(a, b pmetric.HistogramDataPoint) {
 	// Use the timestamp from the normalization point
-	newPoint.SetStartTimestamp(b.Timestamp())
+	a.SetStartTimestamp(b.Timestamp())
 	// Adjust the value based on the start point's value
-	newPoint.SetCount(a.Count() - b.Count())
+	a.SetCount(a.Count() - b.Count())
 	// We drop points without a sum, so no need to check here.
-	newPoint.SetSum(a.Sum() - b.Sum())
+	a.SetSum(a.Sum() - b.Sum())
 	aBuckets := a.BucketCounts()
 	bBuckets := b.BucketCounts()
 	newBuckets := make([]uint64, aBuckets.Len())
 	for i := 0; i < aBuckets.Len(); i++ {
 		newBuckets[i] = aBuckets.At(i) - bBuckets.At(i)
 	}
-	newPoint.BucketCounts().FromRaw(newBuckets)
-	return newPoint
+	a.BucketCounts().FromRaw(newBuckets)
 }
 
 func bucketBoundariesEqual(a, b pcommon.Float64Slice) bool {
@@ -258,7 +244,7 @@ func bucketBoundariesEqual(a, b pcommon.Float64Slice) bool {
 
 // NormalizeNumberDataPoint normalizes a cumulative, monotonic sum.
 // It returns the normalized point, and true if the point should be kept.
-func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier uint64) (pmetric.NumberDataPoint, bool) {
+func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, identifier uint64) bool {
 	start, hasStart := s.startCache.GetNumberDataPoint(identifier)
 	if !hasStart {
 		if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
@@ -268,10 +254,10 @@ func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPo
 			// Record it in history and drop the point.
 			s.startCache.SetNumberDataPoint(identifier, point)
 			s.previousCache.SetNumberDataPoint(identifier, point)
-			return pmetric.NumberDataPoint{}, false
+			return false
 		}
 		// No normalization required, since we haven't cached anything, and the start TS is non-zer0.
-		return point, true
+		return true
 	}
 
 	previous, hasPrevious := s.previousCache.GetNumberDataPoint(identifier)
@@ -281,21 +267,18 @@ func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPo
 		previous = start
 	}
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) || (point.StartTimestamp() == 0 && lessThanNumberDataPoint(point, previous)) {
-		// Make a copy so we don't mutate underlying data
-		newPoint := pmetric.NewNumberDataPoint()
 		// This is a reset point, but we have seen this timeseries before, so we know the reset happened in the time period since the last point.
 		// Assume the reset occurred at T - 1 ms, and leave the value untouched.
-		point.CopyTo(newPoint)
-		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		s.previousCache.SetNumberDataPoint(identifier, newPoint)
+		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
+		s.previousCache.SetNumberDataPoint(identifier, point)
 		// For subsequent points, we don't want to modify the value, but we do
 		// want to make the start timestamp match the point we write here.
 		// Store a point with the same timestamps, but zero value to achieve
 		// that behavior.
 		zeroPoint := pmetric.NewNumberDataPoint()
-		zeroPoint.SetTimestamp(newPoint.StartTimestamp())
+		zeroPoint.SetTimestamp(point.StartTimestamp())
 		s.startCache.SetNumberDataPoint(identifier, zeroPoint)
-		return newPoint, true
+		return true
 	}
 	if !start.Timestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// We found a cached start timestamp that wouldn't produce a valid point.
@@ -305,12 +288,12 @@ func (s *standardNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPo
 			zap.String("lastRecordedReset", start.Timestamp().String()),
 			zap.String("dataPoint", point.Timestamp().String()),
 		)
-		return pmetric.NumberDataPoint{}, false
+		return false
 	}
 	// There was no reset, so normalize the point against the start point
-	newPoint := subtractNumberDataPoint(point, start)
-	s.previousCache.SetNumberDataPoint(identifier, newPoint)
-	return newPoint, true
+	subtractNumberDataPoint(point, start)
+	s.previousCache.SetNumberDataPoint(identifier, point)
+	return true
 }
 
 // lessThanNumberDataPoint returns a < b.
@@ -324,24 +307,20 @@ func lessThanNumberDataPoint(a, b pmetric.NumberDataPoint) bool {
 	return false
 }
 
-// subtractNumberDataPoint returns a - b.
-func subtractNumberDataPoint(a, b pmetric.NumberDataPoint) pmetric.NumberDataPoint {
-	// Make a copy so we don't mutate underlying data
-	newPoint := pmetric.NewNumberDataPoint()
-	a.CopyTo(newPoint)
+// subtractNumberDataPoint subtracts b from a.
+func subtractNumberDataPoint(a, b pmetric.NumberDataPoint) {
 	// Use the timestamp from the normalization point
-	newPoint.SetStartTimestamp(b.Timestamp())
+	a.SetStartTimestamp(b.Timestamp())
 	// Adjust the value based on the start point's value
-	switch newPoint.ValueType() {
+	switch a.ValueType() {
 	case pmetric.NumberDataPointValueTypeInt:
-		newPoint.SetIntValue(a.IntValue() - b.IntValue())
+		a.SetIntValue(a.IntValue() - b.IntValue())
 	case pmetric.NumberDataPointValueTypeDouble:
-		newPoint.SetDoubleValue(a.DoubleValue() - b.DoubleValue())
+		a.SetDoubleValue(a.DoubleValue() - b.DoubleValue())
 	}
-	return newPoint
 }
 
-func (s *standardNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier uint64) (pmetric.SummaryDataPoint, bool) {
+func (s *standardNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, identifier uint64) bool {
 	start, hasStart := s.startCache.GetSummaryDataPoint(identifier)
 	if !hasStart {
 		if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
@@ -351,10 +330,10 @@ func (s *standardNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryData
 			// Record it in history and drop the point.
 			s.startCache.SetSummaryDataPoint(identifier, point)
 			s.previousCache.SetSummaryDataPoint(identifier, point)
-			return pmetric.SummaryDataPoint{}, false
+			return false
 		}
 		// No normalization required, since we haven't cached anything, and the start TS is non-zer0.
-		return point, true
+		return true
 	}
 
 	previous, hasPrevious := s.previousCache.GetSummaryDataPoint(identifier)
@@ -364,21 +343,18 @@ func (s *standardNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryData
 		previous = start
 	}
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) || (point.StartTimestamp() == 0 && lessThanSummaryDataPoint(point, previous)) {
-		// Make a copy so we don't mutate underlying data
-		newPoint := pmetric.NewSummaryDataPoint()
 		// This is a reset point, but we have seen this timeseries before, so we know the reset happened in the time period since the last point.
 		// Assume the reset occurred at T - 1 ms, and leave the value untouched.
-		point.CopyTo(newPoint)
-		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		s.previousCache.SetSummaryDataPoint(identifier, newPoint)
+		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
+		s.previousCache.SetSummaryDataPoint(identifier, point)
 		// For subsequent points, we don't want to modify the value, but we do
 		// want to make the start timestamp match the point we write here.
 		// Store a point with the same timestamps, but zero value to achieve
 		// that behavior.
 		zeroPoint := pmetric.NewSummaryDataPoint()
-		zeroPoint.SetTimestamp(newPoint.StartTimestamp())
+		zeroPoint.SetTimestamp(point.StartTimestamp())
 		s.startCache.SetSummaryDataPoint(identifier, zeroPoint)
-		return newPoint, true
+		return true
 	}
 	if !start.Timestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// We found a cached start timestamp that wouldn't produce a valid point.
@@ -388,12 +364,12 @@ func (s *standardNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryData
 			zap.String("lastRecordedReset", start.Timestamp().String()),
 			zap.String("dataPoint", point.Timestamp().String()),
 		)
-		return pmetric.SummaryDataPoint{}, false
+		return false
 	}
 	// There was no reset, so normalize the point against the start point
-	newPoint := subtractSummaryDataPoint(point, start)
-	s.previousCache.SetSummaryDataPoint(identifier, newPoint)
-	return newPoint, true
+	subtractSummaryDataPoint(point, start)
+	s.previousCache.SetSummaryDataPoint(identifier, point)
+	return true
 }
 
 // lessThanSummaryDataPoint returns a < b.
@@ -401,19 +377,14 @@ func lessThanSummaryDataPoint(a, b pmetric.SummaryDataPoint) bool {
 	return a.Count() < b.Count() || a.Sum() < b.Sum()
 }
 
-// subtractSummaryDataPoint returns a - b.
-func subtractSummaryDataPoint(a, b pmetric.SummaryDataPoint) pmetric.SummaryDataPoint {
-	// Make a copy so we don't mutate underlying data.
-	newPoint := pmetric.NewSummaryDataPoint()
-	// Quantile values are copied, and are not modified. Quantiles are
-	// computed over the same time period as sum and count, but it isn't
-	// possible to normalize them.
-	a.CopyTo(newPoint)
+// subtractSummaryDataPoint subtracts b from a.
+func subtractSummaryDataPoint(a, b pmetric.SummaryDataPoint) {
+	// Quantile values are not modified. Quantiles are computed over the same
+	// time period as sum and count, but it isn't possible to normalize them.
 	// Use the timestamp from the normalization point
-	newPoint.SetStartTimestamp(b.Timestamp())
+	a.SetStartTimestamp(b.Timestamp())
 	// Adjust the value based on the start point's value
-	newPoint.SetCount(a.Count() - b.Count())
+	a.SetCount(a.Count() - b.Count())
 	// We drop points without a sum, so no need to check here.
-	newPoint.SetSum(a.Sum() - b.Sum())
-	return newPoint
+	a.SetSum(a.Sum() - b.Sum())
 }

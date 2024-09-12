@@ -395,17 +395,13 @@ func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
 }
 
 func (l logMapper) logToSplitEntries(
-	log plog.LogRecord,
+	logRecord plog.LogRecord,
 	mr *monitoredrespb.MonitoredResource,
 	logLabels map[string]string,
 	processTime time.Time,
 	logName string,
 	projectID string,
 ) ([]*logpb.LogEntry, error) {
-	// make a copy in case we mutate the record
-	logRecord := plog.NewLogRecord()
-	log.CopyTo(logRecord)
-
 	ts := logRecord.Timestamp().AsTime()
 	if logRecord.Timestamp() == 0 || ts.IsZero() {
 		// if timestamp is unset, fall back to observed_time_unix_nano as recommended
