@@ -28,21 +28,18 @@ func BenchmarkNormalizeNumberDataPoint(b *testing.B) {
 	shutdown := make(chan struct{})
 	defer close(shutdown)
 	normalizer := NewStandardNormalizer(shutdown, zap.NewNop())
-	startPoint := pmetric.NewNumberDataPoint()
-	startPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
-	startPoint.SetIntValue(12)
-	startPoint.Exemplars().AppendEmpty().SetIntValue(0)
-	addAttributes(startPoint.Attributes())
+	startPoint := testNumberDataPoint()
+	startPoint.SetTimestamp(start)
 	id := uint64(12345)
 	// ensure each run is the same by skipping the first call, which will populate caches
 	normalizer.NormalizeNumberDataPoint(startPoint, id)
-	newPoint := pmetric.NewNumberDataPoint()
-	startPoint.CopyTo(newPoint)
-	newPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
 	var ok bool
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		newPoint := testNumberDataPoint()
+		b.StartTimer()
 		_, ok = normalizer.NormalizeNumberDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
@@ -52,24 +49,18 @@ func BenchmarkNormalizeHistogramDataPoint(b *testing.B) {
 	shutdown := make(chan struct{})
 	defer close(shutdown)
 	normalizer := NewStandardNormalizer(shutdown, zap.NewNop())
-	startPoint := pmetric.NewHistogramDataPoint()
-	startPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
-	startPoint.SetCount(2)
-	startPoint.SetSum(10.1)
-	startPoint.BucketCounts().FromRaw([]uint64{1, 1})
-	startPoint.ExplicitBounds().FromRaw([]float64{1, 2})
-	startPoint.Exemplars().AppendEmpty().SetIntValue(0)
-	addAttributes(startPoint.Attributes())
+	startPoint := testHistogramDataPoint()
+	startPoint.SetTimestamp(start)
 	id := uint64(12345)
 	// ensure each run is the same by skipping the first call, which will populate caches
 	normalizer.NormalizeHistogramDataPoint(startPoint, id)
-	newPoint := pmetric.NewHistogramDataPoint()
-	startPoint.CopyTo(newPoint)
-	newPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
 	var ok bool
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		newPoint := testHistogramDataPoint()
+		b.StartTimer()
 		_, ok = normalizer.NormalizeHistogramDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
@@ -79,28 +70,18 @@ func BenchmarkNormalizeExopnentialHistogramDataPoint(b *testing.B) {
 	shutdown := make(chan struct{})
 	defer close(shutdown)
 	normalizer := NewStandardNormalizer(shutdown, zap.NewNop())
-	startPoint := pmetric.NewExponentialHistogramDataPoint()
-	startPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
-	startPoint.SetCount(4)
-	startPoint.SetSum(10.1)
-	startPoint.SetScale(1)
-	startPoint.SetZeroCount(1)
-	startPoint.Exemplars().AppendEmpty().SetIntValue(0)
-	startPoint.Positive().BucketCounts().FromRaw([]uint64{1, 1})
-	startPoint.Positive().SetOffset(1)
-	startPoint.Negative().BucketCounts().FromRaw([]uint64{1, 1})
-	startPoint.Negative().SetOffset(1)
-	addAttributes(startPoint.Attributes())
+	startPoint := testExponentialHistogramDataPoint()
+	startPoint.SetTimestamp(start)
 	id := uint64(12345)
 	// ensure each run is the same by skipping the first call, which will populate caches
 	normalizer.NormalizeExponentialHistogramDataPoint(startPoint, id)
-	newPoint := pmetric.NewExponentialHistogramDataPoint()
-	startPoint.CopyTo(newPoint)
-	newPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
 	var ok bool
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		newPoint := testExponentialHistogramDataPoint()
+		b.StartTimer()
 		_, ok = normalizer.NormalizeExponentialHistogramDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
@@ -110,25 +91,169 @@ func BenchmarkNormalizeSummaryDataPoint(b *testing.B) {
 	shutdown := make(chan struct{})
 	defer close(shutdown)
 	normalizer := NewStandardNormalizer(shutdown, zap.NewNop())
-	startPoint := pmetric.NewSummaryDataPoint()
-	startPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
-	startPoint.SetCount(2)
-	startPoint.SetSum(10.1)
-	startPoint.QuantileValues().AppendEmpty().SetValue(1)
-	addAttributes(startPoint.Attributes())
+	startPoint := testSummaryDataPoint()
+	startPoint.SetTimestamp(start)
 	id := uint64(12345)
 	// ensure each run is the same by skipping the first call, which will populate caches
 	normalizer.NormalizeSummaryDataPoint(startPoint, id)
-	newPoint := pmetric.NewSummaryDataPoint()
-	startPoint.CopyTo(newPoint)
-	newPoint.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 
 	var ok bool
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
+		b.StopTimer()
+		newPoint := testSummaryDataPoint()
+		b.StartTimer()
 		_, ok = normalizer.NormalizeSummaryDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
+}
+
+func BenchmarkResetNormalizeNumberDataPoint(b *testing.B) {
+	shutdown := make(chan struct{})
+	defer close(shutdown)
+	normalizer := NewStandardNormalizer(shutdown, zap.NewNop())
+	startPoint := testNumberDataPoint()
+	startPoint.SetTimestamp(start)
+	startPoint.SetIntValue(int64(b.N + 1))
+	id := uint64(12345)
+	// ensure each run is the same by skipping the first call, which will populate caches
+	normalizer.NormalizeNumberDataPoint(startPoint, id)
+
+	var ok bool
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		// each point decreases in value, which triggers a reset.
+		b.StopTimer()
+		newPoint := testNumberDataPoint()
+		newPoint.SetIntValue(int64(b.N - i))
+		b.StartTimer()
+		_, ok = normalizer.NormalizeNumberDataPoint(newPoint, id)
+		assert.True(b, ok)
+	}
+}
+
+func BenchmarkResetNormalizeHistogramDataPoint(b *testing.B) {
+	shutdown := make(chan struct{})
+	defer close(shutdown)
+	normalizer := NewStandardNormalizer(shutdown, zap.NewNop())
+	startPoint := testHistogramDataPoint()
+	startPoint.SetTimestamp(start)
+	startPoint.SetSum(float64(b.N + 1))
+	id := uint64(12345)
+	// ensure each run is the same by skipping the first call, which will populate caches
+	normalizer.NormalizeHistogramDataPoint(startPoint, id)
+
+	var ok bool
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		// each point decreases in value, which triggers a reset.
+		b.StopTimer()
+		newPoint := testHistogramDataPoint()
+		newPoint.SetSum(float64(b.N - i))
+		b.StartTimer()
+		_, ok = normalizer.NormalizeHistogramDataPoint(newPoint, id)
+		assert.True(b, ok)
+	}
+}
+
+func BenchmarkResetNormalizeExponentialHistogramDataPoint(b *testing.B) {
+	shutdown := make(chan struct{})
+	defer close(shutdown)
+	normalizer := NewStandardNormalizer(shutdown, zap.NewNop())
+	startPoint := testExponentialHistogramDataPoint()
+	startPoint.SetTimestamp(start)
+	startPoint.SetSum(float64(b.N + 1))
+	id := uint64(12345)
+	// ensure each run is the same by skipping the first call, which will populate caches
+	normalizer.NormalizeExponentialHistogramDataPoint(startPoint, id)
+
+	var ok bool
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		// each point decreases in value, which triggers a reset.
+		b.StopTimer()
+		newPoint := testExponentialHistogramDataPoint()
+		newPoint.SetSum(float64(b.N - i))
+		b.StartTimer()
+		_, ok = normalizer.NormalizeExponentialHistogramDataPoint(newPoint, id)
+		assert.True(b, ok)
+	}
+}
+
+func BenchmarkResetNormalizeSummaryDataPoint(b *testing.B) {
+	shutdown := make(chan struct{})
+	defer close(shutdown)
+	normalizer := NewStandardNormalizer(shutdown, zap.NewNop())
+	startPoint := testSummaryDataPoint()
+	startPoint.SetTimestamp(start)
+	startPoint.SetSum(float64(b.N + 1))
+	id := uint64(12345)
+	// ensure each run is the same by skipping the first call, which will populate caches
+	normalizer.NormalizeSummaryDataPoint(startPoint, id)
+
+	var ok bool
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		// each point decreases in value, which triggers a reset.
+		b.StopTimer()
+		newPoint := testSummaryDataPoint()
+		newPoint.SetSum(float64(b.N - i))
+		b.StartTimer()
+		_, ok = normalizer.NormalizeSummaryDataPoint(newPoint, id)
+		assert.True(b, ok)
+	}
+}
+
+var (
+	now   = pcommon.NewTimestampFromTime(time.Now())
+	start = pcommon.NewTimestampFromTime(time.Now().Add(-time.Minute))
+)
+
+func testNumberDataPoint() pmetric.NumberDataPoint {
+	point := pmetric.NewNumberDataPoint()
+	point.SetTimestamp(now)
+	point.SetIntValue(12)
+	point.Exemplars().AppendEmpty().SetIntValue(0)
+	addAttributes(point.Attributes())
+	return point
+}
+
+func testHistogramDataPoint() pmetric.HistogramDataPoint {
+	point := pmetric.NewHistogramDataPoint()
+	point.SetTimestamp(now)
+	point.SetCount(2)
+	point.SetSum(10.1)
+	point.BucketCounts().FromRaw([]uint64{1, 1})
+	point.ExplicitBounds().FromRaw([]float64{1, 2})
+	point.Exemplars().AppendEmpty().SetIntValue(0)
+	addAttributes(point.Attributes())
+	return point
+}
+
+func testExponentialHistogramDataPoint() pmetric.ExponentialHistogramDataPoint {
+	point := pmetric.NewExponentialHistogramDataPoint()
+	point.SetTimestamp(now)
+	point.SetCount(4)
+	point.SetSum(10.1)
+	point.SetScale(1)
+	point.SetZeroCount(1)
+	point.Exemplars().AppendEmpty().SetIntValue(0)
+	point.Positive().BucketCounts().FromRaw([]uint64{1, 1})
+	point.Positive().SetOffset(1)
+	point.Negative().BucketCounts().FromRaw([]uint64{1, 1})
+	point.Negative().SetOffset(1)
+	addAttributes(point.Attributes())
+	return point
+}
+
+func testSummaryDataPoint() pmetric.SummaryDataPoint {
+	point := pmetric.NewSummaryDataPoint()
+	point.SetTimestamp(now)
+	point.SetCount(2)
+	point.SetSum(10.1)
+	point.QuantileValues().AppendEmpty().SetValue(1)
+	addAttributes(point.Attributes())
+	return point
 }
 
 func addAttributes(attrs pcommon.Map) {
