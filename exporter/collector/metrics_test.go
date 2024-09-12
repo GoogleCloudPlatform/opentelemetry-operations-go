@@ -2638,3 +2638,51 @@ func TestPushMetricsOntoWAL(t *testing.T) {
 	err = proto.Unmarshal(bytes, req)
 	require.NoError(t, err)
 }
+
+func Benchmark_TestExport(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		mExp := &MetricsExporter{
+			cfg: DefaultConfig(),
+			exportFunc: func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
+				return nil
+			},
+		}
+
+		req := &monitoringpb.CreateTimeSeriesRequest{Name: "foo"}
+		_, err := proto.Marshal(req)
+		require.NoError(b, err)
+
+		err = mExp.export(context.Background(), req)
+		require.NoError(b, err)
+	}
+}
+
+func Benchmark_TestReadWALAndExport(b *testing.B) {
+	for n := 0; n < b.N; n++ {
+		tmpDir, _ := os.MkdirTemp("", "wal-test-")
+		mExp := &MetricsExporter{
+			cfg: Config{
+				MetricConfig: MetricConfig{
+					WALConfig: &WALConfig{
+						Directory: tmpDir,
+					},
+				},
+			},
+			exportFunc: func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest) error {
+				return nil
+			},
+		}
+
+		_, _, err := mExp.setupWAL()
+		require.NoError(b, err)
+
+		req := &monitoringpb.CreateTimeSeriesRequest{Name: "foo"}
+		bytes, err := proto.Marshal(req)
+		require.NoError(b, err)
+		err = mExp.wal.Write(1, bytes)
+		require.NoError(b, err)
+
+		err = mExp.readWALAndExport(context.Background())
+		require.NoError(b, err)
+	}
+}
