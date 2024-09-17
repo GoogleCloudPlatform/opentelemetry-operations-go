@@ -166,12 +166,14 @@ func NewLogTestExporter(
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
+	var duration time.Duration
 	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
 		cfg,
 		logger,
 		meterProvider,
 		"latest",
+		duration,
 	)
 	require.NoError(t, err)
 
