@@ -43,12 +43,15 @@ func createLogsExporter(
 	cfg := test.CreateLogConfig()
 	// For sending to a real project, set the project ID from an env var.
 	cfg.ProjectID = os.Getenv("PROJECT_ID")
+
+	var duration time.Duration
 	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
 		cfg,
 		logger,
 		noop.NewMeterProvider(),
 		"latest",
+		duration,
 	)
 	require.NoError(t, err)
 	err = exporter.Start(ctx, componenttest.NewNopHost())

@@ -148,6 +148,7 @@ type LogsExporter struct {
 	loggingClient *loggingv2.Client
 	cfg           Config
 	mapper        logMapper
+	timeout       time.Duration
 }
 
 type logMapper struct {
@@ -163,6 +164,7 @@ func NewGoogleCloudLogsExporter(
 	log *zap.Logger,
 	meterProvider metric.MeterProvider,
 	version string,
+	timeout time.Duration,
 ) (*LogsExporter, error) {
 	setVersionInUserAgent(&cfg, version)
 	obs := selfObservability{
@@ -171,8 +173,9 @@ func NewGoogleCloudLogsExporter(
 	}
 
 	return &LogsExporter{
-		cfg: cfg,
-		obs: obs,
+		cfg:     cfg,
+		obs:     obs,
+		timeout: timeout,
 		mapper: logMapper{
 			obs:            obs,
 			cfg:            cfg,
@@ -364,6 +367,13 @@ func mergeLogLabels(instrumentationSource, instrumentationVersion string, resour
 }
 
 func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEntry) (*logpb.WriteLogEntriesResponse, error) {
+	timeout := l.timeout
+	if timeout <= 0 {
+		timeout = 12 * time.Second
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
 	request := &logpb.WriteLogEntriesRequest{
 		PartialSuccess: true,
 		Entries:        batch,
