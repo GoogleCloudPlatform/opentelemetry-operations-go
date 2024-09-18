@@ -367,7 +367,11 @@ func mergeLogLabels(instrumentationSource, instrumentationVersion string, resour
 }
 
 func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEntry) (*logpb.WriteLogEntriesResponse, error) {
-	ctx, cancel := context.WithTimeout(ctx, l.timeout)
+	timeout := l.timeout
+	if timeout <= 0 {
+		timeout = 12 * time.Second
+	}
+	ctx, cancel := context.WithTimeout(ctx, timeout)
 	defer cancel()
 
 	request := &logpb.WriteLogEntriesRequest{
