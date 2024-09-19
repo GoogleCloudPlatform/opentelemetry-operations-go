@@ -224,7 +224,7 @@ update-otel:
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/detectors/gcp VERSION=$(STABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_CONTRIB_OTEL_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector VERSION=$(UNSTABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/confmap VERSION=$(UNSTABLE_COLLECTOR_VERSION)
+	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/confmap VERSION=$(STABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/component VERSION=$(UNSTABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/semconv VERSION=$(UNSTABLE_COLLECTOR_VERSION)
 	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/otelcol VERSION=$(UNSTABLE_COLLECTOR_VERSION)

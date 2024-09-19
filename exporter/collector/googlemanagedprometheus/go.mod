@@ -1,16 +1,14 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus
 
-go 1.21.0
-
-toolchain go1.22.0
+go 1.22.0
 
 require (
-	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus v0.104.0
+	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus v0.109.0
 	github.com/prometheus/common v0.53.0
 	github.com/stretchr/testify v1.9.0
-	go.opentelemetry.io/collector/featuregate v1.11.0
-	go.opentelemetry.io/collector/pdata v1.11.0
-	go.opentelemetry.io/collector/semconv v0.104.0
+	go.opentelemetry.io/collector/featuregate v1.15.0
+	go.opentelemetry.io/collector/pdata v1.15.0
+	go.opentelemetry.io/collector/semconv v0.109.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240604185151-ef581f913117
 )
 
@@ -28,7 +26,7 @@ require (
 	golang.org/x/sys v0.21.0 // indirect
 	golang.org/x/text v0.16.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240604185151-ef581f913117 // indirect
-	google.golang.org/grpc v1.65.0 // indirect
+	google.golang.org/grpc v1.66.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
