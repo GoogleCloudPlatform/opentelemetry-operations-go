@@ -33,58 +33,46 @@ func NewDisabledNormalizer() Normalizer {
 
 type disabledNormalizer struct{}
 
-// NormalizeExponentialHistogramDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, _ uint64) (pmetric.ExponentialHistogramDataPoint, bool) {
+// NormalizeExponentialHistogramDataPoint ensures the start time is before the
+// end time, but does not normalize points.
+func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, _ uint64) bool {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
-		// Make a copy so we don't mutate underlying data.
-		newPoint := pmetric.NewExponentialHistogramDataPoint()
-		point.CopyTo(newPoint)
 		// StartTime = Timestamp - 1 ms
-		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		return newPoint, true
+		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
 	}
-	return point, true
+	return true
 }
 
-// NormalizeHistogramDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, _ uint64) (pmetric.HistogramDataPoint, bool) {
+// NormalizeHistogramDataPoint ensures the start time is before the
+// end time, but does not normalize points.
+func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, _ uint64) bool {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
-		// Make a copy so we don't mutate underlying data.
-		newPoint := pmetric.NewHistogramDataPoint()
-		point.CopyTo(newPoint)
 		// StartTime = Timestamp - 1 ms
-		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		return newPoint, true
+		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
 	}
-	return point, true
+	return true
 }
 
-// NormalizeNumberDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, _ uint64) (pmetric.NumberDataPoint, bool) {
+// NormalizeNumberDataPoint ensures the start time is before the
+// end time, but does not normalize points.
+func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, _ uint64) bool {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
-		// Make a copy so we don't mutate underlying data.
-		newPoint := pmetric.NewNumberDataPoint()
-		point.CopyTo(newPoint)
 		// StartTime = Timestamp - 1 ms
-		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		return newPoint, true
+		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
 	}
-	return point, true
+	return true
 }
 
-// NormalizeSummaryDataPoint returns the point without normalizing.
-func (d *disabledNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, _ uint64) (pmetric.SummaryDataPoint, bool) {
+// NormalizeSummaryDataPoint ensures the start time is before the
+// end time, but does not normalize points.
+func (d *disabledNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, _ uint64) bool {
 	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
 		// Handle explicit reset points.
-		// Make a copy so we don't mutate underlying data.
-		newPoint := pmetric.NewSummaryDataPoint()
-		point.CopyTo(newPoint)
 		// StartTime = Timestamp - 1 ms
-		newPoint.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
-		return newPoint, true
+		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
 	}
-	return point, true
+	return true
 }

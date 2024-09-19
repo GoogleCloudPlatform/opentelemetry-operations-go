@@ -40,7 +40,7 @@ func BenchmarkNormalizeNumberDataPoint(b *testing.B) {
 		b.StopTimer()
 		newPoint := testNumberDataPoint()
 		b.StartTimer()
-		_, ok = normalizer.NormalizeNumberDataPoint(newPoint, id)
+		ok = normalizer.NormalizeNumberDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
 }
@@ -61,7 +61,7 @@ func BenchmarkNormalizeHistogramDataPoint(b *testing.B) {
 		b.StopTimer()
 		newPoint := testHistogramDataPoint()
 		b.StartTimer()
-		_, ok = normalizer.NormalizeHistogramDataPoint(newPoint, id)
+		ok = normalizer.NormalizeHistogramDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
 }
@@ -82,7 +82,7 @@ func BenchmarkNormalizeExopnentialHistogramDataPoint(b *testing.B) {
 		b.StopTimer()
 		newPoint := testExponentialHistogramDataPoint()
 		b.StartTimer()
-		_, ok = normalizer.NormalizeExponentialHistogramDataPoint(newPoint, id)
+		ok = normalizer.NormalizeExponentialHistogramDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
 }
@@ -103,7 +103,7 @@ func BenchmarkNormalizeSummaryDataPoint(b *testing.B) {
 		b.StopTimer()
 		newPoint := testSummaryDataPoint()
 		b.StartTimer()
-		_, ok = normalizer.NormalizeSummaryDataPoint(newPoint, id)
+		ok = normalizer.NormalizeSummaryDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
 }
@@ -127,7 +127,7 @@ func BenchmarkResetNormalizeNumberDataPoint(b *testing.B) {
 		newPoint := testNumberDataPoint()
 		newPoint.SetIntValue(int64(b.N - i))
 		b.StartTimer()
-		_, ok = normalizer.NormalizeNumberDataPoint(newPoint, id)
+		ok = normalizer.NormalizeNumberDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
 }
@@ -151,7 +151,7 @@ func BenchmarkResetNormalizeHistogramDataPoint(b *testing.B) {
 		newPoint := testHistogramDataPoint()
 		newPoint.SetSum(float64(b.N - i))
 		b.StartTimer()
-		_, ok = normalizer.NormalizeHistogramDataPoint(newPoint, id)
+		ok = normalizer.NormalizeHistogramDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
 }
@@ -175,7 +175,7 @@ func BenchmarkResetNormalizeExponentialHistogramDataPoint(b *testing.B) {
 		newPoint := testExponentialHistogramDataPoint()
 		newPoint.SetSum(float64(b.N - i))
 		b.StartTimer()
-		_, ok = normalizer.NormalizeExponentialHistogramDataPoint(newPoint, id)
+		ok = normalizer.NormalizeExponentialHistogramDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
 }
@@ -199,7 +199,7 @@ func BenchmarkResetNormalizeSummaryDataPoint(b *testing.B) {
 		newPoint := testSummaryDataPoint()
 		newPoint.SetSum(float64(b.N - i))
 		b.StartTimer()
-		_, ok = normalizer.NormalizeSummaryDataPoint(newPoint, id)
+		ok = normalizer.NormalizeSummaryDataPoint(newPoint, id)
 		assert.True(b, ok)
 	}
 }

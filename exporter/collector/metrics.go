@@ -337,12 +337,9 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 	// separate request later.
 	pendingTimeSeries := map[string][]*monitoringpb.TimeSeries{}
 
-	// add extra metrics from the ExtraMetrics() extension point, combine into a new copy
+	// add extra metrics from the ExtraMetrics() extension point
 	if me.cfg.MetricConfig.ExtraMetrics != nil {
-		metricsCopy := pmetric.NewMetrics()
-		m.ResourceMetrics().CopyTo(metricsCopy.ResourceMetrics())
-		me.cfg.MetricConfig.ExtraMetrics(metricsCopy)
-		m = metricsCopy
+		me.cfg.MetricConfig.ExtraMetrics(m)
 	}
 	rms := m.ResourceMetrics()
 
@@ -876,11 +873,10 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	}
 	// Normalize the summary point.
 	metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
-	normalizedPoint, keep := m.normalizer.NormalizeSummaryDataPoint(point, metricIdentifier)
+	keep := m.normalizer.NormalizeSummaryDataPoint(point, metricIdentifier)
 	if !keep {
 		return nil
 	}
-	point = normalizedPoint
 	sumType, countType, quantileType, err := m.summaryMetricTypes(metric)
 	if err != nil {
 		m.obs.log.Debug("Failed to get metric type (i.e. name) for summary metric. Dropping the metric.", zap.Error(err), zap.Any("metric", metric))
@@ -1149,11 +1145,10 @@ func (m *metricMapper) histogramToTimeSeries(
 	if hist.AggregationTemporality() == pmetric.AggregationTemporalityCumulative {
 		// Normalize cumulative histogram points.
 		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
-		normalizedPoint, keep := m.normalizer.NormalizeHistogramDataPoint(point, metricIdentifier)
+		keep := m.normalizer.NormalizeHistogramDataPoint(point, metricIdentifier)
 		if !keep {
 			return nil
 		}
-		point = normalizedPoint
 	}
 
 	// We treat deltas as cumulatives w/ resets.
@@ -1203,11 +1198,10 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	if exponentialHist.AggregationTemporality() == pmetric.AggregationTemporalityCumulative {
 		// Normalize the histogram point.
 		metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
-		normalizedPoint, keep := m.normalizer.NormalizeExponentialHistogramDataPoint(point, metricIdentifier)
+		keep := m.normalizer.NormalizeExponentialHistogramDataPoint(point, metricIdentifier)
 		if !keep {
 			return nil
 		}
-		point = normalizedPoint
 	}
 	// We treat deltas as cumulatives w/ resets.
 	metricKind := metricpb.MetricDescriptor_CUMULATIVE
@@ -1258,11 +1252,10 @@ func (m *metricMapper) sumPointToTimeSeries(
 	if sum.IsMonotonic() {
 		if sum.AggregationTemporality() == pmetric.AggregationTemporalityCumulative {
 			metricIdentifier := datapointstorage.Identifier(resource, extraLabels, metric, point.Attributes())
-			normalizedPoint, keep := m.normalizer.NormalizeNumberDataPoint(point, metricIdentifier)
+			keep := m.normalizer.NormalizeNumberDataPoint(point, metricIdentifier)
 			if !keep {
 				return nil
 			}
-			point = normalizedPoint
 		}
 		startTime = timestamppb.New(point.StartTimestamp().AsTime())
 	} else {
