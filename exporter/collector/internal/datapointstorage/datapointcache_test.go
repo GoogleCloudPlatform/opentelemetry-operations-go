@@ -67,7 +67,7 @@ func TestGC(t *testing.T) {
 	fakeTicker := make(chan time.Time)
 	id := uint64(12345)
 
-	c.SetNumberDataPoint(id, pmetric.NumberDataPoint{})
+	c.SetNumberDataPoint(id, pmetric.NewNumberDataPoint())
 
 	// bar exists since we just set it
 	usedPoint, found := c.numberCache[id]

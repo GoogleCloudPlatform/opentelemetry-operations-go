@@ -129,7 +129,7 @@ func subtractExponentialHistogramDataPoint(a, b pmetric.ExponentialHistogramData
 	a.Negative().BucketCounts().FromRaw(subtractExponentialBuckets(a.Negative(), b.Negative()))
 }
 
-// subtractExponentialBuckets returns a - b.
+// subtractExponentialBuckets subtracts b from a.
 func subtractExponentialBuckets(a, b pmetric.ExponentialHistogramDataPointBuckets) []uint64 {
 	newBuckets := make([]uint64, a.BucketCounts().Len())
 	offsetDiff := int(a.Offset() - b.Offset())
@@ -213,7 +213,7 @@ func lessThanHistogramDataPoint(a, b pmetric.HistogramDataPoint) bool {
 	return a.Count() < b.Count() || a.Sum() < b.Sum()
 }
 
-// subtractHistogramDataPoint returns a - b.
+// subtractHistogramDataPoint subtracts b from a.
 func subtractHistogramDataPoint(a, b pmetric.HistogramDataPoint) {
 	// Use the timestamp from the normalization point
 	a.SetStartTimestamp(b.Timestamp())
