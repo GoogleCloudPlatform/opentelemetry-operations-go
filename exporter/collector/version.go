@@ -17,5 +17,5 @@ package collector
 // Version is the current release version of the OpenTelemetry
 // Operations Collector Exporter in use.
 func Version() string {
-	return "0.48.1"
+	return "0.48.2"
 }

@@ -8,8 +8,8 @@ require (
 	cloud.google.com/go/logging v1.10.0
 	cloud.google.com/go/monitoring v1.20.2
 	cloud.google.com/go/trace v1.10.10
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.1
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.1
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.2
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.2
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/google/go-cmp v0.6.0
 	github.com/googleapis/gax-go/v2 v2.12.5
