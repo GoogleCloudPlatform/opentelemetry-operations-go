@@ -335,7 +335,7 @@ func TestRecordToMpb(t *testing.T) {
 		},
 	}
 
-	inputLibrary := instrumentation.Library{Name: "workload.googleapis.com"}
+	inputLibrary := instrumentation.Scope{Name: "workload.googleapis.com"}
 	inputAttributes := attribute.NewSet(
 		attribute.Key("a").String("A"),
 		attribute.Key("b?b").String("B"),
@@ -953,7 +953,7 @@ func TestRecordToMpbUTF8(t *testing.T) {
 		},
 	}
 
-	inputLibrary := instrumentation.Library{Name: "workload.googleapis.com"}
+	inputLibrary := instrumentation.Scope{Name: "workload.googleapis.com"}
 	inputAttributes := attribute.NewSet(
 		attribute.Key("valid_ascii").String("abcdefg"),
 		attribute.Key("valid_utf8").String("שלום"),
