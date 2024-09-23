@@ -32,20 +32,20 @@ type spanSnapshot struct {
 	startTime time.Time
 	// ReadOnlySpan is needed so we can inherit the "private" func
 	sdktrace.ReadOnlySpan
-	resource               *sdkresource.Resource
-	instrumentationLibrary instrumentation.Library
-	status                 sdktrace.Status
-	name                   string
-	attributes             []attribute.KeyValue
-	events                 []sdktrace.Event
-	links                  []sdktrace.Link
-	parent                 apitrace.SpanContext
-	spanContext            apitrace.SpanContext
-	droppedMessageEvents   int
-	droppedLinks           int
-	childSpanCount         int
-	spanKind               apitrace.SpanKind
-	droppedAttributes      int
+	resource             *sdkresource.Resource
+	instrumentationScope instrumentation.Scope
+	status               sdktrace.Status
+	name                 string
+	attributes           []attribute.KeyValue
+	events               []sdktrace.Event
+	links                []sdktrace.Link
+	parent               apitrace.SpanContext
+	spanContext          apitrace.SpanContext
+	droppedMessageEvents int
+	droppedLinks         int
+	childSpanCount       int
+	spanKind             apitrace.SpanKind
+	droppedAttributes    int
 }
 
 func (s spanSnapshot) Name() string                      { return s.name }
@@ -63,6 +63,6 @@ func (s spanSnapshot) DroppedAttributes() int            { return s.droppedAttri
 func (s spanSnapshot) DroppedLinks() int                 { return s.droppedLinks }
 func (s spanSnapshot) DroppedEvents() int                { return s.droppedLinks }
 func (s spanSnapshot) ChildSpanCount() int               { return s.childSpanCount }
-func (s spanSnapshot) InstrumentationLibrary() instrumentation.Library {
-	return s.instrumentationLibrary
+func (s spanSnapshot) InstrumentationScope() instrumentation.Scope {
+	return s.instrumentationScope
 }
