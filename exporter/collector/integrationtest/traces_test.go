@@ -32,8 +32,6 @@ func TestTraces(t *testing.T) {
 	startTime := endTime.Add(-time.Second)
 
 	for _, test := range testcases.TracesTestCases {
-		test := test
-
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeeded(t)
 

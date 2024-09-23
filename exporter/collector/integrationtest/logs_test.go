@@ -32,8 +32,6 @@ func TestLogs(t *testing.T) {
 	timestamp := time.Now()
 
 	for _, test := range testcases.LogsTestCases {
-		test := test
-
 		t.Run(test.Name, func(t *testing.T) {
 			logs := test.LoadOTLPLogsInput(t, timestamp)
 

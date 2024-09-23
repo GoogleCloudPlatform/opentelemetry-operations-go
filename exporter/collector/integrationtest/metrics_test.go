@@ -37,8 +37,6 @@ func TestCollectorMetrics(t *testing.T) {
 	startTime := endTime.Add(-time.Second)
 
 	for _, test := range testcases.MetricsTestCases {
-		test := test
-
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeeded(t)
 
@@ -166,8 +164,6 @@ func TestSDKMetrics(t *testing.T) {
 	startTime := endTime.Add(-time.Second)
 
 	for _, test := range testcases.MetricsTestCases {
-		test := test
-
 		t.Run(test.Name, func(t *testing.T) {
 			test.SkipIfNeededForSDK(t)
 
