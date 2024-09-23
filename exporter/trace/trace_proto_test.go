@@ -77,7 +77,7 @@ func TestTraceProto_attributesFromSpans(t *testing.T) {
 				attribute.StringSlice("rk3", []string{"sv1", "sv2"}),
 				attribute.Bool("conflict", false),
 			),
-			InstrumentationLibrary: instrumentation.Library{
+			InstrumentationScope: instrumentation.Scope{
 				Name:    "lib-name",
 				Version: "v0.0.1",
 			},

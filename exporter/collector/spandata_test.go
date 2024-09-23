@@ -147,7 +147,7 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 			attribute.Int64("timeout_ns", 12e9),
 			attribute.String("header", string(jsonStr)),
 		},
-		instrumentationLibrary: instrumentation.Library{
+		instrumentationScope: instrumentation.Scope{
 			Name:    "test_il_name",
 			Version: "test_il_version",
 		},
@@ -164,5 +164,5 @@ func TestPDataResourceSpansToOTSpanData_endToEnd(t *testing.T) {
 	assert.EqualValues(t, wantOTSpanData.Links(), gotOTSpanData[0].Links())
 	assert.EqualValues(t, wantOTSpanData.Status(), gotOTSpanData[0].Status())
 	assert.ElementsMatch(t, wantOTSpanData.Attributes(), gotOTSpanData[0].Attributes())
-	assert.EqualValues(t, wantOTSpanData.InstrumentationLibrary(), gotOTSpanData[0].InstrumentationLibrary())
+	assert.EqualValues(t, wantOTSpanData.InstrumentationScope(), gotOTSpanData[0].InstrumentationScope())
 }
