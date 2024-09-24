@@ -16,12 +16,18 @@ package gcp
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
+
+	"cloud.google.com/go/compute/metadata"
 )
 
 // See the available GCE instance metadata:
-// https://cloud.google.com/compute/docs/metadata/default-metadata-values#vm_instance_metadata
+// https://cloud.google.com/compute/docs/metadata/predefined-metadata-keys#instance-metadata
 const machineTypeMetadataAttr = "instance/machine-type"
+
+// https://cloud.google.com/compute/docs/instance-groups/getting-info-about-migs#checking_if_a_vm_instance_is_part_of_a_mig
+const createdByMetadataAttr = "instance/created-by"
 
 func (d *Detector) onGCE() bool {
 	_, err := d.metadata.Get(machineTypeMetadataAttr)
@@ -72,4 +78,37 @@ func (d *Detector) GCEAvailabilityZoneAndRegion() (string, string, error) {
 		return "", "", fmt.Errorf("zone was not in the expected format: country-region-zone.  Got %v", zone)
 	}
 	return zone, strings.Join(splitZone[0:2], "-"), nil
+}
+
+type ManagedInstanceGroup struct {
+	Name     string
+	Location string
+	Type     LocationType
+}
+
+var createdByMIGRE = regexp.MustCompile(`^projects/[^/]+/(zones|regions)/([^/]+)/instanceGroupManagers/([^/]+)$`)
+
+func (d *Detector) GCEManagedInstanceGroup() (ManagedInstanceGroup, error) {
+	createdBy, err := d.metadata.Get(createdByMetadataAttr)
+	if _, ok := err.(metadata.NotDefinedError); ok {
+		return ManagedInstanceGroup{}, nil
+	} else if err != nil {
+		return ManagedInstanceGroup{}, err
+	}
+	matches := createdByMIGRE.FindStringSubmatch(createdBy)
+	if matches == nil {
+		return ManagedInstanceGroup{}, nil
+	}
+
+	mig := ManagedInstanceGroup{
+		Name:     matches[3],
+		Location: matches[2],
+	}
+	switch matches[1] {
+	case "zones":
+		mig.Type = Zone
+	case "regions":
+		mig.Type = Region
+	}
+	return mig, nil
 }

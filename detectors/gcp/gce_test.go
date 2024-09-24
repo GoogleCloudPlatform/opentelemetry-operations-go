@@ -124,7 +124,7 @@ func TestGCEAvaiabilityZoneAndRegionNoZone(t *testing.T) {
 	assert.Equal(t, region, "")
 }
 
-func TestGCEAvaiabilityZoneAndRegionErr(t *testing.T) {
+func TestGCEAvailabilityZoneAndRegionErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
@@ -132,4 +132,59 @@ func TestGCEAvaiabilityZoneAndRegionErr(t *testing.T) {
 	assert.Error(t, err)
 	assert.Equal(t, zone, "")
 	assert.Equal(t, region, "")
+}
+
+func TestGCEManagedInstanceGroup(t *testing.T) {
+	for _, test := range []struct {
+		createdBy string
+		mig       *ManagedInstanceGroup
+	}{
+		{
+			"projects/123456789012/zones/us-central1-f/instanceGroupManagers/igm-metadata",
+			&ManagedInstanceGroup{
+				Name:     "igm-metadata",
+				Location: "us-central1-f",
+				Type:     Zone,
+			},
+		},
+		{
+			"projects/123456789012/regions/us-central1-f/instanceGroupManagers/igm-metadata",
+			&ManagedInstanceGroup{
+				Name:     "igm-metadata",
+				Location: "us-central1-f",
+				Type:     Region,
+			},
+		},
+		{
+			"projects/123456789012/zones/us-central1-f/someOtherInstanceGroup/igm-metadata",
+			&ManagedInstanceGroup{},
+		},
+		{
+			"",
+			&ManagedInstanceGroup{},
+		},
+		{
+			"",
+			nil,
+		},
+	} {
+		t.Run(test.createdBy, func(t *testing.T) {
+			fmp := &FakeMetadataProvider{
+				Attributes: map[string]string{},
+			}
+			if test.createdBy != "" {
+				fmp.Attributes[createdByMetadataAttr] = test.createdBy
+			}
+			if test.mig == nil {
+				fmp.Err = fmt.Errorf("fake error")
+			}
+			d := NewTestDetector(fmp, &FakeOSProvider{})
+			mig, err := d.GCEManagedInstanceGroup()
+			if test.mig == nil {
+				assert.Error(t, err)
+			} else {
+				assert.Equal(t, mig, *test.mig)
+			}
+		})
+	}
 }
