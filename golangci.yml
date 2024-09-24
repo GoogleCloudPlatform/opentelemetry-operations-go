@@ -306,6 +306,7 @@ issues:
     - path: _test\.go
       linters:
         - exportloopref
+        - fieldalignment
     # Exclude some linters from running on tests files.
     - path: \.pb\.go
       linters:
