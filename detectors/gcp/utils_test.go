@@ -14,6 +14,8 @@
 
 package gcp
 
+import "cloud.google.com/go/compute/metadata"
+
 func NewTestDetector(metadata *FakeMetadataProvider, os *FakeOSProvider) *Detector {
 	return &Detector{metadata: metadata, os: os}
 }
@@ -69,7 +71,11 @@ func (f *FakeMetadataProvider) InstanceAttributeValue(s string) (string, error) 
 	if f.Err != nil {
 		return "", f.Err
 	}
-	return f.InstanceAttributes[s], nil
+	value, ok := f.InstanceAttributes[s]
+	if ok {
+		return value, nil
+	}
+	return "", metadata.NotDefinedError(s)
 }
 
 type FakeOSProvider struct {

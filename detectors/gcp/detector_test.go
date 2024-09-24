@@ -43,7 +43,11 @@ func TestCloudPlatformAppEngineStandard(t *testing.T) {
 }
 
 func TestCloudPlatformGKE(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataProvider{
+		InstanceAttributes: map[string]string{
+			clusterNameMetadataAttr: "cluster-name",
+		},
+	}, &FakeOSProvider{
 		Vars: map[string]string{
 			k8sServiceHostEnv: "foo",
 		},
@@ -53,7 +57,17 @@ func TestCloudPlatformGKE(t *testing.T) {
 }
 
 func TestCloudPlatformK8sNotGKE(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{Err: fmt.Errorf("foo")}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+		Vars: map[string]string{
+			k8sServiceHostEnv: "foo",
+		},
+	})
+	platform := d.CloudPlatform()
+	assert.Equal(t, platform, GCE)
+}
+
+func TestCloudPlatformUnknown(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataProvider{Err: fmt.Errorf("no metadata server")}, &FakeOSProvider{
 		Vars: map[string]string{
 			k8sServiceHostEnv: "foo",
 		},
