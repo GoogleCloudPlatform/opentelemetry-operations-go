@@ -167,7 +167,7 @@ generate: $(STRINGER) $(PROTOC)
 
 .PHONY: fieldalignment
 fieldalignment: $(FIELDALIGNMENT)
-	$(MAKE) for-all-package CMD="$(FIELDALIGNMENT) -fix ."
+	$(MAKE) for-all-package CMD="$(FIELDALIGNMENT) -fix -test=false ."
 
 
 .PHONY: for-all-mod
