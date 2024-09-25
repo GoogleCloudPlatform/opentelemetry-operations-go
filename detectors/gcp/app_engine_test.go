@@ -22,7 +22,7 @@ import (
 )
 
 func TestAppEngineServiceName(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(fmp(), &FakeOSProvider{
 		Vars: map[string]string{
 			gaeServiceEnv: "my-service",
 		},
@@ -33,7 +33,7 @@ func TestAppEngineServiceName(t *testing.T) {
 }
 
 func TestAppEngineServiceNameErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(fmp(), &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	name, err := d.AppEngineServiceName()
@@ -42,7 +42,7 @@ func TestAppEngineServiceNameErr(t *testing.T) {
 }
 
 func TestAppEngineServiceVersion(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(fmp(), &FakeOSProvider{
 		Vars: map[string]string{
 			gaeVersionEnv: "my-version",
 		},
@@ -53,7 +53,7 @@ func TestAppEngineServiceVersion(t *testing.T) {
 }
 
 func TestAppEngineServiceVersionErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(fmp(), &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	version, err := d.AppEngineServiceVersion()
@@ -62,7 +62,7 @@ func TestAppEngineServiceVersionErr(t *testing.T) {
 }
 
 func TestAppEngineServiceInstance(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(fmp(), &FakeOSProvider{
 		Vars: map[string]string{
 			gaeInstanceEnv: "instance-123",
 		},
@@ -73,7 +73,7 @@ func TestAppEngineServiceInstance(t *testing.T) {
 }
 
 func TestAppEngineServiceInstanceErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(fmp(), &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	instance, err := d.AppEngineServiceInstance()
@@ -82,9 +82,9 @@ func TestAppEngineServiceInstanceErr(t *testing.T) {
 }
 
 func TestAppEngineStandardAvailabilityZone(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeZone: "us16",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(
+		"instance/zone", "us16",
+	), &FakeOSProvider{})
 	zone, err := d.AppEngineStandardAvailabilityZone()
 	assert.NoError(t, err)
 	assert.Equal(t, zone, "us16")
@@ -100,9 +100,9 @@ func TestAppEngineStandardAvailabilityZoneErr(t *testing.T) {
 }
 
 func TestAppEngineStandardCloudRegion(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		Attributes: map[string]string{regionMetadataAttr: "/projects/123/regions/us-central1"},
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(
+		regionMetadataAttr, "/projects/123/regions/us-central1",
+	), &FakeOSProvider{})
 	instance, err := d.AppEngineStandardCloudRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, instance, "us-central1")
@@ -118,19 +118,17 @@ func TestAppEngineStandardCloudRegionErr(t *testing.T) {
 }
 
 func TestAppEngineFlexAvailabilityZoneAndRegion(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeZone: "us-central1-c",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	zone, region, err := d.AppEngineFlexAvailabilityZoneAndRegion()
 	assert.NoError(t, err)
-	assert.Equal(t, zone, "us-central1-c")
-	assert.Equal(t, region, "us-central1")
+	assert.Equal(t, zone, fakeZone)
+	assert.Equal(t, region, fakeRegion)
 }
 
 func TestAppEngineFlexAvailabilityZoneAndRegionMalformedZone(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeZone: "us-central1",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(
+		"instance/zone", "us-central1",
+	), &FakeOSProvider{})
 	zone, region, err := d.AppEngineFlexAvailabilityZoneAndRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zone, "")
@@ -138,9 +136,9 @@ func TestAppEngineFlexAvailabilityZoneAndRegionMalformedZone(t *testing.T) {
 }
 
 func TestAppEngineFlexAvailabilityZoneAndRegionNoZone(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeZone: "",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(
+		"instance/zone", "",
+	), &FakeOSProvider{})
 	zone, region, err := d.AppEngineFlexAvailabilityZoneAndRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zone, "")

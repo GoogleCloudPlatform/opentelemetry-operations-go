@@ -113,12 +113,10 @@ func TestFaaSJobTaskIndexErr(t *testing.T) {
 }
 
 func TestFaaSID(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeInstanceID: "instance-id-123",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	instance, err := d.FaaSID()
 	assert.NoError(t, err)
-	assert.Equal(t, instance, "instance-id-123")
+	assert.Equal(t, instance, fakeInstanceID)
 }
 
 func TestFaaSIDErr(t *testing.T) {
@@ -131,9 +129,9 @@ func TestFaaSIDErr(t *testing.T) {
 }
 
 func TestFaaSCloudRegion(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		Attributes: map[string]string{regionMetadataAttr: "/projects/123/regions/us-central1"},
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(
+		regionMetadataAttr, "/projects/123/regions/us-central1",
+	), &FakeOSProvider{})
 	instance, err := d.FaaSCloudRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, instance, "us-central1")

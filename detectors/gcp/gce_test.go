@@ -22,12 +22,10 @@ import (
 )
 
 func TestGCEHostType(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		Attributes: map[string]string{machineTypeMetadataAttr: "n1-standard1"},
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	hostType, err := d.GCEHostType()
 	assert.NoError(t, err)
-	assert.Equal(t, hostType, "n1-standard1")
+	assert.Equal(t, hostType, fakeInstanceMachineType)
 }
 
 func TestGCEHostTypeErr(t *testing.T) {
@@ -40,12 +38,10 @@ func TestGCEHostTypeErr(t *testing.T) {
 }
 
 func TestGCEHostID(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeInstanceID: "my-instance-id-123",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	instanceID, err := d.GCEHostID()
 	assert.NoError(t, err)
-	assert.Equal(t, instanceID, "my-instance-id-123")
+	assert.Equal(t, instanceID, fakeInstanceID)
 }
 
 func TestGCEHostIDErr(t *testing.T) {
@@ -58,28 +54,31 @@ func TestGCEHostIDErr(t *testing.T) {
 }
 
 func TestGCEHostName(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeInstanceName: "my-host-123",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	hostName, err := d.GCEHostName()
 	assert.NoError(t, err)
-	assert.Equal(t, hostName, "my-host-123")
+	assert.Equal(t, hostName, fakeInstanceName)
 }
 
 func TestGCEInstanceName(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeInstanceName: "my-host-123",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	hostName, err := d.GCEInstanceName()
 	assert.NoError(t, err)
-	assert.Equal(t, hostName, "my-host-123")
+	assert.Equal(t, hostName, fakeInstanceName)
 }
 
 func TestGCEInstanceHostname(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeInstanceName:     "my-host-123",
-		FakeInstanceHostname: "custom-dns.fakevm.example",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(fmp(), &FakeOSProvider{})
+	hostName, err := d.GCEInstanceHostname()
+	assert.NoError(t, err)
+	assert.Equal(t, hostName, fakeInstanceHostname)
+}
+
+func TestGCEInstanceCustomHostname(t *testing.T) {
+	d := NewTestDetector(fmp(
+		"instance/name", "my-host-123",
+		"instance/hostname", "custom-dns.fakevm.example",
+	), &FakeOSProvider{})
 	hostName, err := d.GCEInstanceHostname()
 	assert.NoError(t, err)
 	assert.Equal(t, hostName, "custom-dns.fakevm.example")
@@ -94,30 +93,28 @@ func TestGCEHostNameErr(t *testing.T) {
 	assert.Equal(t, hostName, "")
 }
 
-func TestGCEAvaiabilityZoneAndRegion(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeZone: "us-central1-c",
-	}, &FakeOSProvider{})
+func TestGCEAvailabilityZoneAndRegion(t *testing.T) {
+	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.NoError(t, err)
-	assert.Equal(t, zone, "us-central1-c")
-	assert.Equal(t, region, "us-central1")
+	assert.Equal(t, zone, fakeZone)
+	assert.Equal(t, region, fakeRegion)
 }
 
-func TestGCEAvaiabilityZoneAndRegionMalformedZone(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeZone: "us-central1",
-	}, &FakeOSProvider{})
+func TestGCEAvailabilityZoneAndRegionMalformedZone(t *testing.T) {
+	d := NewTestDetector(fmp(
+		"instance/zone", "us-central1",
+	), &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zone, "")
 	assert.Equal(t, region, "")
 }
 
-func TestGCEAvaiabilityZoneAndRegionNoZone(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeZone: "",
-	}, &FakeOSProvider{})
+func TestGCEAvailabilityZoneAndRegionNoZone(t *testing.T) {
+	d := NewTestDetector(fmp(
+		"instance/zone", "",
+	), &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zone, "")
@@ -169,16 +166,14 @@ func TestGCEManagedInstanceGroup(t *testing.T) {
 		},
 	} {
 		t.Run(test.createdBy, func(t *testing.T) {
-			fmp := &FakeMetadataProvider{
-				Attributes: map[string]string{},
-			}
+			fmpi := fmp()
 			if test.createdBy != "" {
-				fmp.Attributes[createdByMetadataAttr] = test.createdBy
+				fmpi.Metadata["instance/attributes/created-by"] = test.createdBy
 			}
 			if test.mig == nil {
-				fmp.Err = fmt.Errorf("fake error")
+				fmpi.Err = fmt.Errorf("fake error")
 			}
-			d := NewTestDetector(fmp, &FakeOSProvider{})
+			d := NewTestDetector(fmpi, &FakeOSProvider{})
 			mig, err := d.GCEManagedInstanceGroup()
 			if test.mig == nil {
 				assert.Error(t, err)

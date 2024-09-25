@@ -27,7 +27,7 @@ import (
 const machineTypeMetadataAttr = "instance/machine-type"
 
 // https://cloud.google.com/compute/docs/instance-groups/getting-info-about-migs#checking_if_a_vm_instance_is_part_of_a_mig
-const createdByMetadataAttr = "instance/created-by"
+const createdByInstanceAttr = "created-by"
 
 func (d *Detector) onGCE() bool {
 	_, err := d.metadata.Get(machineTypeMetadataAttr)
@@ -89,7 +89,7 @@ type ManagedInstanceGroup struct {
 var createdByMIGRE = regexp.MustCompile(`^projects/[^/]+/(zones|regions)/([^/]+)/instanceGroupManagers/([^/]+)$`)
 
 func (d *Detector) GCEManagedInstanceGroup() (ManagedInstanceGroup, error) {
-	createdBy, err := d.metadata.Get(createdByMetadataAttr)
+	createdBy, err := d.metadata.InstanceAttributeValue(createdByInstanceAttr)
 	if _, ok := err.(metadata.NotDefinedError); ok {
 		return ManagedInstanceGroup{}, nil
 	} else if err != nil {
@@ -97,6 +97,8 @@ func (d *Detector) GCEManagedInstanceGroup() (ManagedInstanceGroup, error) {
 	}
 	matches := createdByMIGRE.FindStringSubmatch(createdBy)
 	if matches == nil {
+		// The "created-by" key exists, but it doesn't describe a MIG.
+		// Something else must have created this VM.
 		return ManagedInstanceGroup{}, nil
 	}
 

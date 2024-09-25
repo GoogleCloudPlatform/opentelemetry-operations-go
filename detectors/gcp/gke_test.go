@@ -21,13 +21,25 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	fakeClusterName     = "my-cluster"
+	fakeClusterLocation = "us-central1-c" // note this is different from fakeZone
+)
+
+func gkeFmp(keyValues ...string) *FakeMetadataProvider {
+	return fmp(
+		append([]string{
+			"instance/attributes/cluster-name", fakeClusterName,
+			"instance/attributes/cluster-location", fakeClusterLocation,
+		}, keyValues...)...,
+	)
+}
+
 func TestGKEHostID(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		FakeInstanceID: "my-instance-id-123",
-	}, &FakeOSProvider{})
+	d := NewTestDetector(gkeFmp(), &FakeOSProvider{})
 	instanceID, err := d.GKEHostID()
 	assert.NoError(t, err)
-	assert.Equal(t, instanceID, "my-instance-id-123")
+	assert.Equal(t, instanceID, fakeInstanceID)
 }
 
 func TestGKEHostIDErr(t *testing.T) {
@@ -40,12 +52,10 @@ func TestGKEHostIDErr(t *testing.T) {
 }
 
 func TestGKEClusterName(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		InstanceAttributes: map[string]string{clusterNameMetadataAttr: "my-cluster"},
-	}, &FakeOSProvider{})
+	d := NewTestDetector(gkeFmp(), &FakeOSProvider{})
 	clusterName, err := d.GKEClusterName()
 	assert.NoError(t, err)
-	assert.Equal(t, clusterName, "my-cluster")
+	assert.Equal(t, clusterName, fakeClusterName)
 }
 
 func TestGKEClusterNameErr(t *testing.T) {
@@ -57,37 +67,35 @@ func TestGKEClusterNameErr(t *testing.T) {
 	assert.Equal(t, clusterName, "")
 }
 
-func TestGKEAvaiabilityZoneOrRegionZonal(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		InstanceAttributes: map[string]string{clusterLocationMetadataAttr: "us-central1-c"},
-	}, &FakeOSProvider{})
+func TestGKEAvailabilityZoneOrRegionZonal(t *testing.T) {
+	d := NewTestDetector(gkeFmp(), &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, zoneOrRegion, Zone)
 	assert.Equal(t, location, "us-central1-c")
 }
 
-func TestGKEAvaiabilityZoneOrRegionRegional(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		InstanceAttributes: map[string]string{clusterLocationMetadataAttr: "us-central1"},
-	}, &FakeOSProvider{})
+func TestGKEAvailabilityZoneOrRegionRegional(t *testing.T) {
+	d := NewTestDetector(gkeFmp(
+		"instance/attributes/cluster-location", "us-central1",
+	), &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, zoneOrRegion, Region)
 	assert.Equal(t, location, "us-central1")
 }
 
-func TestGKEAvaiabilityZoneOrRegionMalformed(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
-		InstanceAttributes: map[string]string{clusterLocationMetadataAttr: "uscentral1c"},
-	}, &FakeOSProvider{})
+func TestGKEAvailabilityZoneOrRegionMalformed(t *testing.T) {
+	d := NewTestDetector(gkeFmp(
+		"instance/attributes/cluster-location", "uscentral1c",
+	), &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.Error(t, err)
 	assert.Equal(t, zoneOrRegion, UndefinedLocation)
 	assert.Equal(t, location, "")
 }
 
-func TestGKEAvaiabilityZoneOrRegionErr(t *testing.T) {
+func TestGKEAvailabilityZoneOrRegionErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataProvider{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
