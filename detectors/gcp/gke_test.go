@@ -26,8 +26,8 @@ const (
 	fakeClusterLocation = "us-central1-c" // note this is different from fakeZone
 )
 
-func gkeFmp(keyValues ...string) *FakeMetadataProvider {
-	return fmp(
+func newGKEFakeMetadataTransport(t *testing.T, keyValues ...string) *FakeMetadataTransport {
+	return newFakeMetadataTransport(t,
 		append([]string{
 			"instance/attributes/cluster-name", fakeClusterName,
 			"instance/attributes/cluster-location", fakeClusterLocation,
@@ -36,14 +36,14 @@ func gkeFmp(keyValues ...string) *FakeMetadataProvider {
 }
 
 func TestGKEHostID(t *testing.T) {
-	d := NewTestDetector(gkeFmp(), &FakeOSProvider{})
+	d := NewTestDetector(newGKEFakeMetadataTransport(t), &FakeOSProvider{})
 	instanceID, err := d.GKEHostID()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeInstanceID, instanceID)
 }
 
 func TestGKEHostIDErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	instanceID, err := d.GKEHostID()
@@ -52,14 +52,14 @@ func TestGKEHostIDErr(t *testing.T) {
 }
 
 func TestGKEClusterName(t *testing.T) {
-	d := NewTestDetector(gkeFmp(), &FakeOSProvider{})
+	d := NewTestDetector(newGKEFakeMetadataTransport(t), &FakeOSProvider{})
 	clusterName, err := d.GKEClusterName()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeClusterName, clusterName)
 }
 
 func TestGKEClusterNameErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	clusterName, err := d.GKEClusterName()
@@ -68,7 +68,7 @@ func TestGKEClusterNameErr(t *testing.T) {
 }
 
 func TestGKEAvailabilityZoneOrRegionZonal(t *testing.T) {
-	d := NewTestDetector(gkeFmp(), &FakeOSProvider{})
+	d := NewTestDetector(newGKEFakeMetadataTransport(t), &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, Zone, zoneOrRegion)
@@ -76,7 +76,7 @@ func TestGKEAvailabilityZoneOrRegionZonal(t *testing.T) {
 }
 
 func TestGKEAvailabilityZoneOrRegionRegional(t *testing.T) {
-	d := NewTestDetector(gkeFmp(
+	d := NewTestDetector(newGKEFakeMetadataTransport(t,
 		"instance/attributes/cluster-location", "us-central1",
 	), &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
@@ -86,7 +86,7 @@ func TestGKEAvailabilityZoneOrRegionRegional(t *testing.T) {
 }
 
 func TestGKEAvailabilityZoneOrRegionMalformed(t *testing.T) {
-	d := NewTestDetector(gkeFmp(
+	d := NewTestDetector(newGKEFakeMetadataTransport(t,
 		"instance/attributes/cluster-location", "uscentral1c",
 	), &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
@@ -96,7 +96,7 @@ func TestGKEAvailabilityZoneOrRegionMalformed(t *testing.T) {
 }
 
 func TestGKEAvailabilityZoneOrRegionErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()

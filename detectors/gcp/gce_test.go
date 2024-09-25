@@ -22,14 +22,14 @@ import (
 )
 
 func TestGCEHostType(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{})
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{})
 	hostType, err := d.GCEHostType()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeInstanceMachineType, hostType)
 }
 
 func TestGCEHostTypeErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	hostType, err := d.GCEHostType()
@@ -38,14 +38,14 @@ func TestGCEHostTypeErr(t *testing.T) {
 }
 
 func TestGCEHostID(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{})
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{})
 	instanceID, err := d.GCEHostID()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeInstanceID, instanceID)
 }
 
 func TestGCEHostIDErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	instanceID, err := d.GCEHostID()
@@ -54,28 +54,28 @@ func TestGCEHostIDErr(t *testing.T) {
 }
 
 func TestGCEHostName(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{})
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{})
 	hostName, err := d.GCEHostName()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeInstanceName, hostName)
 }
 
 func TestGCEInstanceName(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{})
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{})
 	hostName, err := d.GCEInstanceName()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeInstanceName, hostName)
 }
 
 func TestGCEInstanceHostname(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{})
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{})
 	hostName, err := d.GCEInstanceHostname()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeInstanceHostname, hostName)
 }
 
 func TestGCEInstanceCustomHostname(t *testing.T) {
-	d := NewTestDetector(fmp(
+	d := NewTestDetector(newFakeMetadataTransport(t,
 		"instance/name", "my-host-123",
 		"instance/hostname", "custom-dns.fakevm.example",
 	), &FakeOSProvider{})
@@ -85,7 +85,7 @@ func TestGCEInstanceCustomHostname(t *testing.T) {
 }
 
 func TestGCEHostNameErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	hostName, err := d.GCEHostName()
@@ -94,7 +94,7 @@ func TestGCEHostNameErr(t *testing.T) {
 }
 
 func TestGCEAvailabilityZoneAndRegion(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{})
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeZone, zone)
@@ -102,7 +102,7 @@ func TestGCEAvailabilityZoneAndRegion(t *testing.T) {
 }
 
 func TestGCEAvailabilityZoneAndRegionMalformedZone(t *testing.T) {
-	d := NewTestDetector(fmp(
+	d := NewTestDetector(newFakeMetadataTransport(t,
 		"instance/zone", "us-central1",
 	), &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
@@ -112,7 +112,7 @@ func TestGCEAvailabilityZoneAndRegionMalformedZone(t *testing.T) {
 }
 
 func TestGCEAvailabilityZoneAndRegionNoZone(t *testing.T) {
-	d := NewTestDetector(fmp(
+	d := NewTestDetector(newFakeMetadataTransport(t,
 		"instance/zone", "",
 	), &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
@@ -122,7 +122,7 @@ func TestGCEAvailabilityZoneAndRegionNoZone(t *testing.T) {
 }
 
 func TestGCEAvailabilityZoneAndRegionErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
@@ -166,7 +166,7 @@ func TestGCEManagedInstanceGroup(t *testing.T) {
 		},
 	} {
 		t.Run(test.createdBy, func(t *testing.T) {
-			fmpi := fmp()
+			fmpi := newFakeMetadataTransport(t)
 			if test.createdBy != "" {
 				fmpi.Metadata["instance/attributes/created-by"] = test.createdBy
 			}

@@ -22,7 +22,7 @@ import (
 )
 
 func TestCloudPlatformAppEngineFlex(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{
 		Vars: map[string]string{
 			gaeServiceEnv: "foo",
 		},
@@ -32,7 +32,7 @@ func TestCloudPlatformAppEngineFlex(t *testing.T) {
 }
 
 func TestCloudPlatformAppEngineStandard(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{
 		Vars: map[string]string{
 			gaeServiceEnv: "foo",
 			gaeEnv:        "standard",
@@ -43,7 +43,7 @@ func TestCloudPlatformAppEngineStandard(t *testing.T) {
 }
 
 func TestCloudPlatformGKE(t *testing.T) {
-	d := NewTestDetector(fmp(
+	d := NewTestDetector(newFakeMetadataTransport(t,
 		"instance/attributes/cluster-name", "cluster-name",
 	), &FakeOSProvider{
 		Vars: map[string]string{
@@ -55,7 +55,7 @@ func TestCloudPlatformGKE(t *testing.T) {
 }
 
 func TestCloudPlatformK8sNotGKE(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{
 		Vars: map[string]string{
 			k8sServiceHostEnv: "foo",
 		},
@@ -65,7 +65,7 @@ func TestCloudPlatformK8sNotGKE(t *testing.T) {
 }
 
 func TestCloudPlatformUnknown(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{Err: fmt.Errorf("no metadata server")}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{Err: fmt.Errorf("no metadata server")}, &FakeOSProvider{
 		Vars: map[string]string{
 			k8sServiceHostEnv: "foo",
 		},
@@ -75,7 +75,7 @@ func TestCloudPlatformUnknown(t *testing.T) {
 }
 
 func TestCloudPlatformGCE(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	platform := d.CloudPlatform()
@@ -83,7 +83,7 @@ func TestCloudPlatformGCE(t *testing.T) {
 }
 
 func TestCloudPlatformCloudRun(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{
 		Vars: map[string]string{
 			cloudRunConfigurationEnv: "foo",
 		},
@@ -93,7 +93,7 @@ func TestCloudPlatformCloudRun(t *testing.T) {
 }
 
 func TestCloudPlatformCloudRunJobs(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{
 		Vars: map[string]string{
 			cloudRunJobsEnv: "foo",
 		},
@@ -103,7 +103,7 @@ func TestCloudPlatformCloudRunJobs(t *testing.T) {
 }
 
 func TestCloudPlatformCloudFunctions(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{
 		Vars: map[string]string{
 			cloudFunctionsTargetEnv: "foo",
 		},
@@ -113,7 +113,7 @@ func TestCloudPlatformCloudFunctions(t *testing.T) {
 }
 
 func TestCloudPlatformBareMetalSolution(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{Err: fmt.Errorf("no metadata server")}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{Err: fmt.Errorf("no metadata server")}, &FakeOSProvider{
 		Vars: map[string]string{
 			bmsInstanceIDEnv: "foo",
 			bmsProjectIDEnv:  "bar",
@@ -125,14 +125,14 @@ func TestCloudPlatformBareMetalSolution(t *testing.T) {
 }
 
 func TestProjectID(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{})
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{})
 	project, err := d.ProjectID()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeProjectID, project)
 }
 
 func TestProjectIDErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	project, err := d.ProjectID()

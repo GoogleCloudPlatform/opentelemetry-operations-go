@@ -17,6 +17,7 @@ package gcp
 import (
 	"errors"
 	"os"
+	"strings"
 
 	"cloud.google.com/go/compute/metadata"
 )
@@ -68,7 +69,16 @@ func (d *Detector) CloudPlatform() Platform {
 
 // ProjectID returns the ID of the project in which this program is running.
 func (d *Detector) ProjectID() (string, error) {
-	return d.metadata.ProjectID()
+	// N.B. d.metadata.ProjectID() is cached globally, so if we use it here it's untestable.
+	s, err := d.metadata.Get("project/project-id")
+	return strings.TrimSpace(s), err
+}
+
+// instanceID returns the ID of the project in which this program is running.
+func (d *Detector) instanceID() (string, error) {
+	// N.B. d.metadata.InstanceID() is cached globally, so if we use it here it's untestable.
+	s, err := d.metadata.Get("instance/id")
+	return strings.TrimSpace(s), err
 }
 
 // Detector collects resource information for all GCP platforms.

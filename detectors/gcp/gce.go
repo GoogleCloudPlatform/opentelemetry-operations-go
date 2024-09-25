@@ -41,7 +41,7 @@ func (d *Detector) GCEHostType() (string, error) {
 
 // GCEHostID returns the instance ID of the instance on which this program is running.
 func (d *Detector) GCEHostID() (string, error) {
-	return d.metadata.InstanceID()
+	return d.instanceID()
 }
 
 // GCEHostName returns the instance name of the instance on which this program is running.

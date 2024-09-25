@@ -16,54 +16,18 @@ package gcp
 
 import (
 	"fmt"
+	"io"
+	"net/http"
 	"strings"
+	"testing"
 
 	"cloud.google.com/go/compute/metadata"
 )
 
-func NewTestDetector(metadataProvider *FakeMetadataProvider, os *FakeOSProvider) *Detector {
-	return &Detector{metadata: metadataProvider, os: os}
-}
-
-type FakeMetadataProvider struct {
-	Err      error
-	Metadata map[string]string
-}
-
-func (f *FakeMetadataProvider) Get(s string) (string, error) {
-	if f.Err != nil {
-		return "", f.Err
-	}
-	value, ok := f.Metadata[s]
-	if ok {
-		return value, nil
-	}
-	return "", metadata.NotDefinedError(s)
-}
-
-// These keys are all documented at https://cloud.google.com/compute/docs/metadata/predefined-metadata-keys
-func (f *FakeMetadataProvider) ProjectID() (string, error) {
-	return f.Get("project/project-id")
-}
-func (f *FakeMetadataProvider) InstanceID() (string, error) {
-	return f.Get("instance/id")
-}
-func (f *FakeMetadataProvider) InstanceName() (string, error) {
-	return f.Get("instance/name")
-}
-func (f *FakeMetadataProvider) Hostname() (string, error) {
-	return f.Get("instance/hostname")
-}
-func (f *FakeMetadataProvider) Zone() (string, error) {
-	value, err := f.Get("instance/zone")
-	if err != nil {
-		return value, err
-	}
-	// https://github.com/googleapis/google-cloud-go/blob/35d1f813f755c88d6869d993796c5ddf8ac3eea3/compute/metadata/metadata.go#L663
-	return value[strings.LastIndex(value, "/")+1:], nil
-}
-func (f *FakeMetadataProvider) InstanceAttributeValue(s string) (string, error) {
-	return f.Get(fmt.Sprintf("instance/attributes/%s", s))
+func NewTestDetector(metadataTransport *FakeMetadataTransport, os *FakeOSProvider) *Detector {
+	return &Detector{metadata: metadata.NewClient(&http.Client{
+		Transport: metadataTransport,
+	}), os: os}
 }
 
 const (
@@ -77,9 +41,59 @@ const (
 	fakeInstanceMachineType = "n1-standard1"
 )
 
-// fmp constructs a FakeMetadatProvider that responds with the basic GCE metadata fields.
+type FakeMetadataTransport struct {
+	T        *testing.T
+	Err      error
+	Metadata map[string]string
+}
+
+const computeMetadataPrefix = "/computeMetadata/v1/"
+
+func (f *FakeMetadataTransport) getResponse(path string) (string, bool) {
+	if !strings.HasPrefix(path, computeMetadataPrefix) {
+		return "", false
+	}
+	path = strings.TrimPrefix(path, computeMetadataPrefix)
+	content, ok := f.Metadata[path]
+	return content, ok
+}
+
+func (f *FakeMetadataTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if f.T != nil {
+		f.T.Helper()
+		f.T.Logf("metadata request: %v", req)
+	}
+	if req.URL.Host != "169.254.169.254" && req.URL.Host != "metadata.google.internal" {
+		return nil, fmt.Errorf("unknown host %q", req.URL.Host)
+	}
+	if f.Err != nil {
+		return nil, f.Err
+	}
+	pr, pw := io.Pipe()
+	res := &http.Response{
+		Proto:      "HTTP/1.0",
+		ProtoMajor: 1,
+		Header:     make(http.Header),
+		Close:      true,
+		Body:       pr,
+	}
+	content, ok := f.getResponse(req.URL.Path)
+	if ok {
+		res.StatusCode = 200
+	} else {
+		res.StatusCode = 404
+	}
+	go func() {
+		defer pw.Close()
+		_, _ = pw.Write([]byte(content))
+	}()
+	res.Status = fmt.Sprintf("%d %s", res.StatusCode, http.StatusText(res.StatusCode))
+	return res, nil
+}
+
+// newFakeMetadataTransport constructs a FakeMetadataTransport that responds with the basic GCE metadata fields.
 // To add more metadata, pass key-value pairs as arguments.
-func fmp(keyValues ...string) *FakeMetadataProvider {
+func newFakeMetadataTransport(t *testing.T, keyValues ...string) *FakeMetadataTransport {
 	out := map[string]string{
 		"project/project-id":         fakeProjectID,
 		"project/numeric-project-id": fakeProjectNumber,
@@ -92,7 +106,8 @@ func fmp(keyValues ...string) *FakeMetadataProvider {
 	for i := 0; i < len(keyValues); i += 2 {
 		out[keyValues[i]] = keyValues[i+1]
 	}
-	return &FakeMetadataProvider{
+	return &FakeMetadataTransport{
+		T:        t,
 		Metadata: out,
 	}
 }

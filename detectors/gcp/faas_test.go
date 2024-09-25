@@ -22,7 +22,7 @@ import (
 )
 
 func TestFaaSName(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
 			faasServiceEnv: "my-service",
 		},
@@ -33,7 +33,7 @@ func TestFaaSName(t *testing.T) {
 }
 
 func TestFaaSJobsName(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
 			cloudRunJobsEnv: "my-service",
 		},
@@ -44,7 +44,7 @@ func TestFaaSJobsName(t *testing.T) {
 }
 
 func TestFaaSNameErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	name, err := d.FaaSName()
@@ -53,7 +53,7 @@ func TestFaaSNameErr(t *testing.T) {
 }
 
 func TestFaaSVersion(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
 			faasRevisionEnv: "version-123",
 		},
@@ -64,7 +64,7 @@ func TestFaaSVersion(t *testing.T) {
 }
 
 func TestFaaSVersionErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	version, err := d.FaaSVersion()
@@ -73,7 +73,7 @@ func TestFaaSVersionErr(t *testing.T) {
 }
 
 func TestFaaSJobExecution(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
 			cloudRunJobExecutionEnv: "version-123",
 		},
@@ -84,7 +84,7 @@ func TestFaaSJobExecution(t *testing.T) {
 }
 
 func TestFaaSJobExecutionErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	name, err := d.CloudRunJobExecution()
@@ -93,7 +93,7 @@ func TestFaaSJobExecutionErr(t *testing.T) {
 }
 
 func TestFaaSJobTaskIndex(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
 			cloudRunJobTaskIndexEnv: "5",
 		},
@@ -104,7 +104,7 @@ func TestFaaSJobTaskIndex(t *testing.T) {
 }
 
 func TestFaaSJobTaskIndexErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	name, err := d.CloudRunJobTaskIndex()
@@ -113,14 +113,14 @@ func TestFaaSJobTaskIndexErr(t *testing.T) {
 }
 
 func TestFaaSID(t *testing.T) {
-	d := NewTestDetector(fmp(), &FakeOSProvider{})
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{})
 	instance, err := d.FaaSID()
 	assert.NoError(t, err)
 	assert.Equal(t, fakeInstanceID, instance)
 }
 
 func TestFaaSIDErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	instance, err := d.FaaSID()
@@ -129,7 +129,7 @@ func TestFaaSIDErr(t *testing.T) {
 }
 
 func TestFaaSCloudRegion(t *testing.T) {
-	d := NewTestDetector(fmp(
+	d := NewTestDetector(newFakeMetadataTransport(t,
 		regionMetadataAttr, "/projects/123/regions/us-central1",
 	), &FakeOSProvider{})
 	instance, err := d.FaaSCloudRegion()
@@ -138,7 +138,7 @@ func TestFaaSCloudRegion(t *testing.T) {
 }
 
 func TestFaaSCloudRegionErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{
+	d := NewTestDetector(&FakeMetadataTransport{
 		Err: fmt.Errorf("fake error"),
 	}, &FakeOSProvider{})
 	instance, err := d.FaaSCloudRegion()

@@ -21,7 +21,7 @@ import (
 )
 
 func TestBareMetalSolutionInstanceID(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
 			bmsInstanceIDEnv: "my-host-123",
 		},
@@ -32,7 +32,7 @@ func TestBareMetalSolutionInstanceID(t *testing.T) {
 }
 
 func TestBareMetalSolutionInstanceIDErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	instanceID, err := d.BareMetalSolutionInstanceID()
@@ -41,7 +41,7 @@ func TestBareMetalSolutionInstanceIDErr(t *testing.T) {
 }
 
 func TestBareMetalSolutionCloudRegion(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
 			bmsRegionEnv: "us-central1",
 		},
@@ -52,7 +52,7 @@ func TestBareMetalSolutionCloudRegion(t *testing.T) {
 }
 
 func TestBareMetalSolutionCloudRegionErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	region, err := d.BareMetalSolutionCloudRegion()
@@ -61,7 +61,7 @@ func TestBareMetalSolutionCloudRegionErr(t *testing.T) {
 }
 
 func TestBareMetalSolutionProjectID(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
 			bmsProjectIDEnv: "my-test-project",
 		},
@@ -72,7 +72,7 @@ func TestBareMetalSolutionProjectID(t *testing.T) {
 }
 
 func TestBareMetalSolutionProjectIDErr(t *testing.T) {
-	d := NewTestDetector(&FakeMetadataProvider{}, &FakeOSProvider{
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{},
 	})
 	projectID, err := d.BareMetalSolutionProjectID()

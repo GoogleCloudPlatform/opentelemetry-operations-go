@@ -89,7 +89,7 @@ func (d *Detector) CloudRunJobTaskIndex() (string, error) {
 
 // FaaSID returns the instance id of the Cloud Run or Cloud Function.
 func (d *Detector) FaaSID() (string, error) {
-	return d.metadata.InstanceID()
+	return d.instanceID()
 }
 
 // FaaSCloudRegion detects region from the metadata server.
