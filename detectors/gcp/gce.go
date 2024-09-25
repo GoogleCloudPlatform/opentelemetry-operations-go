@@ -15,6 +15,7 @@
 package gcp
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strings"
@@ -30,13 +31,13 @@ const machineTypeMetadataAttr = "instance/machine-type"
 const createdByInstanceAttr = "created-by"
 
 func (d *Detector) onGCE() bool {
-	_, err := d.metadata.Get(machineTypeMetadataAttr)
+	_, err := d.metadata.GetWithContext(context.TODO(), machineTypeMetadataAttr)
 	return err == nil
 }
 
 // GCEHostType returns the machine type of the instance on which this program is running.
 func (d *Detector) GCEHostType() (string, error) {
-	return d.metadata.Get(machineTypeMetadataAttr)
+	return d.metadata.GetWithContext(context.TODO(), machineTypeMetadataAttr)
 }
 
 // GCEHostID returns the instance ID of the instance on which this program is running.
@@ -48,25 +49,25 @@ func (d *Detector) GCEHostID() (string, error) {
 // Recommended to use GCEInstanceName() or GCEInstanceHostname() to more accurately reflect which
 // value is returned.
 func (d *Detector) GCEHostName() (string, error) {
-	return d.metadata.InstanceName()
+	return d.metadata.InstanceNameWithContext(context.TODO())
 }
 
 // GCEInstanceName returns the instance name of the instance on which this program is running.
 // This is the value visible in the Cloud Console UI, and the prefix for the default hostname
 // of the instance as defined by the default internal DNS name (see https://cloud.google.com/compute/docs/internal-dns#instance-fully-qualified-domain-names).
 func (d *Detector) GCEInstanceName() (string, error) {
-	return d.metadata.InstanceName()
+	return d.metadata.InstanceNameWithContext(context.TODO())
 }
 
 // GCEInstanceHostname returns the full value of the default or custom hostname of the instance
 // on which this program is running. See https://cloud.google.com/compute/docs/instances/custom-hostname-vm.
 func (d *Detector) GCEInstanceHostname() (string, error) {
-	return d.metadata.Hostname()
+	return d.metadata.HostnameWithContext(context.TODO())
 }
 
 // GCEAvailabilityZoneAndRegion returns the zone and region in which this program is running.
 func (d *Detector) GCEAvailabilityZoneAndRegion() (string, string, error) {
-	zone, err := d.metadata.Zone()
+	zone, err := d.metadata.ZoneWithContext(context.TODO())
 	if err != nil {
 		return "", "", err
 	}
@@ -89,7 +90,7 @@ type ManagedInstanceGroup struct {
 var createdByMIGRE = regexp.MustCompile(`^projects/[^/]+/(zones|regions)/([^/]+)/instanceGroupManagers/([^/]+)$`)
 
 func (d *Detector) GCEManagedInstanceGroup() (ManagedInstanceGroup, error) {
-	createdBy, err := d.metadata.InstanceAttributeValue(createdByInstanceAttr)
+	createdBy, err := d.metadata.InstanceAttributeValueWithContext(context.TODO(), createdByInstanceAttr)
 	if _, ok := err.(metadata.NotDefinedError); ok {
 		return ManagedInstanceGroup{}, nil
 	} else if err != nil {

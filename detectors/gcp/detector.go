@@ -15,6 +15,7 @@
 package gcp
 
 import (
+	"context"
 	"errors"
 	"os"
 	"strings"
@@ -69,15 +70,15 @@ func (d *Detector) CloudPlatform() Platform {
 
 // ProjectID returns the ID of the project in which this program is running.
 func (d *Detector) ProjectID() (string, error) {
-	// N.B. d.metadata.ProjectID() is cached globally, so if we use it here it's untestable.
-	s, err := d.metadata.Get("project/project-id")
+	// N.B. d.metadata.ProjectIDWithContext(context.TODO()) is cached globally, so if we use it here it's untestable.
+	s, err := d.metadata.GetWithContext(context.TODO(), "project/project-id")
 	return strings.TrimSpace(s), err
 }
 
 // instanceID returns the ID of the project in which this program is running.
 func (d *Detector) instanceID() (string, error) {
-	// N.B. d.metadata.InstanceID() is cached globally, so if we use it here it's untestable.
-	s, err := d.metadata.Get("instance/id")
+	// N.B. d.metadata.InstanceIDWithContext(context.TODO()) is cached globally, so if we use it here it's untestable.
+	s, err := d.metadata.GetWithContext(context.TODO(), "instance/id")
 	return strings.TrimSpace(s), err
 }
 
