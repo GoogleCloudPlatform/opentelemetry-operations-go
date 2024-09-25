@@ -29,7 +29,7 @@ func TestFaaSName(t *testing.T) {
 	})
 	name, err := d.FaaSName()
 	assert.NoError(t, err)
-	assert.Equal(t, name, "my-service")
+	assert.Equal(t, "my-service", name)
 }
 
 func TestFaaSJobsName(t *testing.T) {
@@ -40,7 +40,7 @@ func TestFaaSJobsName(t *testing.T) {
 	})
 	name, err := d.FaaSName()
 	assert.NoError(t, err)
-	assert.Equal(t, name, "my-service")
+	assert.Equal(t, "my-service", name)
 }
 
 func TestFaaSNameErr(t *testing.T) {
@@ -49,7 +49,7 @@ func TestFaaSNameErr(t *testing.T) {
 	})
 	name, err := d.FaaSName()
 	assert.Error(t, err)
-	assert.Equal(t, name, "")
+	assert.Equal(t, "", name)
 }
 
 func TestFaaSVersion(t *testing.T) {
@@ -60,7 +60,7 @@ func TestFaaSVersion(t *testing.T) {
 	})
 	version, err := d.FaaSVersion()
 	assert.NoError(t, err)
-	assert.Equal(t, version, "version-123")
+	assert.Equal(t, "version-123", version)
 }
 
 func TestFaaSVersionErr(t *testing.T) {
@@ -69,7 +69,7 @@ func TestFaaSVersionErr(t *testing.T) {
 	})
 	version, err := d.FaaSVersion()
 	assert.Error(t, err)
-	assert.Equal(t, version, "")
+	assert.Equal(t, "", version)
 }
 
 func TestFaaSJobExecution(t *testing.T) {
@@ -80,7 +80,7 @@ func TestFaaSJobExecution(t *testing.T) {
 	})
 	version, err := d.CloudRunJobExecution()
 	assert.NoError(t, err)
-	assert.Equal(t, version, "version-123")
+	assert.Equal(t, "version-123", version)
 }
 
 func TestFaaSJobExecutionErr(t *testing.T) {
@@ -89,7 +89,7 @@ func TestFaaSJobExecutionErr(t *testing.T) {
 	})
 	name, err := d.CloudRunJobExecution()
 	assert.Error(t, err)
-	assert.Equal(t, name, "")
+	assert.Equal(t, "", name)
 }
 
 func TestFaaSJobTaskIndex(t *testing.T) {
@@ -100,7 +100,7 @@ func TestFaaSJobTaskIndex(t *testing.T) {
 	})
 	version, err := d.CloudRunJobTaskIndex()
 	assert.NoError(t, err)
-	assert.Equal(t, version, "5")
+	assert.Equal(t, "5", version)
 }
 
 func TestFaaSJobTaskIndexErr(t *testing.T) {
@@ -109,14 +109,14 @@ func TestFaaSJobTaskIndexErr(t *testing.T) {
 	})
 	name, err := d.CloudRunJobTaskIndex()
 	assert.Error(t, err)
-	assert.Equal(t, name, "")
+	assert.Equal(t, "", name)
 }
 
 func TestFaaSID(t *testing.T) {
 	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	instance, err := d.FaaSID()
 	assert.NoError(t, err)
-	assert.Equal(t, instance, fakeInstanceID)
+	assert.Equal(t, fakeInstanceID, instance)
 }
 
 func TestFaaSIDErr(t *testing.T) {
@@ -125,7 +125,7 @@ func TestFaaSIDErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	instance, err := d.FaaSID()
 	assert.Error(t, err)
-	assert.Equal(t, instance, "")
+	assert.Equal(t, "", instance)
 }
 
 func TestFaaSCloudRegion(t *testing.T) {
@@ -134,7 +134,7 @@ func TestFaaSCloudRegion(t *testing.T) {
 	), &FakeOSProvider{})
 	instance, err := d.FaaSCloudRegion()
 	assert.NoError(t, err)
-	assert.Equal(t, instance, "us-central1")
+	assert.Equal(t, "us-central1", instance)
 }
 
 func TestFaaSCloudRegionErr(t *testing.T) {
@@ -143,5 +143,5 @@ func TestFaaSCloudRegionErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	instance, err := d.FaaSCloudRegion()
 	assert.Error(t, err)
-	assert.Equal(t, instance, "")
+	assert.Equal(t, "", instance)
 }

@@ -28,7 +28,7 @@ func TestCloudPlatformAppEngineFlex(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, AppEngineFlex)
+	assert.Equal(t, AppEngineFlex, platform)
 }
 
 func TestCloudPlatformAppEngineStandard(t *testing.T) {
@@ -39,7 +39,7 @@ func TestCloudPlatformAppEngineStandard(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, AppEngineStandard)
+	assert.Equal(t, AppEngineStandard, platform)
 }
 
 func TestCloudPlatformGKE(t *testing.T) {
@@ -51,7 +51,7 @@ func TestCloudPlatformGKE(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, GKE)
+	assert.Equal(t, GKE, platform)
 }
 
 func TestCloudPlatformK8sNotGKE(t *testing.T) {
@@ -61,7 +61,7 @@ func TestCloudPlatformK8sNotGKE(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, GCE)
+	assert.Equal(t, GCE, platform)
 }
 
 func TestCloudPlatformUnknown(t *testing.T) {
@@ -71,7 +71,7 @@ func TestCloudPlatformUnknown(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, UnknownPlatform)
+	assert.Equal(t, UnknownPlatform, platform)
 }
 
 func TestCloudPlatformGCE(t *testing.T) {
@@ -79,7 +79,7 @@ func TestCloudPlatformGCE(t *testing.T) {
 		Vars: map[string]string{},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, GCE)
+	assert.Equal(t, GCE, platform)
 }
 
 func TestCloudPlatformCloudRun(t *testing.T) {
@@ -89,7 +89,7 @@ func TestCloudPlatformCloudRun(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, CloudRun)
+	assert.Equal(t, CloudRun, platform)
 }
 
 func TestCloudPlatformCloudRunJobs(t *testing.T) {
@@ -99,7 +99,7 @@ func TestCloudPlatformCloudRunJobs(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, CloudRunJob)
+	assert.Equal(t, CloudRunJob, platform)
 }
 
 func TestCloudPlatformCloudFunctions(t *testing.T) {
@@ -109,7 +109,7 @@ func TestCloudPlatformCloudFunctions(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, CloudFunctions)
+	assert.Equal(t, CloudFunctions, platform)
 }
 
 func TestCloudPlatformBareMetalSolution(t *testing.T) {
@@ -121,14 +121,14 @@ func TestCloudPlatformBareMetalSolution(t *testing.T) {
 		},
 	})
 	platform := d.CloudPlatform()
-	assert.Equal(t, platform, BareMetalSolution)
+	assert.Equal(t, BareMetalSolution, platform)
 }
 
 func TestProjectID(t *testing.T) {
 	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	project, err := d.ProjectID()
 	assert.NoError(t, err)
-	assert.Equal(t, project, fakeProjectID)
+	assert.Equal(t, fakeProjectID, project)
 }
 
 func TestProjectIDErr(t *testing.T) {
@@ -137,5 +137,5 @@ func TestProjectIDErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	project, err := d.ProjectID()
 	assert.Error(t, err)
-	assert.Equal(t, project, "")
+	assert.Equal(t, "", project)
 }

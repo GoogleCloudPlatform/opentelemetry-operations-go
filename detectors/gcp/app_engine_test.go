@@ -29,7 +29,7 @@ func TestAppEngineServiceName(t *testing.T) {
 	})
 	serviceName, err := d.AppEngineServiceName()
 	assert.NoError(t, err)
-	assert.Equal(t, serviceName, "my-service")
+	assert.Equal(t, "my-service", serviceName)
 }
 
 func TestAppEngineServiceNameErr(t *testing.T) {
@@ -38,7 +38,7 @@ func TestAppEngineServiceNameErr(t *testing.T) {
 	})
 	name, err := d.AppEngineServiceName()
 	assert.Error(t, err)
-	assert.Equal(t, name, "")
+	assert.Equal(t, "", name)
 }
 
 func TestAppEngineServiceVersion(t *testing.T) {
@@ -49,7 +49,7 @@ func TestAppEngineServiceVersion(t *testing.T) {
 	})
 	version, err := d.AppEngineServiceVersion()
 	assert.NoError(t, err)
-	assert.Equal(t, version, "my-version")
+	assert.Equal(t, "my-version", version)
 }
 
 func TestAppEngineServiceVersionErr(t *testing.T) {
@@ -58,7 +58,7 @@ func TestAppEngineServiceVersionErr(t *testing.T) {
 	})
 	version, err := d.AppEngineServiceVersion()
 	assert.Error(t, err)
-	assert.Equal(t, version, "")
+	assert.Equal(t, "", version)
 }
 
 func TestAppEngineServiceInstance(t *testing.T) {
@@ -69,7 +69,7 @@ func TestAppEngineServiceInstance(t *testing.T) {
 	})
 	instance, err := d.AppEngineServiceInstance()
 	assert.NoError(t, err)
-	assert.Equal(t, instance, "instance-123")
+	assert.Equal(t, "instance-123", instance)
 }
 
 func TestAppEngineServiceInstanceErr(t *testing.T) {
@@ -78,7 +78,7 @@ func TestAppEngineServiceInstanceErr(t *testing.T) {
 	})
 	instance, err := d.AppEngineServiceInstance()
 	assert.Error(t, err)
-	assert.Equal(t, instance, "")
+	assert.Equal(t, "", instance)
 }
 
 func TestAppEngineStandardAvailabilityZone(t *testing.T) {
@@ -87,7 +87,7 @@ func TestAppEngineStandardAvailabilityZone(t *testing.T) {
 	), &FakeOSProvider{})
 	zone, err := d.AppEngineStandardAvailabilityZone()
 	assert.NoError(t, err)
-	assert.Equal(t, zone, "us16")
+	assert.Equal(t, "us16", zone)
 }
 
 func TestAppEngineStandardAvailabilityZoneErr(t *testing.T) {
@@ -96,7 +96,7 @@ func TestAppEngineStandardAvailabilityZoneErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	zone, err := d.AppEngineStandardAvailabilityZone()
 	assert.Error(t, err)
-	assert.Equal(t, zone, "")
+	assert.Equal(t, "", zone)
 }
 
 func TestAppEngineStandardCloudRegion(t *testing.T) {
@@ -105,7 +105,7 @@ func TestAppEngineStandardCloudRegion(t *testing.T) {
 	), &FakeOSProvider{})
 	instance, err := d.AppEngineStandardCloudRegion()
 	assert.NoError(t, err)
-	assert.Equal(t, instance, "us-central1")
+	assert.Equal(t, "us-central1", instance)
 }
 
 func TestAppEngineStandardCloudRegionErr(t *testing.T) {
@@ -114,15 +114,15 @@ func TestAppEngineStandardCloudRegionErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	instance, err := d.AppEngineStandardCloudRegion()
 	assert.Error(t, err)
-	assert.Equal(t, instance, "")
+	assert.Equal(t, "", instance)
 }
 
 func TestAppEngineFlexAvailabilityZoneAndRegion(t *testing.T) {
 	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	zone, region, err := d.AppEngineFlexAvailabilityZoneAndRegion()
 	assert.NoError(t, err)
-	assert.Equal(t, zone, fakeZone)
-	assert.Equal(t, region, fakeRegion)
+	assert.Equal(t, fakeZone, zone)
+	assert.Equal(t, fakeRegion, region)
 }
 
 func TestAppEngineFlexAvailabilityZoneAndRegionMalformedZone(t *testing.T) {
@@ -131,8 +131,8 @@ func TestAppEngineFlexAvailabilityZoneAndRegionMalformedZone(t *testing.T) {
 	), &FakeOSProvider{})
 	zone, region, err := d.AppEngineFlexAvailabilityZoneAndRegion()
 	assert.Error(t, err)
-	assert.Equal(t, zone, "")
-	assert.Equal(t, region, "")
+	assert.Equal(t, "", zone)
+	assert.Equal(t, "", region)
 }
 
 func TestAppEngineFlexAvailabilityZoneAndRegionNoZone(t *testing.T) {
@@ -141,8 +141,8 @@ func TestAppEngineFlexAvailabilityZoneAndRegionNoZone(t *testing.T) {
 	), &FakeOSProvider{})
 	zone, region, err := d.AppEngineFlexAvailabilityZoneAndRegion()
 	assert.Error(t, err)
-	assert.Equal(t, zone, "")
-	assert.Equal(t, region, "")
+	assert.Equal(t, "", zone)
+	assert.Equal(t, "", region)
 }
 
 func TestAppEngineFlexAvailabilityZoneAndRegionErr(t *testing.T) {
@@ -151,6 +151,6 @@ func TestAppEngineFlexAvailabilityZoneAndRegionErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	zone, region, err := d.AppEngineFlexAvailabilityZoneAndRegion()
 	assert.Error(t, err)
-	assert.Equal(t, zone, "")
-	assert.Equal(t, region, "")
+	assert.Equal(t, "", zone)
+	assert.Equal(t, "", region)
 }

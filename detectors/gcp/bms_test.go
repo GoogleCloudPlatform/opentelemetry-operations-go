@@ -28,7 +28,7 @@ func TestBareMetalSolutionInstanceID(t *testing.T) {
 	})
 	instanceID, err := d.BareMetalSolutionInstanceID()
 	assert.NoError(t, err)
-	assert.Equal(t, instanceID, "my-host-123")
+	assert.Equal(t, "my-host-123", instanceID)
 }
 
 func TestBareMetalSolutionInstanceIDErr(t *testing.T) {
@@ -37,7 +37,7 @@ func TestBareMetalSolutionInstanceIDErr(t *testing.T) {
 	})
 	instanceID, err := d.BareMetalSolutionInstanceID()
 	assert.Error(t, err)
-	assert.Equal(t, instanceID, "")
+	assert.Equal(t, "", instanceID)
 }
 
 func TestBareMetalSolutionCloudRegion(t *testing.T) {
@@ -48,7 +48,7 @@ func TestBareMetalSolutionCloudRegion(t *testing.T) {
 	})
 	region, err := d.BareMetalSolutionCloudRegion()
 	assert.NoError(t, err)
-	assert.Equal(t, region, "us-central1")
+	assert.Equal(t, "us-central1", region)
 }
 
 func TestBareMetalSolutionCloudRegionErr(t *testing.T) {
@@ -57,7 +57,7 @@ func TestBareMetalSolutionCloudRegionErr(t *testing.T) {
 	})
 	region, err := d.BareMetalSolutionCloudRegion()
 	assert.Error(t, err)
-	assert.Equal(t, region, "")
+	assert.Equal(t, "", region)
 }
 
 func TestBareMetalSolutionProjectID(t *testing.T) {
@@ -68,7 +68,7 @@ func TestBareMetalSolutionProjectID(t *testing.T) {
 	})
 	projectID, err := d.BareMetalSolutionProjectID()
 	assert.NoError(t, err)
-	assert.Equal(t, projectID, "my-test-project")
+	assert.Equal(t, "my-test-project", projectID)
 }
 
 func TestBareMetalSolutionProjectIDErr(t *testing.T) {
@@ -77,5 +77,5 @@ func TestBareMetalSolutionProjectIDErr(t *testing.T) {
 	})
 	projectID, err := d.BareMetalSolutionProjectID()
 	assert.Error(t, err)
-	assert.Equal(t, projectID, "")
+	assert.Equal(t, "", projectID)
 }

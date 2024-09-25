@@ -25,7 +25,7 @@ func TestGCEHostType(t *testing.T) {
 	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	hostType, err := d.GCEHostType()
 	assert.NoError(t, err)
-	assert.Equal(t, hostType, fakeInstanceMachineType)
+	assert.Equal(t, fakeInstanceMachineType, hostType)
 }
 
 func TestGCEHostTypeErr(t *testing.T) {
@@ -34,14 +34,14 @@ func TestGCEHostTypeErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	hostType, err := d.GCEHostType()
 	assert.Error(t, err)
-	assert.Equal(t, hostType, "")
+	assert.Equal(t, "", hostType)
 }
 
 func TestGCEHostID(t *testing.T) {
 	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	instanceID, err := d.GCEHostID()
 	assert.NoError(t, err)
-	assert.Equal(t, instanceID, fakeInstanceID)
+	assert.Equal(t, fakeInstanceID, instanceID)
 }
 
 func TestGCEHostIDErr(t *testing.T) {
@@ -50,28 +50,28 @@ func TestGCEHostIDErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	instanceID, err := d.GCEHostID()
 	assert.Error(t, err)
-	assert.Equal(t, instanceID, "")
+	assert.Equal(t, "", instanceID)
 }
 
 func TestGCEHostName(t *testing.T) {
 	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	hostName, err := d.GCEHostName()
 	assert.NoError(t, err)
-	assert.Equal(t, hostName, fakeInstanceName)
+	assert.Equal(t, fakeInstanceName, hostName)
 }
 
 func TestGCEInstanceName(t *testing.T) {
 	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	hostName, err := d.GCEInstanceName()
 	assert.NoError(t, err)
-	assert.Equal(t, hostName, fakeInstanceName)
+	assert.Equal(t, fakeInstanceName, hostName)
 }
 
 func TestGCEInstanceHostname(t *testing.T) {
 	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	hostName, err := d.GCEInstanceHostname()
 	assert.NoError(t, err)
-	assert.Equal(t, hostName, fakeInstanceHostname)
+	assert.Equal(t, fakeInstanceHostname, hostName)
 }
 
 func TestGCEInstanceCustomHostname(t *testing.T) {
@@ -81,7 +81,7 @@ func TestGCEInstanceCustomHostname(t *testing.T) {
 	), &FakeOSProvider{})
 	hostName, err := d.GCEInstanceHostname()
 	assert.NoError(t, err)
-	assert.Equal(t, hostName, "custom-dns.fakevm.example")
+	assert.Equal(t, "custom-dns.fakevm.example", hostName)
 }
 
 func TestGCEHostNameErr(t *testing.T) {
@@ -90,15 +90,15 @@ func TestGCEHostNameErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	hostName, err := d.GCEHostName()
 	assert.Error(t, err)
-	assert.Equal(t, hostName, "")
+	assert.Equal(t, "", hostName)
 }
 
 func TestGCEAvailabilityZoneAndRegion(t *testing.T) {
 	d := NewTestDetector(fmp(), &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.NoError(t, err)
-	assert.Equal(t, zone, fakeZone)
-	assert.Equal(t, region, fakeRegion)
+	assert.Equal(t, fakeZone, zone)
+	assert.Equal(t, fakeRegion, region)
 }
 
 func TestGCEAvailabilityZoneAndRegionMalformedZone(t *testing.T) {
@@ -107,8 +107,8 @@ func TestGCEAvailabilityZoneAndRegionMalformedZone(t *testing.T) {
 	), &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.Error(t, err)
-	assert.Equal(t, zone, "")
-	assert.Equal(t, region, "")
+	assert.Equal(t, "", zone)
+	assert.Equal(t, "", region)
 }
 
 func TestGCEAvailabilityZoneAndRegionNoZone(t *testing.T) {
@@ -117,8 +117,8 @@ func TestGCEAvailabilityZoneAndRegionNoZone(t *testing.T) {
 	), &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.Error(t, err)
-	assert.Equal(t, zone, "")
-	assert.Equal(t, region, "")
+	assert.Equal(t, "", zone)
+	assert.Equal(t, "", region)
 }
 
 func TestGCEAvailabilityZoneAndRegionErr(t *testing.T) {
@@ -127,8 +127,8 @@ func TestGCEAvailabilityZoneAndRegionErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	zone, region, err := d.GCEAvailabilityZoneAndRegion()
 	assert.Error(t, err)
-	assert.Equal(t, zone, "")
-	assert.Equal(t, region, "")
+	assert.Equal(t, "", zone)
+	assert.Equal(t, "", region)
 }
 
 func TestGCEManagedInstanceGroup(t *testing.T) {
@@ -178,7 +178,7 @@ func TestGCEManagedInstanceGroup(t *testing.T) {
 			if test.mig == nil {
 				assert.Error(t, err)
 			} else {
-				assert.Equal(t, mig, *test.mig)
+				assert.Equal(t, *test.mig, mig)
 			}
 		})
 	}

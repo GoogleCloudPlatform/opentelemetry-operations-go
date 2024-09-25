@@ -39,7 +39,7 @@ func TestGKEHostID(t *testing.T) {
 	d := NewTestDetector(gkeFmp(), &FakeOSProvider{})
 	instanceID, err := d.GKEHostID()
 	assert.NoError(t, err)
-	assert.Equal(t, instanceID, fakeInstanceID)
+	assert.Equal(t, fakeInstanceID, instanceID)
 }
 
 func TestGKEHostIDErr(t *testing.T) {
@@ -48,14 +48,14 @@ func TestGKEHostIDErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	instanceID, err := d.GKEHostID()
 	assert.Error(t, err)
-	assert.Equal(t, instanceID, "")
+	assert.Equal(t, "", instanceID)
 }
 
 func TestGKEClusterName(t *testing.T) {
 	d := NewTestDetector(gkeFmp(), &FakeOSProvider{})
 	clusterName, err := d.GKEClusterName()
 	assert.NoError(t, err)
-	assert.Equal(t, clusterName, fakeClusterName)
+	assert.Equal(t, fakeClusterName, clusterName)
 }
 
 func TestGKEClusterNameErr(t *testing.T) {
@@ -64,15 +64,15 @@ func TestGKEClusterNameErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	clusterName, err := d.GKEClusterName()
 	assert.Error(t, err)
-	assert.Equal(t, clusterName, "")
+	assert.Equal(t, "", clusterName)
 }
 
 func TestGKEAvailabilityZoneOrRegionZonal(t *testing.T) {
 	d := NewTestDetector(gkeFmp(), &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.NoError(t, err)
-	assert.Equal(t, zoneOrRegion, Zone)
-	assert.Equal(t, location, "us-central1-c")
+	assert.Equal(t, Zone, zoneOrRegion)
+	assert.Equal(t, "us-central1-c", location)
 }
 
 func TestGKEAvailabilityZoneOrRegionRegional(t *testing.T) {
@@ -81,8 +81,8 @@ func TestGKEAvailabilityZoneOrRegionRegional(t *testing.T) {
 	), &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.NoError(t, err)
-	assert.Equal(t, zoneOrRegion, Region)
-	assert.Equal(t, location, "us-central1")
+	assert.Equal(t, Region, zoneOrRegion)
+	assert.Equal(t, "us-central1", location)
 }
 
 func TestGKEAvailabilityZoneOrRegionMalformed(t *testing.T) {
@@ -91,8 +91,8 @@ func TestGKEAvailabilityZoneOrRegionMalformed(t *testing.T) {
 	), &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.Error(t, err)
-	assert.Equal(t, zoneOrRegion, UndefinedLocation)
-	assert.Equal(t, location, "")
+	assert.Equal(t, UndefinedLocation, zoneOrRegion)
+	assert.Equal(t, "", location)
 }
 
 func TestGKEAvailabilityZoneOrRegionErr(t *testing.T) {
@@ -101,6 +101,6 @@ func TestGKEAvailabilityZoneOrRegionErr(t *testing.T) {
 	}, &FakeOSProvider{})
 	location, zoneOrRegion, err := d.GKEAvailabilityZoneOrRegion()
 	assert.Error(t, err)
-	assert.Equal(t, zoneOrRegion, UndefinedLocation)
-	assert.Equal(t, location, "")
+	assert.Equal(t, UndefinedLocation, zoneOrRegion)
+	assert.Equal(t, "", location)
 }
