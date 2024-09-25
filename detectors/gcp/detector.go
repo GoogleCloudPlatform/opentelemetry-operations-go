@@ -83,20 +83,8 @@ func (d *Detector) instanceID() (string, error) {
 
 // Detector collects resource information for all GCP platforms.
 type Detector struct {
-	metadata metadataProvider
+	metadata *metadata.Client
 	os       osProvider
-}
-
-// metadataProvider contains the subset of the metadata.Client functions used
-// by this resource Detector to allow testing with a fake implementation.
-type metadataProvider interface {
-	ProjectID() (string, error)
-	InstanceID() (string, error)
-	Get(string) (string, error)
-	InstanceName() (string, error)
-	Hostname() (string, error)
-	Zone() (string, error)
-	InstanceAttributeValue(string) (string, error)
 }
 
 // osProvider contains the subset of the os package functions used by.
