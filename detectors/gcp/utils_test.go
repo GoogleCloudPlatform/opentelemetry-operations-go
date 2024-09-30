@@ -14,62 +14,102 @@
 
 package gcp
 
-func NewTestDetector(metadata *FakeMetadataProvider, os *FakeOSProvider) *Detector {
-	return &Detector{metadata: metadata, os: os}
+import (
+	"fmt"
+	"io"
+	"net/http"
+	"strings"
+	"testing"
+
+	"cloud.google.com/go/compute/metadata"
+)
+
+func NewTestDetector(metadataTransport *FakeMetadataTransport, os *FakeOSProvider) *Detector {
+	return &Detector{metadata: metadata.NewClient(&http.Client{
+		Transport: metadataTransport,
+	}), os: os}
 }
 
-type FakeMetadataProvider struct {
-	Err                  error
-	Attributes           map[string]string
-	InstanceAttributes   map[string]string
-	FakeInstanceID       string
-	FakeInstanceName     string
-	FakeInstanceHostname string
-	FakeZone             string
-	Project              string
+const (
+	fakeRegion              = "us-central1"
+	fakeZone                = fakeRegion + "-a"
+	fakeProjectID           = "my-project"
+	fakeProjectNumber       = "1234567890"
+	fakeInstanceID          = "1234567891"
+	fakeInstanceName        = "my-instance"
+	fakeInstanceHostname    = fakeInstanceName + "." + fakeZone + ".c." + fakeProjectID + ".internal"
+	fakeInstanceMachineType = "n1-standard1"
+)
+
+type FakeMetadataTransport struct {
+	T        *testing.T
+	Err      error
+	Metadata map[string]string
 }
 
-func (f *FakeMetadataProvider) ProjectID() (string, error) {
-	if f.Err != nil {
-		return "", f.Err
+const computeMetadataPrefix = "/computeMetadata/v1/"
+
+func (f *FakeMetadataTransport) getResponse(path string) (string, bool) {
+	if !strings.HasPrefix(path, computeMetadataPrefix) {
+		return "", false
 	}
-	return f.Project, nil
+	path = strings.TrimPrefix(path, computeMetadataPrefix)
+	content, ok := f.Metadata[path]
+	return content, ok
 }
-func (f *FakeMetadataProvider) InstanceID() (string, error) {
-	if f.Err != nil {
-		return "", f.Err
+
+func (f *FakeMetadataTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if f.T != nil {
+		f.T.Helper()
+		f.T.Logf("metadata request: %v", req)
 	}
-	return f.FakeInstanceID, nil
+	if req.URL.Host != "169.254.169.254" && req.URL.Host != "metadata.google.internal" {
+		return nil, fmt.Errorf("unknown host %q", req.URL.Host)
+	}
+	if f.Err != nil {
+		return nil, f.Err
+	}
+	pr, pw := io.Pipe()
+	res := &http.Response{
+		Proto:      "HTTP/1.0",
+		ProtoMajor: 1,
+		Header:     make(http.Header),
+		Close:      true,
+		Body:       pr,
+	}
+	content, ok := f.getResponse(req.URL.Path)
+	if ok {
+		res.StatusCode = 200
+	} else {
+		res.StatusCode = 404
+	}
+	go func() {
+		defer pw.Close()
+		_, _ = pw.Write([]byte(content))
+	}()
+	res.Status = fmt.Sprintf("%d %s", res.StatusCode, http.StatusText(res.StatusCode))
+	return res, nil
 }
-func (f *FakeMetadataProvider) Get(s string) (string, error) {
-	if f.Err != nil {
-		return "", f.Err
+
+// newFakeMetadataTransport constructs a FakeMetadataTransport that responds with the basic GCE metadata fields.
+// To add more metadata, pass key-value pairs as arguments.
+func newFakeMetadataTransport(t *testing.T, keyValues ...string) *FakeMetadataTransport {
+	out := map[string]string{
+		"project/project-id":         fakeProjectID,
+		"project/numeric-project-id": fakeProjectNumber,
+		"instance/id":                fakeInstanceID,
+		"instance/name":              fakeInstanceName,
+		"instance/hostname":          fakeInstanceHostname,
+		"instance/machine-type":      fakeInstanceMachineType,
+		"instance/zone":              fmt.Sprintf("projects/%s/zones/%s", fakeProjectNumber, fakeZone),
 	}
-	return f.Attributes[s], nil
-}
-func (f *FakeMetadataProvider) InstanceName() (string, error) {
-	if f.Err != nil {
-		return "", f.Err
+	for i := 0; i < len(keyValues); i += 2 {
+		out[keyValues[i]] = keyValues[i+1]
 	}
-	return f.FakeInstanceName, nil
-}
-func (f *FakeMetadataProvider) Hostname() (string, error) {
-	if f.Err != nil {
-		return "", f.Err
+	return &FakeMetadataTransport{
+		T:        t,
+		Metadata: out,
 	}
-	return f.FakeInstanceHostname, nil
-}
-func (f *FakeMetadataProvider) Zone() (string, error) {
-	if f.Err != nil {
-		return "", f.Err
-	}
-	return f.FakeZone, nil
-}
-func (f *FakeMetadataProvider) InstanceAttributeValue(s string) (string, error) {
-	if f.Err != nil {
-		return "", f.Err
-	}
-	return f.InstanceAttributes[s], nil
 }
 
 type FakeOSProvider struct {
