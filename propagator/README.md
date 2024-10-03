@@ -6,6 +6,13 @@ This package contains Trace Context Propagators for use with [Google Cloud
 Trace](https://cloud.google.com/trace) that make it compatible with
 [OpenTelemetry](http://opentelemetry.io). 
 
+To get started with instrumentation in Google Cloud, see [Generate traces and metrics with
+Go](https://cloud.google.com/stackdriver/docs/instrumentation/setup/go).
+
+To learn more about instrumentation and observability, including opinionated recommendations
+for Google Cloud Observability, visit [Instrumentation and
+observability](https://cloud.google.com/stackdriver/docs/instrumentation/overview).
+
 There are two available propagators in this package:
 
 ### `CloudTraceOneWayPropagator` (Recommended)
