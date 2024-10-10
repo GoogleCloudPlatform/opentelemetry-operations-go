@@ -28,7 +28,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/otel/metric/noop"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
@@ -49,7 +49,7 @@ func createLogsExporter(
 		ctx,
 		cfg,
 		logger,
-		noop.NewMeterProvider(),
+		otel.GetMeterProvider(),
 		"latest",
 		duration,
 	)

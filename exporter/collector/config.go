@@ -257,7 +257,15 @@ func setVersionInUserAgent(cfg *Config, version string) {
 }
 
 func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Config, scopes []string, meterProvider metric.MeterProvider) ([]option.ClientOption, error) {
-	var copts []option.ClientOption
+	// Disable the built-in telemetry so we have full control over the telemetry produced.
+	copts := []option.ClientOption{
+		option.WithTelemetryDisabled(),
+		option.WithGRPCDialOption(otelgrpc.DialOption(otelgrpc.Options{
+			MetricsOptions: otelgrpc.MetricsOptions{
+				MeterProvider: meterProvider,
+			},
+		})),
+	}
 	// grpc.WithUserAgent is used by the Trace exporter, but not the Metric exporter (see comment below)
 	if cfg.UserAgent != "" {
 		copts = append(copts, option.WithGRPCDialOption(grpc.WithUserAgent(cfg.UserAgent)))

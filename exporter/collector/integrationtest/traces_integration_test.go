@@ -27,7 +27,7 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
-	"go.opentelemetry.io/otel/metric/noop"
+	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 )
 
@@ -43,7 +43,7 @@ func createTracesExporter(
 		ctx,
 		cfg,
 		logger,
-		noop.NewMeterProvider(),
+		otel.GetMeterProvider(),
 		"latest",
 		collector.DefaultTimeout,
 	)
