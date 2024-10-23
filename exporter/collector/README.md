@@ -297,6 +297,36 @@ underscores (eg, `service.name`), but these will still collide once all
 attributes are normalized to metric labels. In this case you will need to update
 the collector config above appropriately.
 
+### Performance tuning
+
+The exporter can be configured for performance on higher-throughput systems with
+the `batch` processor and client connection settings in the exporter itself.
+
+For example, see the following config snippet:
+
+```yaml
+processors:
+  batch:
+    send_batch_max_size: 6000
+    send_batch_size: 6000
+    
+exporters:
+  googlecloud:
+    grpc_pool_size: 20
+    sending_queue:
+      num_consumers: 40
+```
+
+This uses the `batch` processor to set a batch size of `6000`, and in the
+`googlecloud` exporter it sets `grpc_pool_size` (the number of simultaneous
+connections in the GCP client) to `20` and the `sending_queue` (the number of
+consumers that dequeue batches) to `40`.
+
+There is no guaranteed one-size-fits-all combination of settings, and for the
+majority of use cases the defaults will provide more than sufficient
+throughput. But in certain outlier cases, these options are a good starting
+point to tune the exporter for maximum efficiency depending on your needs.
+
 ### Logging Exporter
 
 The logging exporter processes OpenTelemetry log entries and exports them to GCP Cloud Logging. Logs can be collected using one 
