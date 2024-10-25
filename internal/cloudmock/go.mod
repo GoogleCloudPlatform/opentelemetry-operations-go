@@ -4,7 +4,7 @@ go 1.21
 
 require (
 	cloud.google.com/go/logging v1.11.0
-	cloud.google.com/go/monitoring v1.21.1
+	cloud.google.com/go/monitoring v1.21.2
 	cloud.google.com/go/trace v1.11.2
 	google.golang.org/genproto/googleapis/api v0.0.0-20241007155032-5fefd90f89a9
 	google.golang.org/grpc v1.67.1

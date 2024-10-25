@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.0
 
 require (
-	cloud.google.com/go/monitoring v1.21.1
+	cloud.google.com/go/monitoring v1.21.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.3
 	github.com/googleapis/gax-go/v2 v2.13.0
 	github.com/stretchr/testify v1.9.0
