@@ -12,7 +12,7 @@ require (
 )
 
 require (
-	cloud.google.com/go/longrunning v0.6.1 // indirect
+	cloud.google.com/go/longrunning v0.6.2 // indirect
 	golang.org/x/net v0.30.0 // indirect
 	golang.org/x/sys v0.26.0 // indirect
 	golang.org/x/text v0.19.0 // indirect
