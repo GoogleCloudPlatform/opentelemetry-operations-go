@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/colle
 go 1.22.0
 
 require (
-	cloud.google.com/go/logging v1.11.0
+	cloud.google.com/go/logging v1.12.0
 	cloud.google.com/go/monitoring v1.21.2
 	cloud.google.com/go/trace v1.11.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.3
