@@ -52,6 +52,7 @@ func TestExporter_ExportSpan(t *testing.T) {
 		option.WithEndpoint(testServer.Endpoint),
 		option.WithoutAuthentication(),
 		option.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
+		option.WithTelemetryDisabled(),
 	}
 
 	// Create Google Cloud Trace Exporter
