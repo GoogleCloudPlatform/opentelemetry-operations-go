@@ -19,14 +19,12 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 )
 
-// GetMetricName returns the metric name with GMP-specific suffixes. The.
-func (c Config) GetMetricName(baseName string, metric pmetric.Metric) (string, error) {
-	// First, build a name that is compliant with prometheus conventions
-	compliantName := prometheus.BuildCompliantName(metric, "", c.AddMetricSuffixes)
+// GetMetricName returns the GMP-specific suffix. baseName includes type (e.g. summary) suffixes.
+// compliantName is the name of the metric with any sanitization already performed.
+func GetMetricName(baseName, compliantName string, metric pmetric.Metric) (string, error) {
 	// Second, ad the GMP-specific suffix
 	switch metric.Type() {
 	case pmetric.MetricTypeSum:

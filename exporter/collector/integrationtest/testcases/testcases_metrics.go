@@ -19,7 +19,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus"
 	"go.opentelemetry.io/collector/featuregate"
+	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/sdk/metric/metricdata"
 	"google.golang.org/api/option"
@@ -480,7 +482,10 @@ func configureGMPCollector(cfg *collector.Config) {
 	cfg.MetricConfig.Prefix = "prometheus.googleapis.com/"
 	cfg.MetricConfig.SkipCreateMetricDescriptor = true
 	gmpConfig := googlemanagedprometheus.DefaultConfig()
-	cfg.MetricConfig.GetMetricName = gmpConfig.GetMetricName
+	cfg.MetricConfig.GetMetricName = func(baseName string, metric pmetric.Metric) (string, error) {
+		compliantName := prometheus.BuildCompliantName(metric, "", gmpConfig.AddMetricSuffixes)
+		return googlemanagedprometheus.GetMetricName(baseName, compliantName, metric)
+	}
 	cfg.MetricConfig.MapMonitoredResource = gmpConfig.MapToPrometheusTarget
 	cfg.MetricConfig.ExtraMetrics = gmpConfig.ExtraMetrics
 	cfg.MetricConfig.InstrumentationLibraryLabels = false
