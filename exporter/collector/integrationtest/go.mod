@@ -6,11 +6,11 @@ require (
 	cloud.google.com/go/logging v1.12.0
 	cloud.google.com/go/monitoring v1.21.2
 	cloud.google.com/go/trace v1.11.2
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.48.3
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.48.3
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.3
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.48.3
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.48.3
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.49.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.49.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.49.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.49.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.49.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.6.0
 	github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus v0.109.0
@@ -37,7 +37,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.4 // indirect
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	cloud.google.com/go/longrunning v0.6.2 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.3 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.25.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
