@@ -44,7 +44,7 @@ func TestCloudPlatformAppEngineStandard(t *testing.T) {
 
 func TestCloudPlatformGKE(t *testing.T) {
 	d := NewTestDetector(newFakeMetadataTransport(t,
-		"instance/attributes/cluster-name", "cluster-name",
+		"instance/attributes/cluster-location", "us-central-1a",
 	), &FakeOSProvider{
 		Vars: map[string]string{
 			k8sServiceHostEnv: "foo",
