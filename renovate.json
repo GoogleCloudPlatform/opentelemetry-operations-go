@@ -1,0 +1,40 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+      "config:recommended"
+    ],
+    "ignorePaths": [],
+    "labels": ["Skip Changelog", "dependencies"],
+    "postUpdateOptions" : [
+      "gomodTidy"
+    ],
+    "postUpdateTask" : {
+        "commands": ["make", "fixtures"]
+    },
+    "packageRules": [
+      {
+        "matchManagers": ["gomod"],
+        "matchDepTypes": ["indirect"],
+        "enabled": true
+      },
+      {
+        "matchFileNames": ["tools/**"],
+        "matchManagers": ["gomod"],
+        "matchDepTypes": ["indirect"],
+        "enabled": false
+      },
+      {
+        "matchPackageNames": ["google.golang.org/**"],
+        "groupName": "google.golang.org"
+      },
+      {
+        "matchPackageNames": ["golang.org/x/**"],
+        "groupName": "golang.org/x"
+      },
+      {
+        "matchManagers": ["gomod"],
+        "matchPackageNames": ["go.opentelemetry.io/**"],
+        "groupName": "go.opentelemetry.io"
+      }
+    ]
+  }
