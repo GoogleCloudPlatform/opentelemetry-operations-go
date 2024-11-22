@@ -8,9 +8,6 @@
     "postUpdateOptions" : [
       "gomodTidy"
     ],
-    "postUpdateTask" : {
-        "commands": ["make", "fixtures"]
-    },
     "packageRules": [
       {
         "matchManagers": ["gomod"],
