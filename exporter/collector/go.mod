@@ -12,7 +12,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/googleapis/gax-go/v2 v2.13.0
 	github.com/stretchr/testify v1.9.0
-	github.com/tidwall/wal v1.1.7
+	github.com/tidwall/wal v1.1.8
 	go.opentelemetry.io/collector/component v0.109.0
 	go.opentelemetry.io/collector/confmap v1.15.0
 	go.opentelemetry.io/collector/pdata v1.15.0
