@@ -8,11 +8,11 @@ require (
 	go.opentelemetry.io/collector/extension v0.109.0
 	golang.org/x/oauth2 v0.23.0
 	google.golang.org/api v0.177.0
-	google.golang.org/grpc v1.66.0
+	google.golang.org/grpc v1.66.2
 )
 
 require (
-	cloud.google.com/go/auth v0.9.4 // indirect
+	cloud.google.com/go/auth v0.11.0 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.6 // indirect
 	cloud.google.com/go/compute/metadata v0.5.2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
