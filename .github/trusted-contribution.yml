@@ -1,0 +1,9 @@
+# Config reference:
+# https://github.com/googleapis/repo-automation-bots/tree/main/packages/trusted-contribution
+
+trustedContributors:
+  - renovate-bot
+annotations:
+  # Automatically run Cloud Build tests
+  - type: comment
+    text: /gcbrun
