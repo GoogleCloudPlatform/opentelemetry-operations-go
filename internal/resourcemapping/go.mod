@@ -5,11 +5,8 @@ go 1.22
 toolchain go1.22.0
 
 require (
-	go.opentelemetry.io/otel v1.30.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e
+	go.opentelemetry.io/otel v1.32.0
+	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697
 )
 
-require (
-	google.golang.org/genproto v0.0.0-20230731193218-e0aa005b6bdf // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
-)
+require google.golang.org/protobuf v1.35.2 // indirect
