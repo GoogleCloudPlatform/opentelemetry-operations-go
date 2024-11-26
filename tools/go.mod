@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/tools
 
 go 1.22.1
 
-toolchain go1.23.1
-
 require (
 	github.com/client9/misspell v0.3.4
 	github.com/golangci/golangci-lint v1.62.2
