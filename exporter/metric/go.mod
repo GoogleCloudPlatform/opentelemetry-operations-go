@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metri
 
 go 1.22
 
-toolchain go1.22.0
+toolchain go1.23.4
 
 require (
 	cloud.google.com/go/monitoring v1.21.2
