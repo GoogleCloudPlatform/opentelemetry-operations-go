@@ -1,11 +1,11 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping
 
-go 1.22
+go 1.22.0
 
-toolchain go1.22.0
+toolchain go1.23.4
 
 require (
-	go.opentelemetry.io/otel v1.30.0
+	go.opentelemetry.io/otel v1.33.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20230726155614-23370e0ffb3e
 )
 
