@@ -25,9 +25,9 @@ require (
 	go.opentelemetry.io/otel/sdk v1.30.0
 	go.opentelemetry.io/otel/sdk/metric v1.30.0
 	go.uber.org/zap v1.27.0
-	google.golang.org/api v0.203.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20241007155032-5fefd90f89a9
-	google.golang.org/grpc v1.67.1
+	google.golang.org/api v0.213.0
+	google.golang.org/genproto/googleapis/api 9240e9c98484
+	google.golang.org/grpc v1.69.2
 	google.golang.org/protobuf v1.35.1
 )
 
@@ -144,9 +144,9 @@ require (
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.7.0 // indirect
 	gonum.org/v1/gonum v0.15.1 // indirect
-	google.golang.org/genproto v0.0.0-20241015192408-796eee8c2d53 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20241015192408-796eee8c2d53 // indirect
-	google.golang.org/grpc/stats/opentelemetry v0.0.0-20240702152247-2da976983bbb // indirect
+	google.golang.org/genproto 9240e9c98484 // indirect
+	google.golang.org/genproto/googleapis/rpc 9240e9c98484 // indirect
+	google.golang.org/grpc/stats/opentelemetry ada6787961b3 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
