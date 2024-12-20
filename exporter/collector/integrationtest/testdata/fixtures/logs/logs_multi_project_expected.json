@@ -772,7 +772,7 @@
       "partialSuccess": true
     }
   ],
-  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.67.1",
+  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.69.2",
   "selfObservabilityMetrics": {
     "createTimeSeriesRequests": [
       {
