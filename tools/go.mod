@@ -9,7 +9,7 @@ require (
 	github.com/golangci/golangci-lint v1.62.2
 	github.com/itchyny/gojq v0.12.16
 	github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad
-	golang.org/x/tools v0.27.0
+	golang.org/x/tools v0.29.0
 	golang.org/x/vuln v1.1.3
 	google.golang.org/protobuf v1.34.2
 )
@@ -186,8 +186,8 @@ require (
 	golang.org/x/exp v0.0.0-20240909161429-701f63a606c0 // indirect
 	golang.org/x/exp/typeparams v0.0.0-20241108190413-2d47ceb2692f // indirect
 	golang.org/x/mod v0.22.0 // indirect
-	golang.org/x/sync v0.9.0 // indirect
-	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/telemetry v0.0.0-20240906150435-6d9f2eb83631 // indirect
 	golang.org/x/text v0.18.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
