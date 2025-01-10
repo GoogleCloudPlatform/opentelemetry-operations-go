@@ -5,7 +5,7 @@ go 1.22
 toolchain go1.22.0
 
 require (
-	cloud.google.com/go/pubsub v1.45.1
+	cloud.google.com/go/pubsub v1.45.3
 	github.com/GoogleCloudPlatform/functions-framework-go v1.9.1
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-server v0.49.0
 	github.com/cloudevents/sdk-go/v2 v2.15.2
