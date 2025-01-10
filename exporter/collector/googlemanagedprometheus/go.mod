@@ -5,9 +5,9 @@ go 1.22.0
 require (
 	github.com/prometheus/common v0.61.0
 	github.com/stretchr/testify v1.10.0
-	go.opentelemetry.io/collector/featuregate v1.15.0
-	go.opentelemetry.io/collector/pdata v1.15.0
-	go.opentelemetry.io/collector/semconv v0.109.0
+	go.opentelemetry.io/collector/featuregate v1.23.0
+	go.opentelemetry.io/collector/pdata v1.23.0
+	go.opentelemetry.io/collector/semconv v0.117.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422
 )
 
