@@ -29,18 +29,19 @@
         "groupName": "golang.org/x"
       },
       {
-        "matchPackageNames": ["cloud.google.com/go/**"],
+        "matchPackageNames": ["cloud.google.com/go**"],
         "groupName": "cloud.google.com/go"
       },
       {
         "matchManagers": ["gomod"],
-        "matchPackageNames": ["go.opentelemetry.io/collector/**", "github.com/open-telemetry/opentelemetry-collector-contrib/**"],
+        "matchPackageNames": ["go.opentelemetry.io/collector**", "github.com/open-telemetry/opentelemetry-collector-contrib**"],
         "groupName": "go.opentelemetry.io/collector"
       },
       {
         "matchManagers": ["gomod"],
-        "matchPackageNames": ["go.opentelemetry.io/otel/**", "go.opentelemetry.io/contrib/**"],
+        "matchPackageNames": ["go.opentelemetry.io/otel**", "go.opentelemetry.io/contrib**"],
         "groupName": "go.opentelemetry.io/otel"
       }
     ]
   }
+  
