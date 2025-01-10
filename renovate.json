@@ -34,8 +34,13 @@
       },
       {
         "matchManagers": ["gomod"],
-        "matchPackageNames": ["go.opentelemetry.io/**"],
-        "groupName": "go.opentelemetry.io"
+        "matchPackageNames": ["go.opentelemetry.io/collector/**", "github.com/open-telemetry/opentelemetry-collector-contrib/**"],
+        "groupName": "go.opentelemetry.io/collector"
+      },
+      {
+        "matchManagers": ["gomod"],
+        "matchPackageNames": ["go.opentelemetry.io/otel/**", "go.opentelemetry.io/contrib/**"],
+        "groupName": "go.opentelemetry.io/otel"
       }
     ]
   }
