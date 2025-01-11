@@ -1,6 +1,8 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/trace/otlpgrpc
 
-go 1.22
+go 1.22.0
+
+toolchain go1.23.4
 
 require (
 	go.opentelemetry.io/otel v1.31.0
@@ -16,7 +18,7 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.19.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.25.1 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.23.1 // indirect
 	go.opentelemetry.io/otel/metric v1.31.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.1.0 // indirect
