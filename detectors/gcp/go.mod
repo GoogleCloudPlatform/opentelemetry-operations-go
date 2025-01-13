@@ -6,7 +6,7 @@ toolchain go1.23.4
 
 require (
 	cloud.google.com/go/compute/metadata v0.6.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.10.0
 )
 
 require (
