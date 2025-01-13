@@ -11,7 +11,7 @@ require (
 	go.opentelemetry.io/otel/metric v1.31.0
 	go.opentelemetry.io/otel/sdk v1.31.0
 	go.opentelemetry.io/otel/sdk/metric v1.31.0
-	gonum.org/v1/gonum v0.14.0
+	gonum.org/v1/gonum v0.15.1
 )
 
 require (
