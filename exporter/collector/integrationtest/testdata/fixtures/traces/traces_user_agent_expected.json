@@ -2859,7 +2859,7 @@
       ]
     }
   ],
-  "userAgent": "custom-user-agent latest grpc-go/1.69.2",
+  "userAgent": "custom-user-agent latest grpc-go/1.69.4",
   "selfObservabilityMetrics": {
     "createTimeSeriesRequests": [
       {
