@@ -653,5 +653,5 @@
       }
     ]
   },
-  "userAgent": "custom-user-agent grpc-go/1.69.2"
+  "userAgent": "custom-user-agent grpc-go/1.69.4"
 }
