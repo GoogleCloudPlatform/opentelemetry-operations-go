@@ -13,11 +13,11 @@ require (
 	github.com/googleapis/gax-go/v2 v2.14.1
 	github.com/stretchr/testify v1.10.0
 	github.com/tidwall/wal v1.1.8
-	go.opentelemetry.io/collector/component v0.117.0
-	go.opentelemetry.io/collector/component/componenttest v0.117.0
-	go.opentelemetry.io/collector/confmap v1.23.0
-	go.opentelemetry.io/collector/pdata v1.23.0
-	go.opentelemetry.io/collector/semconv v0.117.0
+	go.opentelemetry.io/collector/component v0.118.0
+	go.opentelemetry.io/collector/component/componenttest v0.118.0
+	go.opentelemetry.io/collector/confmap v1.24.0
+	go.opentelemetry.io/collector/pdata v1.24.0
+	go.opentelemetry.io/collector/semconv v0.118.0
 	go.opentelemetry.io/otel v1.32.0
 	go.opentelemetry.io/otel/metric v1.32.0
 	go.opentelemetry.io/otel/sdk v1.32.0
@@ -61,7 +61,7 @@ require (
 	github.com/tidwall/match v1.1.1 // indirect
 	github.com/tidwall/pretty v1.2.1 // indirect
 	github.com/tidwall/tinylru v1.2.1 // indirect
-	go.opentelemetry.io/collector/config/configtelemetry v0.117.0 // indirect
+	go.opentelemetry.io/collector/config/configtelemetry v0.118.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.54.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.55.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.32.0 // indirect
