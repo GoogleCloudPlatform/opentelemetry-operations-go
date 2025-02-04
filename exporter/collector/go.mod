@@ -1,10 +1,12 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector
 
-go 1.22.0
+go 1.22.7
+
+toolchain go1.23.6
 
 require (
 	cloud.google.com/go/logging v1.13.0
-	cloud.google.com/go/monitoring v1.22.1
+	cloud.google.com/go/monitoring v1.23.0
 	cloud.google.com/go/trace v1.11.3
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.26.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.50.0
@@ -25,11 +27,11 @@ require (
 	go.uber.org/atomic v1.11.0
 	go.uber.org/zap v1.27.0
 	golang.org/x/oauth2 v0.25.0
-	google.golang.org/api v0.216.0
-	google.golang.org/genproto v0.0.0-20250106144421-5f5ef82da422
-	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422
-	google.golang.org/grpc v1.69.4
-	google.golang.org/protobuf v1.36.2
+	google.golang.org/api v0.219.0
+	google.golang.org/genproto v0.0.0-20250204164813-702378808489
+	google.golang.org/genproto/googleapis/api v0.0.0-20250204164813-702378808489
+	google.golang.org/grpc v1.70.0
+	google.golang.org/protobuf v1.36.4
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -72,7 +74,7 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250106144421-5f5ef82da422 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250204164813-702378808489 // indirect
 )
 
 replace github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace => ../trace
