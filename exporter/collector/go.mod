@@ -4,7 +4,7 @@ go 1.22.0
 
 require (
 	cloud.google.com/go/logging v1.13.0
-	cloud.google.com/go/monitoring v1.22.1
+	cloud.google.com/go/monitoring v1.24.0
 	cloud.google.com/go/trace v1.11.3
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.26.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.50.0
@@ -34,8 +34,8 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.118.0 // indirect
-	cloud.google.com/go/auth v0.14.0 // indirect
+	cloud.google.com/go v0.118.2 // indirect
+	cloud.google.com/go/auth v0.14.1 // indirect
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/longrunning v0.6.4 // indirect
