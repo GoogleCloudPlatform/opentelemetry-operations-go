@@ -49,7 +49,7 @@ func createMetricsExporter(
 		cfg,
 		logger,
 		otel.GetMeterProvider(),
-		"latest",
+		integrationTestBuildInfo,
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)

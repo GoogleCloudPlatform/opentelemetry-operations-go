@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/otel/metric"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
@@ -34,6 +35,11 @@ import (
 	gcpmetric "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
+
+var integrationTestBuildInfo = component.BuildInfo{
+	Description: "GoogleCloudExporter Integration Test",
+	Version:     collector.Version(),
+}
 
 // OTel metrics exporter used to capture self observability metrics.
 type InMemoryOTelExporter struct {
@@ -111,7 +117,7 @@ func NewTraceTestExporter(
 		cfg,
 		zap.NewNop(),
 		meterProvider,
-		"latest",
+		integrationTestBuildInfo,
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
@@ -141,7 +147,7 @@ func NewMetricTestExporter(
 		cfg,
 		logger,
 		meterProvider,
-		"latest",
+		integrationTestBuildInfo,
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
@@ -172,7 +178,7 @@ func NewLogTestExporter(
 		cfg,
 		logger,
 		meterProvider,
-		"latest",
+		integrationTestBuildInfo,
 		duration,
 	)
 	require.NoError(t, err)

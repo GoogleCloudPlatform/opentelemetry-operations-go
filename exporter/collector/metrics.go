@@ -178,10 +178,10 @@ func NewGoogleCloudMetricsExporter(
 	cfg Config,
 	log *zap.Logger,
 	meterProvider metricapi.MeterProvider,
-	version string,
+	buildInfo component.BuildInfo,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
-	setVersionInUserAgent(&cfg, version)
+	setUserAgent(&cfg, buildInfo)
 	meter := meterProvider.Meter(scopeName, metricapi.WithInstrumentationVersion(Version()))
 	pointsExportedCounter, err := meter.Int64Counter(
 		"googlecloudmonitoring/point_count",

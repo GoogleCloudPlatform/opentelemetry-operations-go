@@ -50,7 +50,7 @@ func createLogsExporter(
 		cfg,
 		logger,
 		otel.GetMeterProvider(),
-		"latest",
+		integrationTestBuildInfo,
 		duration,
 	)
 	require.NoError(t, err)

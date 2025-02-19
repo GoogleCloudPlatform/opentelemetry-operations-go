@@ -53,10 +53,10 @@ func NewGoogleCloudTracesExporter(
 	cfg Config,
 	log *zap.Logger,
 	meterProvider metric.MeterProvider,
-	version string,
+	buildInfo component.BuildInfo,
 	timeout time.Duration,
 ) (*TraceExporter, error) {
-	setVersionInUserAgent(&cfg, version)
+	setUserAgent(&cfg, buildInfo)
 	obs := selfObservability{
 		log:           log,
 		meterProvider: meterProvider,
