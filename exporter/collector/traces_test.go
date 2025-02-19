@@ -103,7 +103,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 
 			//nolint:errcheck
 			go srv.Serve(lis)
-			sde, err := NewGoogleCloudTracesExporter(ctx, test.cfg, zap.NewNop(), noop.NewMeterProvider(), "latest", DefaultTimeout)
+			sde, err := NewGoogleCloudTracesExporter(ctx, test.cfg, zap.NewNop(), noop.NewMeterProvider(), testBuildInfo, DefaultTimeout)
 			require.NoError(t, err)
 			err = sde.Start(ctx, componenttest.NewNopHost())
 			if test.expectedErr != "" {

@@ -2353,7 +2353,7 @@ func TestSetupWAL(t *testing.T) {
 		},
 		zap.NewNop(),
 		noop.NewMeterProvider(),
-		Version(),
+		testBuildInfo,
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2388,7 +2388,7 @@ func TestCloseWAL(t *testing.T) {
 		},
 		zap.NewNop(),
 		noop.NewMeterProvider(),
-		Version(),
+		testBuildInfo,
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2416,7 +2416,7 @@ func TestReadWALAndExport(t *testing.T) {
 		},
 		zap.NewNop(),
 		noop.NewMeterProvider(),
-		Version(),
+		testBuildInfo,
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2457,7 +2457,7 @@ func TestReadWALAndExportRetry(t *testing.T) {
 		},
 		zap.NewNop(),
 		noop.NewMeterProvider(),
-		Version(),
+		testBuildInfo,
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2502,7 +2502,7 @@ func TestWatchWALFile(t *testing.T) {
 		},
 		zap.NewNop(),
 		noop.NewMeterProvider(),
-		Version(),
+		testBuildInfo,
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2547,7 +2547,7 @@ func TestRunWALReadAndExportLoop(t *testing.T) {
 		},
 		zap.NewNop(),
 		noop.NewMeterProvider(),
-		Version(),
+		testBuildInfo,
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2608,7 +2608,7 @@ func TestPushMetricsOntoWAL(t *testing.T) {
 		},
 		zap.NewNop(),
 		noop.NewMeterProvider(),
-		Version(),
+		testBuildInfo,
 		10*time.Second,
 	)
 	require.NoError(t, err)

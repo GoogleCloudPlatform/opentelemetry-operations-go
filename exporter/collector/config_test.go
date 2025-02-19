@@ -15,11 +15,18 @@
 package collector
 
 import (
+	"fmt"
 	"testing"
 
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/confmap"
 	"gopkg.in/yaml.v3"
 )
+
+var testBuildInfo = component.BuildInfo{
+	Description: "GoogleCloudExporter Tests",
+	Version:     Version(),
+}
 
 func TestValidateConfig(t *testing.T) {
 	for _, tc := range []struct {
@@ -102,5 +109,18 @@ func TestMarshal(t *testing.T) {
 	_, err = yaml.Marshal(cm.ToStringMap())
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+// These tests are not super useful for functionality, but they
+// exist as an assertion of how we expect the user agent
+// to be constructed from build info to alert if somebody
+// changes it unknowingly.
+func TestBuildInfoUserAgentFallback(t *testing.T) {
+	config := DefaultConfig()
+	setUserAgent(&config, testBuildInfo)
+	expectedUserAgent := fmt.Sprintf("GoogleCloudExporter Tests/%s (linux/amd64)", Version())
+	if config.UserAgent != expectedUserAgent {
+		t.Fatalf("expected user agent to be %s, was %s", expectedUserAgent, config.UserAgent)
 	}
 }

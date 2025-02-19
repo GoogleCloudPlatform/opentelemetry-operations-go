@@ -19,9 +19,11 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 
+	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/metric"
@@ -197,7 +199,6 @@ var domains = []string{"googleapis.com", "kubernetes.io", "istio.io", "knative.d
 // DefaultConfig creates the default configuration for exporter.
 func DefaultConfig() Config {
 	return Config{
-		UserAgent: "opentelemetry-collector-contrib {{version}}",
 		LogConfig: LogConfig{
 			ServiceResourceLabels: true,
 			MapMonitoredResource:  defaultResourceToLoggingMonitoredResource,
@@ -252,8 +253,21 @@ func ValidateConfig(cfg Config) error {
 	return nil
 }
 
-func setVersionInUserAgent(cfg *Config, version string) {
-	cfg.UserAgent = strings.ReplaceAll(cfg.UserAgent, "{{version}}", version)
+func setUserAgent(cfg *Config, buildInfo component.BuildInfo) {
+	if cfg.UserAgent == "" {
+		cfg.UserAgent = fmt.Sprintf(
+			"%s/%s (%s/%s)",
+			buildInfo.Description,
+			buildInfo.Version,
+			runtime.GOOS,
+			runtime.GOARCH,
+		)
+		return
+	}
+
+	if strings.Contains(cfg.UserAgent, "{{version}}") {
+		cfg.UserAgent = strings.ReplaceAll(cfg.UserAgent, "{{version}}", buildInfo.Version)
+	}
 }
 
 func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Config, scopes []string, meterProvider metric.MeterProvider) ([]option.ClientOption, error) {
