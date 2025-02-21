@@ -23,11 +23,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var testBuildInfo = component.BuildInfo{
-	Description: "GoogleCloudExporter Tests",
-	Version:     Version(),
-}
-
 func TestValidateConfig(t *testing.T) {
 	for _, tc := range []struct {
 		desc        string
@@ -118,7 +113,10 @@ func TestMarshal(t *testing.T) {
 // changes it unknowingly.
 func TestBuildInfoUserAgentFallback(t *testing.T) {
 	config := DefaultConfig()
-	SetUserAgent(&config, testBuildInfo)
+	SetUserAgent(&config, component.BuildInfo{
+		Description: "GoogleCloudExporter Tests",
+		Version:     Version(),
+	})
 	expectedUserAgent := fmt.Sprintf("GoogleCloudExporter Tests/%s (linux/amd64)", Version())
 	if config.UserAgent != expectedUserAgent {
 		t.Fatalf("expected user agent to be %s, was %s", expectedUserAgent, config.UserAgent)
