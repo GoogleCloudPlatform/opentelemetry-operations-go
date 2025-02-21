@@ -157,9 +157,9 @@ lint: $(GOLANGCI_LINT) $(MISSPELL) govulncheck
 	done
 	$(MISSPELL) -w $(ALL_DOCS)
 	set -e; for dir in $(ALL_GO_MOD_DIRS) $(TOOLS_MOD_DIR); do \
-	  echo "go mod tidy -compat=1.22 in $${dir}"; \
+	  echo "go mod tidy -compat=1.23 in $${dir}"; \
 	  (cd "$${dir}" && \
-	    go mod tidy -compat=1.22); \
+	    go mod tidy -compat=1.23); \
 	done
 
 generate: $(STRINGER) $(PROTOC)
@@ -198,44 +198,11 @@ govulncheck/%: | $(GOVULNCHECK)
 
 .PHONY: gotidy
 gotidy:
-	$(MAKE) for-all-mod CMD="go mod tidy -compat=1.22"
+	$(MAKE) for-all-mod CMD="go mod tidy -compat=1.23"
 
 .PHONY: update-dep
 update-dep:
 	$(MAKE) for-all-mod CMD="$(PWD)/internal/buildscripts/update-dep"
-
-STABLE_OTEL_VERSION=v1.30.0
-UNSTABLE_OTEL_VERSION=v0.52.0
-STABLE_CONTRIB_OTEL_VERSION=v1.30.0
-UNSTABLE_CONTRIB_OTEL_VERSION=v0.55.0
-STABLE_COLLECTOR_VERSION=v1.15.0
-UNSTABLE_COLLECTOR_VERSION=v0.109.0
-UNSTABLE_COLLECTOR_CONTRIB_VERSION=v0.109.0
-
-.PHONY: update-otel
-update-otel:
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/metric VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/sdk/metric VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/trace VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp VERSION=$(STABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/otel/exporters/prometheus VERSION=$(UNSTABLE_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/detectors/gcp VERSION=$(STABLE_CONTRIB_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp VERSION=$(UNSTABLE_CONTRIB_OTEL_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector VERSION=$(UNSTABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/confmap VERSION=$(STABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/component VERSION=$(UNSTABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/semconv VERSION=$(UNSTABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/otelcol VERSION=$(UNSTABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/extension VERSION=$(UNSTABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/extension/auth VERSION=$(UNSTABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/featuregate VERSION=$(STABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=go.opentelemetry.io/collector/pdata VERSION=$(STABLE_COLLECTOR_VERSION)
-	$(MAKE) update-dep MODULE=github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus VERSION=$(UNSTABLE_COLLECTOR_CONTRIB_VERSION)
-	$(MAKE) gotidy
-	$(MAKE) build
-	$(MAKE) fixtures
 
 .PHONY: prepare-release
 prepare-release:
