@@ -33,7 +33,7 @@ steps:
     env: ["PROJECT_ID=$PROJECT_ID"]
     args:
       - gae-standard
-      - --runtime=go122
+      - --runtime=go123
       - --appsource=/workspace/e2e-test-server/appsource.zip
 logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs
 substitutions:
