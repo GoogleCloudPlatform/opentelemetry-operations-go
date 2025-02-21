@@ -16,6 +16,7 @@ package collector
 
 import (
 	"fmt"
+	"runtime"
 	"testing"
 
 	"go.opentelemetry.io/collector/component"
@@ -117,7 +118,12 @@ func TestBuildInfoUserAgentFallback(t *testing.T) {
 		Description: "GoogleCloudExporter Tests",
 		Version:     Version(),
 	})
-	expectedUserAgent := fmt.Sprintf("GoogleCloudExporter Tests/%s (linux/amd64)", Version())
+	expectedUserAgent := fmt.Sprintf(
+		"GoogleCloudExporter Tests/%s (%s/%s)",
+		Version(),
+		runtime.GOOS,
+		runtime.GOARCH,
+	)
 	if config.UserAgent != expectedUserAgent {
 		t.Fatalf("expected user agent to be %s, was %s", expectedUserAgent, config.UserAgent)
 	}
