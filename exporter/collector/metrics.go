@@ -50,6 +50,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
@@ -176,13 +177,11 @@ func (me *MetricsExporter) Shutdown(ctx context.Context) error {
 func NewGoogleCloudMetricsExporter(
 	ctx context.Context,
 	cfg Config,
-	log *zap.Logger,
-	meterProvider metricapi.MeterProvider,
-	buildInfo component.BuildInfo,
+	set exporter.Settings,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
-	setUserAgent(&cfg, buildInfo)
-	meter := meterProvider.Meter(scopeName, metricapi.WithInstrumentationVersion(Version()))
+	SetUserAgent(&cfg, set.BuildInfo)
+	meter := set.TelemetrySettings.MeterProvider.Meter(scopeName, metricapi.WithInstrumentationVersion(Version()))
 	pointsExportedCounter, err := meter.Int64Counter(
 		"googlecloudmonitoring/point_count",
 		metricapi.WithDescription("Count of metric points written to Cloud Monitoring."),
@@ -200,7 +199,10 @@ func NewGoogleCloudMetricsExporter(
 		return nil, err
 	}
 
-	obs := selfObservability{log: log, meterProvider: meterProvider}
+	obs := selfObservability{
+		log:           set.TelemetrySettings.Logger,
+		meterProvider: set.TelemetrySettings.MeterProvider,
+	}
 	normalizer := normalization.NewDisabledNormalizer()
 	mExp := &MetricsExporter{
 		cfg: cfg,
@@ -864,7 +866,7 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
 	metric pmetric.Metric,
-	sum pmetric.Summary,
+	_ pmetric.Summary,
 	point pmetric.SummaryDataPoint,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().NoRecordedValue() {
@@ -1290,7 +1292,7 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	resource *monitoredrespb.MonitoredResource,
 	extraLabels labels,
 	metric pmetric.Metric,
-	gauge pmetric.Gauge,
+	_ pmetric.Gauge,
 	point pmetric.NumberDataPoint,
 ) []*monitoringpb.TimeSeries {
 	if point.Flags().NoRecordedValue() {

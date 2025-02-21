@@ -253,7 +253,7 @@ func ValidateConfig(cfg Config) error {
 	return nil
 }
 
-func setUserAgent(cfg *Config, buildInfo component.BuildInfo) {
+func SetUserAgent(cfg *Config, buildInfo component.BuildInfo) {
 	if cfg.UserAgent == "" {
 		cfg.UserAgent = fmt.Sprintf(
 			"%s/%s (%s/%s)",

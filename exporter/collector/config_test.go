@@ -118,7 +118,7 @@ func TestMarshal(t *testing.T) {
 // changes it unknowingly.
 func TestBuildInfoUserAgentFallback(t *testing.T) {
 	config := DefaultConfig()
-	setUserAgent(&config, testBuildInfo)
+	SetUserAgent(&config, testBuildInfo)
 	expectedUserAgent := fmt.Sprintf("GoogleCloudExporter Tests/%s (linux/amd64)", Version())
 	if config.UserAgent != expectedUserAgent {
 		t.Fatalf("expected user agent to be %s, was %s", expectedUserAgent, config.UserAgent)
