@@ -30,7 +30,7 @@ steps:
     args:
       - gae
       - --image=$_TEST_SERVER_IMAGE
-      - --runtime=go122
+      - --runtime=go123
 
 logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs
 substitutions:
