@@ -28,7 +28,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/otel"
 	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
@@ -44,13 +43,14 @@ func createLogsExporter(
 	// For sending to a real project, set the project ID from an env var.
 	cfg.ProjectID = os.Getenv("PROJECT_ID")
 
+	set := newTestExporterSettings(t)
+	set.TelemetrySettings.Logger = logger
+
 	var duration time.Duration
 	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
 		cfg,
-		logger,
-		otel.GetMeterProvider(),
-		integrationTestBuildInfo,
+		set,
 		duration,
 	)
 	require.NoError(t, err)

@@ -24,11 +24,10 @@ import (
 
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/metric"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
-	"go.uber.org/zap"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -51,15 +50,13 @@ func (te *TraceExporter) Shutdown(ctx context.Context) error {
 func NewGoogleCloudTracesExporter(
 	ctx context.Context,
 	cfg Config,
-	log *zap.Logger,
-	meterProvider metric.MeterProvider,
-	buildInfo component.BuildInfo,
+	set exporter.Settings,
 	timeout time.Duration,
 ) (*TraceExporter, error) {
-	setUserAgent(&cfg, buildInfo)
+	setUserAgent(&cfg, set.BuildInfo)
 	obs := selfObservability{
-		log:           log,
-		meterProvider: meterProvider,
+		log:           set.TelemetrySettings.Logger,
+		meterProvider: set.TelemetrySettings.MeterProvider,
 	}
 	return &TraceExporter{cfg: cfg, timeout: timeout, obs: obs}, nil
 }

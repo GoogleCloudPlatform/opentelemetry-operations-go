@@ -22,7 +22,9 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/metric/noop"
 	sdkmetric "go.opentelemetry.io/otel/sdk/metric"
 	"go.uber.org/zap"
 	"google.golang.org/api/option"
@@ -36,9 +38,19 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
 )
 
-var integrationTestBuildInfo = component.BuildInfo{
-	Description: "GoogleCloudExporter Integration Test",
-	Version:     collector.Version(),
+func newTestExporterSettings(t testing.TB) exporter.Settings {
+	logger, err := zap.NewDevelopment()
+	require.NoError(t, err)
+	return exporter.Settings{
+		TelemetrySettings: component.TelemetrySettings{
+			Logger:        logger,
+			MeterProvider: noop.NewMeterProvider(),
+		},
+		BuildInfo: component.BuildInfo{
+			Description: "GoogleCloudExporter Integration Test",
+			Version:     collector.Version(),
+		},
+	}
 }
 
 // OTel metrics exporter used to capture self observability metrics.
@@ -112,12 +124,12 @@ func NewTraceTestExporter(
 	cfg.TraceConfig.ClientConfig.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
+	set := newTestExporterSettings(t)
+	set.TelemetrySettings.Logger = zap.NewNop()
 	exporter, err := collector.NewGoogleCloudTracesExporter(
 		ctx,
 		cfg,
-		zap.NewNop(),
-		meterProvider,
-		integrationTestBuildInfo,
+		set,
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
@@ -139,15 +151,10 @@ func NewMetricTestExporter(
 	cfg.MetricConfig.ClientConfig.Endpoint = m.Endpoint
 	cfg.MetricConfig.ClientConfig.UseInsecure = true
 
-	logger, err := zap.NewDevelopment()
-	require.NoError(t, err)
-
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
 		cfg,
-		logger,
-		meterProvider,
-		integrationTestBuildInfo,
+		newTestExporterSettings(t),
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
@@ -169,16 +176,11 @@ func NewLogTestExporter(
 	cfg.LogConfig.ClientConfig.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
-	logger, err := zap.NewDevelopment()
-	require.NoError(t, err)
-
 	var duration time.Duration
 	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
 		cfg,
-		logger,
-		meterProvider,
-		integrationTestBuildInfo,
+		newTestExporterSettings(t),
 		duration,
 	)
 	require.NoError(t, err)

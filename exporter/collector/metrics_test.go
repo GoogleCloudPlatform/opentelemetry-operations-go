@@ -28,6 +28,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/tidwall/wal"
+	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/metric/noop"
@@ -48,6 +50,19 @@ import (
 var (
 	start = time.Unix(1000, 1000)
 )
+
+func newTestExporterSettings() exporter.Settings {
+	return exporter.Settings{
+		TelemetrySettings: component.TelemetrySettings{
+			Logger:        zap.NewNop(),
+			MeterProvider: noop.NewMeterProvider(),
+		},
+		BuildInfo: component.BuildInfo{
+			Description: "GoogleCloudExporter Tests",
+			Version:     Version(),
+		},
+	}
+}
 
 func newTestMetricMapper() (metricMapper, func()) {
 	obs := selfObservability{log: zap.NewNop(), meterProvider: noop.NewMeterProvider()}
@@ -2351,9 +2366,7 @@ func TestSetupWAL(t *testing.T) {
 				},
 			},
 		},
-		zap.NewNop(),
-		noop.NewMeterProvider(),
-		testBuildInfo,
+		newTestExporterSettings(),
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2386,9 +2399,7 @@ func TestCloseWAL(t *testing.T) {
 				},
 			},
 		},
-		zap.NewNop(),
-		noop.NewMeterProvider(),
-		testBuildInfo,
+		newTestExporterSettings(),
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2414,9 +2425,7 @@ func TestReadWALAndExport(t *testing.T) {
 				},
 			},
 		},
-		zap.NewNop(),
-		noop.NewMeterProvider(),
-		testBuildInfo,
+		newTestExporterSettings(),
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2455,9 +2464,7 @@ func TestReadWALAndExportRetry(t *testing.T) {
 				},
 			},
 		},
-		zap.NewNop(),
-		noop.NewMeterProvider(),
-		testBuildInfo,
+		newTestExporterSettings(),
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2500,9 +2507,7 @@ func TestWatchWALFile(t *testing.T) {
 				},
 			},
 		},
-		zap.NewNop(),
-		noop.NewMeterProvider(),
-		testBuildInfo,
+		newTestExporterSettings(),
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2545,9 +2550,7 @@ func TestRunWALReadAndExportLoop(t *testing.T) {
 				},
 			},
 		},
-		zap.NewNop(),
-		noop.NewMeterProvider(),
-		testBuildInfo,
+		newTestExporterSettings(),
 		10*time.Second,
 	)
 	require.NoError(t, err)
@@ -2606,9 +2609,7 @@ func TestPushMetricsOntoWAL(t *testing.T) {
 				},
 			},
 		},
-		zap.NewNop(),
-		noop.NewMeterProvider(),
-		testBuildInfo,
+		newTestExporterSettings(),
 		10*time.Second,
 	)
 	require.NoError(t, err)

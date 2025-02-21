@@ -1,11 +1,11 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/trace/http
 
-go 1.22
+go 1.22.7
 
-toolchain go1.22.0
+toolchain go1.24.0
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.26.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v0.0.0-00010101000000-000000000000
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator v0.50.0
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.55.0
 	go.opentelemetry.io/otel v1.31.0
@@ -18,6 +18,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.7 // indirect
 	cloud.google.com/go/compute/metadata v0.6.0 // indirect
 	cloud.google.com/go/trace v1.11.3 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.0.0-00010101000000-000000000000 // indirect
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.50.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
@@ -35,7 +36,7 @@ require (
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.9.0 // indirect
-	google.golang.org/api v0.216.0 // indirect
+	google.golang.org/api v0.215.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250106144421-5f5ef82da422 // indirect
 	google.golang.org/grpc v1.69.4 // indirect

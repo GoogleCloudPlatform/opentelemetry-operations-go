@@ -1,17 +1,17 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric/otlpgrpc
 
-go 1.22.0
+go 1.22.7
 
-toolchain go1.23.4
+toolchain go1.24.0
 
 require (
-	go.opentelemetry.io/contrib/detectors/gcp v1.31.0
-	go.opentelemetry.io/otel v1.31.0
+	go.opentelemetry.io/contrib/detectors/gcp v1.30.0
+	go.opentelemetry.io/otel v1.30.0
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v1.23.0
-	go.opentelemetry.io/otel/metric v1.31.0
-	go.opentelemetry.io/otel/sdk v1.31.0
-	go.opentelemetry.io/otel/sdk/metric v1.31.0
-	google.golang.org/grpc v1.69.4
+	go.opentelemetry.io/otel/metric v1.30.0
+	go.opentelemetry.io/otel/sdk v1.30.0
+	go.opentelemetry.io/otel/sdk/metric v1.30.0
+	google.golang.org/grpc v1.69.0-dev
 )
 
 require (
@@ -21,9 +21,9 @@ require (
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/grpc-ecosystem/grpc-gateway/v2 v2.26.0 // indirect
-	go.opentelemetry.io/otel/trace v1.31.0 // indirect
-	go.opentelemetry.io/proto/otlp v1.5.0 // indirect
+	github.com/grpc-ecosystem/grpc-gateway/v2 v2.24.0 // indirect
+	go.opentelemetry.io/otel/trace v1.30.0 // indirect
+	go.opentelemetry.io/proto/otlp v1.4.0 // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.25.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect

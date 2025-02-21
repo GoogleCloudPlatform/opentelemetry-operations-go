@@ -1,8 +1,8 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric
 
-go 1.22
+go 1.22.7
 
-toolchain go1.22.0
+toolchain go1.24.0
 
 require (
 	cloud.google.com/go/monitoring v1.22.1
@@ -16,14 +16,14 @@ require (
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/oauth2 v0.25.0
 	golang.org/x/sys v0.29.0 // indirect
-	google.golang.org/api v0.216.0
+	google.golang.org/api v0.215.0
 	google.golang.org/genproto v0.0.0-20250106144421-5f5ef82da422 // indirect
 	google.golang.org/grpc v1.69.4
 	google.golang.org/protobuf v1.36.2
 )
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.50.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.0.0-00010101000000-000000000000
 	go.opentelemetry.io/otel/trace v1.31.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422
 )

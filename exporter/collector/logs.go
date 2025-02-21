@@ -42,9 +42,9 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
-	"go.opentelemetry.io/otel/metric"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
@@ -161,15 +161,13 @@ type logMapper struct {
 func NewGoogleCloudLogsExporter(
 	ctx context.Context,
 	cfg Config,
-	log *zap.Logger,
-	meterProvider metric.MeterProvider,
-	buildInfo component.BuildInfo,
+	set exporter.Settings,
 	timeout time.Duration,
 ) (*LogsExporter, error) {
-	setUserAgent(&cfg, buildInfo)
+	setUserAgent(&cfg, set.BuildInfo)
 	obs := selfObservability{
-		log:           log,
-		meterProvider: meterProvider,
+		log:           set.TelemetrySettings.Logger,
+		meterProvider: set.TelemetrySettings.MeterProvider,
 	}
 
 	return &LogsExporter{
