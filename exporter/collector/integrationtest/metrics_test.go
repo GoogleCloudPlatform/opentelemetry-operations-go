@@ -17,7 +17,6 @@ package integrationtest
 import (
 	"context"
 	"fmt"
-	"runtime"
 	"sort"
 	"testing"
 	"time"
@@ -32,14 +31,6 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
-)
-
-var metricClientUserAgent = fmt.Sprintf(
-	"%s/%s (%s/%s)",
-	"GoogleCloudExporter Integration Test",
-	collector.Version(),
-	runtime.GOOS,
-	runtime.GOARCH,
 )
 
 func TestCollectorMetrics(t *testing.T) {
@@ -181,6 +172,12 @@ func TestSDKMetrics(t *testing.T) {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 
 			testServer, err := cloudmock.NewMetricTestServer()
+
+			metricClientUserAgent := fmt.Sprintf(
+				"%s/%s",
+				"GoogleCloudExporter Integration Test",
+				collector.Version(),
+			)
 			require.NoError(t, err)
 			//nolint:errcheck
 			go testServer.Serve()
