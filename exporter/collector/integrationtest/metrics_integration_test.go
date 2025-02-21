@@ -46,6 +46,9 @@ func createMetricsExporter(
 
 	set := newTestExporterSettings(t)
 	set.TelemetrySettings.Logger = logger
+	collector.SetUserAgent(&cfg, set.BuildInfo)
+	cleanUserAgent(&cfg, set.BuildInfo)
+
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
 		cfg,

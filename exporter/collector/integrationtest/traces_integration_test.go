@@ -40,6 +40,9 @@ func createTracesExporter(
 	cfg.ProjectID = os.Getenv("PROJECT_ID")
 	set := newTestExporterSettings(t)
 	set.TelemetrySettings.Logger = logger
+	collector.SetUserAgent(&cfg, set.BuildInfo)
+	cleanUserAgent(&cfg, set.BuildInfo)
+
 	exporter, err := collector.NewGoogleCloudTracesExporter(
 		ctx,
 		cfg,

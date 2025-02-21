@@ -45,6 +45,8 @@ func createLogsExporter(
 
 	set := newTestExporterSettings(t)
 	set.TelemetrySettings.Logger = logger
+	collector.SetUserAgent(&cfg, set.BuildInfo)
+	cleanUserAgent(&cfg, set.BuildInfo)
 
 	var duration time.Duration
 	exporter, err := collector.NewGoogleCloudLogsExporter(
