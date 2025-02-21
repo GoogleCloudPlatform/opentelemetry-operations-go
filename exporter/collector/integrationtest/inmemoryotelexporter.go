@@ -16,6 +16,10 @@ package integrationtest
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"runtime"
+	"strings"
 	"testing"
 	"time"
 
@@ -51,6 +55,20 @@ func newTestExporterSettings(t testing.TB) exporter.Settings {
 			Version:     collector.Version(),
 		},
 	}
+}
+
+// cleanUserAgent will clean the runtime information from the
+// UserAgent string. This is so when it's recorded in the
+// fixtures, there are no conflicts with runtime information
+// based on which runtime was used to originally record the
+// fixtures.
+func cleanUserAgent(cfg *collector.Config, buildInfo component.BuildInfo) {
+	collector.SetUserAgent(cfg, buildInfo)
+	cfg.UserAgent = strings.ReplaceAll(
+		cfg.UserAgent,
+		fmt.Sprintf(" (%s/%s)", runtime.GOOS, runtime.GOARCH),
+		"",
+	)
 }
 
 // OTel metrics exporter used to capture self observability metrics.
@@ -126,6 +144,9 @@ func NewTraceTestExporter(
 
 	set := newTestExporterSettings(t)
 	set.TelemetrySettings.Logger = zap.NewNop()
+	cleanUserAgent(&cfg, set.BuildInfo)
+	log.Printf("AFTER CLEAN USER AGENT IS %s", cfg.UserAgent)
+
 	exporter, err := collector.NewGoogleCloudTracesExporter(
 		ctx,
 		cfg,
@@ -151,10 +172,12 @@ func NewMetricTestExporter(
 	cfg.MetricConfig.ClientConfig.Endpoint = m.Endpoint
 	cfg.MetricConfig.ClientConfig.UseInsecure = true
 
+	set := newTestExporterSettings(t)
+	cleanUserAgent(&cfg, set.BuildInfo)
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
 		cfg,
-		newTestExporterSettings(t),
+		set,
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
@@ -176,11 +199,13 @@ func NewLogTestExporter(
 	cfg.LogConfig.ClientConfig.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
+	set := newTestExporterSettings(t)
+	cleanUserAgent(&cfg, set.BuildInfo)
 	var duration time.Duration
 	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
 		cfg,
-		newTestExporterSettings(t),
+		set,
 		duration,
 	)
 	require.NoError(t, err)

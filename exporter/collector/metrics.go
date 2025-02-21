@@ -180,7 +180,7 @@ func NewGoogleCloudMetricsExporter(
 	set exporter.Settings,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
-	setUserAgent(&cfg, set.BuildInfo)
+	SetUserAgent(&cfg, set.BuildInfo)
 	meter := set.TelemetrySettings.MeterProvider.Meter(scopeName, metricapi.WithInstrumentationVersion(Version()))
 	pointsExportedCounter, err := meter.Int64Counter(
 		"googlecloudmonitoring/point_count",

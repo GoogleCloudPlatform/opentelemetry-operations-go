@@ -164,7 +164,7 @@ func NewGoogleCloudLogsExporter(
 	set exporter.Settings,
 	timeout time.Duration,
 ) (*LogsExporter, error) {
-	setUserAgent(&cfg, set.BuildInfo)
+	SetUserAgent(&cfg, set.BuildInfo)
 	obs := selfObservability{
 		log:           set.TelemetrySettings.Logger,
 		meterProvider: set.TelemetrySettings.MeterProvider,

@@ -114,7 +114,7 @@ func TestMarshal(t *testing.T) {
 // changes it unknowingly.
 func TestBuildInfoUserAgentFallback(t *testing.T) {
 	config := DefaultConfig()
-	setUserAgent(
+	SetUserAgent(
 		&config,
 		component.BuildInfo{
 			Description: "GoogleCloudExporter Tests",

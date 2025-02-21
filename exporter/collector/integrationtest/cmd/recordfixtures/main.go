@@ -93,7 +93,9 @@ func (fr fixtureRecorder) recordTraces(ctx context.Context, t *FakeTesting, star
 			require.NoError(t, err)
 			//nolint:errcheck
 			defer inMemoryOTelExporter.Shutdown(ctx)
-			testServerExporter := integrationtest.NewTraceTestExporter(ctx, t, testServer, test.CreateTraceConfig(), inMemoryOTelExporter.MeterProvider)
+			cfg := test.CreateTraceConfig()
+			testServerExporter := integrationtest.NewTraceTestExporter(ctx, t, testServer, cfg, inMemoryOTelExporter.MeterProvider)
+			log.Printf("USER AGENT IS: %s", cfg.UserAgent)
 
 			require.NoError(t, testServerExporter.PushTraces(ctx, traces), "failed to export logs to local test server")
 			require.NoError(t, testServerExporter.Shutdown(ctx))
