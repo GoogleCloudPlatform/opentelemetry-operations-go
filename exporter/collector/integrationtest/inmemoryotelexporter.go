@@ -30,6 +30,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/logsutil"
 	gcpmetric "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock"
@@ -106,12 +107,12 @@ func NewTraceTestExporter(
 	cfg.TraceConfig.ClientConfig.UseInsecure = true
 	cfg.ProjectID = "fakeprojectid"
 
+	set := testcases.NewTestExporterSettings(zap.NewNop(), meterProvider)
+	testcases.SetTestUserAgent(&cfg, set.BuildInfo)
 	exporter, err := collector.NewGoogleCloudTracesExporter(
 		ctx,
 		cfg,
-		zap.NewNop(),
-		meterProvider,
-		"latest",
+		set,
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
@@ -136,12 +137,12 @@ func NewMetricTestExporter(
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
+	set := testcases.NewTestExporterSettings(logger, meterProvider)
+	testcases.SetTestUserAgent(&cfg, set.BuildInfo)
 	exporter, err := collector.NewGoogleCloudMetricsExporter(
 		ctx,
 		cfg,
-		logger,
-		meterProvider,
-		"latest",
+		set,
 		collector.DefaultTimeout,
 	)
 	require.NoError(t, err)
@@ -166,13 +167,13 @@ func NewLogTestExporter(
 	logger, err := zap.NewDevelopment()
 	require.NoError(t, err)
 
+	set := testcases.NewTestExporterSettings(logger, meterProvider)
+	testcases.SetTestUserAgent(&cfg, set.BuildInfo)
 	var duration time.Duration
 	exporter, err := collector.NewGoogleCloudLogsExporter(
 		ctx,
 		cfg,
-		logger,
-		meterProvider,
-		"latest",
+		set,
 		duration,
 	)
 	require.NoError(t, err)
