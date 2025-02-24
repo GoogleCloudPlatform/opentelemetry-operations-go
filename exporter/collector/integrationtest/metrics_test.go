@@ -16,6 +16,7 @@ package integrationtest
 
 import (
 	"context"
+	"fmt"
 	"sort"
 	"testing"
 	"time"
@@ -25,6 +26,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/protos"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/integrationtest/testcases"
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
@@ -170,6 +172,12 @@ func TestSDKMetrics(t *testing.T) {
 			metrics := test.LoadOTLPMetricsInput(t, startTime, endTime)
 
 			testServer, err := cloudmock.NewMetricTestServer()
+
+			metricClientUserAgent := fmt.Sprintf(
+				"%s/%s",
+				"GoogleCloudExporter Integration Test",
+				collector.Version(),
+			)
 			require.NoError(t, err)
 			//nolint:errcheck
 			go testServer.Serve()
@@ -180,7 +188,7 @@ func TestSDKMetrics(t *testing.T) {
 					apioption.WithEndpoint(testServer.Endpoint),
 					apioption.WithoutAuthentication(),
 					apioption.WithGRPCDialOption(grpc.WithTransportCredentials(insecure.NewCredentials())),
-					apioption.WithGRPCDialOption(grpc.WithUserAgent("opentelemetry-collector-contrib latest")),
+					apioption.WithGRPCDialOption(grpc.WithUserAgent(metricClientUserAgent)),
 				)},
 				test.MetricSDKExporterOptions...,
 			)

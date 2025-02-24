@@ -777,7 +777,7 @@
       "partialSuccess": true
     }
   ],
-  "userAgent": "opentelemetry-collector-contrib latest grpc-go/1.70.0",
+  "userAgent": "GoogleCloudExporter Integration Test/0.50.0 grpc-go/1.70.0",
   "selfObservabilityMetrics": {
     "createTimeSeriesRequests": [
       {

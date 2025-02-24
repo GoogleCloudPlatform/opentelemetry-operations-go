@@ -60,10 +60,6 @@ output:
   # print linter name in the end of issue text, default is true
   print-linter-name: true
 
-  # make issues output unique by line, default is true
-  uniq-by-line: true
-
-
 # all available settings of specific linters
 linters-settings:
   depguard:
@@ -110,7 +106,7 @@ linters-settings:
         - (github.com/golangci/golangci-lint/pkg/logutils.Log).Warnf
         - (github.com/golangci/golangci-lint/pkg/logutils.Log).Errorf
         - (github.com/golangci/golangci-lint/pkg/logutils.Log).Fatalf
-  
+
     enable-all: true
   misspell:
     # Correct spellings using locale preferences for US or UK.
@@ -316,3 +312,6 @@ issues:
       linters:
         - govet
   exclude-dirs-use-default: false
+
+  # make issues output unique by line, default is true
+  uniq-by-line: true
