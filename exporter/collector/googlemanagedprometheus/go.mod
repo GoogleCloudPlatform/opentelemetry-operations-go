@@ -10,7 +10,7 @@ require (
 	go.opentelemetry.io/collector/featuregate v1.26.0
 	go.opentelemetry.io/collector/pdata v1.26.0
 	go.opentelemetry.io/collector/semconv v0.120.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250106144421-5f5ef82da422
+	google.golang.org/genproto/googleapis/api v0.0.0-20250227231956-55c901821b1e
 )
 
 require (
@@ -27,7 +27,7 @@ require (
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250106144421-5f5ef82da422 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250227231956-55c901821b1e // indirect
 	google.golang.org/grpc v1.70.0 // indirect
 	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
