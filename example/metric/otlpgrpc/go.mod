@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric
 
 go 1.22.0
 
-toolchain go1.23.4
+toolchain go1.24.2
 
 require (
 	go.opentelemetry.io/contrib/detectors/gcp v1.31.0
