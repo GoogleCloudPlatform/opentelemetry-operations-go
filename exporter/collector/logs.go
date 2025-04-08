@@ -93,6 +93,21 @@ var severityMapping = []logtypepb.LogSeverity{
 	logtypepb.LogSeverity_EMERGENCY, // 24 -> Emergency
 }
 
+// otelSeverityForGoogleCloudLoggingFormatSeverityText maps Google Cloud Logging LogSeverity string
+// values set in SeverityText field to SeverityNumbers to be properly exported as a LogEntry.
+// (https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity)
+var otelSeverityForGoogleCloudLoggingFormatSeverityText = map[string]plog.SeverityNumber{
+	"DEFAULT":   plog.SeverityNumberUnspecified,
+	"DEBUG":     plog.SeverityNumberDebug,
+	"INFO":      plog.SeverityNumberInfo,
+	"NOTICE":    plog.SeverityNumberInfo3,
+	"WARNING":   plog.SeverityNumberWarn,
+	"ERROR":     plog.SeverityNumberError,
+	"CRITICAL":  plog.SeverityNumberFatal,
+	"ALERT":     plog.SeverityNumberFatal3,
+	"EMERGENCY": plog.SeverityNumberFatal3,
+}
+
 // otelSeverityForText maps the generic aliases of SeverityTexts to SeverityNumbers.
 // This can be useful if SeverityText is manually set to one of the values from the data
 // model in a way that doesn't automatically parse the SeverityNumber as well
@@ -465,6 +480,12 @@ func (l logMapper) logToSplitEntries(
 		return nil, fmt.Errorf("unknown SeverityNumber %v", logRecord.SeverityNumber())
 	}
 	severityNumber := logRecord.SeverityNumber()
+
+	// Map Google Cloud Logging LogSeverity string values set in SeverityText to the correct otel SeverityNumber.
+	if severityForGCLSeverityText, ok := otelSeverityForGoogleCloudLoggingFormatSeverityText[logRecord.SeverityText()]; ok && severityNumber == 0 {
+		severityNumber = severityForGCLSeverityText
+	}
+
 	// Log severity levels are based on numerical values defined by Otel/GCP, which are informally mapped to generic text values such as "ALERT", "Debug", etc.
 	// In some cases, a SeverityText value can be automatically mapped to a matching SeverityNumber.
 	// If not (for example, when directly setting the SeverityText on a Log entry with the Transform processor), then the
