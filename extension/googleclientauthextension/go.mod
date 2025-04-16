@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/extension/googleclientauthextension
 
-go 1.23.0
+go 1.23.8
 
 toolchain go1.24.0
 

@@ -1,8 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/metric/otlpgrpc
 
-go 1.22.0
-
-toolchain go1.23.4
+go 1.23.8
 
 require (
 	go.opentelemetry.io/contrib/detectors/gcp v1.31.0
