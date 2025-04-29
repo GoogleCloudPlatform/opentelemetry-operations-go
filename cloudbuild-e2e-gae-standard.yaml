@@ -14,7 +14,7 @@
 
 steps:
   # Vendor dependencies, and zip the code.
-  - name: golang:1.23.1
+  - name: golang:1.23.8
     id: zip-code
     entrypoint: /bin/bash
     args:
