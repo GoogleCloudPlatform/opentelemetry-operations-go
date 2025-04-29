@@ -124,6 +124,14 @@ var otelSeverityForText = map[string]plog.SeverityNumber{
 	"fatal2": plog.SeverityNumberFatal2,
 	"fatal3": plog.SeverityNumberFatal3,
 	"fatal4": plog.SeverityNumberFatal4,
+	// Google Cloud Logging LogSeverity values not mapped in the previous generic aliases.
+	// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logseverity
+	"default":   plog.SeverityNumberUnspecified,
+	"notice":    plog.SeverityNumberInfo3,
+	"warning":   plog.SeverityNumberWarn,
+	"critical":  plog.SeverityNumberFatal,
+	"alert":     plog.SeverityNumberFatal3,
+	"emergency": plog.SeverityNumberFatal4,
 }
 
 type attributeProcessingError struct {

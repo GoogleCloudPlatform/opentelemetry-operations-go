@@ -641,6 +641,177 @@ func TestLogMapping(t *testing.T) {
 			},
 			maxEntrySize: defaultMaxEntrySize,
 		},
+		{
+			name: "log with 'DEFAULT' severity text",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("DEFAULT")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Severity:  logtypepb.LogSeverity(logging.Default),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with 'DEBUG' severity text",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("DEBUG")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Severity:  logtypepb.LogSeverity(logging.Debug),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with 'INFO' severity text",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("INFO")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Severity:  logtypepb.LogSeverity(logging.Info),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with 'NOTICE' severity text",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("NOTICE")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Severity:  logtypepb.LogSeverity(logging.Notice),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with 'WARNING' severity text",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("WARNING")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Severity:  logtypepb.LogSeverity(logging.Warning),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with 'ERROR' severity text",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("ERROR")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Severity:  logtypepb.LogSeverity(logging.Error),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with 'CRITICAL' severity text",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("CRITICAL")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Severity:  logtypepb.LogSeverity(logging.Critical),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with 'ALERT' severity text",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("ALERT")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Severity:  logtypepb.LogSeverity(logging.Alert),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with 'EMERGENCY' severity text",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetSeverityText("EMERGENCY")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Severity:  logtypepb.LogSeverity(logging.Emergency),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
 	}
 
 	for _, testCase := range testCases {
