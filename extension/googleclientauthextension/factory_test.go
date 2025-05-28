@@ -88,18 +88,18 @@ func TestStart_WithProjectFromEnvVar(t *testing.T) {
 
 func TestStart_WithProjectOverride(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
-	t.Setenv("GOOGLE_CLOUD_PROJECT", "my-overriden-project")
+	t.Setenv("GOOGLE_CLOUD_PROJECT", "my-overridden-project")
 	ext, err := CreateExtension(context.Background(), extension.Settings{}, CreateDefaultConfig())
 	assert.NotNil(t, ext)
 	assert.NoError(t, err)
 	err = ext.Start(context.Background(), nil)
 	assert.NoError(t, err)
-	// verify the value of the overriden project id
+	// verify the value of the overridden project id
 	ca, ok := ext.(*clientAuthenticator)
 	if !ok {
 		t.Fatalf("Returned extension is not of type *clientAuthenticator. Got: %T", ext)
 	}
-	assert.Equal(t, ca.config.Project, "my-overriden-project")
+	assert.Equal(t, ca.config.Project, "my-overridden-project")
 }
 
 func TestStart_idtoken(t *testing.T) {
