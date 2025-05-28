@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"os"
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/extension"
@@ -25,6 +26,10 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/idtoken"
 	"google.golang.org/grpc/credentials/oauth"
+)
+
+const (
+	envProjectID = "GOOGLE_CLOUD_PROJECT"
 )
 
 func CreateExtension(ctx context.Context, set extension.Settings, cfg component.Config) (extension.Extension, error) {
@@ -49,6 +54,10 @@ func (ca *clientAuthenticator) Start(ctx context.Context, _ component.Host) erro
 	creds, err := google.FindDefaultCredentials(ctx, config.Scopes...)
 	if err != nil {
 		return err
+	}
+	// Allow users to override the Project ID using environment variables
+	if config.Project == "" {
+		config.Project = os.Getenv(envProjectID)
 	}
 	if config.Project == "" {
 		config.Project = creds.ProjectID
