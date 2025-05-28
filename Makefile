@@ -16,8 +16,9 @@ GOTEST_RACE = $(GOTEST) -race
 .PHONY: precommit
 
 TOOLS = $(CURDIR)/.tools
+TOOLS_GO_MOD = $(CURDIR)/tools/go.mod
 
-$(TOOLS):
+$(TOOLS): $(TOOLS_GO_MOD)
 	@mkdir -p $@
 $(TOOLS)/%: | $(TOOLS)
 	cd $(TOOLS_MOD_DIR) && \
