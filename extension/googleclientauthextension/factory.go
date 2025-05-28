@@ -29,6 +29,11 @@ import (
 )
 
 const (
+	// Choose a well-known environment variable for allowing project ID
+	// override.
+	// This environment variable is also used by Google Auth library for Go
+	// (https://pkg.go.dev/cloud.google.com/go/auth) in project ID detection
+	// process.
 	envProjectID = "GOOGLE_CLOUD_PROJECT"
 )
 
