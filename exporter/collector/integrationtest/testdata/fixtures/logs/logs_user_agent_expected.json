@@ -128,7 +128,7 @@
       "partialSuccess": true
     }
   ],
-  "userAgent": "custom-user-agent 0.51.0 grpc-go/1.70.0",
+  "userAgent": "custom-user-agent 0.51.0 grpc-go/1.72.2",
   "selfObservabilityMetrics": {
     "createTimeSeriesRequests": [
       {
