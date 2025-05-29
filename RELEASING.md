@@ -16,11 +16,15 @@ $ # get the PR reviewed and merged
 ## Release
 
 ```
+$ # Ensure that the `origin` remote points to the main repository and NOT your fork
+$ git remote -v
 $ # do this after the pre-release PR is merged
 $ git fetch
 $ git checkout origin/main
 $ make release
 $ # make sure you don't have any stray tags lying around
+$ git push --tags --dry-run
+$ # manually inspect the dry run output to ensure correct tags will be pushed
 $ git push --tags
 ```
 
