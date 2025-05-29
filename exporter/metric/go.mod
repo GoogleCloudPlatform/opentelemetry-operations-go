@@ -4,7 +4,7 @@ go 1.23.8
 
 require (
 	cloud.google.com/go/monitoring v1.24.2
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.51.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.52.0
 	github.com/googleapis/gax-go/v2 v2.14.2
 	github.com/stretchr/testify v1.10.0
 	go.opentelemetry.io/otel v1.36.0
@@ -21,7 +21,7 @@ require (
 )
 
 require (
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.51.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.52.0
 	go.opentelemetry.io/otel/trace v1.36.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20250505200425-f936aa4a68b2
 )
