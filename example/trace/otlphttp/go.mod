@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/trace/otlphttp
 
-go 1.23.8
+go 1.23
 
 require (
 	go.opentelemetry.io/otel v1.36.0
