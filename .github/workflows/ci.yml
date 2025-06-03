@@ -8,6 +8,7 @@ on:
 env:
   # Default minimum version of Go to support.
   DEFAULT_GO_VERSION: "1.23.8"
+  GOTOOLCHAIN: "local"
 jobs:
   lint:
     runs-on: ubuntu-latest
