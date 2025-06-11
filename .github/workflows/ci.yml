@@ -42,7 +42,7 @@ jobs:
       - name: Build
         run: make build
       - name: Run linters
-        run: make lint
+        run: GOTOOLCHAIN=local make lint
       - name: Fixtures
         run: make fixtures
       - name: Check clean repository
