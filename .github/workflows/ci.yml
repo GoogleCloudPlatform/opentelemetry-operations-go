@@ -22,7 +22,7 @@ jobs:
         run: |
           echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
           echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
-          echo "local" >> $GITHUB_ENV
+          echo "local" >> $GOTOOLCHAIN
       - name: Module cache
         uses: actions/cache@v4
         env:
