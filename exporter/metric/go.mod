@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric
 
-go 1.23.8
+go 1.23.0
 
 require (
 	cloud.google.com/go/monitoring v1.24.2

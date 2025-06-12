@@ -1,6 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator
 
-go 1.23.8
+go 1.23.0
 
 require (
 	github.com/google/go-cmp v0.7.0
