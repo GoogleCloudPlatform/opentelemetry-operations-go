@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp
 
 go 1.23.0
 
-toolchain go1.24.2
-
 require (
 	cloud.google.com/go/compute/metadata v0.7.0
 	github.com/stretchr/testify v1.10.0

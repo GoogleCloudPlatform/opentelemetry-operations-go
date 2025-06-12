@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloud
 
 go 1.23.0
 
-toolchain go1.24.2
-
 require (
 	cloud.google.com/go/logging v1.13.0
 	cloud.google.com/go/monitoring v1.24.2

@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/trace/
 
 go 1.23.0
 
-toolchain go1.24.2
-
 require (
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.28.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator v0.52.0

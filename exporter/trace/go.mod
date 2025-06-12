@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace
 
 go 1.23.0
 
-toolchain go1.24.2
-
 require (
 	cloud.google.com/go/trace v1.11.6
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.52.0

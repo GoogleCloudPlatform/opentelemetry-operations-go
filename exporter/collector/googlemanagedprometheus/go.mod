@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/colle
 
 go 1.23.0
 
-toolchain go1.24.2
-
 require (
 	github.com/prometheus/common v0.62.0
 	github.com/stretchr/testify v1.10.0

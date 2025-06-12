@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metri
 
 go 1.23.0
 
-toolchain go1.24.2
-
 require (
 	cloud.google.com/go/monitoring v1.24.2
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.52.0

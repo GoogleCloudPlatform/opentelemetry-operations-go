@@ -177,6 +177,7 @@ for-all-mod:
 	@set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  (cd "$${dir}" && \
 	  	echo "running $${CMD} in $${dir}" && \
+		export GOTOOLCHAIN=local && \
 	 	$${CMD} ); \
 	done
 
