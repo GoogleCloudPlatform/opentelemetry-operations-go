@@ -28,6 +28,7 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 	"go.opentelemetry.io/otel/trace"
 
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 )
 
@@ -38,17 +39,14 @@ func initTracer(projectID string) (func(), error) {
 	if err != nil {
 		panic(err)
 	}
-	token, err := creds.TokenSource.Token()
-	if err != nil {
-		panic(err)
-	}
 
 	// set OTEL_RESOURCE_ATTRIBUTES="gcp.project_id=<project_id>"
 	// set endpoint with OTEL_EXPORTER_OTLP_ENDPOINT=https://<endpoint>
-	exporter, err := otlptracehttp.New(ctx, otlptracehttp.WithHeaders(map[string]string{
-		"Authorization":       fmt.Sprintf("Bearer %s", token.AccessToken),
-		"x-goog-user-project": projectID,
-	}))
+	exporter, err := otlptracehttp.New(ctx,
+		otlptracehttp.WithHTTPClient(oauth2.NewClient(ctx, creds.TokenSource)),
+		otlptracehttp.WithHeaders(map[string]string{
+			"x-goog-user-project": projectID,
+		}))
 	if err != nil {
 		panic(err)
 	}
