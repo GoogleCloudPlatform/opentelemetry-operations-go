@@ -5,7 +5,7 @@ go 1.23.0
 require (
 	cloud.google.com/go/pubsub v1.49.0
 	github.com/GoogleCloudPlatform/functions-framework-go v1.9.1
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-server v0.52.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-server v0.53.0
 	github.com/cloudevents/sdk-go/v2 v2.15.2
 )
 
@@ -17,9 +17,9 @@ require (
 	cloud.google.com/go/functions v1.19.6 // indirect
 	cloud.google.com/go/iam v1.5.2 // indirect
 	cloud.google.com/go/trace v1.11.6 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.28.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.28.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.52.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.29.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.29.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.53.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
