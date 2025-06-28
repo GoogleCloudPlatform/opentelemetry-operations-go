@@ -38,7 +38,7 @@ const (
 func main() {
 	ctx := context.Background()
 
-	// Create OTLP Log exporter(s)
+	// Create OpenTelemetry Log exporter(s)
 	// OTLP log exporter to export structuted logs to an OTLP endpoint
 	otlpLogExporter, err := otlploghttp.New(ctx)
 	if err != nil {
@@ -70,9 +70,9 @@ func main() {
 		log.Fatalf("resource.New: %v", err)
 	}
 
-	// setup OTel logger provider
-	// the logger provider is setup to export logs to both OTLP endpoint
-	// and standard out
+	// Setup OpenTelemetry logger provider.
+	// The logger provider is setup to export logs to both OTLP endpoint
+	// and standard out.
 	loggerProvider := otelsdklog.NewLoggerProvider(
 		otelsdklog.WithProcessor(otelsdklog.NewBatchProcessor(otlpLogExporter)),
 		otelsdklog.WithProcessor(otelsdklog.NewBatchProcessor(stdoutLogExporter)),
