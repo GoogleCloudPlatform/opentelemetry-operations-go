@@ -1,0 +1,37 @@
+receivers:
+  otlp:
+    protocols:      
+      http:        
+        endpoint: "0.0.0.0:4318"
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 65
+    spike_limit_percentage: 20
+  
+  batch:
+  
+  resourcedetection:
+    detectors: [gcp]
+    timeout: 10s
+
+
+exporters:
+  googlecloud:
+    project: ${GOOGLE_CLOUD_PROJECT}
+    log:
+      default_log_name: opentelemetry-collector
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+
+service:  
+  extensions: [health_check, pprof, zpages]
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [resourcedetection, memory_limiter, batch]
+      exporters: [googlecloud]
