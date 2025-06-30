@@ -92,7 +92,6 @@ func main() {
 	// emit structured logs to OTLP and standard out
 	logger := otelslog.NewLogger(name)
 	generateLogs(ctx, logger)
-
 }
 
 func generateLogs(ctx context.Context, logger *slog.Logger) {

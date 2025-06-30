@@ -37,7 +37,7 @@ Change the current directory to the example using `cd examples/log/slogbridge`, 
 // From the exmaples/log/slogbridge directory
 // Start the collector with the provided config
 $ ./collector/run_collector.sh ./collector/config.yaml
-// From a seperate terminal window - build & run the application
+// From a separate terminal window - build & run the application
 $ go build -o otel_logs
 $ ./otel_logs
 ...
