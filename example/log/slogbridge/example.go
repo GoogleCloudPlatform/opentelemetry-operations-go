@@ -23,9 +23,9 @@ import (
 
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/contrib/detectors/gcp"
+	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
-	"go.opentelemetry.io/otel/log/global"
 	otelsdklog "go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
@@ -86,15 +86,32 @@ func main() {
 		}
 	}()
 
-	// Set global logger provider
-	global.SetLoggerProvider(loggerProvider)
-
 	// emit structured logs to OTLP and standard out
-	logger := otelslog.NewLogger(name)
+	logger := otelslog.NewLogger(name,
+		otelslog.WithLoggerProvider(loggerProvider),
+		otelslog.WithSource(true),
+		otelslog.WithVersion("v0.1.0"),
+		otelslog.WithAttributes(
+			attribute.String("fixed_label", "fixed_value"),
+		))
 	generateLogs(ctx, logger)
 }
 
 func generateLogs(ctx context.Context, logger *slog.Logger) {
-	logger.InfoContext(ctx, "Sample application log")
+	logger.DebugContext(ctx, "Sample debug application log")
+	logger.WarnContext(ctx, "Sample warning log from application")
+	logger.InfoContext(ctx, "Sample info application log")
 	logger.InfoContext(ctx, "Sample log with key-value", "OS Name: ", runtime.GOOS)
+	logger.InfoContext(ctx, "Sample log with stronlgy-typed contextual attributes", slog.String("os.arch", runtime.GOARCH))
+	logger.ErrorContext(ctx, "Sample error log from application")
+	// Logs with levels defined in OpenTelemetry Logging which are not built-in slog.
+	//
+	// Subtracting 9 from an OpenTelemetry level in the DEBUG, INFO, WARN and ERROR ranges
+	// converts it to the corresponding slog Level range.
+	// SeverityNumber range for OpenTelemetry Logs can be found at:
+	// https://opentelemetry.io/docs/specs/otel/logs/data-model/#field-severitynumber
+	// 21 is the starting level for FATAL Range in OpenTelemetry Logging
+	logger.Log(ctx, 21-9, "Sample 'FATAL' level OTel log, shows as CRITICAL in Google Cloud")
+	// 1 is the starting level for TRACE Range in OpenTelemetry Logging
+	logger.Log(ctx, 1-9, "Sample 'TRACE' level OTel log, shows as DEBUG in Google Cloud")
 }

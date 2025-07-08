@@ -4,6 +4,24 @@ This example shows how to use [`go.opentelemetry.io/otel`](https://pkg.go.dev/go
 
 ## Setup environment
 
+Get Google credentials on your machine:
+
+```shell
+gcloud auth application-default login
+```
+Executing this command will save your application credentials to default path which will depend on the type of machine -
+- Linux, macOS: `$HOME/.config/gcloud/application_default_credentials.json`
+- Windows: `%APPDATA%\gcloud\application_default_credentials.json`
+
+**NOTE: This method of authentication is not recommended for production environments.**
+
+Next, export the credentials to `GOOGLE_APPLICATION_CREDENTIALS` environment variable - 
+
+For Linux & MacOS:
+```shell
+export GOOGLE_APPLICATION_CREDENTIALS=$HOME/.config/gcloud/application_default_credentials.json
+```
+
 Before sending metrics to Google Cloud Logging, confirm the Cloud Logging API is enabled for the project you will use to access the API as described in [this document](https://cloud.google.com/logging/docs/api/enable-api).
 
 You can find your current project ID using the command:
