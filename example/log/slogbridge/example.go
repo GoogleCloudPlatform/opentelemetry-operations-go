@@ -20,12 +20,15 @@ import (
 	"log"
 	"log/slog"
 	"runtime"
+	"time"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploghttp"
 	"go.opentelemetry.io/otel/exporters/stdout/stdoutlog"
+	otelapilog "go.opentelemetry.io/otel/log"
 	otelsdklog "go.opentelemetry.io/otel/sdk/log"
 	"go.opentelemetry.io/otel/sdk/resource"
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
@@ -86,7 +89,7 @@ func main() {
 		}
 	}()
 
-	// emit structured logs to OTLP and standard out
+	// Create a logger that uses otelslog bridge
 	logger := otelslog.NewLogger(name,
 		otelslog.WithLoggerProvider(loggerProvider),
 		otelslog.WithSource(true),
@@ -94,7 +97,14 @@ func main() {
 		otelslog.WithAttributes(
 			attribute.String("fixed_label", "fixed_value"),
 		))
+
+	// Create a otel logger for structured logging
+	otelLogger := loggerProvider.Logger(name,
+		otelapilog.WithInstrumentationVersion("v0.1.0"),
+		otelapilog.WithInstrumentationAttributes(attribute.String("fixed_label", "raw_logger")),
+	)
 	generateLogs(ctx, logger)
+	generateStructuredLog(ctx, otelLogger)
 }
 
 func generateLogs(ctx context.Context, logger *slog.Logger) {
@@ -114,4 +124,42 @@ func generateLogs(ctx context.Context, logger *slog.Logger) {
 	logger.Log(ctx, 21-9, "Sample 'FATAL' level OTel log, shows as CRITICAL in Google Cloud")
 	// 1 is the starting level for TRACE Range in OpenTelemetry Logging
 	logger.Log(ctx, 1-9, "Sample 'TRACE' level OTel log, shows as DEBUG in Google Cloud")
+}
+
+func generateStructuredLog(ctx context.Context, logger otelapilog.Logger) {
+	details := UserDetails{
+		ID:       "usr_789",
+		Username: "jane.doe",
+		IsAdmin:  true,
+		Properties: map[string]any{
+			"age":       42,
+			"eye_color": "black",
+		},
+	}
+	var detailsMap map[string]interface{}
+	err := mapstructure.Decode(details, &detailsMap)
+	if err != nil {
+		panic(err)
+	}
+	// The slog.Record treats the message as the string type
+	// which is converted to log.StringValue. For logging a
+	// JSON object as a structured body, it needs to be modeled
+	// as a log.MapValue.
+	// A standard OpenTelemetry SDK Logger is used to manually
+	// construct and emit an OpenTelemetry log.Record with body
+	// set as MapValue representation of a JSON struct.
+	//
+	// See https://pkg.go.dev/log/slog#Record.
+	slr := otelapilog.Record{}
+	slr.SetBody(ConvertValue(detailsMap))
+	slr.SetSeverity(otelapilog.SeverityInfo)
+	slr.SetTimestamp(time.Now())
+	logger.Emit(ctx, slr)
+}
+
+type UserDetails struct {
+	Properties map[string]any `json:"properties"`
+	ID         string         `json:"id"`
+	Username   string         `json:"username"`
+	IsAdmin    bool           `json:"is_admin"`
 }
