@@ -142,7 +142,7 @@ func generateStructuredLog(ctx context.Context, logger otelapilog.Logger) {
 		panic(err)
 	}
 	// The slog.Record treats the message as the string type
-	// which is coverted to log.StringValue. For logging a
+	// which is converted to log.StringValue. For logging a
 	// JSON object as a structured body, it needs to be modeled
 	// as a log.MapValue.
 	// A standard OpenTelemetry SDK Logger is used to manually
@@ -158,8 +158,8 @@ func generateStructuredLog(ctx context.Context, logger otelapilog.Logger) {
 }
 
 type UserDetails struct {
+	Properties map[string]any `json:"properties"`
 	ID         string         `json:"id"`
 	Username   string         `json:"username"`
 	IsAdmin    bool           `json:"is_admin"`
-	Properties map[string]any `json:"properties"`
 }
