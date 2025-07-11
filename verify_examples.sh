@@ -47,7 +47,12 @@ for dir in $PACKAGE_DIRS; do
 	printf "  Update go.mod for $dir\n"
 	(cd "${DIR_TMP}/${dir}" && \
 	 # replaces is ("mod1" "mod2" …)
-	 replaces=($(go mod edit -json | ${TOOLS_DIR}/gojq '.Replace[].Old.Path')) && \
+	 if [[ $(go mod edit -json | ${TOOLS_DIR}/gojq '.Replace') == "null" ]]; then
+	 	echo "The 'Replace' field is null (no replace directives) for ${dir}."
+	 	replaces=() # Initialize as an empty array
+	 else
+	  replaces=($(go mod edit -json | ${TOOLS_DIR}/gojq '.Replace[].Old.Path'))
+	 fi
 	 # strip double quotes
 	 replaces=("${replaces[@]%\"}") && \
 	 replaces=("${replaces[@]#\"}") && \
