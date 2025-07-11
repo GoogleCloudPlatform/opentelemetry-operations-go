@@ -483,7 +483,10 @@ func (me *MetricsExporter) export(ctx context.Context, req *monitoringpb.CreateT
 			metricapi.WithAttributes(attribute.String("status", st)),
 		)
 	}
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to export metrics to %v: %w", req.Name, err)
+	}
+	return nil
 }
 
 func statusCodeToString(s *status.Status) string {
