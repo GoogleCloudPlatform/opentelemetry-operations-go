@@ -4,7 +4,7 @@ go 1.23.0
 
 require (
 	go.opentelemetry.io/otel v1.36.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20250505200425-f936aa4a68b2
+	google.golang.org/genproto/googleapis/api v0.0.0-20250721164621-a45f3dfb1074
 )
 
 require (
