@@ -19,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/open-telemetry/opentelemetry-collector-contrib/pkg/translator/prometheus"
+	"github.com/prometheus/otlptranslator"
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/attribute"
@@ -482,8 +482,12 @@ func configureGMPCollector(cfg *collector.Config) {
 	cfg.MetricConfig.Prefix = "prometheus.googleapis.com/"
 	cfg.MetricConfig.SkipCreateMetricDescriptor = true
 	gmpConfig := googlemanagedprometheus.DefaultConfig()
+	metricNamer := otlptranslator.MetricNamer{
+		WithMetricSuffixes: gmpConfig.AddMetricSuffixes,
+		UTF8Allowed:        false,
+	}
 	cfg.MetricConfig.GetMetricName = func(baseName string, metric pmetric.Metric) (string, error) {
-		compliantName := prometheus.BuildCompliantName(metric, "", gmpConfig.AddMetricSuffixes)
+		compliantName := metricNamer.Build(translatorMetricFromOtelMetric(metric))
 		return googlemanagedprometheus.GetMetricName(baseName, compliantName, metric)
 	}
 	cfg.MetricConfig.MapMonitoredResource = gmpConfig.MapToPrometheusTarget
@@ -491,4 +495,29 @@ func configureGMPCollector(cfg *collector.Config) {
 	cfg.MetricConfig.InstrumentationLibraryLabels = false
 	cfg.MetricConfig.ServiceResourceLabels = false
 	cfg.MetricConfig.EnableSumOfSquaredDeviation = true
+}
+
+func translatorMetricFromOtelMetric(otelMetric pmetric.Metric) otlptranslator.Metric {
+	m := otlptranslator.Metric{
+		Name: otelMetric.Name(),
+		Unit: otelMetric.Unit(),
+		Type: otlptranslator.MetricTypeUnknown,
+	}
+	switch otelMetric.Type() {
+	case pmetric.MetricTypeGauge:
+		m.Type = otlptranslator.MetricTypeGauge
+	case pmetric.MetricTypeSum:
+		if otelMetric.Sum().IsMonotonic() {
+			m.Type = otlptranslator.MetricTypeMonotonicCounter
+		} else {
+			m.Type = otlptranslator.MetricTypeNonMonotonicCounter
+		}
+	case pmetric.MetricTypeSummary:
+		m.Type = otlptranslator.MetricTypeSummary
+	case pmetric.MetricTypeHistogram:
+		m.Type = otlptranslator.MetricTypeHistogram
+	case pmetric.MetricTypeExponentialHistogram:
+		m.Type = otlptranslator.MetricTypeExponentialHistogram
+	}
+	return m
 }
