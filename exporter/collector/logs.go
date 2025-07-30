@@ -585,7 +585,7 @@ type httpRequestLog struct {
 	ResponseSize                   int64  `json:"responseSize,string"`
 	RequestSize                    int64  `json:"requestSize,string"`
 	CacheFillBytes                 int64  `json:"cacheFillBytes,string"`
-	Status                         int32  `json:"status,string"`
+	Status                         int32  `json:"status"`
 	CacheLookup                    bool   `json:"cacheLookup"`
 	CacheHit                       bool   `json:"cacheHit"`
 	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer"`
