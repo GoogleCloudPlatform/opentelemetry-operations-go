@@ -30,7 +30,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "VM instance id of the node"
         },
         {
           "metric": {
@@ -64,7 +65,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "Node metadata for the cluster."
         },
         {
           "metric": {
@@ -92,7 +94,8 @@
                 "int64Value": "1639069893"
               }
             }
-          ]
+          ],
+          "description": "Node network unavailable condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -120,7 +123,8 @@
                 "int64Value": "1639069910"
               }
             }
-          ]
+          ],
+          "description": "Node kubelet ready condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -151,7 +155,8 @@
                 "int64Value": "1735528448"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated memory on a node in bytes."
         },
         {
           "metric": {
@@ -182,7 +187,8 @@
                 "int64Value": "107"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated CPU millicores on a node."
         },
         {
           "metric": {
@@ -211,7 +217,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "VM instance id of the node"
         },
         {
           "metric": {
@@ -245,7 +252,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "Node metadata for the cluster."
         },
         {
           "metric": {
@@ -273,7 +281,8 @@
                 "int64Value": "1639069893"
               }
             }
-          ]
+          ],
+          "description": "Node network unavailable condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -301,7 +310,8 @@
                 "int64Value": "1639069900"
               }
             }
-          ]
+          ],
+          "description": "Node kubelet ready condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -332,7 +342,8 @@
                 "int64Value": "1208094720"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated memory on a node in bytes."
         },
         {
           "metric": {
@@ -363,7 +374,8 @@
                 "int64Value": "76"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated CPU millicores on a node."
         },
         {
           "metric": {
@@ -392,7 +404,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "VM instance id of the node"
         },
         {
           "metric": {
@@ -426,7 +439,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "Node metadata for the  cluster."
         },
         {
           "metric": {
@@ -454,7 +468,8 @@
                 "int64Value": "1639075829"
               }
             }
-          ]
+          ],
+          "description": "Node network unavailable condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -482,7 +497,8 @@
                 "int64Value": "1639075839"
               }
             }
-          ]
+          ],
+          "description": "Node kubelet ready condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -513,7 +529,8 @@
                 "int64Value": "27345719296"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated memory on a node in bytes."
         },
         {
           "metric": {
@@ -544,7 +561,8 @@
                 "int64Value": "7586"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated CPU millicores on a node."
         },
         {
           "metric": {
@@ -573,7 +591,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "VM instance id of the node"
         },
         {
           "metric": {
@@ -607,7 +626,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "Node metadata for the cluster."
         },
         {
           "metric": {
@@ -635,7 +655,8 @@
                 "int64Value": "1639075839"
               }
             }
-          ]
+          ],
+          "description": "Node kubelet ready condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -666,7 +687,8 @@
                 "int64Value": "25198235648"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated memory on a node in bytes."
         },
         {
           "metric": {
@@ -697,7 +719,8 @@
                 "int64Value": "6586"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated CPU millicores on a node."
         },
         {
           "metric": {
@@ -726,7 +749,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "VM instance id of the node"
         },
         {
           "metric": {
@@ -760,7 +784,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "Node metadata for the cluster."
         },
         {
           "metric": {
@@ -788,7 +813,8 @@
                 "int64Value": "1639069893"
               }
             }
-          ]
+          ],
+          "description": "Node network unavailable condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -816,7 +842,8 @@
                 "int64Value": "1639069899"
               }
             }
-          ]
+          ],
+          "description": "Node kubelet ready condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -847,7 +874,8 @@
                 "int64Value": "1707216896"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated memory on a node in bytes."
         },
         {
           "metric": {
@@ -878,7 +906,8 @@
                 "int64Value": "6"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated CPU millicores on a node."
         },
         {
           "metric": {
@@ -907,7 +936,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "VM instance id of the node"
         },
         {
           "metric": {
@@ -941,7 +971,8 @@
                 "int64Value": "1"
               }
             }
-          ]
+          ],
+          "description": "Node metadata for the cluster."
         },
         {
           "metric": {
@@ -969,7 +1000,8 @@
                 "int64Value": "1639075829"
               }
             }
-          ]
+          ],
+          "description": "Node network unavailable condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -997,7 +1029,8 @@
                 "int64Value": "1639075839"
               }
             }
-          ]
+          ],
+          "description": "Node kubelet ready condition last transition time (seconds since epoch)"
         },
         {
           "metric": {
@@ -1028,7 +1061,8 @@
                 "int64Value": "27345719296"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated memory on a node in bytes."
         },
         {
           "metric": {
@@ -1059,7 +1093,8 @@
                 "int64Value": "7586"
               }
             }
-          ]
+          ],
+          "description": "Amount of unallocated CPU millicores on a node."
         }
       ]
     }
@@ -1097,7 +1132,8 @@
                 }
               }
             ],
-            "unit": "1"
+            "unit": "1",
+            "description": "Count of metric points written to Cloud Monitoring."
           },
           {
             "metric": {
@@ -1221,7 +1257,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "End-to-end time taken to complete a client call attempt."
           },
           {
             "metric": {
@@ -1291,7 +1328,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes received per call attempt."
           },
           {
             "metric": {
@@ -1361,7 +1399,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes sent per client call attempt."
           },
           {
             "metric": {
@@ -1392,7 +1431,8 @@
                 }
               }
             ],
-            "unit": "attempt"
+            "unit": "attempt",
+            "description": "Number of client call attempts started."
           },
           {
             "metric": {
@@ -1516,7 +1556,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "Time taken by gRPC to complete an RPC from application's perspective."
           }
         ]
       }

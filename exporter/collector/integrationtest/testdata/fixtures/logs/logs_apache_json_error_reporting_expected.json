@@ -308,7 +308,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "End-to-end time taken to complete a client call attempt."
           },
           {
             "metric": {
@@ -378,7 +379,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes received per call attempt."
           },
           {
             "metric": {
@@ -448,7 +450,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes sent per client call attempt."
           },
           {
             "metric": {
@@ -479,7 +482,8 @@
                 }
               }
             ],
-            "unit": "attempt"
+            "unit": "attempt",
+            "description": "Number of client call attempts started."
           },
           {
             "metric": {
@@ -603,7 +607,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "Time taken by gRPC to complete an RPC from application's perspective."
           }
         ]
       }

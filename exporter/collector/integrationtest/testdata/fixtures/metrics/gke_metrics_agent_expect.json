@@ -32,7 +32,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Memory usage in bytes."
         },
         {
           "metric": {
@@ -63,7 +64,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Memory usage in bytes."
         },
         {
           "metric": {
@@ -95,7 +97,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/memory/page_fault_count"
         },
         {
           "metric": {
@@ -127,7 +130,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/memory/page_fault_count"
         },
         {
           "metric": {
@@ -155,7 +159,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "kubernetes.io/container/uptime"
         },
         {
           "metric": {
@@ -183,7 +188,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/used_bytes"
         },
         {
           "metric": {
@@ -211,7 +217,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/pod/network/received_bytes_count"
         },
         {
           "metric": {
@@ -239,7 +246,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/pod/network/sent_bytes_count"
         },
         {
           "metric": {
@@ -266,7 +274,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/internal/pod/pid_used"
         },
         {
           "metric": {
@@ -293,7 +302,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/pod/ephemeral_storage/used_bytes"
         },
         {
           "metric": {
@@ -323,7 +333,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Number of disk bytes used by the pod."
         },
         {
           "metric": {
@@ -353,7 +364,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Total number of disk bytes available to the pod."
         },
         {
           "metric": {
@@ -382,7 +394,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "kubernetes.io/container/cpu/core_usage_time"
         },
         {
           "metric": {
@@ -413,7 +426,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Memory usage in bytes."
         },
         {
           "metric": {
@@ -444,7 +458,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Memory usage in bytes."
         },
         {
           "metric": {
@@ -476,7 +491,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/memory/page_fault_count"
         },
         {
           "metric": {
@@ -508,7 +524,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/memory/page_fault_count"
         },
         {
           "metric": {
@@ -536,7 +553,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "kubernetes.io/container/uptime"
         },
         {
           "metric": {
@@ -564,7 +582,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/used_bytes"
         },
         {
           "metric": {
@@ -590,7 +609,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/node/cpu/total_cores"
         },
         {
           "metric": {
@@ -616,7 +636,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/node/cpu/allocatable_cores"
         },
         {
           "metric": {
@@ -642,7 +663,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/node/memory/total_bytes"
         },
         {
           "metric": {
@@ -668,7 +690,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/node/memory/allocatable_bytes"
         },
         {
           "metric": {
@@ -694,7 +717,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/node/ephemeral_storage/allocatable_bytes"
         },
         {
           "metric": {
@@ -722,7 +746,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -750,7 +775,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -778,7 +804,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -806,7 +833,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -834,7 +862,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -862,7 +891,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -891,7 +921,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -919,7 +950,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -947,7 +979,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -975,7 +1008,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -1003,7 +1037,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -1031,7 +1066,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -1059,7 +1095,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -1088,7 +1125,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -1116,7 +1154,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -1144,7 +1183,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -1172,7 +1212,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -1200,7 +1241,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -1228,7 +1270,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -1256,7 +1299,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -1285,7 +1329,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -1313,7 +1358,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -1341,7 +1387,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -1369,7 +1416,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -1397,7 +1445,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -1425,7 +1474,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -1453,7 +1503,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -1482,7 +1533,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -1510,7 +1562,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -1538,7 +1591,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -1566,7 +1620,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -1594,7 +1649,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -1622,7 +1678,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -1650,7 +1707,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -1679,7 +1737,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -1707,7 +1766,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -1735,7 +1795,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -1763,7 +1824,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -1791,7 +1853,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -1819,7 +1882,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -1847,7 +1911,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -1876,7 +1941,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -1904,7 +1970,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -1932,7 +1999,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -1960,7 +2028,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -1988,7 +2057,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -2016,7 +2086,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -2044,7 +2115,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -2073,7 +2145,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -2101,7 +2174,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -2129,7 +2203,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -2157,7 +2232,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -2185,7 +2261,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -2213,7 +2290,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -2241,7 +2319,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -2270,7 +2349,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -2298,7 +2378,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -2326,7 +2407,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -2354,7 +2436,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -2382,7 +2465,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -2410,7 +2494,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -2438,7 +2523,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -2467,7 +2553,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -2495,7 +2582,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -2523,7 +2611,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -2551,7 +2640,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -2579,7 +2669,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -2607,7 +2698,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -2635,7 +2727,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -2664,7 +2757,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -2692,7 +2786,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -2720,7 +2815,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -2748,7 +2844,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -2776,7 +2873,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -2804,7 +2902,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -2832,7 +2931,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -2861,7 +2961,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -2889,7 +2990,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -2917,7 +3019,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -2945,7 +3048,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -2973,7 +3077,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -3001,7 +3106,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -3029,7 +3135,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -3058,7 +3165,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -3086,7 +3194,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -3114,7 +3223,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -3142,7 +3252,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -3170,7 +3281,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -3198,7 +3310,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -3226,7 +3339,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -3255,7 +3369,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -3283,7 +3398,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -3311,7 +3427,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -3339,7 +3456,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -3367,7 +3485,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -3395,7 +3514,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -3423,7 +3543,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -3452,7 +3573,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -3480,7 +3602,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -3508,7 +3631,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -3536,7 +3660,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -3564,7 +3689,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -3592,7 +3718,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -3620,7 +3747,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -3649,7 +3777,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -3677,7 +3806,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -3705,7 +3835,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -3733,7 +3864,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -3761,7 +3893,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -3789,7 +3922,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -3817,7 +3951,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -3846,7 +3981,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         },
         {
           "metric": {
@@ -3874,7 +4010,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/request_cores"
         },
         {
           "metric": {
@@ -3902,7 +4039,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/request_bytes"
         },
         {
           "metric": {
@@ -3930,7 +4068,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/request_bytes"
         },
         {
           "metric": {
@@ -3958,7 +4097,8 @@
               }
             }
           ],
-          "unit": "{cpu}"
+          "unit": "{cpu}",
+          "description": "kubernetes.io/container/cpu/limit_cores"
         },
         {
           "metric": {
@@ -3986,7 +4126,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/memory/limit_bytes"
         },
         {
           "metric": {
@@ -4014,7 +4155,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "kubernetes.io/container/ephemeral_storage/limit_bytes"
         },
         {
           "metric": {
@@ -4043,7 +4185,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "kubernetes.io/container/restart_count"
         }
       ]
     }
@@ -4081,7 +4224,8 @@
                 }
               }
             ],
-            "unit": "1"
+            "unit": "1",
+            "description": "Count of metric points written to Cloud Monitoring."
           },
           {
             "metric": {
@@ -4205,7 +4349,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "End-to-end time taken to complete a client call attempt."
           },
           {
             "metric": {
@@ -4275,7 +4420,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes received per call attempt."
           },
           {
             "metric": {
@@ -4345,7 +4491,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes sent per client call attempt."
           },
           {
             "metric": {
@@ -4376,7 +4523,8 @@
                 }
               }
             ],
-            "unit": "attempt"
+            "unit": "attempt",
+            "description": "Number of client call attempts started."
           },
           {
             "metric": {
@@ -4500,7 +4648,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "Time taken by gRPC to complete an RPC from application's perspective."
           }
         ]
       }
