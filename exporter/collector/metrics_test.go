@@ -47,9 +47,7 @@ import (
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/internal/normalization"
 )
 
-var (
-	start = time.Unix(1000, 1000)
-)
+var start = time.Unix(1000, 1000)
 
 func newTestMetricMapper() (metricMapper, func()) {
 	obs := selfObservability{log: zap.NewNop(), meterProvider: noop.NewMeterProvider()}
@@ -393,15 +391,25 @@ func TestMergeLabels(t *testing.T) {
 	)
 }
 
+// TODO(bwplotka): Switch this and similar tests to cmp.Diff with the expected monitoringpb.TimeSeries
+// type constructed manually. See example https://github.com/GoogleCloudPlatform/prometheus/blob/1d9c717295219e0f6c53fa963f41429b4e01c27f/google/export/transform_test.go#L59
+//
+// Otherwise those tests are hard to maintain and it's easy to forget about validation.
+// Current those tests also does not test unexpected fields we might have generated.
 func TestHistogramPointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myhist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myhist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyHistogram()
 	point := hist.DataPoints().AppendEmpty()
 	end := start.Add(time.Hour)
@@ -433,6 +441,7 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
@@ -484,14 +493,19 @@ func TestHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myhist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myhist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyHistogram()
 	hist.SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 	point := hist.DataPoints().AppendEmpty()
@@ -548,6 +562,7 @@ func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
@@ -586,6 +601,7 @@ func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
@@ -620,14 +636,19 @@ func TestHistogramPointWithoutTimestampToTimeSeries(t *testing.T) {
 }
 
 func TestNoValueHistogramPointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myhist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myhist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyHistogram()
 	point := hist.DataPoints().AppendEmpty()
 	point.SetFlags(pmetric.DefaultDataPointFlags.WithNoRecordedValue(true))
@@ -645,14 +666,19 @@ func TestNoValueHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestNoSumHistogramPointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myhist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myhist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyHistogram()
 	point := hist.DataPoints().AppendEmpty()
 	end := start.Add(time.Hour)
@@ -669,14 +695,19 @@ func TestNoSumHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestEmptyHistogramPointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myhist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myhist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyHistogram()
 	point := hist.DataPoints().AppendEmpty()
 	end := start.Add(time.Hour)
@@ -694,6 +725,7 @@ func TestEmptyHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
@@ -715,14 +747,19 @@ func TestEmptyHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestNaNSumHistogramPointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myhist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myhist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyHistogram()
 	point := hist.DataPoints().AppendEmpty()
 	end := start.Add(time.Hour)
@@ -740,6 +777,7 @@ func TestNaNSumHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myhist", ts.Metric.Type)
@@ -761,14 +799,19 @@ func TestNaNSumHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myexphist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myexphist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyExponentialHistogram()
 	point := hist.DataPoints().AppendEmpty()
 	end := start.Add(time.Hour)
@@ -797,6 +840,7 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
@@ -833,14 +877,19 @@ func TestExponentialHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myexphist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myexphist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyExponentialHistogram()
 	hist.SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 
@@ -911,6 +960,7 @@ func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
@@ -951,6 +1001,7 @@ func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
@@ -987,14 +1038,19 @@ func TestExponentialHistogramPointWithoutStartTimeToTimeSeries(t *testing.T) {
 }
 
 func TestNaNSumExponentialHistogramPointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myexphist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myexphist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyExponentialHistogram()
 	point := hist.DataPoints().AppendEmpty()
 	end := start.Add(time.Hour)
@@ -1014,6 +1070,7 @@ func TestNaNSumExponentialHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
@@ -1036,14 +1093,19 @@ func TestNaNSumExponentialHistogramPointToTimeSeries(t *testing.T) {
 }
 
 func TestZeroCountExponentialHistogramPointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "myexphist metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mapper.cfg.ProjectID = "myproject"
 	mr := &monitoredrespb.MonitoredResource{}
 	metric := pmetric.NewMetric()
 	metric.SetName("myexphist")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	hist := metric.SetEmptyExponentialHistogram()
 	point := hist.DataPoints().AppendEmpty()
 	end := start.Add(time.Hour)
@@ -1063,6 +1125,7 @@ func TestZeroCountExponentialHistogramPointToTimeSeries(t *testing.T) {
 	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
 	assert.Equal(t, metricpb.MetricDescriptor_DISTRIBUTION, ts.ValueType)
 	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, mr, ts.Resource)
 
 	assert.Equal(t, "workload.googleapis.com/myexphist", ts.Metric.Type)
@@ -1181,10 +1244,15 @@ func TestSumPointToTimeSeries(t *testing.T) {
 	}
 
 	t.Run("Cumulative monotonic", func(t *testing.T) {
+		const (
+			unit = "s"
+			desc = "mysum metric helpful description text"
+		)
+
 		metric, sum, point := newCase()
 		metric.SetName("mysum")
-		unit := "s"
 		metric.SetUnit(unit)
+		metric.SetDescription(desc)
 		sum.SetIsMonotonic(true)
 		sum.SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
 		var value int64 = 10
@@ -1196,9 +1264,10 @@ func TestSumPointToTimeSeries(t *testing.T) {
 		tsl := mapper.sumPointToTimeSeries(mr, labels{}, metric, sum, point)
 		assert.Equal(t, 1, len(tsl))
 		ts := tsl[0]
-		assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-		assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_INT64)
-		assert.Equal(t, ts.Unit, unit)
+		assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, ts.MetricKind)
+		assert.Equal(t, metricpb.MetricDescriptor_INT64, ts.ValueType)
+		assert.Equal(t, unit, ts.Unit)
+		assert.Equal(t, desc, ts.Description)
 		assert.Same(t, ts.Resource, mr)
 
 		assert.Equal(t, ts.Metric.Type, "workload.googleapis.com/mysum")
@@ -1294,6 +1363,11 @@ func TestSumPointToTimeSeries(t *testing.T) {
 }
 
 func TestGaugePointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "mygauge metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mr := &monitoredrespb.MonitoredResource{}
@@ -1309,8 +1383,8 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 
 	metric, gauge, point := newCase()
 	metric.SetName("mygauge")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	var value int64 = 10
 	point.SetIntValue(value)
 	end := start.Add(time.Hour)
@@ -1319,9 +1393,10 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	tsl := mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
 	assert.Len(t, tsl, 1)
 	ts := tsl[0]
-	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
-	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_INT64)
-	assert.Equal(t, ts.Unit, unit)
+	assert.Equal(t, metricpb.MetricDescriptor_GAUGE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_INT64, ts.ValueType)
+	assert.Equal(t, unit, ts.Unit)
+	assert.Equal(t, desc, ts.Description)
 	assert.Same(t, ts.Resource, mr)
 
 	assert.Equal(t, ts.Metric.Type, "workload.googleapis.com/mygauge")
@@ -1340,9 +1415,9 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 	tsl = mapper.gaugePointToTimeSeries(mr, labels{}, metric, gauge, point)
 	assert.Len(t, tsl, 1)
 	ts = tsl[0]
-	assert.Equal(t, ts.MetricKind, metricpb.MetricDescriptor_GAUGE)
-	assert.Equal(t, ts.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, ts.Points[0].Value.GetDoubleValue(), float64(value))
+	assert.Equal(t, metricpb.MetricDescriptor_GAUGE, ts.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, ts.ValueType)
+	assert.Equal(t, float64(value), ts.Points[0].Value.GetDoubleValue())
 
 	// Add extra labels
 	extraLabels := map[string]string{"foo": "bar"}
@@ -1360,6 +1435,11 @@ func TestGaugePointToTimeSeries(t *testing.T) {
 }
 
 func TestSummaryPointToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "mysummary metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mr := &monitoredrespb.MonitoredResource{}
@@ -1369,10 +1449,10 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	point := summary.DataPoints().AppendEmpty()
 
 	metric.SetName("mysummary")
-	unit := "1"
 	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	var count uint64 = 10
-	var sum = 100.0
+	sum := 100.0
 	point.SetCount(count)
 	point.SetSum(sum)
 	quantile := point.QuantileValues().AppendEmpty()
@@ -1392,12 +1472,13 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	quantileResult := ts[2]
 
 	// Test sum mapping
-	assert.Equal(t, sumResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-	assert.Equal(t, sumResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, sumResult.Unit, unit)
-	assert.Same(t, sumResult.Resource, mr)
-	assert.Equal(t, sumResult.Metric.Type, "workload.googleapis.com/mysummary_sum")
-	assert.Equal(t, sumResult.Metric.Labels, map[string]string{})
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, sumResult.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, sumResult.ValueType)
+	assert.Equal(t, unit, sumResult.Unit)
+	assert.Equal(t, desc, sumResult.Description)
+	assert.Same(t, mr, sumResult.Resource)
+	assert.Equal(t, "workload.googleapis.com/mysummary_sum", sumResult.Metric.Type)
+	assert.Equal(t, map[string]string{}, sumResult.Metric.Labels)
 	assert.Nil(t, sumResult.Metadata)
 	assert.Len(t, sumResult.Points, 1)
 	assert.Equal(t, sumResult.Points[0].Interval, &monitoringpb.TimeInterval{
@@ -1406,10 +1487,12 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	})
 	assert.Equal(t, sumResult.Points[0].Value.GetDoubleValue(), sum)
 	// Test count mapping
-	assert.Equal(t, countResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, countResult.Unit, unit)
-	assert.Same(t, countResult.Resource, mr)
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, countResult.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, countResult.ValueType)
+	assert.Equal(t, unit, countResult.Unit)
+	assert.Equal(t, desc, countResult.Description)
+	assert.Same(t, mr, countResult.Resource)
+
 	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_count")
 	assert.Equal(t, countResult.Metric.Labels, map[string]string{})
 	assert.Nil(t, countResult.Metadata)
@@ -1420,10 +1503,12 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 	})
 	assert.Equal(t, countResult.Points[0].Value.GetDoubleValue(), float64(count))
 	// Test quantile mapping
-	assert.Equal(t, quantileResult.MetricKind, metricpb.MetricDescriptor_GAUGE)
-	assert.Equal(t, quantileResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, quantileResult.Unit, unit)
-	assert.Same(t, quantileResult.Resource, mr)
+	assert.Equal(t, metricpb.MetricDescriptor_GAUGE, quantileResult.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, quantileResult.ValueType)
+	assert.Equal(t, unit, quantileResult.Unit)
+	assert.Equal(t, desc, quantileResult.Description)
+	assert.Same(t, mr, quantileResult.Resource)
+
 	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary")
 	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
 		"quantile": "1",
@@ -1437,6 +1522,11 @@ func TestSummaryPointToTimeSeries(t *testing.T) {
 }
 
 func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
+	const (
+		unit = "1"
+		desc = "mysummary metric helpful description text"
+	)
+
 	mapper, shutdown := newTestMetricMapper()
 	defer shutdown()
 	mr := &monitoredrespb.MonitoredResource{}
@@ -1446,7 +1536,8 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	point := summary.DataPoints().AppendEmpty()
 
 	metric.SetName("mysummary")
-	metric.SetUnit("1")
+	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	point.SetCount(10)
 	point.SetSum(100.0)
 	quantile := point.QuantileValues().AppendEmpty()
@@ -1457,7 +1548,8 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 
 	point = summary.DataPoints().AppendEmpty()
 	metric.SetName("mysummary")
-	metric.SetUnit("1")
+	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	point.SetCount(20)
 	point.SetSum(200.0)
 	quantile = point.QuantileValues().AppendEmpty()
@@ -1469,7 +1561,8 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 
 	point = summary.DataPoints().AppendEmpty()
 	metric.SetName("mysummary")
-	metric.SetUnit("1")
+	metric.SetUnit(unit)
+	metric.SetDescription(desc)
 	point.SetCount(30)
 	point.SetSum(300.0)
 	quantile = point.QuantileValues().AppendEmpty()
@@ -1486,10 +1579,12 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	quantileResult := ts[2]
 
 	// Test sum mapping
-	assert.Equal(t, sumResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-	assert.Equal(t, sumResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, sumResult.Unit, "1")
-	assert.Same(t, sumResult.Resource, mr)
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, sumResult.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, sumResult.ValueType)
+	assert.Equal(t, unit, sumResult.Unit)
+	assert.Equal(t, desc, sumResult.Description)
+	assert.Same(t, mr, sumResult.Resource)
+
 	assert.Equal(t, sumResult.Metric.Type, "workload.googleapis.com/mysummary_sum")
 	assert.Equal(t, sumResult.Metric.Labels, map[string]string{})
 	assert.Nil(t, sumResult.Metadata)
@@ -1500,10 +1595,12 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	})
 	assert.Equal(t, sumResult.Points[0].Value.GetDoubleValue(), 100.0)
 	// Test count mapping
-	assert.Equal(t, countResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, countResult.Unit, "1")
-	assert.Same(t, countResult.Resource, mr)
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, countResult.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, countResult.ValueType)
+	assert.Equal(t, unit, countResult.Unit)
+	assert.Equal(t, desc, countResult.Description)
+	assert.Same(t, mr, countResult.Resource)
+
 	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_count")
 	assert.Equal(t, countResult.Metric.Labels, map[string]string{})
 	assert.Nil(t, countResult.Metadata)
@@ -1514,10 +1611,12 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	})
 	assert.Equal(t, countResult.Points[0].Value.GetDoubleValue(), float64(10))
 	// Test quantile mapping
-	assert.Equal(t, quantileResult.MetricKind, metricpb.MetricDescriptor_GAUGE)
-	assert.Equal(t, quantileResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, quantileResult.Unit, "1")
-	assert.Same(t, quantileResult.Resource, mr)
+	assert.Equal(t, metricpb.MetricDescriptor_GAUGE, quantileResult.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, quantileResult.ValueType)
+	assert.Equal(t, unit, quantileResult.Unit)
+	assert.Equal(t, desc, quantileResult.Description)
+	assert.Same(t, mr, quantileResult.Resource)
+
 	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary")
 	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
 		"quantile": "1",
@@ -1534,10 +1633,12 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	quantileResult = ts[5]
 
 	// Test sum mapping
-	assert.Equal(t, sumResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-	assert.Equal(t, sumResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, sumResult.Unit, "1")
-	assert.Same(t, sumResult.Resource, mr)
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, sumResult.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, sumResult.ValueType)
+	assert.Equal(t, unit, sumResult.Unit)
+	assert.Equal(t, desc, sumResult.Description)
+	assert.Same(t, mr, sumResult.Resource)
+
 	assert.Equal(t, sumResult.Metric.Type, "workload.googleapis.com/mysummary_sum")
 	assert.Equal(t, sumResult.Metric.Labels, map[string]string{})
 	assert.Nil(t, sumResult.Metadata)
@@ -1548,10 +1649,12 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	})
 	assert.Equal(t, sumResult.Points[0].Value.GetDoubleValue(), 200.0)
 	// Test count mapping
-	assert.Equal(t, countResult.MetricKind, metricpb.MetricDescriptor_CUMULATIVE)
-	assert.Equal(t, countResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, countResult.Unit, "1")
-	assert.Same(t, countResult.Resource, mr)
+	assert.Equal(t, metricpb.MetricDescriptor_CUMULATIVE, countResult.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, countResult.ValueType)
+	assert.Equal(t, unit, countResult.Unit)
+	assert.Equal(t, desc, countResult.Description)
+	assert.Same(t, mr, countResult.Resource)
+
 	assert.Equal(t, countResult.Metric.Type, "workload.googleapis.com/mysummary_count")
 	assert.Equal(t, countResult.Metric.Labels, map[string]string{})
 	assert.Nil(t, countResult.Metadata)
@@ -1562,10 +1665,12 @@ func TestSummaryPointWithoutStartTimeToTimeSeries(t *testing.T) {
 	})
 	assert.Equal(t, countResult.Points[0].Value.GetDoubleValue(), float64(20))
 	// Test quantile mapping
-	assert.Equal(t, quantileResult.MetricKind, metricpb.MetricDescriptor_GAUGE)
-	assert.Equal(t, quantileResult.ValueType, metricpb.MetricDescriptor_DOUBLE)
-	assert.Equal(t, quantileResult.Unit, "1")
-	assert.Same(t, quantileResult.Resource, mr)
+	assert.Equal(t, metricpb.MetricDescriptor_GAUGE, quantileResult.MetricKind)
+	assert.Equal(t, metricpb.MetricDescriptor_DOUBLE, quantileResult.ValueType)
+	assert.Equal(t, unit, quantileResult.Unit)
+	assert.Equal(t, desc, quantileResult.Description)
+	assert.Same(t, mr, quantileResult.Resource)
+
 	assert.Equal(t, quantileResult.Metric.Type, "workload.googleapis.com/mysummary")
 	assert.Equal(t, quantileResult.Metric.Labels, map[string]string{
 		"quantile": "1",

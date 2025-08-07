@@ -31,7 +31,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Number of held locks."
         },
         {
           "metric": {
@@ -61,7 +62,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Number of transactions waiting for a lock."
         },
         {
           "metric": {
@@ -91,7 +93,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Number of participant transactions."
         },
         {
           "metric": {
@@ -121,7 +124,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Number of coordinator transactions."
         },
         {
           "metric": {
@@ -152,7 +156,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Number of failed (i.e. aborted) transactions."
         },
         {
           "metric": {
@@ -183,7 +188,8 @@
                 "doubleValue": 71
               }
             }
-          ]
+          ],
+          "description": "Number of committed transactions."
         },
         {
           "metric": {
@@ -214,7 +220,8 @@
                 "doubleValue": 82
               }
             }
-          ]
+          ],
+          "description": "Number of transactions logged."
         },
         {
           "metric": {
@@ -245,7 +252,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of transaction restarts."
         },
         {
           "metric": {
@@ -275,7 +283,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Consumers on a channel"
         },
         {
           "metric": {
@@ -305,7 +314,8 @@
                 "doubleValue": 102
               }
             }
-          ]
+          ],
+          "description": "Delivered but not yet acknowledged messages"
         },
         {
           "metric": {
@@ -335,7 +345,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Published but not yet confirmed messages"
         },
         {
           "metric": {
@@ -365,7 +376,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Messages received in a transaction but not yet committed"
         },
         {
           "metric": {
@@ -395,7 +407,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Limit of unacknowledged messages for each consumer"
         },
         {
           "metric": {
@@ -425,7 +438,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total limit of unacknowledged messages for all consumers on a channel"
         },
         {
           "metric": {
@@ -456,7 +470,8 @@
                 "doubleValue": 8066132
               }
             }
-          ]
+          ],
+          "description": "Total number of messages published into an exchange on a channel"
         },
         {
           "metric": {
@@ -487,7 +502,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of messages published into an exchange and confirmed on the channel"
         },
         {
           "metric": {
@@ -518,7 +534,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of messages published as mandatory into an exchange and returned to the publisher as unroutable"
         },
         {
           "metric": {
@@ -549,7 +566,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of messages published as non-mandatory into an exchange and dropped as unroutable"
         },
         {
           "metric": {
@@ -580,7 +598,8 @@
                 "doubleValue": 3392777742
               }
             }
-          ]
+          ],
+          "description": "Total number of channel process reductions"
         },
         {
           "metric": {
@@ -611,7 +630,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of messages fetched with basic.get in manual acknowledgement mode"
         },
         {
           "metric": {
@@ -642,7 +662,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of messages fetched with basic.get in automatic acknowledgement mode"
         },
         {
           "metric": {
@@ -673,7 +694,8 @@
                 "doubleValue": 8065869
               }
             }
-          ]
+          ],
+          "description": "Total number of messages delivered to consumers in manual acknowledgement mode"
         },
         {
           "metric": {
@@ -704,7 +726,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of messages delivered to consumers in automatic acknowledgement mode"
         },
         {
           "metric": {
@@ -735,7 +758,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of messages redelivered to consumers"
         },
         {
           "metric": {
@@ -766,7 +790,8 @@
                 "doubleValue": 8065868
               }
             }
-          ]
+          ],
+          "description": "Total number of messages acknowledged by consumers"
         },
         {
           "metric": {
@@ -797,7 +822,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of times basic.get operations fetched no message"
         },
         {
           "metric": {
@@ -828,7 +854,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "Total number of connections opened"
         },
         {
           "metric": {
@@ -859,7 +886,8 @@
                 "doubleValue": 362
               }
             }
-          ]
+          ],
+          "description": "Total number of connections closed or terminated"
         },
         {
           "metric": {
@@ -890,7 +918,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "Total number of channels opened"
         },
         {
           "metric": {
@@ -921,7 +950,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Total number of channels closed"
         },
         {
           "metric": {
@@ -952,7 +982,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Total number of queues declared"
         },
         {
           "metric": {
@@ -983,7 +1014,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Total number of queues created"
         },
         {
           "metric": {
@@ -1014,7 +1046,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of queues deleted"
         },
         {
           "metric": {
@@ -1045,7 +1078,8 @@
                 "doubleValue": 979898894
               }
             }
-          ]
+          ],
+          "description": "Total number of bytes received on a connection"
         },
         {
           "metric": {
@@ -1076,7 +1110,8 @@
                 "doubleValue": 1115574481
               }
             }
-          ]
+          ],
+          "description": "Total number of bytes sent on a connection"
         },
         {
           "metric": {
@@ -1107,7 +1142,8 @@
                 "doubleValue": 1043850087
               }
             }
-          ]
+          ],
+          "description": "Total number of connection process reductions"
         },
         {
           "metric": {
@@ -1138,7 +1174,8 @@
                 "doubleValue": 873156
               }
             }
-          ]
+          ],
+          "description": "Total number of packets received on a connection"
         },
         {
           "metric": {
@@ -1169,7 +1206,8 @@
                 "doubleValue": 985670
               }
             }
-          ]
+          ],
+          "description": "Total number of packets sent on a connection"
         },
         {
           "metric": {
@@ -1199,7 +1237,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Number of packets waiting to be sent on a connection"
         },
         {
           "metric": {
@@ -1229,7 +1268,8 @@
                 "doubleValue": 2
               }
             }
-          ]
+          ],
+          "description": "Channels on a connection"
         },
         {
           "metric": {
@@ -1260,7 +1300,8 @@
                 "doubleValue": 8066241
               }
             }
-          ]
+          ],
+          "description": "Total number of messages published to queues"
         },
         {
           "metric": {
@@ -1290,7 +1331,8 @@
                 "doubleValue": 36
               }
             }
-          ]
+          ],
+          "description": "Open file descriptors"
         },
         {
           "metric": {
@@ -1320,7 +1362,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "Open TCP sockets"
         },
         {
           "metric": {
@@ -1351,7 +1394,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Memory used in bytes"
         },
         {
           "metric": {
@@ -1382,7 +1426,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk space available in bytes"
         },
         {
           "metric": {
@@ -1412,7 +1457,8 @@
                 "doubleValue": 447
               }
             }
-          ]
+          ],
+          "description": "Erlang processes used"
         },
         {
           "metric": {
@@ -1443,7 +1489,8 @@
                 "doubleValue": 5073035
               }
             }
-          ]
+          ],
+          "description": "Total number of Erlang garbage collector runs"
         },
         {
           "metric": {
@@ -1474,7 +1521,8 @@
                 "doubleValue": 182076118160
               }
             }
-          ]
+          ],
+          "description": "Total number of bytes of memory reclaimed by Erlang garbage collector"
         },
         {
           "metric": {
@@ -1505,7 +1553,8 @@
                 "doubleValue": 4532602
               }
             }
-          ]
+          ],
+          "description": "Total number of Erlang scheduler context switches"
         },
         {
           "metric": {
@@ -1535,7 +1584,8 @@
                 "doubleValue": 1048576
               }
             }
-          ]
+          ],
+          "description": "Open file descriptors limit"
         },
         {
           "metric": {
@@ -1565,7 +1615,8 @@
                 "doubleValue": 943629
               }
             }
-          ]
+          ],
+          "description": "Open TCP sockets limit"
         },
         {
           "metric": {
@@ -1596,7 +1647,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Memory high watermark in bytes"
         },
         {
           "metric": {
@@ -1627,7 +1679,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Free disk space low watermark in bytes"
         },
         {
           "metric": {
@@ -1657,7 +1710,8 @@
                 "doubleValue": 1048576
               }
             }
-          ]
+          ],
+          "description": "Erlang processes limit"
         },
         {
           "metric": {
@@ -1687,7 +1741,8 @@
                 "doubleValue": 4
               }
             }
-          ]
+          ],
+          "description": "Erlang scheduler run queue"
         },
         {
           "metric": {
@@ -1718,7 +1773,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Inter-node heartbeat interval"
         },
         {
           "metric": {
@@ -1749,7 +1805,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Node uptime"
         },
         {
           "metric": {
@@ -1780,7 +1837,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Total number of I/O read operations"
         },
         {
           "metric": {
@@ -1811,7 +1869,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Total number of I/O bytes read"
         },
         {
           "metric": {
@@ -1842,7 +1901,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of I/O write operations"
         },
         {
           "metric": {
@@ -1873,7 +1933,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of I/O bytes written"
         },
         {
           "metric": {
@@ -1904,7 +1965,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of I/O sync operations"
         },
         {
           "metric": {
@@ -1935,7 +1997,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of I/O seek operations"
         },
         {
           "metric": {
@@ -1966,7 +2029,8 @@
                 "doubleValue": 11
               }
             }
-          ]
+          ],
+          "description": "Total number of file open attempts"
         },
         {
           "metric": {
@@ -1997,7 +2061,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of times files have been reopened"
         },
         {
           "metric": {
@@ -2028,7 +2093,8 @@
                 "doubleValue": 15
               }
             }
-          ]
+          ],
+          "description": "Total number of Schema DB memory transactions"
         },
         {
           "metric": {
@@ -2059,7 +2125,8 @@
                 "doubleValue": 13
               }
             }
-          ]
+          ],
+          "description": "Total number of Schema DB disk transactions"
         },
         {
           "metric": {
@@ -2090,7 +2157,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of Message Store read operations"
         },
         {
           "metric": {
@@ -2121,7 +2189,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of Message Store write operations"
         },
         {
           "metric": {
@@ -2152,7 +2221,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of Queue Index read operations"
         },
         {
           "metric": {
@@ -2183,7 +2253,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of Queue Index write operations"
         },
         {
           "metric": {
@@ -2214,7 +2285,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of Queue Index Journal write operations"
         },
         {
           "metric": {
@@ -2245,7 +2317,8 @@
                 "doubleValue": 0.000053
               }
             }
-          ]
+          ],
+          "description": "Total I/O read time"
         },
         {
           "metric": {
@@ -2276,7 +2349,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total I/O write time"
         },
         {
           "metric": {
@@ -2307,7 +2381,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total I/O sync time"
         },
         {
           "metric": {
@@ -2338,7 +2413,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total I/O seek time"
         },
         {
           "metric": {
@@ -2369,7 +2445,8 @@
                 "doubleValue": 0.000645
               }
             }
-          ]
+          ],
+          "description": "Total file open attempts time"
         },
         {
           "metric": {
@@ -2400,7 +2477,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Current Raft term number"
         },
         {
           "metric": {
@@ -2430,7 +2508,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Raft log snapshot index"
         },
         {
           "metric": {
@@ -2460,7 +2539,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Raft log last applied index"
         },
         {
           "metric": {
@@ -2490,7 +2570,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Raft log commit index"
         },
         {
           "metric": {
@@ -2520,7 +2601,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Raft log last written index"
         },
         {
           "metric": {
@@ -2551,7 +2633,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Time taken for an entry to be committed"
         },
         {
           "metric": {
@@ -2581,7 +2664,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Messages ready to be delivered to consumers"
         },
         {
           "metric": {
@@ -2611,7 +2695,8 @@
                 "doubleValue": 231
               }
             }
-          ]
+          ],
+          "description": "Messages delivered to consumers but not yet acknowledged"
         },
         {
           "metric": {
@@ -2641,7 +2726,8 @@
                 "doubleValue": 231
               }
             }
-          ]
+          ],
+          "description": "Sum of ready and unacknowledged messages - total queue depth"
         },
         {
           "metric": {
@@ -2672,7 +2758,8 @@
                 "doubleValue": 4602417253
               }
             }
-          ]
+          ],
+          "description": "Total number of queue process reductions"
         },
         {
           "metric": {
@@ -2702,7 +2789,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Consumers on a queue"
         },
         {
           "metric": {
@@ -2732,7 +2820,8 @@
                 "doubleValue": 0.8418694722177692
               }
             }
-          ]
+          ],
+          "description": "Same as consumer capacity"
         },
         {
           "metric": {
@@ -2763,7 +2852,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Memory in bytes used by the Erlang queue process"
         },
         {
           "metric": {
@@ -2793,7 +2883,8 @@
                 "doubleValue": 231
               }
             }
-          ]
+          ],
+          "description": "Ready and unacknowledged messages stored in memory"
         },
         {
           "metric": {
@@ -2824,7 +2915,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Size of ready and unacknowledged messages stored in memory"
         },
         {
           "metric": {
@@ -2854,7 +2946,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Ready messages stored in memory"
         },
         {
           "metric": {
@@ -2884,7 +2977,8 @@
                 "doubleValue": 231
               }
             }
-          ]
+          ],
+          "description": "Unacknowledged messages stored in memory"
         },
         {
           "metric": {
@@ -2914,7 +3008,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Persistent messages"
         },
         {
           "metric": {
@@ -2945,7 +3040,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Size in bytes of ready and unacknowledged messages"
         },
         {
           "metric": {
@@ -2976,7 +3072,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Size in bytes of ready messages"
         },
         {
           "metric": {
@@ -3007,7 +3104,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Size in bytes of all unacknowledged messages"
         },
         {
           "metric": {
@@ -3037,7 +3135,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Messages paged out to disk"
         },
         {
           "metric": {
@@ -3068,7 +3167,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Size in bytes of messages paged out to disk"
         },
         {
           "metric": {
@@ -3099,7 +3199,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of times queue read messages from disk"
         },
         {
           "metric": {
@@ -3130,7 +3231,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of times queue wrote messages to disk"
         },
         {
           "metric": {
@@ -3162,7 +3264,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "Total number of authorization attempts"
         },
         {
           "metric": {
@@ -3194,7 +3297,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "Total number of successful authentication attempts"
         },
         {
           "metric": {
@@ -3226,7 +3330,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total number of failed authentication attempts"
         },
         {
           "metric": {
@@ -3256,7 +3361,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "Connections currently open"
         },
         {
           "metric": {
@@ -3286,7 +3392,8 @@
                 "doubleValue": 2
               }
             }
-          ]
+          ],
+          "description": "Channels currently open"
         },
         {
           "metric": {
@@ -3316,7 +3423,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Consumers currently connected"
         },
         {
           "metric": {
@@ -3346,7 +3454,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "Queues available"
         },
         {
           "metric": {
@@ -3380,7 +3489,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "RabbitMQ & Erlang/OTP version info"
         },
         {
           "metric": {
@@ -3412,7 +3522,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "RabbitMQ node & cluster identity info"
         },
         {
           "metric": {
@@ -3447,7 +3558,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Scrape size, encoded"
         },
         {
           "metric": {
@@ -3482,7 +3594,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Scrape size, encoded"
         },
         {
           "metric": {
@@ -3516,7 +3629,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Scrape size, not encoded"
         },
         {
           "metric": {
@@ -3550,7 +3664,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Scrape size, not encoded"
         },
         {
           "metric": {
@@ -3584,7 +3699,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Scrape duration"
         },
         {
           "metric": {
@@ -3618,7 +3734,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Scrape duration"
         },
         {
           "metric": {
@@ -3649,7 +3766,8 @@
                 "doubleValue": 1407886
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated for atoms. This memory is part of the memory presented as system memory."
         },
         {
           "metric": {
@@ -3680,7 +3798,8 @@
                 "doubleValue": 17851
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated for atoms. This memory is part of the memory presented as system memory."
         },
         {
           "metric": {
@@ -3711,7 +3830,8 @@
                 "doubleValue": 71661296
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated. This is the same as the sum of the memory size for processes and system."
         },
         {
           "metric": {
@@ -3742,7 +3862,8 @@
                 "doubleValue": 32732680
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated. This is the same as the sum of the memory size for processes and system."
         },
         {
           "metric": {
@@ -3772,7 +3893,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "Erlang VM DETS Tables count."
         },
         {
           "metric": {
@@ -3802,7 +3924,8 @@
                 "doubleValue": 191
               }
             }
-          ]
+          ],
+          "description": "Erlang VM ETS Tables count."
         },
         {
           "metric": {
@@ -3833,7 +3956,8 @@
                 "doubleValue": 32659792
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated for the Erlang processes."
         },
         {
           "metric": {
@@ -3864,7 +3988,8 @@
                 "doubleValue": 72888
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated for the Erlang processes."
         },
         {
           "metric": {
@@ -3895,7 +4020,8 @@
                 "doubleValue": 1425737
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated for the emulator that is not directly related to any Erlang process. Memory presented as processes is not included in this memory."
         },
         {
           "metric": {
@@ -3926,7 +4052,8 @@
                 "doubleValue": 1760464
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated for the emulator that is not directly related to any Erlang process. Memory presented as processes is not included in this memory."
         },
         {
           "metric": {
@@ -3957,7 +4084,8 @@
                 "doubleValue": 36259374
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated for the emulator that is not directly related to any Erlang process. Memory presented as processes is not included in this memory."
         },
         {
           "metric": {
@@ -3988,7 +4116,8 @@
                 "doubleValue": 4123160
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated for the emulator that is not directly related to any Erlang process. Memory presented as processes is not included in this memory."
         },
         {
           "metric": {
@@ -4019,7 +4148,8 @@
                 "doubleValue": 28092561
               }
             }
-          ]
+          ],
+          "description": "The total amount of memory currently allocated for the emulator that is not directly related to any Erlang process. Memory presented as processes is not included in this memory."
         },
         {
           "metric": {
@@ -4052,7 +4182,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4085,7 +4216,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4118,7 +4250,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4151,7 +4284,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4184,7 +4318,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4217,7 +4352,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4250,7 +4386,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4283,7 +4420,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4316,7 +4454,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4349,7 +4488,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4382,7 +4522,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4415,7 +4556,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4448,7 +4590,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4481,7 +4624,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4514,7 +4658,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4547,7 +4692,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4580,7 +4726,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4613,7 +4760,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4646,7 +4794,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4679,7 +4828,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4712,7 +4862,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4745,7 +4896,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4778,7 +4930,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4811,7 +4964,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4844,7 +4998,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4877,7 +5032,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4910,7 +5066,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4943,7 +5100,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -4976,7 +5134,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent handling auxiliary jobs."
         },
         {
           "metric": {
@@ -5009,7 +5168,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5042,7 +5202,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5075,7 +5236,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5108,7 +5270,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5141,7 +5304,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5174,7 +5338,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5207,7 +5372,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5240,7 +5406,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5273,7 +5440,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5306,7 +5474,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5339,7 +5508,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5372,7 +5542,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5405,7 +5576,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5438,7 +5610,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5471,7 +5644,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5504,7 +5678,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5537,7 +5712,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5570,7 +5746,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5603,7 +5780,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5636,7 +5814,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5669,7 +5848,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5702,7 +5882,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5735,7 +5916,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5768,7 +5950,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5801,7 +5984,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5834,7 +6018,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5867,7 +6052,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5900,7 +6086,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5933,7 +6120,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent checking for new I/O events."
         },
         {
           "metric": {
@@ -5966,7 +6154,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -5999,7 +6188,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6032,7 +6222,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6065,7 +6256,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6098,7 +6290,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6131,7 +6324,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6164,7 +6358,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6197,7 +6392,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6230,7 +6426,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6263,7 +6460,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6296,7 +6494,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6329,7 +6528,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         }
       ]
     },
@@ -6367,7 +6567,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         },
         {
           "metric": {
@@ -6400,7 +6601,8 @@
                 "doubleValue": 0
               }
             }
-          ]
+          ],
+          "description": "Total time in seconds spent executing Erlang processes."
         }
       ]
     }
@@ -6438,7 +6640,8 @@
                 }
               }
             ],
-            "unit": "1"
+            "unit": "1",
+            "description": "Count of metric points written to Cloud Monitoring."
           },
           {
             "metric": {
@@ -6562,7 +6765,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "End-to-end time taken to complete a client call attempt."
           },
           {
             "metric": {
@@ -6632,7 +6836,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes received per call attempt."
           },
           {
             "metric": {
@@ -6702,7 +6907,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes sent per client call attempt."
           },
           {
             "metric": {
@@ -6733,7 +6939,8 @@
                 }
               }
             ],
-            "unit": "attempt"
+            "unit": "attempt",
+            "description": "Number of client call attempts started."
           },
           {
             "metric": {
@@ -6857,7 +7064,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "Time taken by gRPC to complete an RPC from application's perspective."
           }
         ]
       }

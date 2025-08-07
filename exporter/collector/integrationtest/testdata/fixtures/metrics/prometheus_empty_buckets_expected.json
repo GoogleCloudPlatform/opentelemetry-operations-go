@@ -31,7 +31,8 @@
                 "doubleValue": 1
               }
             }
-          ]
+          ],
+          "description": "The scraping was successful"
         },
         {
           "metric": {
@@ -62,7 +63,8 @@
               }
             }
           ],
-          "unit": "seconds"
+          "unit": "seconds",
+          "description": "Duration of the scrape"
         },
         {
           "metric": {
@@ -92,7 +94,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "The number of samples the target exposed"
         },
         {
           "metric": {
@@ -122,7 +125,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "The number of samples remaining after metric relabeling was applied"
         },
         {
           "metric": {
@@ -152,7 +156,8 @@
                 "doubleValue": 3
               }
             }
-          ]
+          ],
+          "description": "The approximate number of new series in this scrape"
         }
       ]
     }
@@ -307,7 +312,8 @@
                 }
               }
             ],
-            "unit": "1"
+            "unit": "1",
+            "description": "Count of metric points written to Cloud Monitoring."
           },
           {
             "metric": {
@@ -431,7 +437,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "End-to-end time taken to complete a client call attempt."
           },
           {
             "metric": {
@@ -501,7 +508,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes received per call attempt."
           },
           {
             "metric": {
@@ -571,7 +579,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes sent per client call attempt."
           },
           {
             "metric": {
@@ -602,7 +611,8 @@
                 }
               }
             ],
-            "unit": "attempt"
+            "unit": "attempt",
+            "description": "Number of client call attempts started."
           },
           {
             "metric": {
@@ -726,7 +736,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "Time taken by gRPC to complete an RPC from application's perspective."
           }
         ]
       }

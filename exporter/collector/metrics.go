@@ -623,7 +623,6 @@ func (me *MetricsExporter) watchWALFile(ctx context.Context) error {
 		return err
 	}
 	err = walWatcher.Add(me.wal.path)
-
 	if err != nil {
 		return err
 	}
@@ -891,10 +890,11 @@ func (m *metricMapper) summaryPointToTimeSeries(
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	result := []*monitoringpb.TimeSeries{
 		{
-			Resource:   resource,
-			Unit:       metric.Unit(),
-			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
-			ValueType:  metricpb.MetricDescriptor_DOUBLE,
+			Resource:    resource,
+			Unit:        metric.Unit(),
+			Description: metric.Description(),
+			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:   metricpb.MetricDescriptor_DOUBLE,
 			Points: []*monitoringpb.Point{{
 				Interval: &monitoringpb.TimeInterval{
 					StartTime: startTime,
@@ -913,10 +913,11 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			},
 		},
 		{
-			Resource:   resource,
-			Unit:       metric.Unit(),
-			MetricKind: metricpb.MetricDescriptor_CUMULATIVE,
-			ValueType:  metricpb.MetricDescriptor_DOUBLE,
+			Resource:    resource,
+			Unit:        metric.Unit(),
+			Description: metric.Description(),
+			MetricKind:  metricpb.MetricDescriptor_CUMULATIVE,
+			ValueType:   metricpb.MetricDescriptor_DOUBLE,
 			Points: []*monitoringpb.Point{{
 				Interval: &monitoringpb.TimeInterval{
 					StartTime: startTime,
@@ -942,10 +943,11 @@ func (m *metricMapper) summaryPointToTimeSeries(
 			"quantile": strconv.FormatFloat(quantile.Quantile(), 'f', -1, 64),
 		}
 		result = append(result, &monitoringpb.TimeSeries{
-			Resource:   resource,
-			Unit:       metric.Unit(),
-			MetricKind: metricpb.MetricDescriptor_GAUGE,
-			ValueType:  metricpb.MetricDescriptor_DOUBLE,
+			Resource:    resource,
+			Unit:        metric.Unit(),
+			Description: metric.Description(),
+			MetricKind:  metricpb.MetricDescriptor_GAUGE,
+			ValueType:   metricpb.MetricDescriptor_DOUBLE,
 			Points: []*monitoringpb.Point{{
 				Interval: &monitoringpb.TimeInterval{
 					EndTime: endTime,
@@ -1162,10 +1164,11 @@ func (m *metricMapper) histogramToTimeSeries(
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.histogramPoint(point, projectID)
 	return []*monitoringpb.TimeSeries{{
-		Resource:   resource,
-		Unit:       metric.Unit(),
-		MetricKind: metricKind,
-		ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
+		Resource:    resource,
+		Unit:        metric.Unit(),
+		Description: metric.Description(),
+		MetricKind:  metricKind,
+		ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
 		Points: []*monitoringpb.Point{{
 			Interval: &monitoringpb.TimeInterval{
 				StartTime: startTime,
@@ -1214,10 +1217,11 @@ func (m *metricMapper) exponentialHistogramToTimeSeries(
 	endTime := timestamppb.New(point.Timestamp().AsTime())
 	value := m.exponentialHistogramPoint(point, projectID)
 	return []*monitoringpb.TimeSeries{{
-		Resource:   resource,
-		Unit:       metric.Unit(),
-		MetricKind: metricKind,
-		ValueType:  metricpb.MetricDescriptor_DISTRIBUTION,
+		Resource:    resource,
+		Unit:        metric.Unit(),
+		Description: metric.Description(),
+		MetricKind:  metricKind,
+		ValueType:   metricpb.MetricDescriptor_DISTRIBUTION,
 		Points: []*monitoringpb.Point{{
 			Interval: &monitoringpb.TimeInterval{
 				StartTime: startTime,
@@ -1270,10 +1274,11 @@ func (m *metricMapper) sumPointToTimeSeries(
 	value, valueType := m.numberDataPointToValue(point, metricKind, metric.Unit())
 
 	return []*monitoringpb.TimeSeries{{
-		Resource:   resource,
-		Unit:       metric.Unit(),
-		MetricKind: metricKind,
-		ValueType:  valueType,
+		Resource:    resource,
+		Unit:        metric.Unit(),
+		Description: metric.Description(),
+		MetricKind:  metricKind,
+		ValueType:   valueType,
 		Points: []*monitoringpb.Point{{
 			Interval: &monitoringpb.TimeInterval{
 				StartTime: startTime,
@@ -1311,10 +1316,11 @@ func (m *metricMapper) gaugePointToTimeSeries(
 	value, valueType := m.numberDataPointToValue(point, metricKind, metric.Unit())
 
 	return []*monitoringpb.TimeSeries{{
-		Resource:   resource,
-		Unit:       metric.Unit(),
-		MetricKind: metricKind,
-		ValueType:  valueType,
+		Resource:    resource,
+		Unit:        metric.Unit(),
+		Description: metric.Description(),
+		MetricKind:  metricKind,
+		ValueType:   valueType,
 		Points: []*monitoringpb.Point{{
 			Interval: &monitoringpb.TimeInterval{
 				EndTime: timestamppb.New(point.Timestamp().AsTime()),

@@ -30,7 +30,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of paging operations."
         },
         {
           "metric": {
@@ -59,7 +60,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of paging operations."
         },
         {
           "metric": {
@@ -93,7 +95,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Total CPU seconds broken down by different states."
         },
         {
           "metric": {
@@ -127,7 +130,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Total CPU seconds broken down by different states."
         },
         {
           "metric": {
@@ -161,7 +165,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Total CPU seconds broken down by different states."
         },
         {
           "metric": {
@@ -195,7 +200,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Total CPU seconds broken down by different states."
         },
         {
           "metric": {
@@ -229,7 +235,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Total CPU seconds broken down by different states."
         },
         {
           "metric": {
@@ -263,7 +270,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Total CPU seconds broken down by different states."
         },
         {
           "metric": {
@@ -295,7 +303,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "The amount of physical memory in use."
         },
         {
           "metric": {
@@ -327,7 +336,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "The amount of physical memory in use."
         },
         {
           "metric": {
@@ -359,7 +369,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "The amount of physical memory in use."
         },
         {
           "metric": {
@@ -391,7 +402,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Virtual memory size."
         },
         {
           "metric": {
@@ -423,7 +435,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Virtual memory size."
         },
         {
           "metric": {
@@ -455,7 +468,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Virtual memory size."
         },
         {
           "metric": {
@@ -488,7 +502,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -521,7 +536,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -554,7 +570,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -587,7 +604,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -620,7 +638,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -653,7 +672,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -681,7 +701,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -709,7 +730,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -737,7 +759,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -765,7 +788,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -793,7 +817,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -821,7 +846,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -849,7 +875,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -877,7 +904,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -905,7 +933,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -933,7 +962,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Bytes of memory in use."
         },
         {
           "metric": {
@@ -958,7 +988,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "Average CPU Load over 1 minute."
         },
         {
           "metric": {
@@ -983,7 +1014,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "Average CPU Load over 5 minutes."
         },
         {
           "metric": {
@@ -1008,7 +1040,8 @@
               }
             }
           ],
-          "unit": "1"
+          "unit": "1",
+          "description": "Average CPU Load over 15 minutes."
         },
         {
           "metric": {
@@ -1037,7 +1070,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -1066,7 +1100,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -1095,7 +1130,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -1124,7 +1160,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -1154,7 +1191,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "Disk operations count."
         },
         {
           "metric": {
@@ -1184,7 +1222,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "Disk operations count."
         },
         {
           "metric": {
@@ -1214,7 +1253,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "Disk operations count."
         },
         {
           "metric": {
@@ -1244,7 +1284,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "Disk operations count."
         },
         {
           "metric": {
@@ -1274,7 +1315,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "Disk operations count."
         },
         {
           "metric": {
@@ -1304,7 +1346,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "Disk operations count."
         },
         {
           "metric": {
@@ -1334,7 +1377,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "Disk operations count."
         },
         {
           "metric": {
@@ -1364,7 +1408,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "Disk operations count."
         },
         {
           "metric": {
@@ -1393,7 +1438,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Time disk spent activated. On Windows, this is calculated as the inverse of disk idle time."
         },
         {
           "metric": {
@@ -1422,7 +1468,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Time disk spent activated. On Windows, this is calculated as the inverse of disk idle time."
         },
         {
           "metric": {
@@ -1451,7 +1498,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Time disk spent activated. On Windows, this is calculated as the inverse of disk idle time."
         },
         {
           "metric": {
@@ -1480,7 +1528,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Time disk spent activated. On Windows, this is calculated as the inverse of disk idle time."
         },
         {
           "metric": {
@@ -1508,7 +1557,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The queue size of pending I/O operations."
         },
         {
           "metric": {
@@ -1536,7 +1586,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The queue size of pending I/O operations."
         },
         {
           "metric": {
@@ -1564,7 +1615,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The queue size of pending I/O operations."
         },
         {
           "metric": {
@@ -1592,7 +1644,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The queue size of pending I/O operations."
         },
         {
           "metric": {
@@ -1621,7 +1674,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Time disk spent activated multiplied by the queue length."
         },
         {
           "metric": {
@@ -1650,7 +1704,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Time disk spent activated multiplied by the queue length."
         },
         {
           "metric": {
@@ -1679,7 +1734,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Time disk spent activated multiplied by the queue length."
         },
         {
           "metric": {
@@ -1708,7 +1764,8 @@
               }
             }
           ],
-          "unit": "s"
+          "unit": "s",
+          "description": "Time disk spent activated multiplied by the queue length."
         },
         {
           "metric": {
@@ -1738,7 +1795,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of disk reads merged into single physical disk access operations."
         },
         {
           "metric": {
@@ -1768,7 +1826,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of disk reads merged into single physical disk access operations."
         },
         {
           "metric": {
@@ -1798,7 +1857,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of disk reads merged into single physical disk access operations."
         },
         {
           "metric": {
@@ -1828,7 +1888,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of disk reads merged into single physical disk access operations."
         },
         {
           "metric": {
@@ -1858,7 +1919,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of disk reads merged into single physical disk access operations."
         },
         {
           "metric": {
@@ -1888,7 +1950,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of disk reads merged into single physical disk access operations."
         },
         {
           "metric": {
@@ -1918,7 +1981,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of disk reads merged into single physical disk access operations."
         },
         {
           "metric": {
@@ -1948,7 +2012,8 @@
               }
             }
           ],
-          "unit": "{operations}"
+          "unit": "{operations}",
+          "description": "The number of disk reads merged into single physical disk access operations."
         },
         {
           "metric": {
@@ -1977,7 +2042,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -2006,7 +2072,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -2035,7 +2102,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -2064,7 +2132,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Disk bytes transferred."
         },
         {
           "metric": {
@@ -2094,7 +2163,8 @@
               }
             }
           ],
-          "unit": "{packets}"
+          "unit": "{packets}",
+          "description": "The number of packets transferred."
         },
         {
           "metric": {
@@ -2124,7 +2194,8 @@
               }
             }
           ],
-          "unit": "{packets}"
+          "unit": "{packets}",
+          "description": "The number of packets transferred."
         },
         {
           "metric": {
@@ -2154,7 +2225,8 @@
               }
             }
           ],
-          "unit": "{packets}"
+          "unit": "{packets}",
+          "description": "The number of packets transferred."
         },
         {
           "metric": {
@@ -2184,7 +2256,8 @@
               }
             }
           ],
-          "unit": "{packets}"
+          "unit": "{packets}",
+          "description": "The number of packets transferred."
         },
         {
           "metric": {
@@ -2214,7 +2287,8 @@
               }
             }
           ],
-          "unit": "{errors}"
+          "unit": "{errors}",
+          "description": "The number of errors encountered."
         },
         {
           "metric": {
@@ -2244,7 +2318,8 @@
               }
             }
           ],
-          "unit": "{errors}"
+          "unit": "{errors}",
+          "description": "The number of errors encountered."
         },
         {
           "metric": {
@@ -2274,7 +2349,8 @@
               }
             }
           ],
-          "unit": "{errors}"
+          "unit": "{errors}",
+          "description": "The number of errors encountered."
         },
         {
           "metric": {
@@ -2304,7 +2380,8 @@
               }
             }
           ],
-          "unit": "{errors}"
+          "unit": "{errors}",
+          "description": "The number of errors encountered."
         },
         {
           "metric": {
@@ -2334,7 +2411,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "The number of bytes transmitted and received."
         },
         {
           "metric": {
@@ -2364,7 +2442,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "The number of bytes transmitted and received."
         },
         {
           "metric": {
@@ -2394,7 +2473,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "The number of bytes transmitted and received."
         },
         {
           "metric": {
@@ -2424,7 +2504,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "The number of bytes transmitted and received."
         },
         {
           "metric": {
@@ -2453,7 +2534,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2482,7 +2564,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2511,7 +2594,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2540,7 +2624,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2569,7 +2654,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2598,7 +2684,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2627,7 +2714,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2656,7 +2744,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2685,7 +2774,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2714,7 +2804,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2743,7 +2834,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2772,7 +2864,8 @@
               }
             }
           ],
-          "unit": "{connections}"
+          "unit": "{connections}",
+          "description": "The number of connections."
         },
         {
           "metric": {
@@ -2801,7 +2894,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -2830,7 +2924,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -2859,7 +2954,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -2888,7 +2984,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -2917,7 +3014,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -2946,7 +3044,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -2975,7 +3074,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -3004,7 +3104,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -3033,7 +3134,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -3062,7 +3164,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -3091,7 +3194,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -3120,7 +3224,8 @@
               }
             }
           ],
-          "unit": "By"
+          "unit": "By",
+          "description": "Filesystem bytes used."
         },
         {
           "metric": {
@@ -3146,7 +3251,8 @@
               }
             }
           ],
-          "unit": "{processes}"
+          "unit": "{processes}",
+          "description": "Total number of created processes."
         }
       ]
     }
@@ -3184,7 +3290,8 @@
                 }
               }
             ],
-            "unit": "1"
+            "unit": "1",
+            "description": "Count of metric points written to Cloud Monitoring."
           },
           {
             "metric": {
@@ -3308,7 +3415,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "End-to-end time taken to complete a client call attempt."
           },
           {
             "metric": {
@@ -3378,7 +3486,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes received per call attempt."
           },
           {
             "metric": {
@@ -3448,7 +3557,8 @@
                 }
               }
             ],
-            "unit": "By"
+            "unit": "By",
+            "description": "Compressed message bytes sent per client call attempt."
           },
           {
             "metric": {
@@ -3479,7 +3589,8 @@
                 }
               }
             ],
-            "unit": "attempt"
+            "unit": "attempt",
+            "description": "Number of client call attempts started."
           },
           {
             "metric": {
@@ -3603,7 +3714,8 @@
                 }
               }
             ],
-            "unit": "s"
+            "unit": "s",
+            "description": "Time taken by gRPC to complete an RPC from application's perspective."
           }
         ]
       }
