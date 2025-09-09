@@ -66,7 +66,8 @@ func filterAttributes(
 		if serviceResourceLabels &&
 			(k == semconv.AttributeServiceName ||
 				k == semconv.AttributeServiceNamespace ||
-				k == semconv.AttributeServiceInstanceID) {
+				k == semconv.AttributeServiceInstanceID ||
+				k == semconv.AttributeServiceVersion) {
 			if len(v.AsString()) > 0 {
 				v.CopyTo(attrs.PutEmpty(k))
 			}

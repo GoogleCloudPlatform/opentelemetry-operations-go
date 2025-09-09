@@ -659,11 +659,13 @@ func TestResourceToMetricLabels(t *testing.T) {
 				"service.namespace":       "myservicenamespace",
 				"service.name":            "myservicename",
 				"service.instance.id":     "myserviceinstanceid",
+				"service.version":         "myserviceversion",
 			},
 			expectExtraLabels: labels{
 				"service_namespace":   "myservicenamespace",
 				"service_name":        "myservicename",
 				"service_instance_id": "myserviceinstanceid",
+				"service_version":     "myserviceversion",
 			},
 		},
 		{
@@ -704,11 +706,13 @@ func TestResourceToMetricLabels(t *testing.T) {
 				"service.namespace":       "myservicenamespace",
 				"service.name":            "myservicename",
 				"service.instance.id":     "myserviceinstanceid",
+				"service.version":         "myserviceversion",
 			},
 			expectExtraLabels: labels{
 				"service_namespace":   "myservicenamespace",
 				"service_name":        "myservicename",
 				"service_instance_id": "myserviceinstanceid",
+				"service_version":     "myserviceversion",
 			},
 		},
 		{
@@ -717,11 +721,13 @@ func TestResourceToMetricLabels(t *testing.T) {
 				"service.namespace":   "myservicenamespace",
 				"service.name":        "myservicename",
 				"service.instance.id": "myserviceinstanceid",
+				"service.version":     "myserviceversion",
 			},
 			expectExtraLabels: labels{
 				"service_namespace":   "myservicenamespace",
 				"service_name":        "myservicename",
 				"service_instance_id": "myserviceinstanceid",
+				"service_version":     "myserviceversion",
 			},
 		},
 		{
@@ -732,11 +738,13 @@ func TestResourceToMetricLabels(t *testing.T) {
 				"service.namespace":       "myservicenamespace",
 				"service.name":            "myservicename",
 				"service.instance.id":     "myserviceinstanceid",
+				"service.version":         "myserviceversion",
 			},
 			expectExtraLabels: labels{
 				"service_namespace":   "myservicenamespace",
 				"service_name":        "myservicename",
 				"service_instance_id": "myserviceinstanceid",
+				"service_version":     "myserviceversion",
 			},
 		},
 		{
@@ -747,11 +755,13 @@ func TestResourceToMetricLabels(t *testing.T) {
 				"service.namespace":   "myservicenamespace",
 				"service.name":        "myservicename",
 				"service.instance.id": "myserviceinstanceid",
+				"service.version":     "myserviceversion",
 			},
 			expectExtraLabels: labels{
 				"service_namespace":   "myservicenamespace",
 				"service_name":        "myservicename",
 				"service_instance_id": "myserviceinstanceid",
+				"service_version":     "myserviceversion",
 			},
 		},
 		{
