@@ -3,7 +3,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/log/sl
 go 1.23.8
 
 require (
-	github.com/go-viper/mapstructure/v2 v2.3.0
+	github.com/go-viper/mapstructure/v2 v2.4.0
 	go.opentelemetry.io/contrib/bridges/otelslog v0.12.0
 	go.opentelemetry.io/contrib/detectors/gcp v1.37.0
 	go.opentelemetry.io/otel v1.37.0
