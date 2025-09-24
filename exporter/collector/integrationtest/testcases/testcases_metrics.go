@@ -487,7 +487,10 @@ func configureGMPCollector(cfg *collector.Config) {
 		UTF8Allowed:        false,
 	}
 	cfg.MetricConfig.GetMetricName = func(baseName string, metric pmetric.Metric) (string, error) {
-		compliantName := metricNamer.Build(translatorMetricFromOtelMetric(metric))
+		compliantName, err := metricNamer.Build(translatorMetricFromOtelMetric(metric))
+		if err != nil {
+			return "", err
+		}
 		return googlemanagedprometheus.GetMetricName(baseName, compliantName, metric)
 	}
 	cfg.MetricConfig.MapMonitoredResource = gmpConfig.MapToPrometheusTarget
