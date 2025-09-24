@@ -1431,7 +1431,7 @@
                 }
               }
             ],
-            "unit": "attempt",
+            "unit": "{attempt}",
             "description": "Number of client call attempts started."
           },
           {
@@ -1664,7 +1664,7 @@
           ],
           "metricKind": "CUMULATIVE",
           "valueType": "INT64",
-          "unit": "attempt",
+          "unit": "{attempt}",
           "description": "Number of client call attempts started.",
           "displayName": "grpc.client.attempt.started"
         }
@@ -1694,5 +1694,5 @@
       }
     ]
   },
-  "userAgent": "GoogleCloudExporter Integration Test/0.53.0 grpc-go/1.72.2"
+  "userAgent": "GoogleCloudExporter Integration Test/0.53.0 grpc-go/1.75.1"
 }

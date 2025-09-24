@@ -397,7 +397,7 @@
                 }
               }
             ],
-            "unit": "attempt",
+            "unit": "{attempt}",
             "description": "Number of client call attempts started."
           },
           {
@@ -630,7 +630,7 @@
           ],
           "metricKind": "CUMULATIVE",
           "valueType": "INT64",
-          "unit": "attempt",
+          "unit": "{attempt}",
           "description": "Number of client call attempts started.",
           "displayName": "grpc.client.attempt.started"
         }
@@ -660,5 +660,5 @@
       }
     ]
   },
-  "userAgent": "custom-user-agent grpc-go/1.72.2"
+  "userAgent": "custom-user-agent grpc-go/1.75.1"
 }
