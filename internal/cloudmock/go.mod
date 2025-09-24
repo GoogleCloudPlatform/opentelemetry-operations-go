@@ -15,10 +15,6 @@ require (
 
 require (
 	cloud.google.com/go/longrunning v0.6.7 // indirect
-	github.com/go-logr/logr v1.4.3 // indirect
-	github.com/google/go-cmp v0.7.0 // indirect
-	go.opentelemetry.io/otel v1.37.0 // indirect
-	go.opentelemetry.io/otel/sdk/metric v1.37.0 // indirect
 	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
