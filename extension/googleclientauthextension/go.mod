@@ -7,7 +7,7 @@ toolchain go1.24.2
 require (
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/collector/component v1.42.0
-	go.opentelemetry.io/collector/component/componenttest v0.120.0
+	go.opentelemetry.io/collector/component/componenttest v0.136.0
 	go.opentelemetry.io/collector/extension v1.42.0
 	golang.org/x/oauth2 v0.31.0
 	google.golang.org/api v0.249.0
