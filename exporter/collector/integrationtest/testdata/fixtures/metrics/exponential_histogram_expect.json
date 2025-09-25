@@ -829,5 +829,5 @@
       }
     ]
   },
-  "userAgent": "GoogleCloudExporter Integration Test/0.53.0 grpc-go/1.75.1"
+  "userAgent": "GoogleCloudExporter Integration Test/0.54.0 grpc-go/1.75.1"
 }
