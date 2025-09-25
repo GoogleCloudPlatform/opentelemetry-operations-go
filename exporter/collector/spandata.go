@@ -20,12 +20,12 @@ import (
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
-	semconv "go.opentelemetry.io/collector/semconv/v1.22.0"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/codes"
 	"go.opentelemetry.io/otel/sdk/instrumentation"
 	sdkresource "go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	apitrace "go.opentelemetry.io/otel/trace"
 )
 
@@ -134,9 +134,9 @@ func pdataAttributesToOTAttributes(attrs pcommon.Map, resource pcommon.Resource)
 	otAttrs := make([]attribute.KeyValue, 0, attrs.Len())
 	appendAttrs := func(m pcommon.Map) {
 		m.Range(func(k string, v pcommon.Value) bool {
-			if (k == semconv.AttributeServiceName ||
-				k == semconv.AttributeServiceNamespace ||
-				k == semconv.AttributeServiceInstanceID) &&
+			if (k == string(semconv.ServiceNameKey) ||
+				k == string(semconv.ServiceNamespaceKey) ||
+				k == string(semconv.ServiceInstanceIDKey)) &&
 				len(v.AsString()) == 0 {
 				return true
 			}

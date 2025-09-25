@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/genproto/googleapis/rpc/code"
@@ -87,7 +87,7 @@ func respond(ctx context.Context, client *pubsub.Client, testID string, res *res
 			traceIDKey:    res.traceID.String(),
 		},
 	}
-	publishResult := client.Topic(responseTopicName).Publish(ctx, m)
+	publishResult := client.Publisher(responseTopicName).Publish(ctx, m)
 	_, err := publishResult.Get(ctx)
 	return err
 }

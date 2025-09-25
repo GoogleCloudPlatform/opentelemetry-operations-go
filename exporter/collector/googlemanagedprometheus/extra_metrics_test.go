@@ -23,7 +23,7 @@ import (
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
 func testMetric(timestamp time.Time) pmetric.Metrics {
@@ -34,7 +34,7 @@ func appendMetric(metrics pmetric.Metrics, timestamp time.Time) pmetric.Metrics 
 	rm := metrics.ResourceMetrics().AppendEmpty()
 
 	// foo-label should be copied to target_info, not locationLabel
-	rm.Resource().Attributes().PutStr(semconv.AttributeServiceName, "my-service")
+	rm.Resource().Attributes().PutStr(string(semconv.ServiceNameKey), "my-service")
 	rm.Resource().Attributes().PutStr(locationLabel, "us-east")
 	rm.Resource().Attributes().PutStr("foo-label", "bar")
 

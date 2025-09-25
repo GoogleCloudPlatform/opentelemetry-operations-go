@@ -20,7 +20,6 @@ require (
 	go.opentelemetry.io/collector/confmap v1.42.0
 	go.opentelemetry.io/collector/exporter v1.42.0
 	go.opentelemetry.io/collector/pdata v1.42.0
-	go.opentelemetry.io/collector/semconv v0.128.0
 	go.opentelemetry.io/otel v1.38.0
 	go.opentelemetry.io/otel/metric v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0

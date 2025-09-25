@@ -18,7 +18,7 @@ import (
 	"strings"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	semconv "go.opentelemetry.io/collector/semconv/v1.22.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 )
 
@@ -42,37 +42,37 @@ const (
 var promTargetKeys = map[string][]string{
 	locationLabel: {
 		locationLabel,
-		semconv.AttributeCloudAvailabilityZone,
-		semconv.AttributeCloudRegion,
+		string(semconv.CloudAvailabilityZoneKey),
+		string(semconv.CloudRegionKey),
 	},
 	clusterLabel: {
 		clusterLabel,
-		semconv.AttributeK8SClusterName,
-		semconv.AttributeK8SClusterUID,
+		string(semconv.K8SClusterNameKey),
+		string(semconv.K8SClusterUIDKey),
 	},
 	namespaceLabel: {
 		namespaceLabel,
-		semconv.AttributeK8SNamespaceName,
+		string(semconv.K8SNamespaceNameKey),
 	},
 	jobLabel: {
 		jobLabel,
-		semconv.AttributeServiceName,
-		semconv.AttributeFaaSName,
-		semconv.AttributeK8SDeploymentName,
-		semconv.AttributeK8SStatefulSetName,
-		semconv.AttributeK8SDaemonSetName,
-		semconv.AttributeK8SJobName,
-		semconv.AttributeK8SCronJobName,
+		string(semconv.ServiceNameKey),
+		string(semconv.FaaSNameKey),
+		string(semconv.K8SDeploymentNameKey),
+		string(semconv.K8SStatefulSetNameKey),
+		string(semconv.K8SDaemonSetNameKey),
+		string(semconv.K8SJobNameKey),
+		string(semconv.K8SCronJobNameKey),
 	},
 	serviceNamespaceLabel: {
-		semconv.AttributeServiceNamespace,
+		string(semconv.ServiceNamespaceKey),
 	},
 	instanceLabel: {
 		instanceLabel,
-		semconv.AttributeServiceInstanceID,
-		semconv.AttributeFaaSInstance,
-		semconv.AttributeK8SPodName,
-		semconv.AttributeHostID,
+		string(semconv.ServiceInstanceIDKey),
+		string(semconv.FaaSInstanceKey),
+		string(semconv.K8SPodNameKey),
+		string(semconv.HostIDKey),
 	},
 }
 
@@ -87,8 +87,8 @@ func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.Moni
 	}
 	// Append k8s.container.name to instance if we are using the pod name
 	instanceKey, instance := getKeyAndStringOrDefault(attrs, "", promTargetKeys[instanceLabel]...)
-	if instanceKey == semconv.AttributeK8SPodName {
-		if containerName, ok := attrs.Get(semconv.AttributeK8SContainerName); ok {
+	if instanceKey == string(semconv.K8SPodNameKey) {
+		if containerName, ok := attrs.Get(string(semconv.K8SContainerNameKey)); ok {
 			instance += "/" + containerName.Str()
 		}
 	}
@@ -109,11 +109,11 @@ func (c Config) MapToPrometheusTarget(res pcommon.Resource) *monitoredrespb.Moni
 // See: https://cloud.google.com/stackdriver/docs/managed-prometheus/setup-opsagent
 func getStringOrDefaultClusterName(attrs pcommon.Map, keys ...string) string {
 	defaultClusterName := ""
-	cloudPlatform := getStringOrEmpty(attrs, semconv.AttributeCloudPlatform)
+	cloudPlatform := getStringOrEmpty(attrs, string(semconv.CloudPlatformKey))
 	switch cloudPlatform {
-	case semconv.AttributeCloudPlatformGCPComputeEngine:
+	case string(semconv.CloudPlatformGCPComputeEngine.Value.AsString()):
 		defaultClusterName = "__gce__"
-	case semconv.AttributeCloudPlatformGCPCloudRun:
+	case string(semconv.CloudPlatformGCPCloudRun.Value.AsString()):
 		defaultClusterName = "__run__"
 	}
 	return getStringOrDefault(attrs, defaultClusterName, promTargetKeys[clusterLabel]...)
@@ -135,10 +135,10 @@ func getKeyAndStringOrDefault(attributes pcommon.Map, orElse string, keys ...str
 			return k, val.Str()
 		}
 	}
-	if contains(keys, string(semconv.AttributeServiceName)) {
+	if contains(keys, string(semconv.ServiceNameKey)) {
 		// the service name started with unknown_service, and was ignored above
-		if val, ok := attributes.Get(semconv.AttributeServiceName); ok {
-			return semconv.AttributeServiceName, val.Str()
+		if val, ok := attributes.Get(string(semconv.ServiceNameKey)); ok {
+			return string(semconv.ServiceNameKey), val.Str()
 		}
 	}
 	return "", orElse
