@@ -19,7 +19,7 @@ import (
 	"strings"
 
 	"go.opentelemetry.io/collector/pdata/pcommon"
-	semconv "go.opentelemetry.io/collector/semconv/v1.22.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping"
@@ -64,9 +64,9 @@ func filterAttributes(
 	attributes.Range(func(k string, v pcommon.Value) bool {
 		// Is a service attribute and should be included
 		if serviceResourceLabels &&
-			(k == semconv.AttributeServiceName ||
-				k == semconv.AttributeServiceNamespace ||
-				k == semconv.AttributeServiceInstanceID) {
+			(k == string(semconv.ServiceNameKey) ||
+				k == string(semconv.ServiceNamespaceKey) ||
+				k == string(semconv.ServiceInstanceIDKey)) {
 			if len(v.AsString()) > 0 {
 				v.CopyTo(attrs.PutEmpty(k))
 			}

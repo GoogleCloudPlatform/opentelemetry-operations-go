@@ -21,7 +21,7 @@ import (
 	"log"
 	"os"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 	// funcframework is required to make this build on cloud functions.  See
 	// https://github.com/GoogleCloudPlatform/functions-framework-go/issues/78
 	_ "github.com/GoogleCloudPlatform/functions-framework-go/funcframework"

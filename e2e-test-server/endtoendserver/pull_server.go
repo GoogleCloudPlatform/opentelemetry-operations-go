@@ -18,7 +18,7 @@ import (
 	"context"
 	"log"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-server/scenarios"
 )
@@ -43,7 +43,7 @@ func NewPullServer() (Server, error) {
 // Run the end-to-end test service. This method will block until the context is
 // cancel, or an unrecoverable error is encountered.
 func (s *pullServer) Run(ctx context.Context) error {
-	sub := s.pubsubClient.Subscription(requestSubscriptionName)
+	sub := s.pubsubClient.Subscriber(requestSubscriptionName)
 	log.Printf("End-to-end test service listening on %s", sub)
 	return sub.Receive(ctx, func(ctx context.Context, m *pubsub.Message) { s.onReceive(ctx, m) })
 }

@@ -22,7 +22,7 @@ import (
 	"log"
 	"net/http"
 
-	"cloud.google.com/go/pubsub"
+	"cloud.google.com/go/pubsub/v2"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-server/scenarios"
 )

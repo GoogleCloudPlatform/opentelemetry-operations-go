@@ -21,7 +21,7 @@ import (
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
-	semconv "go.opentelemetry.io/collector/semconv/v1.18.0"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
 var intToDoubleFeatureGate = featuregate.GlobalRegistry().MustRegister(
@@ -215,9 +215,9 @@ func (c Config) addTargetInfoMetric(m pmetric.Metrics) {
 		}
 
 		id := resourceID{
-			serviceName:       getResourceAttr(semconv.AttributeServiceName),
-			serviceNamespace:  getResourceAttr(semconv.AttributeServiceNamespace),
-			serviceInstanceID: getResourceAttr(semconv.AttributeServiceInstanceID),
+			serviceName:       getResourceAttr(string(semconv.ServiceNameKey)),
+			serviceNamespace:  getResourceAttr(string(semconv.ServiceNamespaceKey)),
+			serviceInstanceID: getResourceAttr(string(semconv.ServiceInstanceIDKey)),
 		}
 		if _, ok := ids[id]; ok {
 			// We've already added a resource with the same ID before, so skip this one.
@@ -240,9 +240,9 @@ func (c Config) addTargetInfoMetric(m pmetric.Metrics) {
 		// Other "fallback" attributes which could become `job` or `instance` in the absence of those three
 		// (such as k8s.pod.name or faas.name) will be duplicated as a resource attribute and metric label.
 		rm.Resource().Attributes().Range(func(k string, v pcommon.Value) bool {
-			if k != semconv.AttributeServiceName &&
-				k != semconv.AttributeServiceNamespace &&
-				k != semconv.AttributeServiceInstanceID &&
+			if k != string(semconv.ServiceNameKey) &&
+				k != string(semconv.ServiceNamespaceKey) &&
+				k != string(semconv.ServiceInstanceIDKey) &&
 				k != locationLabel &&
 				k != clusterLabel &&
 				k != namespaceLabel &&
@@ -352,9 +352,9 @@ func (c Config) addScopeInfoMetric(m pmetric.Metrics) {
 			}
 			id := scopeID{
 				resource: resourceID{
-					serviceName:       getResourceAttr(semconv.AttributeServiceName),
-					serviceNamespace:  getResourceAttr(semconv.AttributeServiceNamespace),
-					serviceInstanceID: getResourceAttr(semconv.AttributeServiceInstanceID),
+					serviceName:       getResourceAttr(string(semconv.ServiceNameKey)),
+					serviceNamespace:  getResourceAttr(string(semconv.ServiceNamespaceKey)),
+					serviceInstanceID: getResourceAttr(string(semconv.ServiceInstanceIDKey)),
 				},
 				name:    sm.Scope().Name(),
 				version: sm.Scope().Version(),
