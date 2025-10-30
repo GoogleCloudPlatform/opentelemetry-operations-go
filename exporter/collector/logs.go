@@ -43,6 +43,7 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter"
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 
@@ -62,6 +63,12 @@ const (
 	GCPTypeKey                 = "@type"
 	GCPErrorReportingTypeValue = "type.googleapis.com/google.devtools.clouderrorreporting.v1beta1.ReportedErrorEvent"
 )
+
+var noLogTraceContextPrefix = featuregate.GlobalRegistry().MustRegister(
+	"exporter.googlecloud.noLogTraceContextPrefix",
+	featuregate.StageAlpha,
+	featuregate.WithRegisterFromVersion("v0.139.0"),
+	featuregate.WithRegisterDescription("Do not prefix the trace field in LogEntry with projects/<project_id/traces/."))
 
 // severityMapping maps the integer severity level values from OTel [0-24]
 // to matching Cloud Logging severity levels.
@@ -454,7 +461,11 @@ func (l logMapper) logToSplitEntries(
 
 	// parse TraceID and SpanID, if present
 	if traceID := logRecord.TraceID(); !traceID.IsEmpty() {
-		entry.Trace = fmt.Sprintf("projects/%s/traces/%s", projectID, hex.EncodeToString(traceID[:]))
+		if noLogTraceContextPrefix.IsEnabled() {
+			entry.Trace = hex.EncodeToString(traceID[:])
+		} else {
+			entry.Trace = fmt.Sprintf("projects/%s/traces/%s", projectID, hex.EncodeToString(traceID[:]))
+		}
 	}
 	if spanID := logRecord.SpanID(); !spanID.IsEmpty() {
 		entry.SpanId = hex.EncodeToString(spanID[:])
