@@ -23,6 +23,8 @@ import (
 	"cloud.google.com/go/logging"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
@@ -63,14 +65,15 @@ func TestLogMapping(t *testing.T) {
 	logName := "projects/fakeprojectid/logs/default-log"
 
 	testCases := []struct {
-		expectedError   error
-		log             func() plog.LogRecord
-		mr              func() *monitoredrespb.MonitoredResource
-		config          Option
-		name            string
-		expectedEntries []*logpb.LogEntry
-		expectError     bool
-		maxEntrySize    int
+		expectedError           error
+		log                     func() plog.LogRecord
+		mr                      func() *monitoredrespb.MonitoredResource
+		config                  Option
+		name                    string
+		expectedEntries         []*logpb.LogEntry
+		expectError             bool
+		maxEntrySize            int
+		noLogTraceContextPrefix bool
 	}{
 		{
 			name:         "split entry size",
@@ -570,7 +573,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with trace and span id",
+			name: "log with trace and span id noLogTraceContextPrefix disabled",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -588,7 +591,30 @@ func TestLogMapping(t *testing.T) {
 					SpanId:    hex.EncodeToString(testSpanID[:]),
 				},
 			},
-			maxEntrySize: defaultMaxEntrySize,
+			maxEntrySize:            defaultMaxEntrySize,
+			noLogTraceContextPrefix: false,
+		},
+		{
+			name: "log with trace and span id noLogTraceContextPrefix enabled",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetTraceID(testTraceID)
+				log.SetSpanID(testSpanID)
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Trace:     hex.EncodeToString(testTraceID[:]),
+					SpanId:    hex.EncodeToString(testSpanID[:]),
+				},
+			},
+			maxEntrySize:            defaultMaxEntrySize,
+			noLogTraceContextPrefix: true,
 		},
 		{
 			name: "log with severity number",
@@ -816,6 +842,11 @@ func TestLogMapping(t *testing.T) {
 
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
+			originalValue := noLogTraceContextPrefix.IsEnabled()
+			require.NoError(t, featuregate.GlobalRegistry().Set(noLogTraceContextPrefix.ID(), testCase.noLogTraceContextPrefix))
+			defer func() {
+				require.NoError(t, featuregate.GlobalRegistry().Set(noLogTraceContextPrefix.ID(), originalValue))
+			}()
 			log := testCase.log()
 			mr := testCase.mr()
 			mapper := newTestLogMapper(testCase.maxEntrySize, testCase.config)
