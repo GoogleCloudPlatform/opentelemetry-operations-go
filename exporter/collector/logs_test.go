@@ -163,7 +163,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with json and httpRequest, empty monitoredresource",
+			name: "log with json and httpRequest with string status, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				log.Body().SetEmptyMap().PutStr("message", "hello!")
@@ -172,6 +172,58 @@ func TestLogMapping(t *testing.T) {
 						"requestURL": "https://www.example.com",
 						"requestSize": "1",
 						"status": "200",
+						"responseSize": "1",
+						"userAgent": "test",
+						"remoteIP": "192.168.0.1",
+						"serverIP": "192.168.0.2",
+						"referer": "https://www.example2.com",
+						"cacheHit": false,
+						"cacheValidatedWithOriginServer": false,
+						"cacheFillBytes": "1",
+						"protocol": "HTTP/2"
+					}`))
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
+					HttpRequest: &logtypepb.HttpRequest{
+						RequestMethod:                  "GET",
+						UserAgent:                      "test",
+						Referer:                        "https://www.example2.com",
+						RequestUrl:                     "https://www.example.com",
+						Protocol:                       "HTTP/1.1",
+						RequestSize:                    1,
+						Status:                         200,
+						ResponseSize:                   1,
+						ServerIp:                       "192.168.0.2",
+						RemoteIp:                       "192.168.0.1",
+						CacheHit:                       false,
+						CacheValidatedWithOriginServer: false,
+						CacheFillBytes:                 1,
+						CacheLookup:                    false,
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with json and httpRequest with integer status, empty monitoredresource",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				log.Attributes().PutEmptyBytes(HTTPRequestAttributeKey).FromRaw([]byte(`{
+						"requestMethod": "GET",
+						"requestURL": "https://www.example.com",
+						"requestSize": "1",
+						"status": 200,
 						"responseSize": "1",
 						"userAgent": "test",
 						"remoteIP": "192.168.0.1",
