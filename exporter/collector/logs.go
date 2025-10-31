@@ -585,7 +585,8 @@ func (l logMapper) logToSplitEntries(
 
 type IntOrString int32
 
-// Used to unmarhall JSON fields that can be either provided as integer or a string containing an integer.
+// Used to unmarhall JSON fields that can be either provided as a JSON number
+// or a string containing an integer.
 func (f *IntOrString) UnmarshalJSON(data []byte) error {
 	var num int32
 	if err := json.Unmarshal(data, &num); err == nil {
