@@ -596,7 +596,7 @@ func (f *IntOrString) UnmarshalJSON(data []byte) error {
 
 	var str string
 	if err := json.Unmarshal(data, &str); err == nil {
-		integer, err := strconv.Atoi(strings.TrimSpace(str))
+		integer, err := strconv.ParseInt(strings.TrimSpace(str), 10, 32)
 		if err != nil {
 			return fmt.Errorf("failed to convert quoted string to int: %w", err)
 		}
