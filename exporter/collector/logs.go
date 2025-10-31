@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"math"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -582,24 +583,47 @@ func (l logMapper) logToSplitEntries(
 	return entries, nil
 }
 
+type IntOrString int32
+
+// Used to unmarhall JSON fields that can be either provided as integer or a string containing an integer.
+func (f *IntOrString) UnmarshalJSON(data []byte) error {
+	var num int32
+	if err := json.Unmarshal(data, &num); err == nil {
+		*f = IntOrString(num)
+		return nil
+	}
+
+	var str string
+	if err := json.Unmarshal(data, &str); err == nil {
+		i, err := strconv.Atoi(strings.TrimSpace(str))
+		if err != nil {
+			return fmt.Errorf("failed to convert quoted string to int: %w", err)
+		}
+		*f = IntOrString(i)
+		return nil
+	}
+
+	return fmt.Errorf("field must be a JSON number or a string containing an integer: %s", string(data))
+}
+
 // JSON keys derived from:
 // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#httprequest
 type httpRequestLog struct {
-	RemoteIP                       string `json:"remoteIp"`
-	RequestURL                     string `json:"requestUrl"`
-	Latency                        string `json:"latency"`
-	Referer                        string `json:"referer"`
-	ServerIP                       string `json:"serverIp"`
-	UserAgent                      string `json:"userAgent"`
-	RequestMethod                  string `json:"requestMethod"`
-	Protocol                       string `json:"protocol"`
-	ResponseSize                   int64  `json:"responseSize,string"`
-	RequestSize                    int64  `json:"requestSize,string"`
-	CacheFillBytes                 int64  `json:"cacheFillBytes,string"`
-	Status                         int32  `json:"status,string"`
-	CacheLookup                    bool   `json:"cacheLookup"`
-	CacheHit                       bool   `json:"cacheHit"`
-	CacheValidatedWithOriginServer bool   `json:"cacheValidatedWithOriginServer"`
+	RemoteIP                       string      `json:"remoteIp"`
+	RequestURL                     string      `json:"requestUrl"`
+	Latency                        string      `json:"latency"`
+	Referer                        string      `json:"referer"`
+	ServerIP                       string      `json:"serverIp"`
+	UserAgent                      string      `json:"userAgent"`
+	RequestMethod                  string      `json:"requestMethod"`
+	Protocol                       string      `json:"protocol"`
+	ResponseSize                   int64       `json:"responseSize,string"`
+	RequestSize                    int64       `json:"requestSize,string"`
+	CacheFillBytes                 int64       `json:"cacheFillBytes,string"`
+	Status                         IntOrString `json:"status"`
+	CacheLookup                    bool        `json:"cacheLookup"`
+	CacheHit                       bool        `json:"cacheHit"`
+	CacheValidatedWithOriginServer bool        `json:"cacheValidatedWithOriginServer"`
 }
 
 func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.HttpRequest, error) {
@@ -613,7 +637,7 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.H
 		RequestMethod:                  parsedHTTPRequest.RequestMethod,
 		RequestUrl:                     fixUTF8(parsedHTTPRequest.RequestURL),
 		RequestSize:                    parsedHTTPRequest.RequestSize,
-		Status:                         parsedHTTPRequest.Status,
+		Status:                         int32(parsedHTTPRequest.Status),
 		ResponseSize:                   parsedHTTPRequest.ResponseSize,
 		UserAgent:                      parsedHTTPRequest.UserAgent,
 		ServerIp:                       parsedHTTPRequest.ServerIP,
