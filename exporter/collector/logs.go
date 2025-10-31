@@ -588,19 +588,19 @@ type IntOrString int32
 // Used to unmarhall JSON fields that can be either provided as a JSON number
 // or a string containing an integer.
 func (f *IntOrString) UnmarshalJSON(data []byte) error {
-	var num int32
-	if err := json.Unmarshal(data, &num); err == nil {
-		*f = IntOrString(num)
+	var number int32
+	if err := json.Unmarshal(data, &number); err == nil {
+		*f = IntOrString(number)
 		return nil
 	}
 
 	var str string
 	if err := json.Unmarshal(data, &str); err == nil {
-		i, err := strconv.Atoi(strings.TrimSpace(str))
+		integer, err := strconv.Atoi(strings.TrimSpace(str))
 		if err != nil {
 			return fmt.Errorf("failed to convert quoted string to int: %w", err)
 		}
-		*f = IntOrString(i)
+		*f = IntOrString(integer)
 		return nil
 	}
 
