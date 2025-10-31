@@ -267,6 +267,46 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
+			name: "log with httpRequest attribute unsupported type",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				log.Attributes().PutBool(HTTPRequestAttributeKey, true)
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with timestamp",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetTimestamp(pcommon.NewTimestampFromTime(testSampleTime))
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testSampleTime),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
 			name: "log with empty timestamp, but set observed_time",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
