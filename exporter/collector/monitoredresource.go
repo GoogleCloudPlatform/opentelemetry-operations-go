@@ -51,6 +51,25 @@ func defaultResourceToLoggingMonitoredResource(resource pcommon.Resource) *monit
 	})
 }
 
+func compileResourceFilters(filters []ResourceFilter) []compiledResourceFilter {
+	compiled := make([]compiledResourceFilter, len(filters))
+	for i := range len(filters) {
+		// errors are already handled during Validate()
+		re, _ := regexp.Compile(filters[i].Regex)
+		compiled[i] = compiledResourceFilter{
+			prefix: filters[i].Prefix,
+			regex:  re,
+		}
+	}
+	return compiled
+}
+
+// compiledResourceFilter is a ResourceFilter where the regex has been compiled.
+type compiledResourceFilter struct {
+	regex  *regexp.Regexp
+	prefix string
+}
+
 // resourceToLabels converts the Resource attributes into labels.
 // TODO(@damemi): Refactor to pass control-coupling lint check.
 //
@@ -58,7 +77,7 @@ func defaultResourceToLoggingMonitoredResource(resource pcommon.Resource) *monit
 func filterAttributes(
 	attributes pcommon.Map,
 	serviceResourceLabels bool,
-	resourceFilters []ResourceFilter,
+	resourceFilters []compiledResourceFilter,
 ) pcommon.Map {
 	attrs := pcommon.NewMap()
 	attributes.Range(func(k string, v pcommon.Value) bool {
@@ -74,7 +93,7 @@ func filterAttributes(
 		}
 		// Matches one of the resource filters
 		for _, resourceFilter := range resourceFilters {
-			if match, _ := regexp.Match(resourceFilter.Regex, []byte(k)); strings.HasPrefix(k, resourceFilter.Prefix) && match {
+			if resourceFilter.regex.Match([]byte(k)) && strings.HasPrefix(k, resourceFilter.prefix) {
 				v.CopyTo(attrs.PutEmpty(k))
 				return true
 			}

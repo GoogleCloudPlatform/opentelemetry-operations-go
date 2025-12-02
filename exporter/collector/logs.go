@@ -168,10 +168,11 @@ type LogsExporter struct {
 }
 
 type logMapper struct {
-	obs            selfObservability
-	cfg            Config
-	maxEntrySize   int
-	maxRequestSize int
+	obs             selfObservability
+	compiledFilters []compiledResourceFilter
+	cfg             Config
+	maxEntrySize    int
+	maxRequestSize  int
 }
 
 func NewGoogleCloudLogsExporter(
@@ -191,10 +192,11 @@ func NewGoogleCloudLogsExporter(
 		obs:     obs,
 		timeout: timeout,
 		mapper: logMapper{
-			obs:            obs,
-			cfg:            cfg,
-			maxEntrySize:   defaultMaxEntrySize,
-			maxRequestSize: defaultMaxRequestSize,
+			obs:             obs,
+			cfg:             cfg,
+			compiledFilters: compileResourceFilters(cfg.LogConfig.ResourceFilters),
+			maxEntrySize:    defaultMaxEntrySize,
+			maxRequestSize:  defaultMaxRequestSize,
 		},
 	}, nil
 }
@@ -299,7 +301,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr := l.cfg.LogConfig.MapMonitoredResource(rl.Resource())
-		extraResourceLabels := attributesToUnsanitizedLabels(filterAttributes(rl.Resource().Attributes(), l.cfg.LogConfig.ServiceResourceLabels, l.cfg.LogConfig.ResourceFilters))
+		extraResourceLabels := attributesToUnsanitizedLabels(filterAttributes(rl.Resource().Attributes(), l.cfg.LogConfig.ServiceResourceLabels, l.compiledFilters))
 		projectID := l.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
 		if projectFromResource, found := rl.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {

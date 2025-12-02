@@ -90,8 +90,9 @@ type MetricsExporter struct {
 	// shutdownC is a channel for signaling a graceful shutdown
 	shutdownC chan struct{}
 	// requestOpts applies options to the context for requests, such as additional headers.
-	requestOpts []func(*context.Context, requestInfo)
-	cfg         Config
+	requestOpts     []func(*context.Context, requestInfo)
+	compiledFilters []compiledResourceFilter
+	cfg             Config
 	// goroutines tracks the currently running child tasks
 	goroutines sync.WaitGroup
 	timeout    time.Duration
@@ -222,6 +223,7 @@ func NewGoogleCloudMetricsExporter(
 		shutdownC:             make(chan struct{}),
 		timeout:               timeout,
 		pointsExportedCounter: pointsExportedCounter,
+		compiledFilters:       compileResourceFilters(cfg.MetricConfig.ResourceFilters),
 	}
 	mExp.exportFunc = mExp.exportToTimeSeries
 
@@ -348,7 +350,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		monitoredResource := me.cfg.MetricConfig.MapMonitoredResource(rm.Resource())
-		extraResourceLabels := attributesToLabels(filterAttributes(rm.Resource().Attributes(), me.cfg.MetricConfig.ServiceResourceLabels, me.cfg.MetricConfig.ResourceFilters))
+		extraResourceLabels := attributesToLabels(filterAttributes(rm.Resource().Attributes(), me.cfg.MetricConfig.ServiceResourceLabels, me.compiledFilters))
 		projectID := me.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
 		if projectFromResource, found := rm.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
