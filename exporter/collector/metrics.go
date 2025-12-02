@@ -93,8 +93,9 @@ type MetricsExporter struct {
 	requestOpts []func(*context.Context, requestInfo)
 	cfg         Config
 	// goroutines tracks the currently running child tasks
-	goroutines sync.WaitGroup
-	timeout    time.Duration
+	goroutines      sync.WaitGroup
+	timeout         time.Duration
+	compiledFilters []compiledResourceFilter
 }
 
 type exporterWAL struct {
@@ -222,6 +223,7 @@ func NewGoogleCloudMetricsExporter(
 		shutdownC:             make(chan struct{}),
 		timeout:               timeout,
 		pointsExportedCounter: pointsExportedCounter,
+		compiledFilters:       compileResourceFilters(cfg.MetricConfig.ResourceFilters),
 	}
 	mExp.exportFunc = mExp.exportToTimeSeries
 
@@ -348,7 +350,7 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 	for i := 0; i < rms.Len(); i++ {
 		rm := rms.At(i)
 		monitoredResource := me.cfg.MetricConfig.MapMonitoredResource(rm.Resource())
-		extraResourceLabels := attributesToLabels(filterAttributes(rm.Resource().Attributes(), me.cfg.MetricConfig.ServiceResourceLabels, me.cfg.MetricConfig.ResourceFilters))
+		extraResourceLabels := attributesToLabels(filterAttributes(rm.Resource().Attributes(), me.cfg.MetricConfig.ServiceResourceLabels, me.compiledFilters))
 		projectID := me.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
 		if projectFromResource, found := rm.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
