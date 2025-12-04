@@ -14,7 +14,7 @@
 
 steps:
   # Wait for the image to exist
-  - name: "docker"
+  - name: docker:28
     id: wait-for-image
     entrypoint: "sh"
     timeout: 3m
@@ -22,7 +22,7 @@ steps:
     args:
       - e2e-test-server/wait-for-image.sh
 
-  - name: "docker"
+  - name: docker:28
     id: pull-image
     args:
       - pull
