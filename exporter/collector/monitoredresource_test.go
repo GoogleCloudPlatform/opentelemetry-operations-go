@@ -824,7 +824,7 @@ func TestResourceToMetricLabels(t *testing.T) {
 			}
 			attrs := pcommon.NewMap()
 			assert.NoError(t, attrs.FromRaw(test.resourceLabels))
-			extraLabels := attributesToLabels(filterAttributes(attrs, mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters))
+			extraLabels := attributesToLabels(filterAttributes(attrs, mapper.cfg.MetricConfig.ServiceResourceLabels, compileResourceFilters(mapper.cfg.MetricConfig.ResourceFilters)))
 			assert.Equal(t, test.expectExtraLabels, extraLabels)
 		})
 	}
@@ -872,6 +872,6 @@ func TestResourceMetricsToMonitoredResourceUTF8(t *testing.T) {
 	}
 	mr := defaultResourceToMonitoringMonitoredResource(r)
 	assert.Equal(t, expectMr, mr)
-	extraLabels := attributesToLabels(filterAttributes(r.Attributes(), mapper.cfg.MetricConfig.ServiceResourceLabels, mapper.cfg.MetricConfig.ResourceFilters))
+	extraLabels := attributesToLabels(filterAttributes(r.Attributes(), mapper.cfg.MetricConfig.ServiceResourceLabels, compileResourceFilters(mapper.cfg.MetricConfig.ResourceFilters)))
 	assert.Equal(t, expectExtraLabels, extraLabels)
 }
