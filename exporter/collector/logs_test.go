@@ -890,6 +890,45 @@ func TestLogMapping(t *testing.T) {
 			},
 			maxEntrySize: defaultMaxEntrySize,
 		},
+		{
+			name: "log with event_name",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.SetEventName("my.event")
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Labels: map[string]string{
+						"event.name": "my.event",
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with empty event_name",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				// event_name is empty by default
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
 	}
 
 	for _, testCase := range testCases {
