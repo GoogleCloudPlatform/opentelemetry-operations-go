@@ -12,7 +12,7 @@ require (
 	// [START opentelemetry_otlp_http_auth_deps]
 	// When using http based OTLP exporter, use explicit auth library
 	golang.org/x/oauth2 v0.31.0
-	// [END opentelemetry_otlp_http_auth_deps]
+// [END opentelemetry_otlp_http_auth_deps]
 )
 
 require (

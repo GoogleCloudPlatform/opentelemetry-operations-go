@@ -15,29 +15,29 @@
 
 package main
 
-// [START opentelemetry_otlp_grpc_imports]
+// [START opentelemetry_otlp_grpc_imports].
 import (
 	"context"
-	// [START_EXCLUDE silent]
+	// [START_EXCLUDE silent].
 	"flag"
 	"fmt"
 	"log"
 	"time"
 
-	// [END_EXCLUDE]
+	// [END_EXCLUDE].
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 
-	// [START_EXCLUDE]
+	// [START_EXCLUDE].
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
-	// [START opentelemetry_otlp_grpc_auth_imports]
+	// [START opentelemetry_otlp_grpc_auth_imports].
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/oauth"
-	// [END opentelemetry_otlp_grpc_auth_imports]
-	// [END_EXCLUDE]
+	// [END opentelemetry_otlp_grpc_auth_imports].
+	// [END_EXCLUDE].
 )
 
 // [END opentelemetry_otlp_grpc_imports]
