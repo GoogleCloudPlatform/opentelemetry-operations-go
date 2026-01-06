@@ -15,28 +15,41 @@
 
 package main
 
+// [START opentelemetry_otlp_grpc_imports].
 import (
 	"context"
+	// [START_EXCLUDE silent].
 	"flag"
 	"fmt"
 	"log"
 	"time"
 
+	// [END_EXCLUDE].
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+
+	// [START_EXCLUDE].
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"go.opentelemetry.io/otel/trace"
 
+	// [START opentelemetry_otlp_grpc_auth_imports].
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/oauth"
+	// [END opentelemetry_otlp_grpc_auth_imports].
+	// [END_EXCLUDE].
 )
+
+// [END opentelemetry_otlp_grpc_imports]
 
 var keepRunning = flag.Bool("keepRunning", false, "Set to true for generating spans at a fixed rate indefinitely. Default is false.")
 
 func initTracer() (func(), error) {
+	// [START opentelemetry_otlp_grpc_init]
+	// Initializes OpenTelemetry with OTLP exporters
 	ctx := context.Background()
 
+	// Configure gRPC client with Google Application Default Credentials
 	creds, err := oauth.NewApplicationDefault(ctx)
 	if err != nil {
 		panic(err)
@@ -45,6 +58,7 @@ func initTracer() (func(), error) {
 	// set OTEL_RESOURCE_ATTRIBUTES="gcp.project_id=<project_id>"
 	// set endpoint with OTEL_EXPORTER_OTLP_ENDPOINT=https://<endpoint>
 	// set OTEL_EXPORTER_OTLP_HEADERS="x-goog-user-project=<project_id>"
+	// Configure exporter to use the credentials
 	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithDialOption(grpc.WithPerRPCCredentials(creds)))
 	if err != nil {
 		panic(err)
@@ -57,6 +71,7 @@ func initTracer() (func(), error) {
 		sdktrace.WithBatcher(exporter))
 
 	otel.SetTracerProvider(tp)
+	// [END opentelemetry_otlp_grpc_init]
 	return func() {
 		err := tp.Shutdown(context.Background())
 		if err != nil {

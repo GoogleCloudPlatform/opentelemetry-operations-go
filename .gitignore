@@ -18,5 +18,6 @@ coverage.*
 /example/metric/exponential_histogram/exponential_histogram
 /example/trace/otlphttp/otlphttp
 /example/log/slogbridge/otel_logs
+/example/log/slogbridge/slogbridge
 go.work
 go.work.sum
