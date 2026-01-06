@@ -9,7 +9,10 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.38.0
 	go.opentelemetry.io/otel/sdk v1.38.0
 	go.opentelemetry.io/otel/trace v1.38.0
+	// [START opentelemetry_otlp_http_auth_deps]
+	// When using http based OTLP exporter, use explicit auth library
 	golang.org/x/oauth2 v0.31.0
+	// [END opentelemetry_otlp_http_auth_deps]
 )
 
 require (
