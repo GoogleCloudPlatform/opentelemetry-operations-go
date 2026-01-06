@@ -54,11 +54,10 @@ func defaultResourceToLoggingMonitoredResource(resource pcommon.Resource) *monit
 func compileResourceFilters(filters []ResourceFilter) []compiledResourceFilter {
 	compiled := make([]compiledResourceFilter, len(filters))
 	for i := range len(filters) {
-		// errors are already handled during Validate()
-		re, _ := regexp.Compile(filters[i].Regex)
 		compiled[i] = compiledResourceFilter{
 			prefix: filters[i].Prefix,
-			regex:  re,
+			// errors are already handled during Validate()
+			regex: regexp.MustCompile(filters[i].Regex),
 		}
 	}
 	return compiled
