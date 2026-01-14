@@ -595,7 +595,7 @@ func unmarshalJSONToIntByBitSize(data []byte, bitSize int) (int64, error) {
 	if err := json.Unmarshal(data, &str); err == nil {
 		integer, err := strconv.ParseInt(strings.TrimSpace(str), 10, bitSize)
 		if err != nil {
-			return 0, fmt.Errorf("failed to convert string number to integer: %w", err)
+			return integer, fmt.Errorf("failed to convert string number to integer: %w", err)
 		}
 		return integer, nil
 	}
