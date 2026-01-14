@@ -603,50 +603,50 @@ func unmarshalJSONToIntByBitSize(data []byte, bitSize int) (int64, error) {
 	return 0, fmt.Errorf("field must be a JSON number or a string containing an integer: %s", string(data))
 }
 
-type Int32_Or_String int32
+type Int32OrString int32
 
 // Used to unmarhall JSON fields that can be either provided as a JSON number
 // or a string containing an integer.
-func (f *Int32_Or_String) UnmarshalJSON(data []byte) error {
+func (f *Int32OrString) UnmarshalJSON(data []byte) error {
 	integer, err := unmarshalJSONToIntByBitSize(data, 32)
 	if err != nil {
 		return err
 	}
-	*f = Int32_Or_String(integer)
+	*f = Int32OrString(integer)
 	return nil
 }
 
-type Int64_Or_String int64
+type Int64OrString int64
 
 // Used to unmarhall JSON fields that can be either provided as a JSON number
 // or a string containing an integer.
-func (f *Int64_Or_String) UnmarshalJSON(data []byte) error {
+func (f *Int64OrString) UnmarshalJSON(data []byte) error {
 	integer, err := unmarshalJSONToIntByBitSize(data, 64)
 	if err != nil {
 		return err
 	}
-	*f = Int64_Or_String(integer)
+	*f = Int64OrString(integer)
 	return nil
 }
 
 // JSON keys derived from:
 // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#httprequest
 type httpRequestLog struct {
-	RemoteIP                       string          `json:"remoteIp"`
-	RequestURL                     string          `json:"requestUrl"`
-	Latency                        string          `json:"latency"`
-	Referer                        string          `json:"referer"`
-	ServerIP                       string          `json:"serverIp"`
-	UserAgent                      string          `json:"userAgent"`
-	RequestMethod                  string          `json:"requestMethod"`
-	Protocol                       string          `json:"protocol"`
-	ResponseSize                   Int64_Or_String `json:"responseSize"`
-	RequestSize                    Int64_Or_String `json:"requestSize"`
-	CacheFillBytes                 Int64_Or_String `json:"cacheFillBytes"`
-	Status                         Int32_Or_String `json:"status"`
-	CacheLookup                    bool            `json:"cacheLookup"`
-	CacheHit                       bool            `json:"cacheHit"`
-	CacheValidatedWithOriginServer bool            `json:"cacheValidatedWithOriginServer"`
+	RemoteIP                       string        `json:"remoteIp"`
+	RequestURL                     string        `json:"requestUrl"`
+	Latency                        string        `json:"latency"`
+	Referer                        string        `json:"referer"`
+	ServerIP                       string        `json:"serverIp"`
+	UserAgent                      string        `json:"userAgent"`
+	RequestMethod                  string        `json:"requestMethod"`
+	Protocol                       string        `json:"protocol"`
+	ResponseSize                   Int64OrString `json:"responseSize"`
+	RequestSize                    Int64OrString `json:"requestSize"`
+	CacheFillBytes                 Int64OrString `json:"cacheFillBytes"`
+	Status                         Int32OrString `json:"status"`
+	CacheLookup                    bool          `json:"cacheLookup"`
+	CacheHit                       bool          `json:"cacheHit"`
+	CacheValidatedWithOriginServer bool          `json:"cacheValidatedWithOriginServer"`
 }
 
 func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.HttpRequest, error) {
