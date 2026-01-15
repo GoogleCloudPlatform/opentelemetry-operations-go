@@ -62,6 +62,12 @@ func TestLogMapping(t *testing.T) {
 	testSpanID := pcommon.SpanID([8]byte{
 		0, 0, 0, 0, 0, 0, 0, 1,
 	})
+	testInt64RequestSize := int64(4611686018427387904)    // 2 ^ 62 + 1
+	testInt64ResponseSize := int64(4611686018427387905)   // 2 ^ 62 + 2
+	testInt64CacheFillBytes := int64(4611686018427387906) // 2 ^ 62 + 3
+	testStringRequestSize := "4611686018427387904"        // 2 ^ 62 + 1
+	testStringResponseSize := "4611686018427387905"       // 2 ^ 62 + 2
+	testStringCacheFillBytes := "4611686018427387906"     // 2 ^ 62 + 3
 	logName := "projects/fakeprojectid/logs/default-log"
 
 	testCases := []struct {
@@ -260,6 +266,108 @@ func TestLogMapping(t *testing.T) {
 						CacheHit:                       false,
 						CacheValidatedWithOriginServer: false,
 						CacheFillBytes:                 1,
+						CacheLookup:                    false,
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with json and httpRequest with integer values, empty monitoredresource",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				httpRequest := log.Attributes().PutEmptyMap(HTTPRequestAttributeKey)
+				httpRequest.PutStr("requestMethod", "GET")
+				httpRequest.PutStr("requestURL", "https://www.example.com")
+				httpRequest.PutInt("requestSize", testInt64RequestSize)
+				httpRequest.PutInt("status", 200)
+				httpRequest.PutInt("responseSize", testInt64ResponseSize)
+				httpRequest.PutStr("userAgent", "test")
+				httpRequest.PutStr("remoteIP", "192.168.0.1")
+				httpRequest.PutStr("serverIP", "192.168.0.2")
+				httpRequest.PutStr("referer", "https://www.example2.com")
+				httpRequest.PutBool("cacheHit", false)
+				httpRequest.PutBool("cacheValidatedWithOriginServer", false)
+				httpRequest.PutInt("cacheFillBytes", testInt64CacheFillBytes)
+				httpRequest.PutStr("protocol", "HTTP/2")
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
+					HttpRequest: &logtypepb.HttpRequest{
+						RequestMethod:                  "GET",
+						UserAgent:                      "test",
+						Referer:                        "https://www.example2.com",
+						RequestUrl:                     "https://www.example.com",
+						Protocol:                       "HTTP/1.1",
+						RequestSize:                    testInt64RequestSize,
+						Status:                         200,
+						ResponseSize:                   testInt64ResponseSize,
+						ServerIp:                       "192.168.0.2",
+						RemoteIp:                       "192.168.0.1",
+						CacheHit:                       false,
+						CacheValidatedWithOriginServer: false,
+						CacheFillBytes:                 testInt64CacheFillBytes,
+						CacheLookup:                    false,
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with json and httpRequest with string values, empty monitoredresource",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				httpRequest := log.Attributes().PutEmptyMap(HTTPRequestAttributeKey)
+				httpRequest.PutStr("requestMethod", "GET")
+				httpRequest.PutStr("requestURL", "https://www.example.com")
+				httpRequest.PutStr("requestSize", testStringRequestSize)
+				httpRequest.PutInt("status", 200)
+				httpRequest.PutStr("responseSize", testStringResponseSize)
+				httpRequest.PutStr("userAgent", "test")
+				httpRequest.PutStr("remoteIP", "192.168.0.1")
+				httpRequest.PutStr("serverIP", "192.168.0.2")
+				httpRequest.PutStr("referer", "https://www.example2.com")
+				httpRequest.PutBool("cacheHit", false)
+				httpRequest.PutBool("cacheValidatedWithOriginServer", false)
+				httpRequest.PutStr("cacheFillBytes", testStringCacheFillBytes)
+				httpRequest.PutStr("protocol", "HTTP/2")
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
+					HttpRequest: &logtypepb.HttpRequest{
+						RequestMethod:                  "GET",
+						UserAgent:                      "test",
+						Referer:                        "https://www.example2.com",
+						RequestUrl:                     "https://www.example.com",
+						Protocol:                       "HTTP/1.1",
+						RequestSize:                    testInt64RequestSize,
+						Status:                         200,
+						ResponseSize:                   testInt64ResponseSize,
+						ServerIp:                       "192.168.0.2",
+						RemoteIp:                       "192.168.0.1",
+						CacheHit:                       false,
+						CacheValidatedWithOriginServer: false,
+						CacheFillBytes:                 testInt64CacheFillBytes,
 						CacheLookup:                    false,
 					},
 				},
