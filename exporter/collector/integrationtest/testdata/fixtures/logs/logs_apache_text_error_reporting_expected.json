@@ -44,7 +44,7 @@
       "partialSuccess": true
     }
   ],
-  "userAgent": "GoogleCloudExporter Integration Test/0.54.0 grpc-go/1.75.1",
+  "userAgent": "GoogleCloudExporter Integration Test/0.55.0 grpc-go/1.75.1",
   "selfObservabilityMetrics": {
     "createTimeSeriesRequests": [
       {
