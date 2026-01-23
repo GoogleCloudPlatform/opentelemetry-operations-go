@@ -69,6 +69,8 @@ type ClientConfig struct {
 	// Compression specifies the compression format for Metrics and Logging gRPC requests.
 	// Supported values: gzip.
 	Compression string `mapstructure:"compression"`
+	// UniverseDomain sets the universe domain.
+	UniverseDomain string `mapstructure:"universe_domain"`
 	// Only has effect if Endpoint is not ""
 	UseInsecure bool `mapstructure:"use_insecure"`
 	// GRPCPoolSize sets the size of the connection pool in the GCP client
@@ -341,6 +343,9 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 	}
 	if clientCfg.GRPCPoolSize > 0 {
 		copts = append(copts, option.WithGRPCConnectionPool(clientCfg.GRPCPoolSize))
+	}
+	if clientCfg.UniverseDomain != "" {
+		copts = append(copts, option.WithUniverseDomain(clientCfg.UniverseDomain))
 	}
 	if clientCfg.GetClientOptions != nil {
 		copts = append(copts, clientCfg.GetClientOptions()...)
