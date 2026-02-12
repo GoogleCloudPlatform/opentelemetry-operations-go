@@ -22,7 +22,8 @@ import (
 
 func TestConfig_Validate_ValidAccessToken(t *testing.T) {
 	cfg := &Config{
-		TokenType: accessToken,
+		TokenType:   accessToken,
+		TokenHeader: authorizationHeader,
 	}
 
 	err := cfg.Validate()
@@ -31,8 +32,9 @@ func TestConfig_Validate_ValidAccessToken(t *testing.T) {
 
 func TestConfig_Validate_ValidIDToken(t *testing.T) {
 	cfg := &Config{
-		TokenType: idToken,
-		Audience:  "audience",
+		TokenType:   idToken,
+		Audience:    "audience",
+		TokenHeader: authorizationHeader,
 	}
 
 	err := cfg.Validate()
@@ -41,7 +43,8 @@ func TestConfig_Validate_ValidIDToken(t *testing.T) {
 
 func TestConfig_Validate_MissingAudience(t *testing.T) {
 	cfg := &Config{
-		TokenType: idToken,
+		TokenType:   idToken,
+		TokenHeader: authorizationHeader,
 	}
 
 	err := cfg.Validate()
@@ -50,9 +53,46 @@ func TestConfig_Validate_MissingAudience(t *testing.T) {
 
 func TestConfig_Validate_Invalid(t *testing.T) {
 	cfg := &Config{
-		TokenType: "invalid",
+		TokenType:   "invalid",
+		TokenHeader: authorizationHeader,
 	}
 
 	err := cfg.Validate()
 	assert.Error(t, err)
+}
+
+func TestConfig_Validate_ProxyAuthorizationHeader(t *testing.T) {
+	cfg := &Config{
+		TokenType:   accessToken,
+		TokenHeader: proxyAuthorizationHeader,
+	}
+
+	err := cfg.Validate()
+	assert.NoError(t, err)
+}
+
+func TestConfig_Validate_InvalidTokenHeader(t *testing.T) {
+	cfg := &Config{
+		TokenType:   accessToken,
+		TokenHeader: "invalid",
+	}
+
+	err := cfg.Validate()
+	assert.Error(t, err)
+}
+
+func TestConfig_Validate_EmptyTokenHeader(t *testing.T) {
+	cfg := &Config{
+		TokenType:   accessToken,
+		TokenHeader: "",
+	}
+
+	err := cfg.Validate()
+	assert.NoError(t, err)
+	assert.Equal(t, authorizationHeader, cfg.TokenHeader)
+}
+
+func TestConfig_DefaultTokenHeader(t *testing.T) {
+	cfg := CreateDefaultConfig().(*Config)
+	assert.Equal(t, authorizationHeader, cfg.TokenHeader)
 }

@@ -26,11 +26,19 @@ const (
 
 	// idToken indicates Google-signed ID-token (https://cloud.google.com/docs/authentication/token-types#id)
 	idToken = "id_token"
+
+	authorizationHeader      = "authorization"
+	proxyAuthorizationHeader = "proxy-authorization"
 )
 
 var tokenTypes = map[string]struct{}{
 	accessToken: {},
 	idToken:     {},
+}
+
+var tokenHeaders = map[string]struct{}{
+	authorizationHeader:      {},
+	proxyAuthorizationHeader: {},
 }
 
 // Config stores the configuration for GCP Client Credentials.
@@ -58,6 +66,10 @@ type Config struct {
 	// See https://datatracker.ietf.org/doc/html/rfc6749#section-3.3
 	Scopes []string `mapstructure:"scopes,omitempty"`
 
+	// TokenHeader controls which HTTP header carries the token.
+	// "authorization" (default) or "proxy-authorization" (for IAP-protected endpoints).
+	TokenHeader string `mapstructure:"token_header,omitempty"`
+
 	// TODO: Support impersonation, similar to what exists in the googlecloud collector exporter.
 }
 
@@ -73,6 +85,13 @@ func (cfg *Config) Validate() error {
 		return errors.New("audience must be specified when using the id_token token_type")
 	}
 
+	if cfg.TokenHeader == "" {
+		cfg.TokenHeader = authorizationHeader
+	}
+	if _, ok := tokenHeaders[cfg.TokenHeader]; !ok {
+		return errors.New("invalid token_header, must be \"authorization\" or \"proxy-authorization\"")
+	}
+
 	return nil
 }
 
@@ -86,7 +105,8 @@ var defaultScopes = []string{
 
 func CreateDefaultConfig() component.Config {
 	return &Config{
-		Scopes:    defaultScopes,
-		TokenType: accessToken,
+		Scopes:      defaultScopes,
+		TokenType:   accessToken,
+		TokenHeader: authorizationHeader,
 	}
 }
