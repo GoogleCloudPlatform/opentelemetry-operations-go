@@ -16,7 +16,9 @@ package googleclientauthextension // import "github.com/GoogleCloudPlatform/open
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -25,7 +27,14 @@ import (
 )
 
 func TestRoundTripper(t *testing.T) {
-	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
+	// Mimic metadata server
+	srvProvidingTokens := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "access_token=%s&token_type=%s&refresh_token=%s", "accessToken", "tokenType", "refreshToken")
+	}))
+	defer srvProvidingTokens.Close()
+	t.Setenv("GCE_METADATA_HOST", srvProvidingTokens.URL)
+
 	ca := clientAuthenticator{
 		config: &Config{
 			Project:      "my-project",
@@ -38,9 +47,17 @@ func TestRoundTripper(t *testing.T) {
 	assert.NoError(t, err)
 
 	rt, err := ca.RoundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
-		return nil, nil
+		assert.Equal(t, r.Header.Get("X-Goog-User-Project"), "other-project")
+		assert.Equal(t, r.Header.Get("X-Goog-Project-ID"), "my-project")
+		assert.Equal(t, r.Header.Get("foo"), "bar")
+		assert.Equal(t, r.Header.Get("Authorization"), "TODO")
+		return &http.Response{}, nil
 	}))
 	assert.NotNil(t, rt)
+	assert.NoError(t, err)
+	header := make(http.Header)
+	header.Set("foo", "bar")
+	_, err = rt.RoundTrip(&http.Request{Header: header})
 	assert.NoError(t, err)
 }
 
