@@ -16,9 +16,11 @@ package googleclientauthextension // import "github.com/GoogleCloudPlatform/open
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -26,14 +28,29 @@ import (
 	"google.golang.org/api/idtoken"
 )
 
+func init() {
+	// Make sure metadata.OnGCE always returns true, since the result is
+	// cached.
+	os.Setenv("GCE_METADATA_HOST", "127.0.0.1")
+}
+
 func TestRoundTripper(t *testing.T) {
-	// Mimic metadata server
+	fakeToken := oauth2.Token{
+		AccessToken:  "accessToken",
+		TokenType:    "tokenType",
+		RefreshToken: "refreshToken",
+		ExpiresIn:    1,
+	}
+	b, err := json.Marshal(fakeToken)
+	assert.NoError(t, err)
+	tokenString := string(b)
+	// Mimic metadata server, and return the fake access token.
 	srvProvidingTokens := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "access_token=%s&token_type=%s&refresh_token=%s", "accessToken", "tokenType", "refreshToken")
+		fmt.Fprint(w, tokenString)
 	}))
 	defer srvProvidingTokens.Close()
-	t.Setenv("GCE_METADATA_HOST", srvProvidingTokens.URL)
+	t.Setenv("GCE_METADATA_HOST", srvProvidingTokens.Listener.Addr().String())
 
 	ca := clientAuthenticator{
 		config: &Config{
@@ -43,14 +60,18 @@ func TestRoundTripper(t *testing.T) {
 			TokenHeader:  authorizationHeader,
 		},
 	}
-	err := ca.Start(context.Background(), nil)
+
+	err = ca.Start(t.Context(), nil)
 	assert.NoError(t, err)
 
 	rt, err := ca.RoundTripper(roundTripperFunc(func(r *http.Request) (*http.Response, error) {
 		assert.Equal(t, r.Header.Get("X-Goog-User-Project"), "other-project")
 		assert.Equal(t, r.Header.Get("X-Goog-Project-ID"), "my-project")
 		assert.Equal(t, r.Header.Get("foo"), "bar")
-		assert.Equal(t, r.Header.Get("Authorization"), "TODO")
+		if r.Header.Get("Authorization") != "tokenType accessToken" {
+			// Don't print this out in-case it is a real access token.
+			t.Error("Authorization header was incorrect. FindDefaultCredentials may have found real credentials.")
+		}
 		return &http.Response{}, nil
 	}))
 	assert.NotNil(t, rt)
