@@ -81,6 +81,16 @@ func TestConfig_Validate_InvalidTokenHeader(t *testing.T) {
 	assert.Error(t, err)
 }
 
+func TestConfig_Validate_EmptyTokenHeader(t *testing.T) {
+	cfg := &Config{
+		TokenType:   accessToken,
+		TokenHeader: "",
+	}
+
+	err := cfg.Validate()
+	assert.Error(t, err)
+}
+
 func TestConfig_DefaultTokenHeader(t *testing.T) {
 	cfg := CreateDefaultConfig().(*Config)
 	assert.Equal(t, authorizationHeader, cfg.TokenHeader)
