@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/trace/
 
 go 1.24.0
 
-toolchain go1.24.2
+toolchain go1.26.0
 
 // [START opentelemetry_otlp_grpc_deps]
 require (
