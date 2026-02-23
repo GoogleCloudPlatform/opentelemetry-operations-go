@@ -418,6 +418,12 @@
           },
           "textPayload": "127.0.0.1 - - [26/Apr/2022:22:54:43 +0800] \"-\" 408 -",
           "timestamp": "1970-01-01T00:00:00Z",
+          "httpRequest": {
+            "requestMethod": "-",
+            "status": 408,
+            "remoteIp": "127.0.0.1",
+            "protocol": "HTTP/1.1"
+          },
           "labels": {
             "custom.foobar": "baz",
             "log.file.name": "test.log",
