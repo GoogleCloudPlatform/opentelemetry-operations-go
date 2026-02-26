@@ -85,7 +85,7 @@ jobs:
       - name: Run coverage tests
         run: make test-coverage
       - name: Store coverage test output
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-artifacts-${{ env.DEFAULT_GO_VERSION }}
           path: coverage.txt
@@ -94,7 +94,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [test-coverage]
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           pattern: coverage-artifacts-${{ env.DEFAULT_GO_VERSION }}
       - name: Upload coverage report
