@@ -92,17 +92,14 @@ func (cfg *Config) Validate() error {
 	return nil
 }
 
-// defaultScopes are the scopes required for writing logs, metrics, and traces.
-var defaultScopes = []string{
-	"https://www.googleapis.com/auth/cloud-platform",
-	"https://www.googleapis.com/auth/logging.write",
-	"https://www.googleapis.com/auth/monitoring.write",
-	"https://www.googleapis.com/auth/trace.append",
-}
-
 func CreateDefaultConfig() component.Config {
 	return &Config{
-		Scopes:      defaultScopes,
+		Scopes: []string{
+			"https://www.googleapis.com/auth/cloud-platform",
+			"https://www.googleapis.com/auth/logging.write",
+			"https://www.googleapis.com/auth/monitoring.write",
+			"https://www.googleapis.com/auth/trace.append",
+		},
 		TokenType:   accessToken,
 		TokenHeader: authorizationHeader,
 	}
