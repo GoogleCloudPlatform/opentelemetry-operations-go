@@ -1,8 +1,6 @@
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/example/trace/otlphttp
 
-go 1.24.0
-
-toolchain go1.24.2
+go 1.25.0
 
 require (
 	go.opentelemetry.io/otel v1.38.0
@@ -11,7 +9,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.38.0
 	// [START opentelemetry_otlp_http_auth_deps]
 	// When using http based OTLP exporter, use explicit auth library
-	golang.org/x/oauth2 v0.31.0
+	golang.org/x/oauth2 v0.35.0
 // [END opentelemetry_otlp_http_auth_deps]
 )
 
@@ -28,9 +26,9 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace v1.38.0 // indirect
 	go.opentelemetry.io/otel/metric v1.38.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.8.0 // indirect
-	golang.org/x/net v0.44.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
-	golang.org/x/text v0.29.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/text v0.34.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20250922171735-9219d122eba9 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20250922171735-9219d122eba9 // indirect
 	google.golang.org/grpc v1.75.1 // indirect
