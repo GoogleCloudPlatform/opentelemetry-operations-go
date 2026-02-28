@@ -1627,12 +1627,6 @@
                           }
                         },
                         {
-                          "key": "responseSize",
-                          "value": {
-                            "stringValue": "-"
-                          }
-                        },
-                        {
                           "key": "remoteIp",
                           "value": {
                             "stringValue": "127.0.0.1"

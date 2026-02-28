@@ -1,0 +1,85 @@
+{
+  "resourceLogs": [
+    {
+        "resource":{
+            "attributes":[
+            {
+                "key":"cloud.availability_zone",
+                "value":{
+                    "stringValue":"us-central1-c"
+                }
+            },
+            {
+                "key":"service.name",
+                "value":{
+                    "stringValue":"my.service"
+                }
+            },
+            {
+                "key":"service.instance.id",
+                "value":{
+                    "stringValue":"6041385321835499022"
+                }
+            }
+            ]
+        },
+      "scopeLogs": [
+        {
+          "scope": {},
+          "logRecords": [
+            {
+              "timeUnixNano": "1655923556339005014",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "body",
+                      "value": {
+                        "kvlistValue": {
+                          "values": [
+                            {
+                              "key": "time",
+                              "value": {
+                                "stringValue": "2022-06-22T16:13:19Z"
+                              }
+                            },
+                            {
+                              "key": "level",
+                              "value": {
+                                "stringValue": "info"
+                              }
+                            },
+                            {
+                              "key": "msg",
+                              "value": {
+                                "stringValue": "generic_task service log"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "test.monitoredresource",
+                  "value": {
+                    "stringValue": "true"
+                  }
+                },
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "monitored-resource-test"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

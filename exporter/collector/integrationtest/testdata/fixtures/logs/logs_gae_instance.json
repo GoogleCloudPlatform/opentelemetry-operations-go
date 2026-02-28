@@ -1,0 +1,97 @@
+{
+  "resourceLogs": [
+    {
+        "resource":{
+            "attributes":[
+            {
+                "key":"cloud.availability_zone",
+                "value":{
+                    "stringValue":"us-central1-c"
+                }
+            },
+            {
+                "key":"cloud.platform",
+                "value":{
+                    "stringValue":"gcp_app_engine"
+                }
+            },
+            {
+                "key":"faas.name",
+                "value":{
+                    "stringValue":"my.function"
+                }
+            },
+            {
+                "key":"faas.version",
+                "value":{
+                    "stringValue":"v0.0.1"
+                }
+            },
+            {
+                "key":"faas.instance",
+                "value":{
+                    "stringValue":"6041385321835499022"
+                }
+            }
+            ]
+        },
+      "scopeLogs": [
+        {
+          "scope": {},
+          "logRecords": [
+            {
+              "timeUnixNano": "1655923556339005014",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "body",
+                      "value": {
+                        "kvlistValue": {
+                          "values": [
+                            {
+                              "key": "time",
+                              "value": {
+                                "stringValue": "2022-06-22T16:13:19Z"
+                              }
+                            },
+                            {
+                              "key": "level",
+                              "value": {
+                                "stringValue": "info"
+                              }
+                            },
+                            {
+                              "key": "msg",
+                              "value": {
+                                "stringValue": "gae_instance log"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "test.monitoredresource",
+                  "value": {
+                    "stringValue": "true"
+                  }
+                },
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "monitored-resource-test"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

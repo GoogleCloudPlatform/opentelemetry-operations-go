@@ -1603,12 +1603,6 @@
                             }
                           },
                           {
-                            "key": "responseSize",
-                            "value": {
-                              "stringValue": "-"
-                            }
-                          },
-                          {
                             "key": "remoteIp",
                             "value": {
                               "stringValue": "127.0.0.1"
@@ -3274,12 +3268,6 @@
                             "key": "time",
                             "value": {
                               "stringValue": "26/Apr/2022:22:54:43 +0800"
-                            }
-                          },
-                          {
-                            "key": "responseSize",
-                            "value": {
-                              "stringValue": "-"
                             }
                           },
                           {

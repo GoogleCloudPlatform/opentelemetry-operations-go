@@ -96,4 +96,162 @@ var LogsTestCases = []TestCase{
 			cfg.UserAgent = "custom-user-agent {{version}}"
 		},
 	},
+	{
+		Name:                 "k8s_container monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_k8s_container.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_k8s_container_expected.json",
+	},
+	{
+		Name:                 "k8s_pod monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_k8s_pod.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_k8s_pod_expected.json",
+	},
+	{
+		Name:                 "k8s_node monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_k8s_node.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_k8s_node_expected.json",
+	},
+	{
+		Name:                 "k8s_cluster monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_k8s_cluster.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_k8s_cluster_expected.json",
+	},
+	{
+		Name:                 "gce_instance monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_gce_instance.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_gce_instance_expected.json",
+	},
+	{
+		Name:                 "gae_instance monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_gae_instance.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_gae_instance_expected.json",
+	},
+	{
+		Name:                 "aws_ec2_instance monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_aws_ec2_instance.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_aws_ec2_instance_expected.json",
+	},
+	{
+		Name:                 "baremetalsolution.googleapis.com/Instance monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_bms.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_bms_expected.json",
+	},
+	{
+		Name:                 "generic_task cloud run monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_generic_task_cloud_run.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_generic_task_cloud_run_expected.json",
+	},
+	{
+		Name:                 "generic_task cloud functions monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_generic_task_cloud_functions.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_generic_task_cloud_functions_expected.json",
+	},
+	{
+		Name:                 "generic_task service monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_generic_task_service.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_generic_task_service_expected.json",
+	},
+	{
+		Name:                 "generic_node monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_generic_node.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_generic_node_expected.json",
+	},
+	{
+		Name:                 "source_location",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_source_location.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_source_location_expected.json",
+	},
+}
+
+var OTLPLogsTestCases = []TestCase{
+	{
+		Name:                 "Apache access log with HTTPRequest",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_apache_access.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_access_expected.json",
+	},
+	{
+		Name:                 "Apache error log with severity",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_apache_error.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_error_expected.json",
+	},
+	{
+		Name:                 "Multi-project logs",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_multi_project.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_multi_project_expected.json",
+	},
+	{
+		Name:                 "Logs with scope information",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_apache_error_scope.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_apache_error_scope_expected.json",
+	},
+	{
+		Name:                 "Logs with trace/span info",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_span_trace_id.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_span_trace_id_expected.json",
+	},
+	{
+		Name:                 "k8s_container monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_k8s_container.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_k8s_container_expected.json",
+	},
+	{
+		Name:                 "k8s_pod monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_k8s_pod.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_k8s_pod_expected.json",
+	},
+	{
+		Name:                 "k8s_node monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_k8s_node.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_k8s_node_expected.json",
+	},
+	{
+		Name:                 "k8s_cluster monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_k8s_cluster.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_k8s_cluster_expected.json",
+	},
+	{
+		Name:                 "gce_instance monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_gce_instance.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_gce_instance_expected.json",
+	},
+	{
+		Name:                 "gae_instance monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_gae_instance.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_gae_instance_expected.json",
+	},
+	{
+		Name:                 "aws_ec2_instance monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_aws_ec2_instance.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_aws_ec2_instance_expected.json",
+	},
+	{
+		Name:                 "baremetalsolution.googleapis.com/Instance monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_bms.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_bms_expected.json",
+	},
+	{
+		Name:                 "generic_task cloud run monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_generic_task_cloud_run.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_generic_task_cloud_run_expected.json",
+	},
+	{
+		Name:                 "generic_task cloud functions monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_generic_task_cloud_functions.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_generic_task_cloud_functions_expected.json",
+	},
+	{
+		Name:                 "generic_task service monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_generic_task_service.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_generic_task_service_expected.json",
+	},
+	{
+		Name:                 "generic_node monitored resource",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_generic_node.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_generic_node_expected.json",
+	},
+	{
+		Name:                 "source_location",
+		OTLPInputFixturePath: "testdata/fixtures/logs/logs_source_location.json",
+		ExpectFixturePath:    "testdata/fixtures/logs/logs_source_location_expected.json",
+	},
 }
