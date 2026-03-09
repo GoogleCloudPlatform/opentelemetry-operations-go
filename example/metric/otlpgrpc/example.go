@@ -28,6 +28,8 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/oauth"
+
+	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metricbatcher"
 )
 
 func main() {
@@ -63,9 +65,12 @@ func main() {
 		panic(err)
 	}
 
+	// This splits metrics into batches of 200.
+	batchingExporter := metricbatcher.New(metricExporter)
+
 	meterProvider := sdkmetric.NewMeterProvider(
 		sdkmetric.WithResource(res),
-		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(metricExporter)),
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(batchingExporter)),
 	)
 
 	defer func() {

@@ -15,7 +15,7 @@ gcloud auth application-default login
 ```sh
 # export necessary OTEL environment variables
 export PROJECT_ID=<project-id>
-export OTEL_EXPORTER_OTLP_ENDPOINT=<endpoint>
+export OTEL_EXPORTER_OTLP_ENDPOINT=telemetry.googleapis.com
 export OTEL_RESOURCE_ATTRIBUTES="gcp.project_id=$PROJECT_ID,service.name=otlp-sample,service.instance.id=1"
 export OTEL_EXPORTER_OTLP_HEADERS=X-Goog-User-Project=$PROJECT_ID
 
