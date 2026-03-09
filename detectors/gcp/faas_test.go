@@ -43,6 +43,17 @@ func TestFaaSJobsName(t *testing.T) {
 	assert.Equal(t, "my-service", name)
 }
 
+func TestFaaSWorkerPoolName(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
+		Vars: map[string]string{
+			cloudRunWorkerPoolEnv: "my-service",
+		},
+	})
+	name, err := d.FaaSName()
+	assert.NoError(t, err)
+	assert.Equal(t, "my-service", name)
+}
+
 func TestFaaSNameErr(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{},
@@ -56,6 +67,17 @@ func TestFaaSVersion(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
 			faasRevisionEnv: "version-123",
+		},
+	})
+	version, err := d.FaaSVersion()
+	assert.NoError(t, err)
+	assert.Equal(t, "version-123", version)
+}
+
+func TestFaaSWorkerPoolVersion(t *testing.T) {
+	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
+		Vars: map[string]string{
+			cloudRunWorkerPoolRevision: "version-123",
 		},
 	})
 	version, err := d.FaaSVersion()
