@@ -16,6 +16,7 @@ package testcases
 
 import (
 	"fmt"
+	"regexp"
 	"runtime"
 	"strings"
 
@@ -26,6 +27,8 @@ import (
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
 )
+
+var versionRegex = regexp.MustCompile(`\b\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?\b`)
 
 func NewTestExporterSettings(logger *zap.Logger, meterProvider metric.MeterProvider) exporter.Settings {
 	return exporter.Settings{
@@ -47,5 +50,6 @@ func SetTestUserAgent(cfg *collector.Config, buildInfo component.BuildInfo) {
 
 func UserAgentRemoveRuntimeInfo(userAgent string) string {
 	runtimeInfo := fmt.Sprintf(" (%s/%s)", runtime.GOOS, runtime.GOARCH)
-	return strings.ReplaceAll(userAgent, runtimeInfo, "")
+	ua := strings.ReplaceAll(userAgent, runtimeInfo, "")
+	return versionRegex.ReplaceAllString(ua, "{{version}}")
 }
