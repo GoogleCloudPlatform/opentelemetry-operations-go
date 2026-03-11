@@ -48,6 +48,37 @@ jobs:
       - name: Check clean repository
         run: make check-clean-work-tree
 
+  govulncheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.DEFAULT_GO_VERSION }}
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+      - name: Setup Environment
+        run: |
+          echo "GOPATH=$(go env GOPATH)" >> $GITHUB_ENV
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          echo "GOOTOOLCHAIN=local" >> $GITHUB_ENV
+      - name: Module cache
+        uses: actions/cache@v4
+        env:
+          cache-name: go-mod-cache
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('**/go.sum') }}
+      - name: Tools cache
+        uses: actions/cache@v4
+        env:
+          cache-name: go-tools-cache
+        with:
+          path: ~/.tools
+          key: ${{ runner.os }}-${{ env.cache-name }}-${{ hashFiles('./internal/tools/**') }}
+      - name: Run govulncheck
+        run: make govulncheck
+
   test-race:
     runs-on: ubuntu-latest
     steps:
