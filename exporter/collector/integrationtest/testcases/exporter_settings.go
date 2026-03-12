@@ -22,7 +22,9 @@ import (
 
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/exporter"
+	"go.opentelemetry.io/collector/extension"
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace/noop"
 	"go.uber.org/zap"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector"
@@ -32,6 +34,20 @@ var versionRegex = regexp.MustCompile(`\b\d+\.\d+\.\d+(?:-[a-zA-Z0-9.]+)?\b`)
 
 func NewTestExporterSettings(logger *zap.Logger, meterProvider metric.MeterProvider) exporter.Settings {
 	return exporter.Settings{
+		TelemetrySettings: component.TelemetrySettings{
+			Logger:         logger,
+			MeterProvider:  meterProvider,
+			TracerProvider: noop.NewTracerProvider(),
+		},
+		BuildInfo: component.BuildInfo{
+			Description: "GoogleCloudExporter Integration Test",
+			Version:     collector.Version(),
+		},
+	}
+}
+
+func NewTestExtensionSettings(logger *zap.Logger, meterProvider metric.MeterProvider) extension.Settings {
+	return extension.Settings{
 		TelemetrySettings: component.TelemetrySettings{
 			Logger:        logger,
 			MeterProvider: meterProvider,

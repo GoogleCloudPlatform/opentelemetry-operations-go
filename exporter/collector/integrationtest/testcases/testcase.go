@@ -59,7 +59,10 @@ var (
 	}
 )
 
-const SecondProjectEnv = "SECOND_PROJECT_ID"
+const (
+	SecondProjectEnv = "SECOND_PROJECT_ID"
+	ProejctEnv       = "PROJECT_ID"
+)
 
 type TestCase struct {
 	// ConfigureCollector will be called to modify the default configuration for this test case. Optional.
