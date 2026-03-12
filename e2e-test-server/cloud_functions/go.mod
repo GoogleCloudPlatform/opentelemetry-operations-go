@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-serve
 
 go 1.25.0
 
-toolchain go1.25.8
+toolchain go1.25.7
 
 require (
 	cloud.google.com/go/pubsub/v2 v2.4.0
