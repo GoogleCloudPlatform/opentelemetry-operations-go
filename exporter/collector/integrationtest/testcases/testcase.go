@@ -165,6 +165,15 @@ func NormalizeTraceFixture(t testing.TB, fixture *protos.TraceExpectFixture) {
 			if span.GetEndTime() != nil {
 				span.EndTime = &timestamppb.Timestamp{}
 			}
+			if span.GetAttributes() != nil {
+				if m := span.GetAttributes().GetAttributeMap(); m != nil {
+					if agent, ok := m["g.co/agent"]; ok {
+						if agent.GetStringValue() != nil {
+							agent.GetStringValue().Value = UserAgentRemoveRuntimeInfo(agent.GetStringValue().GetValue())
+						}
+					}
+				}
+			}
 		}
 	}
 }
