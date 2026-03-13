@@ -30,9 +30,9 @@ steps:
     args:
       - gae
       - --image=$_TEST_SERVER_IMAGE
-      - --runtime=go123
+      - --runtime=go125
 
 logsBucket: gs://opentelemetry-ops-e2e-cloud-build-logs
 substitutions:
-  _TEST_RUNNER_IMAGE: us-central1-docker.pkg.dev/${PROJECT_ID}/e2e-testing/opentelemetry-operations-e2e-testing:0.20.1
+  _TEST_RUNNER_IMAGE: us-central1-docker.pkg.dev/${PROJECT_ID}/e2e-testing/opentelemetry-operations-e2e-testing:0.20.3
   _TEST_SERVER_IMAGE: us-central1-docker.pkg.dev/${PROJECT_ID}/e2e-testing/opentelemetry-operations-go-e2e-test-server:${SHORT_SHA}
