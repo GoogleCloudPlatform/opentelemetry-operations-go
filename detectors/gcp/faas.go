@@ -31,16 +31,16 @@ const (
 	//
 	// Cloud Run worker pool env vars:
 	// https://cloud.google.com/run/docs/container-contract#worker-pools-env-vars
-	cloudFunctionsTargetEnv  = "FUNCTION_TARGET"
-	cloudRunConfigurationEnv = "K_CONFIGURATION"
-	cloudRunJobsEnv          = "CLOUD_RUN_JOB"
-	faasServiceEnv           = "K_SERVICE"
-	faasRevisionEnv          = "K_REVISION"
-	cloudRunJobExecutionEnv  = "CLOUD_RUN_EXECUTION"
-	cloudRunJobTaskIndexEnv  = "CLOUD_RUN_TASK_INDEX"
-	cloudRunWorkerPoolEnv    = "CLOUD_RUN_WORKER_POOL"
+	cloudFunctionsTargetEnv    = "FUNCTION_TARGET"
+	cloudRunConfigurationEnv   = "K_CONFIGURATION"
+	cloudRunJobsEnv            = "CLOUD_RUN_JOB"
+	faasServiceEnv             = "K_SERVICE"
+	faasRevisionEnv            = "K_REVISION"
+	cloudRunJobExecutionEnv    = "CLOUD_RUN_EXECUTION"
+	cloudRunJobTaskIndexEnv    = "CLOUD_RUN_TASK_INDEX"
+	cloudRunWorkerPoolEnv      = "CLOUD_RUN_WORKER_POOL"
 	cloudRunWorkerPoolRevision = "CLOUD_RUN_WORKER_POOL_REVISION"
-	regionMetadataAttr       = "instance/region"
+	regionMetadataAttr         = "instance/region"
 )
 
 func (d *Detector) onCloudFunctions() bool {
