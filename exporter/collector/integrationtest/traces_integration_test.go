@@ -13,7 +13,6 @@
 // limitations under the License.
 
 //go:build integrationtest
-// +build integrationtest
 
 package integrationtest
 
