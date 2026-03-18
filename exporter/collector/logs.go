@@ -447,12 +447,16 @@ func (l logMapper) logToSplitEntries(
 
 	// parse LogEntrySourceLocation struct from OTel attribute
 	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
-		var logEntrySourceLocation logpb.LogEntrySourceLocation
-		err := unmarshalAttribute(sourceLocation, &logEntrySourceLocation)
+		var parsedSourceLocation sourceLocationLog
+		err := unmarshalAttribute(sourceLocation, &parsedSourceLocation)
 		if err != nil {
 			return nil, &attributeProcessingError{Key: SourceLocationAttributeKey, Err: err}
 		}
-		entry.SourceLocation = &logEntrySourceLocation
+		entry.SourceLocation = &logpb.LogEntrySourceLocation{
+			File:     parsedSourceLocation.File,
+			Line:     int64(parsedSourceLocation.Line),
+			Function: parsedSourceLocation.Function,
+		}
 		delete(attrsMap, SourceLocationAttributeKey)
 	}
 
@@ -627,6 +631,12 @@ func (f *Int64OrString) UnmarshalJSON(data []byte) error {
 	}
 	*f = Int64OrString(integer)
 	return nil
+}
+
+type sourceLocationLog struct {
+	File     string        `json:"file"`
+	Line     Int64OrString `json:"line"`
+	Function string        `json:"function"`
 }
 
 // JSON keys derived from:
