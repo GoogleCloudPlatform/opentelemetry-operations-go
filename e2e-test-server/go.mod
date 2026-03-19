@@ -7,7 +7,7 @@ toolchain go1.25.7
 require (
 	cloud.google.com/go/pubsub/v2 v2.4.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.31.0
-	go.opentelemetry.io/contrib/detectors/gcp v1.38.0
+	go.opentelemetry.io/contrib/detectors/gcp v1.39.0
 	go.opentelemetry.io/otel v1.41.0
 	go.opentelemetry.io/otel/sdk v1.41.0
 	go.opentelemetry.io/otel/trace v1.41.0
@@ -46,7 +46,7 @@ require (
 	google.golang.org/api v0.268.0 // indirect
 	google.golang.org/genproto v0.0.0-20260226221140-a57be14db171 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260226221140-a57be14db171 // indirect
-	google.golang.org/grpc v1.79.0-dev // indirect
+	google.golang.org/grpc v1.79.3 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 )
 
