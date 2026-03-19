@@ -1,0 +1,103 @@
+{
+  "resourceLogs": [
+    {
+        "resource":{
+            "attributes":[
+            {
+                "key":"cloud.availability_zone",
+                "value":{
+                    "stringValue":"us-central1-c"
+                }
+            },
+            {
+                "key":"k8s.container.name",
+                "value":{
+                    "stringValue":"prometheus-to-sd-exporter"
+                }
+            },
+            {
+                "key":"k8s.namespace.name",
+                "value":{
+                    "stringValue":"kube-system"
+                }
+            },
+            {
+                "key":"k8s.pod.name",
+                "value":{
+                    "stringValue":"event-exporter-gke-664546f4f8-4s526"
+                }
+            },
+            {
+                "key":"cloud.platform",
+                "value":{
+                    "stringValue":"gcp_kubernetes_engine"
+                }
+            },
+            {
+                "key":"k8s.cluster.name",
+                "value":{
+                    "stringValue":"rabbitmq-test-dev"
+                }
+            }
+            ]
+        },
+      "scopeLogs": [
+        {
+          "scope": {},
+          "logRecords": [
+            {
+              "timeUnixNano": "1655923556339005014",
+              "body": {
+                "kvlistValue": {
+                  "values": [
+                    {
+                      "key": "body",
+                      "value": {
+                        "kvlistValue": {
+                          "values": [
+                            {
+                              "key": "time",
+                              "value": {
+                                "stringValue": "2022-06-22T16:13:19Z"
+                              }
+                            },
+                            {
+                              "key": "level",
+                              "value": {
+                                "stringValue": "info"
+                              }
+                            },
+                            {
+                              "key": "msg",
+                              "value": {
+                                "stringValue": "k8s_container log"
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "attributes": [
+                {
+                  "key": "test.monitoredresource",
+                  "value": {
+                    "stringValue": "true"
+                  }
+                },
+                {
+                  "key": "gcp.log_name",
+                  "value": {
+                    "stringValue": "monitored-resource-test"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
