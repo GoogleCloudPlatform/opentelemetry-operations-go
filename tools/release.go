@@ -29,8 +29,8 @@ import (
 const (
 	prefix = "github.com/GoogleCloudPlatform/opentelemetry-operations-go"
 
-	stable   = "1.31.0"
-	unstable = "0.55.0"
+	stable   = "1.32.0"
+	unstable = "0.56.0"
 )
 
 var stableModules = map[string]struct{}{
