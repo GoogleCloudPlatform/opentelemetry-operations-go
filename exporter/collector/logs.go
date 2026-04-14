@@ -445,14 +445,20 @@ func (l logMapper) logToSplitEntries(
 		return true
 	})
 
-	// parse LogEntrySourceLocation struct from OTel attribute
+	// parse LogEntrySourceLocation struct from OTel attribute.
+	// The "line" field may be sent as either a JSON number or a quoted string;
+	// use an intermediate struct with Int64OrString to accept both forms.
 	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
-		var logEntrySourceLocation logpb.LogEntrySourceLocation
-		err := unmarshalAttribute(sourceLocation, &logEntrySourceLocation)
+		var parsed sourceLocationLog
+		err := unmarshalAttribute(sourceLocation, &parsed)
 		if err != nil {
 			return nil, &attributeProcessingError{Key: SourceLocationAttributeKey, Err: err}
 		}
-		entry.SourceLocation = &logEntrySourceLocation
+		entry.SourceLocation = &logpb.LogEntrySourceLocation{
+			File:     parsed.File,
+			Line:     int64(parsed.Line),
+			Function: parsed.Function,
+		}
 		delete(attrsMap, SourceLocationAttributeKey)
 	}
 
@@ -627,6 +633,19 @@ func (f *Int64OrString) UnmarshalJSON(data []byte) error {
 	}
 	*f = Int64OrString(integer)
 	return nil
+}
+
+// sourceLocationLog is an intermediate representation of
+// logging.googleapis.com/sourceLocation that accepts the "line" field as
+// either a JSON number or a quoted string, matching what various log
+// producers emit in practice.
+//
+// JSON keys follow:
+// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntrySourceLocation
+type sourceLocationLog struct {
+	File     string        `json:"file"`
+	Line     Int64OrString `json:"line"`
+	Function string        `json:"function"`
 }
 
 // JSON keys derived from:

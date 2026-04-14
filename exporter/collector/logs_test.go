@@ -623,18 +623,59 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with invalid sourceLocation (map)",
+			// Regression test for https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/issues/1119:
+			// "line" may be sent as a string-typed integer; the exporter must accept it.
+			name: "log with sourceLocation.line as string (map)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				sourceLocationMap := log.Attributes().PutEmptyMap(SourceLocationAttributeKey)
+				sourceLocationMap.PutStr("file", "test.php")
 				sourceLocationMap.PutStr("line", "100")
+				sourceLocationMap.PutStr("function", "helloWorld")
 				return log
 			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					SourceLocation: &logpb.LogEntrySourceLocation{
+						File:     "test.php",
+						Line:     100,
+						Function: "helloWorld",
+					},
+				},
+			},
 			maxEntrySize: defaultMaxEntrySize,
-			expectError:  true,
+		},
+		{
+			// Regression test: "line" as a quoted integer string in JSON.
+			name: "log with sourceLocation.line as string (string-encoded JSON)",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Attributes().PutStr(
+					SourceLocationAttributeKey,
+					`{"file": "test.php", "line": "100", "function":"helloWorld"}`,
+				)
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					SourceLocation: &logpb.LogEntrySourceLocation{
+						File:     "test.php",
+						Line:     100,
+						Function: "helloWorld",
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
 			name: "log with valid sourceLocation (string)",
