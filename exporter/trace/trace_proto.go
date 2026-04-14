@@ -334,7 +334,7 @@ func attributeValue(keyValue attribute.KeyValue) *tracepb.AttributeValue {
 }
 
 // sanitizeUTF8 replaces invalid UTF-8 byte sequences with the Unicode
-// replacement character, matching the behaviour of the metric exporter.
+// replacement character, matching the behavior of the metric exporter.
 // Cloud Trace rejects spans that contain invalid UTF-8 in attribute values.
 func sanitizeUTF8(s string) string {
 	return strings.ToValidUTF8(s, "")
