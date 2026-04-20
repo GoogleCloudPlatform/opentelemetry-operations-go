@@ -85,15 +85,12 @@ These instructions are to get you up and running quickly with the GCP exporter i
           http:
     exporters:
       googlecloud:
-        # Google Cloud Monitoring returns an error if any of the points are invalid, but still accepts the valid points.
-        # Retrying successfully sent points is guaranteed to fail because the points were already written.
-        # This results in a loop of unnecessary retries.  For now, disable retry_on_failure.
-        retry_on_failure:
-          enabled: false
-      logging:
-        loglevel: debug
+
+      debug:
+        verbosity: detailed
     processors:
       memory_limiter:
+
       batch:
         send_batch_max_size: 200
         send_batch_size: 200
@@ -102,11 +99,11 @@ These instructions are to get you up and running quickly with the GCP exporter i
         traces:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [googlecloud, logging]
+          exporters: [googlecloud, debug]
         metrics:
           receivers: [otlp]
           processors: [memory_limiter, batch]
-          exporters: [googlecloud, logging]
+          exporters: [googlecloud, debug]
     ```
 
 3.  **Set up credentials.**
@@ -159,11 +156,6 @@ The following configuration options are supported:
 - `compression` (optional): Enable gzip compression on gRPC calls for Metrics or Logs. Valid values: `gzip`.
 - `resource_mappings` (optional): ResourceMapping defines mapping of resources from source (OpenCensus) to target (Google Cloud).
   - `label_mappings` (optional): Optional flag signals whether we can proceed with transformation if a label is missing in the resource.
-- `retry_on_failure` (optional): Configuration for how to handle retries when sending data to Google Cloud fails.
-  - `enabled` (default = true)
-  - `initial_interval` (default = 5s): Time to wait after the first failure before retrying; ignored if `enabled` is `false`
-  - `max_interval` (default = 30s): Is the upper bound on backoff; ignored if `enabled` is `false`
-  - `max_elapsed_time` (default = 120s): Is the maximum amount of time spent trying to send a batch; ignored if `enabled` is `false`
 - `sending_queue` (optional): Configuration for how to buffer traces before sending.
   - `enabled` (default = true)
   - `num_consumers` (default = 10): Number of consumers that dequeue batches; ignored if `enabled` is `false`
@@ -203,11 +195,6 @@ Example:
 ```yaml
 exporters:
   googlecloud:
-    # Google Cloud Monitoring returns an error if any of the points are invalid, but still accepts the valid points.
-    # Retrying successfully sent points is guaranteed to fail because the points were already written.
-    # This results in a loop of unnecessary retries.  For now, disable retry_on_failure.
-    retry_on_failure:
-      enabled: false
     project: my-project
     endpoint: test-endpoint
     user_agent: my-collector {{version}}
