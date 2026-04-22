@@ -160,3 +160,63 @@ func TestTraceProto_linksProtoFromLinks(t *testing.T) {
 		assert.Len(t, linksPb.Link, maxNumLinks)
 	})
 }
+
+// TestSanitizeUTF8 is a regression test for
+// https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/issues/901.
+// The trace exporter must strip invalid UTF-8 sequences from span names,
+// event names, and string attribute values before sending them to Cloud Trace.
+func TestSanitizeUTF8(t *testing.T) {
+	e := testExporter()
+	invalidUTF8 := "valid\xff\xfeinvalid"
+	startTime := time.Unix(1585674086, 0)
+	endTime := startTime.Add(time.Second)
+
+	rawSpan := tracetest.SpanStub{
+		SpanContext: trace.NewSpanContext(trace.SpanContextConfig{
+			TraceID: trace.TraceID{0x01},
+			SpanID:  trace.SpanID{0x01},
+		}),
+		Name:      invalidUTF8,
+		StartTime: startTime,
+		EndTime:   endTime,
+		Status: sdktrace.Status{
+			Code:        codes.Error,
+			Description: invalidUTF8,
+		},
+		Attributes: []attribute.KeyValue{
+			attribute.String("key", invalidUTF8),
+		},
+		Events: []sdktrace.Event{
+			{Name: invalidUTF8, Time: startTime},
+		},
+	}
+
+	span := e.ConvertSpan(context.Background(), rawSpan.Snapshot())
+	assert.NotNil(t, span)
+
+	// Span display name must not contain invalid UTF-8.
+	assert.True(t, len(span.DisplayName.Value) > 0)
+	for _, b := range []byte(span.DisplayName.Value) {
+		assert.Less(t, b, byte(0x80), "display name contains non-ASCII byte: %x", b)
+	}
+
+	// String attribute value must not contain invalid UTF-8.
+	attrVal := span.Attributes.AttributeMap["key"].GetStringValue().Value
+	for _, b := range []byte(attrVal) {
+		assert.Less(t, b, byte(0x80), "attribute value contains non-ASCII byte: %x", b)
+	}
+
+	// Status description must not contain invalid UTF-8.
+	assert.NotEmpty(t, span.Status.Message)
+	for _, b := range []byte(span.Status.Message) {
+		assert.Less(t, b, byte(0x80), "status message contains non-ASCII byte: %x", b)
+	}
+
+	// Event annotation must not contain invalid UTF-8.
+	if assert.NotNil(t, span.TimeEvents) && assert.Len(t, span.TimeEvents.TimeEvent, 1) {
+		desc := span.TimeEvents.TimeEvent[0].GetAnnotation().Description.Value
+		for _, b := range []byte(desc) {
+			assert.Less(t, b, byte(0x80), "annotation description contains non-ASCII byte: %x", b)
+		}
+	}
+}
