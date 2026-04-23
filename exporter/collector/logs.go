@@ -520,6 +520,14 @@ func (l logMapper) logToSplitEntries(
 		}
 	}
 
+	// Add OTLP event_name field as "event.name" label
+	if eventName := logRecord.EventName(); eventName != "" {
+		if entry.Labels == nil {
+			entry.Labels = make(map[string]string)
+		}
+		entry.Labels["event.name"] = eventName
+	}
+
 	// Handle map and bytes as JSON-structured logs if they are successfully converted.
 	switch logRecord.Body().Type() {
 	case pcommon.ValueTypeMap:
