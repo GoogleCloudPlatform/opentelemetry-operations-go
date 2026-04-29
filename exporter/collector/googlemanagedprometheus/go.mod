@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/colle
 
 go 1.24.0
 
-toolchain go1.25.7
+toolchain go1.26.2
 
 require (
 	github.com/prometheus/common v0.66.1
