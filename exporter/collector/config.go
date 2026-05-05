@@ -69,6 +69,8 @@ type ClientConfig struct {
 	// Compression specifies the compression format for Metrics and Logging gRPC requests.
 	// Supported values: gzip.
 	Compression string `mapstructure:"compression"`
+	// UniverseDomain sets the universe domain.
+	UniverseDomain string `mapstructure:"universe_domain"`
 	// Only has effect if Endpoint is not ""
 	UseInsecure bool `mapstructure:"use_insecure"`
 	// GRPCPoolSize sets the size of the connection pool in the GCP client
@@ -326,21 +328,22 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 			return nil, err
 		}
 		copts = append(copts, option.WithTokenSource(tokenSource))
-	} else if !clientCfg.UseInsecure && (clientCfg.GetClientOptions == nil || len(clientCfg.GetClientOptions()) == 0) {
-		// Only add default credentials if GetClientOptions does not
-		// provide additional options since GetClientOptions could pass
-		// credentials which conflict with the default creds.
+	} else if cfg.ProjectID == "" && !clientCfg.UseInsecure && (clientCfg.GetClientOptions == nil || len(clientCfg.GetClientOptions()) == 0) {
+		// Only use the project from default credentials if
+		// GetClientOptions does not provide additional options since
+		// GetClientOptions could pass credentials which conflict with the
+		// default creds.
 		creds, err := google.FindDefaultCredentials(ctx, scopes...)
 		if err != nil {
 			return nil, fmt.Errorf("error finding default application credentials: %v", err)
 		}
-		copts = append(copts, option.WithCredentials(creds))
-		if cfg.ProjectID == "" {
-			cfg.ProjectID = creds.ProjectID
-		}
+		cfg.ProjectID = creds.ProjectID
 	}
 	if clientCfg.GRPCPoolSize > 0 {
 		copts = append(copts, option.WithGRPCConnectionPool(clientCfg.GRPCPoolSize))
+	}
+	if clientCfg.UniverseDomain != "" {
+		copts = append(copts, option.WithUniverseDomain(clientCfg.UniverseDomain))
 	}
 	if clientCfg.GetClientOptions != nil {
 		copts = append(copts, clientCfg.GetClientOptions()...)

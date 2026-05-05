@@ -13,7 +13,6 @@
 // limitations under the License.
 
 //go:build generate
-// +build generate
 
 //go:generate protoc -I=. --go_opt=paths=source_relative --go_out=. fixtures.proto
 

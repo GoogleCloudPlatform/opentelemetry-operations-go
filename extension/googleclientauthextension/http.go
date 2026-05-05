@@ -16,6 +16,7 @@ package googleclientauthextension // import "github.com/GoogleCloudPlatform/open
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"golang.org/x/oauth2"
@@ -27,12 +28,19 @@ func (ca *clientAuthenticator) RoundTripper(base http.RoundTripper) (http.RoundT
 	if ca.TokenSource == nil {
 		return nil, errors.New("not started")
 	}
+	paramBase := &parameterTransport{
+		base:   base,
+		config: ca.config,
+	}
+	if ca.config.TokenHeader == proxyAuthorizationHeader {
+		return &proxyAuthTransport{
+			source: ca,
+			base:   paramBase,
+		}, nil
+	}
 	return &oauth2.Transport{
 		Source: ca,
-		Base: &parameterTransport{
-			base:   base,
-			config: ca.config,
-		},
+		Base:   paramBase,
 	}, nil
 }
 
@@ -62,5 +70,30 @@ func (t *parameterTransport) RoundTrip(req *http.Request) (*http.Response, error
 		newReq.Header.Set("X-Goog-Project-ID", t.config.Project)
 	}
 
+	return t.base.RoundTrip(&newReq)
+}
+
+// proxyAuthTransport sets the token on the Proxy-Authorization header
+// instead of the Authorization header. This is useful for IAP-protected
+// endpoints where the Authorization header is used by the backend service.
+type proxyAuthTransport struct {
+	source oauth2.TokenSource
+	base   http.RoundTripper
+}
+
+func (t *proxyAuthTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if t.base == nil {
+		return nil, errors.New("transport: no Transport specified")
+	}
+	token, err := t.source.Token()
+	if err != nil {
+		return nil, err
+	}
+	newReq := *req
+	newReq.Header = make(http.Header)
+	for k, vv := range req.Header {
+		newReq.Header[k] = vv
+	}
+	newReq.Header.Set("Proxy-Authorization", fmt.Sprintf("%s %s", token.Type(), token.AccessToken))
 	return t.base.RoundTrip(&newReq)
 }

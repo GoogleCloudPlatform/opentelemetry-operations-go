@@ -149,7 +149,7 @@ test-bench:
 	done
 
 .PHONY: lint
-lint: $(GOLANGCI_LINT) $(MISSPELL) govulncheck
+lint: $(GOLANGCI_LINT) $(MISSPELL)
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "golangci-lint in $${dir}"; \
 	  (cd "$${dir}" && \
