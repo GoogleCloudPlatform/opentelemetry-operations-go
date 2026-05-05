@@ -1,0 +1,27 @@
+name: Auto GCB Run for Bots
+
+permissions:
+  pull-requests: write
+  issues: write
+
+on:
+  pull_request_target:
+    types: [opened, synchronize]
+
+jobs:
+  auto-gcbrun:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.user.login == 'renovate-bot' ||
+      github.event.pull_request.user.login == 'dependabot[bot]'
+    steps:
+      - name: Post /gcbrun
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '/gcbrun'
+            })
