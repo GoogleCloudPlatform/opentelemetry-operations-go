@@ -6,22 +6,21 @@ permissions:
 
 on:
   pull_request_target:
-    types: [opened, synchronize]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  auto-gcbrun:
+  comment:
     runs-on: ubuntu-latest
     if: |
-      github.event.pull_request.user.login == 'renovate-bot' ||
-      github.event.pull_request.user.login == 'dependabot[bot]'
+      github.actor == 'renovate-bot' ||
+      github.actor == 'dependabot[bot]'
     steps:
-      - name: Post /gcbrun
-        uses: actions/github-script@v7
+      - uses: actions/github-script@v7
         with:
           script: |
             github.rest.issues.createComment({
-              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
+              issue_number: context.payload.pull_request.number,
               body: '/gcbrun'
             })
