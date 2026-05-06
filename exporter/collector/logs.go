@@ -668,7 +668,7 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.H
 		Referer:                        parsedHTTPRequest.Referer,
 		CacheHit:                       parsedHTTPRequest.CacheHit,
 		CacheValidatedWithOriginServer: parsedHTTPRequest.CacheValidatedWithOriginServer,
-		Protocol:                       "HTTP/1.1",
+		Protocol:                       parsedHTTPRequest.Protocol,
 		CacheFillBytes:                 int64(parsedHTTPRequest.CacheFillBytes),
 		CacheLookup:                    parsedHTTPRequest.CacheLookup,
 	}
