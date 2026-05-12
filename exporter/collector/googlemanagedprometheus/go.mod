@@ -5,7 +5,7 @@ go 1.25.0
 toolchain go1.25.7
 
 require (
-	github.com/prometheus/common v0.66.1
+	github.com/prometheus/common v0.67.5
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/collector/featuregate v1.57.0
 	go.opentelemetry.io/collector/pdata v1.57.0
