@@ -2,8 +2,6 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/e2e-test-serve
 
 go 1.25.0
 
-toolchain go1.26.3
-
 require (
 	cloud.google.com/go/pubsub/v2 v2.6.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.32.0
