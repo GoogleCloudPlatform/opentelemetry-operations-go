@@ -117,7 +117,7 @@ func TestStart_idtoken(t *testing.T) {
 			Audience:  "my-audience",
 		},
 		newIDTokenSource: func(ctx context.Context, audience string, opts ...idtoken.ClientOption) (oauth2.TokenSource, error) {
-			// opts should have idtoken.WithCredentialsJSON
+			// opts should have option.WithCredentials
 			assert.Len(t, opts, 1)
 
 			return &mockIDTokenSource{token: "dummy token"}, nil

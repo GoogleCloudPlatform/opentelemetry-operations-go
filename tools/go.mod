@@ -2,7 +2,7 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/tools
 
 go 1.25.0
 
-toolchain go1.25.7
+toolchain go1.26.3
 
 require (
 	github.com/client9/misspell v0.3.4
@@ -11,7 +11,7 @@ require (
 	github.com/wadey/gocovmerge v0.0.0-20160331181800-b5bfa59ec0ad
 	golang.org/x/tools v0.45.0
 	golang.org/x/vuln v1.3.0
-	google.golang.org/protobuf v1.36.6
+	google.golang.org/protobuf v1.36.11
 )
 
 require (
