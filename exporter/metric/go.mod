@@ -33,7 +33,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
 	cloud.google.com/go/logging v1.18.0 // indirect
-	cloud.google.com/go/longrunning v0.13.0 // indirect
+	cloud.google.com/go/longrunning v1.0.0 // indirect
 	cloud.google.com/go/trace v1.16.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
