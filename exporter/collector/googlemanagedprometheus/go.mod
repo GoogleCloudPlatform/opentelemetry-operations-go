@@ -7,8 +7,8 @@ toolchain go1.25.7
 require (
 	github.com/prometheus/common v0.67.5
 	github.com/stretchr/testify v1.11.1
-	go.opentelemetry.io/collector/featuregate v1.57.0
-	go.opentelemetry.io/collector/pdata v1.57.0
+	go.opentelemetry.io/collector/featuregate v1.58.0
+	go.opentelemetry.io/collector/pdata v1.58.0
 	go.opentelemetry.io/otel v1.41.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20260120221211-b8f7ae30c516
 )
