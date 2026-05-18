@@ -10,7 +10,7 @@ require (
 	go.opentelemetry.io/collector/featuregate v1.57.0
 	go.opentelemetry.io/collector/pdata v1.57.0
 	go.opentelemetry.io/otel v1.41.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20260120221211-b8f7ae30c516
+	google.golang.org/genproto/googleapis/api v0.0.0-20260511170946-3700d4141b60
 )
 
 require (
