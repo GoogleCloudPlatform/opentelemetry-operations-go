@@ -31,7 +31,7 @@ import (
 func init() {
 	// Make sure metadata.OnGCE always returns true, since the result is
 	// cached.
-	os.Setenv("GCE_METADATA_HOST", "127.0.0.1")
+	_ = os.Setenv("GCE_METADATA_HOST", "127.0.0.1")
 }
 
 func TestRoundTripper(t *testing.T) {
@@ -47,7 +47,7 @@ func TestRoundTripper(t *testing.T) {
 	// Mimic metadata server, and return the fake access token.
 	srvProvidingTokens := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, tokenString)
+		_, _ = fmt.Fprint(w, tokenString)
 	}))
 	defer srvProvidingTokens.Close()
 	t.Setenv("GCE_METADATA_HOST", srvProvidingTokens.Listener.Addr().String())
