@@ -100,13 +100,13 @@ func (s *pushServer) handle(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	// Ack the message
-	fmt.Fprint(w, "OK")
+	_, _ = fmt.Fprint(w, "OK")
 }
 
 func handleReady(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Server Ready")
+	_, _ = fmt.Fprint(w, "Server Ready")
 }
 
 func handleAlive(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Server Alive")
+	_, _ = fmt.Fprint(w, "Server Alive")
 }

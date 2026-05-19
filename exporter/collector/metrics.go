@@ -182,7 +182,7 @@ func NewGoogleCloudMetricsExporter(
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
 	SetUserAgent(&cfg, set.BuildInfo)
-	meter := set.TelemetrySettings.MeterProvider.Meter(scopeName, metricapi.WithInstrumentationVersion(Version()))
+	meter := set.MeterProvider.Meter(scopeName, metricapi.WithInstrumentationVersion(Version()))
 	pointsExportedCounter, err := meter.Int64Counter(
 		"googlecloudmonitoring/point_count",
 		metricapi.WithDescription("Count of metric points written to Cloud Monitoring."),
@@ -201,8 +201,8 @@ func NewGoogleCloudMetricsExporter(
 	}
 
 	obs := selfObservability{
-		log:           set.TelemetrySettings.Logger,
-		meterProvider: set.TelemetrySettings.MeterProvider,
+		log:           set.Logger,
+		meterProvider: set.MeterProvider,
 	}
 	normalizer := normalization.NewDisabledNormalizer()
 	mExp := &MetricsExporter{
@@ -320,7 +320,7 @@ func (me *MetricsExporter) setupWAL() (uint64, uint64, error) {
 
 func (me *MetricsExporter) closeWAL() error {
 	if me.wal != nil && me.wal.Log != nil {
-		err := me.wal.Log.Close()
+		err := me.wal.Close()
 		me.wal.Log = nil
 		return err
 	}
@@ -634,7 +634,7 @@ func (me *MetricsExporter) watchWALFile(ctx context.Context) error {
 		defer func() {
 			watchCh <- wErr
 			close(watchCh)
-			walWatcher.Close()
+			_ = walWatcher.Close()
 		}()
 
 		select {
@@ -749,7 +749,7 @@ func projectName(projectID string) string {
 // isNotRecoverable returns true if the error is permanent.
 func isNotRecoverable(err error) bool {
 	s := status.Convert(err)
-	return !(s.Code() == codes.DeadlineExceeded || s.Code() == codes.Unavailable)
+	return s.Code() != codes.DeadlineExceeded && s.Code() != codes.Unavailable
 }
 
 // Helper method to send metric descriptors to GCM.

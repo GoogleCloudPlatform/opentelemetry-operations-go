@@ -60,6 +60,6 @@ func handleCloudFunction(ctx context.Context, e event.Event) error {
 	if err != nil {
 		return fmt.Errorf("error creating pubsub client: %v", err)
 	}
-	defer pubsubClient.Close()
+	defer func() { _ = pubsubClient.Close() }()
 	return scenarios.HandleMessage(ctx, pubsubClient, m.Message.Attributes)
 }
