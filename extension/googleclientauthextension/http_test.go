@@ -51,6 +51,8 @@ func TestRoundTripper(t *testing.T) {
 	}))
 	defer srvProvidingTokens.Close()
 	t.Setenv("GCE_METADATA_HOST", srvProvidingTokens.Listener.Addr().String())
+	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "")
+	t.Setenv("HOME", t.TempDir())
 
 	ca := clientAuthenticator{
 		config: &Config{

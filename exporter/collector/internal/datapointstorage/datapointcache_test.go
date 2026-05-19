@@ -137,18 +137,18 @@ func TestConcurrentNumber(t *testing.T) {
 		histogramCache:            make(map[uint64]usedHistogramPoint),
 		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
-	setPoint := pmetric.NewNumberDataPoint()
-
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
-		go func() {
-			c.SetNumberDataPoint(id, setPoint)
-			point, found := c.GetNumberDataPoint(id)
-			assert.Equal(t, point, setPoint)
+		go func(i int) {
+			localId := id + uint64(i)
+			localSetPoint := pmetric.NewNumberDataPoint()
+			c.SetNumberDataPoint(localId, localSetPoint)
+			point, found := c.GetNumberDataPoint(localId)
+			assert.Equal(t, point, localSetPoint)
 			assert.True(t, found)
 			wg.Done()
-		}()
+		}(i)
 	}
 	wg.Add(1)
 	go func() {
@@ -169,18 +169,18 @@ func TestConcurrentSummary(t *testing.T) {
 		histogramCache:            make(map[uint64]usedHistogramPoint),
 		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
-	setPoint := pmetric.NewSummaryDataPoint()
-
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
-		go func() {
-			c.SetSummaryDataPoint(id, setPoint)
-			point, found := c.GetSummaryDataPoint(id)
-			assert.Equal(t, point, setPoint)
+		go func(i int) {
+			localId := id + uint64(i)
+			localSetPoint := pmetric.NewSummaryDataPoint()
+			c.SetSummaryDataPoint(localId, localSetPoint)
+			point, found := c.GetSummaryDataPoint(localId)
+			assert.Equal(t, point, localSetPoint)
 			assert.True(t, found)
 			wg.Done()
-		}()
+		}(i)
 	}
 	wg.Add(1)
 	go func() {
@@ -201,18 +201,18 @@ func TestConcurrentHistogram(t *testing.T) {
 		histogramCache:            make(map[uint64]usedHistogramPoint),
 		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
-	setPoint := pmetric.NewHistogramDataPoint()
-
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
-		go func() {
-			c.SetHistogramDataPoint(id, setPoint)
-			point, found := c.GetHistogramDataPoint(id)
-			assert.Equal(t, point, setPoint)
+		go func(i int) {
+			localId := id + uint64(i)
+			localSetPoint := pmetric.NewHistogramDataPoint()
+			c.SetHistogramDataPoint(localId, localSetPoint)
+			point, found := c.GetHistogramDataPoint(localId)
+			assert.Equal(t, point, localSetPoint)
 			assert.True(t, found)
 			wg.Done()
-		}()
+		}(i)
 	}
 	wg.Add(1)
 	go func() {
@@ -233,18 +233,18 @@ func TestConcurrentExponentialHistogram(t *testing.T) {
 		histogramCache:            make(map[uint64]usedHistogramPoint),
 		exponentialHistogramCache: make(map[uint64]usedExponentialHistogramPoint),
 	}
-	setPoint := pmetric.NewExponentialHistogramDataPoint()
-
 	var wg sync.WaitGroup
 	for i := 0; i < 5; i++ {
 		wg.Add(1)
-		go func() {
-			c.SetExponentialHistogramDataPoint(id, setPoint)
-			point, found := c.GetExponentialHistogramDataPoint(id)
-			assert.Equal(t, point, setPoint)
+		go func(i int) {
+			localId := id + uint64(i)
+			localSetPoint := pmetric.NewExponentialHistogramDataPoint()
+			c.SetExponentialHistogramDataPoint(localId, localSetPoint)
+			point, found := c.GetExponentialHistogramDataPoint(localId)
+			assert.Equal(t, point, localSetPoint)
 			assert.True(t, found)
 			wg.Done()
-		}()
+		}(i)
 	}
 	wg.Add(1)
 	go func() {
