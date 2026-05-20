@@ -1,5 +1,8 @@
 name: "CodeQL Analysis"
-permissions: read-all
+permissions:
+  actions: read
+  contents: read
+  security-events: write
 on:
   workflow_dispatch:
   schedule:
