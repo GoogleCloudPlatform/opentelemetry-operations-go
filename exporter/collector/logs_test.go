@@ -623,7 +623,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with invalid sourceLocation (map)",
+			name: "log with valid sourceLocation (map with string line)",
 			mr: func() *monitoredrespb.MonitoredResource {
 				return nil
 			},
@@ -633,8 +633,16 @@ func TestLogMapping(t *testing.T) {
 				sourceLocationMap.PutStr("line", "100")
 				return log
 			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					SourceLocation: &logpb.LogEntrySourceLocation{
+						Line: 100,
+					},
+				},
+			},
 			maxEntrySize: defaultMaxEntrySize,
-			expectError:  true,
 		},
 		{
 			name: "log with valid sourceLocation (string)",
