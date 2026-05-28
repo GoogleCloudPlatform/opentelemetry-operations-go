@@ -97,7 +97,7 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 
 			lis, err := net.Listen("tcp", "localhost:8080")
 			require.NoError(t, err)
-			defer lis.Close()
+			defer func() { _ = lis.Close() }()
 
 			//nolint:errcheck
 			go srv.Serve(lis)

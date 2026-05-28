@@ -55,8 +55,8 @@ func NewGoogleCloudTracesExporter(
 ) (*TraceExporter, error) {
 	SetUserAgent(&cfg, set.BuildInfo)
 	obs := selfObservability{
-		log:           set.TelemetrySettings.Logger,
-		meterProvider: set.TelemetrySettings.MeterProvider,
+		log:           set.Logger,
+		meterProvider: set.MeterProvider,
 	}
 	return &TraceExporter{cfg: cfg, timeout: timeout, obs: obs}, nil
 }

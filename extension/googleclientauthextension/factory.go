@@ -25,6 +25,7 @@ import (
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/idtoken"
+	"google.golang.org/api/option"
 	"google.golang.org/grpc/credentials/oauth"
 )
 
@@ -87,7 +88,7 @@ func (ca *clientAuthenticator) newTokenSource(ctx context.Context, creds *google
 		opts := []idtoken.ClientOption{}
 
 		if len(creds.JSON) > 0 {
-			opts = append(opts, idtoken.WithCredentialsJSON(creds.JSON))
+			opts = append(opts, option.WithCredentials(creds))
 		}
 
 		return ca.newIDTokenSource(ctx, ca.config.Audience, opts...)
