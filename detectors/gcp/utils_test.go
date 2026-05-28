@@ -84,7 +84,7 @@ func (f *FakeMetadataTransport) RoundTrip(req *http.Request) (*http.Response, er
 		res.StatusCode = 404
 	}
 	go func() {
-		defer pw.Close()
+		defer func() { _ = pw.Close() }()
 		_, _ = pw.Write([]byte(content))
 	}()
 	res.Status = fmt.Sprintf("%d %s", res.StatusCode, http.StatusText(res.StatusCode))
