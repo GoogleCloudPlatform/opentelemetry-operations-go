@@ -28,7 +28,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/metric"
 	"golang.org/x/oauth2/google"
-	"google.golang.org/api/impersonate"
+	"cloud.google.com/go/auth/credentials/impersonate"
 	"google.golang.org/api/option"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
@@ -318,16 +318,17 @@ func generateClientOptions(ctx context.Context, clientCfg *ClientConfig, cfg *Co
 			}
 			cfg.ProjectID = creds.ProjectID
 		}
-		tokenSource, err := impersonate.CredentialsTokenSource(ctx, impersonate.CredentialsConfig{
+		creds, err := impersonate.NewCredentials(&impersonate.CredentialsOptions{
 			TargetPrincipal: cfg.ImpersonateConfig.TargetPrincipal,
 			Delegates:       cfg.ImpersonateConfig.Delegates,
 			Subject:         cfg.ImpersonateConfig.Subject,
 			Scopes:          scopes,
+			UniverseDomain:  clientCfg.UniverseDomain,
 		})
 		if err != nil {
 			return nil, err
 		}
-		copts = append(copts, option.WithTokenSource(tokenSource))
+		copts = append(copts, option.WithAuthCredentials(creds))
 	} else if cfg.ProjectID == "" && !clientCfg.UseInsecure && (clientCfg.GetClientOptions == nil || len(clientCfg.GetClientOptions()) == 0) {
 		// Only use the project from default credentials if
 		// GetClientOptions does not provide additional options since

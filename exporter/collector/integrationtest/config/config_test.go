@@ -87,9 +87,9 @@ func TestLoadConfig(t *testing.T) {
 }
 
 func sanitize(cfg *testExporterConfig) *testExporterConfig {
-	cfg.Config.MetricConfig.MapMonitoredResource = nil
-	cfg.Config.MetricConfig.GetMetricName = nil
-	cfg.Config.LogConfig.MapMonitoredResource = nil
+	cfg.MetricConfig.MapMonitoredResource = nil
+	cfg.MetricConfig.GetMetricName = nil
+	cfg.LogConfig.MapMonitoredResource = nil
 	return cfg
 }
 
