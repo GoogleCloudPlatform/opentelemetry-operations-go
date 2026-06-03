@@ -102,6 +102,16 @@ func TestCloudPlatformCloudRunJobs(t *testing.T) {
 	assert.Equal(t, CloudRunJob, platform)
 }
 
+func TestCloudPlatformCloudRunWorkerPool(t *testing.T) {
+	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{
+		Vars: map[string]string{
+			cloudRunWorkerPoolEnv: "foo",
+		},
+	})
+	platform := d.CloudPlatform()
+	assert.Equal(t, CloudRunWorkerPool, platform)
+}
+
 func TestCloudPlatformCloudFunctions(t *testing.T) {
 	d := NewTestDetector(newFakeMetadataTransport(t), &FakeOSProvider{
 		Vars: map[string]string{
