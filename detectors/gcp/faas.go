@@ -79,10 +79,8 @@ func (d *Detector) FaaSName() (string, error) {
 
 // FaaSVersion returns the revision of the Cloud Run or Cloud Functions service.
 func (d *Detector) FaaSVersion() (string, error) {
-	if d.onCloudRunWorkerPool() {
-		if version, found := d.os.LookupEnv(cloudRunRevisionEnv); found {
-			return version, nil
-		}
+	if version, found := d.os.LookupEnv(cloudRunRevisionEnv); found {
+		return version, nil
 	}
 	if version, found := d.os.LookupEnv(faasRevisionEnv); found {
 		return version, nil
