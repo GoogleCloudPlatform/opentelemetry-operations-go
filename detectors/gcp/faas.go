@@ -36,11 +36,11 @@ const (
 	cloudRunJobsEnv            = "CLOUD_RUN_JOB"
 	faasServiceEnv             = "K_SERVICE"
 	faasRevisionEnv            = "K_REVISION"
-	cloudRunJobExecutionEnv    = "CLOUD_RUN_EXECUTION"
-	cloudRunJobTaskIndexEnv    = "CLOUD_RUN_TASK_INDEX"
-	cloudRunWorkerPoolEnv      = "CLOUD_RUN_WORKER_POOL"
-	cloudRunWorkerPoolRevision = "CLOUD_RUN_WORKER_POOL_REVISION"
-	regionMetadataAttr         = "instance/region"
+	cloudRunJobExecutionEnv = "CLOUD_RUN_EXECUTION"
+	cloudRunJobTaskIndexEnv = "CLOUD_RUN_TASK_INDEX"
+	cloudRunWorkerPoolEnv   = "CLOUD_RUN_WORKER_POOL"
+	cloudRunRevisionEnv     = "CLOUD_RUN_REVISION"
+	regionMetadataAttr      = "instance/region"
 )
 
 func (d *Detector) onCloudFunctions() bool {
@@ -79,10 +79,12 @@ func (d *Detector) FaaSName() (string, error) {
 
 // FaaSVersion returns the revision of the Cloud Run or Cloud Functions service.
 func (d *Detector) FaaSVersion() (string, error) {
-	if version, found := d.os.LookupEnv(faasRevisionEnv); found {
-		return version, nil
+	if d.onCloudRunWorkerPool() {
+		if version, found := d.os.LookupEnv(cloudRunRevisionEnv); found {
+			return version, nil
+		}
 	}
-	if version, found := d.os.LookupEnv(cloudRunWorkerPoolRevision); found {
+	if version, found := d.os.LookupEnv(faasRevisionEnv); found {
 		return version, nil
 	}
 	return "", errEnvVarNotFound

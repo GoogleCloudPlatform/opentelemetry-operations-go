@@ -77,7 +77,8 @@ func TestFaaSVersion(t *testing.T) {
 func TestFaaSWorkerPoolVersion(t *testing.T) {
 	d := NewTestDetector(&FakeMetadataTransport{}, &FakeOSProvider{
 		Vars: map[string]string{
-			cloudRunWorkerPoolRevision: "version-123",
+			cloudRunWorkerPoolEnv: "my-pool",
+			cloudRunRevisionEnv:   "version-123",
 		},
 	})
 	version, err := d.FaaSVersion()
