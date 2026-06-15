@@ -475,7 +475,7 @@ var MetricsTestCases = []TestCase{
 	},
 	{
 		Name:                 "[GMP] Multi-project metrics with destination_project_quota enabled",
-		OTLPInputFixturePath: "testdata/fixtures/metrics/multi_project.json",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/gmp_multi_project.json",
 		ExpectFixturePath:    "testdata/fixtures/metrics/google_managed_prometheus_multi_project_destination_quota_expected.json",
 		ConfigureCollector: func(cfg *collector.Config) {
 			configureGMPCollector(cfg)

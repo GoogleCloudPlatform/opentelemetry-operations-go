@@ -13,7 +13,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -47,7 +47,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -83,7 +83,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -119,7 +119,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -181,7 +181,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -234,7 +234,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -262,7 +262,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -291,7 +291,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -319,7 +319,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -352,7 +352,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -386,7 +386,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -422,7 +422,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -458,7 +458,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -520,7 +520,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -573,7 +573,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -601,7 +601,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -630,7 +630,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -658,7 +658,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
@@ -680,6 +680,7 @@
           "metric": {
             "type": "prometheus.googleapis.com/target_info/gauge",
             "labels": {
+              "cloud_availability_zone": "us-central1-c",
               "http_scheme": "http",
               "net_host_port": "3333"
             }
@@ -690,7 +691,7 @@
               "cluster": "",
               "instance": "localhost:3333",
               "job": "demo2",
-              "location": "",
+              "location": "us-central1-c",
               "namespace": ""
             }
           },
