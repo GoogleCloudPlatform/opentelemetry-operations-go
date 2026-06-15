@@ -21,6 +21,8 @@ type Config struct {
 	AddMetricSuffixes bool `mapstructure:"add_metric_suffixes"`
 	// ExtraMetricsConfig configures the target_info and otel_scope_info metrics.
 	ExtraMetricsConfig ExtraMetricsConfig `mapstructure:"extra_metrics_config"`
+	// DestinationProjectQuota enables per-request usage of the destination project's quota.
+	DestinationProjectQuota bool `mapstructure:"destination_project_quota"`
 }
 
 // ExtraMetricsConfig controls the inclusion of additional metrics.
