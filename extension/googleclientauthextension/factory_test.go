@@ -106,13 +106,18 @@ func TestStart_idtoken(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "testdata/fake_creds.json")
 	ca := &clientAuthenticator{
 		config: &Config{
-			Project:   "my-project",
-			Scopes:    defaultScopes,
+			Project: "my-project",
+			Scopes: []string{
+				"https://www.googleapis.com/auth/cloud-platform",
+				"https://www.googleapis.com/auth/logging.write",
+				"https://www.googleapis.com/auth/monitoring.write",
+				"https://www.googleapis.com/auth/trace.append",
+			},
 			TokenType: idToken,
 			Audience:  "my-audience",
 		},
 		newIDTokenSource: func(ctx context.Context, audience string, opts ...idtoken.ClientOption) (oauth2.TokenSource, error) {
-			// opts should have idtoken.WithCredentialsJSON
+			// opts should have option.WithCredentials
 			assert.Len(t, opts, 1)
 
 			return &mockIDTokenSource{token: "dummy token"}, nil
@@ -130,8 +135,13 @@ func Test_newTokenSource_idtokenWithoutCredsJSON(t *testing.T) {
 	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "")
 	ca := &clientAuthenticator{
 		config: &Config{
-			Project:   "my-project",
-			Scopes:    defaultScopes,
+			Project: "my-project",
+			Scopes: []string{
+				"https://www.googleapis.com/auth/cloud-platform",
+				"https://www.googleapis.com/auth/logging.write",
+				"https://www.googleapis.com/auth/monitoring.write",
+				"https://www.googleapis.com/auth/trace.append",
+			},
 			TokenType: idToken,
 			Audience:  "my-audience",
 		},

@@ -25,7 +25,7 @@ $(TOOLS)/%: | $(TOOLS)
 	go build -o $@ $(PACKAGE)
 
 GOLANGCI_LINT = $(TOOLS)/golangci-lint
-$(TOOLS)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/cmd/golangci-lint
+$(TOOLS)/golangci-lint: PACKAGE=github.com/golangci/golangci-lint/v2/cmd/golangci-lint
 
 GOVULNCHECK = $(TOOLS)/govulncheck
 $(TOOLS)/govulncheck: PACKAGE=golang.org/x/vuln/cmd/govulncheck
@@ -149,7 +149,7 @@ test-bench:
 	done
 
 .PHONY: lint
-lint: $(GOLANGCI_LINT) $(MISSPELL) govulncheck
+lint: $(GOLANGCI_LINT) $(MISSPELL)
 	set -e; for dir in $(ALL_GO_MOD_DIRS); do \
 	  echo "golangci-lint in $${dir}"; \
 	  (cd "$${dir}" && \

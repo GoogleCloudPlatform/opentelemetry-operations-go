@@ -168,10 +168,11 @@ type LogsExporter struct {
 }
 
 type logMapper struct {
-	obs            selfObservability
-	cfg            Config
-	maxEntrySize   int
-	maxRequestSize int
+	obs             selfObservability
+	compiledFilters []compiledResourceFilter
+	cfg             Config
+	maxEntrySize    int
+	maxRequestSize  int
 }
 
 func NewGoogleCloudLogsExporter(
@@ -182,8 +183,8 @@ func NewGoogleCloudLogsExporter(
 ) (*LogsExporter, error) {
 	SetUserAgent(&cfg, set.BuildInfo)
 	obs := selfObservability{
-		log:           set.TelemetrySettings.Logger,
-		meterProvider: set.TelemetrySettings.MeterProvider,
+		log:           set.Logger,
+		meterProvider: set.MeterProvider,
 	}
 
 	return &LogsExporter{
@@ -191,10 +192,11 @@ func NewGoogleCloudLogsExporter(
 		obs:     obs,
 		timeout: timeout,
 		mapper: logMapper{
-			obs:            obs,
-			cfg:            cfg,
-			maxEntrySize:   defaultMaxEntrySize,
-			maxRequestSize: defaultMaxRequestSize,
+			obs:             obs,
+			cfg:             cfg,
+			compiledFilters: compileResourceFilters(cfg.LogConfig.ResourceFilters),
+			maxEntrySize:    defaultMaxEntrySize,
+			maxRequestSize:  defaultMaxRequestSize,
 		},
 	}, nil
 }
@@ -299,7 +301,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 	for i := 0; i < ld.ResourceLogs().Len(); i++ {
 		rl := ld.ResourceLogs().At(i)
 		mr := l.cfg.LogConfig.MapMonitoredResource(rl.Resource())
-		extraResourceLabels := attributesToUnsanitizedLabels(filterAttributes(rl.Resource().Attributes(), l.cfg.LogConfig.ServiceResourceLabels, l.cfg.LogConfig.ResourceFilters))
+		extraResourceLabels := attributesToUnsanitizedLabels(filterAttributes(rl.Resource().Attributes(), l.cfg.LogConfig.ServiceResourceLabels, l.compiledFilters))
 		projectID := l.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
 		if projectFromResource, found := rl.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
@@ -443,14 +445,20 @@ func (l logMapper) logToSplitEntries(
 		return true
 	})
 
-	// parse LogEntrySourceLocation struct from OTel attribute
+	// parse LogEntrySourceLocation struct from OTel attribute.
+	// The "line" field may be sent as either a JSON number or a quoted string;
+	// use an intermediate struct with Int64OrString to accept both forms.
 	if sourceLocation, ok := attrsMap[SourceLocationAttributeKey]; ok {
-		var logEntrySourceLocation logpb.LogEntrySourceLocation
-		err := unmarshalAttribute(sourceLocation, &logEntrySourceLocation)
+		var parsed sourceLocationLog
+		err := unmarshalAttribute(sourceLocation, &parsed)
 		if err != nil {
 			return nil, &attributeProcessingError{Key: SourceLocationAttributeKey, Err: err}
 		}
-		entry.SourceLocation = &logEntrySourceLocation
+		entry.SourceLocation = &logpb.LogEntrySourceLocation{
+			File:     parsed.File,
+			Line:     int64(parsed.Line),
+			Function: parsed.Function,
+		}
 		delete(attrsMap, SourceLocationAttributeKey)
 	}
 
@@ -518,6 +526,14 @@ func (l logMapper) logToSplitEntries(
 		}
 	}
 
+	// Add OTLP event_name field as "event.name" label
+	if eventName := logRecord.EventName(); eventName != "" {
+		if entry.Labels == nil {
+			entry.Labels = make(map[string]string)
+		}
+		entry.Labels["event.name"] = eventName
+	}
+
 	// Handle map and bytes as JSON-structured logs if they are successfully converted.
 	switch logRecord.Body().Type() {
 	case pcommon.ValueTypeMap:
@@ -583,48 +599,81 @@ func (l logMapper) logToSplitEntries(
 	return entries, nil
 }
 
-type IntOrString int32
-
-// Used to unmarhall JSON fields that can be either provided as a JSON number
-// or a string containing an integer.
-func (f *IntOrString) UnmarshalJSON(data []byte) error {
-	var number int32
+func unmarshalJSONToIntByBitSize(data []byte, bitSize int) (int64, error) {
+	var number int64
 	if err := json.Unmarshal(data, &number); err == nil {
-		*f = IntOrString(number)
-		return nil
+		return number, nil
 	}
 
 	var str string
 	if err := json.Unmarshal(data, &str); err == nil {
-		integer, err := strconv.ParseInt(strings.TrimSpace(str), 10, 32)
+		integer, err := strconv.ParseInt(strings.TrimSpace(str), 10, bitSize)
 		if err != nil {
-			return fmt.Errorf("failed to convert string number to int32: %w", err)
+			return integer, fmt.Errorf("failed to convert string number to integer: %w", err)
 		}
-		*f = IntOrString(integer)
-		return nil
+		return integer, nil
 	}
 
-	return fmt.Errorf("field must be a JSON number or a string containing an integer: %s", string(data))
+	return 0, fmt.Errorf("field must be a JSON number or a string containing an integer: %s", string(data))
+}
+
+type Int32OrString int32
+
+// Used to unmarhall JSON fields that can be either provided as a JSON number
+// or a string containing an integer.
+func (f *Int32OrString) UnmarshalJSON(data []byte) error {
+	integer, err := unmarshalJSONToIntByBitSize(data, 32)
+	if err != nil {
+		return err
+	}
+	*f = Int32OrString(integer)
+	return nil
+}
+
+type Int64OrString int64
+
+// Used to unmarhall JSON fields that can be either provided as a JSON number
+// or a string containing an integer.
+func (f *Int64OrString) UnmarshalJSON(data []byte) error {
+	integer, err := unmarshalJSONToIntByBitSize(data, 64)
+	if err != nil {
+		return err
+	}
+	*f = Int64OrString(integer)
+	return nil
+}
+
+// sourceLocationLog is an intermediate representation of
+// logging.googleapis.com/sourceLocation that accepts the "line" field as
+// either a JSON number or a quoted string, matching what various log
+// producers emit in practice.
+//
+// JSON keys follow:
+// https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogEntrySourceLocation
+type sourceLocationLog struct {
+	File     string        `json:"file"`
+	Line     Int64OrString `json:"line"`
+	Function string        `json:"function"`
 }
 
 // JSON keys derived from:
 // https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#httprequest
 type httpRequestLog struct {
-	RemoteIP                       string      `json:"remoteIp"`
-	RequestURL                     string      `json:"requestUrl"`
-	Latency                        string      `json:"latency"`
-	Referer                        string      `json:"referer"`
-	ServerIP                       string      `json:"serverIp"`
-	UserAgent                      string      `json:"userAgent"`
-	RequestMethod                  string      `json:"requestMethod"`
-	Protocol                       string      `json:"protocol"`
-	ResponseSize                   int64       `json:"responseSize,string"`
-	RequestSize                    int64       `json:"requestSize,string"`
-	CacheFillBytes                 int64       `json:"cacheFillBytes,string"`
-	Status                         IntOrString `json:"status"`
-	CacheLookup                    bool        `json:"cacheLookup"`
-	CacheHit                       bool        `json:"cacheHit"`
-	CacheValidatedWithOriginServer bool        `json:"cacheValidatedWithOriginServer"`
+	RemoteIP                       string        `json:"remoteIp"`
+	RequestURL                     string        `json:"requestUrl"`
+	Latency                        string        `json:"latency"`
+	Referer                        string        `json:"referer"`
+	ServerIP                       string        `json:"serverIp"`
+	UserAgent                      string        `json:"userAgent"`
+	RequestMethod                  string        `json:"requestMethod"`
+	Protocol                       string        `json:"protocol"`
+	ResponseSize                   Int64OrString `json:"responseSize"`
+	RequestSize                    Int64OrString `json:"requestSize"`
+	CacheFillBytes                 Int64OrString `json:"cacheFillBytes"`
+	Status                         Int32OrString `json:"status"`
+	CacheLookup                    bool          `json:"cacheLookup"`
+	CacheHit                       bool          `json:"cacheHit"`
+	CacheValidatedWithOriginServer bool          `json:"cacheValidatedWithOriginServer"`
 }
 
 func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.HttpRequest, error) {
@@ -637,17 +686,17 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.H
 	pb := &logtypepb.HttpRequest{
 		RequestMethod:                  parsedHTTPRequest.RequestMethod,
 		RequestUrl:                     fixUTF8(parsedHTTPRequest.RequestURL),
-		RequestSize:                    parsedHTTPRequest.RequestSize,
+		RequestSize:                    int64(parsedHTTPRequest.RequestSize),
 		Status:                         int32(parsedHTTPRequest.Status),
-		ResponseSize:                   parsedHTTPRequest.ResponseSize,
+		ResponseSize:                   int64(parsedHTTPRequest.ResponseSize),
 		UserAgent:                      parsedHTTPRequest.UserAgent,
 		ServerIp:                       parsedHTTPRequest.ServerIP,
 		RemoteIp:                       parsedHTTPRequest.RemoteIP,
 		Referer:                        parsedHTTPRequest.Referer,
 		CacheHit:                       parsedHTTPRequest.CacheHit,
 		CacheValidatedWithOriginServer: parsedHTTPRequest.CacheValidatedWithOriginServer,
-		Protocol:                       "HTTP/1.1",
-		CacheFillBytes:                 parsedHTTPRequest.CacheFillBytes,
+		Protocol:                       parsedHTTPRequest.Protocol,
+		CacheFillBytes:                 int64(parsedHTTPRequest.CacheFillBytes),
 		CacheLookup:                    parsedHTTPRequest.CacheLookup,
 	}
 	if parsedHTTPRequest.Latency != "" {

@@ -111,7 +111,7 @@ func ConvertValue(v any) log.Value {
 			})
 		}
 		return log.MapValue(kvs...)
-	case reflect.Ptr, reflect.Interface:
+	case reflect.Pointer, reflect.Interface:
 		if val.IsNil() {
 			return log.Value{}
 		}

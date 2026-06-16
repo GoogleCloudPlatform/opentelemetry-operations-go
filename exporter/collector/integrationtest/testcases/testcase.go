@@ -155,6 +155,7 @@ func (tc *TestCase) SaveRecordedTraceFixtures(
 }
 
 func NormalizeTraceFixture(t testing.TB, fixture *protos.TraceExpectFixture) {
+	fixture.UserAgent = UserAgentRemoveRuntimeInfo(fixture.UserAgent)
 	normalizeSelfObs(t, fixture.SelfObservabilityMetrics)
 	for _, req := range fixture.BatchWriteSpansRequest {
 		for _, span := range req.Spans {
@@ -163,6 +164,15 @@ func NormalizeTraceFixture(t testing.TB, fixture *protos.TraceExpectFixture) {
 			}
 			if span.GetEndTime() != nil {
 				span.EndTime = &timestamppb.Timestamp{}
+			}
+			if span.GetAttributes() != nil {
+				if m := span.GetAttributes().GetAttributeMap(); m != nil {
+					if agent, ok := m["g.co/agent"]; ok {
+						if agent.GetStringValue() != nil {
+							agent.GetStringValue().Value = UserAgentRemoveRuntimeInfo(agent.GetStringValue().GetValue())
+						}
+					}
+				}
 			}
 		}
 	}
@@ -252,6 +262,7 @@ func (tc *TestCase) SaveRecordedLogFixtures(
 // Normalizes timestamps which create noise in the fixture because they can
 // vary each test run.
 func NormalizeLogFixture(t testing.TB, fixture *protos.LogExpectFixture) {
+	fixture.UserAgent = UserAgentRemoveRuntimeInfo(fixture.UserAgent)
 	normalizeSelfObs(t, fixture.SelfObservabilityMetrics)
 	for listIndex, req := range fixture.WriteLogEntriesRequests {
 		// sort the entries in each request
@@ -419,6 +430,7 @@ func (tc *TestCase) SaveRecordedMetricFixtures(
 // Normalizes timestamps which create noise in the fixture because they can
 // vary each test run.
 func NormalizeMetricFixture(t testing.TB, fixture *protos.MetricExpectFixture) {
+	fixture.UserAgent = UserAgentRemoveRuntimeInfo(fixture.UserAgent)
 	normalizeTimeSeriesReqs(t, fixture.CreateTimeSeriesRequests...)
 	normalizeTimeSeriesReqs(t, fixture.CreateServiceTimeSeriesRequests...)
 	normalizeMetricDescriptorReqs(t, fixture.CreateMetricDescriptorRequests...)
