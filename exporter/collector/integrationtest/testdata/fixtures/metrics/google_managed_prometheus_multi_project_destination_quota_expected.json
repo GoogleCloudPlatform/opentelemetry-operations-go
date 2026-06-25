@@ -1,0 +1,1310 @@
+{
+  "createTimeSeriesRequests": [
+    {
+      "name": "projects/fake-other-project",
+      "timeSeries": [
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/scrape_series_added/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 22
+              }
+            }
+          ],
+          "description": "The approximate number of new series in this scrape"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/ex_com_one/gauge",
+            "labels": {
+              "ex_com_lemons": "13",
+              "telemetry_sdk_language": "go",
+              "telemetry_sdk_name": "opentelemetry",
+              "telemetry_sdk_version": "1.6.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/ex_com_one/gauge",
+            "labels": {
+              "A": "1",
+              "B": "2",
+              "C": "3",
+              "ex_com_lemons": "10",
+              "telemetry_sdk_language": "go",
+              "telemetry_sdk_name": "opentelemetry",
+              "telemetry_sdk_version": "1.6.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 13
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/ex_com_two/histogram",
+            "labels": {
+              "A": "1",
+              "B": "2",
+              "C": "3",
+              "ex_com_lemons": "13",
+              "telemetry_sdk_language": "go",
+              "telemetry_sdk_name": "opentelemetry",
+              "telemetry_sdk_version": "1.6.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "distributionValue": {
+                  "count": "1",
+                  "mean": 2,
+                  "sumOfSquaredDeviation": 2.25,
+                  "bucketOptions": {
+                    "explicitBuckets": {
+                      "bounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "0",
+                    "1",
+                    "0",
+                    "0",
+                    "0",
+                    "0"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/ex_com_two/histogram",
+            "labels": {
+              "A": "1",
+              "B": "2",
+              "C": "3",
+              "ex_com_lemons": "10",
+              "telemetry_sdk_language": "go",
+              "telemetry_sdk_name": "opentelemetry",
+              "telemetry_sdk_version": "1.6.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "distributionValue": {
+                  "count": "2",
+                  "mean": 7,
+                  "sumOfSquaredDeviation": 76.25,
+                  "bucketOptions": {
+                    "explicitBuckets": {
+                      "bounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "0",
+                    "1",
+                    "0",
+                    "1",
+                    "0",
+                    "0"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/up/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1
+              }
+            }
+          ],
+          "description": "The scraping was successful"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/scrape_duration_seconds/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.00699415
+              }
+            }
+          ],
+          "unit": "seconds",
+          "description": "Duration of the scrape"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/scrape_samples_scraped/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 22
+              }
+            }
+          ],
+          "description": "The number of samples the target exposed"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/scrape_samples_post_metric_relabeling/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 22
+              }
+            }
+          ],
+          "description": "The number of samples remaining after metric relabeling was applied"
+        }
+      ]
+    },
+    {
+      "name": "projects/fakeprojectid",
+      "timeSeries": [
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/scrape_series_added/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 22
+              }
+            }
+          ],
+          "description": "The approximate number of new series in this scrape"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/ex_com_one/gauge",
+            "labels": {
+              "ex_com_lemons": "13",
+              "telemetry_sdk_language": "go",
+              "telemetry_sdk_name": "opentelemetry",
+              "telemetry_sdk_version": "1.6.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/ex_com_one/gauge",
+            "labels": {
+              "A": "1",
+              "B": "2",
+              "C": "3",
+              "ex_com_lemons": "10",
+              "telemetry_sdk_language": "go",
+              "telemetry_sdk_name": "opentelemetry",
+              "telemetry_sdk_version": "1.6.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 13
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/ex_com_two/histogram",
+            "labels": {
+              "A": "1",
+              "B": "2",
+              "C": "3",
+              "ex_com_lemons": "13",
+              "telemetry_sdk_language": "go",
+              "telemetry_sdk_name": "opentelemetry",
+              "telemetry_sdk_version": "1.6.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "distributionValue": {
+                  "count": "1",
+                  "mean": 2,
+                  "sumOfSquaredDeviation": 2.25,
+                  "bucketOptions": {
+                    "explicitBuckets": {
+                      "bounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "0",
+                    "1",
+                    "0",
+                    "0",
+                    "0",
+                    "0"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/ex_com_two/histogram",
+            "labels": {
+              "A": "1",
+              "B": "2",
+              "C": "3",
+              "ex_com_lemons": "10",
+              "telemetry_sdk_language": "go",
+              "telemetry_sdk_name": "opentelemetry",
+              "telemetry_sdk_version": "1.6.2"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z",
+                "startTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "distributionValue": {
+                  "count": "2",
+                  "mean": 7,
+                  "sumOfSquaredDeviation": 76.25,
+                  "bucketOptions": {
+                    "explicitBuckets": {
+                      "bounds": [
+                        1,
+                        2,
+                        5,
+                        10,
+                        20,
+                        50
+                      ]
+                    }
+                  },
+                  "bucketCounts": [
+                    "0",
+                    "0",
+                    "1",
+                    "0",
+                    "1",
+                    "0",
+                    "0"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/up/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 1
+              }
+            }
+          ],
+          "description": "The scraping was successful"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/scrape_duration_seconds/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 0.00699415
+              }
+            }
+          ],
+          "unit": "seconds",
+          "description": "Duration of the scrape"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/scrape_samples_scraped/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 22
+              }
+            }
+          ],
+          "description": "The number of samples the target exposed"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/scrape_samples_post_metric_relabeling/gauge"
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "DOUBLE",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "doubleValue": 22
+              }
+            }
+          ],
+          "description": "The number of samples remaining after metric relabeling was applied"
+        },
+        {
+          "metric": {
+            "type": "prometheus.googleapis.com/target_info/gauge",
+            "labels": {
+              "cloud_availability_zone": "us-central1-c",
+              "http_scheme": "http",
+              "net_host_port": "3333"
+            }
+          },
+          "resource": {
+            "type": "prometheus_target",
+            "labels": {
+              "cluster": "",
+              "instance": "localhost:3333",
+              "job": "demo2",
+              "location": "us-central1-c",
+              "namespace": ""
+            }
+          },
+          "metricKind": "GAUGE",
+          "valueType": "INT64",
+          "points": [
+            {
+              "interval": {
+                "endTime": "1970-01-01T00:00:00Z"
+              },
+              "value": {
+                "int64Value": "1"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "selfObservabilityMetrics": {
+    "createTimeSeriesRequests": [
+      {
+        "name": "projects/myproject",
+        "timeSeries": [
+          {
+            "metric": {
+              "type": "workload.googleapis.com/googlecloudmonitoring/point_count",
+              "labels": {
+                "status": "OK"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "INT64",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "19"
+                }
+              }
+            ],
+            "unit": "1",
+            "description": "Count of metric points written to Cloud Monitoring."
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.duration",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          0.00001,
+                          0.00005,
+                          0.0001,
+                          0.0003,
+                          0.0006,
+                          0.0008,
+                          0.001,
+                          0.002,
+                          0.003,
+                          0.004,
+                          0.005,
+                          0.006,
+                          0.008,
+                          0.01,
+                          0.013,
+                          0.016,
+                          0.02,
+                          0.025,
+                          0.03,
+                          0.04,
+                          0.05,
+                          0.065,
+                          0.08,
+                          0.1,
+                          0.13,
+                          0.16,
+                          0.2,
+                          0.25,
+                          0.3,
+                          0.4,
+                          0.5,
+                          0.65,
+                          0.8,
+                          1,
+                          2,
+                          5,
+                          10,
+                          20,
+                          50,
+                          100
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "s",
+            "description": "End-to-end time taken to complete a client call attempt."
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "By",
+            "description": "Compressed message bytes received per call attempt."
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          1024,
+                          2048,
+                          4096,
+                          16384,
+                          65536,
+                          262144,
+                          1048576,
+                          4194304,
+                          16777216,
+                          67108864,
+                          268435456,
+                          1073741824,
+                          4294967296
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "By",
+            "description": "Compressed message bytes sent per client call attempt."
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.attempt.started",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "INT64",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "int64Value": "2"
+                }
+              }
+            ],
+            "unit": "{attempt}",
+            "description": "Number of client call attempts started."
+          },
+          {
+            "metric": {
+              "type": "workload.googleapis.com/grpc.client.call.duration",
+              "labels": {
+                "grpc_method": "other",
+                "grpc_status": "OK",
+                "grpc_target": "dns:///127.0.0.1:40441"
+              }
+            },
+            "resource": {
+              "type": "generic_node",
+              "labels": {
+                "location": "global",
+                "namespace": "",
+                "node_id": ""
+              }
+            },
+            "metricKind": "CUMULATIVE",
+            "valueType": "DISTRIBUTION",
+            "points": [
+              {
+                "interval": {
+                  "endTime": "1970-01-01T00:00:00Z",
+                  "startTime": "1970-01-01T00:00:00Z"
+                },
+                "value": {
+                  "distributionValue": {
+                    "bucketOptions": {
+                      "explicitBuckets": {
+                        "bounds": [
+                          0,
+                          0.00001,
+                          0.00005,
+                          0.0001,
+                          0.0003,
+                          0.0006,
+                          0.0008,
+                          0.001,
+                          0.002,
+                          0.003,
+                          0.004,
+                          0.005,
+                          0.006,
+                          0.008,
+                          0.01,
+                          0.013,
+                          0.016,
+                          0.02,
+                          0.025,
+                          0.03,
+                          0.04,
+                          0.05,
+                          0.065,
+                          0.08,
+                          0.1,
+                          0.13,
+                          0.16,
+                          0.2,
+                          0.25,
+                          0.3,
+                          0.4,
+                          0.5,
+                          0.65,
+                          0.8,
+                          1,
+                          2,
+                          5,
+                          10,
+                          20,
+                          50,
+                          100
+                        ]
+                      }
+                    },
+                    "bucketCounts": [
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0",
+                      "0"
+                    ]
+                  }
+                }
+              }
+            ],
+            "unit": "s",
+            "description": "Time taken by gRPC to complete an RPC from application's perspective."
+          }
+        ]
+      }
+    ],
+    "createMetricDescriptorRequests": [
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "googlecloudmonitoring/point_count",
+          "type": "workload.googleapis.com/googlecloudmonitoring/point_count",
+          "labels": [
+            {
+              "key": "status"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "unit": "1",
+          "description": "Count of metric points written to Cloud Monitoring.",
+          "displayName": "googlecloudmonitoring/point_count"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.duration",
+          "type": "workload.googleapis.com/grpc.client.attempt.duration",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "s",
+          "description": "End-to-end time taken to complete a client call attempt.",
+          "displayName": "grpc.client.attempt.duration"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.rcvd_total_compressed_message_size",
+          "type": "workload.googleapis.com/grpc.client.attempt.rcvd_total_compressed_message_size",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Compressed message bytes received per call attempt.",
+          "displayName": "grpc.client.attempt.rcvd_total_compressed_message_size"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.sent_total_compressed_message_size",
+          "type": "workload.googleapis.com/grpc.client.attempt.sent_total_compressed_message_size",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "By",
+          "description": "Compressed message bytes sent per client call attempt.",
+          "displayName": "grpc.client.attempt.sent_total_compressed_message_size"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.attempt.started",
+          "type": "workload.googleapis.com/grpc.client.attempt.started",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "INT64",
+          "unit": "{attempt}",
+          "description": "Number of client call attempts started.",
+          "displayName": "grpc.client.attempt.started"
+        }
+      },
+      {
+        "name": "projects/myproject",
+        "metricDescriptor": {
+          "name": "grpc.client.call.duration",
+          "type": "workload.googleapis.com/grpc.client.call.duration",
+          "labels": [
+            {
+              "key": "grpc_method"
+            },
+            {
+              "key": "grpc_status"
+            },
+            {
+              "key": "grpc_target"
+            }
+          ],
+          "metricKind": "CUMULATIVE",
+          "valueType": "DISTRIBUTION",
+          "unit": "s",
+          "description": "Time taken by gRPC to complete an RPC from application's perspective.",
+          "displayName": "grpc.client.call.duration"
+        }
+      }
+    ]
+  },
+  "userAgent": "GoogleCloudExporter Integration Test/{{version}} grpc-go/{{version}}"
+}

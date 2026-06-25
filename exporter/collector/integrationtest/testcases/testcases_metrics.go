@@ -473,6 +473,16 @@ var MetricsTestCases = []TestCase{
 		// We don't support disabling metric descriptor creation for the SDK exporter
 		SkipForSDK: true,
 	},
+	{
+		Name:                 "[GMP] Multi-project metrics with destination_project_quota enabled",
+		OTLPInputFixturePath: "testdata/fixtures/metrics/gmp_multi_project.json",
+		ExpectFixturePath:    "testdata/fixtures/metrics/google_managed_prometheus_multi_project_destination_quota_expected.json",
+		ConfigureCollector: func(cfg *collector.Config) {
+			configureGMPCollector(cfg)
+			cfg.DestinationProjectQuota = true
+		},
+		SkipForSDK: true,
+	},
 	// TODO: Add integration tests for workload.googleapis.com metrics from the ops agent
 }
 
@@ -482,6 +492,7 @@ func configureGMPCollector(cfg *collector.Config) {
 	cfg.MetricConfig.Prefix = "prometheus.googleapis.com/"
 	cfg.MetricConfig.SkipCreateMetricDescriptor = true
 	gmpConfig := googlemanagedprometheus.DefaultConfig()
+	cfg.DestinationProjectQuota = gmpConfig.DestinationProjectQuota
 	metricNamer := otlptranslator.MetricNamer{
 		WithMetricSuffixes: gmpConfig.AddMetricSuffixes,
 		UTF8Allowed:        false,

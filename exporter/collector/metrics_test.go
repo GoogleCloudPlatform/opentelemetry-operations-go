@@ -39,6 +39,7 @@ import (
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/testing/protocmp"
@@ -2792,3 +2793,84 @@ func Benchmark_TestReadWALAndExport(b *testing.B) {
 		require.NoError(b, err)
 	}
 }
+
+type mockMetricsClient struct {
+	monitoringClient
+	createTimeSeries func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error
+}
+
+func (m *mockMetricsClient) CreateTimeSeries(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error {
+	if m.createTimeSeries != nil {
+		return m.createTimeSeries(ctx, req, opts...)
+	}
+	return nil
+}
+
+func TestDestinationProjectQuota(t *testing.T) {
+	for _, tc := range []struct {
+		desc                    string
+		destinationProjectQuota bool
+		expectedUserProject     string // if empty, expect no user project header
+	}{
+		{
+			desc:                    "disabled",
+			destinationProjectQuota: false,
+			expectedUserProject:     "",
+		},
+		{
+			desc:                    "enabled",
+			destinationProjectQuota: true,
+			expectedUserProject:     "destination-project",
+		},
+	} {
+		t.Run(tc.desc, func(t *testing.T) {
+			mExp, err := NewGoogleCloudMetricsExporter(
+				context.Background(),
+				Config{
+					ProjectID: "default-project",
+					MetricConfig: MetricConfig{
+						MapMonitoredResource: defaultResourceToMonitoringMonitoredResource,
+						GetMetricName:        defaultGetMetricName,
+					},
+					DestinationProjectQuota: tc.destinationProjectQuota,
+				},
+				newTestExporterSettings(),
+				10*time.Second,
+			)
+			require.NoError(t, err)
+
+			called := false
+			mExp.client = &mockMetricsClient{
+				createTimeSeries: func(ctx context.Context, req *monitoringpb.CreateTimeSeriesRequest, opts ...gax.CallOption) error {
+					called = true
+					md, ok := metadata.FromOutgoingContext(ctx)
+					if tc.expectedUserProject == "" {
+						if ok {
+							assert.Empty(t, md.Get("x-goog-user-project"))
+						}
+					} else {
+						require.True(t, ok)
+						userProjects := md.Get("x-goog-user-project")
+						require.Len(t, userProjects, 1)
+						assert.Equal(t, tc.expectedUserProject, userProjects[0])
+					}
+					return nil
+				},
+			}
+
+			metrics := pmetric.NewMetrics()
+			rm := metrics.ResourceMetrics().AppendEmpty()
+			// set gcp.project.id to destination-project
+			rm.Resource().Attributes().PutStr("gcp.project.id", "destination-project")
+			sm := rm.ScopeMetrics().AppendEmpty()
+			metric := sm.Metrics().AppendEmpty()
+			metric.SetName("test-metric")
+			metric.SetEmptyGauge().DataPoints().AppendEmpty().SetIntValue(123)
+
+			err = mExp.PushMetrics(context.Background(), metrics)
+			require.NoError(t, err)
+			assert.True(t, called, "CreateTimeSeries was not called")
+		})
+	}
+}
+
