@@ -16,6 +16,8 @@ package gcp
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -65,6 +67,39 @@ func TestGKEClusterNameErr(t *testing.T) {
 	clusterName, err := d.GKEClusterName()
 	assert.Error(t, err)
 	assert.Equal(t, "", clusterName)
+}
+
+func TestGKEHostType(t *testing.T) {
+	var requestPath string
+	computeServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		requestPath = r.URL.Path
+		_, _ = w.Write([]byte(`{"machineType":"https://www.googleapis.com/compute/v1/projects/my-project/zones/us-central1-a/machineTypes/e2-standard-4"}`))
+	}))
+	defer computeServer.Close()
+
+	d := NewTestDetector(newGKEFakeMetadataTransport(t), &FakeOSProvider{})
+	d.httpClient = computeServer.Client()
+	d.computeBaseURL = computeServer.URL
+
+	hostType, err := d.GKEHostType()
+	assert.NoError(t, err)
+	assert.Equal(t, "e2-standard-4", hostType)
+	assert.Equal(t, "/projects/my-project/zones/us-central1-a/instances/my-instance", requestPath)
+}
+
+func TestGKEHostTypeErr(t *testing.T) {
+	computeServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "forbidden", http.StatusForbidden)
+	}))
+	defer computeServer.Close()
+
+	d := NewTestDetector(newGKEFakeMetadataTransport(t), &FakeOSProvider{})
+	d.httpClient = computeServer.Client()
+	d.computeBaseURL = computeServer.URL
+
+	hostType, err := d.GKEHostType()
+	assert.Error(t, err)
+	assert.Equal(t, "", hostType)
 }
 
 func TestGKEAvailabilityZoneOrRegionZonal(t *testing.T) {
