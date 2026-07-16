@@ -61,7 +61,16 @@ func NewGoogleCloudTracesExporter(
 	return &TraceExporter{cfg: cfg, timeout: timeout, obs: obs}, nil
 }
 
-func (te *TraceExporter) Start(ctx context.Context, _ component.Host) error {
+func (te *TraceExporter) Start(ctx context.Context, host component.Host) error {
+	if te.cfg.Authenticator != "" {
+		authOpts, err := getAuthenticatorClientOptions(host, te.cfg.Authenticator)
+		if err != nil {
+			return err
+		}
+		te.cfg.TraceConfig.ClientConfig.GetClientOptions = func() []option.ClientOption {
+			return authOpts
+		}
+	}
 	topts := []texporter.Option{
 		texporter.WithProjectID(te.cfg.ProjectID),
 		texporter.WithTimeout(te.timeout),

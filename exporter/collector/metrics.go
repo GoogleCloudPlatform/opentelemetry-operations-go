@@ -237,10 +237,19 @@ func NewGoogleCloudMetricsExporter(
 	return mExp, nil
 }
 
-func (me *MetricsExporter) Start(ctx context.Context, _ component.Host) error {
+func (me *MetricsExporter) Start(ctx context.Context, host component.Host) error {
 	me.shutdownC = make(chan struct{})
 	if me.cfg.MetricConfig.CumulativeNormalization {
 		me.mapper.normalizer = normalization.NewStandardNormalizer(me.shutdownC, me.obs.log)
+	}
+	if me.cfg.Authenticator != "" {
+		authOpts, err := getAuthenticatorClientOptions(host, me.cfg.Authenticator)
+		if err != nil {
+			return err
+		}
+		me.cfg.MetricConfig.ClientConfig.GetClientOptions = func() []option.ClientOption {
+			return authOpts
+		}
 	}
 	clientOpts, err := generateClientOptions(ctx, &me.cfg.MetricConfig.ClientConfig, &me.cfg, monitoring.DefaultAuthScopes(), me.obs.meterProvider)
 	if err != nil {

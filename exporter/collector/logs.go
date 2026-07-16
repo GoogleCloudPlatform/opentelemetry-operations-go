@@ -214,7 +214,16 @@ func (l *LogsExporter) ConfigureExporter(config *logsutil.ExporterConfig) {
 	}
 }
 
-func (l *LogsExporter) Start(ctx context.Context, _ component.Host) error {
+func (l *LogsExporter) Start(ctx context.Context, host component.Host) error {
+	if l.cfg.Authenticator != "" {
+		authOpts, err := getAuthenticatorClientOptions(host, l.cfg.Authenticator)
+		if err != nil {
+			return err
+		}
+		l.cfg.LogConfig.ClientConfig.GetClientOptions = func() []option.ClientOption {
+			return authOpts
+		}
+	}
 	clientOpts, err := generateClientOptions(ctx, &l.cfg.LogConfig.ClientConfig, &l.cfg, loggingv2.DefaultAuthScopes(), l.obs.meterProvider)
 	if err != nil {
 		return err
