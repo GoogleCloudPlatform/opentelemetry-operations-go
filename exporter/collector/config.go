@@ -15,28 +15,28 @@
 package collector
 
 import (
-	"cloud.google.com/go/auth/credentials/impersonate"
 	"context"
 	"errors"
 	"fmt"
+	"regexp"
+	"runtime"
+	"strings"
+	"time"
+
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/extension/extensionauth"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/pmetric"
 	"go.opentelemetry.io/otel/metric"
+	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
+	"cloud.google.com/go/auth/credentials/impersonate"
 	"google.golang.org/api/option"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/encoding/gzip"
 	otelgrpc "google.golang.org/grpc/stats/opentelemetry"
-	"regexp"
-	"runtime"
-	"strings"
-	"time"
-
-	"google3/third_party/golang/grpc/credentials/credentials"
-	"google3/third_party/golang/oauth2/oauth2"
 )
 
 const (
@@ -60,16 +60,20 @@ type Config struct {
 	DestinationProjectQuota bool              `mapstructure:"destination_project_quota"`
 }
 
-type tokenSourceProvider interface {
-	TokenSource() oauth2.TokenSource
-}
-
 type clientOptionProvider interface {
 	ClientOptions() []option.ClientOption
 }
 
-type perRPCCredentialsProvider interface {
-	PerRPCCredentials() (credentials.PerRPCCredentials, error)
+type contextTokenSourceProvider interface {
+	Token(context.Context) (*oauth2.Token, error)
+}
+
+type googleApiContextSourceWrapper struct {
+	ts contextTokenSourceProvider
+}
+
+func (w *googleApiContextSourceWrapper) Token() (*oauth2.Token, error) {
+	return w.ts.Token(context.Background())
 }
 
 // getAuthenticatorClientOptions resolves an authentication extension in host.GetExtensions() by name
@@ -94,13 +98,13 @@ func getAuthenticatorClientOptions(host component.Host, authenticatorName string
 	if cop, ok := ext.(clientOptionProvider); ok && len(cop.ClientOptions()) > 0 {
 		return cop.ClientOptions(), nil
 	}
-	if tsProv, ok := ext.(tokenSourceProvider); ok && tsProv.TokenSource() != nil {
-		return []option.ClientOption{option.WithTokenSource(tsProv.TokenSource())}, nil
+	if ctxTS, ok := ext.(contextTokenSourceProvider); ok {
+		return []option.ClientOption{option.WithTokenSource(&googleApiContextSourceWrapper{ts: ctxTS})}, nil
 	}
 	if directTS, ok := ext.(oauth2.TokenSource); ok {
 		return []option.ClientOption{option.WithTokenSource(directTS)}, nil
 	}
-	if grpcProv, ok := ext.(perRPCCredentialsProvider); ok {
+	if grpcProv, ok := ext.(extensionauth.GRPCClient); ok {
 		creds, err := grpcProv.PerRPCCredentials()
 		if err != nil {
 			return nil, fmt.Errorf("authenticator extension %q failed to produce PerRPCCredentials: %w", authenticatorName, err)

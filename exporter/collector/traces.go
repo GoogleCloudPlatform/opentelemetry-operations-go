@@ -28,6 +28,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/api/option"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -62,7 +63,7 @@ func NewGoogleCloudTracesExporter(
 }
 
 func (te *TraceExporter) Start(ctx context.Context, host component.Host) error {
-	if te.cfg.Authenticator != "" {
+	if te.cfg.Authenticator != "" && te.cfg.TraceConfig.ClientConfig.GetClientOptions == nil {
 		authOpts, err := getAuthenticatorClientOptions(host, te.cfg.Authenticator)
 		if err != nil {
 			return err

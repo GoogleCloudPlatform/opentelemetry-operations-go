@@ -30,7 +30,7 @@ require (
 	go.uber.org/zap v1.28.0
 	google.golang.org/api v0.280.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20260519071638-aa98bba5eb94
-	google.golang.org/grpc v1.81.1
+	google.golang.org/grpc v1.82.0
 	google.golang.org/protobuf v1.36.11
 )
 
@@ -105,6 +105,7 @@ require (
 	go.opentelemetry.io/collector/exporter/exportertest v0.152.1 // indirect
 	go.opentelemetry.io/collector/exporter/xexporter v0.152.1 // indirect
 	go.opentelemetry.io/collector/extension v1.58.0 // indirect
+	go.opentelemetry.io/collector/extension/extensionauth v1.62.0 // indirect
 	go.opentelemetry.io/collector/extension/extensioncapabilities v0.152.1 // indirect
 	go.opentelemetry.io/collector/extension/extensiontest v0.152.1 // indirect
 	go.opentelemetry.io/collector/internal/componentalias v0.152.1 // indirect
