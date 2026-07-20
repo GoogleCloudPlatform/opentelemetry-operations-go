@@ -28,6 +28,7 @@ import (
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"google.golang.org/api/option"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -61,7 +62,16 @@ func NewGoogleCloudTracesExporter(
 	return &TraceExporter{cfg: cfg, timeout: timeout, obs: obs}, nil
 }
 
-func (te *TraceExporter) Start(ctx context.Context, _ component.Host) error {
+func (te *TraceExporter) Start(ctx context.Context, host component.Host) error {
+	if te.cfg.Authenticator != "" && te.cfg.TraceConfig.ClientConfig.GetClientOptions == nil {
+		authOpts, err := getAuthenticatorClientOptions(host, te.cfg.Authenticator)
+		if err != nil {
+			return err
+		}
+		te.cfg.TraceConfig.ClientConfig.GetClientOptions = func() []option.ClientOption {
+			return authOpts
+		}
+	}
 	topts := []texporter.Option{
 		texporter.WithProjectID(te.cfg.ProjectID),
 		texporter.WithTimeout(te.timeout),
