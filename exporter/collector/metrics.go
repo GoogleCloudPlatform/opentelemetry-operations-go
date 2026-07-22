@@ -36,6 +36,7 @@ import (
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"github.com/googleapis/gax-go/v2"
+	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/genproto/googleapis/api/label"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
@@ -237,10 +238,19 @@ func NewGoogleCloudMetricsExporter(
 	return mExp, nil
 }
 
-func (me *MetricsExporter) Start(ctx context.Context, _ component.Host) error {
+func (me *MetricsExporter) Start(ctx context.Context, host component.Host) error {
 	me.shutdownC = make(chan struct{})
 	if me.cfg.MetricConfig.CumulativeNormalization {
 		me.mapper.normalizer = normalization.NewStandardNormalizer(me.shutdownC, me.obs.log)
+	}
+	if me.cfg.Authenticator != "" && me.cfg.MetricConfig.ClientConfig.GetClientOptions == nil {
+		authOpts, err := getAuthenticatorClientOptions(host, me.cfg.Authenticator)
+		if err != nil {
+			return err
+		}
+		me.cfg.MetricConfig.ClientConfig.GetClientOptions = func() []option.ClientOption {
+			return authOpts
+		}
 	}
 	clientOpts, err := generateClientOptions(ctx, &me.cfg.MetricConfig.ClientConfig, &me.cfg, monitoring.DefaultAuthScopes(), me.obs.meterProvider)
 	if err != nil {

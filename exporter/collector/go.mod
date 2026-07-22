@@ -9,8 +9,8 @@ require (
 	cloud.google.com/go/logging v1.18.0
 	cloud.google.com/go/monitoring v1.29.0
 	cloud.google.com/go/trace v1.16.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.33.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.57.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.34.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.58.0
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/google/go-cmp v0.7.0
 	github.com/googleapis/gax-go/v2 v2.22.0
@@ -20,6 +20,7 @@ require (
 	go.opentelemetry.io/collector/component/componenttest v0.152.1
 	go.opentelemetry.io/collector/confmap v1.58.0
 	go.opentelemetry.io/collector/exporter v1.58.0
+	go.opentelemetry.io/collector/extension/extensionauth v1.62.0
 	go.opentelemetry.io/collector/featuregate v1.58.0
 	go.opentelemetry.io/collector/pdata v1.58.0
 	go.opentelemetry.io/otel v1.43.0
@@ -32,7 +33,7 @@ require (
 	google.golang.org/api v0.280.0
 	google.golang.org/genproto v0.0.0-20260519071638-aa98bba5eb94
 	google.golang.org/genproto/googleapis/api v0.0.0-20260519071638-aa98bba5eb94
-	google.golang.org/grpc v1.81.1
+	google.golang.org/grpc v1.82.0
 	google.golang.org/protobuf v1.36.11
 	gopkg.in/yaml.v3 v3.0.1
 )

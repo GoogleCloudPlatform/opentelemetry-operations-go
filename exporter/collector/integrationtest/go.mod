@@ -8,11 +8,11 @@ require (
 	cloud.google.com/go/logging v1.18.0
 	cloud.google.com/go/monitoring v1.29.0
 	cloud.google.com/go/trace v1.16.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.57.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.57.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.57.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.57.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.57.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector v0.58.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/collector/googlemanagedprometheus v0.58.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.58.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.58.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.58.0
 	github.com/google/go-cmp v0.7.0
 	github.com/google/uuid v1.6.0
 	github.com/prometheus/otlptranslator v1.0.0
@@ -30,7 +30,7 @@ require (
 	go.uber.org/zap v1.28.0
 	google.golang.org/api v0.280.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20260519071638-aa98bba5eb94
-	google.golang.org/grpc v1.81.1
+	google.golang.org/grpc v1.82.0
 	google.golang.org/protobuf v1.36.11
 )
 
@@ -40,7 +40,7 @@ require (
 	cloud.google.com/go/auth/oauth2adapt v0.2.8 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
 	cloud.google.com/go/longrunning v1.0.0 // indirect
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.33.0 // indirect
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.34.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v5 v5.0.3 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
@@ -105,6 +105,7 @@ require (
 	go.opentelemetry.io/collector/exporter/exportertest v0.152.1 // indirect
 	go.opentelemetry.io/collector/exporter/xexporter v0.152.1 // indirect
 	go.opentelemetry.io/collector/extension v1.58.0 // indirect
+	go.opentelemetry.io/collector/extension/extensionauth v1.62.0 // indirect
 	go.opentelemetry.io/collector/extension/extensioncapabilities v0.152.1 // indirect
 	go.opentelemetry.io/collector/extension/extensiontest v0.152.1 // indirect
 	go.opentelemetry.io/collector/internal/componentalias v0.152.1 // indirect

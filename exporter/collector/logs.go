@@ -32,6 +32,7 @@ import (
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
 	"github.com/googleapis/gax-go/v2"
 	"go.uber.org/zap"
+	"google.golang.org/api/option"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	logtypepb "google.golang.org/genproto/googleapis/logging/type"
 	"google.golang.org/grpc"
@@ -214,7 +215,16 @@ func (l *LogsExporter) ConfigureExporter(config *logsutil.ExporterConfig) {
 	}
 }
 
-func (l *LogsExporter) Start(ctx context.Context, _ component.Host) error {
+func (l *LogsExporter) Start(ctx context.Context, host component.Host) error {
+	if l.cfg.Authenticator != "" && l.cfg.LogConfig.ClientConfig.GetClientOptions == nil {
+		authOpts, err := getAuthenticatorClientOptions(host, l.cfg.Authenticator)
+		if err != nil {
+			return err
+		}
+		l.cfg.LogConfig.ClientConfig.GetClientOptions = func() []option.ClientOption {
+			return authOpts
+		}
+	}
 	clientOpts, err := generateClientOptions(ctx, &l.cfg.LogConfig.ClientConfig, &l.cfg, loggingv2.DefaultAuthScopes(), l.obs.meterProvider)
 	if err != nil {
 		return err
