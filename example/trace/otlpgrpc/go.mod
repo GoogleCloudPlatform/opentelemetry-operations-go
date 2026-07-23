@@ -16,7 +16,7 @@ require (
 
 	// [START opentelemetyry_otlp_grpc_auth_deps]
 	// When using gRPC based OTLP exporter, the auth is built in.
-	google.golang.org/grpc v1.81.1
+	google.golang.org/grpc v1.82.1
 // [END opentelemetyry_otlp_grpc_auth_deps]
 // [END_EXCLUDE]
 )
