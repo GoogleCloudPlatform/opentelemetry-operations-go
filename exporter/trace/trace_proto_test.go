@@ -16,6 +16,7 @@ package trace
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -29,6 +30,7 @@ import (
 
 	"cloud.google.com/go/trace/apiv2/tracepb"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testExporter() *traceExporter {
@@ -219,4 +221,111 @@ func TestSanitizeUTF8(t *testing.T) {
 			assert.Less(t, b, byte(0x80), "annotation description contains non-ASCII byte: %x", b)
 		}
 	}
+}
+
+func TestTraceProto_SpanLimits(t *testing.T) {
+	e := testExporter()
+	startTime := time.Unix(1585674086, 0)
+	endTime := startTime.Add(time.Second)
+
+	t.Run("Span DisplayName limits", func(t *testing.T) {
+		longName := strings.Repeat("a", 1200)
+		rawSpan := tracetest.SpanStub{
+			SpanContext: genSpanContext(),
+			Name:        longName,
+			StartTime:   startTime,
+			EndTime:     endTime,
+		}
+		span := e.ConvertSpan(context.Background(), rawSpan.Snapshot())
+		assert.NotNil(t, span)
+		assert.Equal(t, maxDisplayNameLength, len(span.DisplayName.Value))
+		assert.EqualValues(t, 1200-maxDisplayNameLength, span.DisplayName.TruncatedByteCount)
+
+		exactName := strings.Repeat("a", maxDisplayNameLength)
+		rawSpanExact := tracetest.SpanStub{
+			SpanContext: genSpanContext(),
+			Name:        exactName,
+			StartTime:   startTime,
+			EndTime:     endTime,
+		}
+		spanExact := e.ConvertSpan(context.Background(), rawSpanExact.Snapshot())
+		assert.NotNil(t, spanExact)
+		assert.Equal(t, maxDisplayNameLength, len(spanExact.DisplayName.Value))
+		assert.EqualValues(t, 0, spanExact.DisplayName.TruncatedByteCount)
+	})
+
+	t.Run("Attribute key length limits", func(t *testing.T) {
+		validKey := strings.Repeat("k", maxAttributeKeyLength)
+		tooLongKey := strings.Repeat("k", maxAttributeKeyLength+1)
+		rawSpan := tracetest.SpanStub{
+			SpanContext: genSpanContext(),
+			Name:        "test",
+			StartTime:   startTime,
+			EndTime:     endTime,
+			Attributes: []attribute.KeyValue{
+				attribute.String(validKey, "value1"),
+				attribute.String(tooLongKey, "value2"),
+			},
+		}
+		span := e.ConvertSpan(context.Background(), rawSpan.Snapshot())
+		assert.NotNil(t, span)
+		assert.Contains(t, span.Attributes.AttributeMap, validKey)
+		assert.NotContains(t, span.Attributes.AttributeMap, tooLongKey)
+		assert.EqualValues(t, 1, span.Attributes.DroppedAttributesCount)
+	})
+
+	t.Run("Attribute value length limits", func(t *testing.T) {
+		longValue := strings.Repeat("v", 70000)
+		rawSpan := tracetest.SpanStub{
+			SpanContext: genSpanContext(),
+			Name:        "test",
+			StartTime:   startTime,
+			EndTime:     endTime,
+			Attributes: []attribute.KeyValue{
+				attribute.String("long_str", longValue),
+			},
+		}
+		span := e.ConvertSpan(context.Background(), rawSpan.Snapshot())
+		assert.NotNil(t, span)
+		strVal := span.Attributes.AttributeMap["long_str"].GetStringValue()
+		assert.Equal(t, maxAttributeStringValue, len(strVal.Value))
+		assert.EqualValues(t, 70000-maxAttributeStringValue, strVal.TruncatedByteCount)
+	})
+
+	t.Run("Annotation description limits", func(t *testing.T) {
+		longDesc := strings.Repeat("d", 1200)
+		rawSpan := tracetest.SpanStub{
+			SpanContext: genSpanContext(),
+			Name:        "test",
+			StartTime:   startTime,
+			EndTime:     endTime,
+			Events: []sdktrace.Event{
+				{Name: longDesc, Time: startTime},
+			},
+		}
+		span := e.ConvertSpan(context.Background(), rawSpan.Snapshot())
+		assert.NotNil(t, span)
+		require.Len(t, span.TimeEvents.TimeEvent, 1)
+		desc := span.TimeEvents.TimeEvent[0].GetAnnotation().Description
+		assert.Equal(t, maxAnnotationDescriptionLength, len(desc.Value))
+		assert.EqualValues(t, 1200-maxAnnotationDescriptionLength, desc.TruncatedByteCount)
+	})
+
+	t.Run("Annotation event count limits", func(t *testing.T) {
+		events := make([]sdktrace.Event, 300)
+		for i := 0; i < 300; i++ {
+			events[i] = sdktrace.Event{Name: "event", Time: startTime}
+		}
+		rawSpan := tracetest.SpanStub{
+			SpanContext: genSpanContext(),
+			Name:        "test",
+			StartTime:   startTime,
+			EndTime:     endTime,
+			Events:      events,
+		}
+		span := e.ConvertSpan(context.Background(), rawSpan.Snapshot())
+		assert.NotNil(t, span)
+		assert.Len(t, span.TimeEvents.TimeEvent, maxAnnotationEventsPerSpan)
+		assert.EqualValues(t, 300-maxAnnotationEventsPerSpan, span.TimeEvents.DroppedAnnotationsCount)
+	})
 }

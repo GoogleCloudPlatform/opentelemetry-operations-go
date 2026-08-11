@@ -39,12 +39,15 @@ import (
 )
 
 const (
-	maxAnnotationEventsPerSpan = 32
+	maxAnnotationEventsPerSpan     = 256
 	// TODO(ymotongpoo): uncomment this after gRPC trace get supported.
-	// maxMessageEventsPerSpan    = 128.
-	maxAttributeStringValue = 256
-	maxNumLinks             = 128
-	agentLabel              = "g.co/agent"
+	// maxMessageEventsPerSpan      = 128.
+	maxDisplayNameLength           = 1024
+	maxAnnotationDescriptionLength = 1024
+	maxAttributeKeyLength          = 512
+	maxAttributeStringValue        = 65532
+	maxNumLinks                    = 128
+	agentLabel                     = "g.co/agent"
 
 	// Attributes recorded on the span for the requests.
 	// Only trace exporters will need them.
@@ -145,7 +148,7 @@ func (e *traceExporter) protoFromReadOnlySpan(s sdktrace.ReadOnlySpan) (*tracepb
 	sp := &tracepb.Span{
 		Name:                    "projects/" + projectID + "/traces/" + traceIDString + "/spans/" + spanIDString,
 		SpanId:                  spanIDString,
-		DisplayName:             trunc(sanitizeUTF8(s.Name()), 128),
+		DisplayName:             trunc(sanitizeUTF8(s.Name()), maxDisplayNameLength),
 		StartTime:               timestampProto(s.StartTime()),
 		EndTime:                 timestampProto(s.EndTime()),
 		SameProcessAsParentSpan: &wrapperspb.BoolValue{Value: !s.Parent().IsRemote()},
@@ -176,7 +179,7 @@ func (e *traceExporter) protoFromReadOnlySpan(s sdktrace.ReadOnlySpan) (*tracepb
 			droppedAnnotationsCount = len(es) - i
 			break
 		}
-		annotation := &tracepb.Span_TimeEvent_Annotation{Description: trunc(sanitizeUTF8(ev.Name), maxAttributeStringValue)}
+		annotation := &tracepb.Span_TimeEvent_Annotation{Description: trunc(sanitizeUTF8(ev.Name), maxAnnotationDescriptionLength)}
 		e.copyAttributes(&annotation.Attributes, ev.Attributes)
 		event := &tracepb.Span_TimeEvent{
 			Time:  timestampProto(ev.Time),
@@ -280,7 +283,7 @@ func (e *traceExporter) copyAttributes(out **tracepb.Span_Attributes, in []attri
 			continue
 		}
 		key := e.o.mapAttribute(kv.Key)
-		if len(key) > 128 {
+		if len(key) > maxAttributeKeyLength {
 			dropped++
 			continue
 		}
