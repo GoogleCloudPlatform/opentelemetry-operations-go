@@ -45,7 +45,7 @@ const (
 	maxDisplayNameLength           = 1024
 	maxAnnotationDescriptionLength = 1024
 	maxAttributeKeyLength          = 512
-	maxAttributeStringValue        = 65532
+	maxAttributeStringValue        = 65536
 	maxNumLinks                    = 128
 	agentLabel                     = "g.co/agent"
 
