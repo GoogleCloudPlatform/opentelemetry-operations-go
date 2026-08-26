@@ -255,7 +255,7 @@ func initDoubleWritingMeter(ctx context.Context) (func(), error) {
 		return nil, fmt.Errorf("failed to create resource: %w", err)
 	}
 
-	// Create legacy exporter
+	// Create legacy exporter (pass mexporter.WithProjectID if ADC lacks an embedded project ID)
 	legacyExporter, err := mexporter.New()
 	if err != nil {
 		return nil, err
