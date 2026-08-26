@@ -104,7 +104,7 @@ The following table maps the configurations available in `exporter/trace` to the
 
 ### Complete Sample
 
-For a complete runnable sample, see [`example/trace/otlpgrpc`](example/trace/otlpgrpc).
+For a complete runnable sample, see the [Trace OTLP sample in opentelemetry-samples](https://github.com/GoogleCloudPlatform/opentelemetry-samples/tree/main/golang/trace).
 
 ---
 
@@ -277,4 +277,4 @@ The following table maps configurations available in `exporter/metric` to their 
 
 #### Complete Sample
 
-For a complete runnable sample, see [`example/metric/otlpgrpc`](example/metric/otlpgrpc).
+For a complete runnable sample, see the [Metric OTLP sample in opentelemetry-samples](https://github.com/GoogleCloudPlatform/opentelemetry-samples/tree/main/golang/metric).
