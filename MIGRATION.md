@@ -12,6 +12,8 @@ The legacy exporters in this repository are deprecated and will be archived afte
 
 ## Migrate from Google Cloud Trace Exporter to OTLP Exporter
 
+For detailed information on Google Cloud Trace's native OTLP ingestion, see the official Google Cloud documentation on [Migrating to OTLP endpoints](https://docs.cloud.google.com/trace/docs/migrate-to-otlp-endpoints).
+
 To migrate from `github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace` to the standard OpenTelemetry OTLP trace exporter:
 
 ### 1. Add Dependencies
