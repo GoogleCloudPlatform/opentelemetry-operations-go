@@ -221,6 +221,20 @@ To prevent gaps in monitoring dashboards while migrating, you can export metrics
 
 ```go
 func initDoubleWritingMeter(ctx context.Context) (func(), error) {
+	// Detect GCP platform resources as shown in Strategy #1
+	res, err := resource.New(
+		ctx,
+		resource.WithDetectors(gcp.NewDetector()),
+		resource.WithTelemetrySDK(),
+		resource.WithFromEnv(),
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String("my-service"),
+		),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create resource: %w", err)
+	}
+
 	// Create legacy exporter
 	legacyExporter, err := mexporter.New()
 	if err != nil {
@@ -243,6 +257,7 @@ func initDoubleWritingMeter(ctx context.Context) (func(), error) {
 
 	// Register both readers on the same MeterProvider
 	meterProvider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithResource(res),
 		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(legacyExporter)),
 		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(otlpExporter)),
 	)
