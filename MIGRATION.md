@@ -267,7 +267,7 @@ The following table maps configurations available in `exporter/metric` to their 
 | `WithFilteredResourceAttributes(f)` | OpenTelemetry Views / Resource configuration | Filter resource attributes using custom views or resource options. |
 | `WithMetricDescriptorTypeFormatter(f)` | N/A | Telemetry API handles metric naming automatically under `prometheus.googleapis.com/`. |
 | `WithDisableCreateMetricDescriptors()` | N/A | Telemetry API creates descriptors dynamically as needed. |
-| `WithCreateServiceTimeSeries()` | N/A | Internal option specific to Cloud Monitoring API. |
+| `WithCreateServiceTimeSeries()` | N/A | Specific to Google-internal usage of the exporter. |
 | `WithMonitoredResourceDescription(...)` | N/A | OTel uses standard OTel resource attributes mapped automatically by GCP. |
 
 #### Complete Sample
