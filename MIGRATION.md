@@ -293,7 +293,10 @@ func initDoubleWritingMeter(ctx context.Context) (func(), error) {
 
 ### Strategy 3: Custom Metric Prefixing / Metric Views
 
-If you want to preserve legacy metric prefixes (such as `workload.googleapis.com/` or `custom.googleapis.com/`) during migration, you can use OpenTelemetry Views (`sdkmetric.WithView`) to prepend the prefix to metric names before export:
+If you want to preserve legacy metric prefixes (such as `workload.googleapis.com/` or `custom.googleapis.com/`) during migration, you can use OpenTelemetry Views (`sdkmetric.WithView`) to prepend the prefix to metric names before export. Google Cloud's Telemetry API recognizes `workload.googleapis.com/` and `custom.googleapis.com/` prefixes in OTLP metric names and routes them directly to Cloud Monitoring custom metrics, preserving existing dashboards and alerts without converting them to `prometheus.googleapis.com/` metrics.
+
+> [!NOTE]
+> Metrics ingested under `workload.googleapis.com/` or `custom.googleapis.com/` are billed at Cloud Monitoring Custom Metric rates rather than Google Managed Prometheus rates.
 
 ```go
 func initPrefixedMeter(ctx context.Context) (func(), error) {
