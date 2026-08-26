@@ -24,6 +24,7 @@ import (
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/genproto/googleapis/rpc/code"
 
+	//nolint:staticcheck // testing deprecated trace exporter
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
 
@@ -93,6 +94,7 @@ func respond(ctx context.Context, client *pubsub.Client, testID string, res *res
 }
 
 func newTracerProvider(res *resource.Resource) (*sdktrace.TracerProvider, error) {
+	//nolint:staticcheck // testing deprecated trace exporter
 	exporter, err := texporter.New(texporter.WithProjectID(projectID))
 	if err != nil {
 		return nil, err

@@ -2,6 +2,10 @@
 
 [![Build Status][circleci-image]][circleci-url]
 
+> [!WARNING]
+> The OpenTelemetry Google Cloud Trace and Monitoring exporters in this repository are deprecated and will be archived after January 1st, 2027.
+> Please migrate to the standard OpenTelemetry OTLP exporters. For migration instructions, see the [Migration Guide](MIGRATION.md).
+
 This repository contains the source code of 2 packages of OpenTelemetry exporters to [Google Cloud Trace](https://cloud.google.com/trace) and [Google Cloud Monitoring](https://cloud.google.com/monitoring).
 
 To get started with instrumentation in Google Cloud, see [Generate traces and metrics with
@@ -13,11 +17,17 @@ observability](https://cloud.google.com/stackdriver/docs/instrumentation/overvie
 
 ## OpenTelemetry Google Cloud Trace Exporter
 
-OpenTelemetry Google Cloud Trace Exporter allow the user to send collected traces and spans to Google Cloud.
+> [!WARNING]
+> Deprecated: Please migrate to the standard OpenTelemetry OTLP trace exporter. See [MIGRATION.md](MIGRATION.md) for details.
+
+OpenTelemetry Google Cloud Trace Exporter allows the user to send collected traces and spans to Google Cloud.
 
 See [README.md](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/main/exporter/trace/README.md) for setup and usage information.
 
 ## OpenTelemetry Google Cloud Monitoring Exporter
+
+> [!WARNING]
+> Deprecated: Please migrate to the standard OpenTelemetry OTLP metric exporter. See [MIGRATION.md](MIGRATION.md) for details.
 
 OpenTelemetry Google Cloud Monitoring Exporter allows the user to send collected metrics to Google Cloud Monitoring.
 

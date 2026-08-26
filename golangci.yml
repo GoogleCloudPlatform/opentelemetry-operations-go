@@ -264,6 +264,11 @@ linters:
     - misspell
     - staticcheck
     - unused
+  exclusions:
+    rules:
+      - linters:
+          - staticcheck
+        text: "SA1019:"
 
 issues:
   # Excluding configuration per-path, per-linter, per-text and per-source
