@@ -101,6 +101,7 @@ The following table maps the configurations available in `exporter/trace` to the
 | `WithTraceClientOptions(opts...)` | `otlptracegrpc.WithDialOption(...)` | Pass gRPC dial options directly to the OTLP exporter. |
 | `WithErrorHandler(h)` | `otel.SetErrorHandler(h)` | Use standard OpenTelemetry error handler. |
 | `WithAttributeMapping(m)` | N/A | Standard OpenTelemetry semantic conventions should be used directly. |
+| `WithContext(ctx)` | `otlptracegrpc.New(ctx, ...)` | Pass context directly to `otlptracegrpc.New(ctx, ...)` and trace provider operations (`Shutdown(ctx)`). |
 
 ### Complete Sample
 
@@ -341,14 +342,17 @@ The following table maps configurations available in `exporter/metric` to their 
 | :--- | :--- | :--- |
 | `WithProjectID(id)` | Resource attribute `gcp.project_id` | Set via `resource.WithAttributes` or `OTEL_RESOURCE_ATTRIBUTES`. |
 | `WithDestinationProjectQuota()` | Header `x-goog-user-project` | Set via `otlpmetricgrpc.WithHeaders` or `OTEL_EXPORTER_OTLP_HEADERS`. |
+| `WithMonitoringClient(cl)` | N/A | Pre-configured `MetricClient` cannot be passed directly to `otlpmetricgrpc.New`. Use `otlpmetricgrpc.WithDialOption` for custom gRPC client configuration. |
 | `WithMonitoringClientOptions(opts...)` | `otlpmetricgrpc.WithDialOption(...)` | Pass gRPC dial options directly to the OTLP exporter. |
 | `WithCompression("gzip")` | `otlpmetricgrpc.WithCompressor("gzip")` / `OTEL_EXPORTER_OTLP_COMPRESSION` | Configure compression on the exporter. |
 | `WithTimeout(t)` | `otlpmetricgrpc.WithTimeout(t)` / `OTEL_EXPORTER_OTLP_TIMEOUT` | Exporter request timeout. |
 | `WithFilteredResourceAttributes(f)` | OpenTelemetry Views / Resource configuration | Filter resource attributes using custom views or resource options. |
-| `WithMetricDescriptorTypeFormatter(f)` | N/A | Telemetry API handles metric naming automatically under `prometheus.googleapis.com/`. |
+| `WithMetricDescriptorTypeFormatter(f)` | OpenTelemetry Views (`sdkmetric.WithView`) / N/A | Telemetry API handles metric naming automatically under `prometheus.googleapis.com/`. Use Views if custom prefixing is required. |
 | `WithDisableCreateMetricDescriptors()` | N/A | Telemetry API creates descriptors dynamically as needed. |
+| `WithSumOfSquaredDeviation()` | N/A | OpenTelemetry histograms do not calculate or export estimated sum of squared deviation; Telemetry API handles distributions natively. |
 | `WithCreateServiceTimeSeries()` | N/A | Specific to Google-internal usage of the exporter. |
 | `WithMonitoredResourceDescription(...)` | N/A | OTel uses standard OTel resource attributes mapped automatically by GCP. |
+| `WithContext(ctx)` | `otlpmetricgrpc.New(ctx, ...)` | Pass context directly to `otlpmetricgrpc.New(ctx, ...)` and meter provider operations (`Shutdown(ctx)`). |
 
 #### Complete Sample
 
