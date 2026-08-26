@@ -86,6 +86,9 @@ export OTEL_EXPORTER_OTLP_PROTOCOL=grpc
 export OTEL_RESOURCE_ATTRIBUTES="gcp.project_id=<PROJECT_ID>"
 ```
 
+> [!NOTE]
+> Setting environment variables alone does not configure authentication credentials. When exporting directly to `telemetry.googleapis.com`, you must still configure Google Application Default Credentials (ADC) in your code using `grpc.WithPerRPCCredentials(creds)` as shown in the initialization example above.
+
 ### Configuration Mapping
 
 The following table maps the configurations available in `exporter/trace` to their OTLP equivalents:
