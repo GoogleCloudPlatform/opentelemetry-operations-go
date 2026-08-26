@@ -271,6 +271,66 @@ func initDoubleWritingMeter(ctx context.Context) (func(), error) {
 
 ---
 
+### Strategy 3: Custom Metric Prefixing / Metric Views
+
+If you want to preserve legacy metric prefixes (such as `workload.googleapis.com/` or `custom.googleapis.com/`) during migration, you can use OpenTelemetry Views (`sdkmetric.WithView`) to prepend the prefix to metric names before export:
+
+```go
+func initPrefixedMeter(ctx context.Context) (func(), error) {
+	creds, err := oauth.NewApplicationDefault(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load application default credentials: %w", err)
+	}
+
+	res, err := resource.New(
+		ctx,
+		// Detect GCP platform information
+		resource.WithDetectors(gcp.NewDetector()),
+		resource.WithTelemetrySDK(),
+		resource.WithFromEnv(),
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String("my-service"),
+		),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create resource: %w", err)
+	}
+
+	exporter, err := otlpmetricgrpc.New(
+		ctx,
+		otlpmetricgrpc.WithEndpoint("telemetry.googleapis.com:443"),
+		otlpmetricgrpc.WithDialOption(grpc.WithPerRPCCredentials(creds)),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create OTLP metric exporter: %w", err)
+	}
+
+	// Custom View to prepend "workload.googleapis.com/" to all metric instrument names
+	prefixView := func(i sdkmetric.Instrument) (sdkmetric.Stream, bool) {
+		return sdkmetric.Stream{
+			Name:        "workload.googleapis.com/" + i.Name,
+			Description: i.Description,
+			Unit:        i.Unit,
+		}, true
+	}
+
+	meterProvider := sdkmetric.NewMeterProvider(
+		sdkmetric.WithResource(res),
+		sdkmetric.WithReader(sdkmetric.NewPeriodicReader(exporter)),
+		sdkmetric.WithView(prefixView),
+	)
+	otel.SetMeterProvider(meterProvider)
+
+	return func() {
+		if err := meterProvider.Shutdown(ctx); err != nil {
+			log.Printf("error shutting down meter provider: %v", err)
+		}
+	}, nil
+}
+```
+
+---
+
 ### Mapping and Limitations
 
 #### Configuration Mapping
