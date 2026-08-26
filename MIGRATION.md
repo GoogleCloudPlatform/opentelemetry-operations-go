@@ -18,16 +18,17 @@ To migrate from `github.com/GoogleCloudPlatform/opentelemetry-operations-go/expo
 
 ### 1. Add Dependencies
 
-Add the standard OpenTelemetry OTLP trace exporter and gRPC OAuth credentials to your `go.mod`:
+Add the standard OpenTelemetry OTLP trace exporter, GCP resource detector, and gRPC OAuth credentials to your `go.mod`:
 
 ```bash
 go get go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc
+go get go.opentelemetry.io/contrib/detectors/gcp
 go get google.golang.org/grpc/credentials/oauth
 ```
 
 ### 2. Update Initialization Code
 
-Replace the `texporter.New()` initialization with `otlptracegrpc.New()` configured with Google Application Default Credentials (ADC):
+Replace the `texporter.New()` initialization with `otlptracegrpc.New()` configured with Google Application Default Credentials (ADC) and GCP resource detection:
 
 ```go
 package main
@@ -37,9 +38,12 @@ import (
 	"fmt"
 	"log"
 
+	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc"
+	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/oauth"
 )
@@ -49,6 +53,20 @@ func initTracer(ctx context.Context) (func(), error) {
 	creds, err := oauth.NewApplicationDefault(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load application default credentials: %w", err)
+	}
+
+	res, err := resource.New(
+		ctx,
+		// Detect GCP platform information
+		resource.WithDetectors(gcp.NewDetector()),
+		resource.WithTelemetrySDK(),
+		resource.WithFromEnv(),
+		resource.WithAttributes(
+			semconv.ServiceNameKey.String("my-service"),
+		),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create resource: %w", err)
 	}
 
 	// Configure exporter to use Application Default Credentials.
@@ -64,6 +82,7 @@ func initTracer(ctx context.Context) (func(), error) {
 	}
 
 	tp := sdktrace.NewTracerProvider(
+		sdktrace.WithResource(res),
 		sdktrace.WithBatcher(exporter),
 	)
 	otel.SetTracerProvider(tp)
