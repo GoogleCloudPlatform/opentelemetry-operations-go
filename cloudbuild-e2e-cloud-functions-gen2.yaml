@@ -33,7 +33,7 @@ steps:
     env: ["PROJECT_ID=$PROJECT_ID", "TEST_RUN_ID=$BUILD_ID"]
     args:
       - cloud-functions-gen2
-      - --runtime=go123
+      - --runtime=go126
       - --functionsource=/workspace/e2e-test-server/cloud_functions/function-source.zip
       - --entrypoint=HandleCloudFunction
       - --skip-cleanup
