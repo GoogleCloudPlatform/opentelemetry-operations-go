@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Package propagator provides trace context propagators for Google Cloud Trace format.
+//
+// Deprecated: Google Cloud OpenTelemetry Trace Propagators for Go are deprecated.
+// Use the standard W3C Trace Context propagator (go.opentelemetry.io/otel/propagation.TraceContext) instead.
 package propagator
 
 import (
@@ -30,6 +34,8 @@ import (
 
 // TraceContextHeaderName is the HTTP header field for Google Cloud Trace
 // https://cloud.google.com/trace/docs/setup#force-trace
+//
+// Deprecated: Use the standard W3C Trace Context propagator (go.opentelemetry.io/otel/propagation.TraceContext) instead.
 const TraceContextHeaderName = "x-cloud-trace-context"
 
 // traceContextHeaderFormat is the regular expression pattern for valid Cloud Trace header value.
@@ -60,6 +66,8 @@ func (e errInvalidHeader) Error() string {
 // This is the preferred mechanism of propagation as X-Cloud-Trace-Context sampling flag
 // behaves subtly different from expectations in both w3c traceparent *and* opentelemetry
 // propagation.
+//
+// Deprecated: Use the standard W3C Trace Context propagator (go.opentelemetry.io/otel/propagation.TraceContext) instead.
 type CloudTraceOneWayPropagator struct {
 	CloudTraceFormatPropagator
 }
@@ -77,6 +85,8 @@ var _ propagation.TextMapPropagator = CloudTraceOneWayPropagator{}
 
 // CloudTraceFormatPropagator is a TextMapPropagator that injects/extracts a context to/from the carrier
 // following Google Cloud Trace format.
+//
+// Deprecated: Use the standard W3C Trace Context propagator (go.opentelemetry.io/otel/propagation.TraceContext) instead.
 type CloudTraceFormatPropagator struct{}
 
 func (p CloudTraceFormatPropagator) getHeaderValue(carrier propagation.TextMapCarrier) string {
@@ -166,6 +176,8 @@ func spanContextFromXCTCHeader(header string) (trace.SpanContext, error) {
 
 // SpanContextFromRequest extracts a trace.SpanContext from the HTTP request req.
 // In this method, SpanID is expected to be stored in big endian.
+//
+// Deprecated: Use the standard W3C Trace Context propagator (go.opentelemetry.io/otel/propagation.TraceContext) instead.
 func SpanContextFromRequest(req *http.Request) (trace.SpanContext, error) {
 	h := req.Header.Get(TraceContextHeaderName)
 	return spanContextFromXCTCHeader(h)

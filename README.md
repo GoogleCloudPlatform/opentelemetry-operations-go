@@ -33,5 +33,14 @@ OpenTelemetry Google Cloud Monitoring Exporter allows the user to send collected
 
 See [README.md](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/main/exporter/metric/README.md) for setup and usage information.
 
+## OpenTelemetry Google Cloud Trace Propagators
+
+> [!WARNING]
+> Deprecated: Please migrate to the standard W3C Trace Context propagator (`go.opentelemetry.io/otel/propagation.TraceContext`).
+
+OpenTelemetry Google Cloud Trace Propagators provides trace context propagators for Google Cloud Trace format (`X-Cloud-Trace-Context`).
+
+See [README.md](https://github.com/GoogleCloudPlatform/opentelemetry-operations-go/blob/main/propagator/README.md) for setup and usage information.
+
 [circleci-image]: https://circleci.com/gh/GoogleCloudPlatform/opentelemetry-operations-go.svg?style=shield 
 [circleci-url]: https://circleci.com/gh/GoogleCloudPlatform/opentelemetry-operations-go

@@ -1,6 +1,8 @@
-# OpenTelemetry Google Cloud Trace Propagators
+# OpenTelemetry Google Cloud Trace Propagators (Deprecated)
 
-[![Docs](https://godoc.org/github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator?status.svg)](https://pkg.go.dev/github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator)
+> [!WARNING]
+> The OpenTelemetry Google Cloud Trace Propagators for Go are deprecated and will be archived after January 1st, 2027.
+> Please migrate to the standard W3C Trace Context propagator (`go.opentelemetry.io/otel/propagation.TraceContext`).
 
 This package contains Trace Context Propagators for use with [Google Cloud
 Trace](https://cloud.google.com/trace) that make it compatible with

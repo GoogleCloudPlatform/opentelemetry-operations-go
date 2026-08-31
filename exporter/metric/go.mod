@@ -1,3 +1,4 @@
+// Deprecated: Use the standard OpenTelemetry OTLP metric exporter (go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc) instead.
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric
 
 go 1.26.0

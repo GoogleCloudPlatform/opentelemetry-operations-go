@@ -1,3 +1,4 @@
+// Deprecated: Use go.opentelemetry.io/contrib/detectors/gcp instead.
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp
 
 go 1.26.0

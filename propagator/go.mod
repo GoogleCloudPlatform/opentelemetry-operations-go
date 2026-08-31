@@ -1,3 +1,4 @@
+// Deprecated: Use the standard W3C Trace Context propagator (go.opentelemetry.io/otel/propagation.TraceContext) instead.
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/propagator
 
 go 1.26.0

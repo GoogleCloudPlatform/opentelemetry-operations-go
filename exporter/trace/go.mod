@@ -1,3 +1,4 @@
+// Deprecated: Use the standard OpenTelemetry OTLP trace exporter (go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc) instead.
 module github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace
 
 go 1.26.0
