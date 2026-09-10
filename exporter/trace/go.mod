@@ -7,8 +7,8 @@ toolchain go1.26.3
 
 require (
 	cloud.google.com/go/trace v1.16.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.61.0
-	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.61.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.62.0
+	github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resourcemapping v0.62.0
 	github.com/stretchr/testify v1.11.1
 	go.opentelemetry.io/otel v1.44.0
 	go.opentelemetry.io/otel/sdk v1.44.0
