@@ -169,7 +169,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with json and httpRequest with string status, empty monitoredresource",
+			name: "log with json httpRequest with string status, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				log.Body().SetEmptyMap().PutStr("message", "hello!")
@@ -221,7 +221,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with json and httpRequest with integer status, empty monitoredresource",
+			name: "log with json httpRequest with integer status, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				log.Body().SetEmptyMap().PutStr("message", "hello!")
@@ -273,7 +273,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with json and httpRequest with integer values, empty monitoredresource",
+			name: "log with map httpRequest with integer values, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				log.Body().SetEmptyMap().PutStr("message", "hello!")
@@ -324,7 +324,7 @@ func TestLogMapping(t *testing.T) {
 			maxEntrySize: defaultMaxEntrySize,
 		},
 		{
-			name: "log with json and httpRequest with string values, empty monitoredresource",
+			name: "log with map httpRequest with string values, empty monitoredresource",
 			log: func() plog.LogRecord {
 				log := plog.NewLogRecord()
 				log.Body().SetEmptyMap().PutStr("message", "hello!")
@@ -392,6 +392,136 @@ func TestLogMapping(t *testing.T) {
 					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
 						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
 					}}},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with json operation with bool bools, empty monitoredresource",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				log.Attributes().PutEmptyBytes(OperationAttributeKey).FromRaw([]byte(`{
+						"id": "abc123",
+						"producer": "my_producer",
+						"first": true,
+						"last": true
+					}`))
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
+					Operation: &logpb.LogEntryOperation{
+						Id:       "abc123",
+						Producer: "my_producer",
+						First:    true,
+						Last:     true,
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with json operation with string bools, empty monitoredresource",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				log.Attributes().PutEmptyBytes(OperationAttributeKey).FromRaw([]byte(`{
+						"id": "abc123",
+						"producer": "my_producer",
+						"first": "true",
+						"last": "true"
+					}`))
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
+					Operation: &logpb.LogEntryOperation{
+						Id:       "abc123",
+						Producer: "my_producer",
+						First:    true,
+						Last:     true,
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with map operation with bool bools, empty monitoredresource",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				o := log.Attributes().PutEmptyMap(OperationAttributeKey)
+				o.PutStr("id", "abc123")
+				o.PutStr("producer", "my_producer")
+				o.PutBool("first", true)
+				o.PutBool("last", true)
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
+					Operation: &logpb.LogEntryOperation{
+						Id:       "abc123",
+						Producer: "my_producer",
+						First:    true,
+						Last:     true,
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
+		{
+			name: "log with map operation with string bools, empty monitoredresource",
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetEmptyMap().PutStr("message", "hello!")
+				o := log.Attributes().PutEmptyMap(OperationAttributeKey)
+				o.PutStr("id", "abc123")
+				o.PutStr("producer", "my_producer")
+				o.PutStr("first", "true")
+				o.PutStr("last", "true")
+				return log
+			},
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload: &logpb.LogEntry_JsonPayload{JsonPayload: &structpb.Struct{Fields: map[string]*structpb.Value{
+						"message": {Kind: &structpb.Value_StringValue{StringValue: "hello!"}},
+					}}},
+					Operation: &logpb.LogEntryOperation{
+						Id:       "abc123",
+						Producer: "my_producer",
+						First:    true,
+						Last:     true,
+					},
 				},
 			},
 			maxEntrySize: defaultMaxEntrySize,

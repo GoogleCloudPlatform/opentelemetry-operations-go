@@ -59,6 +59,7 @@ const (
 
 	HTTPRequestAttributeKey    = "gcp.http_request"
 	LogNameAttributeKey        = "gcp.log_name"
+	OperationAttributeKey      = "gcp.operation"
 	SourceLocationAttributeKey = "gcp.source_location"
 	TraceSampledAttributeKey   = "gcp.trace_sampled"
 
@@ -499,6 +500,15 @@ func (l logMapper) logToSplitEntries(
 		delete(attrsMap, HTTPRequestAttributeKey)
 	}
 
+	if operationAttr, ok := attrsMap[OperationAttributeKey]; ok {
+		operation, err := l.parseOperation(operationAttr)
+		if err != nil {
+			l.obs.log.Debug("Unable to parse operation", zap.Error(err))
+		}
+		entry.Operation = operation
+		delete(attrsMap, OperationAttributeKey)
+	}
+
 	if logRecord.SeverityNumber() < 0 || int(logRecord.SeverityNumber()) > len(severityMapping)-1 {
 		return nil, fmt.Errorf("unknown SeverityNumber %v", logRecord.SeverityNumber())
 	}
@@ -653,6 +663,27 @@ func (f *Int64OrString) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
+type BoolOrString bool
+
+// Used to unmarshal JSON fields that can either be provided as a bool or
+// a string containing a bool.
+// https://docs.cloud.google.com/stackdriver/docs/reference/telemetry/otlp-log-record-to-log-entry#operation documents support for strings.
+func (f *BoolOrString) UnmarshalJSON(data []byte) error {
+	var b bool
+	if err := json.Unmarshal(data, &b); err == nil {
+		*f = BoolOrString(b)
+		return nil
+	}
+
+	var str string
+	if err := json.Unmarshal(data, &str); err == nil {
+		*f = str == "true"
+		return nil
+	}
+
+	return fmt.Errorf("field must be a JSON boolean or a string containing a boolean: %s", string(data))
+}
+
 // sourceLocationLog is an intermediate representation of
 // logging.googleapis.com/sourceLocation that accepts the "line" field as
 // either a JSON number or a quoted string, matching what various log
@@ -716,6 +747,31 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.H
 		}
 	}
 	return pb, nil
+}
+
+// JSON keys derived from:
+// https://docs.cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#logentryoperation
+// https://docs.cloud.google.com/stackdriver/docs/reference/telemetry/otlp-log-record-to-log-entry#operation
+type operationLog struct {
+	ID       string       `json:"id"`
+	Producer string       `json:"producer"`
+	First    BoolOrString `json:"first"`
+	Last     BoolOrString `json:"last"`
+}
+
+func (l logMapper) parseOperation(operationAttr pcommon.Value) (*logpb.LogEntryOperation, error) {
+	var parsedOperation operationLog
+	err := unmarshalAttribute(operationAttr, &parsedOperation)
+	if err != nil {
+		return nil, &attributeProcessingError{Key: OperationAttributeKey, Err: err}
+	}
+
+	return &logpb.LogEntryOperation{
+		Id:       parsedOperation.ID,
+		Producer: parsedOperation.Producer,
+		First:    bool(parsedOperation.First),
+		Last:     bool(parsedOperation.Last),
+	}, nil
 }
 
 // toProtoStruct converts v, which must marshal into a JSON object,
