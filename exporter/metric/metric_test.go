@@ -37,6 +37,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/genproto/googleapis/api/label"
 	googlemetricpb "google.golang.org/genproto/googleapis/api/metric"
+	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
@@ -315,56 +316,68 @@ func TestMonitoredResourceDescriptionDeduplicatesLabels(t *testing.T) {
 
 func TestRecordToMpb(t *testing.T) {
 	metricName := "testing"
-
-	md := &googlemetricpb.MetricDescriptor{
-		Name:        metricName,
-		Type:        fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, metricName),
-		MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
-		ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
-		Description: "test",
-	}
-
-	mdkey := key{
-		name:        md.Name,
-		libraryname: "",
-	}
-	me := &metricExporter{
-		o: &options{},
-		mdCache: map[key]*googlemetricpb.MetricDescriptor{
-			mdkey: md,
-		},
-	}
-
 	inputLibrary := instrumentation.Scope{Name: "workload.googleapis.com"}
+	inputMetrics := metricdata.Metrics{
+		Name: metricName,
+	}
 	inputAttributes := attribute.NewSet(
 		attribute.Key("a").String("A"),
 		attribute.Key("b?b").String("B"),
 		attribute.Key("8foo").Int64(100),
 	)
-	inputMetrics := metricdata.Metrics{
-		Name: metricName,
-	}
 	inputExtraLabels := attribute.NewSet(
 		attribute.Key("service.name").String("servicename"),
 		attribute.Key("service.namespace").String("servicenamespace"),
 		attribute.Key("service.instance.id").String("23490238490235gfdg87g"),
 	)
+	wantLabels := map[string]string{
+		"a":                   "A",
+		"b_b":                 "B",
+		"key_8foo":            "100",
+		"service_instance_id": "23490238490235gfdg87g",
+		"service_name":        "servicename",
+		"service_namespace":   "servicenamespace",
+	}
 
-	want := &googlemetricpb.Metric{
-		Type: md.Type,
-		Labels: map[string]string{
-			"a":                   "A",
-			"b_b":                 "B",
-			"key_8foo":            "100",
-			"service_instance_id": "23490238490235gfdg87g",
-			"service_name":        "servicename",
-			"service_namespace":   "servicenamespace",
-		},
-	}
-	out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary, &inputExtraLabels)
-	if !reflect.DeepEqual(want, out) {
-		t.Errorf("expected: %v, actual: %v", want, out)
-	}
+	t.Run("cache hit uses cached descriptor type", func(t *testing.T) {
+		cachedType := "custom.googleapis.com/cached_testing"
+		md := &googlemetricpb.MetricDescriptor{
+			Name:        metricName,
+			Type:        cachedType,
+			MetricKind:  googlemetricpb.MetricDescriptor_GAUGE,
+			ValueType:   googlemetricpb.MetricDescriptor_DOUBLE,
+			Description: "test",
+		}
+		me := &metricExporter{
+			o: &options{},
+			mdCache: map[key]*googlemetricpb.MetricDescriptor{
+				keyOf(inputMetrics, inputLibrary): md,
+			},
+		}
+		want := &googlemetricpb.Metric{
+			Type:   cachedType,
+			Labels: wantLabels,
+		}
+		out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary, &inputExtraLabels)
+		if !reflect.DeepEqual(want, out) {
+			t.Errorf("expected: %v, actual: %v", want, out)
+		}
+	})
+
+	t.Run("cache miss computes metric type directly", func(t *testing.T) {
+		me := &metricExporter{
+			o:       &options{disableCreateMetricDescriptors: true},
+			mdCache: map[key]*googlemetricpb.MetricDescriptor{},
+		}
+		want := &googlemetricpb.Metric{
+			Type:   fmt.Sprintf(cloudMonitoringMetricDescriptorNameFormat, metricName),
+			Labels: wantLabels,
+		}
+		out := me.recordToMpb(inputMetrics, inputAttributes, inputLibrary, &inputExtraLabels)
+		if !reflect.DeepEqual(want, out) {
+			t.Errorf("expected: %v, actual: %v", want, out)
+		}
+	})
 }
 
 func TestExtraLabelsFromResource(t *testing.T) {
@@ -1468,3 +1481,39 @@ func TestBatchingExport(t *testing.T) {
 		})
 	}
 }
+
+func BenchmarkRecordToTspbDisableCreateMetricDescriptors(b *testing.B) {
+	me := &metricExporter{
+		o: &options{
+			disableCreateMetricDescriptors: true,
+		},
+		mdCache: make(map[key]*googlemetricpb.MetricDescriptor),
+	}
+	const numPoints = 2000
+	points := make([]metricdata.DataPoint[int64], numPoints)
+	for i := range points {
+		points[i] = metricdata.DataPoint[int64]{
+			Attributes: attribute.NewSet(
+				attribute.String("partition_id", "p-0"),
+				attribute.String("state", "OCCUPIED"),
+				attribute.String("node_pool_name", "pool-1"),
+			),
+			Value: int64(i),
+		}
+	}
+	m := metricdata.Metrics{
+		Name: "kubernetes.io/internal/addons/partition_tree/occupancy",
+		Data: metricdata.Gauge[int64]{DataPoints: points},
+	}
+	mr := &monitoredrespb.MonitoredResource{Type: "k8s_entity"}
+	extra := attribute.EmptySet()
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		tss, err := me.recordToTspb(m, mr, instrumentation.Scope{Name: "test"}, extra)
+		if err != nil || len(tss) != numPoints {
+			b.Fatalf("unexpected result: err=%v, len=%d", err, len(tss))
+		}
+	}
+}
+
