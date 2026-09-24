@@ -30,7 +30,7 @@ require (
 	go.uber.org/zap v1.28.0
 	google.golang.org/api v0.280.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20260526163538-3dc84a4a5aaa
-	google.golang.org/grpc v1.82.1
+	google.golang.org/grpc v1.83.1
 	google.golang.org/protobuf v1.36.11
 )
 
