@@ -184,3 +184,23 @@ func NewMetricTestServer() (*MetricsTestServer, error) {
 
 	return testServer, nil
 }
+
+func NewMetricTestServerWithEndpoint(endpoint string) (*MetricsTestServer, error) {
+	srv := grpc.NewServer()
+	lis, err := net.Listen("tcp", endpoint)
+	if err != nil {
+		return nil, err
+	}
+	testServer := &MetricsTestServer{
+		Endpoint: lis.Addr().String(),
+		lis:      lis,
+		srv:      srv,
+	}
+
+	monitoringpb.RegisterMetricServiceServer(
+		srv,
+		&fakeMetricServiceServer{metricsTestServer: testServer},
+	)
+
+	return testServer, nil
+}
