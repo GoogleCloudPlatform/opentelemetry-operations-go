@@ -1,0 +1,48 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:4317"
+      http:        
+        endpoint: "0.0.0.0:4318"
+
+processors:
+  memory_limiter:
+    check_interval: 1s
+    limit_percentage: 65
+    spike_limit_percentage: 20
+  
+  batch:
+  
+  resourcedetection:
+    detectors: [env, gcp]
+    timeout: 10s
+
+  # When sending telemetry to the GCP OTLP endpoint, the gcp.project_id resource attribute is required to be set to your project ID.
+  resource/gcp_project_id:
+    attributes:
+    - key: gcp.project_id
+      # MAKE SURE YOU REPLACE THIS WITH YOUR PROJECT ID
+      value: ${GOOGLE_CLOUD_PROJECT}
+      action: insert
+
+exporters:
+  otlp:
+    endpoint: telemetry.googleapis.com:443
+    auth:
+      authenticator: googleclientauth
+
+extensions:
+  googleclientauth:
+    project: ${GOOGLE_CLOUD_PROJECT}
+  health_check:
+  pprof:
+  zpages:  
+
+service:  
+  extensions: [health_check, pprof, zpages, googleclientauth]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [resourcedetection, resource/gcp_project_id, memory_limiter, batch]
+      exporters: [otlp]
