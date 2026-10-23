@@ -2,11 +2,11 @@ module github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/resou
 
 go 1.26.0
 
-toolchain go1.27.2
+toolchain go1.27.3
 
 require (
 	go.opentelemetry.io/otel v1.47.0
-	google.golang.org/genproto/googleapis/api v0.0.0-20261012220534-4341edf3f941
+	google.golang.org/genproto/googleapis/api v0.0.0-20261019180522-ce908d29299b
 )
 
 require (
