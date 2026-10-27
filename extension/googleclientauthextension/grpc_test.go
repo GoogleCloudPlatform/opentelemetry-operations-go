@@ -18,8 +18,8 @@ import (
 	"context"
 	"testing"
 
+	"cloud.google.com/go/auth/credentials/idtoken"
 	"github.com/stretchr/testify/assert"
-	"google.golang.org/api/idtoken"
 )
 
 func TestPerRPCCredentials(t *testing.T) {
@@ -45,7 +45,7 @@ func TestPerRPCCredentialsWithIDToken(t *testing.T) {
 			TokenType: idToken,
 			Audience:  "http://example.com",
 		},
-		newIDTokenSource: idtoken.NewTokenSource,
+		newIDTokenCredentials: idtoken.NewCredentials,
 	}
 	err := ca.Start(context.Background(), nil)
 	assert.NoError(t, err)

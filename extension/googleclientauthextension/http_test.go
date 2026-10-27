@@ -23,9 +23,9 @@ import (
 	"os"
 	"testing"
 
+	"cloud.google.com/go/auth/credentials/idtoken"
 	"github.com/stretchr/testify/assert"
 	"golang.org/x/oauth2"
-	"google.golang.org/api/idtoken"
 )
 
 func init() {
@@ -93,7 +93,7 @@ func TestRoundTripperWithIDToken(t *testing.T) {
 			Audience:    "http://example.com",
 			TokenHeader: authorizationHeader,
 		},
-		newIDTokenSource: idtoken.NewTokenSource,
+		newIDTokenCredentials: idtoken.NewCredentials,
 	}
 	err := ca.Start(context.Background(), nil)
 	assert.NoError(t, err)
