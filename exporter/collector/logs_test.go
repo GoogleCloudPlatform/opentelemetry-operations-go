@@ -15,8 +15,11 @@
 package collector
 
 import (
+	"context"
 	"encoding/hex"
 	"fmt"
+	"net"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -24,12 +27,18 @@ import (
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/consumer/consumererror"
+	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/plog"
 	"go.uber.org/zap"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	logtypepb "google.golang.org/genproto/googleapis/logging/type"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -1285,6 +1294,110 @@ func TestGetLogName(t *testing.T) {
 				assert.Nil(t, err)
 				assert.Equal(t, testCase.expectedName, name)
 			}
+		})
+	}
+}
+
+type statusLoggingServer struct {
+	logpb.UnimplementedLoggingServiceV2Server
+	err   error
+	calls atomic.Int32
+}
+
+func (s *statusLoggingServer) WriteLogEntries(ctx context.Context, _ *logpb.WriteLogEntriesRequest) (*logpb.WriteLogEntriesResponse, error) {
+	s.calls.Add(1)
+	if s.err != nil {
+		return nil, s.err
+	}
+	<-ctx.Done()
+	return nil, status.FromContextError(ctx.Err()).Err()
+}
+
+func TestPushLogsPermanentErrorClassification(t *testing.T) {
+	testCases := []struct {
+		name            string
+		defaultLogName  string
+		serverErr       error
+		expectedCalls   int32
+		expectPermanent bool
+	}{
+		{
+			name:            "missing log name is permanent",
+			defaultLogName:  "",
+			serverErr:       nil,
+			expectedCalls:   0,
+			expectPermanent: true,
+		},
+		{
+			name:            "PermissionDenied is permanent",
+			defaultLogName:  "default-log",
+			serverErr:       status.Error(codes.PermissionDenied, "permission denied"),
+			expectedCalls:   1,
+			expectPermanent: true,
+		},
+		{
+			name:            "InvalidArgument is permanent",
+			defaultLogName:  "default-log",
+			serverErr:       status.Error(codes.InvalidArgument, "invalid argument"),
+			expectedCalls:   1,
+			expectPermanent: true,
+		},
+		{
+			name:            "DeadlineExceeded is retryable by `sending_queue` with gax retries disabled",
+			defaultLogName:  "default-log",
+			serverErr:       nil,
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
+		{
+			name:            "Unavailable is retryable by `sending_queue` with gax retries disabled",
+			defaultLogName:  "default-log",
+			serverErr:       status.Error(codes.Unavailable, "unavailable"),
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			lis, err := net.Listen("tcp", "localhost:0")
+			require.NoError(t, err)
+			srv := grpc.NewServer()
+			loggingSrv := &statusLoggingServer{err: tc.serverErr}
+			logpb.RegisterLoggingServiceV2Server(srv, loggingSrv)
+			go func() {
+				_ = srv.Serve(lis)
+			}()
+			defer srv.Stop()
+
+			cfg := DefaultConfig()
+			cfg.ProjectID = "test-project"
+			cfg.LogConfig.DefaultLogName = tc.defaultLogName
+			cfg.LogConfig.ClientConfig.Endpoint = lis.Addr().String()
+			cfg.LogConfig.ClientConfig.UseInsecure = true
+
+			exp, err := NewGoogleCloudLogsExporter(
+				context.Background(),
+				cfg,
+				exporter.Settings{TelemetrySettings: componenttest.NewNopTelemetrySettings()},
+				50*time.Millisecond,
+			)
+			require.NoError(t, err)
+			require.NoError(t, exp.Start(context.Background(), componenttest.NewNopHost()))
+			defer func() {
+				_ = exp.Shutdown(context.Background())
+			}()
+
+			ld := plog.NewLogs()
+			rl := ld.ResourceLogs().AppendEmpty()
+			sl := rl.ScopeLogs().AppendEmpty()
+			lr := sl.LogRecords().AppendEmpty()
+			lr.Body().SetStr("test-log-message")
+
+			err = exp.PushLogs(context.Background(), ld)
+			require.Error(t, err)
+			assert.Equal(t, tc.expectPermanent, consumererror.IsPermanent(err))
+			assert.Equal(t, tc.expectedCalls, loggingSrv.calls.Load())
 		})
 	}
 }
