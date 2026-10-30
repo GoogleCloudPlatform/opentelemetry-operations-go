@@ -240,7 +240,7 @@ func (l *LogsExporter) Start(ctx context.Context, host component.Host) error {
 	}
 
 	// Disable gax Logging Client retries when `sending_queue` is enabled.
-	if l.cfg.QueueSettings.Enabled {
+	if l.cfg.RetrySettings.Enabled {
 		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries, gax.WithRetry(nil))
 	}
 
