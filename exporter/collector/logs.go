@@ -239,6 +239,11 @@ func (l *LogsExporter) Start(ctx context.Context, host component.Host) error {
 		return err
 	}
 
+	// Disable gax Logging Client retries when `sending_queue` is enabled.
+	if l.cfg.QueueSettings.Enabled {
+		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries, gax.WithRetry(nil))
+	}
+
 	if l.cfg.LogConfig.ClientConfig.Compression == gzip.Name {
 		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries,
 			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
