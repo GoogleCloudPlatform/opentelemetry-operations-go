@@ -1343,14 +1343,14 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			expectPermanent: true,
 		},
 		{
-			name:            "DeadlineExceeded is retryable by `sending_queue` with gax retries disabled",
+			name:            "DeadlineExceeded is retryable by `retry_on_failure` with gax retries disabled",
 			defaultLogName:  "default-log",
 			serverErr:       nil,
 			expectedCalls:   1,
 			expectPermanent: false,
 		},
 		{
-			name:            "Unavailable is retryable by `sending_queue` with gax retries disabled",
+			name:            "Unavailable is retryable by `retry_on_failure` with gax retries disabled",
 			defaultLogName:  "default-log",
 			serverErr:       status.Error(codes.Unavailable, "unavailable"),
 			expectedCalls:   1,
@@ -1373,6 +1373,7 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			cfg := DefaultConfig()
 			cfg.ProjectID = "test-project"
 			cfg.LogConfig.DefaultLogName = tc.defaultLogName
+			cfg.LogConfig.DisableRetries = true
 			cfg.LogConfig.ClientConfig.Endpoint = lis.Addr().String()
 			cfg.LogConfig.ClientConfig.UseInsecure = true
 
