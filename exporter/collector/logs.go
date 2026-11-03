@@ -429,11 +429,16 @@ func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEn
 }
 
 func isRetryableWriteLogEntriesError(err error) bool {
-	if errors.Is(err, context.DeadlineExceeded) {
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 		return true
 	}
 	switch status.Code(err) {
-	case codes.DeadlineExceeded, codes.Internal, codes.Unavailable:
+	case codes.Canceled,
+		codes.DeadlineExceeded,
+		codes.ResourceExhausted,
+		codes.Aborted,
+		codes.Internal,
+		codes.Unavailable:
 		return true
 	default:
 		return false

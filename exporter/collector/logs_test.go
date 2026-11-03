@@ -1356,6 +1356,27 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			expectedCalls:   1,
 			expectPermanent: false,
 		},
+		{
+			name:            "ResourceExhausted is retryable by `retry_on_failure` with gax retries disabled",
+			defaultLogName:  "default-log",
+			serverErr:       status.Error(codes.ResourceExhausted, "resource exhausted"),
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
+		{
+			name:            "Aborted is retryable by `retry_on_failure` with gax retries disabled",
+			defaultLogName:  "default-log",
+			serverErr:       status.Error(codes.Aborted, "aborted"),
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
+		{
+			name:            "Canceled is retryable by `retry_on_failure` with gax retries disabled",
+			defaultLogName:  "default-log",
+			serverErr:       status.Error(codes.Canceled, "canceled"),
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
 	}
 
 	for _, tc := range testCases {
