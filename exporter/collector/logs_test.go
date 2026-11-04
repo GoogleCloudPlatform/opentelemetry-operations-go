@@ -17,8 +17,10 @@ package collector
 import (
 	"encoding/hex"
 	"fmt"
+	"strings"
 	"testing"
 	"time"
+	"unicode/utf8"
 
 	"cloud.google.com/go/logging"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
@@ -51,6 +53,25 @@ func newTestLogMapper(entrySize int, opts ...Option) logMapper {
 		obs:          obs,
 		maxEntrySize: entrySize,
 	}
+}
+
+func TestLogSplitMultiByteUTF8(t *testing.T) {
+	// "あ" is 3 bytes; 300003 bytes split in half lands mid-rune.
+	body := strings.Repeat("あ", 100_001)
+	log := plog.NewLogRecord()
+	log.Body().SetStr(body)
+	mapper := newTestLogMapper(defaultMaxEntrySize)
+	entries, err := mapper.logToSplitEntries(log, nil, nil, time.Now(), "default-log", "fakeprojectid")
+	require.NoError(t, err)
+	require.Greater(t, len(entries), 1)
+
+	var joined strings.Builder
+	for _, entry := range entries {
+		chunk := entry.GetTextPayload()
+		assert.True(t, utf8.ValidString(chunk), "split %d is not valid UTF-8", entry.GetSplit().GetIndex())
+		joined.WriteString(chunk)
+	}
+	assert.Equal(t, body, joined.String())
 }
 
 func TestLogMapping(t *testing.T) {
