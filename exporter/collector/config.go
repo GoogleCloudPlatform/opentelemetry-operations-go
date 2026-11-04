@@ -237,6 +237,10 @@ type LogConfig struct {
 	// exporter. It allows overriding the function used to map otel resource to
 	// monitored resource.
 	MapMonitoredResource func(pcommon.Resource) *monitoredrespb.MonitoredResource `mapstructure:"-"`
+	// DisableRetries is not exposed as an option in the configuration, but can be
+	// set by wrapper exporters (e.g., when exporterhelper retry_on_failure is enabled)
+	// to disable the underlying Cloud Logging client's built-in gax retries.
+	DisableRetries bool `mapstructure:"-"`
 	// DefaultLogName sets the fallback log name to use when one isn't explicitly set
 	// for a log entry. If unset, logs without a log name will raise an error.
 	DefaultLogName string `mapstructure:"default_log_name"`

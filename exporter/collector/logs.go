@@ -36,14 +36,17 @@ import (
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	logtypepb "google.golang.org/genproto/googleapis/logging/type"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/encoding/gzip"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/structpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/featuregate"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -236,6 +239,11 @@ func (l *LogsExporter) Start(ctx context.Context, host component.Host) error {
 		return err
 	}
 
+	// Disable gax Logging Client retries when exporterhelper `retry_on_failure` is enabled.
+	if l.cfg.LogConfig.DisableRetries {
+		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries, gax.WithRetry(nil))
+	}
+
 	if l.cfg.LogConfig.ClientConfig.Compression == gzip.Name {
 		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries,
 			gax.WithGRPCOptions(grpc.UseCompressor(gzip.Name)))
@@ -260,10 +268,11 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 	}
 	projectEntries, err := l.mapper.createEntries(ld)
 	if err != nil {
-		return err
+		return consumererror.NewPermanent(err)
 	}
 
 	var errs []error
+	hasRetryableErr := false
 	for project, entries := range projectEntries {
 		entry := 0
 		currentBatchSize := 0
@@ -293,14 +302,23 @@ func (l *LogsExporter) PushLogs(ctx context.Context, ld plog.Logs) error {
 			// if the current entry goes over the request size (or we have gone over every entry, i.e. index=len),
 			// write the list up to but not including the current entry's index
 			_, err := l.writeLogEntries(ctx, entries[:entry])
-			errs = append(errs, err)
+			if err != nil {
+				if isRetryableWriteLogEntriesError(err) {
+					hasRetryableErr = true
+				}
+				errs = append(errs, err)
+			}
 
 			entries = entries[entry:]
 			entry = 0
 			currentBatchSize = 0
 		}
 	}
-	return errors.Join(errs...)
+	err = errors.Join(errs...)
+	if err != nil && !hasRetryableErr {
+		return consumererror.NewPermanent(err)
+	}
+	return err
 }
 
 func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, error) {
@@ -408,6 +426,23 @@ func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEn
 
 	// TODO(damemi): handle response code
 	return l.loggingClient.WriteLogEntries(ctx, request)
+}
+
+func isRetryableWriteLogEntriesError(err error) bool {
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return true
+	}
+	switch status.Code(err) {
+	case codes.Canceled,
+		codes.DeadlineExceeded,
+		codes.ResourceExhausted,
+		codes.Aborted,
+		codes.Internal,
+		codes.Unavailable:
+		return true
+	default:
+		return false
+	}
 }
 
 func (l logMapper) getLogName(log plog.LogRecord) (string, error) {

@@ -19,6 +19,7 @@ require (
 	go.opentelemetry.io/collector/component v1.68.0
 	go.opentelemetry.io/collector/component/componenttest v0.162.0
 	go.opentelemetry.io/collector/confmap v1.68.0
+	go.opentelemetry.io/collector/consumer/consumererror v0.162.0
 	go.opentelemetry.io/collector/exporter v1.68.0
 	go.opentelemetry.io/collector/extension/extensionauth v1.68.0
 	go.opentelemetry.io/collector/featuregate v1.68.0
@@ -68,6 +69,7 @@ require (
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/collector/consumer v1.68.0 // indirect
 	go.opentelemetry.io/collector/internal/componentalias v0.162.0 // indirect
+	go.opentelemetry.io/collector/pdata/pprofile v0.162.0 // indirect
 	go.opentelemetry.io/collector/pipeline v1.68.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.72.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.72.0 // indirect
