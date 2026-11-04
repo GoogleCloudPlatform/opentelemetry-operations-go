@@ -631,12 +631,19 @@ func (l logMapper) logToSplitEntries(
 	endIndex := int(math.Floor((1.0 / float64(splits)) * float64(len(logBodyString))))
 	for i := 0; i < splits; i++ {
 		newEntry := proto.Clone(entry).(*logpb.LogEntry)
+		// Don't split in the middle of a multi-byte UTF-8 character.
+		for endIndex > startIndex && endIndex < len(logBodyString) && !utf8.RuneStart(logBodyString[endIndex]) {
+			endIndex--
+		}
 		currentSplit := logBodyString[startIndex:endIndex]
 
 		// If the current split is larger than the entry size, iterate until it is within the max
 		// (This may happen since not all characters are exactly 1 byte)
 		for len([]byte(currentSplit)) > l.maxEntrySize {
 			endIndex--
+			for endIndex > startIndex && !utf8.RuneStart(logBodyString[endIndex]) {
+				endIndex--
+			}
 			currentSplit = logBodyString[startIndex:endIndex]
 		}
 		newEntry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
