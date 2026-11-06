@@ -1238,6 +1238,71 @@ func TestLogMapping(t *testing.T) {
 			},
 			maxEntrySize: defaultMaxEntrySize,
 		},
+		{
+			name: "log with invalid UTF-8 in text payload, attributes, event_name, sourceLocation, httpRequest, and operation",
+			mr: func() *monitoredrespb.MonitoredResource {
+				return nil
+			},
+			log: func() plog.LogRecord {
+				log := plog.NewLogRecord()
+				log.Body().SetStr("body:" + invalidUtf8TwoOctet + ":" + invalidUtf8SequenceID)
+				log.SetEventName("event:" + invalidUtf8TwoOctet)
+				log.Attributes().PutStr("attr_two_octet", invalidUtf8TwoOctet)
+				log.Attributes().PutStr("attr_seq_id", invalidUtf8SequenceID)
+
+				sourceLocationMap := log.Attributes().PutEmptyMap(SourceLocationAttributeKey)
+				sourceLocationMap.PutStr("file", invalidUtf8TwoOctet)
+				sourceLocationMap.PutInt("line", 42)
+				sourceLocationMap.PutStr("function", invalidUtf8SequenceID)
+
+				httpRequest := log.Attributes().PutEmptyMap(HTTPRequestAttributeKey)
+				httpRequest.PutStr("requestMethod", invalidUtf8TwoOctet)
+				httpRequest.PutStr("requestUrl", invalidUtf8SequenceID)
+				httpRequest.PutStr("userAgent", invalidUtf8TwoOctet)
+				httpRequest.PutStr("remoteIp", invalidUtf8SequenceID)
+				httpRequest.PutStr("serverIp", invalidUtf8TwoOctet)
+				httpRequest.PutStr("referer", invalidUtf8SequenceID)
+				httpRequest.PutStr("protocol", invalidUtf8TwoOctet)
+
+				operation := log.Attributes().PutEmptyMap(OperationAttributeKey)
+				operation.PutStr("id", invalidUtf8TwoOctet)
+				operation.PutStr("producer", invalidUtf8SequenceID)
+				operation.PutBool("first", true)
+				return log
+			},
+			expectedEntries: []*logpb.LogEntry{
+				{
+					LogName:   logName,
+					Timestamp: timestamppb.New(testObservedTime),
+					Payload:   &logpb.LogEntry_TextPayload{TextPayload: "body:\ufffd(:\ufffd"},
+					Labels: map[string]string{
+						"attr_two_octet": "\ufffd(",
+						"attr_seq_id":    "\ufffd",
+						"event.name":     "event:\ufffd(",
+					},
+					SourceLocation: &logpb.LogEntrySourceLocation{
+						File:     "\ufffd(",
+						Line:     42,
+						Function: "\ufffd",
+					},
+					HttpRequest: &logtypepb.HttpRequest{
+						RequestMethod: "\ufffd(",
+						RequestUrl:    "\ufffd",
+						UserAgent:     "\ufffd(",
+						RemoteIp:      "\ufffd",
+						ServerIp:      "\ufffd(",
+						Referer:       "\ufffd",
+						Protocol:      "\ufffd(",
+					},
+					Operation: &logpb.LogEntryOperation{
+						Id:       "\ufffd(",
+						Producer: "\ufffd",
+						First:    true,
+					},
+				},
+			},
+			maxEntrySize: defaultMaxEntrySize,
+		},
 	}
 
 	for _, testCase := range testCases {
@@ -1334,11 +1399,45 @@ func (s *statusLoggingServer) WriteLogEntries(ctx context.Context, _ *logpb.Writ
 	return nil, status.FromContextError(ctx.Err()).Err()
 }
 
+func TestCreateEntriesUTF8(t *testing.T) {
+	mapper := newTestLogMapper(defaultMaxEntrySize, func(cfg *Config) {
+		cfg.LogConfig.ServiceResourceLabels = true
+	})
+
+	ld := plog.NewLogs()
+	rl := ld.ResourceLogs().AppendEmpty()
+	rl.Resource().Attributes().PutStr("service.name", invalidUtf8TwoOctet)
+	sl := rl.ScopeLogs().AppendEmpty()
+	sl.Scope().SetName(invalidUtf8TwoOctet)
+	sl.Scope().SetVersion(invalidUtf8SequenceID)
+	lr := sl.LogRecords().AppendEmpty()
+	lr.Body().SetStr(invalidUtf8TwoOctet)
+	lr.Attributes().PutStr("custom_attr", invalidUtf8SequenceID)
+
+	entriesByProject, err := mapper.createEntries(ld)
+	require.NoError(t, err)
+	entries := entriesByProject[""]
+	require.Len(t, entries, 1)
+
+	assert.Equal(t, "\ufffd(", entries[0].GetTextPayload())
+	assert.Equal(t, map[string]string{
+		"service.name":            "\ufffd(",
+		"instrumentation_source":  "\ufffd(",
+		"instrumentation_version": "\ufffd",
+		"custom_attr":             "\ufffd",
+	}, entries[0].GetLabels())
+
+	_, err = proto.Marshal(&logpb.WriteLogEntriesRequest{Entries: entries})
+	require.NoError(t, err)
+}
+
 func TestPushLogsPermanentErrorClassification(t *testing.T) {
 	testCases := []struct {
 		name            string
 		defaultLogName  string
 		serverErr       error
+		config          Option
+		disableRetries  bool
 		expectedCalls   int32
 		expectPermanent bool
 	}{
@@ -1346,6 +1445,7 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			name:            "missing log name is permanent",
 			defaultLogName:  "",
 			serverErr:       nil,
+			disableRetries:  true,
 			expectedCalls:   0,
 			expectPermanent: true,
 		},
@@ -1353,6 +1453,7 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			name:            "PermissionDenied is permanent",
 			defaultLogName:  "default-log",
 			serverErr:       status.Error(codes.PermissionDenied, "permission denied"),
+			disableRetries:  true,
 			expectedCalls:   1,
 			expectPermanent: true,
 		},
@@ -1360,13 +1461,49 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			name:            "InvalidArgument is permanent",
 			defaultLogName:  "default-log",
 			serverErr:       status.Error(codes.InvalidArgument, "invalid argument"),
+			disableRetries:  true,
 			expectedCalls:   1,
 			expectPermanent: true,
+		},
+		{
+			name:           "client-side marshaling error is permanent with gax retries disabled",
+			defaultLogName: "default-log",
+			serverErr:      nil,
+			disableRetries: true,
+			config: func(cfg *Config) {
+				cfg.LogConfig.MapMonitoredResource = func(pcommon.Resource) *monitoredrespb.MonitoredResource {
+					return &monitoredrespb.MonitoredResource{Type: invalidUtf8TwoOctet}
+				}
+			},
+			expectedCalls:   0,
+			expectPermanent: true,
+		},
+		{
+			name:           "client-side marshaling error is not retried by gax and is permanent",
+			defaultLogName: "default-log",
+			serverErr:      nil,
+			disableRetries: false,
+			config: func(cfg *Config) {
+				cfg.LogConfig.MapMonitoredResource = func(pcommon.Resource) *monitoredrespb.MonitoredResource {
+					return &monitoredrespb.MonitoredResource{Type: invalidUtf8TwoOctet}
+				}
+			},
+			expectedCalls:   0,
+			expectPermanent: true,
+		},
+		{
+			name:            "server-side Internal error is retryable by `retry_on_failure` with gax retries disabled",
+			defaultLogName:  "default-log",
+			serverErr:       status.Error(codes.Internal, "internal server error"),
+			disableRetries:  true,
+			expectedCalls:   1,
+			expectPermanent: false,
 		},
 		{
 			name:            "DeadlineExceeded is retryable by `retry_on_failure` with gax retries disabled",
 			defaultLogName:  "default-log",
 			serverErr:       nil,
+			disableRetries:  true,
 			expectedCalls:   1,
 			expectPermanent: false,
 		},
@@ -1374,6 +1511,7 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			name:            "Unavailable is retryable by `retry_on_failure` with gax retries disabled",
 			defaultLogName:  "default-log",
 			serverErr:       status.Error(codes.Unavailable, "unavailable"),
+			disableRetries:  true,
 			expectedCalls:   1,
 			expectPermanent: false,
 		},
@@ -1381,6 +1519,7 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			name:            "ResourceExhausted is retryable by `retry_on_failure` with gax retries disabled",
 			defaultLogName:  "default-log",
 			serverErr:       status.Error(codes.ResourceExhausted, "resource exhausted"),
+			disableRetries:  true,
 			expectedCalls:   1,
 			expectPermanent: false,
 		},
@@ -1388,6 +1527,7 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			name:            "Aborted is retryable by `retry_on_failure` with gax retries disabled",
 			defaultLogName:  "default-log",
 			serverErr:       status.Error(codes.Aborted, "aborted"),
+			disableRetries:  true,
 			expectedCalls:   1,
 			expectPermanent: false,
 		},
@@ -1395,6 +1535,7 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			name:            "Canceled is retryable by `retry_on_failure` with gax retries disabled",
 			defaultLogName:  "default-log",
 			serverErr:       status.Error(codes.Canceled, "canceled"),
+			disableRetries:  true,
 			expectedCalls:   1,
 			expectPermanent: false,
 		},
@@ -1415,9 +1556,12 @@ func TestPushLogsPermanentErrorClassification(t *testing.T) {
 			cfg := DefaultConfig()
 			cfg.ProjectID = "test-project"
 			cfg.LogConfig.DefaultLogName = tc.defaultLogName
-			cfg.LogConfig.DisableRetries = true
+			cfg.LogConfig.DisableRetries = tc.disableRetries
 			cfg.LogConfig.ClientConfig.Endpoint = lis.Addr().String()
 			cfg.LogConfig.ClientConfig.UseInsecure = true
+			if tc.config != nil {
+				tc.config(&cfg)
+			}
 
 			exp, err := NewGoogleCloudLogsExporter(
 				context.Background(),
