@@ -36,8 +36,13 @@ type disabledNormalizer struct{}
 // NormalizeExponentialHistogramDataPoint ensures the start time is before the
 // end time, but does not normalize points.
 func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetric.ExponentialHistogramDataPoint, _ uint64) bool {
-	if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
-		// Handle points without a start time and explicit reset points.
+	if point.StartTimestamp() == 0 {
+		// A series without a start time has no start on any point, so adjusting
+		// it would make every point look like a reset. Drop the point instead.
+		return false
+	}
+	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// Handle explicit reset points.
 		// StartTime = Timestamp - 1 ms
 		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
 	}
@@ -47,8 +52,13 @@ func (d *disabledNormalizer) NormalizeExponentialHistogramDataPoint(point pmetri
 // NormalizeHistogramDataPoint ensures the start time is before the
 // end time, but does not normalize points.
 func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.HistogramDataPoint, _ uint64) bool {
-	if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
-		// Handle points without a start time and explicit reset points.
+	if point.StartTimestamp() == 0 {
+		// A series without a start time has no start on any point, so adjusting
+		// it would make every point look like a reset. Drop the point instead.
+		return false
+	}
+	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// Handle explicit reset points.
 		// StartTime = Timestamp - 1 ms
 		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
 	}
@@ -58,8 +68,13 @@ func (d *disabledNormalizer) NormalizeHistogramDataPoint(point pmetric.Histogram
 // NormalizeNumberDataPoint ensures the start time is before the
 // end time, but does not normalize points.
 func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPoint, _ uint64) bool {
-	if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
-		// Handle points without a start time and explicit reset points.
+	if point.StartTimestamp() == 0 {
+		// A series without a start time has no start on any point, so adjusting
+		// it would make every point look like a reset. Drop the point instead.
+		return false
+	}
+	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// Handle explicit reset points.
 		// StartTime = Timestamp - 1 ms
 		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
 	}
@@ -69,8 +84,13 @@ func (d *disabledNormalizer) NormalizeNumberDataPoint(point pmetric.NumberDataPo
 // NormalizeSummaryDataPoint ensures the start time is before the
 // end time, but does not normalize points.
 func (d *disabledNormalizer) NormalizeSummaryDataPoint(point pmetric.SummaryDataPoint, _ uint64) bool {
-	if point.StartTimestamp() == 0 || !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
-		// Handle points without a start time and explicit reset points.
+	if point.StartTimestamp() == 0 {
+		// A series without a start time has no start on any point, so adjusting
+		// it would make every point look like a reset. Drop the point instead.
+		return false
+	}
+	if !point.StartTimestamp().AsTime().Before(point.Timestamp().AsTime()) {
+		// Handle explicit reset points.
 		// StartTime = Timestamp - 1 ms
 		point.SetStartTimestamp(pcommon.Timestamp(uint64(point.Timestamp()) - uint64(time.Millisecond)))
 	}
