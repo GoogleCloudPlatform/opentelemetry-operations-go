@@ -24,9 +24,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.opentelemetry.io/collector/component/componenttest"
+	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/pdata/pcommon"
 	"go.opentelemetry.io/collector/pdata/ptrace"
+	"go.uber.org/atomic"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/emptypb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
@@ -132,6 +136,116 @@ func TestGoogleCloudTraceExport(t *testing.T) {
 			_, ok := r.Spans[0].GetAttributes().GetAttributeMap()[test.expectedServiceKey]
 			assert.True(t, ok)
 			assert.Equal(t, timestamppb.New(testTime), r.Spans[0].StartTime)
+		})
+	}
+}
+
+type statusTraceServer struct {
+	tracepb.UnimplementedTraceServiceServer
+	err   error
+	calls atomic.Int32
+}
+
+func (s *statusTraceServer) BatchWriteSpans(ctx context.Context, _ *tracepb.BatchWriteSpansRequest) (*emptypb.Empty, error) {
+	s.calls.Add(1)
+	if s.err != nil {
+		return nil, s.err
+	}
+	<-ctx.Done()
+	return nil, status.FromContextError(ctx.Err()).Err()
+}
+
+func TestPushTracesPermanentErrorClassification(t *testing.T) {
+	testCases := []struct {
+		name            string
+		serverErr       error
+		expectedCalls   int32
+		expectPermanent bool
+	}{
+		{
+			name:            "PermissionDenied is permanent",
+			serverErr:       status.Error(codes.PermissionDenied, "permission denied"),
+			expectedCalls:   1,
+			expectPermanent: true,
+		},
+		{
+			name:            "InvalidArgument is permanent",
+			serverErr:       status.Error(codes.InvalidArgument, "invalid argument"),
+			expectedCalls:   1,
+			expectPermanent: true,
+		},
+		{
+			name:            "DeadlineExceeded is retryable by `retry_on_failure` with gax retries disabled",
+			serverErr:       nil,
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
+		{
+			name:            "Unavailable is retryable by `retry_on_failure` with gax retries disabled",
+			serverErr:       status.Error(codes.Unavailable, "unavailable"),
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
+		{
+			name:            "ResourceExhausted is retryable by `retry_on_failure` with gax retries disabled",
+			serverErr:       status.Error(codes.ResourceExhausted, "resource exhausted"),
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
+		{
+			name:            "Aborted is retryable by `retry_on_failure` with gax retries disabled",
+			serverErr:       status.Error(codes.Aborted, "aborted"),
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
+		{
+			name:            "Canceled is retryable by `retry_on_failure` with gax retries disabled",
+			serverErr:       status.Error(codes.Canceled, "canceled"),
+			expectedCalls:   1,
+			expectPermanent: false,
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			lis, err := net.Listen("tcp", "localhost:0")
+			require.NoError(t, err)
+			srv := grpc.NewServer()
+			traceSrv := &statusTraceServer{err: tc.serverErr}
+			tracepb.RegisterTraceServiceServer(srv, traceSrv)
+			go func() {
+				_ = srv.Serve(lis)
+			}()
+			defer srv.Stop()
+
+			cfg := DefaultConfig()
+			cfg.ProjectID = "test-project"
+			cfg.TraceConfig.DisableRetries = true
+			cfg.TraceConfig.ClientConfig.Endpoint = lis.Addr().String()
+			cfg.TraceConfig.ClientConfig.UseInsecure = true
+
+			exp, err := NewGoogleCloudTracesExporter(
+				context.Background(),
+				cfg,
+				newTestExporterSettings(),
+				50*time.Millisecond,
+			)
+			require.NoError(t, err)
+			require.NoError(t, exp.Start(context.Background(), componenttest.NewNopHost()))
+			defer func() {
+				_ = exp.Shutdown(context.Background())
+			}()
+
+			traces := ptrace.NewTraces()
+			rspans := traces.ResourceSpans().AppendEmpty()
+			ispans := rspans.ScopeSpans().AppendEmpty()
+			span := ispans.Spans().AppendEmpty()
+			span.SetName("test-span")
+
+			err = exp.PushTraces(context.Background(), traces)
+			require.Error(t, err)
+			assert.Equal(t, tc.expectPermanent, consumererror.IsPermanent(err))
+			assert.Equal(t, tc.expectedCalls, traceSrv.calls.Load())
 		})
 	}
 }

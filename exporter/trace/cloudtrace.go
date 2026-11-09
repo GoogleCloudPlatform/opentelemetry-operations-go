@@ -88,6 +88,8 @@ type options struct {
 	// destinationProjectQuota sets whether the request should use quota from
 	// the destination project for the request.
 	destinationProjectQuota bool
+	// disableRetries disables the underlying Cloud Trace client's built-in gax retries.
+	disableRetries bool
 }
 
 // WithProjectID sets Google Cloud Platform project as projectID.
@@ -110,6 +112,15 @@ func WithProjectID(projectID string) func(o *options) {
 func WithDestinationProjectQuota() func(o *options) {
 	return func(o *options) {
 		o.destinationProjectQuota = true
+	}
+}
+
+// WithDisableRetries disables the underlying Cloud Trace client's built-in gax retries.
+//
+// Deprecated: Google Cloud OpenTelemetry Trace exporter for Go is deprecated. Use standard OpenTelemetry OTLP exporters instead.
+func WithDisableRetries() func(o *options) {
+	return func(o *options) {
+		o.disableRetries = true
 	}
 }
 
