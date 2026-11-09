@@ -142,6 +142,11 @@ type TraceConfig struct {
 	// service keys so that they appear more prominently in the UI.
 	AttributeMappings []AttributeMapping `mapstructure:"attribute_mappings"`
 
+	// DisableRetries is not exposed as an option in the configuration, but can be
+	// set by wrapper exporters (e.g., when exporterhelper retry_on_failure is enabled)
+	// to disable the underlying Cloud Trace client's built-in gax retries.
+	DisableRetries bool `mapstructure:"-"`
+
 	ClientConfig ClientConfig `mapstructure:",squash"`
 }
 

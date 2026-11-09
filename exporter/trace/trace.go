@@ -26,6 +26,7 @@ import (
 
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"cloud.google.com/go/trace/apiv2/tracepb"
+	"github.com/googleapis/gax-go/v2"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
@@ -47,6 +48,9 @@ func newTraceExporter(o *options) (*traceExporter, error) {
 	client, err := traceapi.NewClient(o.context, clientOps...)
 	if err != nil {
 		return nil, fmt.Errorf("stackdriver: couldn't initiate trace client: %v", err)
+	}
+	if o.disableRetries {
+		client.CallOptions.BatchWriteSpans = append(client.CallOptions.BatchWriteSpans, gax.WithRetry(nil))
 	}
 
 	e := &traceExporter{

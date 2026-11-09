@@ -24,11 +24,14 @@ import (
 
 	traceapi "cloud.google.com/go/trace/apiv2"
 	"go.opentelemetry.io/collector/component"
+	"go.opentelemetry.io/collector/consumer/consumererror"
 	"go.opentelemetry.io/collector/exporter"
 	"go.opentelemetry.io/collector/pdata/ptrace"
 	"go.opentelemetry.io/otel/attribute"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	"google.golang.org/api/option"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 )
@@ -81,6 +84,10 @@ func (te *TraceExporter) Start(ctx context.Context, host component.Host) error {
 		topts = append(topts, texporter.WithDestinationProjectQuota())
 	}
 
+	if te.cfg.TraceConfig.DisableRetries {
+		topts = append(topts, texporter.WithDisableRetries())
+	}
+
 	if te.cfg.TraceConfig.AttributeMappings != nil {
 		topts = append(topts, texporter.WithAttributeMapping(mappingFuncFromAKM(te.cfg.TraceConfig.AttributeMappings)))
 	}
@@ -127,5 +134,37 @@ func (te *TraceExporter) PushTraces(ctx context.Context, td ptrace.Traces) error
 		spans = append(spans, sd...)
 	}
 
-	return te.texporter.ExportSpans(ctx, spans)
+	err := te.texporter.ExportSpans(ctx, spans)
+	if err != nil && !isRetryableTraceError(err) {
+		return consumererror.NewPermanent(err)
+	}
+	return err
+}
+
+func isRetryableTraceError(err error) bool {
+	if err == nil {
+		return false
+	}
+	if multi, ok := err.(interface{ Unwrap() []error }); ok {
+		for _, subErr := range multi.Unwrap() {
+			if isRetryableTraceError(subErr) {
+				return true
+			}
+		}
+		return false
+	}
+	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+		return true
+	}
+	switch status.Code(err) {
+	case codes.Canceled,
+		codes.DeadlineExceeded,
+		codes.ResourceExhausted,
+		codes.Aborted,
+		codes.Internal,
+		codes.Unavailable:
+		return true
+	default:
+		return false
+	}
 }
