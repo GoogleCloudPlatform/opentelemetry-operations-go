@@ -477,10 +477,10 @@ func isRetryableWriteLogEntriesError(err error) bool {
 func (l logMapper) getLogName(log plog.LogRecord) (string, error) {
 	logNameAttr, exists := log.Attributes().Get(LogNameAttributeKey)
 	if exists {
-		return sanitizeUTF8(logNameAttr.AsString()), nil
+		return logNameAttr.AsString(), nil
 	}
 	if len(l.cfg.LogConfig.DefaultLogName) > 0 {
-		return sanitizeUTF8(l.cfg.LogConfig.DefaultLogName), nil
+		return l.cfg.LogConfig.DefaultLogName, nil
 	}
 	return "", fmt.Errorf("no log name provided.  Set the 'default_log_name' option, or add the 'gcp.log_name' attribute to set a log name")
 }
@@ -680,7 +680,7 @@ func (l logMapper) logToSplitEntries(
 		}
 		newEntry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
 		newEntry.Split = &logpb.LogSplit{
-			Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.AsTime().String()),
+			Uid:         fmt.Sprintf("%s-%s", sanitizeUTF8(logName), entry.Timestamp.AsTime().String()),
 			Index:       int32(i),
 			TotalSplits: int32(splits),
 		}

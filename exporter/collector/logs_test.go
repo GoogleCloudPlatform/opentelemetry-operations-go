@@ -1400,7 +1400,8 @@ func (s *statusLoggingServer) WriteLogEntries(ctx context.Context, _ *logpb.Writ
 }
 
 func TestCreateEntriesUTF8(t *testing.T) {
-	mapper := newTestLogMapper(defaultMaxEntrySize, func(cfg *Config) {
+	mapper := newTestLogMapper(500, func(cfg *Config) {
+		cfg.ProjectID = "fakeprojectid"
 		cfg.LogConfig.ServiceResourceLabels = true
 	})
 
@@ -1411,15 +1412,18 @@ func TestCreateEntriesUTF8(t *testing.T) {
 	sl.Scope().SetName(invalidUtf8TwoOctet)
 	sl.Scope().SetVersion(invalidUtf8SequenceID)
 	lr := sl.LogRecords().AppendEmpty()
-	lr.Body().SetStr(invalidUtf8TwoOctet)
+	lr.Body().SetStr(strings.Repeat("a", 500) + invalidUtf8TwoOctet)
+	lr.Attributes().PutStr(LogNameAttributeKey, "my"+invalidUtf8TwoOctet+"log")
 	lr.Attributes().PutStr("custom_attr", invalidUtf8SequenceID)
 
 	entriesByProject, err := mapper.createEntries(ld)
 	require.NoError(t, err)
 	entries := entriesByProject[""]
-	require.Len(t, entries, 1)
+	require.Len(t, entries, 2)
 
-	assert.Equal(t, "\ufffd(", entries[0].GetTextPayload())
+	assert.Equal(t, "projects/fakeprojectid/logs/my%C3%28log", entries[0].GetLogName())
+	assert.Contains(t, entries[0].GetSplit().GetUid(), "my\ufffd(log-")
+	assert.Equal(t, strings.Repeat("a", 500)+"\ufffd(", entries[0].GetTextPayload()+entries[1].GetTextPayload())
 	assert.Equal(t, map[string]string{
 		"service.name":            "\ufffd(",
 		"instrumentation_source":  "\ufffd(",
