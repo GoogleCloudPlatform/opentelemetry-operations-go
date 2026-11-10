@@ -25,6 +25,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	loggingv2 "cloud.google.com/go/logging/apiv2"
 	logpb "cloud.google.com/go/logging/apiv2/loggingpb"
@@ -677,7 +678,7 @@ func (l logMapper) logToSplitEntries(
 			}
 			currentSplit = logBodyString[startIndex:endIndex]
 		}
-		newEntry.Payload = &logpb.LogEntry_TextPayload{TextPayload: sanitizeUTF8(currentSplit)}
+		newEntry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
 		newEntry.Split = &logpb.LogSplit{
 			Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.AsTime().String()),
 			Index:       int32(i),
