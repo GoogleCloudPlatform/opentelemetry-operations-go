@@ -15,7 +15,6 @@
 package collector
 
 import (
-	"bytes"
 	"context"
 	"encoding/hex"
 	"encoding/json"
@@ -242,6 +241,17 @@ func (l *LogsExporter) Start(ctx context.Context, host component.Host) error {
 	// Disable gax Logging Client retries when exporterhelper `retry_on_failure` is enabled.
 	if l.cfg.LogConfig.DisableRetries {
 		loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries, gax.WithRetry(nil))
+	} else {
+		var cs gax.CallSettings
+		for _, opt := range loggingClient.CallOptions.WriteLogEntries {
+			opt.Resolve(&cs)
+		}
+		if cs.Retry != nil {
+			baseRetry := cs.Retry
+			loggingClient.CallOptions.WriteLogEntries = append(loggingClient.CallOptions.WriteLogEntries, gax.WithRetry(func() gax.Retryer {
+				return &nonMarshalingRetryer{base: baseRetry()}
+			}))
+		}
 	}
 
 	if l.cfg.LogConfig.ClientConfig.Compression == gzip.Name {
@@ -334,7 +344,7 @@ func (l logMapper) createEntries(ld plog.Logs) (map[string][]*logpb.LogEntry, er
 		projectID := l.cfg.ProjectID
 		// override project ID with gcp.project.id, if present
 		if projectFromResource, found := rl.Resource().Attributes().Get(resourcemapping.ProjectIDAttributeKey); found {
-			projectID = projectFromResource.AsString()
+			projectID = sanitizeUTF8(projectFromResource.AsString())
 		}
 
 		for j := 0; j < rl.ScopeLogs().Len(); j++ {
@@ -403,10 +413,10 @@ func mergeLogLabels(instrumentationSource, instrumentationVersion string, resour
 	labelsMap := make(map[string]string)
 	// TODO(damemi): Make overwriting these labels (if they already exist) configurable
 	if len(instrumentationSource) > 0 {
-		labelsMap["instrumentation_source"] = instrumentationSource
+		labelsMap["instrumentation_source"] = sanitizeUTF8(instrumentationSource)
 	}
 	if len(instrumentationVersion) > 0 {
-		labelsMap["instrumentation_version"] = instrumentationVersion
+		labelsMap["instrumentation_version"] = sanitizeUTF8(instrumentationVersion)
 	}
 	return mergeLabels(labelsMap, resourceLabels)
 }
@@ -428,7 +438,26 @@ func (l *LogsExporter) writeLogEntries(ctx context.Context, batch []*logpb.LogEn
 	return l.loggingClient.WriteLogEntries(ctx, request)
 }
 
+type nonMarshalingRetryer struct {
+	base gax.Retryer
+}
+
+func (r *nonMarshalingRetryer) Retry(err error) (time.Duration, bool) {
+	if isClientMarshalingError(err) || r.base == nil {
+		return 0, false
+	}
+	return r.base.Retry(err)
+}
+
+func isClientMarshalingError(err error) bool {
+	st, ok := status.FromError(err)
+	return ok && st.Code() == codes.Internal && strings.Contains(st.Message(), "grpc: error while marshaling:")
+}
+
 func isRetryableWriteLogEntriesError(err error) bool {
+	if isClientMarshalingError(err) {
+		return false
+	}
 	if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 		return true
 	}
@@ -501,9 +530,9 @@ func (l logMapper) logToSplitEntries(
 			return nil, &attributeProcessingError{Key: SourceLocationAttributeKey, Err: err}
 		}
 		entry.SourceLocation = &logpb.LogEntrySourceLocation{
-			File:     parsed.File,
+			File:     sanitizeUTF8(parsed.File),
 			Line:     int64(parsed.Line),
-			Function: parsed.Function,
+			Function: sanitizeUTF8(parsed.Function),
 		}
 		delete(attrsMap, SourceLocationAttributeKey)
 	}
@@ -563,7 +592,7 @@ func (l logMapper) logToSplitEntries(
 	// Parse severityNumber > 17 (error) to a GCP Error Reporting entry if enabled
 	if severityNumber >= 17 && l.cfg.LogConfig.ErrorReportingType {
 		if logRecord.Body().Type() != pcommon.ValueTypeMap {
-			strValue := logRecord.Body().AsString()
+			strValue := sanitizeUTF8(logRecord.Body().AsString())
 			logRecord.Body().SetEmptyMap()
 			logRecord.Body().Map().PutStr("message", strValue)
 		}
@@ -576,8 +605,11 @@ func (l logMapper) logToSplitEntries(
 		if strings.HasPrefix(k, "gcp.") {
 			continue
 		}
+		if entry.Labels == nil {
+			entry.Labels = make(map[string]string)
+		}
 		if _, ok := entry.Labels[k]; !ok {
-			entry.Labels[k] = v.AsString()
+			entry.Labels[k] = sanitizeUTF8(v.AsString())
 		}
 	}
 
@@ -586,7 +618,7 @@ func (l logMapper) logToSplitEntries(
 		if entry.Labels == nil {
 			entry.Labels = make(map[string]string)
 		}
-		entry.Labels["event.name"] = eventName
+		entry.Labels["event.name"] = sanitizeUTF8(eventName)
 	}
 
 	// Handle map and bytes as JSON-structured logs if they are successfully converted.
@@ -610,7 +642,7 @@ func (l logMapper) logToSplitEntries(
 
 	// log.Body().AsString() can be expensive, and we use it several times below this, so
 	// do it once and save that as a variable.
-	logBodyString := logRecord.Body().AsString()
+	logBodyString := sanitizeUTF8(logRecord.Body().AsString())
 	if len(logBodyString) == 0 {
 		return []*logpb.LogEntry{entry}, nil
 	}
@@ -648,7 +680,7 @@ func (l logMapper) logToSplitEntries(
 		}
 		newEntry.Payload = &logpb.LogEntry_TextPayload{TextPayload: currentSplit}
 		newEntry.Split = &logpb.LogSplit{
-			Uid:         fmt.Sprintf("%s-%s", logName, entry.Timestamp.AsTime().String()),
+			Uid:         fmt.Sprintf("%s-%s", sanitizeUTF8(logName), entry.Timestamp.AsTime().String()),
 			Index:       int32(i),
 			TotalSplits: int32(splits),
 		}
@@ -767,18 +799,18 @@ func (l logMapper) parseHTTPRequest(httpRequestAttr pcommon.Value) (*logtypepb.H
 	}
 
 	pb := &logtypepb.HttpRequest{
-		RequestMethod:                  parsedHTTPRequest.RequestMethod,
-		RequestUrl:                     fixUTF8(parsedHTTPRequest.RequestURL),
+		RequestMethod:                  sanitizeUTF8(parsedHTTPRequest.RequestMethod),
+		RequestUrl:                     sanitizeUTF8(parsedHTTPRequest.RequestURL),
 		RequestSize:                    int64(parsedHTTPRequest.RequestSize),
 		Status:                         int32(parsedHTTPRequest.Status),
 		ResponseSize:                   int64(parsedHTTPRequest.ResponseSize),
-		UserAgent:                      parsedHTTPRequest.UserAgent,
-		ServerIp:                       parsedHTTPRequest.ServerIP,
-		RemoteIp:                       parsedHTTPRequest.RemoteIP,
-		Referer:                        parsedHTTPRequest.Referer,
+		UserAgent:                      sanitizeUTF8(parsedHTTPRequest.UserAgent),
+		ServerIp:                       sanitizeUTF8(parsedHTTPRequest.ServerIP),
+		RemoteIp:                       sanitizeUTF8(parsedHTTPRequest.RemoteIP),
+		Referer:                        sanitizeUTF8(parsedHTTPRequest.Referer),
 		CacheHit:                       parsedHTTPRequest.CacheHit,
 		CacheValidatedWithOriginServer: parsedHTTPRequest.CacheValidatedWithOriginServer,
-		Protocol:                       parsedHTTPRequest.Protocol,
+		Protocol:                       sanitizeUTF8(parsedHTTPRequest.Protocol),
 		CacheFillBytes:                 int64(parsedHTTPRequest.CacheFillBytes),
 		CacheLookup:                    parsedHTTPRequest.CacheLookup,
 	}
@@ -809,8 +841,8 @@ func (l logMapper) parseOperation(operationAttr pcommon.Value) (*logpb.LogEntryO
 	}
 
 	return &logpb.LogEntryOperation{
-		Id:       parsedOperation.ID,
-		Producer: parsedOperation.Producer,
+		Id:       sanitizeUTF8(parsedOperation.ID),
+		Producer: sanitizeUTF8(parsedOperation.Producer),
 		First:    bool(parsedOperation.First),
 		Last:     bool(parsedOperation.Last),
 	}, nil
@@ -837,35 +869,25 @@ func toProtoStruct(v any) (*structpb.Struct, error) {
 	return structpb.NewStruct(m)
 }
 
-// fixUTF8 is a helper that fixes an invalid UTF-8 string by replacing
-// invalid UTF-8 runes with the Unicode replacement character (U+FFFD).
-// See Issue https://github.com/googleapis/google-cloud-go/issues/1383.
-// Coped from https://github.com/googleapis/google-cloud-go/blob/69705144832c715cf23832602ad9338b911dff9a/logging/logging.go#L557
-func fixUTF8(s string) string {
-	if utf8.ValidString(s) {
-		return s
-	}
-
-	// Otherwise time to build the sequence.
-	buf := new(bytes.Buffer)
-	buf.Grow(len(s))
-	for _, r := range s {
-		if utf8.ValidRune(r) {
-			buf.WriteRune(r)
-		} else {
-			buf.WriteRune('\uFFFD')
-		}
-	}
-	return buf.String()
-}
-
 func unmarshalAttribute(v pcommon.Value, out any) error {
 	var valueBytes []byte
 	switch v.Type() {
 	case pcommon.ValueTypeBytes:
-		valueBytes = v.Bytes().AsRaw()
-	case pcommon.ValueTypeMap, pcommon.ValueTypeStr:
-		valueBytes = []byte(v.AsString())
+		valueBytes = []byte(sanitizeUTF8(string(v.Bytes().AsRaw())))
+	case pcommon.ValueTypeStr:
+		valueBytes = []byte(sanitizeUTF8(v.AsString()))
+	case pcommon.ValueTypeMap:
+		rawMap := v.Map().AsRaw()
+		for k, val := range rawMap {
+			if s, ok := val.(string); ok {
+				rawMap[k] = sanitizeUTF8(s)
+			}
+		}
+		var err error
+		valueBytes, err = json.Marshal(rawMap)
+		if err != nil {
+			return err
+		}
 	default:
 		return &unsupportedValueTypeError{ValueType: v.Type()}
 	}
