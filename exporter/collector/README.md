@@ -456,3 +456,32 @@ and should be migrated:
 - `trace.bundle_byte_threshold` (optional): Use `memorylimiter` processor instead ([docs](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/memorylimiterprocessor))
 - `trace.bundle_byte_limit` (optional): Use `memorylimiter` processor instead ([docs](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/memorylimiterprocessor))
 - `trace.buffer_max_bytes` (optional): Use `memorylimiter` processor instead ([docs](https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor/memorylimiterprocessor))
+
+### Programmatic ordered metric RPC workers
+
+Integrations that serialize `PushMetrics` calls in input order can set
+`MetricConfig.OrderedRPCWorkers` to a value from 1 through 64. The default, zero,
+keeps the existing serial RPC implementation. This field is deliberately not a
+YAML configuration option: an integration must also ensure a single ordered
+input dispatcher. Setting multiple dequeue consumers does not provide that
+ordering guarantee. WAL is not supported with ordered RPC workers.
+
+The exporter maps each input snapshot, partitions its final time-series identities
+into RPC lanes, sends each lane sequentially, and waits for all lanes before the
+call returns. Different identities can be written concurrently. Repeated
+identities within an input are sent in separate sequential requests, not silently
+deduplicated. The next serialized call cannot overtake an earlier snapshot.
+
+Requests involving unfamiliar metric schemas are initialized serially within an
+exporter, reducing races in Google's automatic descriptor creation. Successful
+schemas are remembered in a bounded 4,096-entry FIFO cache. Waiting for schema
+initialization respects context cancellation; known schemas do not wait on an
+unrelated initialization. Eviction may reduce concurrency, but does not weaken
+ordering. The input queue is owned by the integration; this implementation adds
+no second queue and does not establish a hard bound on mapped in-flight memory.
+
+This mode does not sort late input, coordinate multiple exporters or collector
+pods, guarantee that an ambiguous timed-out RPC did not commit, or retry rejected
+requests. Separate exporters can still race when creating a new metric. The flush
+barrier can cause head-of-line blocking; validate capacity with representative
+snapshot sizes, schema diversity, API latency, and failure conditions.

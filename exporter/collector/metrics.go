@@ -75,6 +75,13 @@ type selfObservability struct {
 
 // MetricsExporter is the GCM exporter that uses pdata directly.
 type MetricsExporter struct {
+	// orderedSchemasMu protects only cache bookkeeping, never RPC I/O.
+	orderedSchemasMu   sync.Mutex
+	orderedSchemas     map[string]bool
+	orderedSchemaOrder []string
+	orderedSchemaNext  int
+	orderedSchemaInit  chan struct{}
+
 	mapper metricMapper
 	obs    selfObservability
 	client monitoringClient
@@ -182,6 +189,9 @@ func NewGoogleCloudMetricsExporter(
 	set exporter.Settings,
 	timeout time.Duration,
 ) (*MetricsExporter, error) {
+	if err := validateOrderedRPCConfig(cfg.MetricConfig); err != nil {
+		return nil, err
+	}
 	SetUserAgent(&cfg, set.BuildInfo)
 	meter := set.MeterProvider.Meter(scopeName, metricapi.WithInstrumentationVersion(Version()))
 	pointsExportedCounter, err := meter.Int64Counter(
@@ -399,6 +409,10 @@ func (me *MetricsExporter) PushMetrics(ctx context.Context, m pmetric.Metrics) e
 				}
 			}
 		}
+	}
+
+	if me.cfg.MetricConfig.OrderedRPCWorkers > 0 {
+		return me.exportOrdered(ctx, pendingTimeSeries)
 	}
 
 	var errs []error

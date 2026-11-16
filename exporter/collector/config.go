@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"cloud.google.com/go/auth/credentials/impersonate"
 	"go.opentelemetry.io/collector/component"
 	"go.opentelemetry.io/collector/extension/extensionauth"
 	"go.opentelemetry.io/collector/pdata/pcommon"
@@ -30,7 +31,6 @@ import (
 	"go.opentelemetry.io/otel/metric"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
-	"cloud.google.com/go/auth/credentials/impersonate"
 	"google.golang.org/api/option"
 	monitoredrespb "google.golang.org/genproto/googleapis/api/monitoredres"
 	"google.golang.org/grpc"
@@ -159,6 +159,12 @@ type AttributeMapping struct {
 }
 
 type MetricConfig struct {
+	// OrderedRPCWorkers enables parallel RPC lanes within one PushMetrics call.
+	// Zero preserves the existing serial RPC behavior; valid enabled values are 1..64.
+	// The caller must serialize PushMetrics calls in input order. This setting is
+	// programmatic only: integrations must provide a single ordered dispatcher.
+	// WAL cannot be combined with this mode.
+	OrderedRPCWorkers int `mapstructure:"-"`
 	// MapMonitoredResource is not exposed as an option in the configuration, but
 	// can be used by other exporters to extend the functionality of this
 	// exporter. It allows overriding the function used to map otel resource to
@@ -288,6 +294,10 @@ func DefaultConfig() Config {
 
 // ValidateConfig returns an error if the provided configuration is invalid.
 func ValidateConfig(cfg Config) error {
+	if err := validateOrderedRPCConfig(cfg.MetricConfig); err != nil {
+		return err
+	}
+
 	seenKeys := make(map[string]struct{}, len(cfg.TraceConfig.AttributeMappings))
 	seenReplacements := make(map[string]struct{}, len(cfg.TraceConfig.AttributeMappings))
 	for _, mapping := range cfg.TraceConfig.AttributeMappings {
