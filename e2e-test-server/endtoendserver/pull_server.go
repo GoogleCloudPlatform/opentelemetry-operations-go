@@ -16,7 +16,9 @@ package endtoendserver
 
 import (
 	"context"
+	"errors"
 	"log"
+	"net/http"
 
 	"cloud.google.com/go/pubsub/v2"
 
@@ -26,23 +28,48 @@ import (
 // pullServer is an end-to-end test service.
 type pullServer struct {
 	pubsubClient *pubsub.Client
+	srv          *http.Server
 }
 
-// New instantiates a new end-to-end test service.
+func newHealthCheckServer(addr string) *http.Server {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/alive", handleAlive)
+	mux.HandleFunc("/ready", handleReady)
+	return &http.Server{
+		Addr:    addr,
+		Handler: mux,
+	}
+}
+
+// NewPullServer instantiates a new end-to-end test service.
 func NewPullServer() (Server, error) {
 	pubsubClient, err := pubsub.NewClient(context.Background(), projectID)
 	if err != nil {
 		return nil, err
 	}
 
+	var srv *http.Server
+	if port != "" {
+		srv = newHealthCheckServer(":" + port)
+	}
+
 	return &pullServer{
 		pubsubClient: pubsubClient,
+		srv:          srv,
 	}, nil
 }
 
 // Run the end-to-end test service. This method will block until the context is
 // cancel, or an unrecoverable error is encountered.
 func (s *pullServer) Run(ctx context.Context) error {
+	if s.srv != nil {
+		go func() {
+			if err := s.srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+				log.Printf("HTTP server ListenAndServe: %v", err)
+			}
+		}()
+	}
+
 	sub := s.pubsubClient.Subscriber(requestSubscriptionName)
 	log.Printf("End-to-end test service listening on %s", sub)
 	return sub.Receive(ctx, func(ctx context.Context, m *pubsub.Message) { s.onReceive(ctx, m) })
@@ -51,7 +78,18 @@ func (s *pullServer) Run(ctx context.Context) error {
 // Shutdown gracefully shuts down the service, flushing and closing resources as
 // appropriate.
 func (s *pullServer) Shutdown(ctx context.Context) error {
-	return s.pubsubClient.Close()
+	var errs []error
+	if s.srv != nil {
+		if err := s.srv.Shutdown(ctx); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	if s.pubsubClient != nil {
+		if err := s.pubsubClient.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errors.Join(errs...)
 }
 
 // onReceive executes a scenario based on the incoming message from the test runner.
